@@ -350,7 +350,7 @@ Pair with Grafana for service-side correlation (`observability/dashboards`).
 4. Add CSV feeders / body files under `src/gatling/resources/` as needed.
 5. Wire seed / cleanup Gradle tasks if the test mutates state; chain via `dependsOn` / `finalizedBy`.
 6. Add CI step (smoke on PR; full on release). Publish `build/reports/gatling/` as a CI artifact.
-7. Run locally with `./gradlew gatlingRun-<FQN>`; confirm per-route assertions; confirm the test fails when an SLO is breached. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+7. Run locally with `./gradlew gatlingRun-<FQN>`; confirm per-route assertions; confirm the test fails when an SLO is breached.
 8. Add the report to the release / change notes (see `_shared` template).
 
 ## Handoffs

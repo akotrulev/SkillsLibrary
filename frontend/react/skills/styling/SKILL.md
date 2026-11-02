@@ -190,8 +190,6 @@ This skill owns only the CSS *authority* rules responsive design rides on: **mob
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
-
 - The project's own build and typecheck scripts (run with the package manager `packageManager` names) clean; `globals.css` holds only tokens + reset (no component rules).
 - Toggle dark mode → colors flip with **no** component CSS changes and **no** light→dark flash on reload.
 - Grep `*.module.css` (and `sx` literals) for hex/`px` colors → none (all `var(--token)`).

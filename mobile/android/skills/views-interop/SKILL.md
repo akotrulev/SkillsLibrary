@@ -183,8 +183,6 @@ Edge-to-edge is **enforced at targetSdk 35**; predictive back is on at 36.
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Build clean; Android Lint (`ViewBinding`, `UnusedResources`, `HardcodedText`, `ContentDescription`), detekt and ktlint pass.
 - Rotate and navigate back: no crash from a stale binding; a `ComposeView` keeps its `rememberSaveable` state across a Fragment back-stack pop; LeakCanary (debug) shows no retained view.
 - With the IME open and font scale 200 %: the focused field and the list's last row stay reachable; edge-to-edge shows content under the bars with correct padding.

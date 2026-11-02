@@ -17,7 +17,7 @@ A decision bound to a framework or version cites its official doc: see `source-g
 
 **The plan document format is a contract — read it before writing anything.** It is at
 [`./references/plan-format.md`](./references/plan-format.md): the header, the numbered sections, the
-task block's fields, the gate-once rule, and the `## Prompts — one per task` section. This skill is
+task block's fields, the gate rule, and the `## Prompts — one per task` section. This skill is
 the procedure; that file is the shape. Do not improvise either.
 
 **Three properties of that format drive everything below:**
@@ -28,8 +28,8 @@ the procedure; that file is the shape. Do not improvise either.
 2. **The narrative comes first; the tasks come last.** A task block is only readable against the
    context above it, so `## 1. What already exists, and what is missing` and the sections that decide
    the work are written *before* any task is.
-3. **The plan gates once, in its last runnable task.** Every task before it writes code and tests,
-   commits, and stops.
+3. **Every task gates what it built.** It runs the commands its `Gate:` line names and leaves them green
+   before it commits; the last runnable task runs the whole set once more.
 
 **The unit of work is a task.** A plan is one flat, ordered list of them, ids prefixed by the family of
 work (`B1`, `B2`, `B3`, then `P1`) — never a "slice", never a "phase", never a "stage", and never
@@ -124,11 +124,10 @@ them — the sequence itself carries the ordering, and the third task is "the th
   tasks** — an agent switch costs a whole context reload, so a plan of twenty tiny tasks is more
   expensive than one of eight full ones, and it re-reads the same files eight times instead of once.
 - **Documentation and close-out ride with the last task**, never a session of their own. That session
-  is the only one that knows what actually landed.
+  is the only one that knows what actually landed, and it holds no feature work when the plan has any.
 
-**Because the plan gates once, the tree is not guaranteed green at every task boundary.** Say so in the
-plan, in those words. It is the deliberate price of one verify-and-fix loop per plan instead of one per
-task, and it means the plan cannot be stopped halfway and trusted. Where a stack-cut task cannot be
+**A plan stopped halfway has each landed task's own tests green, but the whole suite has not run.** Say so
+in the plan, in those words. Where a stack-cut task cannot be
 demonstrated end to end on its own — a backend task whose screen arrives two tasks later — say so in
 its `Not in <id>` line rather than pretending the capability landed, and have the contract-first side
 return an explicit not-implemented response, never a fake success.
@@ -187,15 +186,16 @@ an input to how the task is written.
 | A file modified in place | 1.5k |
 | A registration, config key, or migration entry | 0.5k |
 
-**Per task, once:** the output it reads back, **6k** for an ungated task (its own commit and diff),
-**10k** for an own-tests task (its commit and diff, plus the filtered runs) or **12k** for the last
-task (the whole gate, the coverage floor included, and the fix loop it triggers); then **× 1.2** on the sum for conversation and tool churn.
+**Per task, once:** the output it reads back, **10k** for any code task (its commit and diff, plus its
+own gate's output; ~8k more when it needs a production build and e2e), or **12k plus 2k per earlier
+task** for the last task (the whole set, the coverage floor included, and the fix loop it triggers);
+then **× 1.2** on the sum for conversation and tool churn.
 
 `Budget = (floor + skills + sections + orientation + files + read-back) × 1.2`
 
 **Worked example** — a task creating an Orders resource: 25k floor + 24k (3 skills) + 1k task block +
-6k (3 sections) + 10k (4 source files + 1 test) + 1.5k (1 modified) + 6k read-back = 73.5k × 1.2 =
-**~90k**.
+6k (3 sections) + 10k (4 source files + 1 test) + 1.5k (1 modified) + 10k read-back = 77.5k × 1.2 =
+**~95k**.
 
 **Aim for ~80k–150k, centred on ~130k.** Under ~80k, look at the next task in the same stack — merge
 only if the result still states **one** deliverable. Over ~150k, name the task's natural split point,
@@ -206,14 +206,14 @@ from a 95k of one large one:
 
 ```markdown
 **Budget:** ~95k — CLAUDE.md 25k, plan §2 and §4 4k, `OrderService.cs` + its tests as the pattern ~12k,
-3 skills 24k, 5 files created and 1 modified 11.5k, commit and diff read-back 6k, churn ×1.2
+3 skills 24k, 5 files created and 1 modified 11.5k, commit, diff and gate read-back 10k, churn ×1.2
 ```
 
 Re-derive it whenever the task's files, skills or cited sections change. A stale budget is worse than
 none — it is a number someone will trust.
 
 > **The budget is a guide, never a gate.** Three rules outrank it, always: one deliverable; one stack
-> and one agent; the plan's single gate lands in its last runnable task. A task that overshoots with
+> and one agent; every task gates what it built. A task that overshoots with
 > all three satisfied is a large task correctly authored — it is labelled, not filed as a defect. Never
 > split something coherent to hit a number, and never pad a task to fill one.
 
@@ -225,19 +225,20 @@ Four rules are easy to get wrong and expensive when you do:
 - **Every prompt block's first line is `Depends on: <ids>`** — ids only, comma-separated, or
   `Depends on: none` when the task can start at once (format reference §6). It is the task block's
   `**Depends on:**` reduced to ids, overlap edges included; a program reads it, so no prose on that line.
-  The gate task waits for every task that nothing else waits for. The prompts table carries a
+  The last runnable task waits for every task that nothing else waits for. The prompts table carries a
   `Runs beside` column, and the preamble says what runs together in one line — "After C1, B1 → B2 run
-  beside Q1; F1 waits for both; F2 is the gate."
-- **Every task but the last carries `**Gate: none**`**, naming the commands it must not run — except,
-  in a test-first plan, the `Q` tasks and the implementation tasks, which carry `**Gate: own tests**`:
-  the one command, filtered by file or class, that runs the tests they write or must turn green (format
-  reference §5). A `Q` task expects red on the stub; an implementation task expects green, and the
-  acceptance tests are read-only to it (format reference §4). The last
-  runnable task carries the whole gate, in run order, and **fixes what it finds rather than handing it
-  back**. When the plan writes code, the gate ends with the **coverage floor** (format reference §5):
-  ≥ 80% branch coverage of the code the plan wrote, short of which the gate task writes the missing tests.
-  Every task before it designs its tests for that floor — each one's bullets name the branches its tests
-  must reach, as `OrderServiceTests` does in the format reference's deliverable table.
+  beside Q1; F1 waits for both; F2 runs the whole set."
+- **Every task that writes code or tests carries `**Gate: own tests**`**, naming the commands, filtered by
+  file or class, that build what it touched and run the tests it writes or must turn green (format
+  reference §5). A `Q` task expects red for the recorded reason; a `Q` task whose app cannot start in one
+  command proves its tests load and list (Playwright's `--list`), and the task that serves each journey
+  turns it green. An implementation task expects green, and the acceptance tests are read-only to it
+  (format reference §4). `**Gate: none**` is only for a task with nothing runnable, and it says so. The
+  last runnable task runs the whole set once more, in run order, and **fixes what it finds rather than
+  handing it back**. When the plan writes code, it ends with the **coverage floor** (format reference §5):
+  ≥ 80% branch coverage of the code the plan wrote, short of which that task writes the missing tests.
+  Every task before it measures that floor over its own files — each one's bullets name the branches its
+  tests must reach, as `OrderServiceTests` does in the format reference's deliverable table.
 - **A prompt you cannot write yet is not guessed.** Where a block genuinely depends on what an earlier
   task lands — the shape of a file it has not created, an id it will assign, a decision it will make —
   write `**Blocked on <id>** — <id> writes this prompt when it lands, from <what it will then know>.`
@@ -274,8 +275,8 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
    The contract, the schema and the stubs come before any `Q` task.
 6. **Parallel check:** every block opens with a `Depends on:` line of ids only, equal to its task
    block's `**Depends on:**`; any two tasks whose `Files` overlap, or that build one tree, are ordered by
-   an edge; the `Runs beside` column lists only pairs with disjoint files and different trees; the gate
-   task waits for every task nothing else waits for.
+   an edge; the `Runs beside` column lists only pairs with disjoint files and different trees; the last
+   runnable task waits for every task nothing else waits for.
 7. **Deliverable check:** every task has one, and each states a result rather than an activity.
 8. **Stack check:** every task names exactly one of the eight — run it as a mechanical check on the
    files each task touches. A task whose files span two trees is two tasks, and the split is an
@@ -286,12 +287,12 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
    the prompts section agrees. Every estimate over ~150k names its natural split point or says why the
    task is one thing anyway; every one under ~80k was checked against the next same-stack task and
    either merged or left alone deliberately.
-11. **Gate check:** exactly one task carries the gate, it is the last runnable one, its commands are
+11. **Gate check:** every code task's `**Gate: own tests**` names its commands, filtered and never the
+    unfiltered suite; a code task whose gate runs nothing is a defect. `**Gate: none**` appears only on a
+    task with nothing runnable, which says so. The last runnable task runs the whole set: its commands are
     the project's own and in run order, it ends with the coverage floor (format reference §5) when the
-    plan writes code, and every other task says `**Gate: none**` with what not to run, or
-    `**Gate: own tests**` with one filtered command (never the unfiltered suite) on `Q` and
-    implementation tasks.
-    The ungated-boundary cost is stated in the plan.
+    plan writes code, and it holds no feature work when the plan has any. What a halfway stop leaves is
+    stated in the plan.
 12. **Filing check:** where a blocked task will outlive the last runnable one, the last runnable block
     says the plan stays in `docs/plans/` until it clears; the plan's own number was taken from the high-water mark across both
     folders.
@@ -325,8 +326,9 @@ path, and re-reads the plan before its close-out edits.
 - Ground the plan in `## 1.`'s gap table, then decide the work in the numbered sections, then cut tasks
 - Tasks flat and ordered, ids prefixed by family — no slices, no phases, no grouping layer
 - One deliverable, one stack, one agent, one budget with drivers, one `Depends on` line per task and per prompt, overlap edges included
-- The plan gates once, in its last runnable task, and that task fixes what the gate finds — including
-  a branch-coverage shortfall under the 80% floor, which it closes by writing tests
+- Every task gates what it built and leaves its own tests green; the last runnable task runs the whole
+  set once more and fixes what it finds — including a branch-coverage shortfall under the 80% floor,
+  which it closes by writing tests
 - One paste-ready prompt per task, rewritten in place by any task that changes what it assumes; a
   prompt that cannot be written yet is written by the task that unblocks it
 - A landed task's prompt is deleted; the live prompt set is the progress indicator, and the task that

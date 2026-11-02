@@ -30,11 +30,11 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 - Honor every global rule in the library `CLAUDE.md`: constructor injection only, no static mutable state, structured logging (SLF4J message templates, never string concatenation in log calls), no secrets in code or `application.yml`, `Should_X_When_Y` names, one logical assertion per test, no `Thread.sleep`, builders for 4+ field test data, `final` where it fits.
 - Read 2–3 existing files in the target project before writing anything; match its conventions over the templates' defaults (including Maven over Gradle if the project already uses it).
 - Work **one step at a time**. Do not start step N+1 until step N's exit gate passes. If invoked for a single step, do only that step.
-- Run what you write, outside a `Gate: none` plan task. A step whose code has never executed does not pass its gate. If a run fails, fix and re-run once before reporting the failure.
+- Run what you write. A step whose code has never executed does not pass its gate. If a run fails, fix and re-run once before reporting the failure.
 - Ask at most 2–3 clarifying questions up front (target project path, API base URL / OpenAPI spec location, environment + credentials source); infer the rest.
 - A run that fails because of a **product defect** (not the test or the environment) → hand it to `qa-test-case-designer` (it owns bug reports), mark the affected case blocked in the plan, and continue with the remaining cases.
 - **Emit no comments.** Per `engineering-practices/code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** `Gate: own tests` runs exactly the commands its block names (its own tests and the acceptance tests it writes or must turn green) and leaves them green; no unfiltered suite. The last runnable task runs the whole set, whatever an exit criterion below says.
 
 ## Input modes
 
@@ -90,9 +90,9 @@ Most requests are against a test suite that already exists — "this test is fai
 - **How the suite is invoked** (the exact `./gradlew test` filter/env the project uses) and its **target environment / credentials source**.
 - **Project conventions** (naming, build tool — Maven vs Gradle, strictness settings) — match these over the templates' defaults.
 
-Outside a `Gate: none` plan task, confirm the suite **builds and runs** before you change it (`./gradlew build`, then the suite). If it is red on arrival, say so — that's a finding, not your bug to silently absorb.
+Confirm the suite **builds and runs** before you change it (`./gradlew build`, then the suite). If it is red on arrival, say so — that's a finding, not your bug to silently absorb.
 
-**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run outside a `Gate: none` plan task, regardless of the cache gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is the **API's own shape** — the service under test can be redeployed with no commit in *this* repo, so the git delta cannot see it at all.
+**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run, regardless of the cache gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is the **API's own shape** — the service under test can be redeployed with no commit in *this* repo, so the git delta cannot see it at all.
 
 **What this agent's cache records:**
 

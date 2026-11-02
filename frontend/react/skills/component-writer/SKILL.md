@@ -344,8 +344,6 @@ For every artifact:
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
-
 Run the project's own typecheck, lint and test scripts with the package manager `packageManager` names:
 
 - typecheck (`tsc --noEmit`) — 0 errors

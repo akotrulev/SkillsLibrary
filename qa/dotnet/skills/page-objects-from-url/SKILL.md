@@ -168,8 +168,6 @@ changes the runsettings — and the MCP registration — never per locator.
 
 ### 6. Verify and hand off
 
-Inside a plan task marked `Gate: none`, run none of the checks below and report the POM as "written, not run".
-
 - `dotnet build` (or project equivalent) → must compile clean.
 - A smoke test for the page exists → run it; a new POM → verify the load landmark against one more live snapshot.
 - Report: elements extracted (counts: test-id-backed / fallback / ⚠ CSS), POM created or updated (diff summary), `missing-testids.md` path, open questions.

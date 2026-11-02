@@ -241,8 +241,6 @@ Set explicit budgets and fail CI when they regress — an unmeasured perf rule r
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
-
 - Published WASM `_framework` transfer size within budget; Brotli served (Network shows `content-encoding: br`).
 - A key large grid uses `Virtualize`; scrolling stays smooth (no long tasks in DevTools Performance).
 - Toggle `IsFixed`/`ShouldRender`/`@key` off→on and confirm the render-count meter drops on the target interaction.

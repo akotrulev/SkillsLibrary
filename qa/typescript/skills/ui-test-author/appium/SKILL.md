@@ -168,7 +168,7 @@ Other removed endpoints have `mobile:` replacements: `mobile: backgroundApp`, `m
 2. For each element with no test id, record it in `missing-testids.md`; do not silently fall back to XPath.
 3. Write `src/pages/mobile/<Screen>Page.ts`: constants, private accessors, `verifyPageLoaded`, intent actions, and a scoped component for each repeating group.
 4. Stub missing destination pages; write the spec with one `it` per scenario.
-5. Outside a `Gate: none` plan task, run `npx wdio run wdio.conf.ts` and expect zero failures. If the service fails to start, run `appium driver list --installed`. A server run by hand answers `curl -s http://127.0.0.1:4723/status`.
+5. Run `npx wdio run wdio.conf.ts` and expect zero failures. If the service fails to start, run `appium driver list --installed`. A server run by hand answers `curl -s http://127.0.0.1:4723/status`.
 
 A visible element missing from the page source is usually an accessibility, app-state, active-app (a system alert) or native-versus-WebView problem; fix that before the locator. For doctor failures and driver questions the Appium docs tools (`mcp__appium-mcp__appium_documentation_query`, `mcp__appium-mcp__appium_skills`, on when `APPIUM_MCP_DOCS_ENABLED=true`) answer from the official docs.
 

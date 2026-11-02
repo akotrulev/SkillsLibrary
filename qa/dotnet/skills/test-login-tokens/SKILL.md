@@ -123,7 +123,7 @@ These sections live in `references/details.md` — **read it when the task touch
 2. Confirm `Auth0.AuthenticationApi` is referenced (`dotnet add package Auth0.AuthenticationApi`).
 3. Confirm the env vars are wired into the test environment (CI secret store / launch profile), **not** committed: `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `AUTH0_M2M_CLIENT_ID/SECRET`, for ROPG `AUTH0_ROPG_CLIENT_ID`, `AUTH0_TEST_USERNAME/PASSWORD`, `AUTH0_REALM`, for device-code `AUTH0_DEVICE_CLIENT_ID`, and `BASE_URL` for UI seeding.
 4. Generate `Auth0Config.cs`, `CachedTokenProvider.cs`, `Tokens.cs`, plus the consumer wiring (API client header and/or the token body of `AuthSetup`).
-5. Run the cache unit tests anywhere (offline); run the live token tests with the secrets present. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+5. Run the cache unit tests anywhere (offline); run the live token tests with the secrets present.
 
 ## Cross-references
 

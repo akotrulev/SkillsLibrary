@@ -207,8 +207,6 @@ Record the chosen policy per entity in the feature's doc. A `409` keeps the user
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Typecheck and lint with the project's scripts clean; `npx expo-doctor` clean (a library not in the SDK's version set).
 - Device: write in airplane mode → item shows "not synced"; reconnect → it replays once; kill the app mid-queue → it resumes.
 - Sign out → secure-store, MMKV user keys, SQLite user tables and the persisted cache are empty.

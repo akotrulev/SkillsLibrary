@@ -193,7 +193,7 @@ describe('POST /api/users', () => {
 2. For each resource in scope, verify the Zod schema + inferred types (`models/{api}/{resource}/`) and the `{resource}Client` exist. Create missing ones via `qa/typescript/skills/api-models` then `qa/typescript/skills/api-client-writer` before writing any spec.
 3. Author one spec file per operation, picking patterns from the scenario matrix. Body-manipulation cases (malformed JSON, extra/missing property) require the optional `createRaw` / `createUnchecked` client methods — add them via `api-client-writer`.
 4. Verify every test title describes behavior (and carries the TC-ID when a document exists) and asserts one behavior; verify every TC-ID maps to a test or is explicitly deferred.
-5. Run the project's own typecheck script (with the package manager `packageManager` names), then `npx vitest run` — expect 0 type errors and 0 failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+5. Run the project's own typecheck script (with the package manager `packageManager` names), then `npx vitest run` — expect 0 type errors and 0 failures.
 
 ## Handoffs
 

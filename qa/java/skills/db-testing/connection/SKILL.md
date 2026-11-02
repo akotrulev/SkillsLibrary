@@ -255,7 +255,7 @@ List tables explicitly. Don't loop over `information_schema.tables` — that tou
 3. For each new test set, scaffold a `<Aggregate>Seeder.java` (write) and `<Aggregate>DbProbe.java` (read), reusing builders from `qa/java/skills/test-data-builder`.
 4. Add `DbWaits` (Awaitility wrapper) if the SUT involves async projections.
 5. Pick a cleanup strategy (transactional rollback default); annotate / wire `@AfterMethod`.
-6. Run `./gradlew test` — every test passes; no leaks between tests. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+6. Run `./gradlew test` — every test passes; no leaks between tests.
 
 ## Handoffs
 

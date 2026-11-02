@@ -215,8 +215,6 @@ One schema per step plus a merged final schema; the accumulated values live in a
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Typecheck and lint with the project's scripts clean.
 - Simulator and emulator: open the keyboard on the last field — it is visible and the submit control reachable; chain fields with `Next`; autofill a password.
 - Submit invalid → first invalid field focused, errors announced; submit with a `400 errors` body → errors on the right fields; submit twice quickly → one request.

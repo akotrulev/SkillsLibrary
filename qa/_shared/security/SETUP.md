@@ -129,7 +129,7 @@ This is the highest-setup, highest-value skill. It needs:
    (ROPG must be explicitly enabled on the tenant — see the `test-login-tokens` skill's security caveat.)
 4. **The project's 403-vs-404 leak policy decided** — does cross-tenant access return `403` (confirms
    existence) or `404` (hides it)? The `expectDenied(status)` helper codifies whichever you choose.
-5. **Run:** it's the project's own test command, read from the repo (the `package.json` script run with the package manager `packageManager` names, the `.sln`, the Gradle wrapper). No external service. Inside a `Gate: none` plan task, run none of it and report "written, not run".
+5. **Run:** it's the project's own test command, read from the repo (the `package.json` script run with the package manager `packageManager` names, the `.sln`, the Gradle wrapper). No external service.
 
 ### `dependency-scan` — SCA (per package manager)
 - **TypeScript:** `npm audit` (+ the skill's gating wrapper). **.NET:** `dotnet list package --vulnerable`.

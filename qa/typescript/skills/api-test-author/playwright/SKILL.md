@@ -243,7 +243,7 @@ calls of a failed test (`qa/typescript/skills/evidence-capture`).
 5. Add the identity and cleanup fixtures the planned scenarios need to `tests/fixtures.ts`.
 6. Author one spec file per operation from the scenario matrix.
 7. Run the project's own typecheck script, then `npx playwright test --project=api` — expect 0 type errors, 0
-   failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+   failures.
 
 ## Cross-references
 

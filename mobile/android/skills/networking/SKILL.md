@@ -222,8 +222,6 @@ Pull above; push is a socket the app opens **only while a screen needs it and th
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Build clean; detekt, ktlint and Android Lint pass.
 - With the emulator's network at "100 % loss": a request past its budget fails at the deadline with a timeout; leaving the screen cancels silently.
 - Airplane mode: no retry attempts in the log; reconnect refetches.

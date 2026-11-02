@@ -110,7 +110,7 @@ These sections live in `references/details.md` — **read it when the task touch
 2. Confirm `auth0` is installed (`npm i -D auth0`) — or decide on bare `fetch` if you'd rather not add it.
 3. Confirm the env vars are wired into the test environment (CI secret store / `.env.test`), **not** committed: `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `AUTH0_M2M_CLIENT_ID/SECRET`, and for ROPG `AUTH0_ROPG_CLIENT_ID`, `AUTH0_TEST_USERNAME/PASSWORD`, `AUTH0_REALM`.
 4. Generate `auth0.config.ts`, `token-provider.ts`, `tokens.ts`, plus the consumer wiring (API client header and/or a token-seeding `token.setup.ts` in the Playwright `setup` project).
-5. Run the cache unit test anywhere (offline); run the live token tests with the secrets present. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+5. Run the cache unit test anywhere (offline); run the live token tests with the secrets present.
 
 ## Cross-references
 

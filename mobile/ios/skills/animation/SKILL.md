@@ -145,8 +145,6 @@ struct DismissibleCard<Content: View>: View {
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Reduce Motion on (Settings → Accessibility → Motion): entrances become fades or disappear, loops stop, a drag still follows the finger and the state still changes.
 - Instruments (SwiftUI template, Animation Hitches) on a device: the interaction holds the frame budget with no hitch in the animation; no per-frame view-body work in the update count.
 - `rg "\.animation\([^,)]*\)$"` for value-less modifiers → none (Q2).

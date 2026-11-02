@@ -25,8 +25,6 @@ shared by every tool in the family.
 - Shard with fail-fast off; always publish JUnit XML + Allure results, including on failure.
 - Secrets via OIDC / the platform's secret store — never in YAML.
 - Cross-stack conventions live in `qa/cicd/ci-conventions` — load it alongside the tool reference.
-- Inside a `Gate: none` plan task, run none of the generation steps' lint, dry-run or smoke checks, and report the pipeline as "written, not run".
-
 ## Sharding NUnit suites: class filters computed once
 
 **Neither `Microsoft.Playwright.NUnit` nor NUnit shards a run.** `-- Playwright.Shard=i/N` is ignored (the

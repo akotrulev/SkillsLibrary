@@ -279,7 +279,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 - **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — each `if`/`else` arm, `switch` case and its `default`, ternary, `??` and `?.`, short-circuit `&&`/`||`, a default parameter value, guard-clause return, `catch`, a loop run zero times and many, **both `Result` branches** — and give each a test or an `it.each` row that asserts its effect. The slack under 100% is for branches no honest unit test reaches, such as the `never` default of an exhaustive `switch`.
 - **Only an asserting test counts.** A test that runs a branch without asserting what it did is a **major** finding — it moves the number and catches nothing. The tautology test applies; with no TypeScript mutation skill yet (Handoffs), it is this stack's only guard against hollow coverage.
 - **Leave out what the matrix says not to test, by name.** Type-only files, barrels, constants and generated clients stay out of the measured file list, and the report names each one left out. Never reach 80% by lowering the number or by a `/* v8 ignore … */` hint over code that has behavior.
-- **Measure.** The plan's gate runs this; outside a plan, run it before you report (with the project's package manager — `npx`, `pnpm exec`, `yarn`):
+- **Measure.** A plan task's `Gate: own tests` runs this over the files it wrote; outside a plan, run it before you report (with the project's package manager — `npx`, `pnpm exec`, `yarn`):
 
   ```bash
   npx vitest run --coverage --coverage.reporter=text \
@@ -309,7 +309,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 3. **Fix the seams first** — a direct `Date.now()`, `crypto.randomUUID()`, `process.env` read, or `fetch` call is a `pattern-writer`-shaped edit to production code, done before the test.
 4. **Write the failing test**, watch it fail for the right reason (the run a `Gate: own tests` task may make), make it pass.
 5. **Add the boundary cases** with `it.each` — nulls, empties, min/max, the rounding boundary, **both `Result` branches**, the refused transition.
-6. **Verify:** the project's test script green (from `package.json`, run with its `packageManager`), `tsc --noEmit` clean, lint clean, branch coverage of the changed code ≥ 80% (*Coverage floor*). Report counts and the coverage figure. Inside a plan task, `Gate: none` runs nothing and reports "written, not run"; `Gate: own tests` runs this task's tests — step 4's red run, then green — and the *Coverage floor* measure over the files it wrote, and nothing else.
+6. **Verify:** the project's test script green (from `package.json`, run with its `packageManager`), `tsc --noEmit` clean, lint clean, branch coverage of the changed code ≥ 80% (*Coverage floor*). Report counts and the coverage figure. Inside a plan task, `Gate: own tests` runs this task's tests — step 4's red run, then green — and the *Coverage floor* measure over the files it wrote; the last runnable task runs everything else.
 7. **Sweep:** a union whose members are handled in one place but tested in one case is a gap.
 
 ## Handoffs

@@ -136,8 +136,6 @@ Expo Router turns a URL into a route: `https://example.com/orders/42` opens `app
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Android 13+ device: the permission prompt appears only after the channel exists and only after the pre-prompt.
 - Deny notifications: the in-app list still shows the update; the settings row opens Settings.
 - Tap from killed, background and foreground: each lands on the right screen once.

@@ -156,8 +156,6 @@ export function ScannerGate({ children }: { children: React.ReactNode }) {
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Fresh install: the screen shows the pre-prompt first; the system dialog opens only after "Continue".
 - Deny, then deny with "don't ask again": the denied screen offers the alternative and an Open Settings button that lands on the app's settings.
 - Grant in Settings, return to the app: the feature unlocks without a restart.

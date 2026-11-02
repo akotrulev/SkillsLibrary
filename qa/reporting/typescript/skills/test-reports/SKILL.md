@@ -338,8 +338,6 @@ Place at the project root and copy it into `allure-results/` before `allure gene
 7. Wire CI per the snippet for the team's CI platform; configure history retention.
 8. Smoke a green build + a deliberate failing test; confirm trend, categories, attachments populate.
 
-Inside a `Gate: none` plan task, skip the smoke run in the last step and report the wiring as "written, not run".
-
 ## Handoffs
 
 - .NET Allure → `qa/reporting/dotnet/skills/test-reports`

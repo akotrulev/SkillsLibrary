@@ -437,7 +437,7 @@ GraphQL rides on HTTP — contract it as a CDCT HTTP interaction: `POST /graphql
 ## Generation steps
 
 1. Add a Gradle sub-module `{service}-contract-tests` with `useJUnitPlatform()`.
-2. For the consumer: scaffold `{Provider}ConsumerTest.java` annotated with `@ExtendWith(PactConsumerTestExt.class)` + `@PactTestFor(providerName = "{provider}")`; author one `@Pact` method + one `@Test`; run `./gradlew :{module}:test`; confirm a pact file appears under `build/pacts/`. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+2. For the consumer: scaffold `{Provider}ConsumerTest.java` annotated with `@ExtendWith(PactConsumerTestExt.class)` + `@PactTestFor(providerName = "{provider}")`; author one `@Pact` method + one `@Test`; run `./gradlew :{module}:test`; confirm a pact file appears under `build/pacts/`.
 3. For the provider: scaffold `{Service}ProviderVerificationTest.java` with `@Provider`, `@PactBroker`, `@SpringBootTest(RANDOM_PORT)`, and a `@State("…")` handler per state name.
 4. Configure Gradle `test` task system properties (`pact.provider.version`, `pact.provider.branch`, `pact.verifier.publishResults`, `pactbroker.url`, `pactbroker.auth.token`).
 5. Wire consumer CI: `./gradlew :{consumer}-contract-tests:test` → `pact-cli broker publish` with `--branch` and `--consumer-app-version`.

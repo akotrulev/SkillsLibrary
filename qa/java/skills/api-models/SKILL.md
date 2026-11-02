@@ -156,4 +156,4 @@ public record {Resource}ListDto(
 2. Ask: resource name and DTO kind (`Dto`, `InDto`, `ModDto`, nested, wrapper).
 3. Ask which properties are needed, or inspect a sample API response.
 4. Generate at `apitests/src/test/java/com/{org}/apitests/models/{api}/{resource}/{Name}Dto.java`.
-5. Run `./gradlew :apitests:compileTestJava` — expect 0 errors. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+5. Run `./gradlew :apitests:compileTestJava` — expect 0 errors.

@@ -178,7 +178,7 @@ QA's explorer writes, per screen, a table of `Element | Type | Visible text / la
 2. For each target file, derive the screen name; walk the view body; apply rules 1–7; skip decoratives and list them.
 3. For a grouped or combined element, decide the reachable level (rule 8) and say which.
 4. Report per file: ids added, decoratives skipped, collisions, and any grouping that hides children.
-5. Outside a `Gate: none` plan task, build the target; with a simulator build, read one screen's page source (`appium_get_page_source`) and confirm `name` matches each assigned id.
+5. Build the target; with a simulator build, read one screen's page source (`appium_get_page_source`) and confirm `name` matches each assigned id.
 
 ## Anti-patterns
 

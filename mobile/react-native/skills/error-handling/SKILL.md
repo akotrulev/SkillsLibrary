@@ -188,8 +188,6 @@ Raise it from **one place per failure path** — `QueryCache.onError` / `Mutatio
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Throw in a region → its boundary shows friendly content with a reference; the rest of the screen works; no `error.message` on screen.
 - Fail the list query with search and filters filled → both stay interactive; only the rows carry the error; the banner sits below the notch until its close control is pressed.
 - Fail a pull-to-refresh after a load → rows remain, stale marker with an age, one banner.

@@ -131,7 +131,7 @@ blocks**, **parallelism**, the **tunnel**, and **AWS Device Farm**. Read it when
 3. **Web**: add `Support/Grid/GridConnection.cs` (the vendor endpoint as `ConnectOptionsAsync()`'s tuple) and `Support/Grid/GridSession.cs` (verdict + session link). For each test class to rerun, add `Grid/<Class>OnBrowserStack.cs`: `[Category("grid")]`, derives from the test class, overrides `ConnectOptionsAsync()`, reports in `[TearDown]`. Sauce: scaffold `.sauce/config.yml`. **Mobile**: add `AppiumGridDriverFactory`.
 4. Wire the run: `dotnet test --filter TestCategory=grid -- NUnit.NumberOfTestWorkers=$GRID_CONCURRENCY`, and `TestCategory!=grid` on the local/PR run; note `shards × workers ≤ cap` and cross-link `qa/cicd/dotnet/skills/ci-pipelines`.
 5. If the target is private, add `GridTunnel` and its `[SetUpFixture]` in `Example.UiTests.Grid`.
-6. Run a single grid fixture first (`NUnit.NumberOfTestWorkers=1`) to confirm the connection + caps before fanning out; confirm the session appears on the dashboard with the right build/project tags. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+6. Run a single grid fixture first (`NUnit.NumberOfTestWorkers=1`) to confirm the connection + caps before fanning out; confirm the session appears on the dashboard with the right build/project tags.
 
 ## Cross-references
 

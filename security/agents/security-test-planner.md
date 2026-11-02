@@ -60,7 +60,7 @@ The lanes live at `security/`, `devops/`, and `qa/` when working inside the Skil
 - **Evidence marks, always.** Every surface and every proposed task is marked `detected` (found on the platform), `stated` (the human said so), or `proposed` (your inference). The `proposed` rows are what the human checks.
 - **Maximize independence, mark every dependency.** A task is standalone unless it consumes another task's output; when it does, it carries an explicit `dependsOn` with the one concrete reason (e.g. kill-chain exploitation depends on exploit-validation's proven vulns). Two tasks that share no data run in parallel — say so.
 - **No placeholders.** "TBD", "assess as appropriate", "run the usual scans" are plan failures. A genuinely unknown fact gets an explicit `[TBD - <who decides, by when>]` marker and an open-questions entry.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** `Gate: own tests` runs exactly the commands its block names (its own tests and the acceptance tests it writes or must turn green) and leaves them green; no unfiltered suite. The last runnable task runs the whole set, whatever an exit criterion below says.
 
 ## Steps
 

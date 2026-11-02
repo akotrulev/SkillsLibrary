@@ -165,8 +165,6 @@ it there — and in the MCP registration — never per locator.
 
 ### 6. Verify and hand off
 
-Inside a plan task marked `Gate: none`, run none of the checks below and report the POM as "written, not run".
-
 - `npx tsc --noEmit` (or project equivalent) → must type-check clean.
 - A smoke spec for the page exists → run it (`npx playwright test`); a new POM → verify the load landmark against one more live snapshot.
 - Report: elements extracted (counts: test-id-backed / fallback / ⚠ CSS), POM created or updated (diff summary), `missing-testids.md` path, open questions.

@@ -239,7 +239,7 @@ Don't build "an order in the DB" inside the factory — that couples the factory
 4. Add an ObjectMother under `tests/mothers/<noun>.ts` with the canonical variants.
 5. Replace inline literals in 2–3 representative tests so the pattern is set; leave the rest as a follow-up sweep.
 6. Run the project's own test script with the package manager `packageManager` names — every test still passes with the new defaults.
-7. Run `tsc --noEmit` — strict TS green. Inside a plan task marked `Gate: none`, run none of steps 6–7 and report the files as "written, not run".
+7. Run `tsc --noEmit` — strict TS green.
 
 ## Handoffs
 

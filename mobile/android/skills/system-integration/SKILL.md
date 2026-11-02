@@ -155,8 +155,6 @@ Compose-style widgets with Glance (`glance-appwidget` 1.2.0, `glance-material3` 
 
 ## Validation (exit gate)
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - [ ] Every `<service>` that goes foreground has `foregroundServiceType` and the matching `FOREGROUND_SERVICE_*` permission; the Console declaration is listed
 - [ ] Work is `enqueueUnique…`; the app survives process death mid-work and the worker re-runs cleanly
 - [ ] A foreground service stops when its work ends; a denied `POST_NOTIFICATIONS` still lets it run

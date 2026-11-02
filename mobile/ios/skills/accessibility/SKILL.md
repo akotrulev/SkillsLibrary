@@ -144,8 +144,6 @@ A voluntary App Store Connect declaration per supported feature (VoiceOver, Voic
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Accessibility Inspector audit on each screen: no unlabelled element, no clipped text, no target under 44 pt.
 - A VoiceOver pass at `accessibility5`: each row is one stop, each action reachable, the error announced once.
 - Settings → Accessibility with Increase Contrast, Reduce Transparency, Reduce Motion and Differentiate Without Color on: nothing disappears, nothing relies on colour.

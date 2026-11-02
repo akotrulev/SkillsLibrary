@@ -281,8 +281,6 @@ known-flaky is `qa/reporting/dotnet/skills/flaky-test-quarantine`'s.
 6. Wire CI per `qa/cicd/dotnet/skills/ci-pipelines` for the team's CI platform; configure history retention.
 7. Smoke a green build + a deliberate failing test; confirm trend, categories, attachments populate.
 
-Inside a `Gate: none` plan task, skip the smoke run in the last step and report the wiring as "written, not run".
-
 ## Handoffs
 
 - Java Allure → `qa/reporting/java/skills/test-reports`

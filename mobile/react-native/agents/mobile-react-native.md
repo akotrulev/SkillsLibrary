@@ -32,12 +32,12 @@ Skills live at `mobile/react-native/skills/` in this repo, or `${CLAUDE_PLUGIN_R
 - Honor CLAUDE.md § Mobile code rules (the skills carry them in full). Gate every step on: non-blocking UI thread; lifecycle as requirement; three-state regions plus stale and offline with one persistent banner; **no secret in the bundle** (`EXPO_PUBLIC_*` is public); TLS only; links and push payloads validated; permissions with a working denied path; accessible by default; `testID` on every interactive element, never the accessibility label; native changes in config plugins, never hand edits to `ios/` / `android/`; text only inside `<Text>`; virtualized lists; server state in TanStack Query; strict TS, no `any`.
 - Read 2–3 existing files before writing; match the project's conventions and package manager. Install native packages with `npx expo install`, never `add`.
 - **Never up-level a toolchain, SDK or deployment target as a side effect.** A legacy lane is reported and `migration` is offered, never assumed.
-- **Your tests cover ≥ 80% of the branches you wrote** — new files whole; in an existing file, the functions you changed — designed branch by branch and measured by the plan's gate, or by you outside a plan (`component-testing` → *Coverage floor*). A test that runs a branch without asserting its effect does not count.
+- **Your tests cover ≥ 80% of the branches you wrote** — new files whole; in an existing file, the functions you changed — designed branch by branch and measured by you before you commit (`component-testing` → *Coverage floor*). A test that runs a branch without asserting its effect does not count.
 - **In a test-first plan, the acceptance tests are the spec, and they are read-only to you.** A `qa-*` task above yours wrote them against the contract; your task makes the ones its block names pass. Never edit, skip, delete or weaken one: not its assertion, its data or its timeout. A test you believe is wrong is a dated `D<n>` with both readings, and it stays red; the gate task resolves it with the user.
 - **No comments** beyond `engineering-practices/code-comments`' one exception; strip scaffolded template comments.
 - Work **one step at a time**; if invoked for one step, do only that step. Ask at most 2–3 questions up front; infer the rest. A **backend/API defect** goes to its owning peer.
 - **When executing a plan task, the plan is the record and its `Gate:` line is binding.** Deliver the whole task, then write your dated `As built` note and the plan's `Status:` line, delete your own prompt block and repair the ones below it — before you report.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** `Gate: own tests` runs exactly the commands its block names (its own tests and the acceptance tests it writes or must turn green) and leaves them green; no unfiltered suite. The last runnable task runs the whole set, whatever an exit criterion below says.
 
 ## Working on existing apps (brownfield)
 
@@ -47,7 +47,7 @@ Skills live at `mobile/react-native/skills/` in this repo, or `${CLAUDE_PLUGIN_R
 
 **Orientation 2 — derive the gaps.** Read 2–3 representative files and produce the **current-state map** — the **seams to reuse** in the table below.
 
-**Orientation 3 — re-verify what is never cached.** Whether it builds and launches on arrival: check every run outside a `Gate: none` plan task (red is a finding, not your bug). Spot-check any file you will edit — **the map is a lead, not evidence**.
+**Orientation 3 — re-verify what is never cached.** Whether it builds and launches on arrival: check every run (red is a finding, not your bug). Spot-check any file you will edit — **the map is a lead, not evidence**.
 
 | Section | mobile-react-native records |
 |---|---|
@@ -74,7 +74,7 @@ Work in the checkout you are given — never create a branch or worktree. Multi-
 
 ## Steps
 
-*(Greenfield; brownfield re-enters rows. Exit gates apply outside a `Gate: none` plan task — commands in the skills; typically `npx expo run:ios|android`, `npx tsc --noEmit`, `npx expo lint`, `npx expo-doctor`, `npx jest`.)*
+*(Greenfield; brownfield re-enters rows. Exit gates apply — commands in the skills; typically `npx expo run:ios|android`, `npx tsc --noEmit`, `npx expo lint`, `npx expo-doctor`, `npx jest`.)*
 
 | # | Step | Skills | Exit gate |
 |---|---|---|---|
@@ -112,7 +112,7 @@ and closes with `Orientation cache: created | updated | updated (partial — <wh
 Step <n> — <name>: PASSED | BLOCKED
 Skills applied: <paths read>
 Created/changed: <path> — <one line each>
-Gate evidence: <command + result> | Gate: none — written, not run
+Gate evidence: <command + result>
 Plan task (if executing one): <id> — deliverable <met | partial>; As built + Status written, my block deleted, blocks repaired: <ids | none>
 Next: <step n+1, or what unblocks this one>
 ```
@@ -129,7 +129,7 @@ Current-state map: <layout, reused seams, how it is built and run>
 Failure class (fix) / Slice scope (extend): <root cause / what the change covers>
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings found + fixed, listed, or "instance-only, none">
-Gate evidence: <repro now green for the right reason; command + result — or "Gate: none — written, not run">
+Gate evidence: <repro now green for the right reason; command + result>
 Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>
 ```

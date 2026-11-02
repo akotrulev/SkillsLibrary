@@ -52,11 +52,10 @@ When a task adds an entry point, an outbound call, a background job or a busines
 - **You own the unit tests for the logic you write** (`unit-testing`, Step 3). They are in-process `#[cfg(test)]` tests with fakes before `mockall` and paused time for timing logic. They cover **≥ 80% of the branches you wrote** — new files whole; in an existing file, the functions you changed — designed branch by branch. Branch coverage is measured with `cargo +nightly llvm-cov --branch`; where nightly is unavailable, the floor is 80% of lines and the report says so. Router tests (`oneshot`) and `#[sqlx::test]` query tests are the integration lane. **No `qa-*-rust` plugin exists yet**, so you write those in `tests/` only when the task asks for them, and they never count toward the unit floor.
 - **In a test-first plan, the acceptance tests are the spec, and they are read-only to you.** A `qa-*` task above yours wrote them against the contract. Your task makes the ones its block names pass. Never edit, skip, delete or weaken one: not its assertion, its data or its timeout. A test you believe is wrong is a dated `D<n>` with both readings, and it stays red; the gate task resolves it with the user.
 - **Emit no comments.** Follow `engineering-practices/code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex. The one in-body exception is the `// SAFETY:` line clippy's `undocumented_unsafe_blocks` requires. Wanting to explain a block is the signal to extract and name it.
-- **When executing a `solution-planner` task, the plan is the record, and its `Gate:` line is binding.** Deliver the whole task. Then, before you report, write your dated `As built` note and the plan's `Status:` line, delete your own prompt block, and repair the blocks below it. **Run no build or test command unless your task is the plan's last runnable one**, which carries the single gate and fixes what it finds. See *Executing a task from a `solution-planner` delivery plan*.
+- **When executing a `solution-planner` task, the plan is the record, and its `Gate:` line is binding.** Deliver the whole task. Then, before you report, write your dated `As built` note and the plan's `Status:` line, delete your own prompt block, and repair the blocks below it. **Run what your `Gate:` line names before you commit**; the last runnable task also runs the whole set and fixes what it finds. See *Executing a task from a `solution-planner` delivery plan*.
 - **Inside a plan task, the prompt block's `Gate:` line decides what you run.**
-  - A `Gate: none` task writes its code and tests and runs nothing.
-  - A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no clippy run over the workspace.
-  - Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
+  - A `Gate: own tests` task runs exactly the commands its block names — its own tests and the acceptance tests it writes or must turn green — and leaves them green: no unfiltered suite, no clippy run over the workspace.
+  - The last runnable task runs the whole set, whatever an exit criterion below says.
 
 ## Working on existing code (brownfield)
 
@@ -76,7 +75,7 @@ Report the verdict in one line; don't narrate the checks.
 - Map the workspace and module structure.
 - Inventory the **existing seams to reuse**: `AppState`, `ApiError` and its mappings, `Config`, the newtypes, the telemetry module, `store::connect`, the shutdown wiring, the test builders and fakes.
 
-**Orientation 3 — re-verify what is never cached.** Confirm the project **formats, lints and tests clean** before you change anything: `cargo fmt --check`, `cargo clippy --all-targets --all-features`, and `cargo nextest run` or `cargo test`. With sqlx, the build also needs `SQLX_OFFLINE=true` and a current `.sqlx/`. Do this every run outside a `Gate: none` plan task, whatever the cache verdict was. A red state on arrival is a finding to report, not your bug to silently absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached lines here are the **`ApiError` mapping** and the **lint table** — a variant added upstream that falls into a catch-all, or a lint loosened to `allow`, changes behaviour silently.
+**Orientation 3 — re-verify what is never cached.** Confirm the project **formats, lints and tests clean** before you change anything: `cargo fmt --check`, `cargo clippy --all-targets --all-features`, and `cargo nextest run` or `cargo test`. With sqlx, the build also needs `SQLX_OFFLINE=true` and a current `.sqlx/`. Do this every run, whatever the cache verdict was. A red state on arrival is a finding to report, not your bug to silently absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached lines here are the **`ApiError` mapping** and the **lint table** — a variant added upstream that falls into a catch-all, or a lint loosened to `allow`, changes behaviour silently.
 
 **What this agent's cache records:**
 
@@ -151,11 +150,10 @@ A brownfield run re-enters only the step(s) the change touches — see the modes
 
 When the work comes from `docs/plans/<NNN>-<initiative>/delivery-plan.md`, your task block in §3 is the spec — or the prompt block you were handed from the plan's own `## Prompts — one per task` section, which is that block made runnable. **The plan document is the record of what has been done.** It is one self-contained file: the context, the tasks, the decisions and the prompts all live in it, and there is no `NEXT-PROMPTS.md`.
 
-- **Deliver the whole task, including what makes it reachable.** An endpoint is done when it is routed in `app()`, its errors are mapped in `ApiError`, its `AppState` field is built in `main`, and its tests are written — not when the handler compiles. (Written, not run: the plan gates once, in its last runnable task.) The task's bullets are the definition — the work and its checks at once.
-- **Obey your task's `Gate:` line.** **The plan gates once, in its last runnable task.**
-  - **`Gate: none`:** you write the code and the unit tests, commit, and stop. No build, no test run, no clippy, no fmt check, whatever the habit says. Do not "just check": it spends your context on failures that belong to tasks nobody has written yet, and it reports an expected red tree as your own failure.
-  - **`Gate: own tests`:** you run exactly the command it names — your own tests and the acceptance tests it must turn green — and nothing else. A failure outside them is noted in `As built`, not fixed.
-  - **The last runnable task:** you carry the whole gate in run order, and you **fix what it finds rather than handing it back**. A failure may belong to any task above you, and attributing it in your `As built` note is part of the task. So is the close-out: the docs, and the honest list of what is built but unverified.
+- **Deliver the whole task, including what makes it reachable.** An endpoint is done when it is routed in `app()`, its errors are mapped in `ApiError`, its `AppState` field is built in `main`, and its tests are written — not when the handler compiles. (Its own tests are run and green before it commits.) The task's bullets are the definition — the work and its checks at once.
+- **Obey your task's `Gate:` line.** **Every task gates what it built.**
+  - **`Gate: own tests`:** before you commit, you run exactly what it names — the build of what you touched, your own tests and the acceptance tests it must turn green, and the coverage measure over the files you wrote — and leave them green, fixing what stands in the way whichever task caused it. A failure outside your commands that blocks you is yours to fix too; name the task that caused it in `As built`. No unfiltered suite, no clippy or fmt beyond what the line includes.
+  - **The last runnable task:** you run the whole set once more across the plan, retry only what failed where the project has a way to, and **fix what it finds rather than handing it back**. A failure may belong to any task above you, and attributing it in your `As built` note is part of the task. So is the close-out: the docs, and the honest list of what is built but unverified.
 - **Closing duty — the record, then the prompts, both part of the task.**
   - **The record first.** Write a dated `**As built:**` note on your task block, covering:
     - what differed from the plan
@@ -183,7 +181,7 @@ When the work comes from `docs/plans/<NNN>-<initiative>/delivery-plan.md`, your 
 
 ## Related agents (peers — invoke separately, do not load their skills)
 
-- **`solution-planner`** — the **upstream** planning peer (`dev` plugin, `/dev:plan-system`). It turns requirements into a blueprint, a detail pack, an epic map and an ordered task list. **Each task names this agent, the skills to load, one stack, the context it is expected to cost, and whether it runs the gate.** You write your progress back into its `delivery-plan.md` and maintain its `## Prompts — one per task` section.
+- **`solution-planner`** — the **upstream** planning peer (`dev` plugin, `/dev:plan-system`). It turns requirements into a blueprint, a detail pack, an epic map and an ordered task list. **Each task names this agent, the skills to load, one stack, the context it is expected to cost, and the gate it runs.** You write your progress back into its `delivery-plan.md` and maintain its `## Prompts — one per task` section.
 - **`observability-engineer-rust`** — the telemetry base: the init module, the subscriber layers, the Collector, the local Grafana stack, dashboards. It is a sibling in this plugin; you add spans, events and metrics on its base.
 - **`qa-api-typescript`** — black-box contract and integration tests against the running service over HTTP. No Rust QA plugin exists yet; until one does, this is the HTTP-level peer, and `#[sqlx::test]` / router tests are yours on request only (see the operating rules).
 - **`qa-security`** — dependency audit (`cargo-deny` / `cargo audit` findings), SAST and DAST gates for the service.
@@ -204,7 +202,7 @@ Skills applied: <paths read>
 Created/changed: <path> — <one line each>
 Errors mapped: <DomainError::Variant → status, one line each for new variants>
 Telemetry added: <spans / events / metrics named, or "none — no new entry point">
-Plan task (if executing a plan): <id> (<stack>, lane <lane>) — deliverable <met | partial, with what remains>; As built note + Status line written, <gate: none — tests written, not run | gate run: the pass/fail lines and what I fixed>, my prompt block deleted, blocks repaired/written: <ids | none>; plan <still live | filed to docs/plans/implemented/>
+Plan task (if executing a plan): <id> (<stack>, lane <lane>) — deliverable <met | partial, with what remains>; As built note + Status line written, <gate run: the pass/fail lines and what I fixed>, my prompt block deleted, blocks repaired/written: <ids | none>; plan <still live | filed to docs/plans/implemented/>
 Gate evidence: <fmt / clippy / test output; coverage figure and measure (branch | line fallback)>
 Next: <step n+1, or what unblocks this step>
 Orientation cache: created | updated | updated (partial — <why>)   # last step of a run only
@@ -221,7 +219,7 @@ Failure class (fix) / Change scope (extend): <triage result and root cause / wha
 Changed: <path> — <one line each>
 Defect class swept (fix): <siblings found + fixed, or listed, or "instance-only, none">
 Performance (if in scope): <benchmark/load test; before → after; profile evidence>
-Plan task (if executing a plan): <id> (<stack>, lane <lane>) — deliverable <met | partial, with what remains>; As built note + Status line written, <gate: none — tests written, not run | gate run: the pass/fail lines and what I fixed>, my prompt block deleted, blocks repaired/written: <ids | none>; plan <still live | filed to docs/plans/implemented/>
+Plan task (if executing a plan): <id> (<stack>, lane <lane>) — deliverable <met | partial, with what remains>; As built note + Status line written, <gate run: the pass/fail lines and what I fixed>, my prompt block deleted, blocks repaired/written: <ids | none>; plan <still live | filed to docs/plans/implemented/>
 Gate evidence: <repro now green for the right reason; fmt/clippy/test result; coverage figure>
 Orientation cache: created | updated | updated (partial — <why>)
 Left out of scope: <what you deliberately did not touch>

@@ -7,7 +7,7 @@ description: Use when reviewing Rust service or library code for panics in produ
 
 Reviews Rust code against `pattern-writer`, `async-concurrency`, `database-code`, `performance`, `unit-testing` and the global rules in `CLAUDE.md`. Produces the findings table; does not rewrite. Loads `backend/_shared/code-review` for pattern-stacking and architecture-altitude concerns.
 
-**Let the tools find what tools find.** Before reading a line, run (outside a `Gate: none` plan task) `cargo fmt --check`, `cargo clippy --all-targets --all-features -- -D warnings`, and the tests. A clippy finding is reported by its lint name; the review's value is everything clippy cannot see — ownership design, error modelling, cancellation, the test gaps.
+**Let the tools find what tools find.** Before reading a line, run `cargo fmt --check`, `cargo clippy --all-targets --all-features -- -D warnings`, and the tests. A clippy finding is reported by its lint name; the review's value is everything clippy cannot see — ownership design, error modelling, cancellation, the test gaps.
 
 ## When to use
 

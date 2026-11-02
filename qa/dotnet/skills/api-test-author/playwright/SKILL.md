@@ -220,7 +220,7 @@ Same table format and severities.
 5. Author one fixture per resource from the scenario matrix: rich happy-path template for 2xx, strict
    `ProblemDetails` template for 4xx, single status assert for 401.
 6. Verify every test name follows `Should_X_When_Y` and every TC-ID maps to a test or is explicitly deferred; review with § Review.
-7. Run `dotnet build ApiTests/ApiTests.csproj` then `dotnet test` — expect 0 errors, 0 failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+7. Run `dotnet build ApiTests/ApiTests.csproj` then `dotnet test` — expect 0 errors, 0 failures.
 
 ## Cross-references
 

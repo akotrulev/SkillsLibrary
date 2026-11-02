@@ -179,7 +179,7 @@ Other removed endpoints have `mobile:` replacements that java-client 11's driver
 2. For each element with no test id, record it in `missing-testids.md`; do not silently fall back to XPath.
 3. Write `src/main/java/pom/mobile/<Screen>Page.java`: constants, `verifyPageLoaded`, intent actions, and a scoped component for each repeating group.
 4. Stub missing destination pages; write the test with one `@Test` per scenario.
-5. Outside a `Gate: none` plan task, run `./gradlew test` with `PLATFORM` set and expect zero failures. For a remote session, `curl -s http://127.0.0.1:4723/status` answers and `appium driver list --installed` lists the driver.
+5. Run `./gradlew test` with `PLATFORM` set and expect zero failures. For a remote session, `curl -s http://127.0.0.1:4723/status` answers and `appium driver list --installed` lists the driver.
 
 A visible element missing from the page source is usually an accessibility, app-state, active-app (a system alert) or native-versus-WebView problem; fix that before the locator. For doctor failures and driver questions the Appium docs tools (`mcp__appium-mcp__appium_documentation_query`, `mcp__appium-mcp__appium_skills`, on when `APPIUM_MCP_DOCS_ENABLED=true`) answer from the official docs.
 

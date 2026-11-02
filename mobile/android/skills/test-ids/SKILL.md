@@ -175,7 +175,7 @@ QA's `mobile-screen-explorer` writes, per screen, a table of `| Element | Type |
 3. For each file: derive the screen name from its key; walk the composables; apply rules 1–8; list decoratives skipped.
 4. For a Material control, confirm the tag lands on the interactive node, otherwise tag the wrapping touch target.
 5. Report per file: tags added, decoratives skipped, collisions, merged-semantics cases.
-6. Outside a `Gate: none` plan task, read one screen's page source from a dev build (UiAutomator dump / Appium inspector) and confirm `resource-id` carries the bare tag.
+6. Read one screen's page source from a dev build (UiAutomator dump / Appium inspector) and confirm `resource-id` carries the bare tag.
 
 ## Anti-patterns
 

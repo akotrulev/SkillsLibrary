@@ -260,8 +260,6 @@ A multi-step flow holds **one draft** above the steps (`@State` in the owning vi
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Build with warnings as errors; run the project's `swift-format` / SwiftLint configuration.
 - On a device or simulator: Return walks the fields in order and the last one submits; the password manager offers a credential on the sign-in form; an invalid submit focuses the first invalid field; Dynamic Type at the largest accessibility size keeps every field reachable.
 - A double tap on submit sends one request.

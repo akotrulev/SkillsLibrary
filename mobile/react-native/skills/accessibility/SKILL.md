@@ -150,8 +150,6 @@ useEffect(() => {
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Dev-side: `getByRole('button', { name })` finds each control; `toBeDisabled`, `toHaveAccessibleName` and `accessibilityState` assertions hold ([`component-testing`](../component-testing/SKILL.md)).
 - On devices (peer): VoiceOver and TalkBack read each screen in order with sensible names; the largest text size clips nothing; Reduce Motion removes decorative motion — `qa-mobile-typescript`.
 - Lint: `eslint-plugin-react-native-a11y` through the project's ESLint config catches missing roles and labels as you type.

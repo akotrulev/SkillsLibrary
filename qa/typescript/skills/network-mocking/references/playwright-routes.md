@@ -398,7 +398,6 @@ test('Should_KeepSpinnerVisible_When_OrdersRespondSlowly', async ({ mockApi, ord
    it; read buffers after the completion signal.
 4. For a third party, record the HAR once with `HAR_UPDATE=1`, commit it, replay with `notFound: 'abort'`.
 5. Run `npx playwright test` and `tsc --noEmit`; the trace's Network tab shows which requests were routed.
-   Inside a plan task marked `Gate: none`, run none of this and report the files as written, not run.
 
 ## Cross-references
 

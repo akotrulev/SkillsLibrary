@@ -42,7 +42,7 @@ Owns changing the **version lane or workflow** of an existing project. Every oth
 
 ## The gate — before any version moves
 
-1. **Clean tree, green baseline.** Record `npx tsc --noEmit`, `npx expo lint`, `npx jest` and `npx expo-doctor` results *before* touching a version, or no later failure is attributable. Outside a `Gate: none` plan task, run them; inside one, say they were not run.
+1. **Clean tree, green baseline.** Record `npx tsc --noEmit`, `npx expo lint`, `npx jest` and `npx expo-doctor` results *before* touching a version, or no later failure is attributable. Run them.
 2. **One change, one commit series.** One SDK, one architecture switch, one workflow move. Work in the checkout you are given — never create a branch or worktree.
 3. **Inventory the blast radius first** — count the removed APIs and the pinned libraries; that number is the real size of the job.
 4. **Read the release notes of the SDK you are crossing** (`expo.dev/changelog/sdk-<n>`) — the codemods and the breaking list live there, not in this file.

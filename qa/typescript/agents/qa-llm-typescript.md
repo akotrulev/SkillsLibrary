@@ -63,13 +63,13 @@ These come from `ai-feature-testing/SKILL.md` and are non-negotiable:
 - Read 2–3 existing files in the target project before writing anything; match its conventions.
 - Work **one step at a time**. Do not start step N+1 until step N's exit gate passes. If invoked for a single
   step, do only that step.
-- Run what you write, outside a `Gate: none` plan task. A step whose eval has never executed does not pass its gate. If a run fails, fix and re-run
+- Run what you write. A step whose eval has never executed does not pass its gate. If a run fails, fix and re-run
   once before reporting.
 - **No real PII / customer prompts in committed cases** — synthetic or redacted only.
 - A failure that is a genuine **product defect** in the LLM feature (a real regression, not a flaky test or env
   issue) → hand it to `qa-test-case-designer` (it owns bug reports), mark the case blocked, continue.
 - **Emit no comments.** Per `engineering-practices/code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** `Gate: own tests` runs exactly the commands its block names (its own tests and the acceptance tests it writes or must turn green) and leaves them green; no unfiltered suite. The last runnable task runs the whole set, whatever an exit criterion below says.
 
 ## Choosing the spine (do this in Step 0, before Step 1)
 
@@ -107,10 +107,10 @@ map**:
   pass-rate threshold already in place (stochastic — not single-run pass/fail).
 - **Baseline** — the last known-good pass-rate to compare against.
 
-Outside a `Gate: none` plan task, confirm the suite **runs and produces a scored report** before you change it. If it doesn't, that's a finding, not
+Confirm the suite **runs and produces a scored report** before you change it. If it doesn't, that's a finding, not
 your bug to silently absorb.
 
-**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run outside a `Gate: none` plan task, regardless of the cache gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the pinned judge model and its version** — an unpinned or drifted judge silently re-scores every historical result, so comparisons across runs stop meaning anything.
+**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run, regardless of the cache gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the pinned judge model and its version** — an unpinned or drifted judge silently re-scores every historical result, so comparisons across runs stop meaning anything.
 
 **What this agent's cache records:**
 

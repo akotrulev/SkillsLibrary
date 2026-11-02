@@ -199,7 +199,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 - **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — each `if`/`else`, `when` arm including `else`, `?:` and `?.`, short-circuit `&&`/`||`, `try`/`catch`, a failing `require`/`check`, an early `return`, each region state (loading / loaded / failed / stale / offline), a loop run zero times and many — and give each a test or a parameterized row that asserts its effect. The slack under 100% is for branches no honest unit test reaches, such as the ones the compiler adds around coroutines and inline functions.
 - **Only an asserting test counts.** A test that runs a branch without asserting what it did is a **major** finding — it moves the number and catches nothing. *Validation*'s mutate-one-rule check is how hollow coverage gets caught.
 - **Leave out what *Test what has behaviour* does not test, by name.** Type-only files, constants, DAO interfaces, forwarding wrappers and generated code (`androidGeneratedClasses()`, plus KSP / Room / Hilt output) stay out of the measured class list, and the report names each one left out. Never reach 80% by lowering the number or by a Kover exclusion over code that has behavior.
-- **Measure** with Kover. The plan's gate runs this; outside a plan, run it before you report:
+- **Measure** with Kover. A plan task's `Gate: own tests` runs this over the files it wrote; outside a plan, run it before you report:
 
   ```kotlin
   // app/build.gradle.kts — once per module; the plugin is the `kover` alias in libs.versions.toml (0.9.x)
@@ -247,7 +247,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 
 ## Validation
 
-Inside a plan task, `Gate: none` runs nothing and reports "written, not run"; `Gate: own tests` runs this task's tests — the red run, then green — and the *Coverage floor* measure over the files it wrote, and nothing else. The plan's gate task runs everything else.
+Inside a plan task, `Gate: own tests` runs this task's tests — the red run, then green — and the *Coverage floor* measure over the files it wrote; the last runnable task runs everything else.
 
 - `./gradlew testDebugUnitTest` passes on JDK 21; each test passes alone (`--tests`) and in a shuffled order; `connectedDebugAndroidTest` for the Compose rules that need a device.
 - Mutate one rule in the code under test; a test fails with a message naming the value.

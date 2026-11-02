@@ -161,8 +161,6 @@ export default function RootLayout() {
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Release build, mid-range device: scrolling a 1,000-row list holds the frame rate and shows no blank rows; typing in a search field does not re-render every visible row (DevTools Profiler).
 - Atlas export shows no duplicate large module and a delta against the previous export.
 - Cold start to interactive is within the recorded budget in `expo-observe`.

@@ -225,7 +225,7 @@ Queries are proven only against a real engine. `#[sqlx::test]` creates a fresh d
 3. Write the queries with `query!` / `query_as!`, newtypes via `sqlx::Type`, and a transaction where more than one statement must succeed together.
 4. Run `cargo sqlx prepare` and commit `.sqlx/`.
 5. Unit-test the logic around the queries (`unit-testing`); write `#[sqlx::test]` tests only when the task asks for them (see *Testing the queries*).
-6. Validate (skipped in a `Gate: none` task): `cargo clippy`, `cargo sqlx prepare --check`, the tests.
+6. Validate: `cargo clippy`, `cargo sqlx prepare --check`, the tests.
 
 ## Handoffs
 

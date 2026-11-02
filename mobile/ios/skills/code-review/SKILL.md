@@ -98,7 +98,7 @@ Detect before flagging: Xcode and Swift (`xcodebuild -version`, `swift-tools-ver
 
 ## The screenshot pass (Step 5)
 
-Only when a simulator is available and the app builds; otherwise report "screenshot pass not run" and why. Never build inside a `Gate: none` plan task.
+Only when a simulator is available and the app builds; otherwise report "screenshot pass not run" and why.
 
 ```bash
 xcrun simctl io booted screenshot ios-<screen>.png

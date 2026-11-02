@@ -287,8 +287,7 @@ budget", and both report.
 2. Extend `cdp.fixtures.ts`: `Network.enable`, the response capture, intent methods, `detach()` in teardown.
 3. Pin the spec to Chromium.
 4. Apply the hook before the navigation; assert on a loading or ready signal with a deadline.
-5. Run `npx playwright test --project=chromium` and `tsc --noEmit`. Inside a plan task marked
-   `Gate: none`, run none of this and report the files as written, not run.
+5. Run `npx playwright test --project=chromium` and `tsc --noEmit`.
 
 ## Cross-references
 

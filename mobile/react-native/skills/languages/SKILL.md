@@ -152,8 +152,6 @@ The list calls the hook **once** in the screen and passes `formatter.format` dow
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Change the device language: on return the app shows it; text, dates, numbers and money all change.
 - Pick a per-app language in system Settings: the app follows it.
 - A missing key falls back to English in a release build; development logs it.

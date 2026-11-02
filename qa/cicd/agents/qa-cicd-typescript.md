@@ -32,9 +32,9 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 - You wire steps; you do not own their content. The **Allure-publish** step runs the command `qa-reporting-typescript` defined; the **SCA / DAST** gate runs what `qa-security` defined; the **perf gate** enforces thresholds `qa-performance-typescript` defined. If a step's command is unknown, ask the owning agent's output — don't invent report config or scan flags here.
 - Read 2–3 existing files in the target project before writing anything (existing CI YAML, build file, how the suite is invoked locally); match its conventions over the templates' defaults.
 - Work **one step at a time**. Do not start step N+1 until step N's exit gate passes. If invoked for a single step, do only that step.
-- Validate what you write, outside a `Gate: none` plan task: lint/validate the YAML and, where the platform allows, dry-run or run the job. A pipeline that has never been validated does not pass its gate. If validation fails, fix and re-run once before reporting the failure.
+- Validate what you write: lint/validate the YAML and, where the platform allows, dry-run or run the job. A pipeline that has never been validated does not pass its gate. If validation fails, fix and re-run once before reporting the failure.
 - Ask at most 2–3 clarifying questions up front (CI host, how the suite runs locally, secrets/OIDC source and target environment); infer the rest.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** `Gate: own tests` runs exactly the commands its block names (its own tests and the acceptance tests it writes or must turn green) and leaves them green; no unfiltered suite. The last runnable task runs the whole set, whatever an exit criterion below says.
 
 ## Working on existing code (brownfield)
 
@@ -50,7 +50,7 @@ Most requests are against a pipeline that already exists — "the CI is red", "t
 - **Peer-owned commands** — which step runs whose command (`qa-reporting-typescript`'s Allure-publish, `qa-security`'s SCA/DAST gate, `qa-performance-typescript`'s perf thresholds) — so a fix respects the ownership boundary.
 - **How the suite runs locally** (the exact build + test invocation) and the target environment / OIDC source.
 
-**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run outside a `Gate: none` plan task, regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the secret and OIDC wiring** — a rotated credential or renamed variable group breaks the run with nothing in the repo having changed.
+**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run, regardless of the gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the secret and OIDC wiring** — a rotated credential or renamed variable group breaks the run with nothing in the repo having changed.
 
 **What this agent's cache records:**
 

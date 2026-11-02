@@ -101,7 +101,7 @@ The compilable reference is `qa/java/skills/ui-test-author/appium/assets/`.
    - Element's accessibility id changed → update the constant, note it as a breaking rename for the team
    - Fallback locator where a test id now exists → upgrade to `byTestId`, rename the constant, remove the row from `missing-testids.md`
    - Never reorder/rename existing public methods tests already call without flagging it
-5. **Verify:** `./gradlew compileTestJava` (or the project equivalent) → compiles clean. Confirm `verifyPageLoaded()`'s landmark matches what `mobile-screen-explorer` reported for this screen. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+5. **Verify:** `./gradlew compileTestJava` (or the project equivalent) → compiles clean. Confirm `verifyPageLoaded()`'s landmark matches what `mobile-screen-explorer` reported for this screen.
 6. **Report:** class created/updated (diff summary), counts (test-id-backed / fallback / ⚠ XPath), destination stubs created, open questions.
 
 ## Rules

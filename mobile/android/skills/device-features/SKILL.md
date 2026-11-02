@@ -188,8 +188,6 @@ Sign-in is Credential Manager 1.6 (password + passkey + federated); the server o
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Build clean; Android Lint (`MissingPermission`, `ScopedStorage`) passes; the merged manifest lists only used permissions (`./gradlew :app:processReleaseManifest`).
 - On a device: deny once → rationale; deny again → denied screen with **Open Settings**; grant in Settings → returning resumes the feature; "Only this time" re-asks next launch.
 - Biometrics with none enrolled and with a lockout: a working screen each time.

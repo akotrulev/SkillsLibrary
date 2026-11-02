@@ -217,7 +217,7 @@ public class PostUserTest extends BaseTest {
 2. For each resource in scope, verify the record DTOs (`models/{api}/{resource}/`) and the `{Resource}Client` exist. Create missing ones via `qa/java/skills/api-models` then `qa/java/skills/api-client-writer` before writing any test.
 3. Author one test class per operation, picking patterns from the scenario matrix. Body-manipulation cases (malformed JSON, extra/missing property) require the optional raw/`Map` client overloads — add them via `api-client-writer`.
 4. Verify every test name follows `Should_X_When_Y` and asserts one behavior; verify every TC-ID (when given) maps to a test or is explicitly deferred.
-5. Run `./gradlew :apitests:test` — expect 0 failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+5. Run `./gradlew :apitests:test` — expect 0 failures.
 
 ## Handoffs
 

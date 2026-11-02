@@ -194,8 +194,6 @@ SSE and WebSocket connections are **stateful and pinned to one server instance**
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
-
 - The project's own build and typecheck scripts (run with the package manager `packageManager` names) clean.
 - Drop the connection (kill the server / go offline) → status affordance flips to closed; SSE auto-reconnects, the WS hook reconnects with backoff and stops when the component unmounts.
 - Navigate away from a live page → the channel closes; no post-unmount `setState` warning, no lingering socket in DevTools.

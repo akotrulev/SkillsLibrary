@@ -239,7 +239,7 @@ See `qa/_shared/contract-testing-pact` for the shared `can-i-deploy` and `record
 ## Generation steps
 
 1. Add a new package under `tests/{service}.contract/` with `@pact-foundation/pact` and `vitest` as devDependencies; set `"type": "module"`.
-2. For the consumer: scaffold `{provider}.consumer.spec.ts` building a `PactV3`; add one interaction with `given(...)` + `uponReceiving(...)`; run the package's own test script; confirm a pact file appears under `pacts/`. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+2. For the consumer: scaffold `{provider}.consumer.spec.ts` building a `PactV3`; add one interaction with `given(...)` + `uponReceiving(...)`; run the package's own test script; confirm a pact file appears under `pacts/`.
 3. For the provider: scaffold `{service}.provider.spec.ts` that boots the real server on `5050`, calls `new Verifier({ ... }).verifyProvider()`, with `stateHandlers` for each state name.
 4. Wire consumer CI: Vitest → `pact-cli broker publish` with `--branch` and `--consumer-app-version`.
 5. Wire provider CI: Vitest with `PACT_BROKER_*` and `GIT_SHA` / `BRANCH_NAME` env vars exported.

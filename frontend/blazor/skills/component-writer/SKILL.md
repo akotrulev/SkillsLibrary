@@ -410,8 +410,6 @@ For every component:
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
-
 - `dotnet build` — 0 warnings
 - `dotnet test` — bUnit tests pass
 - Smoke in browser: confirm no double fetch on prerender, confirm `Dispose` is invoked on navigation (DevTools network panel)

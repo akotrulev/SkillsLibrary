@@ -133,7 +133,7 @@ Re-opt in explicitly where you relied on it: `fetch(url, { cache: 'force-cache' 
 
 ## Verification (every migration, non-negotiable)
 
-Per [`dev:verify`](../../../../engineering-practices/verify-before-done/SKILL.md) — an upgrade you haven't run is not done. Inside a `Gate: none` plan task, run none of these checks and report the upgrade as "written, not run"; the plan's gate task runs them.
+Per [`dev:verify`](../../../../engineering-practices/verify-before-done/SKILL.md) — an upgrade you haven't run is not done.
 
 1. `<pm> build` clean · `tsc --noEmit` 0 errors · lint 0 warnings
 2. `<pm> test` green (Vitest) — plus the `qa-ui-typescript` peer's E2E suite if one exists; a major upgrade is exactly when E2E earns its cost

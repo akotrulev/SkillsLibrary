@@ -298,7 +298,7 @@ it('Should_AttachPdfInvoice_When_InvoiceIsEmailed', async () => {
    - `tests/integration/email/extractors.ts`
    - Concrete `{flow}-email.int.test.ts` per scenario
 4. Add `MAILPIT_API` / `SMTP_HOST` / `SMTP_PORT` to the SUT's test profile.
-5. Run `npm run test:integration` (or the existing script). Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+5. Run `npm run test:integration` (or the existing script).
 
 ## Cross-references
 

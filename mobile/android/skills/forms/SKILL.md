@@ -249,8 +249,6 @@ One ViewModel, one draft, a `step` in `uiState`; secrets never restore. See [`re
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Build clean; detekt, ktlint and Android Lint (compose-lints) pass.
 - On a device with the IME open in landscape and font scale 200 %: the focused field and its error stay visible; `Next` walks the fields in order; `Done` submits.
 - A `422` marks the named field; a timeout keeps the typed values and shows the banner; rotation and process death keep the e-mail and drop the password.

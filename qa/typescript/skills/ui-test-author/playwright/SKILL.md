@@ -184,7 +184,7 @@ start a second one.
    `Should_X_When_Y` name, page objects from fixtures, `{ tag }`, `test.step` for long journeys.
 6. For signed-in flows, make sure the setup project exists and the spec's project depends on it.
 7. Run `npx playwright test` (0 failures) and check new locators in `npx playwright test --ui` before
-   committing. In a `Gate: none` plan task, run neither; report the files as "written, not run".
+   committing.
 
 ## Handoffs
 

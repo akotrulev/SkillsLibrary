@@ -211,8 +211,7 @@ Start from the assets: copy them, rename the root namespace, and keep their shap
 6. For signed-in fixtures, keep `AuthSetup` in the root namespace and amend `ContextOptions()` with
    `StorageStatePath`; for devices, amend it from `Playwright.Devices[...]`.
 7. Build, install the browser with `pwsh bin/Debug/net10.0/playwright.ps1 install chromium`, and run
-   `dotnet test` (0 failures); debug with `HEADED=1` or `PWDEBUG=1`. In a `Gate: none` plan task, run none
-   of this; report the files as "written, not run".
+   `dotnet test` (0 failures); debug with `HEADED=1` or `PWDEBUG=1`.
 
 ## Handoffs
 

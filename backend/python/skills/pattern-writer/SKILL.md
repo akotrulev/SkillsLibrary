@@ -299,7 +299,7 @@ Retry belongs only around I/O that can transiently fail; there is none inside a 
 
 ## Validation
 
-Run the checks below — unless you are inside a plan task marked `Gate: none`, which runs none of them and reports "written, not run":
+Run the checks below:
 
 - `uv run ruff check . && uv run ruff format --check .` — clean
 - `uv run mypy src tests` — clean

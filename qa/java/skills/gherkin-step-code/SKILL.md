@@ -169,7 +169,7 @@ public void iSignInWith(String email, String password) {
 4. Implement each body with page-object calls only; put assertions in `Then` with web-first `assertThat`.
 5. For any missing page object/method, build it (`page-object-design`/`page-objects-from-url`) before binding the step.
 6. Ensure the Cleanup is implemented as the `@After` hook (scaffold layer), not as steps.
-7. `./gradlew test`, then run the features: every step bound (no undefined/ambiguous), the smoke scenario green. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+7. `./gradlew test`, then run the features: every step bound (no undefined/ambiguous), the smoke scenario green.
 
 ## Anti-patterns to flag
 

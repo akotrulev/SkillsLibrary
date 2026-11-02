@@ -186,8 +186,6 @@ This is the exact seam between the two lanes: **data-fetching owns the snapshot,
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
-
 - `dotnet build` — 0 warnings.
 - Kill the connection (stop the hub / drop the network) → status affordance flips to Reconnecting; on restore, `WithStatefulReconnect` replays buffered messages (no gap).
 - Navigate away from a live page → subscription unsubscribed / `HubConnection` disposed (no `StateHasChanged` on a disposed component in logs).

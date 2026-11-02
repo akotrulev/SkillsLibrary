@@ -13,7 +13,7 @@ If you haven't run the verification command in this message, you cannot claim it
 
 `quality-constraints` is the during-work counterpart to this end-of-work evidence gate.
 
-**Inside a plan task, the prompt block's `Gate:` line decides what you run:** a `Gate: none` task runs nothing and reports its work as "written, not run", never "passing"; a `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it must turn green — reports those results, and runs nothing else.
+**Inside a plan task, the prompt block's `Gate:` line decides what you run:** a `Gate: own tests` task runs exactly the commands its block names — its own tests and the acceptance tests it must turn green — reports those results, and leaves them green; it runs no unfiltered suite. A task with nothing runnable, such as a docs-only task, says so on its `Gate: none` line and claims nothing passes.
 
 ## The Gate Function
 

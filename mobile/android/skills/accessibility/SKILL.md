@@ -152,8 +152,6 @@ fun SaveStatus(message: String?, modifier: Modifier = Modifier) {
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - A Compose test with `enableAccessibilityChecks()` per screen: no missing label, no target under 48 dp, no low contrast ([`unit-testing`](../unit-testing/SKILL.md)).
 - Accessibility Scanner on each screen; a TalkBack pass at the largest font: each row is one stop, each action reachable, the error announced once.
 - Settings → Accessibility with bold text, colour correction, remove animations and the largest display size on: nothing clips, nothing disappears.

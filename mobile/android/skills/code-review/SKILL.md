@@ -101,7 +101,7 @@ An API above the detected Kotlin, compileSdk or BOM is a **finding** (A1 / A7); 
 
 ## The screenshot pass (Step 5)
 
-Only when an emulator is available and the app builds; otherwise report "screenshot pass not run" and why. Never build inside a `Gate: none` plan task.
+Only when an emulator is available and the app builds; otherwise report "screenshot pass not run" and why.
 
 ```bash
 adb exec-out screencap -p > android-<screen>.png

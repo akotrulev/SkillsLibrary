@@ -349,8 +349,7 @@ way: register the rule, drive the client, assert on its error state.
 3. Add the fixtures: the proxy, the client pointed at it (trusting the CA), and the page objects.
 4. Register rules before the action; read `getSeenRequests()` after the client-visible signal; assert the
    client's state for every fault.
-5. Run the suite and `tsc --noEmit`; in CI, trust the per-run CA before the client starts. Inside a plan task
-   marked `Gate: none`, run none of this and report the files as written, not run.
+5. Run the suite and `tsc --noEmit`; in CI, trust the per-run CA before the client starts.
 
 ## Cross-references
 

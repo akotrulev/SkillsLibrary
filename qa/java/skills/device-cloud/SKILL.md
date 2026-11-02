@@ -165,7 +165,7 @@ public final class FarmCredentials {
 3. **Live-session**: add `AppUploader` (REST upload → `bs://…`/`custom_id`), `RealDeviceDriverFactory` (real-device caps + the device-only features the test needs), and `DeviceFeatures` for mid-session injection; drive a device matrix from a `@Factory`.
 4. **Remote-run**: add `DeviceFarmRunner` from `references/aws-device-farm.md`.
 5. Reuse `browser-cloud-setup`'s session-status + dashboard-URL teardown; map concurrency onto the plan cap per its rules.
-6. Run **one** device/session first to confirm the upload + caps + features before fanning the matrix out; confirm the session/run appears on the dashboard with the right build/project tags. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+6. Run **one** device/session first to confirm the upload + caps + features before fanning the matrix out; confirm the session/run appears on the dashboard with the right build/project tags.
 
 ## Cross-references
 

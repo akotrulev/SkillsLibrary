@@ -223,8 +223,6 @@ A full disk is common and caches are wiped under pressure; none of these is a cr
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Build with warnings as errors; the project's formatter and linter pass.
 - Install the previous build, create data, install the new build: the data is intact and the migration stage ran.
 - Archive → Generate Privacy Report lists `UserDefaults` with the declared reason.

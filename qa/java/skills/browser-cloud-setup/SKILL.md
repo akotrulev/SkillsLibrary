@@ -137,7 +137,7 @@ that needs it.
 4. Add `testng-grid.xml` (`parallel="classes"`, the grid package) with the `GridConcurrency` listener, and the `gridTest` Gradle task; note the `shards × GRID_CONCURRENCY ≤ cap` rule and cross-link `qa/cicd/java/skills/ci-pipelines/*`.
 5. Mark each session once and attach its dashboard URL — `GridSession.markOutcome` in the grid class's `@AfterClass` (web), `SessionStatus.mark…` in the driver teardown (mobile).
 6. If the target is private, add the tunnel lifecycle (`GridTunnel` in a `@BeforeSuite`/`@AfterSuite` class listed in `testng-grid.xml`) and tie sessions via the cap.
-7. Run a single test against the grid first (one thread) to confirm the connection + caps before fanning out. Confirm the session appears on the dashboard with the right build/project tags. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+7. Run a single test against the grid first (one thread) to confirm the connection + caps before fanning out. Confirm the session appears on the dashboard with the right build/project tags.
 
 ## Cross-references
 

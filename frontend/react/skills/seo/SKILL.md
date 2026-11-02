@@ -153,8 +153,6 @@ Emit `schema.org` JSON-LD in a `<script type="application/ld+json">` rendered **
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
-
 - **View source** (not the rendered DOM) / `curl` a public page: the `<h1>`, body text, `title`, `meta description`, canonical, OG tags, and JSON-LD are all present in the **response HTML**.
 - Load the page with JS disabled — the core content is there.
 - Hit a non-existent URL and a valid-route-no-data URL → **HTTP 404** (check the status, not just the page), and it's `noindex`.

@@ -260,7 +260,7 @@ Redis: `FLUSHDB` is fine in test mode; never in shared environments.
 3. For each new test set, scaffold an `<Aggregate>Seeder.cs` (write) and `<Aggregate>DbProbe.cs` (read), reusing builders from `qa/dotnet/skills/test-data-builder`.
 4. Add the polling helper if the SUT involves async projections.
 5. Pick a cleanup strategy (Respawn default); wire `[OneTimeSetUp]` / `[TearDown]`.
-6. Run `dotnet test` — every test passes; no leaks between fixtures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+6. Run `dotnet test` — every test passes; no leaks between fixtures.
 
 ## Handoffs
 

@@ -6,7 +6,7 @@ description: Use when a design pack (blueprint, data model, API surface, integra
 # Delivery Plan — the ordered, agent-bound task list
 
 The artifact that turns the design pack into work. It is written in **the library's plan document
-format** — the header, the numbered sections, the task block, the gate-once rule and the
+format** — the header, the numbered sections, the task block, the gate rule and the
 `## Prompts — one per task` section are all specified in
 `engineering-practices/writing-plans/references/plan-format.md`, and this skill produces that shape
 with four additions a `solution-planner` pack needs: the streams table, the epic/story binding on every
@@ -46,13 +46,15 @@ derived by `dev:plan-session-budget` while the task is being authored, not measu
 > **A task that touches both the API tree and the web tree is two tasks.** There is no mixed task at
 > any size, and no estimate justifies one.
 
-**The plan gates once, in its last runnable task.** Every task before it writes its code and its unit
-tests, commits, and stops — no build, no test run, no lint, no format check, no typecheck. The last
-runnable task runs the whole set for every task in the plan together and **fixes what it finds rather
-than handing it back**, because a failure there may belong to any task above it; it also carries the
-documentation and close-out work. The cost is stated in the plan rather than discovered: intermediate
-commits are ungated, so the tree is **not** known to build at every task boundary and the plan cannot
-be stopped halfway and trusted. See Step 4.
+**Every task gates what it built.** Before it commits, a task builds what it touched and runs the tests
+for it: the tests it wrote, the acceptance tests it writes or must turn green (on a production build where
+they need one), and the coverage measure over the files it wrote. It leaves them green, fixing what stands
+in the way whichever task caused it. Its `**Gate:**` line names those exact commands. It does not run the
+project's whole suite, lint or typecheck beyond what those commands include. The last runnable task runs
+the whole set once more across the plan, ending with the coverage floor when the plan writes code, retries
+only what failed where the project has a way to, **fixes what it finds rather than handing it back**, and
+carries the docs and close-out. It holds no feature work when the plan has any. A plan stopped halfway has
+each landed task's own tests green, but the whole suite has not run. See Step 4.
 
 And one property decides the shape of the sequence: **how the plan will be executed**. User-facing work
 is sequenced *feature-complete* by default — the tasks for one capability run consecutively and the last
@@ -138,7 +140,7 @@ The order must satisfy five things:
 
 - **The order is a valid serialization of `epic-map.md`'s dependency graph.** No task is ordered before anything it transitively depends on, cross-epic edges included. That is the whole constraint the epic map places on the order — **it does not require the waves to be worked one at a time.** A wave-3 lane's task may sit above a wave-2 lane's task when its own dependencies are already met, and under feature-complete sequencing it usually will: the order is the single sequence one person would work through, while the waves are the claim about what *could* be open at once, which the streams table carries. Where a dependency edge makes the order impossible, the epic map is wrong — report it and fix it there.
 - **Startable at its position.** Everything a task imports, calls, migrates against, registers with, or configures exists by the time its turn comes. If it does not, the task is in the wrong place — move it, don't annotate it.
-- **Self-contained work at every task boundary.** Each task ends having written everything its deliverable needs, including its unit tests, and having committed. It does **not** end with a verified green tree: the plan gates once, in its last runnable task, so a task that leaves the build red is expected and the failure is fixed there. What is still a defect is a task that leaves the *work* half-done — a service with no caller, an endpoint nobody registered — because the next task cannot start on it. Where the deliverable genuinely cannot exist until the following task lands, the two are one task.
+- **Self-contained work at every task boundary.** Each task ends having written everything its deliverable needs, including its unit tests, having run its own gate green, and having committed. A task that leaves what it touched red is a defect, and so is one that leaves the *work* half-done — a service with no caller, an endpoint nobody registered — because the next task cannot start on it. Where the deliverable genuinely cannot exist until the following task lands, the two are one task.
 - **Dependencies point backwards, always.** A `Depends on` naming a task with a higher order is a contradiction, and it is reported as a plan defect rather than resolved by reordering the ids.
 - **Prerequisites first.** Human-blocked provisioning from `integrations.md` leads the sequence as its own tasks, so nothing downstream stalls on a credential nobody requested.
 
@@ -185,7 +187,7 @@ Three rules keep it honest:
 | Then | **Journey batches** (`Q`, `qa-ui-<stack>` / `qa-mobile-<stack>`) — written against the agreed test ids and red on the placeholders |
 | Then | **Backend, one batch per module** — a module is a file tree one agent owns (`src/Booking/*`): its entities, domain rules, service, endpoint bodies, registration and unit tests, in a single task. Most-depended-on module first |
 | Then | **Frontend, one batch per screen area** — an area is one nav section of `experience-plan.md` §2 and the screens under it: their components, routes, states and wiring, in a single task, ordered by the nav map |
-| Last | The OpenAPI asset's regeneration, business dashboards and alert rules, rate limiting, docs — and the **verification batch**: the full build, the whole test run (old and new), the journeys and the coverage floor. The acceptance tests are no longer deferred to it: they ran red before the implementation |
+| Last | The OpenAPI asset's regeneration, business dashboards and alert rules, rate limiting, docs — and the **verification batch**: the full build, the whole test run (old and new), the journeys and the coverage floor, once more across the plan. The acceptance tests are not deferred to it: they ran red before the implementation, and each batch turned its own green |
 
 **What may be merged into one batch — all four, or it stays separate:**
 
@@ -201,7 +203,7 @@ Three rules keep it honest:
 - **No capability is usable until both its batches have landed.** The plan says which capabilities become usable at which batch, and the frontend batch that completes each one still carries the behavioural deliverable — the sentence just arrives later than it would under feature-complete sequencing.
 - **Test-first adds two agent switches** — the API batch and the journey batch — between the contract wave and the first module batch.
 - **Stubs must be unmistakable.** A contract-wave endpoint with no behaviour yet answers exactly the standard stub response — `501` `application/problem+json`, `type` slug `not-implemented`, `detail` naming the module batch that fills it (validation catalog V8.6) — never a fake success or an empty list, and the batch's `Out of scope` names that batch. An indistinguishable stub is the failure mode of this shape, and a `Q` test cannot be red for the right reason without one.
-- **Nothing about task discipline relaxes.** A batch *is* a task, so it states one deliverable, names one agent, and writes its own unit tests inside the batch that writes the code. What is deferred to the last runnable task is **running** them — the build, the suite, the lint and the typecheck for the whole plan at once, plus the live/integration/E2E pass. That is a deferred verification, not a licence to ship untested code: the tests are written, committed and read by the gate task, which fixes what they catch.
+- **Nothing about task discipline relaxes.** A batch *is* a task, so it states one deliverable, names one agent, writes its own unit tests inside the batch that writes the code, and runs its own gate before it commits. What the last runnable task adds is the **whole set** — the build, the suite, the lint and the typecheck for the plan at once — and it fixes what they catch.
 
 **Where several plan packs are executed as one delivery** — three initiative folders that together make one working application — the shape is decided once across all of them and the batching is derived across the packs, not inside each: one contract wave covering every pack's schema and contracts, then the module batches, then the area batches. Tasks keep their own pack's ids and are cited as `<NNN-initiative>/T<n>`; the batch order lives in the pack that owns the contract wave, and the others' delivery plans point at it rather than restating it.
 
@@ -268,12 +270,10 @@ The block is the plan format's task block (`plan-format.md` §4) plus the epic/s
 **Deliverable:** every Orders endpoint in `api-surface.md` §5.2 and every AC of US7–US9 has an
 acceptance test in `tests/Ordering.AcceptanceTests/`, and each fails on `501 not-implemented`.
 **Depends on:** C1 (the stubs and the OpenAPI asset generated from them)
-**Budget:** ~95k — CLAUDE.md 25k, `api-surface.md` §4 and §5.2 and `stories.md` US7–US9 8k, 2 skills 16k,
-the OpenAPI asset's typed client 4k, 5 test files created 10k, the filtered run's output 10k,
-commit and diff read-back 6k, churn ×1.2
-**Gate: own tests** — run only `dotnet test tests/Ordering.AcceptanceTests`; expect every test red on
-`not-implemented`. This plan gates once, in F4. Do not run the full suite, another tree's build, lint
-or typecheck.
+**Budget:** ~90k — CLAUDE.md 25k, `api-surface.md` §4 and §5.2 and `stories.md` US7–US9 8k, 2 skills 16k,
+the OpenAPI asset's typed client 4k, 5 test files created 10k, commit, diff and gate read-back 10k, churn ×1.2
+**Gate: own tests** — before committing, run `dotnet test tests/Ordering.AcceptanceTests`; expect every
+test red on `not-implemented`, and record the reason. Do not run the unfiltered suite.
 
 **Files:**
 - Create: `tests/Ordering.AcceptanceTests/PlaceOrderTests.cs`, `CancelOrderTests.cs`, `CloseOrderTests.cs`, `ListOrdersTests.cs`, `OrdersApiFixture.cs`
@@ -297,10 +297,11 @@ tests from Q1 pass, and B3's unit tests cover ≥ 80% of its branches.
 **Depends on:** C1 (schema, auth wiring, shared DTOs + error middleware), Q1 (the acceptance tests it turns green)
 **Budget:** ~110k — CLAUDE.md 25k, `api-surface.md` §5 and two `data-model.md` entity blocks 6k,
 3 skills 24k, `src/Billing/*` as the module pattern ~14k, 6 files created and 1 modified 13.5k,
-commit and diff read-back 6k plus the filtered run 4k, churn ×1.2
-**Gate: own tests** — run only `dotnet test --filter "FullyQualifiedName~Orders" --collect:"XPlat Code Coverage"`,
-then read branch coverage over `src/Ordering/*` (`plan-format.md` §5); expect the Q1 tests green. This plan
-gates once, in F4. Do not run the full suite, another tree's build, lint or typecheck.
+commit, diff and gate read-back 10k, churn ×1.2
+**Gate: own tests** — before committing, run `dotnet build src/Ordering`, then
+`dotnet test --filter "FullyQualifiedName~Orders" --collect:"XPlat Code Coverage"`, then read branch coverage
+over `src/Ordering/*` (`plan-format.md` §5); expect the Q1 tests green, and leave them so. Do not run the
+unfiltered suite.
 
 **Files:**
 - Create: `src/Ordering/Domain/Order.cs`, `src/Ordering/Domain/OrderLine.cs`
@@ -354,15 +355,17 @@ Rules:
   "Handles errors properly" is not a bullet; "returns the documented `type` slug for each of the three
   deltas" is. Where the task is a batch, the bullets **are** its per-piece breakdown — one per
   endpoint, per screen, per rule.
-- **`Gate: none` on every task but the last runnable one — or `Gate: own tests`, on a test-first plan's
-  `Q` and implementation tasks** — naming the commands it must not run, or the one filtered command it
-  runs (`plan-format.md` §5). A journey suite that cannot start its app in one command is `Gate: none`.
-  The last runnable task carries the whole gate, in run order, with the project's own commands from the
-  orientation pass — and it fixes what the gate finds rather than handing it back, because a failure
-  there may belong to any task above it. When the plan writes code, the gate ends with the **coverage
-  floor** (`plan-format.md` §5): ≥ 80% branch coverage of the code the plan wrote, closed by writing
-  the missing tests. It also carries the close-out: the docs, the repository-state note, and the honest
-  list of what is built but unverified.
+- **`Gate: own tests` on every task that writes code or tests**, naming its commands: a scoped build,
+  filtered unit tests, filtered acceptance tests, the coverage measure (`plan-format.md` §5). A `Q` task
+  expects red for the recorded reason; a `Q` task whose app cannot start in one command proves its tests
+  load and list (Playwright's `--list`), and the task that serves each journey turns it green. `Gate: none`
+  is only for a task with nothing runnable, such as a docs-only task, and it says so. The last runnable
+  task runs the whole set once more, in run order, with the project's own commands from the orientation
+  pass — and it fixes what it finds rather than handing it back, because a failure there may belong to any
+  task above it. When the plan writes code, it ends with the **coverage floor** (`plan-format.md` §5): ≥ 80%
+  branch coverage of the code the plan wrote, closed by writing the missing tests. It also carries the
+  close-out: the docs, the repository-state note, and the honest list of what is built but unverified. It
+  holds no feature work when the plan has any.
 - **`As built`** is written by the task when it lands, dated: what differed from the plan, the ids and
   names it assigned, and what is built but unverified. It is the durable record, appended and never
   edited backwards.
@@ -416,10 +419,9 @@ Rules:
   not-implemented response, never a fake success or an empty list.
 - **Tasks are implementation, and `Q` tasks write the acceptance tests before it.** In a test-first plan
   a `qa-*` task writes the API and journey acceptance tests against the stubs, before the implementation
-  they specify, and an implementation task turns the ones its deliverable names green. Running the whole
-  suite, the journeys and any manual verification stay with the gate; starting servers does too, except
-  where an own-tests command starts the service itself. Unit tests are part of the implementation
-  task, not a separate one.
+  they specify, and an implementation task turns the ones its deliverable names green, starting whatever
+  they need. Running the whole suite and any manual verification stay with the last runnable task. Unit
+  tests are part of the implementation task, not a separate one.
 - **An implementation task names its signals.** Where a `be` task adds an entry point, an outbound call, a
   background job or a business event, one bullet lists the spans, the decision-point logs and the metrics it
   adds: a span per business operation, a log per rejection or state change, a metric per business event
@@ -458,7 +460,7 @@ is the progress indicator — what is left to run is exactly what is still writt
 what a block is built from: a task block with `Epic` / `Story` / `Stack` / `Agent` / `Skills` /
 `Files` / `Budget` / `Gate` filled in, and a streams table that says which lanes exist.
 
-**Every block's first line is `Depends on: <ids>`** — ids only, comma-separated, or `none` (`plan-format.md` §6) — derived from the task as Step 3 says: stream predecessor, cross-stream edges, file and build-tree overlaps. The gate task waits for every task nothing else waits for. The task table gains a `Runs beside` column naming, per task, the tasks it can run in parallel with (different streams, disjoint files, different trees), and the preamble says it in one line: "After C1, B1 → B2 run beside Q1; F1 waits for both; F2 is the gate."
+**Every block's first line is `Depends on: <ids>`** — ids only, comma-separated, or `none` (`plan-format.md` §6) — derived from the task as Step 3 says: stream predecessor, cross-stream edges, file and build-tree overlaps. The last runnable task waits for every task nothing else waits for. The task table gains a `Runs beside` column naming, per task, the tasks it can run in parallel with (different streams, disjoint files, different trees), and the preamble says it in one line: "After C1, B1 → B2 run beside Q1; F1 waits for both; F2 runs the whole set."
 
 Close the header note by naming the two duties an executing agent has, so neither is a surprise: **the
 record goes into its task's `As built` note and the header `Status:` line; the next session's prompt is
@@ -489,10 +491,9 @@ The task graph maps 1:1 — the streams in §2 become MC's lanes, each task keep
 `stream` and `order` alongside its `deliverable`, `agent`, `skills`, `files` and
 `dependsOn`, and the open questions below carry their options. There is no grouping
 level: ordering is the `order` sequence, and every prerequisite is an explicit
-`dependsOn` edge. This plan gates once, in <the last runnable task> — the earlier
-tasks deliberately run no build or whole-suite command (a test-first plan's `Q` and
-implementation tasks run only their own filtered tests), so a lane that reports green
-without one is behaving as planned. MC's planner re-reads the target repo, so it may
+`dependsOn` edge. Every task gates what it built: its `Gate:` line names the commands
+it runs before it commits, and no earlier task runs the unfiltered suite, so a lane's
+green covers its own tests. <the last runnable task> runs the whole set. MC's planner re-reads the target repo, so it may
 split a task it finds too large; that is expected and does not invalidate the
 sequence — the new pieces belong in the split task's own lane, and each needs its own
 deliverable.
@@ -527,9 +528,9 @@ file to keep in step with it. Three things carry the record, and every executing
 
 | When | What the executing agent writes |
 |---|---|
-| Finishing a task | A dated `**As built:**` note on the task block — what differed from the plan, the ids and names it assigned, what is built but unverified, and the `file:line` or command output that proves the deliverable exists. Then it **deletes its own prompt block**, and rewrites the prompt blocks below it wherever what it landed differs from what they assume |
+| Finishing a task | Its own gate, green. A dated `**As built:**` note on the task block — what differed from the plan, the ids and names it assigned, what is built but unverified, and the `file:line` or command output that proves the deliverable exists. Then it **deletes its own prompt block**, and rewrites the prompt blocks below it wherever what it landed differs from what they assume |
 | Finishing a task another task's prompt was blocked on | The blocked prompt block itself, from what it now knows — that duty is a bullet on this task and a line in its own prompt |
-| Finishing the last runnable task | The gate, in run order, with the failures **fixed here** rather than handed back — a branch-coverage shortfall under the 80% floor included, closed by writing tests, and the figure recorded; then the close-out: the docs, the repository-state note, and the honest list of what is built but unverified |
+| Finishing the last runnable task | The whole set, in run order, with the failures **fixed here** rather than handed back — a branch-coverage shortfall under the 80% floor included, closed by writing tests, and the figure recorded; then the close-out: the docs, the repository-state note, and the honest list of what is built but unverified |
 | Stopping mid-task | The header `**Status:**` line names the task and what remains; a `**Progress:**` line on the task block lists the bullets not yet done. The prompt block **stays** and gains a `Picking up from:` line |
 | Building it differently | Both readings on the task block, and the resolution appended to `## Decisions` as a dated `D<n>` once the human picks. A divergence is escalated, never absorbed |
 | Hitting a blocker | The `**Status:**` line and the task block name what it waits on and who owns it. The prompt block **stays** and names the blocker and its owner — deleting it loses the lane |
@@ -567,7 +568,7 @@ Run this **before** re-sequencing anything, when a plan and partially-built code
 
 **The governing rule: the plan is a lead, not evidence.** An `As built` note, a green pipeline, a commit message, a deleted prompt block and the header `Status:` line are all claims. A verdict is assigned only after reading the code **this session**.
 
-**One thing this format changes about the reconcile:** because the plan gates once, an unfinished plan's tree may not build, and a red build is **not** by itself evidence that a task failed. Establish which it is before assigning verdicts — run the gate yourself, and attribute each failure to the task that owns the file.
+**A red build is a finding about the task that left it.** Every task gates what it built, so run the gate yourself and attribute each failure to the task that owns the file before assigning verdicts.
 
 1. **Read the design pack**, so you know what was supposed to exist.
 2. **Walk each task** in the task table and look for its artifacts — the files it names, the migration, the endpoint, the registration.
@@ -614,13 +615,13 @@ that lands anything.>
 
 > **For agentic workers:** the tasks below are one flat sequence — work them in order. Each names the
 > agent that should execute it, the skills to load, and the one deliverable that means it is done.
-> **This plan gates once, in <the last runnable task>:** every task before it writes its code and its
-> unit tests — designed to cover ≥ 80% of the branches it writes — commits, and stops: no build, no test
-> run, no lint, no typecheck. In a test-first plan the `Q` tasks and the implementation tasks run exactly
-> the filtered command their `Gate: own tests` line names and nothing else, and the acceptance tests a
-> `Q` task wrote are read-only to every later task but the gate. The gate measures the coverage floor over
-> the whole plan's change. The tree is therefore not known to build at every task boundary — only each
-> task's own tests are known to pass — and the plan cannot be stopped halfway and trusted.
+> **Every task gates what it built:** before it commits, it runs the commands its `Gate: own tests` line
+> names — the build of what it touched, its unit tests (≥ 80% of the branches it writes), the acceptance
+> tests it writes or must turn green, and the coverage measure over its files — and leaves them green,
+> fixing what stands in the way whichever task caused it. No earlier task runs the unfiltered suite. The
+> acceptance tests a `Q` task wrote are read-only to every later task but the gate. <The last runnable
+> task> runs the whole set once more and measures the coverage floor over the whole plan's change. A plan
+> stopped halfway has each landed task's own tests green, but the whole suite has not run.
 > **Update this document as you work** — the dated `As built` note on your task, the `Status:` line
 > above, and `## Decisions` for anything you built differently — then **delete your own prompt block**
 > and rewrite the ones below yours wherever what you landed differs from what they assume.
@@ -694,12 +695,12 @@ that lands anything.>
    stack split of one, recorded back into that document), and the order is a valid serialization of that
    document's dependency graph.
 10. Every task's bullets are checkable and cite the design pack by section.
-11. **Exactly one task carries the gate**, it is the last runnable one, its commands are the project's
-    own from the orientation pass and in run order, and it is told to fix what the gate finds rather
-    than hand it back; when the plan writes code, the gate ends with the coverage floor
-    (`plan-format.md` §5). Every other task says `Gate: none` and names what not to run — or, on a
-    test-first plan's `Q` and implementation tasks, `Gate: own tests` with one **filtered** command. The
-    ungated-boundary cost is stated in the header note.
+11. **Every code task says `Gate: own tests` with **filtered** commands**, and a code task whose gate runs
+    nothing is a defect. `Gate: none` appears only on a task with nothing runnable, which says so. **The
+    last runnable task runs the whole set**: its commands are the project's own from the orientation pass
+    and in run order, it is told to fix what it finds rather than hand it back, it holds no feature work
+    when the plan has any, and when the plan writes code it ends with the coverage floor
+    (`plan-format.md` §5). What a halfway stop leaves is stated in the header note.
 12. `## Prompts — one per task` exists inside this document, with one block per task that has not
     landed, each naming one task, an exact agent, exact skills, and pack **sections** rather than
     artifacts — and every `Blocked on <id>` placeholder is matched by a bullet on that task and a line

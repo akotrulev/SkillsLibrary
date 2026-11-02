@@ -255,7 +255,7 @@ Create/update flows keep the RestAssured sibling's cleanup discipline: track cre
    `(APIRequestContext)` constructor.
 5. Author one test class per operation from the scenario matrix, one client field per identity in `@BeforeClass`.
 6. Verify every test name follows `Should_X_When_Y` and every TC-ID maps to a test or is explicitly deferred.
-7. Run `./gradlew :apitests:test` — expect 0 failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+7. Run `./gradlew :apitests:test` — expect 0 failures.
 
 ## Cross-references
 

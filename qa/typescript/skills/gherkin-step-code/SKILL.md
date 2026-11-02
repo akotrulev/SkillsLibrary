@@ -57,7 +57,7 @@ If a step needs a page object/method that doesn't exist, stop and build it via `
 5. Implement each body with page-object calls only; put assertions in `Then` with the framework's `expect`.
 6. For any missing page object/method, build it before binding the step.
 7. Ensure the Cleanup is implemented as teardown/`After` (scaffold layer), not as steps.
-8. Run the toolchain (web: `npx bddgen && npx playwright test`; mobile: `npx wdio run`): every step bound (no undefined/ambiguous), the smoke scenario green. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+8. Run the toolchain (web: `npx bddgen && npx playwright test`; mobile: `npx wdio run`): every step bound (no undefined/ambiguous), the smoke scenario green.
 
 ## Anti-patterns to flag (both frameworks)
 

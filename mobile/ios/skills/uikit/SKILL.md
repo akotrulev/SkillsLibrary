@@ -216,8 +216,6 @@ The iOS 27 SDK makes the UIScene lifecycle mandatory; an app that builds against
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Build with warnings as errors; the project's formatter and linter pass.
 - Run on an iPad in a resized window and at the largest accessibility text size: no clipped or overlapped content.
 - Leaving a screen mid-load cancels the request; Instruments (Leaks, Memory Graph) shows the controller deallocated after pop.

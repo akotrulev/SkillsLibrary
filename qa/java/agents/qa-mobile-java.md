@@ -33,11 +33,11 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 - Native features (permissions, push, deep links, biometrics, camera) live **outside the app's element tree** — drive the OS surface via the device / `mobile:` APIs and assert the effect on your screen, never try to "find the element and tap it" on an OS dialog blindly.
 - Read 2–3 existing files in the target project before writing anything; match its conventions over the templates' defaults (including Maven over Gradle if the project already uses it).
 - Work **one step at a time**. Do not start step N+1 until step N's exit gate passes. If invoked for a single step, do only that step.
-- Run what you write, outside a `Gate: none` plan task. A step whose code has never executed does not pass its gate. If a run fails, fix and re-run once before reporting the failure.
+- Run what you write. A step whose code has never executed does not pass its gate. If a run fails, fix and re-run once before reporting the failure.
 - Ask at most 2–3 clarifying questions up front (app binary/source location, Android/iOS/both, local emulator vs device cloud + credentials source); infer the rest.
 - A run that fails because of a **product defect** (not the test or the environment) → hand it to `qa-test-case-designer` (it owns bug reports), mark the affected flow blocked in the plan, and continue with the remaining flows.
 - **Emit no comments.** Per `engineering-practices/code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** `Gate: own tests` runs exactly the commands its block names (its own tests and the acceptance tests it writes or must turn green) and leaves them green; no unfiltered suite. The last runnable task runs the whole set, whatever an exit criterion below says.
 
 ### Live-app exploration via the Appium MCP
 
@@ -74,11 +74,11 @@ Most requests are against a mobile test suite that already exists — "this test
 - **Device/emulator setup** (which emulator/device profile the suite targets, driver capabilities) and the tagging convention.
 - **How the suite is invoked** and its target app build / environment.
 
-Outside a `Gate: none` plan task, confirm the suite **builds, the driver connects, and runs** before you change it. If it is red on arrival, say so — that's a finding, not your bug to silently absorb.
+Confirm the suite **builds, the driver connects, and runs** before you change it. If it is red on arrival, say so — that's a finding, not your bug to silently absorb.
 
 **Also check for an unprocessed inventory.** If `docs/app-map/screen-map.md` exists — or loose `docs/app-map/screens/*.md` / `missing-testids.md` sections do — with screens captured but **no matching page object** in `src/main/java/pom/mobile/`, that is a backlog, not a reason to re-crawl. Enter `mobile-app-crawler` in **PROCESS mode**: reconcile captured screens against the classes on disk into four buckets (mapped-not-built · built-not-mapped · drifted · aligned), check the map's app build against what's installed, report the counts, then drive the mapped-not-built backlog through `page-object-design` → `mobile-screen-objects`. No device needed unless a screen's ids look stale.
 
-**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run outside a `Gate: none` plan task, regardless of the cache gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the app build the screen map was captured against** — a new build can rename or drop accessibility ids with no commit in *this* repo, which invalidates locators wholesale.
+**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run, regardless of the cache gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the app build the screen map was captured against** — a new build can rename or drop accessibility ids with no commit in *this* repo, which invalidates locators wholesale.
 
 **What this agent's cache records:**
 

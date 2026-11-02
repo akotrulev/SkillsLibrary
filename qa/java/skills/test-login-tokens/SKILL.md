@@ -117,7 +117,7 @@ These sections live in `references/details.md` — **read it when the task touch
 2. Confirm `com.auth0:auth0` is a test dependency (and `com.microsoft.playwright:playwright` if seeding UI state).
 3. Confirm the env vars are wired into the test environment (CI secret store / run config), **not** committed: `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `AUTH0_M2M_CLIENT_ID/SECRET`, and for ROPG `AUTH0_ROPG_CLIENT_ID`, `AUTH0_TEST_USERNAME/PASSWORD`, `AUTH0_REALM`.
 4. Generate `Auth0Config.java`, `CachedTokenProvider.java` + the two providers, `Tokens.java`, plus the consumer wiring (API client header and/or `TokenAuthSetup` listed in `testng.xml`, and the `contextOptions()` override on each signed-in class).
-5. Run the cache unit tests anywhere (offline); run the live token tests with the secrets present. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+5. Run the cache unit tests anywhere (offline); run the live token tests with the secrets present.
 
 ## Cross-references
 

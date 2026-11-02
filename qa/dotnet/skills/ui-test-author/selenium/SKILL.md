@@ -221,7 +221,7 @@ public sealed class AuthenticationTests : BaseTest
    - For repeating items, an `IReadOnlyList<{Component}>` property wrapping each `IWebElement` in a component class
 4. If a destination page doesn't exist yet, create a stub or recursively generate it.
 5. Generate the test class inheriting `BaseTest`; one `[Test]` per scenario, assertions on user-visible outcomes.
-6. Run `dotnet test` — expect 0 failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+6. Run `dotnet test` — expect 0 failures.
 
 ## Handoffs
 

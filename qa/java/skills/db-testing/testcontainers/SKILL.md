@@ -236,7 +236,7 @@ new GenericContainer<>("ghcr.io/myco/legacy-app:1.4.0")
    - `support/datasets/empty.yml` (db-rider seed reset)
    - Concrete `{Feature}IT.java`
    - `build.gradle.kts` dependency additions.
-4. Run `./gradlew test --tests "*IT"` — expect green or real assertion failure. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+4. Run `./gradlew test --tests "*IT"` — expect green or real assertion failure.
 
 ## Cross-references
 

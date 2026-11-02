@@ -210,7 +210,7 @@ The build is `assets/build.gradle.kts`: the pins above, Allure on allure-java 3,
 6. For signed-in classes, add `AuthSetup` and override `contextOptions()`; for devices, override it with the
    device's options.
 7. Run `./gradlew installPlaywrightBrowsers test` (0 failures) and debug with `HEADED=1` or
-   `PWDEBUG=1`. In a `Gate: none` plan task, run neither; report the files as "written, not run".
+   `PWDEBUG=1`.
 
 ## Handoffs
 

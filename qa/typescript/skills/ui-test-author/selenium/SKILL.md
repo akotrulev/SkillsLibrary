@@ -230,7 +230,7 @@ describe("Authentication", () => {
    - For repeating items, an `async {component}s(): Promise<Component[]>` method
 4. If a destination page is missing, stub it or recursively generate it.
 5. Generate the spec file using `BaseTest`; one `it(...)` per scenario.
-6. Run the project's own test script with the package manager `packageManager` names — expect 0 failures. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+6. Run the project's own test script with the package manager `packageManager` names — expect 0 failures.
 
 ## Handoffs
 

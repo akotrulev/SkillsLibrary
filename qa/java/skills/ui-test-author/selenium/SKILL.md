@@ -218,7 +218,7 @@ public class AuthenticationTest extends BaseTest {
    - For repeating items, a `List<{Component}>` method that wraps each `WebElement` in a component class
 4. If a destination page doesn't exist yet, create a stub or recursively generate it.
 5. Generate the test class extending `BaseTest`; one `@Test` per scenario, with assertions on user-visible outcomes (not implementation details).
-6. Run `./gradlew test` — expect 0 failures. If browser drivers fail to download, check the `WebDriverManager` version and `system.properties`. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+6. Run `./gradlew test` — expect 0 failures. If browser drivers fail to download, check the `WebDriverManager` version and `system.properties`.
 
 ## Handoffs
 

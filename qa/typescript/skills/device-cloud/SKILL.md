@@ -270,7 +270,7 @@ export function browserStackCreds(): BrowserStackCreds {
 
 1. Confirm the paradigm, the platform and the vendor's Appium version.
 2. Live session: `farm-credentials.ts`, `uploadApp`, `device-matrix.ts`, `device-features.ts`, the farm config. Remote run: `DeviceFarmRunner`.
-3. Map the device count onto `maxInstances` per `browser-cloud-setup`, run **one** device first, and confirm the dashboard shows the right build tags. Inside a `Gate: none` plan task run none of this and report the files as "written, not run".
+3. Map the device count onto `maxInstances` per `browser-cloud-setup`, run **one** device first, and confirm the dashboard shows the right build tags.
 
 ## Cross-references
 

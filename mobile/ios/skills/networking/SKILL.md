@@ -221,8 +221,6 @@ Pull above; push is a socket the app opens **only while foregrounded and the scr
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Build clean with warnings as errors; the project's `swift-format` / SwiftLint pass.
 - On a device with the Network Link Conditioner on "100% loss": a request past its budget fails at the deadline with a timeout; leaving the screen cancels silently.
 - Airplane mode: no retry attempts in the network log; reconnect refetches.

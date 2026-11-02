@@ -4,7 +4,7 @@ The filled example for `dev:plan-delivery`, from the **workshop-booking** toy in
 by all the planner examples. **Shapes and disciplines are normative; domain content is illustrative.**
 A real artifact writes a full block for *every* task — this example writes five representative ones (a
 foundation task, an acceptance-test task, a backend capability task, the frontend task that actually
-delivers that capability, and the gate-and-close-out task) and abbreviates the rest, saying so.
+delivers that capability, and the whole-set-and-close-out task) and abbreviates the rest, saying so.
 
 The document format is `engineering-practices/writing-plans/references/plan-format.md`; the prompts
 section's shape is `backend/_shared/session-budget/references/prompts-section-template.md`; the epic
@@ -16,12 +16,12 @@ usable.
 
 Read for six things this example carries that a generic plan does not: every task names **one**
 stack, so the backend and screens of one capability are separate tasks; every task carries its **epic
-and story**; every task carries a **`Budget`** with the drivers behind it; **exactly one task carries
-the gate** (`B7`, the last runnable one), the `Q` and `B` tasks run only their own filtered tests
-(`Gate: own tests`) and every other says `Gate: none`; **the acceptance tests exist, red on the stubs,
+and story**; every task carries a **`Budget`** with the drivers behind it; **every code task gates what
+it built** (`Gate: own tests`, with named commands) and **`B7`, the last runnable one, runs the whole set
+once more**; **the acceptance tests exist, red on the stubs,
 before the code they specify** (`C8` → `Q1`–`Q4` → `B1`–`B3`); and the plan's **progress
 is the `As built` notes plus the prompt blocks that are left**, not a status column. Note also where the
-filing duty sits: `B4` is blocked on a person and outlives the gate task, so **`B4`'s block carries the
+filing duty sits: `B4` is blocked on a person and outlives `B7`, so **`B4`'s block carries the
 move to `docs/plans/implemented/`**, not `B7`'s.
 
 ---
@@ -35,25 +35,24 @@ domain is verified.
 **Status:** *(2026-08-09)* `H1`, `C1`–`C9`, `Q1`–`Q3`, `B1` and `F1` have landed — **E1 is usable**: a
 member browses the timetable and an admin publishes a workshop (J1 walked by hand 2026-08-08). `B2`
 (bookings) is **partial**: book and my-bookings are written, cancel and attend are not, and `Q1`'s
-bookings tests for them are still red. Nothing has been built or tested as a whole yet — **this plan
-gates once, in `B7`**, which has not run, so the tree is not known to build; only each `Q` and `B`
-task's own tests have run. `H2` (SendGrid domain authentication) is blocked on the studio owner, and
-`B4` sits below the gate because of it.
+bookings tests for them are still red. Each landed task's own tests are green, but the whole suite has
+not run: **that is `B7`**, the last runnable task. `H2` (SendGrid domain authentication) is blocked on the
+studio owner, and `B4` sits below `B7` because of it.
 
 **Pack:** `./epics.md` · `./stories.md` · `./blueprint.md` · `./data-model.md` · `./experience-plan.md` · `./api-surface.md` · `./integrations.md` · `./epic-map.md`
 **Target repo:** `~/src/workshop-booking` · **Stack:** .NET 10 + PostgreSQL 18 (`src/`) · React 19 + Next 15 (`web/`)
-**Build/test:** `dotnet build` / `dotnet test` / `dotnet format` for `be` tasks · `pnpm build` / `pnpm test` for `fe` tasks — **run in full once, by `B7`**; `Q` and `B` tasks run only the filtered `dotnet test` their `Gate: own tests` line names
+**Build/test:** `dotnet build` / `dotnet test` / `dotnet format` for `be` tasks · `pnpm build` / `pnpm test` for `fe` tasks — **run in full once, by `B7`**; every earlier code task runs only the scoped commands its `Gate: own tests` line names
 **Sequencing shape:** feature-complete — the studio owner wants the timetable demonstrable before booking exists · **Test-first:** yes — the API surface and journeys are the contract (the user did not opt out)
 
 > **For agentic workers:** the tasks in §3 are one flat sequence — work them in order. Each names the
 > agent that should execute it, the skills to load, and the one deliverable that means it is done.
-> **This plan gates once, in `B7`:** every task before it writes its code and its unit tests, commits,
-> and stops — no `dotnet build`, no full `dotnet test`, no `pnpm build`, no lint. The one exception is
-> `Gate: own tests`: a `Q` task or a backend implementation task runs exactly the filtered command its
-> block names. The acceptance tests a `Q` task wrote are the spec, and read-only to every later task
-> except `B7`. The tree is therefore not known to build at every task boundary — only each task's own
-> tests are known to pass — and the plan cannot be stopped halfway and trusted; `B7` runs the whole set
-> and fixes what it finds, whichever task it belongs to.
+> **Every task gates what it built:** before it commits, it runs the commands its `Gate: own tests` line
+> names — the build of what it touched, its unit tests, the acceptance tests it writes or must turn green,
+> and the coverage measure over its files — and leaves them green, fixing what stands in the way whichever
+> task caused it. No earlier task runs the unfiltered suite. The acceptance tests a `Q` task wrote are the
+> spec, and read-only to every later task except `B7`. `B7` runs the whole set once more and fixes what it
+> finds, whichever task it belongs to. A plan stopped halfway has each landed task's own tests green, but
+> the whole suite has not run.
 > **Update this document as you work** — a dated `As built` note on your task, the `Status:` line
 > above, and `## 6. Decisions` for anything you built differently — then **delete your own prompt
 > block**, repair the ones below yours, and write any block that was `Blocked on` you.
@@ -71,7 +70,7 @@ grounding — every task below traces to a row, and a row with no task is someth
 | Workshops, sessions and bookings in the database, with capacity enforced | — | Migrations 001–002 (`C5`), migration 003 + the capacity guard (`C7`), guard review (`DA1`) |
 | A web shell a member can navigate, and a typed client | — | `C6` — the shell with a placeholder per screen route, the nav map, the route tree, `web/lib/api-client.ts` |
 | Every endpoint routed before it is implemented, and a spec the tests bind to | — | `C8` — every `api-surface.md` §5 endpoint answers `501 not-implemented`; the OpenAPI asset is generated from the stubs |
-| Acceptance tests that exist before the code | — | `Q3`, `Q1`, `Q4` (API tests per resource group, `qa-api-dotnet`) and `Q2` (journeys J1–J2, `qa-ui-typescript`), each red on the stubs |
+| Acceptance tests that exist before the code | — | `Q3`, `Q1`, `Q4` (API tests per resource group, `qa-api-dotnet`), each red on the stubs, and `Q2` (journeys J1–J2, `qa-ui-typescript`), proved to load and list until `F1` and `F2` serve them |
 | Publishing workshops and sessions | — | `B1` (API, turns `Q3` green) + `F1` (screens, turns J1 green). **`B1` alone does not deliver it** |
 | Booking, cancelling, seeing your bookings | — | `B2` (API, turns `Q1` green) + `F2` (screens, turns J2 green) |
 | A member profile | — | `B3` (API, turns `Q4` green) + `F3` (screen) |
@@ -79,7 +78,7 @@ grounding — every task below traces to a row, and a row with no task is someth
 | The committed OpenAPI asset matches the implemented surface | — | `C8` commits it from the stubs; `B5` regenerates it after the last endpoint task and diffs it against `C8`'s |
 | Traces, logs and RED metrics reaching a local Grafana stack from the first request | — | `C9` — the OpenTelemetry SDK, structured logging, the resource attributes, `deploy/local/` and a RED dashboard; each implementation task then instruments what it builds (`B2` names its signals) |
 | Business dashboards and alert rules | — | `B6`, once the named signals exist |
-| One verified build, suite and format pass, plus the docs | — | `B7`, the plan's only gate |
+| One verified build, suite and format pass across the plan, plus the docs | — | `B7`, the last runnable task |
 
 ## 2. Streams
 
@@ -89,7 +88,7 @@ Derived from `epic-map.md` §2, split by stack where a lane spans two — the on
 
 | Stream | Epic | Stack | Owns | Why it is internally sequential |
 |---|---|---|---|---|
-| `foundations-api` | `E0` | `be` | Solution root and everything shared: scaffold, config, CI, auth wiring, error middleware, the endpoint-module seam, the endpoint stubs, the OpenAPI asset, the telemetry base, the gate | Every task edits the solution root or `src/Api/Program.cs`. `H1` sits here too — the Auth0 tenant is what `C3` wires |
+| `foundations-api` | `E0` | `be` | Solution root and everything shared: scaffold, config, CI, auth wiring, error middleware, the endpoint-module seam, the endpoint stubs, the OpenAPI asset, the telemetry base, the whole-set run | Every task edits the solution root or `src/Api/Program.cs`. `H1` sits here too — the Auth0 tenant is what `C3` wires |
 | `schema` | `E0` | `be` / `data` | Migrations and the data-integrity work that follows — `src/Api/Migrations/*` | Migrations are ordered by definition, and `DA1`'s review reads the constraint `C7` creates. Disjoint from `foundations-api`'s file set, so its own lane |
 | `foundations-ui` | `E0` | `fe` | App shell, nav map, route tree, typed API client — `web/app/layout.tsx`, `web/app/(nav)/*`, `web/lib/api-client.ts` | One root file set on the web side, exactly as `foundations-api` is on the API side |
 | `timetable-api` | `E1` | `be` / `qa` | Workshops + Sessions — `src/Scheduling/*`, `tests/Scheduling.AcceptanceTests/*` | One module, one file set; `Q3` precedes `B1` |
@@ -124,9 +123,10 @@ graph, not a wave-by-wave march through it. The scannable index is the task tabl
 can self-register its routes without editing `Program.cs`.
 **Depends on:** C2 (config + startup validation)
 **Budget:** ~90k — CLAUDE.md 25k, `api-surface.md` §1/§3/§4 6k, 2 skills 16k, `src/Api/Program.cs` as
-written by C2 ~4k, 4 files created and 1 modified 9.5k, commit and diff read-back 6k, churn ×1.2
-**Gate: none** — this plan gates once, in `B7`. Do not run `dotnet build`, `dotnet test` or
-`dotnet format`.
+written by C2 ~4k, 4 files created and 1 modified 9.5k, commit, diff and gate read-back 10k, churn ×1.2
+**Gate: own tests** — before committing, run `dotnet build src/Api`, then
+`dotnet test tests/Shared.Tests --collect:"XPlat Code Coverage"`, then read branch coverage over
+`src/Shared/*` (`plan-format.md` §5). Leave them green. Do not run the unfiltered suite or `dotnet format`.
 
 **Files:**
 - Create: `src/Shared/ProblemDetailsMiddleware.cs`, `src/Shared/PagedResult.cs`, `src/Shared/SessionSummary.cs`
@@ -146,7 +146,7 @@ written by C2 ~4k, 4 files created and 1 modified 9.5k, commit and diff read-bac
 - **As built (2026-08-05):** `IEndpointModule` registers through an assembly scan in
   `src/Api/ModuleRegistration.cs` rather than an explicit list, so a new module needs no `Program.cs`
   edit at all (`src/Shared/ProblemDetailsMiddleware.cs:1-76`, `src/Api/ModuleRegistration.cs:1-31`).
-  Tests written, not run — `B7` owns the gate.
+  `dotnet test tests/Shared.Tests`: 9 passed, 0 failed; branch coverage 86% over `src/Shared/*`.
 
 ### Q1 — Bookings API acceptance tests
 
@@ -156,10 +156,10 @@ written by C2 ~4k, 4 files created and 1 modified 9.5k, commit and diff read-bac
 acceptance test in `tests/Booking.AcceptanceTests/`, and each fails on `501 not-implemented`.
 **Depends on:** C8 (the stubs and the OpenAPI asset generated from them), C3 (auth, for the member and admin tokens)
 **Budget:** ~90k — CLAUDE.md 25k, `api-surface.md` §4 and §5.3 and `stories.md` US6–US9 8k, 2 skills 16k,
-the OpenAPI asset's typed client 4k, 4 test files and 1 fixture created 10k, the filtered run's output
-8k, commit and diff read-back 6k, churn ×1.2
-**Gate: own tests** — run only `dotnet test tests/Booking.AcceptanceTests`; expect every test red on
-`not-implemented`. This plan gates once, in `B7`. Do not run the full suite, `pnpm`, lint or `dotnet format`.
+the OpenAPI asset's typed client 4k, 4 test files and 1 fixture created 10k, commit, diff and gate
+read-back 10k, churn ×1.2
+**Gate: own tests** — before committing, run `dotnet test tests/Booking.AcceptanceTests`; expect every test
+red on `not-implemented`, and record the reason. Do not run the unfiltered suite, `pnpm` or `dotnet format`.
 
 **Files:**
 - Create: `tests/Booking.AcceptanceTests/BookSessionTests.cs`, `MyBookingsTests.cs`, `CancelBookingTests.cs`, `AttendBookingTests.cs`, `BookingApiFixture.cs`
@@ -189,11 +189,12 @@ capacity guard — book, my-bookings, cancel, attend — the 11 Bookings accepta
 and `B2`'s unit tests cover ≥ 80% of its branches.
 **Depends on:** Q1 (the acceptance tests it turns green), C7 (the capacity constraint), C3 (auth), C4 (envelope + seam), C9 (the telemetry base it instruments against)
 **Budget:** ~115k — CLAUDE.md 25k, `api-surface.md` §2/§5.3, `data-model.md` §3 and `blueprint.md` §3b
-8k, 5 skills 28k, `src/Scheduling/*` as the module pattern ~12k, 5 files created 10k, commit and diff
-read-back 6k plus the filtered run 4k, churn ×1.2
-**Gate: own tests** — run only `dotnet test --filter "FullyQualifiedName~Booking" --collect:"XPlat Code Coverage"`,
-then read branch coverage over `src/Booking/*` (`plan-format.md` §5); expect the `Q1` tests green. This
-plan gates once, in `B7`. Do not run the full suite, `pnpm`, lint or `dotnet format`.
+8k, 5 skills 28k, `src/Scheduling/*` as the module pattern ~12k, 5 files created 10k, commit, diff and
+gate read-back 10k, churn ×1.2
+**Gate: own tests** — before committing, run `dotnet build src/Booking`, then
+`dotnet test --filter "FullyQualifiedName~Booking" --collect:"XPlat Code Coverage"`, then read branch coverage
+over `src/Booking/*` (`plan-format.md` §5); expect the `Q1` tests green, and leave them so. Do not run the
+unfiltered suite, `pnpm` or `dotnet format`.
 
 **Files:**
 - Create: `src/Booking/Domain/Booking.cs`, `src/Booking/BookingService.cs`, `src/Booking/BookingEndpoints.cs`, `src/Booking/BookingConfiguration.cs`
@@ -231,10 +232,12 @@ a session is full — journey J2, end to end, and `Q2`'s J2 tests go green. **Th
 **Depends on:** C6 (shell + typed client), Q2 (the J2 tests and their test ids), F1 (the session detail page the Book action lives on), B2 (the endpoints)
 **Budget:** ~125k — CLAUDE.md 25k, `experience-plan.md` §3/§4 (S3, S4)/§6 and `api-surface.md` §5.3
 10k, 3 skills 24k, `web/app/timetable/*` as the screen pattern ~14k, 2 screens + 3 components created
-and 2 modified 15k, commit and diff read-back 6k, churn ×1.2
-**Gate: none** — this plan gates once, in `B7`. Do not run `pnpm build`, `pnpm test` or `pnpm playwright test`:
-the J2 tests need the API, the database and the web app running together, which no single command starts,
-so their green check moves to `B7`.
+and 2 modified 15k, commit, diff and gate read-back 10k plus 8k for the production build and e2e, churn ×1.2
+**Gate: own tests** — before committing, run `pnpm build`, then
+`pnpm vitest run web/app/bookings web/app/timetable --coverage --coverage.reporter=text`, then start the API
+and the database (`docker compose up -d api postgres`) and run `pnpm playwright test e2e/j2-*.spec.ts`
+against the production build; expect `Q2`'s J2 tests green, and leave them so. Do not run the unfiltered
+suite, or `dotnet` beyond starting the API.
 
 **Files:**
 - Create: `web/app/bookings/page.tsx`, `web/app/bookings/booking-list.tsx`, `web/app/bookings/cancel-dialog.tsx`
@@ -256,7 +259,7 @@ so their green check moves to `B7`.
   the J2 tests (`Q2`, `qa-ui-typescript`) and the J2 walk-through (`B7`'s close-out records whether the
   journey has been walked).
 
-### B7 — the gate and the close-out
+### B7 — the whole set and the close-out
 
 **Epic:** `E0` Contract + foundations · **Story:** — · **Stack:** `be` · **Stream:** `foundations-api` · **Order:** 25
 **Agent:** `be-dotnet` · **Skills:** `be-dotnet:conventions-review`
@@ -264,11 +267,11 @@ so their green check moves to `B7`.
 and journeys J1–J2 included — the format check is clean, unit
 tests cover ≥ 80% of the branches this plan wrote in each stack, and `docs/repository-state.md` says
 what is built and what is unverified.
-**Depends on:** every task above it — this is the plan's only gate
-**Budget:** ~140k — CLAUDE.md 25k, this plan 12k, the `As built` notes of 18 tasks 10k, the gate output
-and the fix loop 12k plus 4k per earlier task whose failures land here (~40k budgeted for six),
-the coverage reports and the tests a shortfall needs ~10k, the docs written 8k, churn ×1.2
-**Gate (this is the last runnable task, so it carries the plan's only gate, in run order):**
+**Depends on:** every task above it — this task runs the whole set
+**Budget:** ~135k — CLAUDE.md 25k, this plan 12k, the `As built` notes of 18 tasks 10k, the whole set's
+output and the fix loop 12k plus 2k per earlier task (48k for 18), the coverage reports and the tests a
+shortfall needs ~10k, the docs written 8k, churn ×1.2
+**Gate (this is the last runnable task, so it runs the whole set once more across the plan, in run order):**
 ```
 dotnet build   →  dotnet test   →  dotnet format --verify-no-changes
 pnpm install   →  pnpm build    →  pnpm test   →  pnpm playwright test
@@ -286,7 +289,8 @@ attributing it is part of this task, and the `As built` note says which task eac
 - Modify: whatever the gate proves wrong, in whichever task's tree it lives
 - Create: `docs/repository-state.md`, `docs/api/README.md`
 
-- Run the gate in the order above. Do not reorder it: a format failure after a red build wastes the run.
+- Run the set in the order above. Do not reorder it: a format failure after a red build wastes the run.
+  On a re-run, retry only what failed where the project has a way to (`pnpm playwright test --last-failed`).
 - The acceptance tests are read-only to every task but this one. A test an implementation task recorded
   as wrong in a `D<n>` is resolved here, with the user, before it is changed.
 - Every failure is fixed here, and attributed in the `As built` note to the task that introduced it.
@@ -309,8 +313,8 @@ attributing it is part of this task, and the `As built` note says which task eac
 
 ### H1, H2, C1–C3, C5–C9, Q2–Q4, B1, B3–B6, F1, F3, DA1 — abbreviated in this example
 
-Each gets the same block shape, deliverable first. `Gate: none` on every one except `Q3`, `Q4`, `B1` and
-`B3`, which say `Gate: own tests` with a filtered command like `Q1`'s and `B2`'s. Notable:
+Each gets the same block shape, deliverable first. Every code task says `Gate: own tests` with named
+commands like `C4`'s, `Q1`'s, `B2`'s and `F2`'s; the `human` tasks have no gate. Notable:
 
 - **`C1` writes the architecture test** (ArchUnitNET, per `be-dotnet:patterns-apply` "Module boundaries"):
   a module may not depend on another module's `Internal` namespace, so every later task is checked
@@ -327,21 +331,22 @@ Each gets the same block shape, deliverable first. `Gate: none` on every one exc
   `detail` naming the task that implements it (validation catalog V8.6), declaring its real response types.
   It then generates the OpenAPI asset from the stubs and commits it canonicalized, so `Q1`, `Q3` and `Q4`
   have their typed client. `B5` regenerates it once the bodies exist and diffs it against this one.
-- **`Q2` is `Stack: qa`**, `qa-ui-typescript`, and `Gate: none`: the J1 and J2 tests need the API, the
-  database and the web app running together, which no single command starts, so their red check moves to
-  `B7`. Its `Epic` is `E1` because it precedes the first capability's screens; J2 belongs to `E2`.
+- **`Q2` is `Stack: qa`**, `qa-ui-typescript`, and `Gate: own tests` with `pnpm playwright test --list
+  e2e/`: the J1 and J2 tests need the API, the database and the web app running together, which no single
+  command starts yet, so its gate proves they load and list, and `F1` and `F2`, which serve each journey,
+  turn them green. Its `Epic` is `E1` because it precedes the first capability's screens; J2 belongs to `E2`.
 - **`Q3` and `Q4` are `Q1`'s shape** for Workshops and Sessions (before `B1`) and for the Profile
   resource (before `B3`) — every endpoint and every AC of the resource group covered, red on the stubs.
 - **`DA1` is `Stack: data`**, agent `data-architect`, and executes `data-model.md` §9's routed
   decision: a written verdict on the capacity guard under concurrent booking, with any constraint
   change applied.
-- **`C9` is the telemetry base**, agent `observability-engineer-dotnet` — same stack as `C8`, different peer, so its own task. It wires the OpenTelemetry SDK (OTLP export), Serilog with the trace id on every line, the resource attributes (`service.name`, `service.version`, `deployment.environment`) and a RED dashboard, and commits `deploy/local/docker-compose.yml` (Collector, Loki, Tempo, Prometheus, Grafana). It sits after the stubs so the first request that reaches Grafana is a real route, and before `Q3`, so every later task's code is observable while it is built.
+- **`C9` is the telemetry base**, agent `observability-engineer-dotnet` — same stack as `C8`, different peer, so its own task. It wires the OpenTelemetry SDK (OTLP export), Serilog with the trace id on every line, the resource attributes (`service.name`, `service.version`, `deployment.environment`) and a RED dashboard, and commits `deploy/local/docker-compose.yml` (Collector, Loki, Tempo, Prometheus, Grafana). It sits after the stubs so the first request that reaches Grafana is a real route, and before `Q3`, so every later task's code is observable while it is built. Its gate starts the stack once to prove it comes up, and sends one request.
 - **`B6` is agent `observability-engineer-dotnet` too**, and builds the *business* dashboards and alert rules (bookings placed by outcome, the 5xx-rate alert) from the signals `B1`–`B3` named — the SDK and the stack were `C9`'s.
 - **There is no pin task here.** The repo is greenfield, so no behaviour exists that no test pins. On a
   brownfield plan, a `qa-api-dotnet` or `be-dotnet` pin task would sit above the first task that touches
   the untested area: "the current behaviour of <area> is pinned by N tests, green on today's code."
 - **`B4` sits below `B7`**, because it is blocked on `H2`. `B7` is the last *runnable* task and
-  therefore the gate; `B4` carries its own gate for whenever the sending domain clears.
+  therefore runs the whole set; `B4` carries its own gate for whenever the sending domain clears.
 
 ## 4. Open questions
 
@@ -370,16 +375,17 @@ capability wait on provisioning. *(2026-08-02)*
 lands.** This is the one-stack rule, recorded once rather than re-argued per capability. The cost is
 stated rather than discovered: `B2` finished is not a demo. *(2026-08-02)*
 
-**D4 — the plan gates once, in `B7`.** Eighteen tasks × a 12k verify loop each is ~200k of context
-spent proving the same tree, and a failure in task 6 is usually only diagnosable once task 12 exists.
-The accepted cost: the tree is not known to build at any boundary before `B7`, and this plan cannot be
-stopped halfway and trusted. `C4`'s `As built` note says "tests written, not run" for exactly this
-reason. *(2026-08-02)*
+**D4 — every task gates what it built, and `B7` runs the whole set once more.** A failure surfaces in the
+task that caused it, while its files are still in that session's context, and not in a last task that has
+to reload them. Each code task pays about 10k of read-back for its scoped build and filtered tests, and
+`B7`'s fix loop shrinks to 12k plus 2k per earlier task. No earlier task runs the unfiltered suite. What a
+halfway stop leaves: each landed task's own tests green, but the whole suite has not run. `C4`'s `As built`
+note records its own test run for this reason. *(2026-08-02)*
 
 **D5 — the plan is test-first: the stubs and `Q1`–`Q4` precede the implementation.** The API surface and
 the journeys are the contract, so the acceptance tests are written by `qa-api-dotnet` and
-`qa-ui-typescript` against `C8`'s stubs and `C6`'s placeholders, red before any code exists. `Q` and `B`
-tasks run only their own filtered tests (`Gate: own tests`); `B7` still runs everything once. The cost:
+`qa-ui-typescript` against `C8`'s stubs and `C6`'s placeholders, red before any code exists. Each
+task runs its own filtered tests (`Gate: own tests`); `B7` runs everything once more. The cost:
 two more agent switches per capability, one more contract task (`C8`), and a wrong acceptance test stays
 red until `B7` resolves it with the user. *(2026-08-02)*
 
@@ -408,11 +414,10 @@ Before you stop, in this order, in this file:
 ## Prompts — one per task
 
 Run them in order, one session each. Every block is complete on its own — it names the agent, the
-skills, and the exact sections to read. **This plan gates once, in `B7`:** every block before it says
-`Gate: none` and names what not to run — except the `Q` and `B` blocks, which say `Gate: own tests` and
-run only the one filtered `dotnet test` they name. No block may run the full suite or `pnpm test`. The
-plan's cost, stated once: the tree is not known to build at a task boundary; only each task's own tests
-are known to pass.
+skills, and the exact sections to read. **Every task gates what it built:** each code block says
+`Gate: own tests` and names the commands it runs before it commits, and leaves them green. No block but
+`B7`'s runs the unfiltered suite. What a halfway stop leaves, stated once: each landed task's own tests
+green, but the whole suite has not run.
 
 **Gates run locally.** Commit locally; ask before `git push`.
 
@@ -430,7 +435,7 @@ are known to pass.
 | 10 | C9 | `E0` | — | `be` | `foundations-api` | A request to any endpoint emits a trace, a log line carrying its trace id and the standard RED metrics, all visible in the local Grafana stack (`deploy/local/`) | `observability-engineer-dotnet` | ~95k | C2, C8 |
 | 11 | Q3 | `E1` | `US1`–`US3` | `qa` | `timetable-api` | Every Workshops and Sessions endpoint and AC has an acceptance test, each red on `501 not-implemented` | `qa-api-dotnet` | ~90k | C8, C3 |
 | 12 | B1 | `E1` | `US1`–`US3` | `be` | `timetable-api` | An admin can publish a workshop, add sessions and list them via the API; nobody else can; the `Q3` tests pass | `be-dotnet` | ~115k | Q3, C5, C3, C4 |
-| 13 | Q2 | `E1` | `US4`–`US5`, `US10` | `qa` | `journeys` | Journeys J1 and J2 have Playwright tests on the agreed test ids, each red on a placeholder | `qa-ui-typescript` | ~95k | C6, C8 |
+| 13 | Q2 | `E1` | `US4`–`US5`, `US10` | `qa` | `journeys` | Journeys J1 and J2 have Playwright tests on the agreed test ids, each loaded and listed; `F1` and `F2` turn them green | `qa-ui-typescript` | ~95k | C6, C8 |
 | 14 | F1 | `E1` | `US4`–`US5` | `fe` | `timetable-ui` | **A member browses the timetable and an admin publishes a workshop** — J1 complete, its `Q2` tests green | `fe-react` | ~140k | Q2, C6, B1 |
 | 15 | C7 | `E0` | — | `be` | `schema` | Migration head `003` applies; a booking past capacity is rejected by the database itself | `be-dotnet` | ~65k | C5 |
 | 16 | Q1 | `E2` | `US6`–`US9` | `qa` | `booking-api` | Every Bookings endpoint and AC has an acceptance test, each red on `501 not-implemented` | `qa-api-dotnet` | ~90k | C8, C3 |
@@ -442,7 +447,7 @@ are known to pass.
 | 22 | B5 | `E0` | — | `be` | `foundations-api` | The OpenAPI asset regenerated from the implemented surface differs from `C8`'s only in response bodies | `be-dotnet` | ~70k | B1, B2, B3 |
 | 23 | B6 | `E0` | — | `be` | `foundations-api` | A Grafana dashboard shows bookings placed by outcome and an alert fires on a sustained 5xx rate | `observability-engineer-dotnet` | ~95k | C9, B1, B2 |
 | 24 | DA1 | `E0` | — | `data` | `schema` | A written verdict on the capacity guard under concurrent booking, with any constraint change applied | `data-architect` | ~80k | C7 |
-| 25 | B7 | `E0` | — | `be` | `foundations-api` | The solution builds, the whole suite and the journeys pass, the format check is clean, and the repository-state note is written | `be-dotnet` | ~140k | all of the above |
+| 25 | B7 | `E0` | — | `be` | `foundations-api` | The solution builds, the whole suite and the journeys pass, the format check is clean, and the repository-state note is written | `be-dotnet` | ~135k | all of the above |
 | 26 | B4 | `E4` | `US14` | `be` | `email` | A confirmed booking produces a confirmation email, deliverable in dev against Mailpit | `be-dotnet` | ~90k | C4, B2, H2 |
 
 **`H1`, `C1`–`C9`, `Q1`–`Q3`, `B1` and `F1` have landed, and their prompts are deleted** — a prompt for a
@@ -507,10 +512,11 @@ Traps:
 - `blueprint.md` §3b's R3 is the one people miss: a cancellation inside the window on a session that
   has already started is `invalid-state`, not a late cancel.
 
-Gate: own tests — run only `dotnet test --filter "FullyQualifiedName~Booking" --collect:"XPlat Code
-Coverage"`, then read branch coverage over `src/Booking/*` (plan-format.md §5) and write the tests a
-shortfall needs. This plan gates once, in B7. Do not run the full suite, `pnpm`, lint or `dotnet format`;
-a failure outside the Booking tests is not yours — note it in `As built`.
+Gate: own tests — before you commit, run `dotnet build src/Booking`, then `dotnet test --filter
+"FullyQualifiedName~Booking" --collect:"XPlat Code Coverage"`, then read branch coverage over
+`src/Booking/*` (plan-format.md §5) and write the tests a shortfall needs. Leave them green, fixing what
+stands in the way whichever task caused it, and name that task in `As built`. Do not run the unfiltered
+suite, `pnpm` or `dotnet format`.
 
 Commit: `feat: booking cancel and attend (B2)`.
 
@@ -536,7 +542,7 @@ delivered and what is still unverified, then
 ---
 
 *(The remaining live blocks — `F2`, `Q4`, `B3`, `F3`, `B5`, `B6`, `DA1`, `B7` — are abbreviated in this
-example. `B7`'s block is the one that carries the gate, in run order, with the instruction to fix what
+example. `B7`'s block is the one that runs the whole set, in run order, with the instruction to fix what
 it finds and attribute each failure to the task that introduced it.)*
 
 ## For Mission Control
@@ -548,9 +554,9 @@ its `stream` and `order` alongside its `deliverable`, `agent`, `skills`, `files`
 and `budget` travel with each task as additive fields — MC ignores what it does not
 know, and losing them costs the whole epic and sizing story on a round trip. There is
 no grouping level: ordering is the `order` sequence, and every prerequisite is an
-explicit `dependsOn` edge. **This plan gates once, in `B7`** — every earlier task
-deliberately runs no build or test command, so a lane that reports green without one is
-behaving as planned. MC's planner re-reads the target repo, so it may split a task it
+explicit `dependsOn` edge. **Every task gates what it built:** its `Gate:` line names the
+commands it runs before it commits, and no earlier task runs the unfiltered suite, so a
+lane's green covers its own tests. `B7` runs the whole set. MC's planner re-reads the target repo, so it may split a task it
 finds too large; that is expected and does not invalidate the sequence — the new pieces
 belong in the split task's own lane, and each needs its own deliverable.
 

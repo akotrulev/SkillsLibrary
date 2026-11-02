@@ -175,8 +175,6 @@ Raise it from **one place per failure path** — the repository or ViewModel tha
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Fail the list load with search and filters filled → both stay interactive; only the rows carry the error; the banner sits below the status bar and cutout until its close control is pressed.
 - Fail a pull-to-refresh after a load → rows remain, stale marker with an age, one banner.
 - Airplane mode → offline or stale, never "failed", no retry attempts; emulator network at 100 % loss → the timeout body at the deadline.

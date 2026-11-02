@@ -134,7 +134,7 @@ Build a workflow tool only when the steps are genuinely atomic — they must all
 4. **Prove one failure path** — force a `validation_failed` and a `conflict`, and check the agent-facing message actually says what to do next.
 5. **Destructive tools:** prove the `confirm` gate refuses without it.
 
-Report what you ran and what it returned. "It should work" is not a verification. Inside a `Gate: none` plan task, run none of these checks and report the server as "written, not run".
+Report what you ran and what it returned. "It should work" is not a verification.
 
 ### Step 8 — Ship the registration snippet
 

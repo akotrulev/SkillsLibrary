@@ -33,7 +33,7 @@ If a listed file is missing, say so and proceed with the global rules only.
 - **Evidence tiers hold.** `#observed` carries `file:line` read this session; intent the code cannot show is `#inferred` or `#assumption` plus a question; never `#confirmed`.
 - **The agent never commits.** In a repo where the docs stay untracked, they stay untracked.
 - **Work in the checkout you are given** — no branch, no worktree.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task runs nothing. A `Gate: own tests` task runs exactly the command its block names and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** `Gate: own tests` runs exactly the commands its block names (its own tests and the acceptance tests it writes or must turn green) and leaves them green; no unfiltered suite. The last runnable task runs the whole set, whatever an exit criterion below says.
 
 ## Steps
 

@@ -182,8 +182,6 @@ The region sits **under** the screen header, search and filters, which render re
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Typecheck and lint with the project's scripts (`eslint-config-expo/flat`) clean.
 - On a simulator and an emulator: scroll the list fast — no blank cells; rotate; turn text size to maximum — nothing clips.
 - Throttle the network and force an error: header and filters stay, the rows body swaps to the failed slot.

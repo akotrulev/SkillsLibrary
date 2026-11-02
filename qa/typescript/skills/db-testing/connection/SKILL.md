@@ -281,7 +281,7 @@ Order the deletes by FK dependency.
 4. Add the `waitFor` polling helper if the SUT involves async projections.
 5. Pick a cleanup strategy (`TRUNCATE … CASCADE` default); wire `beforeEach`.
 6. Run the project's own test script with the package manager `packageManager` names — every test passes; no leaks between specs.
-7. Run `tsc --noEmit` — strict TS green. Inside a plan task marked `Gate: none`, run none of steps 6–7 and report the files as "written, not run".
+7. Run `tsc --noEmit` — strict TS green.
 
 ## Handoffs
 

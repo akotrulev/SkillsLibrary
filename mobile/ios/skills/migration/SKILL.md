@@ -39,7 +39,7 @@ Owns changing the **language mode, framework, dependency manager, SDK or deploym
 
 ## The gate — before any lane moves
 
-1. **Clean tree, green baseline.** Record `xcodebuild … build`, `xcodebuild … test`, `xcrun swift-format lint` and `swiftlint` results *before* touching anything, or no later failure is attributable. Outside a `Gate: none` plan task, run them; inside one, say they were not run.
+1. **Clean tree, green baseline.** Record `xcodebuild … build`, `xcodebuild … test`, `xcrun swift-format lint` and `swiftlint` results *before* touching anything, or no later failure is attributable. Run them.
 2. **One module, one change.** Commit the move per module (or screen, or pod) so a failure bisects to one unit. Work in the checkout you are given — never create a branch or worktree.
 3. **Inventory the blast radius first** — count the warnings the strict mode reports, the `ObservableObject` types, the pods, the Objective-C files. That number is the real size of the job; a number you cannot bound is a reason to ask.
 4. **Read the source of the move**, not memory: swift.org/migration for language modes, Apple's Technical Notes (TN3187) for the scene lifecycle, the Xcode 27 release notes for the SDK. Names of build settings and flags move between toolchains — read the installed toolchain's `-help` and the build settings reference.

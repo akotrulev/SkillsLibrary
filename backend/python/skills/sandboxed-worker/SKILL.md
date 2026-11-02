@@ -218,8 +218,6 @@ plus a default-deny egress `NetworkPolicy` for the pod and an `emptyDir` with `m
 
 ## Validation
 
-Inside a plan task marked `Gate: none`, run none of these and report the image as "written, not run".
-
 - `docker build` succeeds with `--build-arg U2NET_SHA256=<pinned>`; changing one hex digit fails the build
 - `docker run --rm --network none <image> python -c "from rembg import new_session; new_session('u2net')"` succeeds (weights present, no download)
 - Egress check raises inside the running container

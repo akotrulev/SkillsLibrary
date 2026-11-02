@@ -166,8 +166,6 @@ Detail, entitlement list and per-surface checklists: [`references/background-and
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - The widget gallery shows the widget with the placeholder; a data change in the app reloads it; with the app killed the last snapshot still renders and says how old it is.
 - An intent run from Shortcuts with a hostile parameter fails with a message, not a crash; a destructive intent asks for confirmation and unlock.
 - A Live Activity starts on the action, updates, ends when the event does, and a device with Live Activities off still shows the status in-app.

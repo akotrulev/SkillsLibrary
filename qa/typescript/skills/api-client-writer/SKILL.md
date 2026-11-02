@@ -317,4 +317,4 @@ Only add these overloads when the test plan requires them — not by default.
 4. Ensure the required Zod schemas and inferred types exist under `src/models/{api}/{resource}/`. If not, run `qa/typescript/skills/api-models` first.
 5. Generate the file at `src/clients/{api}/{resource}Client.ts`.
 6. Run the project's own typecheck script with the package manager `packageManager` names — expect 0 errors.
-7. Run the project's own lint script on `src/clients/{api}/{resource}Client.ts` — expect 0 errors. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+7. Run the project's own lint script on `src/clients/{api}/{resource}Client.ts` — expect 0 errors.

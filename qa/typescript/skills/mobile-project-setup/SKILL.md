@@ -196,4 +196,4 @@ The exit gate for the project: it typechecks, `appium driver doctor` is clean fo
 - [ ] `wdio.conf.ts` reads `PLATFORM`, `DEVICE_NAME`, `APP_PATH` (and `PLATFORM_VERSION` on iOS) from the environment — nothing hard-coded
 - [ ] `.env.example` committed, `.env` ignored; `.gitignore` takes `test-results/`, `allure-results/` and `evidence/`
 - [ ] `smoke.spec.ts` launches the app and verifies the landing screen
-- [ ] `npm run typecheck` clean; the smoke green on a booted device. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+- [ ] `npm run typecheck` clean; the smoke green on a booted device.

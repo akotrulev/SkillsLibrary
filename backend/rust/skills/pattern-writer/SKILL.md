@@ -466,7 +466,7 @@ crates/billing/            # lib
 
 ## Validation
 
-Unless inside a plan task marked `Gate: none` (which runs nothing and reports "written, not run"):
+Run:
 
 - `cargo fmt --check`
 - `cargo clippy --all-targets --all-features --locked` with warnings as errors. Use `CARGO_BUILD_WARNINGS=deny` on 1.97+: it does not invalidate the build cache the way `-D warnings` in `RUSTFLAGS` does. On older toolchains, use `-- -D warnings`.

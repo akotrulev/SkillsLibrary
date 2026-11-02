@@ -119,8 +119,6 @@ German and Finnish run 30–40 % longer; CJK is shorter and taller. No fixed wid
 
 ## Validation (exit gate)
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - [ ] No user-visible string literal in Kotlin or layout files; every ViewModel string is a resource id or typed state
 - [ ] Plurals use `<plurals>` with the count passed twice; no `count == 1` branch
 - [ ] Per-app language list shows the shipped locales; picking one recreates the screen in that language

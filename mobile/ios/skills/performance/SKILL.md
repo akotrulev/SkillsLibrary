@@ -151,8 +151,6 @@ final class LegacyMetricsSubscriber: NSObject, MXMetricManagerSubscriber {
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Hangs instrument on the changed flow shows no event ≥ 250 ms; Animation Hitches shows no new hitches.
 - Ten navigate-and-back cycles leave no extra instances in the Memory Graph.
 - A before-and-after launch figure from the App Launch template.

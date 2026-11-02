@@ -68,7 +68,7 @@ Confirm at most 2–3.
 3. Web: add `defineBddConfig(...)` to `playwright.config.ts` and a `bddgen` script. Mobile: add `wdio.conf.ts` with the appium service + the cucumber framework + the World/hooks files.
 4. Create the state/lifecycle layer — web: a `test` fixture extending page objects (no World); mobile: a `CustomWorld` + `Before`/`After` hooks that own the driver **with teardown**.
 5. Create the empty `features/` folder and one throwaway smoke `.feature` to prove the rig parses and runs.
-6. Run the toolchain (web: `npx bddgen && npx playwright test`; mobile: `npx wdio run`), confirm the smoke scenario is green. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+6. Run the toolchain (web: `npx bddgen && npx playwright test`; mobile: `npx wdio run`), confirm the smoke scenario is green.
 7. Report files created and hand off to `feature-file-writer` (features) + `gherkin-step-code` (steps).
 
 ## Templates — Web (playwright-bdd)

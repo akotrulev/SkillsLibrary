@@ -159,8 +159,6 @@ The AASA `components` shape, path exclusions, caching and testing are in [`refer
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - A device build with the right `aps-environment`: the pre-prompt appears first, then the system prompt once; denying keeps the in-app list and shows the Settings row.
 - Tap from killed, background and foreground: each lands on the right screen once.
 - A payload with an unknown `screen` or a non-UUID id lands on home with nothing opened; a hostile link (`https://evil.example/orders/x`, `//` paths) is ignored.

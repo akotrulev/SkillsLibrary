@@ -312,7 +312,7 @@ Configure the remote-write endpoint via `K6_PROMETHEUS_RW_SERVER_URL`. The metri
 5. Add `setup()` / `teardown()` for seeded fixtures, namespacing ids per run.
 6. If authoring in TS, configure esbuild to mark `k6` / `k6/*` as external; run the project's own perf build script with the package manager `packageManager` names.
 7. Add CI step (smoke on PR; full on release). Pin `grafana/k6:<version>`.
-8. Run locally; review per-route thresholds; confirm the test fails when an SLO is breached. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+8. Run locally; review per-route thresholds; confirm the test fails when an SLO is breached.
 9. Add the report to the release / change notes (see `_shared` template).
 
 ## Handoffs

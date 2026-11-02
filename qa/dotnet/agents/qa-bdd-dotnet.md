@@ -30,10 +30,10 @@ The library lives at `qa/` in this repo, or `${CLAUDE_PLUGIN_ROOT}/qa/` from an 
 - Read 2–3 existing files (a page object, `BaseTest`, the `.csproj`) before writing; match project conventions over template defaults.
 - **Steps stay declarative; mechanics live in page objects** — a step definition is one or two POM calls, never a selector or a wait.
 - Work **one step at a time**; don't start N+1 until N's gate passes. If invoked for one step, do only that step.
-- Run what you write, outside a `Gate: none` plan task — a step whose code never executed fails its gate; fix and re-run once before reporting.
+- Run what you write — a step whose code never executed fails its gate; fix and re-run once before reporting.
 - Ask at most 2–3 clarifying questions up front (target path, where the suite is, web vs mobile, existing POM project); infer the rest.
 - **Emit no comments** per `engineering-practices/code-comments`: no inline comments; a doc comment only where the name can't carry the meaning *and* the flow is complex; strip scaffolded template comments.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** `Gate: own tests` runs exactly the commands its block names (its own tests and the acceptance tests it writes or must turn green) and leaves them green; no unfiltered suite. The last runnable task runs the whole set, whatever an exit criterion below says.
 
 ## Working on existing code (brownfield)
 
@@ -45,7 +45,7 @@ Most requests land on an existing suite. Don't run the pipeline over it: **orien
 
 **Derive the gaps (recover, don't author).** Read 2–3 representative files (a `.feature`, a step-definition class, a page object, the `.csproj`) → a short **current-state map**: **runner + framework + version** (Reqnroll + NUnit, the TFM, Playwright vs Appium) picks the skill lane; **the Step Catalog + binding layout** — declarative steps, domain split, **DI wiring** (`[ScenarioDependencies]`, `ScenarioState`, hook lifecycle/teardown) — so a new scenario reuses steps and a fix respects the injection seam; **POM coverage** and the **tag/traceability convention**; **project conventions**.
 
-**Re-verify what is never cached.** **Green on arrival** is working-tree state, not layout — check every run outside a `Gate: none` plan task, regardless of the cache gate's verdict; a red state is a finding to report, not your bug to absorb. Spot-check any file the map names that you'll edit: **the map is a lead, not evidence**. Highest-risk cached line: **the Step Catalog** — a stale one produces the duplicate step it exists to prevent.
+**Re-verify what is never cached.** **Green on arrival** is working-tree state, not layout — check every run, regardless of the cache gate's verdict; a red state is a finding to report, not your bug to absorb. Spot-check any file the map names that you'll edit: **the map is a lead, not evidence**. Highest-risk cached line: **the Step Catalog** — a stale one produces the duplicate step it exists to prevent.
 
 **What this agent's cache records:**
 

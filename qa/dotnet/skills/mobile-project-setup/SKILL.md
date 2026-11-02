@@ -154,4 +154,4 @@ Flat solution + shared `TestCore` + CPM make this purely additive. To add a sibl
 - [ ] `AppiumDriverFactory` reads `PLATFORM`, `DEVICE_NAME`, `APP_PATH` from the environment — no hard-coded options
 - [ ] No `Thread.Sleep`; waits in `BaseAppiumPage.Wait`
 - [ ] Per-project `allureConfig.json`, `mobile.runsettings`, `.env.example`, `README`; secrets out of config
-- [ ] `dotnet build` clean; `dotnet test` green against a booted device. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+- [ ] `dotnet build` clean; `dotnet test` green against a booted device.

@@ -182,8 +182,6 @@ Pull is TanStack Query above; push is a socket the app opens **only while foregr
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Typecheck and lint with the project's scripts clean.
 - On a device with the network throttled: a request past its budget rejects at the deadline with `TimeoutError`; leaving the screen aborts silently.
 - Airplane mode: no retry attempts appear in the network log; reconnect refetches stale queries.

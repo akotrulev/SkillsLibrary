@@ -133,7 +133,7 @@ A composite command is justified only when the steps are atomic — all succeed 
 4. **Prove the exit codes** — force a validation failure and a conflict, and assert the code, not the message.
 5. **Destructive commands:** prove the prompt refuses without `--yes`, and that `--dry-run` changes nothing.
 
-Report what you ran and what it printed. Inside a `Gate: none` plan task, write the smoke script but run none of these checks, and report the CLI as "written, not run".
+Report what you ran and what it printed.
 
 ### Step 9 — Ship it installable
 

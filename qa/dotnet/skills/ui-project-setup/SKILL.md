@@ -194,4 +194,4 @@ Flat solution + shared `TestCore` + CPM make this purely additive. To add a sibl
 - [ ] `BaseTest` sets `BaseURL` from `BASE_URL` and keeps trace, screenshot and video on failure; `AuthSetup` in the root namespace
 - [ ] Browsers installed (`playwright.ps1 install`) — or the run uses `mcr.microsoft.com/playwright/dotnet:v1.63.0-noble`
 - [ ] No secrets in the repo
-- [ ] `dotnet build` clean; `dotnet test` green. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+- [ ] `dotnet build` clean; `dotnet test` green.

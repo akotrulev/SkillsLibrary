@@ -341,7 +341,7 @@ For every pattern:
 
 ## Validation
 
-After scaffolding, run the project's own scripts (from `package.json`, with its `packageManager`) — unless you are inside a plan task marked `Gate: none`, which runs none of them and reports "written, not run":
+After scaffolding, run the project's own scripts (from `package.json`, with its `packageManager`):
 
 - typecheck (`tsc --noEmit`) — 0 errors
 - lint — 0 warnings

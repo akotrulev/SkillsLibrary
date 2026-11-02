@@ -99,7 +99,8 @@ that vanishes reads as a task that was forgotten. Where nothing better fits, `T`
 **Depends on:** B1.
 **Budget:** ~140k — CLAUDE.md 25k, this plan 12k, `tools/assistant` as the package pattern ~12k,
 the chat route's request shape and stream ~10k, writes ~40k, test output ~15k.
-**Gate: none** — this plan gates once, in B3. Do not run the build, the test suite, lint or typecheck.
+**Gate: own tests** — `pnpm --filter model-bench build`, `pnpm --filter model-bench test --coverage`,
+`pnpm bench:agent --dry-run`. Do not run the unfiltered suite.
 
 - New workspace package `tools/model-bench`, same shape as `tools/assistant` — its own `args.ts`, an
   injectable `fetch`, and a `main.ts` that is the only file that touches the process.
@@ -119,7 +120,7 @@ the chat route's request shape and stream ~10k, writes ~40k, test output ~15k.
 | `**Deliverable:**` | **One** observable thing that exists when the task is done, stated as a fact about the world rather than as an activity, and checkable by someone who did not do the work. It is what `Done` means. Two deliverables is two tasks; no statable deliverable is a fragment of one |
 | `**Depends on:**` | The ids this task needs that are not immediately above it, each with what it provides — or `—`. Backwards only. **It also names every earlier task whose `Files` overlap this task's or that builds the same tree** — one .NET solution, one Gradle build or one pnpm package graph shares build output — with the overlap as the reason: once the prompts carry `Depends on:` lines (§6), position orders nothing, and a task that leaves an overlapping predecessor out runs beside it in the same working tree |
 | `**Budget:**` | `~<n>k` plus the **itemized drivers** — what the session actually loads: `CLAUDE.md`, the plan sections it reads, the files it must read as patterns, the files it writes, and the output it reads back. A bare `~140k` is unfalsifiable |
-| `**Gate:**` | One of three forms — see §5. `**Gate: none**` naming the commands it must not run; `**Gate: own tests**` naming the one filtered command it runs (a `Q` task and the implementation tasks of a test-first plan); the whole gate, in run order, on the last task |
+| `**Gate:**` | One of three forms — see §5. `**Gate: own tests**` naming the commands it runs, on every task that writes code or tests; `**Gate: none**` only on a task with nothing runnable, saying so; the whole set, in run order, on the last task |
 | The bullets | **The work, in the order it is done**, with exact paths, exact names, exact commands, and the real values the code will use. This is the task's body; it replaces a step list |
 | `**Not in B2:**` | What belongs to another task or another agent, named. Mostly it keeps the executing agent out of a peer's lane. Where a stack-cut task cannot be demonstrated end to end on its own — a backend task whose screen arrives two tasks later — say so **here** rather than pretending the capability landed, and have the contract-first side return an explicit **not-implemented** response, never a fake success or an empty list |
 | `**As built:**` | **Written by the task when it lands**, dated: what actually happened where it differed from the plan, the ids and names it assigned, and what is built but unverified. It is the plan's durable record, and it is what makes a re-read of the plan worth more than a re-read of the diff. Never edited backwards |
@@ -156,42 +157,45 @@ Act, since a setup call that reaches a stub is also the right reason — or, for
 screen's placeholder**. A test that passes against a stub asserts nothing. A test that is red on a
 `404`, a compile error or a wrong URL has a wiring defect, which the `Q` task fixes before it stops.
 
-## 5. The plan gates once, at the end
+## 5. Every task gates what it built
 
-**Every task but the last writes its code and its tests, commits, and stops.** No build, no test run,
-no lint, no format check, no typecheck, no eval, no integration suite, no e2e. Its `**Gate:**` line
-says so and names what not to run. The one exception is a test-first plan's `Gate: own tests` task,
-below, which runs exactly its own filtered tests.
+**Every task gates what it built.** Before it commits, a task builds what it touched and runs the tests
+for it: the tests it wrote, the acceptance tests it writes or must turn green (on a production build
+where they need one), and the coverage measure over the files it wrote. It leaves them green, fixing what
+stands in the way whichever task caused it. Its `**Gate:**` line names those exact commands. It does not
+run the project's whole suite, lint or typecheck beyond what those commands include.
 
-**The last task runs the whole set, for every task in the plan together, and fixes what it finds rather
-than handing it back** — a failure there may belong to any task above it. The last task also carries the
-documentation and close-out work: it is the only session that knows what actually landed and what is
-built but unverified, and a session that only writes markdown is the wasted agent switch this rule
-exists to remove.
+**The last runnable task runs the whole set once more across the plan**, ending with the coverage floor
+when the plan writes code, retries only what failed where the project has a way to, **fixes what it finds
+rather than handing it back**, and carries the docs and close-out: it is the only session that knows what
+actually landed and what is built but unverified, and a session that only writes markdown is the wasted
+agent switch this rule exists to remove. It holds no feature work when the plan has any.
 
 **The `Gate:` line takes one of three forms:**
 
 | Form | On | Runs |
 |---|---|---|
-| `**Gate: none** — this plan gates once, in <id>. Do not run …` | contract tasks, docs tasks, journey tasks whose app cannot start in one command | nothing |
-| ``**Gate: own tests** — run only `<command>`; this plan gates once, in <id>. Do not run the full suite, another tree's build, lint or typecheck.`` | `Q` tasks and the implementation tasks of a test-first plan | exactly the command |
+| ``**Gate: own tests** — `<command>`, `<command>`. Do not run the unfiltered suite.`` | every task that writes code or tests, the default | exactly its commands: a scoped build, filtered unit tests, filtered acceptance tests, the coverage measure |
+| `**Gate: none** — <why nothing here is runnable>.` | only a task with nothing runnable, such as a docs-only task | nothing, and it says so |
 | `**Gate (this is the last runnable task …):**` | the last runnable task | the whole set in run order, ending with the coverage floor |
 
-- **The planner writes the command, filtered by file or class**, never the unfiltered suite:
-  `dotnet test tests/Orders.AcceptanceTests --filter "FullyQualifiedName~Orders"`,
-  `./gradlew test --tests '*OrdersApiTest'`, `npx vitest run src/orders`,
-  `npx playwright test e2e/booking.spec.ts`.
-- **A `Q` task's command runs the tests it writes and expects red. An implementation task's command
-  runs its unit tests and the acceptance tests it must turn green, then the coverage-floor measure
-  over the files it wrote** (the table below, scoped to those files), so a shortfall is closed in the
-  session that wrote the code.
+- **The planner writes the commands, filtered by file or class**, never the unfiltered suite:
+  `dotnet build src/Orders`, `dotnet test tests/Orders.AcceptanceTests --filter "FullyQualifiedName~Orders"`,
+  `./gradlew :orders:assemble test --tests '*OrdersApiTest'`, `npx vitest run src/orders`,
+  `npx playwright test e2e/booking.spec.ts`. A few commands on one line are normal; the unfiltered whole
+  suite never is.
+- **A `Q` task's commands run the tests it writes and expect red for the recorded reason. An implementation
+  task's commands build what it touched, run its unit tests and the acceptance tests it must turn green,
+  then the coverage-floor measure over the files it wrote** (the table below, scoped to those files), so a
+  shortfall is closed in the session that wrote the code.
 - **When the acceptance tests need a running service**, the command starts it the project's own way
-  (a Testcontainers fixture, the compose file, Playwright's `webServer`), and the block says so. A
-  journey suite that cannot start its app in one command is `Gate: none`, and its red check moves to
-  the gate.
-- **A failure outside the task's own tests is not its to fix**; it is noted in `As built`.
-- **Every test-first plan restates the cost:** the tree is still not known to build at a task
-  boundary; only each task's own tests are known to pass.
+  (a Testcontainers fixture, the compose file, Playwright's `webServer`), and the block says so. A `Q` task
+  whose app cannot start in one command proves its tests load and list (Playwright's `--list`, or the
+  runner's equivalent), and the task that serves each journey turns it green.
+- **A failure that stands in a task's way is its to fix**, whichever task caused it, and `As built` names
+  that task. A red build at a task boundary is a finding about the task that left it.
+- **A test the task believes wrong is the one thing that stays red** (§4): it is a dated `D<n>`, and the
+  last runnable task resolves it with the user.
 
 **The gate ends with the coverage floor** whenever the plan wrote code: unit tests cover **at least
 80% of the branches in the code the plan wrote** — every file it created, whole, and the methods it
@@ -252,10 +256,8 @@ With no container runtime on the machine, or a service the gate cannot start, th
 the plan — a run the user starts, a credential, a decision — the gate belongs to the last task that can
 actually run, and the blocked tasks sit below it carrying their own gate for whenever they run.
 
-**The cost, accepted and stated once in the plan rather than discovered:** intermediate commits are
-ungated, so the tree is **not** known to build at every task boundary, and a plan cannot be stopped
-halfway and trusted. Say it in the plan. It buys one verify-and-fix loop per plan instead of one per
-task, which is the single largest line in a task's budget.
+**What a halfway stop leaves, stated once in the plan:** each landed task's own tests green, but the
+whole suite has not run.
 
 ## 6. `## Prompts — one per task`
 
@@ -278,10 +280,10 @@ starts it"). Then the task table:
 ```
 
 **Which tasks run in parallel is written down, not inferred.** The preamble says it in one line — *"After
-B1, B2 runs beside Q1; B3 waits for both and is the gate."* — and the table's `Runs beside` column names,
+B1, B2 runs beside Q1; B3 waits for both and runs the whole set."* — and the table's `Runs beside` column names,
 per task, the tasks it can run in parallel with (`—` for none). Tasks that run together share one working
 tree, so a pair may run beside each other only when their `Files` are disjoint and they build different
-trees. **The gate task waits for every task that nothing else waits for**, so it starts last.
+trees. **The last runnable task waits for every task that nothing else waits for**, so it starts last.
 
 The table is the plan's index — it is how a reader sees the order, the routing and the cost without
 opening a block — and it includes rows for the steps **the user** performs, because a plan that hides
@@ -314,7 +316,7 @@ Traps:
 - `$/quote` must come from token counts × the registry. The CLI's own cost is only a cross-check.
 - The R-rules propose; nothing drops a configuration automatically.
 
-Gate (this is the last task, so it carries the plan's only gate, in run order):
+Gate (this is the last task, so it runs the whole set once more across the plan, in run order):
   pnpm install && pnpm build && pnpm test --continue && pnpm typecheck && pnpm lint
   pnpm bench:agent --dry-run --runs 1 --screenshots
 Fix what it finds — a failure may belong to B1 or B2, not only to you.
@@ -425,7 +427,7 @@ block, no `Blocked on <id>` placeholder, and no blocked task holding one. So:
 
 - **A blocked task keeps the plan in `docs/plans/`.** Its block stays, naming its blocker and its
   owner; a plan whose only remaining work is waiting on a person is still in flight, and moving it
-  would hide the wait. The filing duty then belongs to *that* block, not to the gate task's — say so
+  would hide the wait. The filing duty then belongs to *that* block, not to the last runnable task's — say so
   in both.
 - **A task marked unnecessary does not.** It keeps its id and its "why", per §3, but it has no prompt
   block, so it holds nothing up.
@@ -444,11 +446,12 @@ These are plan failures, not style:
 - A `**Deliverable:**` naming an activity instead of a result
 - A task with no `**Agent:**` line, or one naming two agents; a task naming two stacks
 - A `**Budget:**` with no drivers behind it
-- A task with no `**Gate:**` line, or an intermediate task that runs more than its own tests — the
-  build, the whole suite, lint or typecheck (a filtered `Gate: own tests` run is not a defect)
+- A task with no `**Gate:**` line, a code task whose gate runs nothing, or an intermediate task that runs
+  the unfiltered whole suite
+- A plan with no last task running the whole set
 - An implementation task that edits, skips or deletes an acceptance test
-- A `Gate: own tests` line with no command, or with an unfiltered one
-- A `Q` task that was allowed to run its tests and did not see them red on the stub
+- A `Gate: own tests` line with no commands, or with an unfiltered one
+- A `Q` task that ran its tests and did not see them red on the stub, or whose gate proves nothing loads
 - A plan that writes code whose gate does not end with the coverage floor (§5)
 - A prompt block that says "see the task", or one missing its reading list, its traps or its gate, or
   its close-out line; a plan with no `## Close-out — every task` section

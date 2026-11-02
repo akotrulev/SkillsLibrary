@@ -155,8 +155,6 @@ fun rememberAnimationsEnabled(): Boolean {
 
 ## Validation (exit gate)
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - [ ] No animated value is read in composition for a transform or opacity (`graphicsLayer` / lambda modifiers)
 - [ ] With `animator_duration_scale` 0 every main journey works and nothing loops
 - [ ] Each gesture has a non-gesture alternative reachable by TalkBack

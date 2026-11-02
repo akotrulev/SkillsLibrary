@@ -173,8 +173,6 @@ The file's shape, per-variant fingerprints and the `adb` verification commands a
 
 ## Validation (exit gate)
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - [ ] Pre-prompt appears first, then the system dialog once; denying keeps the in-app list and shows the Settings row
 - [ ] Tap from killed, background and foreground each opens the right screen once
 - [ ] A payload with an unknown `screen` or a malformed id opens the start destination and nothing else

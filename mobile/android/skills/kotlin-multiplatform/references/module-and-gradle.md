@@ -115,4 +115,4 @@ dependencies {
 ## Verify
 
 - `rg -n "com.android.library|com.android.application|kotlin.android|androidLibrary" shared -g '*.kts'` finds none in the shared module.
-- The module builds for the host test and `linkDebugFrameworkIosSimulatorArm64` — outside a `Gate: none` task.
+- The module builds for the host test and `linkDebugFrameworkIosSimulatorArm64`.

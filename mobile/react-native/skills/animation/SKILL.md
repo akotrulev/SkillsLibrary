@@ -177,8 +177,6 @@ export function Draggable({ children }: { children: React.ReactNode }) {
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Reduce Motion on (iOS) / Remove animations on (Android): entrances, parallax and loops are gone; a drag still follows the finger.
 - A release build on a mid-range Android device: press feedback and a drag hold 60 fps with no JS-thread work per frame (React Native DevTools / Perf Monitor).
 - `rg "\.value\b"` over components under the compiler → none; `rg "onStart|onEnd"` on an SDK 58 project → none in gesture config (Q3, Q4).

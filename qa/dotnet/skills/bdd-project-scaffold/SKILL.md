@@ -64,7 +64,7 @@ Confirm at most 2–3.
    (`references/hooks.md`) — the browser per scenario, failure evidence, teardown.
 5. Create the empty `Features/` folder and one throwaway smoke `.feature` to prove the rig parses and runs.
 6. `dotnet build` (the source generator must produce code-behind) and run the smoke scenario with `BASE_URL`
-   set. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+   set.
 7. Report files created and hand off to `feature-file-writer` (features) + `gherkin-step-code` (steps).
 
 ## Templates

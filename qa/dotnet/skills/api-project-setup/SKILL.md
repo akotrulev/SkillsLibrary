@@ -199,4 +199,4 @@ The same recipe folds in `AppiumTests` (Appium) and a `PerfTests` console projec
 - [ ] `TestCore` exists as a shared library; `ApiTests` references it
 - [ ] Per-project `appsettings.json`/`appsettings.test.json`/`allureConfig.json`/`Dockerfile`/`README.md` present
 - [ ] No secrets in `appsettings*.json`; secrets via env vars
-- [ ] `dotnet build` → 0 errors / 0 warnings; `dotnet test` discovers the placeholder. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+- [ ] `dotnet build` → 0 errors / 0 warnings; `dotnet test` discovers the placeholder.

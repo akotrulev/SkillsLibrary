@@ -188,7 +188,7 @@ QA's `mobile-screen-explorer` writes, per screen:
 2. For each target file, derive the screen root; walk the JSX; apply rules 1–7; skip decoratives and list them.
 3. For a component library control, confirm the id lands on the interactive element (page source, or the library's docs) — otherwise tag the wrapping touch target.
 4. Report per file: ids added, decoratives skipped, collisions, and any `accessible` grouping that hides children (rule 8).
-5. Outside a `Gate: none` plan task, typecheck with the project's script; with a dev build, read the page source of one screen on each platform.
+5. Typecheck with the project's script; with a dev build, read the page source of one screen on each platform.
 
 ## Anti-patterns
 

@@ -160,8 +160,6 @@ fun coldStartup() = benchmarkRule.measureRepeated(
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - `./gradlew :macrobenchmark:connectedCheck` on a physical device: cold start and `FrameTimingMetric` before and after; the profile variant is faster than `CompilationMode.None()`.
 - Debug run with StrictMode penalties on: no disk, network or leaked-closable violation on the launch path.
 - The minified release (or `benchmark`) build: launch, sign in, one list, one write — no `ClassNotFoundException`, no missing-serializer crash.

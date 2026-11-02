@@ -153,11 +153,9 @@ A file with `'use dom'` at the top renders **web** React inside a WebView on nat
 3. Config-only change → declarative field, else a typed plugin with a Jest fixture test.
 4. A local module → scaffold, load the two `basics`, write TS wrapper + Swift + Kotlin, typed errors, lifecycle.
 5. Native UI → Expo UI primitive inside `Host`; a missing control → module with a native view.
-6. Prebuild once (outside a `Gate: none` task), read the generated manifest and plist, then build a development client.
+6. Prebuild once, read the generated manifest and plist, then build a development client.
 
 ## Validation
-
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
 
 - `npx expo prebuild --clean` reproduces every native setting from plugins alone; `git status` on `ios/` / `android/` is empty in CNG.
 - `npx expo-doctor` clean; development build launches; the module is callable on iOS **and** Android.

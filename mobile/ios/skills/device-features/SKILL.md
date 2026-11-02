@@ -194,8 +194,6 @@ enum BiometricError: Error { case unavailable }
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Build with warnings as errors; the project's formatter and linter pass.
 - On a device after "Reset Location & Privacy" (Settings → General → Transfer or Reset): each feature shows the pre-prompt, then the system prompt once; denying shows the denied screen with a working Settings button; flipping the permission in Settings and returning updates the screen.
 - A camera screen popped mid-capture leaves the camera indicator off; location updates stop with the screen.

@@ -216,8 +216,6 @@ The repository, not the screen, catches `SQLiteFullException` / `IOException`, k
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - Build clean; detekt, ktlint and Android Lint pass; the schema JSON for the current version exists.
 - Migration tests walk every version to current with `MigrationTestHelper` (Room 2 lane) or the Room 3 equivalent against the committed schemas.
 - Airplane mode: the screen shows cached rows marked stale; a queued write drains after reconnect exactly once; the process killed mid-write leaves a consistent database.

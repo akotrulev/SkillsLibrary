@@ -144,4 +144,4 @@ Flat solution + shared `TestCore` + CPM make this purely additive. The most comm
 - [ ] Target environment confirmed safe to load-test; auth token/creds sourced from config
 - [ ] Every scenario has an explicit, SLA-derived threshold
 - [ ] Load profile (VUs, ramp, duration, URL) read from per-project `appsettings.<env>.json`
-- [ ] `dotnet build` clean; `dotnet run` produces an HTML report under `reports/`. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+- [ ] `dotnet build` clean; `dotnet run` produces an HTML report under `reports/`.

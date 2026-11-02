@@ -23,7 +23,7 @@ they disagree, the `As built` notes are right.
 | **Sections, never whole artifacts** | `api-surface.md` §5.3, not `api-surface.md`. This is the single biggest lever on the budget holding — a session told to read the pack reads the pack |
 | **Exact agent name, exact skill names** | The block is a binding, not a suggestion. An invented name is the most damaging defect here, same as in the plan |
 | **Every block carries its traps** | The two to four things specific to that task. This is what the prompt adds to the task block, and it is what earns it its place |
-| **Every block carries a gate line** | `Gate: none` with what not to run, on every block but the last runnable task's — or, in a test-first plan, `Gate: own tests` with the one filtered command on a `Q` block (expecting red) and an implementation block (expecting green). The last block carries the whole gate, in run order, and the instruction to fix what it finds |
+| **Every block carries a gate line** | `Gate: own tests` with its filtered commands on every block that writes code or tests: a `Q` block expects red, any other expects green. `Gate: none` only on a block with nothing runnable, saying so. The last block carries the whole set, in run order, and the instruction to fix what it finds |
 | **An implementation block in a test-first plan repeats the read-only rule** | The acceptance tests are the spec; a block that omits the rule invites the session to pass a test by editing it |
 | **Every block ends with the close-out line** | `Close out per the plan's "Close-out — every task" before you stop.` — pointing at the section directly above this one, copied verbatim from plan format §7. Without it the section rots after the first session |
 | **A blocked task keeps its block** | It states its blocker and its owner. A deleted block reads as finished work — and it would file a plan that is still waiting |
@@ -41,11 +41,11 @@ they disagree, the `As built` notes are right.
 ## Prompts — one per task
 
 Run them in order, one session each. Every block is complete on its own — it names the agent, the
-skills, and the exact sections to read. **This plan gates once, in `<the last runnable task>`:** every
-block before it says `Gate: none` and names what not to run. <Anything no prompt may do — "none of
-them may start a real run; the user starts it.">
+skills, and the exact sections to read. **Every task gates what it built:** each block's `Gate:` line
+names its commands, and `<the last runnable task>` runs the whole set once more. <Anything no prompt may
+do — "none of them may start a real run; the user starts it.">
 
-**What runs together:** <one line — "After C1, B1 → B2 run beside Q1; F1 waits for both; F2 is the gate." Tasks that run together share one working tree: each commits only its own files, by path, and re-reads the plan before its close-out edits.>
+**What runs together:** <one line — "After C1, B1 → B2 run beside Q1; F1 waits for both; F2 runs the whole set." Tasks that run together share one working tree: each commits only its own files, by path, and re-reads the plan before its close-out edits.>
 
 **Gates run <where>.** <Where to commit, and whether to ask before pushing.>
 
@@ -90,14 +90,13 @@ Traps:
 - <the file that looks like the pattern but is not>
 - <the down-level API that does not exist in this project's version lane>
 
-Gate: none — this plan gates once, in `<the last runnable task>`. Do not run <the build, test, lint
-and typecheck commands>. Write the tests; leave running them to that task.
-<In a test-first plan, an implementation block instead names, under Deliverable, the `Q` tests it turns
-green and carries the read-only paragraph below, verbatim; its gate line becomes:>
-Gate: own tests — run only `<the filtered command>`, then read branch coverage over the files you wrote
-(plan-format.md §5) and write the tests a shortfall needs. This plan gates once, in `<the last runnable
-task>`. Do not run the full suite, another tree's build, lint or typecheck; a failure outside your own
-tests is not yours — note it in `As built`.
+Gate: own tests — before you commit, run `<the scoped build>` and `<the filtered tests>`, then read branch
+coverage over the files you wrote (plan-format.md §5) and write the tests a shortfall needs. Leave them
+green, fixing what stands in the way whichever task caused it, and name that task in `As built`. Do not
+run the unfiltered suite, or lint or typecheck beyond these commands.
+<In a test-first plan, an implementation block also names, under Deliverable, the `Q` tests it turns
+green, adds their filter to its commands, and carries the read-only paragraph below, verbatim. A block with
+nothing runnable, such as a docs-only task, says instead: `Gate: none — <why nothing here is runnable>.`>
 
 The acceptance tests a `Q` task wrote are the spec, and they are **read-only** to every later task
 except the gate. Never edit, skip, delete or weaken one: not its assertion, its data or its timeout. A
@@ -149,11 +148,10 @@ Traps:
 - <the per-task trap: the fixture that needs a token, the setup call that reaches a stub, the AC with no
   visible outcome on this surface>
 
-Gate: own tests — run only `<the filtered command that runs the tests this task writes>`; expect every
-test red, and record each one's red reason in `As built`. This plan gates once, in `<the last runnable
-task>`. Do not run the full suite, another tree's build, lint or typecheck.
-<A journey suite that cannot start its app in one command is `Gate: none`, and its red check moves to the
-gate task.>
+Gate: own tests — before you commit, run `<the filtered command that runs the tests this task writes>`;
+expect every test red, and record each one's red reason in `As built`. Do not run the unfiltered suite.
+<A journey suite that cannot start its app in one command proves its tests load and list instead —
+`<npx playwright test --list e2e/…>` — and the task that serves each journey turns it green.>
 
 Commit: `<the commit message>`.
 
@@ -171,11 +169,11 @@ Close out per the plan's "Close-out — every task" before you stop.
 Depends on: <every task nothing else waits for>
 
 You are `<exact agent name>`. Task F3 of docs/plans/<NNN>-<initiative>/delivery-plan.md:
-<the mission>. **You are the last runnable task, so you carry the plan's gate and its close-out.**
+<the mission>. **You are the last runnable task, so you run the whole set and carry the close-out.**
 
 … (the same reading list / deliverable / build / traps shape) …
 
-Gate (this is the last runnable task, so it carries the plan's only gate, in run order):
+Gate (this is the last runnable task, so it runs the whole set once more across the plan, in run order):
   <the project's own install, build, test, typecheck, lint and format commands>
   <the coverage floor — plan-format.md §5: the changed-file list from git, then each stack's
    coverage command; ≥ 80% of the branches the plan wrote (Swift: lines)>
@@ -216,9 +214,9 @@ The **workshop-booking** pack, caught after the contract wave has landed (its
 ## Prompts — one per task
 
 Run them one session each. Every block is complete on its own and opens with its `Depends on:` line.
-B1 and B2 share the .NET solution, so B2 waits for B1 and nothing runs beside anything. **This plan gates once, in
-F4:** every block before it says `Gate: none`. No prompt may run `dotnet test` — F4 runs the suite for
-the whole plan and fixes what it catches.
+B1 and B2 share the .NET solution, so B2 waits for B1 and nothing runs beside anything. **Every task gates
+what it built:** each block's `Gate:` line names its commands. No block but F4's runs the unfiltered suite —
+F4 runs the whole set once more for the plan and fixes what it catches.
 
 **Gates run locally.** Commit locally; ask before `git push`.
 
@@ -279,8 +277,10 @@ Traps:
   endpoint bypasses it and produces a second error shape.
 - This project is on .NET 8, not 10: no `[FromServices]`-free minimal-API injection.
 
-Gate: none — this plan gates once, in F4. Do not run `dotnet build`, `dotnet test` or
-`dotnet format`. Write the tests; leave running them to F4.
+Gate: own tests — before you commit, run `dotnet build src/Scheduling` and `dotnet test
+tests/Scheduling.Tests --collect:"XPlat Code Coverage"`, then read branch coverage over `src/Scheduling/*`
+(plan-format.md §5) and write the tests a shortfall needs. Leave them green, fixing what stands in the way
+whichever task caused it. Do not run the unfiltered suite or `dotnet format`.
 
 Commit: `feat: workshops and sessions resources (B1)`.
 
@@ -302,11 +302,11 @@ Close out per the plan's "Close-out — every task" before you stop.
   and it is the cheapest few thousand tokens in the block.
 - **The traps are per-task, not a house-rules recital.** "Follow CLAUDE.md" is not a trap. "This
   project is on .NET 8, so the API you would reach for does not exist" is.
-- **The gate line is on every block.** The most expensive violation of this format is an intermediate
-  block that tells its session to run the suite: it pays for a verify loop whose failures belong to
-  tasks nobody has written yet, and it reports a red tree as its own failure.
+- **The gate line is on every block, and it names real commands.** A code block whose gate runs nothing
+  pushes its failure to the last task, where it is slowest to fix. An intermediate block that tells its
+  session to run the unfiltered suite spends its context on work that belongs to the last task.
 - **When the next task binds to a different agent, say so above the close-out line.** The agent writing the
   repair is not the agent who will run it, and a block that quietly changes hands is one nobody adopts.
-- **The filing duty goes on whichever block will be the last.** Normally that is the gate task's, but a task that was blocked on a person outlives it — then the duty is on *that* block, and the gate task's says the plan stays in `docs/plans/` until it clears. Getting this wrong leaves a finished plan in the live folder, or files one that is still waiting.
+- **The filing duty goes on whichever block will be the last.** Normally that is the last runnable task's, but a task that was blocked on a person outlives it — then the duty is on *that* block, and the last runnable task's says the plan stays in `docs/plans/` until it clears. Getting this wrong leaves a finished plan in the live folder, or files one that is still waiting.
 - **Partial / blocked / diverged keeps the block on the same task**, with a `**Picking up from:**` line
   naming what remains and where inside the task to start. The task's unfinished bullets are that list.

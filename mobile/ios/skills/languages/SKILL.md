@@ -110,8 +110,6 @@ let names = participants.formatted(.list(type: .and))
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these and report "written, not run"; the plan's gate task runs them.
-
 - The catalog shows no *New* or *Needs Review* in a shipped language; no *Stale* entries linger.
 - Run with the Double-Length and RTL pseudolanguages: no truncation of primary actions, nothing laid out left-to-right that should mirror.
 - A device set to Arabic and a region with different separators: plurals read correctly, numbers and dates follow the region.

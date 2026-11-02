@@ -32,11 +32,11 @@ The skills library lives at the repo's `qa/` folder when working inside the Skil
 - Never load-test an environment you are not authorized to load. Confirm the target environment is disposable/sized for it before the first real run.
 - Read 2–3 existing files in the target project before writing anything; match its conventions over the templates' defaults. The project's existing fetch clients cannot run inside k6 — mirror their payload shapes and Zod-derived types into the k6 scripts instead.
 - Work **one step at a time**. Do not start step N+1 until step N's exit gate passes. If invoked for a single step, do only that step.
-- Run what you write, outside a `Gate: none` plan task — smoke-profile first (minimal load), full profile only against the confirmed target. If a run fails, fix and re-run once before reporting the failure.
+- Run what you write — smoke-profile first (minimal load), full profile only against the confirmed target. If a run fails, fix and re-run once before reporting the failure.
 - Ask at most 2–3 clarifying questions up front (target endpoints + environment and authorization to load it, expected traffic profile / SLOs if known, credentials source); infer the rest.
 - A run that exposes a **product defect** (errors under load, leaks, race conditions — not a test or environment problem) → write it up via `qa/manual/bug-report-writer/SKILL.md` with the workload profile and numbers attached, mark the affected scenario blocked, and continue with the remaining scenarios.
 - **Emit no comments.** Per `engineering-practices/code-comments`: no inline comments in any body you write, and a doc comment only where the name genuinely cannot carry the meaning *and* the flow is complex (a non-obvious rule, a caller-facing ordering/lifetime constraint, a deliberate deviation, or a contract the signature can't express). Strip scaffolded template comments from anything a CLI generated. Wanting to explain a block is the signal to extract and name it.
-- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
+- **Inside a plan task, the prompt block's `Gate:` line decides what you run.** `Gate: own tests` runs exactly the commands its block names (its own tests and the acceptance tests it writes or must turn green) and leaves them green; no unfiltered suite. The last runnable task runs the whole set, whatever an exit criterion below says.
 
 ## Working on existing code (brownfield)
 
@@ -53,9 +53,9 @@ Most requests are against a load-test script that already exists — "this perf 
 - **How it's invoked** (local `k6 run script.js` + CI perf-gate command) and the target environment (dedicated perf env vs shared — this matters for the noise triage below).
 - **Baseline** — the last known-good k6 summary/report percentiles to compare against.
 
-Outside a `Gate: none` plan task, confirm the script **runs and produces a report** before you change it (`k6 run script.js` → summary/report emitted). If it doesn't, that's a finding, not your bug to silently absorb.
+Confirm the script **runs and produces a report** before you change it (`k6 run script.js` → summary/report emitted). If it doesn't, that's a finding, not your bug to silently absorb.
 
-**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run outside a `Gate: none` plan task, regardless of the cache gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the thresholds** — a moved SLO silently changes what passes, so a stale threshold line turns a red run green without anyone editing a test.
+**Orientation 3 — re-verify what is never cached.** Whether it is **green on arrival** is working-tree state, not layout — check it every run, regardless of the cache gate's verdict, and treat a red state as a finding to report rather than your bug to absorb. Then spot-check any file the map names that you are about to edit: **the map is a lead, not evidence**. The highest-risk cached line here is **the thresholds** — a moved SLO silently changes what passes, so a stale threshold line turns a red run green without anyone editing a test.
 
 **What this agent's cache records:**
 

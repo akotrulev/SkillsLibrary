@@ -163,8 +163,6 @@ Whichever lane, **`GridQuery`/`GridPage` stay the same** so the fetch layer and 
 
 ## Validation
 
-Inside a `Gate: none` plan task, run none of these checks and report "written, not run"; the plan's gate task runs them.
-
 - Network shows **one page** of rows per interaction — never the whole table.
 - Sorting, filtering, and paging each fire exactly one request, and the request carries the tiebreaker sort.
 - Killing the API leaves the toolbar, search, and filters rendered; only the rows show the failed body, and one persistent notification appears.

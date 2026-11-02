@@ -64,7 +64,7 @@ private const string PasswordRevealXPathFallback = "//*[@class='…ImageButton']
    - Element's accessibility id changed → update the constant, note it as a breaking rename for the team
    - Fallback locator where a test id now exists → upgrade to `ByTestId`, remove the row from `missing-testids.md`
    - Never reorder/rename existing public methods tests already call without flagging it
-5. **Verify:** `dotnet build` (or the project equivalent) → compiles clean. Confirm `VerifyPageLoaded()`'s landmark matches what `mobile-screen-explorer` reported for this screen. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+5. **Verify:** `dotnet build` (or the project equivalent) → compiles clean. Confirm `VerifyPageLoaded()`'s landmark matches what `mobile-screen-explorer` reported for this screen.
 6. **Report:** class created/updated (diff summary), counts (accessibility-id-backed / fallback / ⚠ XPath), destination stubs created, open questions.
 
 ## Rules

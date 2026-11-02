@@ -112,7 +112,7 @@ These sections live in `references/details.md` — **read it when the task touch
 4. Map the session cap onto `workers` / `maxInstances` from `GRID_CONCURRENCY`; note the `shards × workers ≤ cap` rule and cross-link `qa/cicd/typescript/skills/ci-pipelines/*`.
 5. Wire the session URL (`gridEvidence`, awaited `testInfo.attach`) and the session status (`markSession`, once per worker) into the fixture teardowns.
 6. If the target is private, add the tunnel lifecycle (`GridTunnel` started in `globalSetup`, which returns `tunnel.stop`) and tie sessions via the cap.
-7. Run a single spec against the grid first (one worker) to confirm the connection + caps before fanning out. Confirm the session appears on the dashboard with the right build/project tags. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+7. Run a single spec against the grid first (one worker) to confirm the connection + caps before fanning out. Confirm the session appears on the dashboard with the right build/project tags.
 
 ## Cross-references
 

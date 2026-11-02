@@ -296,7 +296,7 @@ For every pattern:
 
 ## Validation
 
-After scaffolding, run the checks below — unless you are inside a plan task marked `Gate: none`, which runs none of them and reports "written, not run":
+After scaffolding, run the checks below:
 
 - `./gradlew build` — 0 warnings (Gradle `compileJava` set to `-Werror`)
 - `./gradlew test` — generated tests pass

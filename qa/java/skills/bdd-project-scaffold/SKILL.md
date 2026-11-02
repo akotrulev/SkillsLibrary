@@ -50,7 +50,7 @@ Confirm at most 2–3.
 3. Create the runner: a JUnit 5 `@Suite` class (`RunCucumberTest`) that **selects** the features, and `src/test/resources/junit-platform.properties` carrying glue, plugins and the tag filter. **One discovery mechanism**: the `@SelectClasspathResource("features")` selector — never also `cucumber.features`, which makes the engine ignore every discovery selector.
 4. Create `support/` : the per-scenario `TestContext` (holds the Playwright `Page` / Selenium `WebDriver` + lazily-built page objects), and the lifecycle `Hooks` class (`@Before`/`@After` that own the browser/driver and the failure evidence — **with teardown**). PicoContainer is zero-config — adding the dependency is the whole wiring step.
 5. Create the empty `src/test/resources/features/` folder and one throwaway smoke `.feature` to prove the rig parses and runs.
-6. `./gradlew test` (the engine must discover the feature and bind the smoke step) and run the smoke scenario. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+6. `./gradlew test` (the engine must discover the feature and bind the smoke step) and run the smoke scenario.
 7. Report files created and hand off to `feature-file-writer` (features) + `gherkin-step-code` (steps).
 
 ## Templates

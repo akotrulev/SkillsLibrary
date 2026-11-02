@@ -213,7 +213,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 3. **Fix the seams** in production code (pass `now`, ids and rngs in; put outbound I/O behind a trait).
 4. **Write the failing test**, watch it fail for the right reason (a `Gate: own tests` task may make that run), then make it pass.
 5. **Add the boundary cases** with `rstest`: zero, one, max, overflow, empty, every error variant.
-6. **Verify:** the tests pass, `cargo clippy --all-targets` is clean, and branch coverage of the change is ≥ 80%; report the counts and the figure. In a plan, `Gate: none` runs nothing and reports "written, not run". `Gate: own tests` runs this task's tests and the coverage measure over its files, and nothing else.
+6. **Verify:** the tests pass, `cargo clippy --all-targets` is clean, and branch coverage of the change is ≥ 80%; report the counts and the figure. In a plan, `Gate: own tests` runs this task's tests and the coverage measure over its files; the last runnable task runs everything else.
 
 ## Handoffs
 

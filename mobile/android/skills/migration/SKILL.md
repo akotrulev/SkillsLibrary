@@ -40,7 +40,7 @@ Owns changing the **toolchain, framework, library generation or target SDK** of 
 
 ## The gate — before any lane moves
 
-1. **Clean tree, green baseline.** Record `./gradlew assembleDebug testDebugUnitTest lintDebug detekt ktlintCheck` and the connected tests *before* touching anything, or no later failure is attributable. Outside a `Gate: none` plan task, run them; inside one, say they were not run.
+1. **Clean tree, green baseline.** Record `./gradlew assembleDebug testDebugUnitTest lintDebug detekt ktlintCheck` and the connected tests *before* touching anything, or no later failure is attributable. Run them.
 2. **One unit, one change.** Commit per module / screen / table so a failure bisects. Work in the checkout you are given — never create a branch or worktree.
 3. **Inventory first** — count `kapt` users, `LiveData` types, Fragments, `.java` files, `androidx.room` imports, `EncryptedSharedPreferences` call sites. That number is the size of the job; a number you cannot bound is a reason to ask.
 4. **Read the source of the move**, not memory: developer.android.com/build/migrate-to-built-in-kotlin, the AGP release notes, the Compose migration guides, the Navigation 3 and Room 3 pages, the behaviour-changes page per API level.

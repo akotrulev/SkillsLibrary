@@ -174,4 +174,4 @@ public class {Resource}ListDto
 2. Ask: resource name and DTO kind (`Dto`, `InDto`, `ModDto`, nested, wrapper).
 3. Ask which properties are needed, or inspect a sample API response.
 4. Generate at `ApiTests/Models/{Api}/{Resource}Models/{Name}Dto.cs`.
-5. Run `dotnet build ApiTests/ApiTests.csproj` — expect 0 errors. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+5. Run `dotnet build ApiTests/ApiTests.csproj` — expect 0 errors.

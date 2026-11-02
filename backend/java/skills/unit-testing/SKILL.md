@@ -259,7 +259,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 - **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — each `if`/`else` arm, `switch` arm and its `default` (a pattern-matching `switch` with its `case null` too), ternary, short-circuit `&&`/`||`, guard-clause return, `catch`, a loop run zero times and many — and give each a test or a `@ParameterizedTest` row that asserts its effect. The slack under 100% is for branches no honest unit test reaches: the synthetic ones JaCoCo does not filter, and a guard the types already exclude.
 - **Only an asserting test counts.** A test that runs a branch without asserting what it did is a **major** finding — it moves the number and catches nothing. The tautology test applies; mutation score is how hollow coverage gets caught.
 - **Leave out what the matrix says not to test, by name.** Records and DTOs with no behavior, entities without rules, `@Configuration` classes, Flyway migrations and generated code (MapStruct implementations, Lombok output) stay out of the measured class list, and the report names each one left out. Never reach 80% by lowering the number or by a JaCoCo exclusion over code that has behavior.
-- **Measure.** The plan's gate runs this; outside a plan, run it before you report:
+- **Measure.** A plan task's `Gate: own tests` runs this over the files it wrote; outside a plan, run it before you report:
 
   ```kotlin
   // build.gradle.kts — once per project
@@ -298,7 +298,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 3. **Fix the seams first** — a direct `Instant.now()`, `UUID.randomUUID()`, `@Value`, or outbound call is a `pattern-writer`-shaped edit to production code, done before the test.
 4. **Write the failing test** (behavior name, AAA, one logical assertion), watch it fail for the right reason (the run a `Gate: own tests` task may make), make it pass.
 5. **Add the boundary cases** as `@ParameterizedTest` rows — nulls, empties, min/max, the rounding boundary, the refused transition.
-6. **Verify:** `./gradlew test` green, no `UnnecessaryStubbingException`, compiler warning-clean, branch coverage of the changed code ≥ 80% (*Coverage floor*). Report counts and the coverage figure. Inside a plan task, `Gate: none` runs nothing and reports "written, not run"; `Gate: own tests` runs this task's tests — step 4's red run, then green — and the *Coverage floor* measure over the files it wrote, and nothing else.
+6. **Verify:** `./gradlew test` green, no `UnnecessaryStubbingException`, compiler warning-clean, branch coverage of the changed code ≥ 80% (*Coverage floor*). Report counts and the coverage figure. Inside a plan task, `Gate: own tests` runs this task's tests — step 4's red run, then green — and the *Coverage floor* measure over the files it wrote; the last runnable task runs everything else.
 7. **Sweep:** a strategy family with one tested member is a gap.
 
 ## Handoffs

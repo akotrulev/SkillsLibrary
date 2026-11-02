@@ -89,7 +89,7 @@ A manual `useMemo` / `useCallback` is a finding only when the React Compiler is 
 
 ## The screenshot pass (Step 5)
 
-Only when a simulator or emulator is available and the app builds; otherwise report "screenshot pass not run" and why. Never build inside a `Gate: none` plan task.
+Only when a simulator or emulator is available and the app builds; otherwise report "screenshot pass not run" and why.
 
 ```bash
 xcrun simctl io booted screenshot ios-<screen>.png

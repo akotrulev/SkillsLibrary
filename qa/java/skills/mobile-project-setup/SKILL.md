@@ -200,4 +200,4 @@ The exit gate for the project: it compiles, `appium driver doctor` is clean for 
 - [ ] `AppiumDriverFactory` reads `PLATFORM`, `DEVICE_NAME`, `APP_PATH` (and `PLATFORM_VERSION` on iOS) from the environment — nothing hard-coded
 - [ ] `.env.example` committed, `.env` ignored; `.gitignore` takes `build/`, `allure-results/` and `evidence/`
 - [ ] `SmokeTest` launches the app and verifies the landing screen
-- [ ] `./gradlew compileTestJava` clean; the smoke green on a booted device. Inside a plan task marked `Gate: none`, run none of this and report the files as "written, not run".
+- [ ] `./gradlew compileTestJava` clean; the smoke green on a booted device.
