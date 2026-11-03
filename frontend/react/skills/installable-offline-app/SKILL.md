@@ -134,6 +134,8 @@ export function useOnline() {
 
 ## Rules
 
+The general standards are the fe-react rule files (`react.md`, `react-data.md`). Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). These are the PWA-specific ones:
+
 - **Offline needs a cacheable render strategy** — static/client-rendered routes precache; per-request dynamic RSC/Server Actions can't run offline. Put offline surfaces on static/client routes.
 - **Serwist on Next.js, vite-plugin-pwa on Vite** — don't hand-roll a service worker; both are Workbox-based and inject a content-hashed precache manifest.
 - **Disable the SW in development** — a caching worker in `next dev` serves stale; offline only works in a built app.
@@ -153,7 +155,6 @@ export function useOnline() {
 - No "redeploy = instantly updated" assumption — implement the skip-waiting prompt or document next-launch behavior.
 - No cache-first over live API data without a freshness policy — users see stale or broken data.
 - No offline write that reports success — mark it pending until it actually syncs.
-- No reading `navigator.onLine` during render/SSR — crashes on the server / hydration mismatch; read it in an effect.
 - No manifest without a maskable icon + `theme_color` — poor install presentation.
 
 ## Validation

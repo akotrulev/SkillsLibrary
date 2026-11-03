@@ -123,23 +123,7 @@ The list calls the hook **once** in the screen and passes `formatter.format` dow
 
 ## Rules
 
-- **Globalization (formatting) is always on; localization (text) is opt-in** — they are separate tasks.
-- **One i18n library**; keys are stable ids; ICU plurals and interpolation in the catalog.
-- **Initialise before the first render**; persisted choice > device language > `en`.
-- **Hoist every `Intl` object**; module scope when static, `useMemo` per locale otherwise.
-- **Logical styles for layout**; RTL flip needs a reload and is announced.
-- **Native strings (permissions, app name) are localized through config plugins**, not i18next.
-- **Never ship a language without a complete catalog** — a half-translated app is worse than the fallback; track coverage per language.
-
-## What NOT to do
-
-- No string concatenation for a sentence, plural or list — `Intl.ListFormat` and ICU.
-- No `toLocaleString()` / `new Intl.*` in a render or `renderItem`.
-- No locale-derived currency; no fixed-separator money.
-- No `left` / `right` / `marginLeft` in a shared component.
-- No raw key visible in a release build when a translation is missing.
-- No translated string as a `testID` or as the selector in a test.
-- No `Platform.OS`-based language guess when `getLocales()` answers.
+The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `react-native-forms.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Procedure
 

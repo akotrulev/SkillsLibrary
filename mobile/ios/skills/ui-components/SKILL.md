@@ -158,24 +158,7 @@ Every reusable view ships `#Preview`s for its **states** — loading, loaded, em
 
 ## Rules
 
-- Views are small structs; sub-regions are their own types.
-- Async starts only in `.task`; cancellation is not failure.
-- Every data region renders loading, loaded, empty, failed (plus stale / offline where cached), scoped to the region.
-- `List` for standard rows, lazy stacks for custom, stable ids always.
-- SF Symbols first; system controls and text styles — no imitation of Android or the web.
-- No I/O, formatter construction or sorting in `body`.
-- A `#Preview` per state; an accessibility size among them.
-- Every interactive element and list carries a static `accessibilityIdentifier`.
-
-## What NOT to do
-
-- `Task { }` in `onAppear`, or a load in `init`.
-- Index as id; `GeometryReader` as a default layout tool.
-- Three booleans for loading / error / empty.
-- A custom back button, tab bar or alert imitating a platform control.
-- Use `AnyView` to erase types to dodge a compile error.
-- Surface `error.localizedDescription` directly to the user.
-- Hard-code a font size or colour — [`styling`](../styling/SKILL.md).
+The standards this skill's output must meet are the mobile-ios rule files, not a list here: `swiftui.md`, `ios-accessibility.md` and `ios-styling.md`. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation (exit gate)
 

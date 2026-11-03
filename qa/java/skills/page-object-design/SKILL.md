@@ -197,19 +197,9 @@ A page object should split when **any** are true:
 - <question> — owner: <name>
 ```
 
-## Anti-patterns to flag
+## Rules
 
-- **God page** (300+ lines, every selector in the app)
-- **Inheritance for code reuse** — prefer composition
-- **Page returns DTOs** — that's API territory; page methods return next pages or visible text
-- **Locators in a central constants file** — couples every page change to one file
-- **Flow class with mutable state** — flows are stateless static methods
-- **`@FindBy` + explicit `findElement` mixed** in the same project — pick one
-- **`BaseTest` doing app-specific work** — bases handle infrastructure (driver, fixtures), not domain workflow; page objects are not `BaseTest` fields
-- **Playwright `BasePage` before a third concrete page shares real behaviour**, or a base that only holds `page`
-- **Test extends a page object** to "reuse helpers" — push the helper into a flow or `BaseTest`
-- **`public static WebDriver driver` / `static Playwright`** — breaks TestNG parallel execution; Playwright and Appium use instance fields with `parallel="classes"`, Selenium a `ThreadLocal<WebDriver>` factory
-- **Mixing implicit + explicit waits** in `BasePage` — `driver.manage().timeouts().implicitlyWait(...)` together with `WebDriverWait` causes unpredictable timeouts; pick explicit
+The standards a page-object tree must meet are the qa-java rule files, not a list here: `qa-java-ui.md` and `qa-java.md` (core). Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's design disagree, the rule files win. Two design calls they leave to this skill: a page method returns the next page or visible text, never a DTO (that is API territory), and a flow is a stateless helper, never a class holding mutable state.
 
 ## Procedure
 

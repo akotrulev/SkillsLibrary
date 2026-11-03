@@ -130,16 +130,9 @@ DTD_ATTACKS = [
 ]
 ```
 
-## Conventions
+## Rules
 
-- Name: `test_should_<outcome>_when_<condition>`; the Arrange / Act / Assert shape is the explanation, no comments
-- One expected condition per assertion — `assert verdict.reason == "polyglot"`, never `in ("polyglot", "unsupported-format")`; a wobbling expectation is split into rows
-- No `try`/`except` in a test body; expected exceptions use `pytest.raises(Type, match=...)`; unexpected ones reach the runner
-- No `if` / `for` driving assertions — `@pytest.mark.parametrize` with `id=`s that read as the case name
-- Every fixture builder returns `bytes` or an `Image.Image`; the test writes to `tmp_path` only when the unit under test takes a `Path`
-- A failed deserialisation says what broke: assert on `ValidationError.errors()[0]["loc"]` and `["type"]`, never on the message string
-- Tests are order-independent: no module-level image, no shared `BytesIO`, no environment mutation outside `monkeypatch`
-- `model`-marked tests assert one geometric fact (corner alpha is 0, centre alpha is 255), never a pixel-exact mask — models drift between wheel versions
+The standards a test must meet are the be-python rule file `python-tests.md`, not a list here. Read the project's copy in `.claude/rules/be-python/`, or the plugin's in `backend/python/skills/rules/` when the project has not installed them (`/be-python:rules` does). Where it and this skill disagree, the rule file wins. The coverage floor below is how its 80% rule is measured.
 
 ## Doubles policy
 

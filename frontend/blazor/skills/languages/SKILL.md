@@ -127,25 +127,7 @@ Once `CurrentCulture` is correct, `@item.Price.ToString("C")`, `date.ToString("d
 
 ## Rules
 
-- **Distinguish globalization (formatting, always on) from localization (text swap, `IStringLocalizer`).**
-- **`.resx` keyed to component type**, keys are stable ids, never hardcode UI strings under localization.
-- **Culture pipeline by render mode:** Server/SSR → `RequestLocalizationOptions` + cookie; WASM → set `CultureInfo` at startup with `autostart=false` + satellite assemblies; mixed Web App → cookie for both.
-- **WASM needs ICU data** (`BlazorWebAssemblyLoadAllGlobalizationData` or a shard) and **`InvariantGlobalization=false`** — else formatting silently no-ops.
-- **Language switch = write culture cookie + full reload**, persisted for return visits.
-- **Formatting flows from `CurrentCulture`** — never hand-roll separators; parse inputs with `@bind:culture`.
-- **Localize validation messages** through the same localizer ([`forms`](../forms/SKILL.md)).
-- **`dir` derives from culture**; logical-property mirroring is `styling`'s job.
-
-## What NOT to do
-
-- No hardcoded UI strings once localization is enabled — invisible to translators.
-- No `InvariantGlobalization=true` on a localized WASM app — kills all culture behavior.
-- No assuming WASM culture can change without a reload — it's set at boot.
-- No `RequestLocalization` placed after the Blazor endpoints — the circuit misses the culture.
-- No hand-formatted dates/money with fixed separators — breaks in every other culture.
-- No `.resx` folder/namespace mismatch — the localizer silently returns raw keys (looks "untranslated").
-- No shipping the full ICU dataset without checking the WASM size budget ([`performance`](../performance/SKILL.md)).
-- No RTL via `left/right` CSS — use logical properties so one stylesheet serves both directions.
+The standards this skill's output must meet are the fe-blazor rule files, not a list here: `blazor-ui.md`, `blazor-config.md` and `blazor-styles.md`. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation
 

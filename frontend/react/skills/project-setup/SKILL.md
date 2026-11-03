@@ -163,22 +163,15 @@ Feature folders answer *"which capability owns this?"*; a reuse-level taxonomy a
 
 ## Rules
 
-- **Server Component default; `'use client'` opt-in per leaf.** Keep routes server; island the interactive parts.
-- **Decide rendering strategy per route** (static/dynamic/streaming) from its data shape, using the matrix; document it.
-- **Feature folders**, not type folders; `app/` files stay thin. Layer by reuse level as a placement heuristic; promote to shared on the second consumer.
-- **Strict TS + ESLint (hooks rules) + Prettier + locked lockfile** from commit one — retrofitting is painful.
-- **Real `<Link>` navigation**, `not-found.tsx` per app, `metadata` on every route (see [`component-writer`](../component-writer/SKILL.md), [`seo`](../seo/SKILL.md)).
-- **Typed, validated env**; secrets server-only; no `NEXT_PUBLIC_` on secrets.
-- **Version keyed** — follow the detected React/Next major; no React-19-only API in an 18 project.
+The standards this skill's output must meet are the fe-react rule files `react.md` and `react-data.md`, not a list here. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Where they and this skill disagree, the rule files win.
 
-## What NOT to do
+Beyond the rule files, this skill's own rules:
 
-- No blanket `'use client'` on a route "to keep it simple" — it opts the whole subtree into the bundle.
-- No one-rendering-strategy-for-the-whole-app; no hardcoded strategy inside a reusable component (the route decides).
-- No `NEXT_PUBLIC_` on a secret; no secret imported into a Client Component; no DB/server-only dep reachable from a `'use client'` file.
-- No global `atoms/`/`molecules/`/`organisms/` tree competing with feature folders; no domain types inside an atom; no extracting a shared component before a second consumer exists.
-- No hardcoded URLs / `localhost` fallbacks; no `../../../` imports when the alias exists.
-- No React-19-only API in a React 18 project; no async-request-API pattern in Next 14.
+- **Decide the rendering strategy per route** (static / dynamic / streaming) from its data shape, using the matrix, and document it; never one strategy for the whole app, never one hardcoded inside a reusable component.
+- **Strict TS + ESLint (hooks rules) + Prettier + a locked lockfile** from commit one.
+- **`not-found.tsx` per app** and a typed, validated env.
+- **Feature folders, not type folders**; `app/` files stay thin; no global `atoms/`/`molecules/`/`organisms/` tree, no domain types inside an atom.
+- **No `../../../` imports** when the alias exists; no `localhost` fallbacks.
 
 ## Validation (exit gate)
 

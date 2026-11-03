@@ -162,27 +162,7 @@ This is the exact seam between the two lanes: **data-fetching owns the snapshot,
 
 ## Rules
 
-- **Open every live feature with the transport routing decision**: push → here; pull → [`data-fetching`](../data-fetching/SKILL.md).
-- **Interactive Server: no SignalR client** — subscribe to a server broker; the circuit is the channel.
-- **Every background→UI update is marshalled through `InvokeAsync(StateHasChanged)`** — a background thread never touches component state directly (circuit *and* renderer sync context).
-- **Every subscription/connection is torn down** — `IDisposable`/`IAsyncDisposable`, unsubscribe from singleton brokers, `DisposeAsync` the `HubConnection`.
-- **WASM: build `HubConnection` in `OnInitializedAsync`**, `WithAutomaticReconnect()` + `WithStatefulReconnect()` (net8+), Reconnecting/Reconnected/Closed handlers, and a **connection-status affordance**.
-- **Prefer WebSockets**; rely on automatic transport fallback rather than pinning.
-- **Prerender a `[PersistentState]` snapshot** via [`data-fetching`](../data-fetching/SKILL.md), then hand off to the live channel — no flash, no double-fetch.
-- **Hub auth token is IdP-agnostic** (Auth0 / Cognito), sourced from the auth skill.
-- **Scale-out (Server): sticky sessions + Azure SignalR/Redis backplane.**
-- **Every live element carries a `data-testid`** per [`test-ids`](../test-ids/SKILL.md); connection-status control included.
-
-## What NOT to do
-
-- No mutating component state from a broker/hub callback without `InvokeAsync` — it races the renderer.
-- No subscription/`HubConnection` left undisposed; no missed unsubscribe from a singleton broker (leaks the whole render tree).
-- No SignalR *client* in an interactive-Server component to reach its own UI — use the circuit + broker.
-- No `HubConnection` built in `OnAfterRenderAsync` for the connection itself (auth/token timing) — build it in `OnInitializedAsync`.
-- No live channel on a static-SSR page — promote to an interactive island first.
-- No stale UI without a connection-status affordance during reconnect.
-- No scale-out without sticky sessions + backplane (Server) — cross-node pushes silently vanish.
-- No net10-only API (circuit pause/resume, `ReconnectModal`) emitted into net8/net9.
+The standards this skill's output must meet are the fe-blazor rule file `blazor.md`, not a list here. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where it and this skill's recipes disagree, the rule file wins.
 
 ## Validation
 

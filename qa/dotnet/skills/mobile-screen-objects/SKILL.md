@@ -32,16 +32,10 @@ Turns a discovered element inventory into a **C# Appium page object** — a `Bas
 
 ## Conventions (owned by `ui-test-author/appium`)
 
-Before writing, **load `qa/dotnet/skills/ui-test-author/appium/SKILL.md`** and apply its page-object rules. The non-negotiables it defines:
+Before writing, **load `qa/dotnet/skills/ui-test-author/appium/SKILL.md`**; it and the qa-dotnet rule files `mobile-ui.md` and `automation.md` set every convention (base class, finders, locator ladder, `private const string` locators, `VerifyPageLoaded()`, private elements, no sleeps). Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does); the rule files win any disagreement. What this skill adds:
 
-- Extend `BaseAppiumPage`; constructor passes `driver` to `: base(driver)` — never extend `AppiumDriver` or call `Driver.FindElement(...)` directly
-- All element access goes through the inherited finders, in ladder order: `ByTestId` (iOS `AccessibilityId`, Android `Id`) → a native query (`ByAndroidUiAutomator` · `ByIosPredicate` / `ByIosClassChain`) → `ByXPath`. An XPath rung is a temporary scaffold, not a destination — when `mobile-screen-explorer` later reports a stronger locator for that element, downgrade to it and drop the fallback row from `missing-testids.md`.
-- Each locator is a `private const string {Element}Id` constant at the top (a fallback is `{Element}XPathFallback`) — never inline a locator string in a method
-- Return types: `void` for same-screen actions; the destination page object for navigation actions
-- **Every page object overrides `VerifyPageLoaded()`** asserting the landmark is displayed (the only assertion allowed inside a page object)
-- Elements stay private: a page exposes intent methods and queries (`Title()`), never an `AppiumElement`; no PageFactory / `[FindsBy]`
-- No `Thread.Sleep` — the base class's `WebDriverWait` handles timing
-- Namespace `AppiumTests.Pages`; file `AppiumTests/Pages/<Screen>Page.cs`; multi-step flows in a sub-namespace, repeating rows as components scoped to a parent `AppiumElement`
+- An XPath rung is a temporary scaffold, not a destination: when `mobile-screen-explorer` later reports a stronger locator for that element, downgrade to it and drop the fallback row from `missing-testids.md`.
+- Namespace `AppiumTests.Pages`; file `AppiumTests/Pages/<Screen>Page.cs`; multi-step flows in a sub-namespace, repeating rows as components scoped to a parent `AppiumElement`.
 
 ## Template
 
@@ -69,10 +63,8 @@ private const string PasswordRevealXPathFallback = "//*[@class='…ImageButton']
 
 ## Rules
 
-- **Discovery is not this skill's job** — never invent a locator. If an element wasn't in the `mobile-screen-explorer` inventory, go get it there first.
-- **Test-id-first** in the emitted code, matching the discovery contract; every fallback has a `missing-testids.md` row and no marker in the code.
-- **`ui-test-author/appium` wins on every convention conflict** — this skill is its codegen-from-inventory front end, not a competing rulebook.
-- **No assertions outside `VerifyPageLoaded()`**, no business logic / API calls, no test code in the page object.
+- **Discovery is not this skill's job**: never invent a locator. If an element wasn't in the `mobile-screen-explorer` inventory, go get it there first.
+- Every fallback in the emitted code has a `missing-testids.md` row and no marker in the code.
 - One class per screen; update in place rather than creating a parallel duplicate.
 
 ## Handoffs

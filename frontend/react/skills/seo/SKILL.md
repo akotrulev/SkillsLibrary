@@ -132,6 +132,8 @@ Emit `schema.org` JSON-LD in a `<script type="application/ld+json">` rendered **
 
 ## Rules
 
+The general standards (the RSC boundary, a title on every route) are the fe-react rule file `react.md`. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). These are the SEO-specific ones:
+
 - **Public routes default to server rendering** (Server Component, static/ISR where possible); interactivity per-island only — never make core content depend on a client render or `ssr:false`.
 - **Per-route unique `title` + `description`** via `metadata`/`generateMetadata`, set from route/model data.
 - **Open Graph + Twitter Card** on shareable pages; `og:image` absolute (or the `opengraph-image` file convention).

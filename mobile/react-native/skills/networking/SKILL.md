@@ -149,27 +149,7 @@ Pull is TanStack Query above; push is a socket the app opens **only while foregr
 
 ## Rules
 
-- One API module; base URL from `EXPO_PUBLIC_*` config; https only.
-- A timeout budget on every call, per endpoint class; compose with the caller's signal; `TimeoutError` ≠ `AbortError`.
-- Retries bounded (≤ 2 for reads), jittered, honour `Retry-After`; none for writes without an idempotency key; **none while offline**.
-- `focusManager` on `AppState` and `onlineManager` on NetInfo, mounted once.
-- Responses parsed with Zod; a parse failure is an error, never empty.
-- Query keys carry every dependency; `signal` forwarded; dependent queries `enabled`-gated.
-- 401 triggers one shared refresh, then replay once, then re-auth in place.
-- Sockets and SSE closed on background and on unmount.
-- No token, body or PII in logs.
-
-## What NOT to do
-
-- No request without a timeout; no `setTimeout`-vs-`fetch` race where `AbortSignal.timeout` fits; no timeout signal that replaces the caller's.
-- No retry loop inside `api()` on top of the query client's; no retry while offline; no retry of a non-idempotent write.
-- No `Retry-After` ignored; no fixed-interval retry without jitter.
-- No `fetch` inside `useEffect` without an abort; no `.then()` that swallows an error into a blank region.
-- No `Promise.all` spanning a critical and an optional call.
-- No server data copied into Zustand ([`architecture`](../architecture/SKILL.md)).
-- No secret in `EXPO_PUBLIC_*`; no hardcoded `localhost` or LAN URL in a release build.
-- No socket opened in render or left open in the background.
-- No second HTTP client beside the one the project has.
+The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `react-native.md` and `react-native-data.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

@@ -205,20 +205,18 @@ A page object should split when **any** are true:
 - <question> — owner: <name>
 ```
 
-## Anti-patterns to flag
+## Rules
 
-- **God page** (300+ lines, every selector in the app)
-- **Inheritance for code reuse** — prefer composition
-- **Page returns DTOs** — that's API territory; page methods return next pages or visible text
-- **Locators in a central constants file** — couples every page change to one file
-- **Flow class with state** — flows are functions, not stateful objects
-- **`PageFactory` + explicit `FindElement` mixed** in the same project — pick one (explicit; `PageFactory` is deprecated)
-- **`BaseTest` doing app-specific work** — bases handle infrastructure (driver, context options, evidence), not domain workflow; page objects are not `BaseTest` properties
-- **Playwright `BasePage` before a third concrete page shares real behaviour**, or a base that only holds `IPage`
-- **Seeding in `[OneTimeSetUp]`** of a Playwright fixture — no `Page` exists there; seed per test in `[SetUp]`
-- **`Test extends a page object`** to "reuse helpers" — push the helper into a flow
-- **`public static IWebDriver Driver`** or `ParallelScope.All` with Playwright — breaks parallel execution; Playwright uses `PageTest` with `ParallelScope.Self`, Selenium / Appium an `AsyncLocal<IWebDriver>` factory
-- **`.Result` / `.Wait()`** in `BasePage` to bridge sync test code over async Playwright — make the chain async
+The page-object standards a design must meet are the qa-dotnet rule files, not a list here: `automation.md` (page objects), `web-ui.md` and `mobile-ui.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
+
+## Design smells to flag
+
+- **God page** (300+ lines, every selector in the app): split by screen and component.
+- **Page returns DTOs**: that is API territory; page methods return the next page or visible state.
+- **Locators in a central constants file**: couples every page change to one file.
+- **Flow class with state**: flows are functions, not stateful objects.
+- **`BaseTest` doing app-specific work**: bases handle infrastructure (driver, context options, evidence), not domain workflow.
+- **A test inheriting a page object** to reuse helpers: push the helper into a flow.
 
 ## Procedure
 

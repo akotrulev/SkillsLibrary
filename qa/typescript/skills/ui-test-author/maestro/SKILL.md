@@ -194,17 +194,7 @@ jobs:
 
 ## Review rows
 
-| Check | Bad sign | Severity |
-|---|---|---|
-| No fixed waits | A script, a repeated `tapOn`, or a long `timeout` standing in for a condition; every `timeout` at 60000 | blocker |
-| Test id first | `text:` where the app tags an id; a `point:` coordinate | major |
-| Repeated steps are a subflow | The same sign-in block pasted into several flows | major |
-| Every flow is tagged | No `tags:` header | minor |
-| Reset between flows | A flow with no `launchApp` / `clearState`, or one that needs the previous flow's state | blocker |
-| No credentials in a flow | A literal email or password, or a real account | blocker |
-| Subflows stay out of discovery | `flows: ["**"]` with no `!subflows/**` | major |
-
-The `ui-test-author/review` skill carries these rows for a review run.
+A flow is judged by the Maestro rule in the qa-typescript rule file `mobile-tests.md` (the project's copy in `.claude/rules/qa-typescript/`, or `qa/typescript/skills/rules/`), not by the page-object rules. `ui-test-author/review` applies it in a review run.
 
 ## Handoffs
 

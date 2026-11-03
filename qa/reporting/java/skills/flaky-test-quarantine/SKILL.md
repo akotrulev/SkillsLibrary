@@ -209,43 +209,19 @@ class, not a flakiness verdict: filing every timeout as "known flaky" hides real
 metric that matters is *flaky-rate* (flaky marks ÷ total tests) trending **down** — wire it into the team's
 quality dashboard (`qa/manual/quality-metrics`). A growing `flaky` group is a smell: tagging faster than fixing.
 
-## Anti-patterns
-
-- **A suite-wide retry.** An `IAnnotationTransformer` that stamps an analyzer on every `@Test`, a
-  `RetryListener` in `META-INF/services`, or Maven Surefire's `rerunFailingTestsCount` — each retries every
-  test, which `ci-conventions` bans. *Fix:* no retry; quarantine with a ticket.
-- **Detecting flakes through retries.** With no retry, TestNG never reports "passed on retry". *Fix:* Allure
-  history and the `flaky` category.
-- **Retrying a *deterministic* failure.** Fails every run → retrying wastes CI minutes before the same red.
-  *Fix:* it's a caught regression or broken test — fix it.
-- **`enabled = false` as "quarantine".** A disabled test stops running, rots, and lies. *Fix:*
-  `@Test(groups = "flaky")` + a non-gating lane that **still runs** it.
-- **Quarantine with no ticket / no owner.** An untracked group only grows. *Fix:* every
-  `@Test(groups = "flaky")` carries `@Issue("…")`; review the group every sprint; it must **shrink**.
-- **A "known flaky" category matched on `TimeoutException`.** *Fix:* match `"flaky": true`.
-- **Fighting a sleep-induced flake with retries.** A `Thread.sleep`-based wait is the *cause*. *Fix:* replace
-  it with a condition-wait (Playwright's auto-waiting assertions; Awaitility in `qa-java:db-connection` /
-  `qa-java:messaging-testing`), then most "flakiness" disappears.
-
 ## Deep-dive reference
 
 These sections live in `references/details.md` — **read it when the task touches them**: **Examples**.
 
-## Rules (hard constraints)
+## Rules
 
-- **Retries follow `qa/cicd/ci-conventions`** — none, except `@Test(retryAnalyzer = RetryOnce.class)` on a
-  documented hotspot, dated and linked. Never a suite-wide analyzer, listener or Surefire rerun.
-- **Detection = Allure history + the `flaky` category.** TestNG's "retried" status is not used.
-- **Quarantine = group + non-gating lane, never `enabled = false`.** `@Test(groups = "flaky")`, excluded from
-  the gate with `excludeGroups("flaky")`, run by a `flakyQuarantine` task with `ignoreFailures = true` in a
-  separate CI job. The test keeps running.
-- **Every quarantined test carries `@Issue("…")`** (an owned ticket) and `@Flaky`. The group **shrinks** over
-  time; review it each sprint; a test that can't be de-flaked is **deleted**, not left in quarantine forever.
-- **The quarantine category matches `"flaky": true`** and is first in `categories.json`.
-- **A deterministic failure is a bug, not a flake** — fix the code/test; do not retry or quarantine it.
-- **No `Thread.sleep`** — replace with condition-waits, don't paper over them with retries. Test names
-  `Should_X_When_Y`; one logical assertion; no conditional logic in tests; builders for 4+-field test data;
-  structured logging.
+The standards this skill's output must meet are the qa-java rule files, not a list here: `qa-java.md` (retries, quarantine, the annotations), `qa-java-suite.md` (the gating and quarantine tasks, `categories.json`) and `qa-java-ci.md` (no pipeline retry; the quarantine job is the one non-gating job). Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
+
+## Conventions
+
+- Detection is Allure history plus the `flaky` category. With no retry, TestNG never reports "passed on retry", so its retried status is not used.
+- Quarantine is a loan: every quarantined test has an owner and an exit condition, the group is reviewed each sprint and must shrink, and a test that cannot be de-flaked is deleted rather than left there.
+- A `Thread.sleep`-based wait is usually the cause of the flake. Replace it with a condition wait (Playwright's auto-waiting assertions; Awaitility in `qa-java:db-connection` / `qa-java:messaging-testing`) before reaching for quarantine.
 
 ## Cross-references
 

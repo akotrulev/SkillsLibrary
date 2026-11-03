@@ -222,20 +222,6 @@ If a generated or reviewed query contains any of the following **outside** a des
 
 The reviewer should produce the standard finding table (from `CLAUDE.md`) and mark these **blocker**.
 
-## Anti-patterns
-
-- **String concatenation / interpolation of values**:
-  `conn.QueryAsync($"SELECT id FROM orders WHERE id = '{orderId}'")` — even with a `Guid`, this trains the wrong habit and breaks the moment the value is a string.
-- **`SELECT *` in an assertion**: hides which columns the test actually depends on; every schema change touches every test.
-- **`DELETE FROM orders;` in a test**: no `WHERE`, no cleanup helper. Use `TRUNCATE` in `[TearDown]` or Respawn.
-- **Hidden ORM lazy-loading in assertions**: pulling an EF `Order` entity and reading `.Customer.Name` issues a second query the test author can't see. Probe with explicit SQL.
-- **`Task.Delay(5000)` before the assertion**: not deterministic; use `WaitForRowAsync`.
-- **`int` for `COUNT(*)`**: silently truncates on large fixtures.
-- **Logging the SQL with parameter values**: leaks PII / secrets into structured logs. Log the probe *name* and IDs you already trust.
-- **Building `IN (...)` by `string.Join(",", ids)`**: classic injection vector even in tests. Use `ANY (@ids)` (Postgres) or a TVP (SQL Server).
-- **`whereClause` parameter built from runtime input**: only literal strings owned by the test code may flow into the SQL shape.
-- **`DateTime` in a probe record where the column is `timestamptz`**: timezone drift will make the test flaky in CI.
-
 ## Examples
 
 ### Example 1 — assert one row exists with these columns
@@ -316,15 +302,12 @@ Assert.That(order.Customer.Name, Is.EqualTo("Alice"));            // second quer
 
 ## Rules
 
-- Parameterized binding only — every value flows through Dapper's anonymous object or `DynamicParameters`.
-- Explicit column lists in every assertion query; records (`public sealed record`) for projection types.
-- `EXISTS (...)` for boolean checks; `COUNT(*)` returns `long`.
-- `LIKE` patterns built in C# with `EscapeLike` before binding, with `ESCAPE '\'`.
-- `Guid` / `long` / `DateTimeOffset` for `uuid` / `bigint` / `timestamptz` — no `.ToString()` round-trips.
-- No `Task.Delay` as an assertion wait — use `WaitForRowAsync` with the same probe.
-- No destructive verbs outside designated cleanup; refuse with the reviewer finding table.
-- Constructor injection on probe classes; `ILogger<T>` via DI; structured logs using message templates (`{OrderId}`, never `$"{orderId}"`).
-- Async all the way — `await using`, `CancellationToken` threaded through every call.
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `db-verification.md` and `automation.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
+
+## Conventions
+
+- `LIKE` patterns are built in C# with `EscapeLike` before binding, with `ESCAPE '\'`; an `IN` list binds an array (`ANY (@ids)` on Postgres, a TVP on SQL Server).
+- Probe classes take `ILogger<T>` by constructor; log the probe name and ids already trusted, with message templates (`{OrderId}`), and thread a `CancellationToken` through every call.
 
 ## Handoffs
 

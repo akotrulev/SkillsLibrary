@@ -114,22 +114,7 @@ val showTwoPane = sizeClass.isWidthAtLeastBreakpoint(WindowSizeClass.WIDTH_DP_EX
 
 ## Rules
 
-- One `AppTheme`; screens read `MaterialTheme.*` tokens, no colour or text-size literals.
-- Dynamic colour with a recorded static fallback; dark theme follows the system.
-- Text in `sp` from typography roles; layouts survive 200% font scale; scaling is never locked.
-- Layout branches on window size class; the class is read once at the top.
-- No orientation or resizability lock; wide windows get two panes or bounded width.
-- Insets are consumed in composables; `Scaffold` `innerPadding` is applied.
-- Expressive only on material3 1.5 or an existing opt-in.
-
-## What NOT to do
-
-- Hard-code `Color(0x…)`, `14.sp` or `RoundedCornerShape(8.dp)` in a screen.
-- Test `isTablet`, `Build.MODEL` or `screenWidthDp` to pick a layout.
-- Lock `screenOrientation` or set `resizeableActivity="false"`.
-- Ignore `innerPadding`, or use `fitsSystemWindows` in Compose.
-- Mix Material 2 and Material 3 in a screen, or adopt Expressive while "just styling".
-- Fix a font size to stop text growing.
+The standards this skill's output must meet are the mobile-android rule files, not a list here: `android-ui.md`, `android-ui-a11y.md` and `android-manifest.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation (exit gate)
 

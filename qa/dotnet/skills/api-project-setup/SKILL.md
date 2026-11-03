@@ -173,9 +173,9 @@ ASPNETCORE_ENVIRONMENT=test dotnet test       # pick env overrides (appsettings.
 
 ## Conventions (the shell only)
 
-- **Config**: per-project `appsettings.json` + `appsettings.<env>.json`; base URLs, timeouts, flags from env vars. **No secrets in any committed file.**
+The standards the shell must meet are the qa-dotnet rule files, not a list here: `automation.md`, `api.md` and `suite-config.md`. Tell the user to install them with the shell (`/qa-dotnet:rules` copies them into `.claude/rules/qa-dotnet/`); until then read the plugin's copies in `qa/dotnet/skills/rules/`. Where they and this skill's recipes disagree, the rule files win.
+
 - **Auth**: token acquisition lives in `TestCore/Http` (Auth0 M2M / ROPG per `test-login-tokens`), injected into the `RestClient` factory — never inline in tests.
-- **DI**: constructor injection only; no static mutable state. Async all the way (`await`, never `.Result`).
 - **Allure hook**: leave the per-project `allureConfig.json` + the `Allure.NUnit` reference; `qa-reporting-dotnet` owns the decorators and CI publish.
 
 DTO shapes, typed-client structure, test naming, builders, and deep verification are owned by the `qa-api-dotnet` skills. Defer to them.

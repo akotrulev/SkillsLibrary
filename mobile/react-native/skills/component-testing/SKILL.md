@@ -153,11 +153,7 @@ it.each([
 });
 ```
 
-- One behaviour per test, `Should_X_When_Y`; `it.each` for variants — no `if` / `for` driving assertions.
-- **No `try`/`catch` in a test body.** An expected rejection is `await expect(promise).rejects.toThrow(...)`; cleanup is `afterEach`.
-- **One expected value per assertion** — never `200 or 204`; a failed parse names the field path and payload (assert on `issues[].path` / `code`, not the message).
-- Test data from a builder (`anOrder({ status: 'shipped' })`) once a shape has four or more fields.
-- **No snapshot of a whole screen**; no querying by style or host-element type; no assertions on `result.current` for a rendered component.
+They follow `react-native-tests.md` (see *Rules* below): one behaviour per test, `it.each` for variants, a builder for test data.
 
 ## Hooks
 
@@ -175,14 +171,7 @@ Pass a `wrapper` for hooks that read context; test the hook's contract, not its 
 
 ## Rules
 
-- Jest + `jest-expo` + RNTL 14; **never Vitest**.
-- **Every RNTL call is awaited** — `render`, `renderHook`, `rerender`, `unmount`, `fireEvent.*`, `userEvent.*`, `act`.
-- Role / label before `testID`; `userEvent` for user actions; matchers over snapshots.
-- Native modules faked at the boundary, fakes over mocks of your own code, a fresh `QueryClient` per test.
-- Fake timers, not sleeps; no `try` / `catch` and no `if` in a test body; one expected value per assertion.
-- Plain `*.test.ts` for logic that doesn't render; logic, not markup.
-- Device journeys go to `qa-mobile-typescript`.
-- **≥ 80% of the branches you wrote are covered** — see *Coverage floor* below.
+The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `react-native-tests.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Coverage floor — ≥ 80% of the branches you wrote
 
@@ -199,16 +188,6 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 
   `% Branch` on the `All files` row is the number; `Uncovered Line #s` points at the misses. `collectCoverageFrom` also counts a file no test imports, at 0% — which is why the changed files are named rather than left to what the tests happened to load.
 - **Below 80%, write the missing tests.** The uncovered lines are the list.
-
-## What NOT to do
-
-- No `render(...)` without `await` on RNTL 14; no `act(() => …)` bare; no `fireEvent` for a user press.
-- No Vitest, `vi.mock`, jsdom or `@testing-library/react` (the DOM one) in an RN project.
-- No `UNSAFE_getByType`, `update`, `concurrentRoot` or `createNodeMock` — removed in v14.
-- No real network, real secure store or real timers in a unit test; no `setTimeout` waits.
-- No snapshot of a whole screen; no testing the library (that `useState` updates, that FlashList scrolls).
-- No shared `QueryClient` across tests; no test that only passes in file order.
-- No re-implementing E2E by mocking the router and calling it a journey.
 
 ## Generation steps
 

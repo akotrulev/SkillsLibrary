@@ -184,25 +184,7 @@ The repository, not the screen, catches `SQLiteFullException` / `IOException`, k
 
 ## Rules
 
-- Room 3 for new databases on KSP with a `SQLiteDriver`; Room 2.8 stays Room 2.8; never `kapt`.
-- DAO functions `suspend` or `Flow`; entities separate from DTOs and domain types; one transaction per multi-table write.
-- Every schema change has a migration and a committed schema JSON; no destructive fallback for user data.
-- DataStore, not `SharedPreferences`, in new code; one instance per file; no main-thread blocking read.
-- Secrets in Keystore-backed storage only; **no `EncryptedSharedPreferences` in new code**; a decrypt failure means signed out.
-- Backup rules exclude databases, DataStore, keyset and tokens.
-- Room (or the repository's source of truth) feeds the UI; the network refreshes it; stale data stays visible.
-- Offline writes go through an outbox with idempotency keys, drained by unique WorkManager work.
-- A storage failure degrades to memory and surfaces; it never crashes and never silently loses an edit.
-
-## What NOT to do
-
-- No `fallbackToDestructiveMigration()` on a user-data database.
-- No `allowMainThreadQueries()`; no `runBlocking` on a DataStore or Room read.
-- No `LiveData` / RxJava return types in Room 3; no `androidx.room` and `androidx.room3` mixed inside one database.
-- No token, password or key in `SharedPreferences`, plain DataStore, Room, `BuildConfig`, files, logs or `SavedStateHandle`.
-- No `EncryptedSharedPreferences`, `EncryptedFile`, `MasterKey` or `security-crypto` dependency in new code.
-- No repository interface with one implementation to "mock Room" — Room runs in-memory in a test, or a fake DAO is the seam ([`unit-testing`](../unit-testing/SKILL.md)).
-- No DTO as an entity; no entity in a composable.
+The standards this skill's output must meet are the mobile-android rule files, not a list here: `android-data.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

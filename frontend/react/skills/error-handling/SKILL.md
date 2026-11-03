@@ -324,50 +324,23 @@ A single generic "No data" for all three is a defect — it tells the user nothi
 
 ## Rules
 
-- **`global-error.tsx`** at the root + **`error.tsx` per route** + **per-feature `react-error-boundary`** around independently-failing regions (Vite: `react-error-boundary` at root + per route).
-- **Report** caught errors (structured, with context/correlation id) via `onError`/`useEffect`/React 19 `onCaughtError`; **never render `error.message`/stack** — friendly text + correlation id only; always offer `reset`/retry.
-- **Retry idempotent calls only**, with exponential backoff (TanStack Query `retry`/`retryDelay`); never auto-retry a POST/mutation without an idempotency key; don't retry 4xx.
-- **Report client errors to the server** (Sentry/OTel/rate-limited endpoint) — never console-only; include the correlation id.
-- **Writes get their own discipline** ([details](references/writes-and-dependencies.md)) — pending disables the control (double-submit = duplicate charge), retryable writes carry an **idempotency key per intent**, a rolled-back optimistic update **always notifies** and never clears the user's input, a 409/412 conflict is handed back as a choice (never silently retried), 422 goes to the fields, bulk reports per item, and an unconfirmable write says so and refetches.
-- **Honour `Retry-After`**, cap attempts, and **stop auto-retrying after k consecutive failures** — switch the region to manual retry and stop re-notifying.
-- **Third-party dependencies fail in their own boundary, with their own timeout** ([details](references/writes-and-dependencies.md)) — analytics/flags fail silently to the user (defaults, logged); maps/embeds fail to their region; payment/auth iframes fail loudly with a fallback path. A flag provider never blocks first render.
-- **Storage access is guarded and degrades to memory** ([`state-management`](../state-management/SKILL.md)) — a quota/private-mode throw must never break a render.
-- **A 404 on a record is "gone", not "broken"** — its own message and a way out, with the deleted row invalidated from the list.
-- **Report recoverable errors too** (hydration mismatches via `onRecoverableError`) — a console-only signal is no signal.
-- **Cap and roll up notifications** — ≤ ~3 visible with a "+N more", grouped by cause rather than by call, so one outage is one message.
-- **Handle deploy version skew** ([details](references/session-and-deploy.md)) — set `deploymentId`, catch `ChunkLoadError`/dynamic-import failures globally and reload **once** (sessionStorage-guarded), prompt rather than force-reload when work is unsaved, and share one "new version available" affordance with the service worker's.
-- **A mid-session 401 runs the ladder** ([details](references/session-and-deploy.md)) — single-flight silent refresh → replay once → **re-auth in place** → redirect only from a surface with no unsaved work. 403 renders permission-denied (no retry, no re-auth); only your own API triggers it; warn before the deadline; `returnTo` the exact route.
-- **Live-data status stays consistent** — show "reconnecting", never stale live data as current while the socket is down (coordinate with [`realtime`](../realtime/SKILL.md)); handle offline explicitly.
-- **Three-state data regions** everywhere: loading / loaded / failed **inline with retry** — never swallow a failure into a blank section. An unreadable/drifted response is a **failed** state, not an empty one.
-- **A failed *refetch* renders the stale state, not the failed body** — keep the data the user already has, label how old it is, offer retry, notify once; disable actions that are unsafe on stale data. The failed body is only for a region with no data yet.
-- **Every request carries a timeout budget** (`AbortSignal.timeout` composed with the cancel signal via `AbortSignal.any`), set per endpoint class, categorized as its own `TimeoutError` — and a soft "still loading" tier before it. A user-initiated `AbortError` is not a failure: no failed state, no notification.
-- **Scope the failure to the data-dependent subtree** — search, filters, toolbars, headers, and the user's typed filter state keep rendering; only the part fed by the response swaps to the failed body. No early `return <Error/>` from a container that also owns the chrome; boundaries wrap the region, not the route.
-- **Every surfaced failure also raises a persistent notification** — top-right, **no auto-dismiss**, explicit close button, friendly message + correlation id, deduped by key, from one root-mounted provider and one raise-point per failure path.
-- **Grid failures render inline in the grid**; loading + failed bound on the **shared grid component**.
-- **Actionable empty states** — distinguish no-records / no-filter / filter-matched-nothing.
+The standards this skill's output must meet are the fe-react rule files `react.md` and `react-data.md`, not a list here. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Where they and this skill disagree, the rule files win. The data-region, notification, timeout, retry, 401 and version-skew rules live there.
 
-## What NOT to do
+Beyond the rule files, this skill's own rules:
 
-- No app without a root boundary (`global-error.tsx` / root `react-error-boundary`) — one uncaught render error = blank app.
-- No `error.message` / raw response body / stack trace rendered to a user.
-- No two-state region (loaded / not-loaded) — a failure then reads as "no data".
-- No failure surfaced *only* as a toast for a persistent region (grid/detail/section) — and equally, no inline failure without the notification.
-- **No auto-dismissing error notification** (a timed-out error the user was scrolling past is an unreported bug), no notification without a close button, no error notification anywhere but the top-right stack, no per-feature toast portal.
-- No whole-page/whole-section unmount for one failed call — filters, search, and toolbars must not disappear with the rows; no early `return` that discards the user's filter state.
-- No drifted/unparseable response falling through to `[]` and rendering as "no records"; no `catch` that turns a failed read into an empty one.
-- **No request without a deadline** — no region that can spin forever, no reliance on the browser's ~300s default, no `setTimeout`-vs-`fetch` race where `AbortSignal.timeout` fits, and no timeout signal that *replaces* the library's cancel signal instead of composing with it.
-- **No error panel replacing data the user was already reading** because a background refetch failed; no skeleton flash over existing rows on a refresh or a page change (`keepPreviousData`); no stale data shown as current, and no enabled write action on stale data that makes the write unsafe.
-- No submit control left enabled while its mutation is pending; no retryable write without an idempotency key; **no silent optimistic rollback**; no form cleared on a failed submit; no 409/412 auto-retried or silently overwritten; no 422 shown as a toast instead of on the field; no blanket success/failure over a partially-failed bulk write; no timed-out write reported as a definite failure.
-- No toast for a failed analytics beacon (nothing the user can act on); no flag provider gating first paint; no third-party widget crash reaching the route's boundary; no unguarded storage write; no 404-on-a-record rendered as a generic failure or left retryable; no hydration mismatch swallowed by the console.
-- No ignoring `Retry-After`; no unbounded auto-retry through an outage (the client becomes part of the incident); no notification per retry attempt; no uncapped notification stack, and no six toasts for one 503.
-- No `ChunkLoadError` left as a terminal error state (the recovery is a reload, not a message); **no unguarded auto-reload** (infinite loop on a broken build); no forced reload over unsaved work; no second, competing "new version" prompt beside the service worker's.
-- **No `loginWithRedirect()` straight off a 401** — not before a single-flight refresh + one replay, and never from a page holding unsaved work; no per-request refresh (rotation stampede); no replayed request re-entering the ladder (refresh→401 loop); no logout triggered by a 403 or by a third-party host's 401; no redirect answer to a `fetch`/Server Action (return 401 JSON).
-- No blind retry of a **timed-out** non-idempotent request (it may have succeeded server-side); no user-cancelled/unmounted request (`AbortError`) rendered as a failure or notified.
-- No generic "No data" covering all three empty situations.
-- No auto-retry on a non-idempotent mutation; no retry on a 4xx; no hand-rolled retry loop where TanStack Query's `retry` fits.
-- No stale live data shown as current while the connection is down.
-- No console-only client error (invisible = unlogged).
-- No App-Router-only convention (`error.tsx`/`global-error.tsx`) emitted into a Vite SPA — use `react-error-boundary`.
+- **Boundaries per tier**: `global-error.tsx` + `error.tsx` per route + a per-feature `react-error-boundary` around each independently failing region (Vite: `react-error-boundary` at the root and per route; never an App-Router-only file in a Vite SPA). Always offer `reset`/retry.
+- **Report caught and recoverable errors** (`onCaughtError`, `onRecoverableError`) with the correlation id — a hydration mismatch swallowed by the console is unreported.
+- **Stop auto-retrying after k consecutive failures** — switch the region to manual retry and stop re-notifying; no notification per retry attempt; no hand-rolled retry loop where TanStack Query's `retry` fits.
+- **Writes** ([details](references/writes-and-dependencies.md)): bulk writes report per item; a timed-out write says it is unconfirmed and refetches, never "failed", and is never blindly retried when non-idempotent.
+- **Third-party dependencies fail in their own boundary, with their own timeout** — analytics and flags fail silently (defaults, logged), maps and embeds fail to their region, payment and auth iframes fail loudly with a fallback; a flag provider never blocks first render.
+- **A 404 on a record is "gone", not "broken"** — its own message and a way out, the row invalidated from the list, no retry.
+- **Cap and roll up notifications** — ≤ ~3 visible with "+N more", grouped by cause and deduped by key, from one root-mounted provider with one raise-point per failure path.
+- **Version skew** ([details](references/session-and-deploy.md)): prompt rather than force-reload over unsaved work; one "new version available" affordance, shared with the service worker's.
+- **The 401 ladder** ([details](references/session-and-deploy.md)) is triggered only by your own API (never a third-party host's 401); 403 renders permission-denied; warn before the session deadline; `returnTo` the exact route; a `fetch` or Server Action gets a 401 JSON answer, never a redirect.
+- **Live-data status stays consistent** — "reconnecting", never stale live data as current while the socket is down (with [`realtime`](../realtime/SKILL.md)); offline handled explicitly.
+- **A soft "still loading" tier** before the timeout; no skeleton flash over existing rows (`keepPreviousData`); actions unsafe on stale data are disabled.
+- **Grid failures render inline in the grid**, loading and failed bound on the shared grid component.
+- **Actionable empty states** — no-records, no-filter and filter-matched-nothing are three messages, never one generic "No data".
 
 ## Validation
 

@@ -151,25 +151,7 @@ Edge-to-edge is **enforced at targetSdk 35**; predictive back is on at 36.
 
 ## Rules
 
-- Match the codebase's binding and navigation style; add Compose only through the two seams.
-- ViewBinding access is nulled in `onDestroyView`; collection uses `viewLifecycleOwner` + `repeatOnLifecycle`.
-- `ListAdapter` + `DiffUtil` on domain ids; `onBind` only assigns; no `notifyDataSetChanged`.
-- `ComposeView` in a Fragment uses `DisposeOnViewTreeLifecycleDestroyed`; in a pooled item, the default.
-- `AndroidView` puts state in `update` and releases in `onRelease`.
-- One `uiState`, no event channel, in Views as in Compose (D26).
-- Edge-to-edge and insets are handled; the IME never hides the focused field.
-- Every interactive View carries a static `android:id`; every actionable image a `contentDescription`.
-
-## What NOT to do
-
-- No `findViewById` or synthetic imports in new code; no `lateinit var binding` that is never cleared in a Fragment.
-- No `lifecycleScope.launchWhenStarted`; no collecting in `onCreateView` with `this` as the lifecycle owner.
-- No `Handler().postDelayed` for UI timing; no `AsyncTask`; no `Thread` + `runOnUiThread` for I/O.
-- No `ComposeView` with the default strategy inside a Fragment; no `setContent` before the strategy is set.
-- No state duplicated in a View's field **and** the ViewModel; no ViewModel reference captured in an `AndroidView` factory.
-- No `onBackPressed()` override; no `adjustPan` hacks for a covered field.
-- No Compose "wrapper" `Fragment` per tiny composable; no second navigation library beside the one present.
-- No `dataBinding` added to a ViewBinding project; no rewrite of a working screen as a side effect.
+The standards this skill's output must meet are the mobile-android rule files, not a list here: `android-views.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

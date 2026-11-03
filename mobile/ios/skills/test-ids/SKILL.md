@@ -180,20 +180,9 @@ QA's explorer writes, per screen, a table of `Element | Type | Visible text / la
 4. Report per file: ids added, decoratives skipped, collisions, and any grouping that hides children.
 5. Build the target; with a simulator build, read one screen's page source (`appium_get_page_source`) and confirm `name` matches each assigned id.
 
-## Anti-patterns
+## Rule file
 
-| Anti-pattern | Fix |
-|---|---|
-| `.accessibilityIdentifier("Row.\(order.id)")` | Static `Orders.Row` (rule 6) |
-| `.accessibilityLabel("Login.EmailField")`, or label text used as the id | `.accessibilityIdentifier`; the label stays human copy |
-| Locating by visible text (`name == "Sign in"`) or a translated label | The identifier; text breaks in every other locale |
-| An id on every layout stack | Remove — page-source noise |
-| `[Enum: String]` id map | Interpolate from the value (rule 7) |
-| kebab-case or snake_case ids | PascalCase segments |
-| Translated string, index or GUID in an id | Enum / field name |
-| Same id on two non-row elements | Sub-namespace one |
-| A wrapper view added only to carry ids | Inline `.accessibilityIdentifier` |
-| Assuming a container's id reaches the children | Tag leaves; verify in the page source |
+The review form of these rules, with severities, is the mobile-ios rule file `ios-accessibility.md` (Test ids). Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where it and this skill disagree, the rule file wins.
 
 ## Handoffs
 

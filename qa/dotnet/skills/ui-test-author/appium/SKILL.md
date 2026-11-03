@@ -97,42 +97,15 @@ Code for each is in [`references/details.md`](references/details.md) — read it
 
 ## Rules
 
-### Page object rules
-- Extend `BaseAppiumPage`; pass `driver` to `base(driver)`. Pages take the driver, never a test context.
-- Accessors stay private; a page exposes intent (`SignIn`, `Title()`) and queries, never an `AppiumElement`.
-- **One locator-constant style:** each id is `private const string {Element}Id` at the top of the class; a fallback is `{Element}XPathFallback`. Never inline a locator string in an action.
-- **Locator order:** the test id, a native query, XPath. On iOS `id`, `name` and `accessibility id` are synonyms over the element's `name`.
-- No raw `Driver.FindElement` in a page: every lookup goes through a base finder, and a WebView lookup through a base helper.
-- One class per screen; flows in a sub-namespace; repeating items as scoped components.
-- Navigation returns the destination page; same-screen actions return `void`.
-- Every page overrides `VerifyPageLoaded()` on its landmark. That is the only assertion in a page.
-- `IsTestIdVisible` returns `false` when the element is not displayed within the timeout, and lets anything else through.
-- Per-platform differences sit in the finder, never in an `if` inside an action.
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `automation.md` and `mobile-ui.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-### Test rules
-- Extend `BaseMobileTest`; it provides `Driver`. Names are `Should_X_When_Y`. Tag with `[Category]`.
-- Assertions live in the test: `Assert.That(actual, Is.EqualTo(expected), subject)`; `Assert.Multiple` only for several fields after one action. The one exception is the page's own `VerifyPageLoaded`.
-- **One expected condition per assertion — never an `OR`.** No `.Or.`, no `Is.AnyOf`, no `||`, no `"a|b"` regex. When Android and iOS show different copy, that is two platform-scoped expectations. If two outcomes are both reachable, split into one `[Test]` per outcome.
-- No `try`/`catch` in a test or a `[TearDown]` that runs a test body; expected exceptions use `Assert.Throws<T>`. A catch lives only in an I/O helper that narrows one named exception (`IsTestIdVisible`); `BaseMobileTest` has none.
-- No `if` or loop driving an assertion; one `[TestCase]` per data row.
-- **Failures name the subject:** `Assert.That(title, Is.EqualTo(expected), $"title of order {orderNumber}")`.
+## Conventions
 
-### Waits
-- `WebDriverWait` (10 s) for conditions, built by `BaseAppiumPage.Wait`. Keep `ImplicitWait` at zero (the default). No `Thread.Sleep` anywhere, including for transitions and animations.
-
-### Driver lifecycle
-- **A driver per fixture**, in `[OneTimeSetUp]` and quit in `[OneTimeTearDown]`. The field is per instance, never static. `[Parallelizable(ParallelScope.Self)]` lets fixtures run side by side and keeps the tests inside one fixture serial.
-- Parallel fixtures need one device each and unique `appium:systemPort`, `appium:mjpegServerPort` and `appium:wdaLocalPort` per session; `NumberOfTestWorkers` in `mobile.runsettings` never exceeds the device count.
-- Never instantiate `AndroidDriver` or `IOSDriver` in a test; the factory does. The server URL is `APPIUM_URL`, devices and app paths come from env, never from code.
-
-### Failure evidence
-`BaseMobileTest` is the only failure hook. A test adds none. What it keeps and where it lands is `qa/dotnet/skills/evidence-capture/references/appium.md`.
-
-### What NOT to do
-- No `Driver.FindElement` outside `BaseAppiumPage` and components; no `[FindsBy]` or page factory.
-- No `TouchAction`, `ResetApp`, `ToggleWifi`, `SetConnectionType` or `DesiredCapabilities`.
-- No `AppiumBy` (it does not exist in .NET); no raw `IWebElement` returns; no assertions inside actions beyond the landmark.
-- No business logic or API calls inside a page object.
+- On iOS `id`, `name` and `accessibility id` are synonyms over the element's `name`. `IsTestIdVisible` returns `false` when the element is not displayed within the timeout and lets anything else through.
+- Flows live in a sub-namespace; repeating items are components scoped to a parent `AppiumElement`.
+- Tests extend `BaseMobileTest`, which provides `Driver`, and are tagged with `[Category]`. `Assert.Multiple` only for several fields after one action. Different Android and iOS copy is two platform-scoped expectations, never an `OR`.
+- `BaseAppiumPage.Wait` builds a 10 s `WebDriverWait`.
+- What `BaseMobileTest` keeps on failure, and where: `qa/dotnet/skills/evidence-capture/references/appium.md`.
 
 ## Generation steps
 

@@ -3,168 +3,59 @@ name: conventions-review
 description: Use when reviewing C#/.NET code for pattern misuse, over-abstraction, async or DI anti-patterns. Triggers "review this .NET service", "is this CQRS justified". Not for explanations (patterns).
 ---
 
-# .NET Design Patterns — Reviewer
+# C# / .NET — Reviewer
 
-Reviews C# / .NET code — **10 primary, 8/9 supported** — against the patterns and rules enforced by `backend/dotnet/skills/pattern-writer` and the global rules in `CLAUDE.md`. Produces a findings table in the format defined in `CLAUDE.md`. Does **not** rewrite — points to the fix and lets the human apply it.
+Reviews C# / .NET backend code against the be-dotnet rule files and produces a findings table. It does **not** rewrite: it points to the fix and hands off to `pattern-writer`.
+
+## The checklist is the rule file
+
+Every check, and the severity it reports, lives in one place: the be-dotnet rule files `dotnet.md` (core), `dotnet-persistence.md`, `dotnet-api.md`, `dotnet-tests.md` and `dotnet-config.md`.
+
+1. **The project's copies first**: `.claude/rules/be-dotnet/` at the project root. The team may have edited them, and its edits win.
+2. **Otherwise the plugin's copies**: `backend/dotnet/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/be-dotnet:rules` installs them.
+
+Read `dotnet.md`, plus each other file whose `paths:` match a file under review, in full before the first finding. A file under review that no glob matches (a backend project the installed globs miss) still gets `dotnet.md`. A rule loaded on its own by the session is not enough: a review needs every file that applies, not just the ones the session happened to open. Never review from memory of the rules, and never add a check the file does not contain; propose it as a rule change instead. Auth-provider specifics (Auth0, Cognito) are checked against the `auth0` / `cognito` skills' Rules sections.
 
 ## Version policy
 
-Detect the reviewed project's `<TargetFramework>` first. Don't flag a net8/net9 project for lacking a net10-only feature (e.g. a newer `[Timestamp]`/collection-expression idiom); do flag a net10 project that ignores one available to it as a `minor`/`nit` per the usual severity rules.
+Detect every reviewed project's `<TargetFramework>` first. Do not flag a net8/net9 project for lacking a net10-only API; do flag a net10 project that ignores one available to it, at the severity its rule carries. The rule file's "the codebase wins" line applies: a convention the project follows consistently is not a finding.
 
 ## When to use
 
-- A diff or file is submitted for review (service, handler, DI registration, decorator, repository)
-- Pre-merge gate on a PR that touches `Application/` / `Infrastructure/` / `Program.cs` / `*Module.cs`
-- The user wants a second opinion on whether a pattern is earning its complexity
-- A pattern feels "off" and the user wants the smell named
+- A diff or file submitted for review: a service, handler, DI registration, decorator, repository, endpoint
+- A pre-merge gate on a change touching `Application/`, `Infrastructure/`, `Program.cs` or a `*Module.cs`
+- A second opinion on whether a pattern earns its complexity, or a smell that needs naming
 
 ## When NOT to use
 
 - Conceptual lookup → `backend/dotnet/skills/pattern-guide`
 - Generating new code → `backend/dotnet/skills/pattern-writer`
-- Reviewing API tests → `qa/dotnet/skills/api-test-author/review`
-- Reviewing UI tests → `qa/dotnet/skills/ui-test-author/review`
-
-## Inputs needed
-
-1. **Files** under review (service, handler, registration, decorator)
-2. **Context** — new feature, refactor, bug fix?
-3. **Surrounding architecture** if it matters (Onion / Clean / vertical slices) — affects severity of layer-crossings
-4. **Project conventions** that override defaults (e.g. project standardized on Autofac instead of MS DI)
-
-## Review checklist
-
-Severity column maps directly to the output table.
-
-### Async & threading
-
-| Check | Bad sign | Severity |
-|---|---|---|
-| No sync-over-async | `.Result`, `.Wait()`, `.GetAwaiter().GetResult()` | blocker |
-| `CancellationToken` threaded through every async method | A `Task` method that takes no `CancellationToken` argument | major |
-| No `async void` outside event handlers | `public async void HandleX(...)` | blocker |
-| No `Task` returned from a method named `*Sync` | `public Task DoSync()` | major |
-| No `Task.Run` to "make it async" | `await Task.Run(() => SyncWork())` for I/O | major |
-
-### Dependency injection
-
-| Check | Bad sign | Severity |
-|---|---|---|
-| Constructor injection only | Field/property injection without a constructor source | major |
-| No service locator | `IServiceProvider.GetService<T>()` inside business code | major |
-| Lifetimes match dependency lifetimes | Singleton consuming Scoped (captures stale scope) | blocker |
-| One registration block per module | DI calls sprinkled across `Program.cs` | minor |
-| Decorators registered in the right order | Order undocumented or inverted (real impl outside cache) | major |
-| `IOptions<T>` over `IConfiguration[...]` reads | Stringly-typed configuration in business code | major |
-| `IOptionsSnapshot<>` / `IOptionsMonitor<>` chosen for the right lifetime | Singleton holding an `IOptions<T>` that ships changes | major |
-
-### Pattern application
-
-| Check | Bad sign | Severity |
-|---|---|---|
-| One pattern per problem — no stacking | Repository + UoW + Specification + Mediator + Decorator on a CRUD slice | major |
-| Modules reach each other only through the owner's public API (`I<Module>Api`) | A module reading another module's table, entity or `Internal` type — a cross-schema join, an `Include` across modules, a `using` of another module's `Internal` namespace | major |
-| Instrumented as built | New behaviour (an entry point, an outbound call, a job, a business event) with no span, no log at its decision points or no business metric; a secret or personal data in a log line or span attribute | major; **blocker** for the secret or personal data |
-| Repository earns its keep | `IFooRepository` that mirrors `DbSet<Foo>` 1:1 with `Get/Add/Update/Delete` | major |
-| CQRS justified | MediatR adopted on a service with one read + one write | major |
-| Strategy / Factory replace `switch` chains | `switch (type) { case ... }` repeated across the codebase | major |
-| Decorators have one responsibility | One class doing logging + retry + caching | major |
-| Mediator pipeline behaviors for cross-cutting | Validation, logging, metrics duplicated in each handler | major |
-
-### Nullability & types
-
-| Check | Bad sign | Severity |
-|---|---|---|
-| Nullable reference types enabled per project | `<Nullable>` missing or `disable` | major |
-| No `!` to silence the compiler | `x!.Foo` instead of `?.`, `ArgumentNullException.ThrowIfNull`, or a real fix | major |
-| `record` for value-shaped data, `class` for behavior | A mutable `class` with public init-only props pretending to be a value type | minor |
-| `sealed` by default on concretes | Public concrete class with no `sealed` and no real subclass | minor |
-| Primary constructors used where appropriate | Boilerplate `private readonly Foo _foo; public Bar(Foo foo) { _foo = foo; }` for a trivial DI ctor | nit |
-
-### Static state & mutability
-
-| Check | Bad sign | Severity |
-|---|---|---|
-| No static mutable state | `private static List<Foo> _cache = new();` | blocker |
-| Constants explicitly `const` / `static readonly` | Mutable `static` field used as if it were a constant | major |
-| Immutability for DTOs / value objects | `class Order { public List<Line> Lines { get; set; } }` exposing mutable lists | major |
-| `IReadOnlyList<>` / `IReadOnlyCollection<>` on read-only surfaces | `List<T>` returned where callers shouldn't mutate | minor |
-
-### Logging & exceptions
-
-| Check | Bad sign | Severity |
-|---|---|---|
-| Message templates, not interpolation | `_logger.LogInformation($"Order {id}")` | major |
-| `ILogger<T>` injected, not `Log.Logger` static | Direct `Serilog.Log.*` calls in service code | minor |
-| Exceptions passed as the first arg | `_logger.LogError(ex.ToString(), ...)` | major |
-| Specific exception types caught | `catch (Exception ex)` swallowing everything | major |
-| No re-throw losing stack trace | `catch (Exception ex) { throw ex; }` | major |
-
-### Architecture / dependencies
-
-| Check | Bad sign | Severity |
-|---|---|---|
-| Domain has no infra dependencies | `Domain/` referencing `Microsoft.EntityFrameworkCore` | major |
-| Application orchestrates, doesn't know HTTP | Controllers calling `DbContext` directly | major |
-| Infrastructure adapters implement Application interfaces | Application code newing up infrastructure types | major |
-| Cross-feature references go through public contracts | Feature A reaching into Feature B's `Internal/` | major |
-
-### Comments & XML documentation
-
-Load **[`engineering-practices/code-comments`](../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here.
-
-| .NET mechanic | What to check |
-|---|---|
-| Doc syntax | XML doc (`/// <summary>`). `<exception>` / `<returns>` carry real contract — `<returns>The result.</returns>` is a **nit** |
-| Suppressions needing a reason | `#pragma warning disable`, `[SuppressMessage]` (use its `Justification` argument) |
-| Directives, not comments — these stay | Serializer / OpenAPI / validation attributes, source-generator markers |
-| Scaffolding to remove | `// <auto-generated/>`-style banners and IDE template headers left in hand-written files |
-
-**The .NET corollary:** a comment above a `catch` explaining which failure it handles means the `catch` is too broad — narrow the exception type instead (see the Logging & exceptions rows).
+- A whole service, saved as a re-runnable report → `backend/dotnet/skills/standards-audit`
+- Test-suite review → `qa-dotnet:api-tests-review` / `qa-dotnet:ui-tests-review`
 
 ## Procedure
 
-1. Read the whole file before writing findings.
-2. Walk the checklists, top to bottom. Lifetime and async issues are usually the highest-severity ones — start there.
-3. For each finding: file path + line, the issue (concrete), one-sentence fix.
-4. **Do not rewrite the code.** Hand off to `backend/dotnet/skills/pattern-writer` if the user wants the rewrite.
+1. Read the rule files, then each changed file end to end.
+2. Walk the rules in this order: DI lifetimes, Async, persistence, then the rest. Most blockers live there.
+3. Per finding: file and line, the rule broken, a one-sentence fix. The severity is the tag on the rule, never a new judgment.
+4. Do not rewrite. Hand off to `backend/dotnet/skills/pattern-writer`.
 
 ## Output format
 
 ```
-| Severity | Location                          | Issue                                                              | Suggested fix                                                              |
-|----------|-----------------------------------|--------------------------------------------------------------------|----------------------------------------------------------------------------|
-| blocker  | Application/Orders/OrderService.cs:54 | `_repo.GetAsync(id).Result` — sync-over-async                  | `await _repo.GetAsync(id, ct)`; thread `CancellationToken` through         |
-| blocker  | Application/Modules.cs:18         | Singleton `OrderService` depends on Scoped `AppDbContext`          | Register `OrderService` as Scoped, or extract a Scoped accessor service    |
-| major    | Application/Pricing/PricingService.cs:33 | `switch (cart.Mode)` selects pricing algorithm inline       | Extract to `IPricingStrategy` + keyed DI; remove the switch                |
-| minor    | Application/Orders/OrderService.cs:12 | Concrete `OrderService` is not `sealed`                       | Mark `sealed` unless inheritance is part of the design                     |
+| Severity | Location                                  | Issue                                                  | Suggested fix                                                     |
+|----------|-------------------------------------------|--------------------------------------------------------|-------------------------------------------------------------------|
+| blocker  | Application/Orders/OrderService.cs:54     | `_repo.GetAsync(id).Result` — sync-over-async          | `await _repo.GetAsync(id, ct)`; thread the `CancellationToken`    |
+| blocker  | Application/Modules.cs:18                 | Singleton `OrderService` depends on scoped `AppDbContext` | Register `OrderService` scoped                                 |
+| major    | Application/Pricing/PricingService.cs:33  | `switch (cart.Mode)` selects the pricing algorithm inline | Extract `IPricingStrategy` with keyed DI; remove the switch    |
+| minor    | Application/Orders/OrderService.cs:12     | Concrete `OrderService` is not `sealed`                | Mark it `sealed`                                                  |
 ```
 
-Severities (from `CLAUDE.md`):
-- **blocker** — ships a bug, violates a hard rule (sync-over-async, lifetime mismatch, static mutable state)
-- **major** — design / correctness issue that will hurt soon (wrong pattern choice, leaky abstraction, missing nullability)
-- **minor** — style / small inconsistency (naming, missing `sealed`, hand-rolled boilerplate)
-- **nit** — optional preference
-
-## Anti-patterns to always flag
-
-- **Anemic interface that has one implementation forever.** Wait for the second concrete before extracting the interface.
-- **Repository that wraps `DbSet<T>` 1:1.** It pays the abstraction cost without delivering any indirection value.
-- **Mediator on a CRUD slice.** If your handler is `_db.Add(...); await _db.SaveChangesAsync();`, MediatR is a tax.
-- **God service.** `IOrderService` with 22 methods spanning 3 bounded contexts.
-- **`Task.Run` to wrap I/O.** Drops to a thread for no reason; the I/O was already async.
-- **Singleton consuming Scoped.** The scope captured at construction is wrong forever after.
-- **`catch (Exception)` followed by `return default`.** Swallows the failure; the test passes; production silently corrupts.
-- **`DbContext` injected into every service.** A `DbContext` injected widely tends to become the "service" — push behind a real abstraction or keep it in a thin data layer.
-- **Decorators with two concerns.** "LoggingAndRetryDecorator" — split.
-- **`public abstract class XBase` with one subclass.** Subclassing isn't the pattern; composition is.
-- **Comments compensating for naming, and stale comments.** A body that needs a step-by-step commentary needs extracting; a comment that no longer matches the code is a confident lie. Both per `engineering-practices/code-comments` — the fix is the rename or the extraction, never a reword.
+End with one line: `Rules: project .claude/rules/be-dotnet/ | plugin copy (not installed)`.
 
 ## Handoffs
 
 - Need a rewrite → `backend/dotnet/skills/pattern-writer`
 - Conceptual lookup → `backend/dotnet/skills/pattern-guide`
-- Java review of similar issues → `backend/java/skills/code-review`
-- TypeScript review → `backend/node/skills/code-review`
-- Test-side reviews → `qa/dotnet/skills/api-test-author/review` / `qa/dotnet/skills/ui-test-author/review`
-- Language-agnostic pattern/architecture altitude review → `backend/_shared/code-review`
+- A rule is missing or wrong → edit the project's `.claude/rules/be-dotnet/`; for every project, the plugin's `backend/dotnet/skills/rules/`
+- Cross-stack architecture critique → `backend/_shared/code-review`

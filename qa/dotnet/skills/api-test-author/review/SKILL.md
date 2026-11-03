@@ -5,7 +5,7 @@ description: Use when reviewing existing .NET API test code (NUnit + RestSharp) 
 
 # QA — API Test Reviewer (.NET / NUnit + RestSharp)
 
-Reviews .NET API test code against the patterns enforced by `qa/dotnet/skills/api-test-author/writer`. Produces a findings table in the `CLAUDE.md` review format. Does **not** rewrite — points to the fix and lets the human apply it.
+Reviews .NET API test code (tests, clients, DTOs) against the qa-dotnet rule files. Produces a findings table in the `CLAUDE.md` review format. Does **not** rewrite — points to the fix and lets the human apply it.
 
 ## When to use
 
@@ -28,69 +28,25 @@ Reviews .NET API test code against the patterns enforced by `qa/dotnet/skills/ap
 2. **Endpoint contract** if available (OpenAPI snippet, sample 4xx body) — needed to grade `ProblemDetails` / error-body assertions
 3. **Project conventions** that override defaults (e.g. project standardized on `ErrorDto` rather than `ProblemDetailsDto`)
 
-## Review checklist
+## The checklist is the rule file
 
-### Cross-stack (applies to all API tests)
+Every check, and the severity it reports, lives in one place: the qa-dotnet rule files `automation.md` (core), `api.md`, and `test-data.md`, `db-verification.md` or `suite-config.md` when the files under review match their `paths:`.
 
-| Check | Bad sign | Severity |
-|---|---|---|
-| Each test asserts something | Test ends after the request with no assertion | blocker |
-| Status code is always asserted first | Test reads body before checking status | major |
-| Tests are independent | Test B reads a row that Test A creates | blocker |
-| No hardcoded credentials, base URLs, tokens | Literal `"https://staging..."` or `"x-api-key: abc123"` | blocker |
-| No `Thread.Sleep` | Any literal millisecond sleep | blocker |
-| Resource cleanup on resources the test created | Created records left in the system if the test fails mid-way | major |
-| One logical behavior per test | A single test asserts 200 path AND 404 path AND 401 path | major |
-| Every assertion states one expected condition | `Is.EqualTo(OK).Or.EqualTo(NoContent)`, `Is.AnyOf(...)`, `\|\|` inside `Assert.That` — on a status, a field, a count, or a duration | major |
-| Test names describe behavior | `Test1`, `TestGet`, `It_Works` | minor |
-| Deserialization uses a typed DTO | `JsonNode` / dictionary parsing in assertions | major |
-| Status codes via named constants | Raw integers (`200`, `401`) | minor |
-| Error responses asserted beyond status | A 400/404/422 test that only asserts the code, ignoring the body | major |
+1. **The project's copies first**: `.claude/rules/qa-dotnet/` at the project root. The team may have edited them, and its edits win.
+2. **Otherwise the plugin's copies**: `qa/dotnet/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/qa-dotnet:rules` installs them.
 
-### .NET (NUnit + RestSharp) specifics
+Read `automation.md` and `api.md`, plus each other file whose `paths:` match a file under review, in full before the first finding. A rule loaded on its own by the session is not enough: a review needs every file that applies. Never review from memory of the rules, and never add a check the files do not contain; propose it as a rule change instead.
 
-| Check | Bad sign | Severity |
-|---|---|---|
-| Fixture inherits `BaseApiTest` | Direct test class with hand-built RestSharp clients | major |
-| Single `AuthToken` convention (post P/M-client collapse) | `*PClient` / `*MClient` types or `UserAuthToken` / `AdminAuthToken` references | minor |
-| Positive tests use the typed client overload with `HttpStatusCode expected` | Test reads `response.StatusCode` then calls `Deserialize<T>` manually for a happy path | major |
-| 4xx tests apply the strict `ProblemDetails` template | A 400/404/422 that asserts only `response.StatusCode` | major |
-| `AttachBody(response)` called before asserting an error body | Failure produces a status-code message but no body in Allure | minor |
-| `Assert.That` + `Assert.Multiple` only — no FluentAssertions | `.Should()`, `AssertionScope` | major |
-| `System.Text.Json` only — no Newtonsoft | `JsonConvert.DeserializeObject` | major |
-| Explicit types — no `var` for known types | `var dto = client.Create(...)` | minor |
-| Client variable named after concrete type in camelCase | Generic `client` variable | nit |
-| No `try`/`catch` anywhere in a test or `[TearDown]` | Any catch block in a `[Test]`; a `try/finally` wrapping the body for cleanup; a swallowing `[TearDown]` | major |
-| Created resources tracked and deleted in `[TearDown]` | Cleanup inlined in the test body instead of registered | major |
-| Unexpected errors fail loudly with an identifying message | Empty `catch`, catch-and-continue, or an assertion whose failure names no id/subject | major |
-| Deserialization failures name the property path and body | A bare `JsonException` trace with no `AttachBody` and no contract-drift message | major |
-| A job test never waits for the real schedule (`qa/dotnet/skills/time-and-concurrency-testing`) | A `Thread.Sleep` / `Task.Delay` or long poll until the cron fires, or the production schedule edited so the job fires soon | blocker |
-| A boundary test runs with a controlled clock or a stated skew margin | A cut-off / DST / month-end test with no replaced `TimeProvider`, no test-clock endpoint, and no margin larger than skew plus latency named in the test | major |
-| A race test has a start gate and `[Repeat]`; a duplicate-delivery test is not defeated by broker deduplication | Sequential awaits called a race; a `for` loop or `Parallelizable` as the barrier; asserting which request won; a duplicate publish with the same broker message / deduplication id | major |
-| 401 test uses a single status-code assertion | A 401 test that tries to deserialize a `ProblemDetails` body | minor |
-| `[AllureFeature]` + `[AllureStory]` + `[AllureSeverity]` on every test | Missing Allure attributes | minor |
-| TC-ID traceability when a test-case document exists (`[AllureTms(...)]` / `[Property("TmsLink", "TC-…")]` / `[AllureStory("TC-… — …")]`) | Tests generated from a TC document with no link back to the planned cases | nit |
-| No `.Result` / `.Wait()` / `.GetAwaiter().GetResult()` | Sync-over-async on an async RestSharp call | blocker |
+## Version policy
 
-### Comments in test code
-
-Load **[`engineering-practices/code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. Its **test-code** section carries the AAA-banner rule and the exactly-three-permitted-comments list. This section supplies only the mechanics that differ here.
-
-| .NET mechanic | What to check |
-|---|---|
-| Doc syntax | XML doc (`/// <summary>`) — a doc block restating the test name is trivia |
-| Skips needing a reason and a ticket | `[Ignore("")]` / a bare `[Explicit]` — a silently disabled test |
-| Where an unclear step goes instead | Into a named client method, not a comment above the request-building chain |
-
-**The API-test corollary:** an instruction to accept more than one value is permitted comment #2 — but only alongside a real parameterized case (`[TestCase]`) or a split test. A comment alone does not license the `OR`.
+Detect the TFM, NUnit major and client library first (`RestSharp`, `Microsoft.Playwright`, `HttpClient`). The rule file's "the codebase wins" line applies: a convention the suite follows consistently (an established naming shape, an `ErrorDto` in place of `ProblemDetailsDto`) is not a finding.
 
 ## Procedure
 
-1. Confirm imports show NUnit + RestSharp (`using NUnit.Framework;`, `using RestSharp;`).
-2. Read the whole file (test + client + DTO) before writing findings — cross-file issues are usually the real bugs.
-3. Walk the cross-stack checklist, then the .NET-specific list.
-4. For each finding, capture: file + line, the issue (concrete, not "looks weird"), and a one-sentence fix.
-5. **Do not rewrite the code.** Hand off to `qa/dotnet/skills/api-test-author/writer` if the user wants the rewrite.
+1. Read the rule files, then the whole of each file under review (test, client and DTO together); cross-file issues are usually the real bugs.
+2. Walk the rules in this order: assertions (one value, exact status, `ProblemDetails`), errors and cleanup, async and waiting, then the rest. Most blockers live there.
+3. Per finding: file and line, the rule broken, a one-sentence fix. The severity is the tag on the rule, never a new judgment.
+4. **Do not rewrite the code.** Hand off to `qa/dotnet/skills/api-test-author/writer` (or `playwright`) if the user wants the rewrite.
 
 ## Output format
 
@@ -100,33 +56,14 @@ Load **[`engineering-practices/code-comments`](../../../../../engineering-practi
 | blocker  | ApiTests/Tests/OrderTests.cs:67                   | `Thread.Sleep(2000)` between create and read                | Remove — the create is synchronous; rely on response body              |
 | major    | ApiTests/Tests/OrderTests.cs:88                   | 400 test asserts only `StatusCode`, ignores ProblemDetails  | Apply strict template: assert Type/Title/Status + `Errors["Amount"]`   |
 | minor    | ApiTests/Clients/OrderClient.cs:42                | Raw integer `200` in expected status                        | Use `HttpStatusCode.OK`                                                |
-| nit      | ApiTests/Tests/OrderTests.cs:14                   | Test name `Test1`                                           | Rename to behavior: `GetOrderByIdReturnsOk`                            |
+| minor    | ApiTests/Tests/OrderTests.cs:14                   | Test name `Test1`                                           | Rename to behavior: `Should_ReturnTheOrder_When_TheIdExists`           |
 ```
 
-Severities (from `CLAUDE.md`):
-
-- **blocker** — ships a bug, breaks the build, hard rule violation (sleeps, leaked credentials, shared state, sync-over-async)
-- **major** — design / correctness issue that will hurt soon (silent failures, lost coverage, wrong layering)
-- **minor** — style / small inconsistency (naming, constants)
-- **nit** — optional preference
-
-## Anti-patterns to always flag
-
-- **Status-code-only 4xx test.** When the backend emits a `ProblemDetails` body, asserting just the code throws away the highest-signal failure information.
-- **`OR` in an assertion.** `Is.EqualTo(HttpStatusCode.OK).Or.EqualTo(HttpStatusCode.NoContent)` (or `Is.AnyOf`, or `||` inside the condition) means the author did not know what the endpoint returns, so the test passes on the wrong behavior and never fails when the API changes between the two. Applies to fields, counts, and time budgets as much as to status codes. Fix by splitting into one test per expected outcome, parameterizing with `[TestCase]`, or pinning the correct value.
-- **Happy-path test that asserts one field.** Round-trip persistence (GET-after-POST) is cheap and catches most regressions; one-field tests pass through real bugs.
-- **Client that deserializes.** Couples response shape to the client layer and removes the test's ability to assert on raw `RestResponse` for error paths.
-- **Shared mutable test data.** Tests must remain independent; pre-seeded shared rows always end up being mutated by some test eventually.
-- **401 test that deserializes a body.** Auth middleware returns no body — wasting effort and producing flaky `null` checks.
-- **A `try`/`catch` inside a test.** There is no legitimate one: an expected exception is asserted with `Assert.ThrowsAsync<T>`, an unexpected one must reach NUnit, and cleanup belongs in `[TearDown]`. A catch in a test body is either hiding a failure or substituting for an assertion.
-- **A `try`/`finally` wrapping a test body for cleanup.** Track the created id and delete it in `[TearDown]` — the test body stays linear and cleanup runs whether the test passed, failed, or threw.
-- **A swallowing `[TearDown]`.** `catch { }` around the delete means the suite leaks data silently until the environment rots. Let it throw; NUnit reports the teardown error.
-- **Deserialization failure with no context.** A raw "The JSON value could not be converted" with no attached body and no property path makes the reader reproduce the call by hand to learn what the test already knew.
-- **Reading dates as strings.** Forgetting `JsonSerializerOptions` for dates causes silent `null` reads.
-- **Tests tightly coupled to specific data ids.** "Order 42 exists in staging" tests fail the day someone reseeds.
+End with one line: `Rules: project .claude/rules/qa-dotnet/ | plugin copy (not installed)`.
 
 ## Handoffs
 
+- A rule is missing or wrong → edit the project's `.claude/rules/qa-dotnet/`; for every project, the plugin's `qa/dotnet/skills/rules/`
 - Need a rewrite → `qa/dotnet/skills/api-test-author/writer`
 - DTO is wrong → `qa/dotnet/skills/api-models`
 - Client layer needs refactor → `qa/dotnet/skills/api-client-writer`

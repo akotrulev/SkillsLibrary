@@ -195,24 +195,7 @@ Order: stop accepting → drain in-flight requests (axum does this) → cancel a
 
 ## Rules
 
-- No blocking call and no CPU work over ~100 µs on a runtime thread; `spawn_blocking` or `rayon`
-- No `std::sync` guard alive across `.await`; prefer copying out over `tokio::sync::Mutex`
-- Every spawned task has an owner (`JoinSet` / `TaskTracker`) and a cancellation path
-- Every channel fed from outside is bounded; every scarce resource has a `Semaphore`
-- Every outbound call has a timeout; retries only for idempotent operations
-- Every `select!` branch in a loop is cancel-safe
-- Shutdown order: stop accepting → drain → cancel tasks → flush telemetry → close pools
-- `tracing` spans attach to futures with `.instrument(span)`, never `span.enter()` across `.await`
-
-## What NOT to do
-
-- No `tokio::spawn` whose handle is dropped and whose error is never seen
-- No `unbounded_channel` between a request handler and a worker
-- No `Arc<Mutex<HashMap>>` grown without bound as a cache — use `moka` with a capacity and TTL
-- No `thread::sleep` in async code; no `tokio::time::sleep` in a test to "wait for" something
-- No nested runtimes (`#[tokio::main]` inside a library, `Runtime::new()` inside async code)
-- No `select!` with a `biased;` ordering unless starvation of the later branches is intended and stated
-- No `futures::executor::block_on` anywhere in a tokio program
+The standards this skill's output must meet are the be-rust rule file `rust.md` (Async on tokio), not a list here. Read the project's copy in `.claude/rules/be-rust/`, or the plugin's in `backend/rust/skills/rules/` when the project has not installed them (`/be-rust:rules` does). Where it and this skill's recipes disagree, the rule file wins.
 
 ## Handoffs
 

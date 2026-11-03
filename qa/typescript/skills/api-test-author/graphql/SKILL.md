@@ -229,25 +229,9 @@ on a 4xx; here the analogue is `GraphQLErrorsSchema` on a 200 — same "validate
 a status" discipline, different envelope. The two skills share the Schema + Client + Spec spine; only the
 transport contract differs.
 
-## Rules (hard constraints)
+## Rules
 
-- **The gate is the `errors` envelope, not the HTTP status.** Assert `res.status === 200` (it documents the
-  GraphQL contract) but make `expect(res.errors).toBeUndefined()` (happy) / `GraphQLErrorsSchema.parse(res.errors)`
-  (error) the real assertion. The one exception — transport-level auth/parse failures — is pinned explicitly per
-  the server's contract, not assumed.
-- **The client never throws on a GraphQL error.** `execute` returns `{ status, data, errors }` raw; the spec
-  owns what counts as a failure. No `graphql-request`/Apollo throw-on-error in the assertion path.
-- **`data` and `errors` are asserted together on partial responses** — the resolved field(s) on `data` **and**
-  the failing field's `errors[]` entry by `path`/`extensions.code`. Never assert one half.
-- **Operations are parameterized — variables passed separately, never interpolated into the query string.** A
-  typed `variables` object; no string-splicing of input.
-- **Validate the typed `data` with a per-operation Zod schema** modelling the **selection set**, plus the shared
-  `GraphQLErrorSchema` for the envelope. One logical assertion per test; assert specific `extensions.code` +
-  `path`, never a bare `errors` presence.
-- **A mutation test round-trips a read** to prove persistence; data created in a spec is cleaned up in
-  `afterEach`/`afterAll` (ids tracked as created; no `try/finally` in the spec, no `try/catch` in the hook).
-- **Subscriptions are out of scope** → `qa-typescript:realtime-stream-testing`. **Endpoint + token via env**, read
-  lazily, never logged. No `waitForTimeout`/sleeps; `strict: true`.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `api-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Cross-references
 

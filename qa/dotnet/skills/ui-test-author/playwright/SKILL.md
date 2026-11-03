@@ -96,104 +96,17 @@ Start from the assets: copy them, rename the root namespace, and keep their shap
 
 ## Rules
 
-### Lifecycle
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `automation.md` and `web-ui.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-- **Every test class derives from the one `BaseTest`.** No test or specialised skill calls
-  `Playwright.CreateAsync()` or declares a second base class; a role, a device or a locale is an override
-  of `ContextOptions()` on the fixture that needs it. The one other `Playwright.CreateAsync()` is
-  `AuthSetup`'s `[OneTimeSetUp]`.
-- **`ContextOptions()` amends `base.ContextOptions()`**, never returns `new()` — that drops `BaseURL`, the
-  video folder and the defaults.
-- **Parallelism is `ParallelScope.Self` only**, declared once on `BaseTest`. Never `All`, `Children` or
-  `Fixtures`: tests of one fixture share one instance and its `Page`.
-- **Launch options live in the `.runsettings`** (`BrowserName`, `LaunchOptions`, `ExpectTimeout`,
-  `TestIdAttribute` — the only keys the adapter reads). The browser is per worker, so a suite that needs
-  other launch arguments gets its own `.runsettings` and run.
-- `BASE_URL` is required: `GotoAsync("/login")` and `Page.APIRequest` resolve against it. `HEADED=1` runs
-  headed (the adapter reads it); `BROWSER=firefox` switches the browser.
-- Failure evidence is `BaseTest`'s: trace, full-page screenshot and video kept only on failure, in
-  `<WorkDirectory>/playwright-artifacts/<Class>.<Test>.{zip,png,webm}`. Its `[TearDown]` closes the context
-  itself — `PageTest` does so only after a pass — then saves the video. The video API is `PathAsync()`; the
-  docs' `GetPathAsync()` does not exist.
+## Mechanics the rules rely on
 
-### Locators
-
-1. **The ladder:** `GetByTestId` → `GetByRole` → `GetByLabel` → `GetByPlaceholder` → `GetByText` →
-   `GetByAltText` / `GetByTitle` → CSS. The first rung the element supports wins.
-2. **Test ids are PascalCase dot-separated and static** — `Login.Submit`, `OrderRow`, `OrderRow.Title` — the
-   format `fe-react` and `fe-blazor` generate. A row is picked by its content, never by an id that embeds a
-   key, an index or a state.
-3. **A fallback carries no marker in the code.** Record it in `missing-testids.md` (page, element,
-   suggested id, fallback in use). The report is the contract; no `TODO`, no comment on the locator.
-4. **Scope instead of picking.** A locator that matches many is narrowed by its component root,
-   `parent.Locator(child)`, or `Filter(new() { Has = ... })` / `Filter(new() { HasText = ... })`. `Nth()` /
-   `First` only where order is the behaviour, and then the member name says so.
-5. The `Visible` property (1.63) instead of `:visible`; `FrameLocator` / `ContentFrame` for iframes;
-   `AddLocatorHandlerAsync` for overlays that may appear; `Describe()` on every locator a test asserts on.
-6. **Never assert on an `Or()` locator** — it passes on either state.
-
-### Page objects
-
-- Locators are built once, in the constructor: `private readonly ILocator` fields, and get-only properties
-  for the ones tests assert on (`Error`). Not expression-bodied properties: a lazy locator is no slower
-  there, but the definitions scatter.
-- A page takes `(IPage page)`. A **component** (a region reused across pages — a form, a row, a menu) takes
-  its root `ILocator` and builds its children from it, as `SignInForm` does.
-- Methods are `async Task`, named for user intent (`SignInAsync`, `AddToCartAsync`), never the widget
-  (`ClickButtonAsync`). An action that always lands on another page may return that page object.
-- The page owns its URL in `GoToAsync()`. Test classes never call `Page.GotoAsync`, `Page.Locator` or any
-  other raw `Page` method.
-- **No assertions in page objects.** They expose locators; tests assert. An optional `ExpectLoadedAsync()`
-  that asserts one landmark is the only exception.
-- Pages are built in the test class's `[SetUp]`, never as properties of `BaseTest`. No shared `BasePage`
-  until three pages share real behaviour (`page-object-design`).
-
-### Tests
-
-- **Names are `Should_X_When_Y`** (`Should_ShowInvalidCredentialsError_When_PasswordIsWrong`), one test class
-  per feature.
-- **Categories tag the area and the tier:** `[Category("login")]`, `[Category("smoke")]`;
-  `[AllureFeature("Login")]` on the class.
-- One logical behaviour per test; every test asserts. Several assertions are fine when they check one
-  behaviour.
-- **Web-first assertions only** (`references/assertions.md`). No one-shot read compared later
-  (`Assert.That(await loc.IsVisibleAsync(), Is.True)`, `TextContentAsync()`); `ILocator` has no `.Text`
-  (that is Selenium's `IWebElement`).
-- **One expected condition per assertion — never an `OR`**: no `.Or.`, no `Is.AnyOf(...)`, no `||` in
-  `Assert.That`, no `Regex("a|b")` in a text or URL assertion. Split the outcomes, or use `[TestCase]`.
-- **Failures name the subject:** `Describe()` on the locator, and `Expect(locator, "message")` (1.60) where
-  the record or user matters; NUnit value assertions carry the evidence as the message.
-- **No `try` / `catch` / `finally` in a test or a hook.** An expected exception from async code is
-  `Assert.ThrowsAsync<T>` — never `Assert.Throws<T>` around a `Task`, which reports that nothing was thrown.
-  Cleanup is the class's `[TearDown]`.
-- No `if` or `for` driving assertions; `[TestCase]` / `[TestCaseSource]` instead. Tests are independent:
-  no `[Order]` chains, no shared mutable state. One long journey is one test with `[AllureStep]` methods.
-- API responses assert the exact status with the body:
-  `Assert.That(created.Status, Is.EqualTo(201), await created.TextAsync())` — never
-  `Assert.That(res.Ok, Is.True)` or `ToBeOKAsync()`.
-- Async all the way: never `.Result`, `.Wait()` or `.GetAwaiter().GetResult()`. No hardcoded credentials,
-  URLs or hostnames — `BASE_URL`, `E2E_USER`, `E2E_PASSWORD`. No `Console.WriteLine`; use the trace.
-
-### Waiting
-
-- No `WaitForTimeoutAsync` and no `Task.Delay` for UI state; raise the matcher's timeout
-  (`ToBeVisibleAsync(new() { Timeout = 15_000 })`), or set `ExpectTimeout` once in the runsettings.
-- No `WaitUntil = WaitUntilState.NetworkIdle`; navigate, then assert a landmark.
-- No `WaitForAsync()` before an action that already auto-waits; no `Force = true` (close the overlay with
-  `AddLocatorHandlerAsync`, scroll, wait for the state).
-- No `WaitForNavigationAsync` (deprecated); `WaitForURLAsync` or `Expect(Page).ToHaveURLAsync(...)`, whose
-  string is an exact match — a glob needs `WaitForURLAsync` or a `Regex`. No page-level selector APIs
-  (`Page.ClickAsync(selector)`, `Page.InnerTextAsync(selector)`).
-- `RunAndWaitForResponseAsync(action, predicate)` starts the wait with the action. No hand-rolled retry
-  loops.
-
-### Auth and data
-
-- Sign in **once per run per role** in `AuthSetup` (root namespace), save the state, and point signed-in
-  fixtures at it in `ContextOptions()`. Never sign in inside every test.
-- Records a test needs are created through `Page.APIRequest` in the class's `[SetUp]`, with a unique value
-  per test, and deleted in its `[TearDown]`. Never seed in `[OneTimeSetUp]`.
-- Builders for any record with four or more fields (`qa/dotnet/skills/test-data-builder`).
+- Launch options live in the `.runsettings` (`BrowserName`, `LaunchOptions`, `ExpectTimeout`, `TestIdAttribute`, the only keys the adapter reads). The browser is per worker, so a suite that needs other launch arguments gets its own `.runsettings` and run. `HEADED=1` runs headed; `BROWSER=firefox` switches the browser.
+- `BaseTest`'s `[TearDown]` closes the context itself (`PageTest` does so only after a pass), then saves the video; evidence lands in `<WorkDirectory>/playwright-artifacts/<Class>.<Test>.{zip,png,webm}`. The video API is `PathAsync()`; the docs' `GetPathAsync()` does not exist.
+- Locators are `private readonly ILocator` fields built in the constructor, with get-only properties for the ones tests assert on (not expression-bodied, so the definitions stay together). A component takes its root `ILocator` and builds its children from it, as `SignInForm` does.
+- The `Visible` property (1.63) instead of `:visible`; `FrameLocator` / `ContentFrame` for iframes; `AddLocatorHandlerAsync` for overlays that may appear; `Expect(locator, "message")` (1.60) where the record or user matters. `ILocator` has no `.Text`; that is Selenium's `IWebElement`.
+- A slow state raises the matcher's timeout (`ToBeVisibleAsync(new() { Timeout = 15_000 })`) or sets `ExpectTimeout` once in the runsettings.
+- Categories tag the area and the tier (`[Category("login")]`, `[Category("smoke")]`), `[AllureFeature]` on the class; a long journey is one test with `[AllureStep]` methods.
+- An API call inside a UI test asserts the exact status with the body as the message: `Assert.That(created.Status, Is.EqualTo(201), await created.TextAsync())`, never `res.Ok` or `ToBeOKAsync()`.
 
 ## Generation steps
 

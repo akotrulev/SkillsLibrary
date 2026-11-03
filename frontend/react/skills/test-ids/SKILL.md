@@ -241,18 +241,7 @@ When QA's `page-objects-from-url` hands over a report of elements it could not l
 
 ## Anti-patterns to flag
 
-| Anti-pattern | Fix |
-|---|---|
-| `data-testid={`Row.${model.id}`}` on a list row | Hardcode the static row locator (Rule 6) |
-| `data-testid` on a layout `<div>` with no test purpose | Remove |
-| `Record<Enum, string>` mapping enum → testid | Replace with inline `` `…${enumValue}` `` (Rule 7) |
-| Ternary collapsing to `undefined` | Use `?? ''` and a named local (Rule 3) |
-| New `AppButton`/`AppTextField` wrapper introduced just to carry testids | Set the inline attribute on the library control — its rest-prop spread forwards it (Rule 1) |
-| Two distinct elements sharing one locator | Sub-namespace one of them (Rule 6) |
-| kebab-case or snake_case segments | PascalCase only |
-| Locators containing numeric ids, GUIDs, or array indexes | Use enum/field names; rows are addressed by index over a shared static locator |
-| Array index reused as both React `key` and testid qualifier | `key` = stable domain id; testid = static role — different concerns |
-| `aria-label` added to mirror a testid | One attribute only — a11y labels belong to [`accessibility`](../accessibility/SKILL.md) |
+Each smell is the inverse of rules 1–7 above, and the review severities are in the fe-react core rule file `react.md`. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). One more, owned here: **no `aria-label` added to mirror a testid** — one attribute only; accessible names belong to [`accessibility`](../accessibility/SKILL.md).
 
 ## Out of scope
 

@@ -220,6 +220,10 @@ public Response getAll(int page, int resultsPerPage) {
 
 ## Rules
 
+The standards this skill's output must meet are the qa-java rule files, not a list here: `qa-java.md` (core) and `qa-java-api.md`. Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
+
+## Conventions
+
 ### Class structure
 
 - Class name: `{Resource}Client` — PascalCase resource noun + `Client`. **No `P`/`M` suffix.**
@@ -293,19 +297,6 @@ public Response create(Map<String, Object> body) {
 ```
 
 Only add these overloads when the test plan requires them — not by default.
-
-### What NOT to do
-
-- No `Thread.sleep()` or manual delays.
-- No `RestAssured.given()` directly — always go through inherited `spec()` so base URI, auth header, and logging filter are applied.
-- No `RestAssured.baseURI = ...` mutation; do not touch the static config.
-- No hardcoded base URLs or credentials.
-- No try/catch around HTTP calls — `BaseApiClient`'s logging filter handles failure reporting.
-- No `Object` body parameters on the default overloads — always strongly-typed DTOs.
-- Do not deserialize inside raw `Response` methods — only in typed overloads.
-- No `P`/`M` class-name suffix; no `public/` or `management/` subpackages.
-- No static mutable state on the client.
-- No `@BeforeClass` / `@BeforeMethod` lifecycle inside the client — clients are pure helpers, not test fixtures.
 
 ## Generation steps
 

@@ -163,13 +163,7 @@ Only where the project already uses `swift-snapshot-testing`: **one reusable vie
 
 ## Rules
 
-- Swift Testing in every new test; XCTest only for UI automation, performance and Objective-C exceptions.
-- One behaviour per test, one expected value per assertion, no `if` / `for` driving assertions — parameterize instead.
-- No `do`/`catch` in a test body; `#expect(throws:)` or the error reaches the runner.
-- Time, identity, randomness, configuration and I/O enter through the initializer; fakes over mocks; no protocol created only for a test.
-- No `Task.sleep` or timing in a test; tests are independent and order-free.
-- Journeys, gestures and system dialogs go to `qa-mobile-<stack>`.
-- **≥ 80% of the code you wrote is covered** — see *Coverage floor* below.
+The standards a test must meet are the mobile-ios rule file `swift-tests.md`, not a list here. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where it and this skill disagree, the rule file wins. The coverage floor below is how its 80% rule is measured.
 
 ## Coverage floor — ≥ 80% of the code you wrote
 
@@ -189,15 +183,6 @@ The tests cover **at least 80% of the code the change wrote**: every type it cre
 
   `lineCoverage` on the changed files (`targets[].files[]`) is the number. A Swift package: `swift test --enable-code-coverage`, then the JSON at `swift test --show-codecov-path`.
 - **Below 80%, write the missing tests.** The uncovered lines are the list.
-
-## What NOT to do
-
-- No `XCTAssert*` inside Swift Testing, no `#expect` inside an `XCTestCase`.
-- No force unwrap but the fixed-literal fixture; no `try!` — use `try` in a `throws` test.
-- No `URLSession.shared` in a test; no real network, Keychain or system clock.
-- No shared mutable state between tests; no `.serialized` to hide one.
-- No whole-screen snapshot; no snapshot as a substitute for an assertion.
-- No tests of getters, DTOs or a wrapper that only forwards; no comment narrating a test.
 
 ## Generation steps
 

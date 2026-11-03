@@ -210,14 +210,7 @@ A Client Component renders **on the server (prerender)** and **again in the brow
 
 ## Common gotchas
 
-- **Defensive `'use client'`** creeping the whole tree into the bundle — default server, opt in per leaf.
-- **`await`ing data in a Client Component body** — you can't; fetch in the RSC parent, or use `use()`/a data hook.
-- **Reading `window`/`localStorage` in render** → hydration mismatch. Do it in `useEffect`.
-- **Index keys** in dynamic lists — state/focus corruption on reorder.
-- **`useEffect` syncing two pieces of state** — almost always one should be derived, not stored.
-- **Missing effect cleanup** — leaked subscriptions/timers across navigations.
-- **Server data in a client store** — that's TanStack Query / RSC's job, not Zustand's ([`state-management`](../state-management/SKILL.md)).
-- **A Client Component importing a Server Component** — pass it as `children` instead.
+The gotchas a beginner hits (defensive `'use client'`, `await` in a Client Component, browser reads in render, index keys, effect-synced state, missing cleanup, server data in a client store, a Client Component importing a Server Component) are rules in the fe-react core rule file `react.md`, with their severities. Read the project's copy in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does).
 
 ## Handoffs
 

@@ -180,21 +180,7 @@ Constructor-injection's RN form is **props, then context**: pass collaborators (
 
 ## Rules
 
-- Server state → TanStack Query; never a store.
-- Screen-scoped state is a typed route param.
-- State is minimal ground truth; no effect-synced mirrors.
-- One Context or store per concern; selectors on stores; throwing consumer hooks.
-- Persist deliberately: MMKV for client state, `expo-secure-store` for secrets, the Query cache for server data.
-- No manual memoization for render cost when the Compiler is on.
-
-## What NOT to do
-
-- No server data in Zustand or Context.
-- No giant `AppStore`; no 6-level prop drilling.
-- No `useEffect` syncing two states.
-- No `useReducer` for a single boolean.
-- No tokens in a plain persisted store.
-- No hand-built offline mutation queue in a raw store.
+The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `react-native.md` and `react-native-data.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Handoffs
 

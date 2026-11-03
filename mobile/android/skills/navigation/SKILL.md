@@ -134,24 +134,7 @@ NavHost(navController, startDestination = OrdersList) {
 
 ## Rules
 
-- New apps: Navigation 3; existing apps: Navigation Compose 2.10 with typed routes; never both mixed in one graph.
-- Keys are `@Serializable`, id-carrying, small; the back stack is `rememberNavBackStack` (N3) / typed routes (2.10).
-- Entry decorators on `NavDisplay`; ViewModels scoped to the entry.
-- Screens take callbacks, not the back stack or `NavController`.
-- A destination loads from its key; a restored process works.
-- Top-level areas are a navigation suite with one back stack each — no hand-built tab bar.
-- Back is predictive; `BackHandler` enabled only while it has a job; no `onBackPressed()` override.
-- Links go through one validated parse function; bad input is ignored; no secret in a scheme.
-
-## What NOT to do
-
-- Navigate with string routes, or put a model object or lambda in a key.
-- Pass `NavBackStack` / `NavController` into a leaf composable or a ViewModel.
-- Navigate by emitting a ViewModel event — the state-based pattern is in [`architecture`](../architecture/SKILL.md).
-- Leave `BackHandler(enabled = true)` permanently.
-- Claim `pathPattern=".*"` or trust `intent.data` unchecked.
-- Rewrite a working Navigation Compose graph to Navigation 3 as a side effect.
-- Use `LaunchedEffect(Unit) { navigate(...) }` to drive a flow.
+The standards this skill's output must meet are the mobile-android rule files, not a list here: `android-ui.md`, `android-manifest.md` and `android.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation (exit gate)
 

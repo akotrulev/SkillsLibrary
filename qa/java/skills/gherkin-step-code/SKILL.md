@@ -37,37 +37,18 @@ Confirm at most 2–3.
 2. **The page objects** available (paths) — which intent methods exist; what's missing.
 3. **Platform** — Playwright/Selenium (web) or Appium (mobile).
 
-## Core rules
+## Rules
 
-### 1. One glue class per domain, mapped to the Step Catalog
+The standards this skill's output must meet are the qa-java rule files, not a list here: `qa-java-bdd.md` and `qa-java.md` (core). Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-Group steps by feature/domain (`AuthenticationSteps`, `CartSteps`), **not** one giant `Steps.java`. Each canonical Step-Catalog row becomes exactly one step method — reuse across scenarios, never duplicate. A step shared by many features goes in a `CommonSteps` glue class.
+How the bindings are built:
 
-### 2. Cucumber Expressions, not regex
-
-Default to Cucumber Expressions (`{string}`, `{int}`, `{word}`, `{double}`, enums via a registered `ParameterType`). Plain text with `{...}` placeholders maps cleanly to the catalog params; reach for regex only when matching genuinely needs it (anchors / alternation). Custom types via a `@ParameterType` method in a glue class.
-
-### 3. Inject shared state via the constructor — never new up the page or use static state
-
-Step classes take `TestContext` (the per-scenario object PicoContainer builds) in the constructor. The page/driver was created in the `@Before` hook; steps reach page objects through the context. **Cucumber does not support step-class inheritance** — every **glue class** gets `TestContext` injected through its constructor; no static fields, no `ThreadLocal` in the glue, no string-keyed bag.
-
-**Page objects take the `Page`, never `TestContext`.** They are the same classes the TestNG suite uses (`new LoginPage(page)`, `ui-test-author/playwright/SKILL.md` — constructor `(Page page)`, never config), so the BDD layer reuses them unchanged. `TestContext` builds them lazily from its `Page` and hands them to the steps; a page object that knew `TestContext` could not run outside Cucumber.
-
-### 4. Steps are thin; mechanics live in page objects
-
-A step body is one or two page-object calls. **No selectors, no `page.locator(...)`, no `findElement`, no waits in step definitions** — those belong in the page object. `Given`/`When` act; `Then` asserts with web-first `assertThat(...)` on a locator the page object exposes. Page objects never assert.
-
-### 5. No fixed waits (web)
-
-Rely on Playwright auto-waiting and web-first assertions (or Selenium `WebDriverWait` inside the page object). Never `Thread.sleep` / `page.waitForTimeout(...)` in a step.
-
-### 6. Implement the Cleanup as a hook, not steps
-
-The `feature-file-writer` Cleanup handoff becomes an `@After` hook in the support layer (the scaffold owns hook placement) — never Gherkin steps and never a step definition.
-
-### 7. Missing page objects → build them first
-
-If a step needs a page object/method that doesn't exist, stop and build it via `page-object-design`/`page-objects-from-url` (or hand to `qa-ui-java`/`qa-mobile-java`). Do not inline locators into the step to "make it pass."
+- Each canonical Step-Catalog row becomes exactly one step method; a step shared by many features goes in a `CommonSteps` glue class.
+- Cucumber Expressions map cleanly to the catalog's params (`{string}`, `{int}`, `{word}`, `{double}`); enums and custom types come from a `@ParameterType` method in a glue class. Regex only for anchors or alternation.
+- Every glue class takes `TestContext`, the per-scenario object PicoContainer builds, in its constructor. `TestContext` builds the page objects lazily from its `Page` and hands them to the steps; the page objects are the same classes the TestNG suite uses (`new LoginPage(page)`, `ui-test-author/playwright`), so the BDD layer reuses them unchanged.
+- `Then` asserts with web-first `assertThat(...)` on a locator the page object exposes.
+- The `feature-file-writer` Cleanup handoff becomes an `@After` hook in the support layer; the scaffold owns hook placement.
+- A step that needs a page object or method that does not exist stops here: build it with `page-object-design` / `page-objects-from-url`, or hand it to `qa-ui-java` / `qa-mobile-java`.
 
 ## Templates
 
@@ -170,21 +151,6 @@ public void iSignInWith(String email, String password) {
 5. For any missing page object/method, build it (`page-object-design`/`page-objects-from-url`) before binding the step.
 6. Ensure the Cleanup is implemented as the `@After` hook (scaffold layer), not as steps.
 7. `./gradlew test`, then run the features: every step bound (no undefined/ambiguous), the smoke scenario green.
-
-## Anti-patterns to flag
-
-- One mega step-definition file instead of per-domain classes.
-- Duplicate step methods for steps the catalog already unified — parameterize and reuse.
-- `page.locator(...)`, `findElement`, CSS, or waits inside step definitions — promote to a page object.
-- `new LoginPage(page)` or static state inside a step — inject `TestContext`, which builds the page objects.
-- A page object whose constructor takes `TestContext` — page objects take the `Page`, so the TestNG suite and the BDD layer share them.
-- An `expectLoaded()` or any other assertion inside a page object — the `Then` step asserts on the locator it exposes.
-- A string-keyed `Map`/`ThreadLocal` bag for typed state — use the injected `TestContext`.
-- Trying to share state via a `BaseSteps` superclass — Cucumber doesn't support step inheritance; inject `TestContext`.
-- `When`/`Given` doing assertions.
-- `Thread.sleep` / `page.waitForTimeout(...)` in a step.
-- Regex step expressions where a Cucumber Expression reads cleaner.
-- Implementing Cleanup as Gherkin/steps instead of an `@After` hook.
 
 ## Handoffs
 

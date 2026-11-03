@@ -120,19 +120,7 @@ A voluntary App Store Connect declaration per supported feature (VoiceOver, Voic
 
 ## Rules
 
-- `Button` / `Toggle` / `NavigationLink`, never a tap gesture on a view; every control has a label, the right trait and a value where it holds state.
-- Decorative content hidden; informative content described; rows grouped into one stop; headings marked.
-- Every gesture-only operation has an `accessibilityAction`; results are announced, focus moves only on meaning change.
-- Text styles and `@ScaledMetric`; layouts survive `accessibility5`; no clamp on content.
-- Targets ≥ 44 pt; contrast holds in light, dark and Increase Contrast; state never by colour alone; Reduce Motion honoured.
-
-## What NOT to do
-
-- No `.onTapGesture` as a button; no "button", "selected" or "disabled" inside a label.
-- No `.font(.system(size:))` for readable text; no `lineLimit(1)` on content; no `.dynamicTypeSize` clamp on content.
-- No `accessibilityLabel` used as a test identifier, no identifier copied into a label.
-- No `.accessibilityHidden(true)` on an interactive element; no fixed-height container around scalable text.
-- No Nutrition Label declared from code reading alone.
+The standards this skill's output must meet are the mobile-ios rule files, not a list here: `ios-accessibility.md`. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

@@ -127,20 +127,7 @@ fun SaveStatus(message: String?, modifier: Modifier = Modifier) {
 
 ## Rules
 
-- A real control, never a tap handler on a `Box`; every interactive element has a name, a role and its state in semantics.
-- Decorative content is `null`-described; informative content described; rows merged into one stop; headings marked.
-- Every gesture-only operation has a custom action; results announced through a live region; focus moves only on a meaning change.
-- `sp` text from the theme; layouts survive 200 % font scale; no `maxLines = 1` on content; no locked font scale.
-- Targets ≥ 48 dp, minimum never disabled; contrast holds in light, dark and dynamic colour; state never by colour alone; reduced motion honoured.
-
-## What NOT to do
-
-- No `Modifier.clickable` on a bare `Box` with no role; no "button", "selected" or "disabled" inside a description.
-- No `contentDescription = ""` on a clickable; no `contentDescription` on a decorative image.
-- No `contentDescription` used as a test id, no id copied into a description.
-- No `clearAndSetSemantics` over a tested row without moving the id; no `hideFromAccessibility` on an interactive element.
-- No `dp` text, no `fontScale` clamp, no `LocalMinimumInteractiveComponentSize` opt-out.
-- No accessibility claim made from code reading alone — it needs a TalkBack pass.
+The standards this skill's output must meet are the mobile-android rule files, not a list here: `android-ui-a11y.md` and `android-views.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win. An accessibility claim needs a TalkBack pass; code reading alone does not make one.
 
 ## Generation steps
 

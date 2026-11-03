@@ -219,7 +219,7 @@ async function getAll(page: number, perPage: number): Promise<ApiResponse> {
 
 `createBaseClient` is responsible for serializing `query` into a URL query string (skip undefined values, encode each key/value).
 
-## Rules
+## Conventions
 
 ### Module structure
 
@@ -294,19 +294,9 @@ async function createUnchecked(body: Record<string, unknown>): Promise<ApiRespon
 
 Only add these overloads when the test plan requires them — not by default.
 
-### What NOT to do
+## Rules
 
-- No `setTimeout(..., n)` or manual delays as sync.
-- No `axios`, `got`, `node-fetch`, `superagent`, or `supertest` — native `fetch` only.
-- No `// @ts-ignore` / `// @ts-expect-error` to silence type errors — fix the type.
-- No `any` in client method signatures or return types; Zod-inferred DTOs everywhere.
-- No hardcoded base URLs, secrets, or JWTs.
-- No try/catch around `execute(...)` — `baseClient` handles logging + network error rethrow.
-- No JSON parsing in raw methods — that's `baseClient`'s job; raw method returns `ApiResponse` unchanged.
-- No `expect` calls in raw methods — assertions belong in typed methods only.
-- No `P`/`M` class-name suffix; no `public/` or `management/` subfolders.
-- No top-level `await` for token fetching inside the client module.
-- No floating promises — every `execute(...)` must be `await`ed or `return`ed.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `api-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

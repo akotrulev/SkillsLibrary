@@ -30,18 +30,14 @@ Turns a discovered element inventory into a **WebdriverIO page object** — a `B
 4. **Actions** — user-intent actions and, for each, whether it navigates to another screen (→ destination `*Page` class name)
 5. **Target project** — repo path and existing `src/pages/mobile/` location/convention to match
 
-## Conventions (owned by `ui-test-author/appium`)
+## Conventions
 
-Before writing, **load `qa/typescript/skills/ui-test-author/appium/SKILL.md`** and apply its page-object rules. The non-negotiables it defines:
+The standards an emitted screen object must meet are the qa-typescript rule files `mobile-tests.md` and `qa-typescript.md`: the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). `ui-test-author/appium` carries the `BasePage` and the scoped-component recipe. The codegen specifics:
 
-- Extend `BasePage`; pages take **no `driver` parameter** — WebdriverIO's `browser` is implicit. Never call `browser.$(...)` directly outside `BasePage`.
-- All element access goes through the inherited selector helpers, in ladder order: `byTestId` (iOS `~`, Android `id=`) → native query (`byIosPredicate` · `byIosClassChain` · `byAndroidUiAutomator`, the last secondary because Google is deprecating `UiSelector`) → `byXPath`. An XPath rung is a temporary scaffold, not a destination — when `mobile-screen-explorer` later reports a stronger locator for that element, downgrade to it and drop its row from `missing-testids.md`. The code carries no marker.
-- Each locator id is a `private static readonly {ELEMENT}_ID` constant at the top (a fallback is named `{ELEMENT}_XPATH_FALLBACK`); elements are `private get` accessors that call the matching selector helper — never inline a selector string in an action. A page exposes intent and queries, never an element.
-- Return types: `Promise<void>` for same-screen actions; `Promise<{Destination}Page>` for navigation actions (return `new {Destination}Page()`).
-- **Every page object implements `verifyPageLoaded(): Promise<void>`** asserting the landmark is displayed (`expect(...).toBeDisplayed()` — the only assertion allowed inside a page object).
-- Accessors are typed `ChainablePromiseElement`; no manual `browser` plumbing. WDIO 10's `$` throws when a selector matches more than one element, so a repeating group becomes a **scoped component** (a row key, re-resolved on every call; see `ui-test-author/appium`), never a bare child selector.
-- No `browser.pause(ms)` / `setTimeout` waits — WDIO auto-waits, and `isElementVisible` returns `false` on a timeout.
-- Folder `src/pages/mobile/`; file `src/pages/mobile/<Screen>Page.ts`; multi-step flows in a sub-folder, repeating rows as scoped components that do not extend `BasePage`.
+- Element access goes through the inherited selector helpers, in ladder order: `byTestId` (iOS `~`, Android `id=`) → native query (`byIosPredicate` · `byIosClassChain` · `byAndroidUiAutomator`, the last secondary because Google is deprecating `UiSelector`) → `byXPath`. An XPath rung is a temporary scaffold: when `mobile-screen-explorer` later reports a stronger locator, downgrade to it and drop its row from `missing-testids.md`.
+- Each locator id is a `private static readonly {ELEMENT}_ID` constant (a fallback is `{ELEMENT}_XPATH_FALLBACK`); elements are `private get` accessors calling the matching helper.
+- Navigation actions return `Promise<{Destination}Page>` (`return new {Destination}Page()`); same-screen actions return `Promise<void>`.
+- Folder `src/pages/mobile/`, file `src/pages/mobile/<Screen>Page.ts`; multi-step flows in a sub-folder, repeating rows as scoped components that do not extend `BasePage`.
 
 ## Template
 
@@ -98,10 +94,8 @@ private get passwordReveal() { return this.byXPath(LoginPage.PASSWORD_REVEAL_XPA
 ## Rules
 
 - **Discovery is not this skill's job** — never invent a locator. If an element wasn't in the `mobile-screen-explorer` inventory, go get it there first.
-- **Test-id-first** in the emitted code, matching the discovery contract; fallbacks are named as fallbacks and listed in `missing-testids.md`. No `TODO` marker in code.
-- **`ui-test-author/appium` wins on every convention conflict** — this skill is its codegen-from-inventory front end, not a competing rulebook.
-- **No assertions outside `verifyPageLoaded()`**, no business logic / API calls, no test code in the page object.
 - One class per screen; update in place rather than creating a parallel duplicate.
+- Everything else an emitted screen object must meet is the rule files named under Conventions; where they and this skill disagree, the rule files win.
 
 ## Handoffs
 

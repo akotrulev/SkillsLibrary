@@ -434,27 +434,7 @@ crates/billing/            # lib
 
 ## Rules
 
-- Edition, `rust-version` and toolchain as detected; lints in `Cargo.toml`; `Cargo.lock` committed for binaries
-- No `unwrap()` outside tests; `expect("…")` only with the invariant stated
-- `thiserror` enums in modules and libraries, `anyhow` only in `main` / CLI glue
-- Newtypes for ids, quantities and money (integer minor units); constructors validate
-- `std::env::var` only in `config.rs`; secrets in `SecretString`
-- One `AppState`, built in `main`; no global mutable state (`static` + `Mutex`, `lazy_static` registries)
-- Handlers are transport; time and ids are passed into domain functions
-- Every error crosses to HTTP through one exhaustive `From` → `ApiError` → problem+json
-- Every router has a trace layer, a timeout and a body limit
-
-## What NOT to do
-
-- No `Box<dyn Error>` or `anyhow::Error` in a library's public signature
-- No trait with one implementation and no fake; no `*Service` → `*Repository` → sqlx forwarding chain
-- No `#[async_trait]` on a trait that is only used generically — native `async fn` works there
-- No `Arc<Mutex<…>>` in `AppState` for data the database owns
-- No `.clone()` to quiet the borrow checker on a `Vec`/`String` without restructuring first
-- No `#![allow(clippy::all)]` / `#![allow(warnings)]`
-- No `std::process::exit` in service code — return from `main` so destructors and the telemetry flush run
-- No `/:id` paths on axum 0.8 — they are literal segments now and silently match nothing
-- No `lazy_static!` / `once_cell` in new code — `std::sync::LazyLock` (1.80) covers it
+The standards this skill's output must meet are the be-rust rule files, not a list here: `rust.md`, and `cargo.md` for the manifest and toolchain. Read the project's copy in `.claude/rules/be-rust/`, or the plugin's in `backend/rust/skills/rules/` when the project has not installed them (`/be-rust:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation outputs
 

@@ -6,10 +6,10 @@ description: Use when reviewing existing TypeScript UI test code or page objects
 # QA — UI Test & Page Object Reviewer (TypeScript)
 
 Reviews TypeScript UI test code (Playwright Test, Selenium WebDriverJS / WebdriverIO, Appium with
-WebdriverIO, Maestro flows) against the patterns the matching generator skills enforce. Produces a findings table in the
+WebdriverIO, Maestro flows) against the qa-typescript rule files. Produces a findings table in the
 `CLAUDE.md` format. **Does not rewrite the code** — it points to the fix and lets the human apply it.
 
-The Playwright rules it checks against are owned by `qa/typescript/skills/ui-test-author/playwright`:
+The Playwright know-how behind those rules is `qa/typescript/skills/ui-test-author/playwright`:
 locators in `references/locators.md`, assertions in `references/assertions.md`, the config in
 `references/config-and-fixtures.md`.
 
@@ -52,109 +52,20 @@ Severities (from `CLAUDE.md`):
 
 **Do not rewrite the code during review.** If the user wants a rewrite, hand off to the matching generator.
 
-## Cross-stack smells (every TypeScript UI review)
+End with one line: `Rules: project .claude/rules/qa-typescript/ | plugin copy (not installed)`.
 
-| Check | Bad sign | Severity |
-|---|---|---|
-| Strict TypeScript honoured | `strict: true` off, scattered `any`, `as unknown as X` casts | major |
-| No sleeps as UI sync | `waitForTimeout`, `browser.pause`, `setTimeout` — any duration | blocker |
-| Locators follow the ladder (test id → role → label → placeholder → text → alt/title → CSS) | Raw CSS / XPath, or a role locator, where a test id exists | major |
-| Test ids are PascalCase dot-separated and static | `login-submit`, `order-row-42`, an index or a GUID in the id | minor |
-| Fallback locators carry no marker | A `// TODO: missing data-testid` comment instead of a `missing-testids.md` row | minor |
-| Assertions live in tests, not page objects | `expect(...)` in a page-object action | blocker |
-| No business logic in page objects | Price maths, JSON parsing, branching on app state | major |
-| Tests are independent | Test B relies on Test A's data; `test.describe.serial` chaining | blocker |
-| One logical behaviour per test | One test covers login + cart + checkout | major |
-| No `try` / `catch` / `finally` in a test or cleanup hook | Any catch in a test; `.catch(() => {})` on an action | major |
-| Failures identify the subject | Assertions with no message, so a failure cannot be told from a bad locator | minor |
-| One expected condition per assertion | `expect([a, b]).toContain(x)`, `\|\|` in an `expect`, `/a\|b/` in `toHaveText` / `toHaveURL`, an assertion on an `or()` locator | major |
-| Test names are `Should_X_When_Y` | `test1`, `'login test'`, `'click button'` | minor |
-| Tags in the details object | `test('@smoke signs in', …)` instead of `{ tag: '@smoke' }` | nit |
-| No hardcoded credentials or base URLs | Literal `admin@example.com`, `https://staging.x.y` | major |
-| Locators promoted to `readonly` fields | Locator strings re-typed across methods | minor |
-| No conditional logic driving assertions | `if (x) expect(...)` | major |
-| Data-driven cases generate one `test()` per row | A `for` loop of assertions inside one `test()`, or `test.each` (Playwright Test has none) | major |
-| No floating promises | An un-awaited action, `expect` or Allure call | blocker |
-| No unearned base class | A `BasePage` / `BaseMobilePage` with fewer than three real sharers, or one that only forwards | major |
+## The checklist is the rule files
 
-## Playwright / TypeScript smells
+Every check, and the severity it reports, lives in one place: the qa-typescript rule files `qa-typescript.md` (core), plus `ui-tests.md` for Playwright, Selenium and WebdriverIO web suites, `mobile-tests.md` for Appium screens and Maestro flows, and `bdd.md` when step definitions are in the diff.
 
-| Check | Bad sign | Severity |
-|---|---|---|
-| Every test asserts something | The body ends with an action and no `expect` | blocker |
-| Web-first assertions, no one-shot reads | `expect(await loc.isVisible()).toBe(true)`, `textContent()`, `inputValue()`, `count()`, `getAttribute()`, `expect(page.url())` | major |
-| Exact status on API calls in fixtures | `expect(res.ok()).toBeTruthy()`, `toBeOK()` | minor |
-| No raw `page.` calls in specs | `page.locator(...)`, `page.goto(...)` in a spec file | major |
-| No page-level selector APIs | `page.click(sel)`, `page.fill(sel)`, `page.innerText(sel)`, `page.$(sel)` — discouraged; use locators | major |
-| Locators scoped, not left to match many | `page.getByText('Delete')` or `getByRole('alert')` hitting several elements | major |
-| No positional picks without a reason | `.nth(2)` / `.first()` that silences strictness; the name does not say why order matters | major |
-| `visible()` instead of `:visible` | `locator('button:visible')` on 1.63+ | minor |
-| `exact: true` on ambiguous names | `getByText('Submit')` matching `Submit order` | minor |
-| Overlays handled by `addLocatorHandler` | `if (await banner.isVisible()) await close()` | major |
-| Locators are `readonly` fields | Functions that return `page.locator(...)` per call | minor |
-| No `{ waitUntil: 'networkidle' }` | `goto(url, { waitUntil: 'networkidle' })` | major |
-| No `{ force: true }` | `.click({ force: true })`, `.fill(..., { force: true })` | major |
-| No redundant pre-waits | `loc.waitFor()` right before `loc.click()` | minor |
-| `waitForResponse` ordered | Awaited before the triggering action, or created after it | major |
-| No hand-rolled retry loops | `while (retries--) { … }` instead of `toPass` / `expect.poll` | major |
-| `toPass` bounded | No `timeout` on `toPass`, or inner assertions without a short `{ timeout }` | minor |
-| `expect.poll` / `waitForFunction` not used for DOM state | `expect.poll(() => loc.textContent())` where `toHaveText` works | minor |
-| Deprecated APIs gone | `page.waitForNavigation(...)` | major |
-| Auth through a setup project | Every test calls `loginPage.signIn(...)`; `globalSetup` where a setup project fits | major |
-| Page objects come from fixtures | A spec calls `new SomePage(page)` | minor |
-| Seeded data cleaned in fixture teardown | Records created in a test and never deleted, or deleted in the test body | major |
-| Failure evidence configured | `trace` / `video` not `'retain-on-failure'` — `'on-first-retry'` with `retries: 0` records nothing; `'on'` on CI costs every run | minor |
-| HAR recorded through a valid option | `test.use({ recordHar })` — not a test option; use `contextOptions: { recordHar }` or `context.tracing.startHar()` (1.60) | major |
-| Allure calls awaited, from `allure-js-commons` | `allure.attachment(...)` without `await`; `import { allure } from 'allure-playwright'` (deprecated) | blocker |
+1. **The project's copies first**: `.claude/rules/qa-typescript/` at the project root. The team may have edited them, and its edits win.
+2. **Otherwise the plugin's copies**: `qa/typescript/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/qa-typescript:rules` installs them.
 
-## Selenium WebDriverJS / WebdriverIO (TS) smells
+Read `qa-typescript.md`, plus each other file whose `paths:` match a file under review, in full before the first finding. A rule loaded on its own by the session is not enough: a review needs every file that applies, not just the ones the session happened to open. Never review from memory of the rules, and never add a check the files do not contain; propose it as a rule change instead.
 
-| Check | Bad sign | Severity |
-|---|---|---|
-| Locator order: `data-testid` (or the project's test-id attribute) → id → CSS → XPath | XPath where a test id exists | major |
-| Components scoped to a parent element for repeating items | One page object re-querying the DOM for every card | major |
-| WebdriverIO async API only (v8+) | Synchronous `browser.$(...).click()` | blocker |
-| No `browser.pause(...)` | `browser.pause(2000)` as sync | blocker |
-| Conditional waits | `setTimeout` / `browser.pause` instead of `waitForDisplayed` / `waitForClickable` / `waitForExist` | blocker |
-| Multi-step flows in sub-folders (`pages/checkout/`) | A flat `pages/` with 30 unrelated files | minor |
-| Navigation returns the destination page object | Returns `void`; the spec builds the next page | minor |
-| No `browser.execute` around actionability | `browser.execute('arguments[0].click()', el)` | major |
-| Getters return the element, not a pre-asserted boolean | `async isLoginButtonVisible(): boolean` | minor |
+## Version policy
 
-## Appium / WebdriverIO TS smells
-
-| Check | Bad sign | Severity |
-|---|---|---|
-| Screen objects share behaviour by composition | A `BasePage` with fewer than three real sharers; a class extending `WebdriverIO.Browser`; a scoped component that extends `BasePage` | major |
-| Test id first, per platform (iOS `~id`, Android `id=`) → native query → XPath | XPath where an `accessibilityIdentifier` or a `resource-id` exists; `~id` on Android for a React Native `testID` | major |
-| Typed element accessors | A page returns `any` or `unknown` | minor |
-| `verifyPageLoaded()` asserts a landmark | Missing or empty | major |
-| Navigation returns the destination screen object | Returns `void` | minor |
-| Locator strings are `private static readonly` constants | Literals inline in action methods | minor |
-| Platform branching behind a locator map | `if (browser.isIOS) … else …` across pages or actions | major |
-| App state between tests: a fresh session, `mobile: clearApp`, or `terminateApp` + `activateApp` | Tests leak data through shared app state | blocker |
-| No removed Appium 2 calls | `driver.reset()`, `resetApp`, `closeApp`, or a hand-rolled call to a removed `/appium/*` route | blocker |
-| Capabilities from an env-driven `wdio.conf.ts`, with the `appium:` prefix | `deviceName: 'Pixel_6'` hardcoded in a spec; an unprefixed `automationName` | major |
-| Gestures via `tap` / `swipe` / `browser.action('pointer')` / `mobile:` | `touchAction`, which WDIO 10 removed | major |
-| Repeating rows are scoped components that re-resolve on every call | A row element held across calls, or a bare child selector that matches in every row | major |
-| WDIO 10 `$` left strict | `{ strict: false }` or `strictSelectors: false` to silence a `StrictSelectorError` | major |
-| Mocha (or Cucumber) is the runner | Vitest or Jest specs under `wdio run` | major |
-| Clipboard content is base64 | `setClipboard('text', 'plaintext')` | major |
-| Failure evidence comes from `BaseTest`'s `afterTest` | A spec with its own screenshot hook, or no evidence on failure | major |
-| No `browser.pause` between gestures | `browser.pause(1500)` after a swipe | blocker |
-
-## Maestro smells
-
-Owned by `qa/typescript/skills/ui-test-author/maestro`; a flow is judged by these rows, not by the page-object rows above.
-
-| Check | Bad sign | Severity |
-|---|---|---|
-| No fixed waits | A script or repeated `tapOn` standing in for a condition; every `timeout` at 60000 | blocker |
-| Reset between flows | No `launchApp` / `clearState`, or a flow that needs the previous flow's state | blocker |
-| Test id first | `text:` where the app tags an id; a `point:` coordinate | major |
-| Repeated steps are a subflow | The same sign-in block pasted into several flows | major |
-| Subflows stay out of discovery | `flows: ["**"]` in `config.yaml` with no `!subflows/**` | major |
-| Every flow is tagged | No `tags:` header | minor |
+Detect the stack from imports and config files, and the versions from `package.json`: `@playwright/test` (1.64 on this lane), WebdriverIO and Appium majors, Maestro CLI. Do not flag a suite for lacking an API its pinned version does not have (`locator.within()` needs 1.64; a device cloud on Appium 2 stays on WebdriverIO 9). The rule files' "the codebase wins" line applies: a convention the suite follows consistently (a different test-id attribute, a mandated lint plugin) is not a finding.
 
 ## Good signals (TypeScript)
 
@@ -162,41 +73,16 @@ The shape of `ui-test-author/playwright/assets/`: intent-revealing page methods,
 locators on the highest ladder rung, `Should_X_When_Y` tests on fixtures with `{ tag }`, web-first
 assertions with a subject, an auth setup project, seeded data deleted in fixture teardown.
 
-## Always-flag anti-patterns
+## The locator corollary
 
-- **An `OR` in an assertion** — `toContain` over candidates, `||`, a `/a|b/` alternation, an `or()`
-  locator. It passes on the wrong state. Split per outcome, generate a test per row, or pin the value.
-- **A test that asserts nothing**; **`expect` inside a page object**; **login in every test**.
-- **Sleeps**, **`force: true`**, **`networkidle`**, and **floating promises** (Allure calls included).
-- **A brittle or positional chain** — `div > div > span:nth-child(3) > a`, an unexplained `.first()`.
-- **Any `try` / `catch` in a test or a cleanup hook.** An expected rejection is `await expect(...).rejects`;
-  cleanup is fixture teardown. The only catches belong in I/O helpers narrowing one named error.
-- **`any` / `as unknown as X`** in fixtures or page objects.
-- **Any inline comment** in a test body or page-object method, and any stale comment (`engineering-practices/code-comments`).
-
-## Comments in test code
-
-Load **[`engineering-practices/code-comments`](../../../../../engineering-practices/code-comments/SKILL.md)** for the rule, the
-complex-flow test that earns a doc comment, the trivia list and the severity mapping. Its **test-code**
-section carries the AAA-banner rule and the three permitted comments. Here it also covers page-object and
-screen-object bodies: an intent-revealing method name is the page object's documentation.
-
-| TypeScript mechanic | What to check |
-|---|---|
-| Doc syntax | TSDoc (`/** … */`); a doc block on a locator field, or restating `clickSave`, is trivia |
-| Skips need a reason and a ticket | A bare `test.skip(...)` / `.fixme` |
-| Suppressions need a reason | `@ts-expect-error` / `eslint-disable` in a fixture or page-object type |
-
-**The locator corollary.** A comment explaining a locator (`// the third span is the price`) is evidence
-the locator is **positional and brittle**, not a comment finding. File it under the locator rows: request a
-test id and record it in `missing-testids.md`.
+A comment explaining a locator (`// the third span is the price`) is evidence the locator is **positional and brittle**, not a comment finding. File it under the locator rules: request a test id and record it in `missing-testids.md`.
 
 ## Procedure
 
 1. Identify the **stack** from imports and config files, and the Playwright version from `package.json`.
 2. Read each file end to end before writing findings — context sets severity.
-3. Walk the cross-stack list, then the stack-specific list.
-4. For each finding: file and line, issue, a one-sentence fix.
+3. Walk the rules: waits, async and assertions in page objects first, where most blockers live, then locators, then the rest.
+4. For each finding: file and line, the rule broken, a one-sentence fix. The severity is the tag on the rule, never a new judgment.
 5. **Do not rewrite the code.** Hand off to the generator if the user asks for a rewrite.
 
 ## Handoffs
@@ -207,3 +93,4 @@ test id and record it in `missing-testids.md`.
 - API tests in the same PR → `qa/typescript/skills/api-test-author/review`
 - Evidence settings beyond the config defaults → `qa/typescript/skills/evidence-capture`
 - Allure reporting → `qa/reporting/typescript/skills/test-reports`
+- A rule is missing or wrong → edit the project's `.claude/rules/qa-typescript/`; for every project, the plugin's `qa/typescript/skills/rules/`

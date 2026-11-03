@@ -128,23 +128,7 @@ Compose Multiplatform shares the UI as well. It is chosen deliberately, per proj
 
 ## Rules
 
-- Share logic by default; shared UI only by an explicit, recorded decision.
-- Hilt and Dagger never in a shared module; Koin or Metro, constructor-injected.
-- A shared module on AGP 9 uses `com.android.kotlin.multiplatform.library`; the Android app is its own `com.android.application` module.
-- Swift export is labelled **Alpha**; the Objective-C export framework is the shipping default.
-- No Android type (`Context`, `Activity`, `Uri`) in `commonMain`; no secrets in shared storage.
-- The Swift consumer code is `mobile-ios`'s — this skill does not write it.
-- Never raise Kotlin, AGP or an iOS deployment target as a side effect.
-
-## What NOT to do
-
-- Put `@HiltViewModel` or `@Inject` Hilt modules in `commonMain`.
-- Apply `com.android.library` or `com.android.application` beside `org.jetbrains.kotlin.multiplatform` on AGP 9.
-- Use `androidLibrary { }` on AGP 9, or `kotlin-android` in a shared module.
-- Turn on Swift export in a shipping app because it is newer.
-- Share the UI because "it is less code" without the product accepting non-native iOS.
-- Wrap every platform call in `expect` / `actual` instead of an injected interface.
-- Share a navigation graph by hand-rolling a router — navigation stays per platform unless Compose Multiplatform owns the UI.
+The standards this skill's output must meet are the mobile-android rule files, not a list here: `android-kmp.md` and `android-build.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation (exit gate)
 

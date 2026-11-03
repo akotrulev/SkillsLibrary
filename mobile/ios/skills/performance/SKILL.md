@@ -127,19 +127,7 @@ final class LegacyMetricsSubscriber: NSObject, MXMetricManagerSubscriber {
 
 ## Rules
 
-- A hang (main thread blocked ≥ 250 ms) is a defect; heavy work runs off the main actor; nothing blocks on a semaphore or a synchronous read.
-- `body` is pure and cheap; identity is stable and domain-based; unbounded data sits in a lazy container.
-- Nothing needless before the first frame; SDK initialisation deferred except the crash reporter.
-- Measure on a release build on a real device before and after; keep the numbers.
-- One MetricKit subscription, forwarded to the single crash-reporter pipeline, tagged by version.
-
-## What NOT to do
-
-- No optimisation without a number; no profiling a debug build or a simulator.
-- No `DispatchQueue.main.sync`, `Thread.sleep` or `DispatchSemaphore` on the main thread.
-- No `AnyView` to silence a type error; no `id: \.self` on non-unique data; no index as identity.
-- No second crash or metrics SDK beside MetricKit plus the one reporter.
-- No unbounded in-memory cache; no full-resolution decode for a thumbnail.
+The standards this skill's output must meet are the mobile-ios rule files, not a list here: `swift.md` and `swiftui.md`. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

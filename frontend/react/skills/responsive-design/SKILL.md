@@ -145,25 +145,16 @@ Make that possible:
 
 ## Rules
 
-- **One breakpoint set app-wide**, documented as CSS vars + a TS mirror; with a library, *its* values are the set.
-- **Mobile-first `min-width` only**; never `min-`+`max-` on one boundary.
-- **Intrinsic CSS (`auto-fit`/`minmax`, flex-wrap) before breakpoints; container queries for
-  container-dependent components; media queries last; JS breakpoint hooks only when DOM must differ.**
-- **One grid container owns each region's geometry** — children span tracks, never self-position per breakpoint.
-- **Server-rendered surfaces are CSS-responsive only**; JS breakpoint hooks run in `'use client'` with a
-  hydration-safe, mobile-first default and cleaned-up listeners.
-- **Variant swaps: both variants testid-labeled**; DOM order = reading order when visual order changes.
-- No fixed dimensions on content regions; images responsive (`sizes`/`max-width: 100%`).
+The standards this skill's output must meet are the fe-react rule file `react-styling.md`, not a list here. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Where they and this skill disagree, the rule files win.
 
-## What NOT to do
+Beyond the rule files, this skill's own rules:
 
-- No second (or third) breakpoint system next to the library's.
-- No magic width numbers scattered in modules — boundary values appear only as the documented set (or `theme.breakpoints`).
-- No per-sibling margin tuning to "re-align" elements at a breakpoint — restructure into one grid.
-- No `useMediaQuery` driving layout on an SSR surface without a mount guard / `ssrMatchMedia` (hydration mismatch, wrong-variant flash).
-- No duplicated full-page DOM variants for big surfaces — restyle one structure.
-- No desktop-first `max-width` cascades bolted onto a mobile-first codebase.
-- No visual `order`/`grid-area` reshuffle that leaves focus order wrong — DOM order is the reading order.
+- **One breakpoint set app-wide**, documented as CSS vars + a TS mirror; with a library, *its* values are the set — never a second system beside it.
+- **Never `min-` + `max-` on one boundary**; no desktop-first `max-width` cascade bolted onto a mobile-first codebase.
+- **One grid container owns each region's geometry** — children span tracks, never self-position per breakpoint; no per-sibling margin tuning to re-align.
+- **Server-rendered surfaces are CSS-responsive only**; JS breakpoint hooks only when the DOM must differ, in `'use client'`, with a hydration-safe mobile-first default (or `ssrMatchMedia`) and cleaned-up listeners.
+- **Variant swaps: both variants testid-labeled**; no duplicated full-page DOM variants for big surfaces.
+- **No fixed dimensions on content regions**; images responsive (`sizes` / `max-width: 100%`).
 
 ## Validation
 

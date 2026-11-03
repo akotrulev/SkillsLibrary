@@ -270,40 +270,19 @@ On the App Router, URL state also lets a **Server Component** read `searchParams
 - **Server Actions + `revalidate`** replace "fetch, then invalidate a client cache" for mutations — often eliminating client-side TanStack Query on that route.
 - The picture for new App Router apps: **RSC + Server Actions for the bulk of data, client stores only for genuine client state.**
 
-## Common anti-patterns
-
-- **Server data in a global store.** Use TanStack Query / RSC / Server Actions.
-- **Context with everything.** Split by concern or move to a real store.
-- **Mutating state directly** (`state.items.push(x)`). Outside Immer/RTK, breaks React's change detection.
-- **`useEffect` syncing two states.** Almost always one should be derived.
-- **Form state in a global store.** Forms have their own library ([`forms`](../forms/SKILL.md)).
-- **A module-level Zustand store read during a Server Component render.** Per-request leak — use a provider-scoped store.
-- **Client state that's really URL state.** Filters/pagination belong in `searchParams`.
-
 ## Rules
 
-- **Server state** → TanStack Query / RSC / Server Actions; never Redux / Zustand / Context.
-- **Client state**: local first, lift second, Context for cross-cutting, Zustand when Context isn't enough.
-- **URL-derivable state lives in the URL.**
-- **One store / one Context per concern** — no god stores.
-- **Selectors** for store subscriptions; **memoize** Context values; **split** read/write Contexts under write churn.
-- **Persist deliberately** — pick the right storage; wrap `localStorage` in a hook, and route every access through a **guarded wrapper that degrades to in-memory** (quota/private-mode/blocked-context throws must never break a render); discard corrupt entries; persist no tokens, PII, or server data; prune what grows.
-- **Broadcast session/auth transitions across tabs** (`BroadcastChannel`/`storage`) so a logout or refresh in one tab doesn't leave a sibling live; don't sync ordinary view state.
-- **App Router**: providers/stores behind `'use client'`; per-request store scope for server-rendered trees.
+The standards this skill's output must meet are the fe-react rule file `react.md`, not a list here. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Where they and this skill disagree, the rule files win. Server data in a client store, effect-synced state, direct mutation, unguarded storage and URL state kept in a store are rules there.
+
+Beyond the rule files, this skill's own rules:
+
+- **Client state ladder**: local, then lifted, then Context for cross-cutting state, then Zustand when Context isn't enough. No Redux setup for a new small app; no `useReducer` for a single boolean; no 6-level prop drilling.
+- **Selectors** for store subscriptions; no giant `AppContext` carrying user + theme + cart + flags.
+- **Form state stays in the form library** ([`forms`](../forms/SKILL.md)), never a global store.
+- **Persist deliberately** — wrap storage in a hook, discard corrupt entries (no unguarded `JSON.parse`), prune what grows.
+- **Broadcast session/auth transitions across tabs** (`BroadcastChannel`/`storage`), so a logout in one tab doesn't leave a sibling signed in; don't sync ordinary view state.
+- **App Router**: providers and stores behind `'use client'`, a per-request store scope for server-rendered trees — never a module-level store read during a Server Component render.
 - **Devtools** middleware on stores in development.
-
-## What NOT to do
-
-- No server data in client global stores.
-- No 6-level prop drilling — extract Context or compose.
-- No giant `AppContext` carrying user + theme + cart + flags.
-- No `useEffect` syncing two states that could be one derived value.
-- No mutation of immutable state outside Immer / RTK.
-- No unguarded `localStorage`/`sessionStorage`/IndexedDB access (it throws — quota, private mode, blocked context) and no unguarded `JSON.parse` of what comes back; no token/PII/server data persisted; no unbounded persisted list.
-- No app that keeps rendering as signed-in in one tab after a logout in another.
-- No `localStorage` in render (hydration mismatch) — wrap in a hook read in an effect.
-- No Redux setup for a new small app — Zustand + TanStack Query is the modern default.
-- No `useReducer` for a single boolean; no `'use client'` on a whole route just because one leaf needs a store.
 
 ## Generation steps
 

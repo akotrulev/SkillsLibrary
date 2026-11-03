@@ -144,23 +144,7 @@ Raise it from **one place per failure path** — the model that owns the load, a
 
 ## Rules
 
-- Every thrown error is caught where it is thrown and becomes state; no `try!`, no force unwrap, no `fatalError` for a recoverable condition.
-- Regions are one `LoadState` enum with failed, stale and offline; a drifted response is *failed*; a failed refetch keeps the data and shows the stale marker.
-- Scope the failure to the response-dependent subtree; chrome and filter state survive.
-- Every surfaced failure also raises the persistent banner — safe-area top, no auto-dismiss, 44 pt close, deduped, one host, one raise-point per path, ≤ 3 visible, rolled up by cause.
-- `timedOut` has its own body; cancellation renders nothing; offline is not a server error and never retries.
-- A 401 runs the ladder with in-place re-auth; 403 is permission-denied; an unsupported app version shows the forced-update screen.
-- An unknown write outcome is reconciled, not reported as failed; third parties fail in their own region; storage failures degrade to memory with one notice.
-- 404 on a record is "gone"; empty is three kinds; every state and the banner carry an `accessibilityIdentifier`.
-
-## What NOT to do
-
-- No two-state region; no failure only inline or only in a banner; no `catch { }` that leaves the region empty.
-- No early return from a screen that owns search and filters; no failed body over data the user is reading.
-- No auto-dismissing banner, none behind the Dynamic Island or keyboard, none with a close target under 44 pt; no banner per retry, none uncapped.
-- No request without a deadline; no failed state for a cancelled request; no retry button while offline.
-- No sign-out straight off a 401 or from a 403 / third-party 401; no blocking update screen for a version the server still supports.
-- No generic "No data"; no retry on a 404 record; no `localizedDescription` on screen.
+The standards this skill's output must meet are the mobile-ios rule files, not a list here: `swiftui.md`, `swift-networking.md` and `swift.md`. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

@@ -206,30 +206,9 @@ Don't build "an order in the DB" inside the factory — that couples the factory
 
 ## Rules
 
-- Factories live under `tests/builders/`; ObjectMothers under `tests/mothers/`.
-- Every field has a sensible default — adding a non-nullable field doesn't ripple through 50 tests.
-- One factory per aggregate; child aggregates have their own factories.
-- Defaults are deterministic literals; only id-like fields use random with reason (seeded faker).
-- Factory return type is the real DTO type (the same shape the production code consumes), not `any` / `Record<string, unknown>`.
-- ObjectMother methods accept `Partial<T>` and return the built object (because TS already has `Partial`).
-- Tests never construct domain objects with inline literals across more than 1–2 places — extract to a factory.
-- Strict TypeScript: no `any`, no `as unknown as X`, factory params and returns fully typed.
-- No async / `Promise<T>` returns from factories — factories are pure.
-- ESLint `no-floating-promises` enabled to catch missed `await` on persistence calls (which live outside the factory).
+Factories live under `tests/builders/`, ObjectMothers under `tests/mothers/`, one factory per aggregate.
 
-## What NOT to do
-
-- No inline test data literals duplicated across test files.
-- No `null` for required fields in defaults — pick a real default.
-- No randomness on fields the test asserts against.
-- No "god factory" with 30 optional parameters covering 4 unrelated aggregates — split per aggregate.
-- No persistence in the factory — shape and save are separate concerns.
-- No production-code factories disguised as test factories ("we'll reuse this in prod too") — separate them; remove `Test*` prefix only when promoting deliberately.
-- No exposing mutable arrays without `ReadonlyArray<>` — accidental in-place mutation across tests is hard to debug.
-- No defaults that violate domain invariants (e.g. negative `totalMinor`) — the default factory must produce a valid object.
-- No mixing factory + class builder for the same aggregate — pick one.
-- No `Object.assign({}, defaults, overrides)` — use spread (`...`) so TS narrows the literal correctly.
-- No `Date.now()` / `new Date()` calls in defaults — pin an ISO string so the date doesn't drift across runs.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

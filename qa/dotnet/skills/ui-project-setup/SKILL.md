@@ -167,10 +167,10 @@ dotnet test --filter "TestCategory=smoke"
 
 ## Conventions (the shell only)
 
-- **No `Thread.Sleep` / `Task.Delay` / `WaitForTimeoutAsync`.** Use Playwright auto-waiting and `Expect(...).ToBeVisibleAsync()`; for Selenium use explicit `WebDriverWait` helpers.
-- **Page objects expose intent, not selectors**; one page object per screen; no assertions inside them.
+The standards the shell must meet are the qa-dotnet rule files, not a list here: `automation.md`, `web-ui.md` and `suite-config.md`. Tell the user to install them with the shell (`/qa-dotnet:rules` copies them into `.claude/rules/qa-dotnet/`); until then read the plugin's copies in `qa/dotnet/skills/rules/`. Where they and this skill's recipes disagree, the rule files win.
+
 - **One base fixture** (`Support/BaseTest.cs`) owns the context options and failure evidence; launch settings live in `ui.runsettings`.
-- **Config / auth / secrets**: environment variables (`BASE_URL`, `E2E_USER`, `E2E_PASSWORD`), no secrets committed; the signed-in state file is written under `bin/` at run time.
+- **Auth**: `BASE_URL`, `E2E_USER`, `E2E_PASSWORD` from the environment; the signed-in state file is written under `bin/` at run time.
 
 Page-object architecture, selector strategy (`data-testid`-first), and test bodies are owned by the `qa-ui-dotnet` skills (`page-object-design`, `page-objects-from-url`, `ui-test-author/*`). Defer to them.
 

@@ -114,6 +114,10 @@ public record {Resource}ListDto(
 
 ## Rules
 
+The standards this skill's output must meet are the qa-java rule files, not a list here: `qa-java.md` (core) and `qa-java-api.md`. Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
+
+## Conventions
+
 ### Naming
 
 - `{Resource}Dto` — PascalCase noun + `Dto` (e.g. `UserDto`, `OrderDto`).
@@ -141,13 +145,6 @@ public record {Resource}ListDto(
   | ISO date string  | `OffsetDateTime`   | needs `JavaTimeModule` registered on `ObjectMapper` |
   | array of T       | `List<T>`          | use `List.of()` for empty |
   | nested object    | another record DTO |       |
-
-### Class rules
-
-- DTOs are plain data carriers — no behavior, no validation. Records enforce this.
-- Construct in tests via the canonical constructor: `new {Name}InDto(value1, value2)`.
-- Jackson `ObjectMapper` must register `JavaTimeModule` once at app startup (typically in a `TestConfig` / `RestAssuredConfig` setup).
-- Deserialization happens in tests / clients, never inside the DTO.
 
 ## Generation steps
 

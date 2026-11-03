@@ -198,6 +198,10 @@ public RestResponse GetAll(int page, int resultsPerPage)
 
 ## Rules
 
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `automation.md` and `api.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
+
+## Conventions
+
 ### Class structure
 
 - Class name: `{Resource}Client` — PascalCase resource noun + `Client`. **No `P`/`M` suffix.**
@@ -228,7 +232,6 @@ public RestResponse GetAll(int page, int resultsPerPage)
 - Build a `RestRequest` and call inherited `Execute(request)`.
 - Use `AddUrlSegment` for path params, `AddQueryParameter` for query strings, `AddJsonBody` for bodies.
 - Body parameters are strongly-typed DTOs (e.g. `{Resource}InDto body`), not `object`.
-- One-line comment per raw method; not repeated on the typed overload.
 - Deserialization uses inherited `Deserialize<T>(response)` — never `JsonSerializer.Deserialize` directly.
 
 ### Method naming
@@ -262,17 +265,6 @@ public RestResponse Create(object body) =>
 ```
 
 Only add these overloads when the test plan requires them — not by default.
-
-### What NOT to do
-
-- No `Thread.Sleep()` or manual delays.
-- No `RestClient` instantiation inside the class — that's `BaseApiClient`'s job.
-- No hardcoded base URLs or credentials.
-- No try/catch around HTTP calls — `BaseApiClient` logs failures automatically.
-- Do not re-implement `LogResponse` logic — it's wired into every verb method in `BaseApiClient`.
-- Do not deserialize in raw `RestResponse` methods — only in typed overloads.
-- No `object` body parameters on the default overloads — always strongly-typed DTOs.
-- No `P`/`M` class-name suffix, no `Public/` or `Management/` subfolders.
 
 ## Generation steps
 

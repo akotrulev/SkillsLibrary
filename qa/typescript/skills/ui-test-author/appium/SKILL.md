@@ -123,44 +123,12 @@ The old `reset` and `resetApp` calls are gone with the removed `/appium/app/*` r
 
 Other removed endpoints have `mobile:` replacements: `mobile: backgroundApp`, `mobile: getClipboard` and `mobile: setClipboard` (base64), `mobile: lock`, `mobile: setConnectivity`, `mobile: pressKey`, `mobile: startActivity`. WDIO's wrappers call them; do not hand-roll HTTP.
 
-## Rules
-
-### Page object rules
-- Extend `BasePage`; pages take no driver (WDIO's `browser` is implicit); `$` appears only in `BasePage` and in components.
-- Accessors return `ChainablePromiseElement`, are `private`, and each id is a `private static readonly` constant at the top of the class. A page exposes intent (`signIn`, `title()`), never an element.
-- One class per screen; flows in a sub-folder; repeating items as scoped components.
-- Navigation returns the destination page; same-screen actions return `Promise<void>`.
-- Every page implements `verifyPageLoaded()` on its landmark. That is the only assertion in a page.
-- `isElementVisible` returns `false` when the element is not displayed within the timeout, and rethrows anything else.
-- Per-platform differences sit in a locator map in the page, never an `if (browser.isIOS)` inside an action.
-
-### Test rules
-- Mocha `describe` / `it`; no inheritance. Names are `Should_X_When_Y`.
-- Tag by file path or `--mochaOpts.grep "@smoke"`.
-- Assertions live in the test. An element matcher carries a message: `toBeDisplayed({ message: '…' })`. A value matcher takes none, so the subject goes into the value: `expect({ orderNumber, title }).toEqual({ orderNumber, title: expected })`.
-- **One expected condition per assertion — never an `OR`.** No `||`, no `/a|b/`, no `expect([a, b]).toContain(x)`. When Android and iOS show different copy, that is two platform-scoped expectations. If two outcomes are both reachable, split into one `it` per outcome.
-- No `try`/`catch` in a test or a cleanup hook. Expected rejections use `await expect(promise).rejects`. A catch lives only in an I/O helper that narrows one named error (`isElementVisible`, `BaseTest.tolerate`).
-- No `if` or loop driving an assertion; one `it` per data row.
-- Tests and hooks are `async`, every promise awaited.
-
-### Waits
-- WDIO auto-waits element commands. For a condition use `waitForDisplayed`, `waitForEnabled` or `browser.waitUntil(...)`.
-- No `browser.pause(n)` and no `setTimeout` for synchronization, including for transitions and animations.
-
-### Session
-- Capabilities live in `wdio.conf.ts`, from env (`PLATFORM`, `DEVICE_NAME`, `APP_PATH`); no hardcoded device, path or URL.
-- The `appium` service starts the server; never start one by hand. A device cloud swaps the service (`device-cloud`).
-- `appium:settings[<name>]` capabilities start a session with a setting already set.
-
-### Failure evidence
+## Failure evidence
 `BaseTest.ts` is the only failure hook. A spec adds none. What it keeps and where it lands is `evidence-capture/references/appium.md`.
 
-### What NOT to do
-- No `browser.$` outside `BasePage` and components; no assertions in page actions beyond the landmark.
-- No `any`, no casts such as `as unknown as ChainablePromiseElement`.
-- No shared mutable state on pages; instantiate per test.
-- No business logic or API calls in a page object.
-- No `setTimeout`, `browser.pause`, `touchAction`, `resetApp` or `driver.reset()`.
+## Rules
+
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `mobile-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

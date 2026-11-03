@@ -34,18 +34,19 @@ Motion on a phone runs on the **UI thread** or it janks. This skill owns Reanima
 - Jank from list rendering → [`performance`](../performance/SKILL.md)
 - Native menus, sheets, system modals (already animated by the OS) → [`ui-components`](../ui-components/SKILL.md)
 
-## Rules that hold on both lanes
+## Rules
 
-1. **Animate `transform` and `opacity` only.** `width`, `height`, `top`, `left`, `margin`, `padding` force layout every frame: `rules/animation-gpu-properties.md`. For a collapsing panel, animate `scaleY` + `opacity`, or use a layout animation for the height change.
-2. **Drive it from a shared value on the UI thread.** The worklet runs on the UI thread; JS `setState` per frame does not. Call JS from a worklet with `scheduleOnRN` (worklets 0.5+) — `runOnJS` is the older name in Reanimated 3 / early 4 docs; detect which the installed version exports.
-3. **Derive, do not react.** `useDerivedValue` for a value computed from another; `useAnimatedReaction` only for side effects (haptics, logging): `rules/animation-derived-value.md`.
-4. **Store the state, derive the visual.** A press is `pressed: 0 | 1`, scale is `interpolate(pressed, [0, 1], [1, 0.95])`: `rules/animation-gesture-detector-press.md`.
-5. **React Compiler is on — use `.get()` and `.set()`**, never `.value`, in components the compiler touches: `rules/react-compiler-reanimated-shared-values.md`. A worklet that mutates a shared value read from a captured object breaks under the compiler; keep shared values as locals or refs-of-shared.
-6. **No shared value in React state, no animation in `useState`.** A shared value is not a render trigger; to show it as text use `useAnimatedProps` with a `TextInput`, not state per frame.
-7. **No `setTimeout` choreography** — `withDelay`, `withSequence`, `withRepeat`; cancel on unmount (`cancelAnimation`) — Reanimated cancels on unmount for hook-owned values, but a manual timer leaks.
-8. **Key by stable id.** An animated list keyed by index breaks entering / exiting / layout tracking.
-9. **Prefer a native control to a hand-built one** — a native modal, sheet, menu or `Switch` is already smooth ([`ui-components`](../ui-components/SKILL.md)).
-10. **Test ids and labels survive animation** — an `Animated.View` that is a tap target still carries `testID` and an accessible role ([`test-ids`](../test-ids/SKILL.md), [`accessibility`](../accessibility/SKILL.md)).
+The standards every animation must meet are the mobile-react-native rule files, not a list here: `react-native-a11y.md` (motion, Reduce Motion, test ids) and `react-native-ui.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
+
+The recipes behind them, on both lanes:
+
+- **Collapsing panel:** animate `scaleY` + `opacity`, or use a layout animation for the height change (`rules/animation-gpu-properties.md`).
+- **Calling JS from a worklet:** `scheduleOnRN` (worklets 0.5+); `runOnJS` is the older name in Reanimated 3 / early 4 docs. Detect which the installed version exports.
+- **Derive, do not react:** `useDerivedValue` for a value computed from another; `useAnimatedReaction` only for side effects such as haptics (`rules/animation-derived-value.md`).
+- **Store the state, derive the visual:** a press is `pressed: 0 | 1`, scale is `interpolate(pressed, [0, 1], [1, 0.95])` (`rules/animation-gesture-detector-press.md`).
+- **Compiler on:** `.get()` / `.set()` (`rules/react-compiler-reanimated-shared-values.md`); keep shared values as locals or refs-of-shared, not read from a captured object. To show a shared value as text, `useAnimatedProps` on a `TextInput`.
+- **Cancel on unmount:** Reanimated cancels hook-owned values; a manual timer leaks, so `cancelAnimation` anything else.
+- **Prefer a native control** (modal, sheet, menu, `Switch`) to a hand-built animated one ([`ui-components`](../ui-components/SKILL.md)); an animated tap target keeps its `testID` and role ([`test-ids`](../test-ids/SKILL.md), [`accessibility`](../accessibility/SKILL.md)).
 
 ```tsx
 import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';

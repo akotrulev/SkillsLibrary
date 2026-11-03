@@ -116,21 +116,14 @@ Renders and interop are async. Assert on a **condition**, never a delay (global 
 
 ## Rules
 
-- Inherit `BunitContext`; render with `Render<T>` / `Render(@<T/>)`; dispose with `DisposeComponentsAsync` when a test needs mid-test disposal (the context disposes at test end automatically).
-- **Semantic assertions only** — `MarkupMatches` / `Find(...).TextContent`, never brittle full-string equality on rendered HTML.
-- **Select by `data-testid`** (authored per `test-ids`), not by tag/class/nth-child — the same stable contract the E2E suite uses.
-- **One behavior per test**, `Should_X_When_Y` / `Given_When_Then` naming, no `if`/`for` driving assertions (parameterize with `[Theory]`/`[TestCase]` instead) — the global test rules apply here.
-- **Fakes/stubs over mocks-of-everything**; constructor-injected into `Services`. Fake the service the component depends on; don't reconstruct the whole app graph.
-- **JS interop in Strict mode** so unasserted interop fails loudly.
-- Test **logic**, not markup: if removing the assertion leaves a tautology, delete the test.
-- **≥ 80% of the branches you wrote are covered** — see *Coverage floor* below.
+The standards a test must meet are the fe-blazor rule file `blazor-tests.md`, not a list here. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where it and this skill disagree, the rule file wins. The coverage floor below is how its 80% rule is measured.
 
 ## Coverage floor — ≥ 80% of the branches you wrote
 
 The tests cover **at least 80% of the branches in the code the change wrote**: every component and class it created, whole, and the methods it changed in a file that already existed. The scope is the change, never the repo.
 
 - **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — `@if`/`else` and `@switch` in markup, each region state (loading / loaded / failed / empty), a `@foreach` over no items and many, event-handler `if`/`else`, `OnParametersSet` guards, `??` and `?.` — and give each a test or a `[TestCase]` row that asserts its effect. The slack under 100% is for branches no honest test reaches, such as compiler-generated ones in the Razor output.
-- **Only an asserting test counts.** A render that executes a branch without asserting the markup or state it produced is a **major** finding — it moves the number and catches nothing. The tautology rule above applies.
+- **Only an asserting test counts.** A render that executes a branch without asserting the markup or state it produced is a **major** finding — it moves the number and catches nothing. The tautology rule in `blazor-tests.md` applies.
 - **Leave out what the matrix says not to test, by name.** Markup-only components, `_Imports.razor`, `App.razor`/`Routes.razor` and `Program.cs` stay out of the measured file list, and the report names each one left out. Never reach 80% by lowering the number or by `[ExcludeFromCodeCoverage]` on code that has behavior.
 - **Measure.** A plan task's `Gate: own tests` runs this over the files it wrote; outside a plan, run it before you report:
 
@@ -144,17 +137,6 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
   `Branch coverage` in `TestResults/coverage/Summary.txt` is the number; for a method changed in an existing file, that file's page in the HTML report shows its branches. `coverlet.collector` comes with the test project template — add it where it is missing; ReportGenerator is the local tool `dotnet-reportgenerator-globaltool`.
 - **Below 80%, write the missing tests.** The report's uncovered branches are the list.
 - **Gate.** Inside a plan task, `Gate: own tests` runs this task's tests — the red run, then green — and the *Coverage floor* measure over the files it wrote; the last runnable task runs everything else.
-
-## Anti-patterns to avoid
-
-- **Inheriting `TestContext`** or calling `RenderComponent<T>` / `DisposeComponents()` — v1 API; obsolete in v2.
-- **Snapshot-testing a markup-only component** — locks layout churn, proves no behavior. (This is what a *visual regression* test is for — `qa/dotnet/skills/visual-regression`, a peer.)
-- **`Thread.Sleep` / `Task.Delay`** to wait for a render — use `WaitForState` / `WaitForAssertion`.
-- **Asserting whole-component markup** — one selector change breaks dozens of tests; assert the smallest proving node.
-- **Selecting by CSS class / tag / index** — couples the test to styling; use `data-testid`.
-- **Re-implementing E2E in bUnit** — faking `NavigationManager` and pretending it's a journey test. Hand real navigation to `qa-ui-dotnet`.
-- **Loose JS mode everywhere** — hides interop that silently no-ops.
-- **Testing the framework** — asserting that `@bind` binds or `EditForm` submits; test *your* logic, not Blazor's.
 
 ## Pure-logic tests (no renderer)
 

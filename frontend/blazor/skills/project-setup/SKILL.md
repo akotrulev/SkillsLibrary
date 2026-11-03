@@ -181,25 +181,7 @@ MyApp.Client/
 
 ## Rules
 
-- **Static SSR default; interactivity opt-in per surface.** Prefer `--all-interactive false` (islands) over global interactivity.
-- **Decide render mode per route from the transport shape**, using the matrix above; document the decision (Step-1 decision record).
-- **`.Client` holds only browser-runnable components**; server-only dependencies (EF Core, secrets, server services) never leak into it.
-- **Feature folders**, not type folders. Layer components by reuse level (atom → molecule → organism → template → page) as a **placement heuristic**: shared atoms/molecules in `.Client/Components/`, feature-specific organisms/pages in the feature folder. Promote to shared on the *second* consumer, not the first.
-- **Nullable + warnings-as-errors + CPM + `.editorconfig`** from commit one — retrofitting is painful.
-- **`<PageTitle>` on every page**, `NotFoundPage` on the router (net10) / `Router.NotFound` fragment (net8/net9) — see [`component-writer`](../component-writer/SKILL.md).
-- **Base addresses and external links from config**, never literals.
-- **TFM keyed** — guidance follows the detected `TargetFramework`; don't emit net10-only flags/APIs into net8/net9.
-
-## What NOT to do
-
-- No global interactivity (`--all-interactive true`) "to keep it simple" — it opts every static page into a circuit/WASM payload.
-- No one-render-mode-for-the-whole-app decision; no `@rendermode` hardcoded inside a reusable component (the consumer sets it — see [`component-writer`](../component-writer/SKILL.md)).
-- No EF Core / server service reference from `.Client`.
-- No global `Atoms/`/`Molecules/`/`Organisms/` folder tree competing with feature folders; no domain types or `@rendermode` inside an atom/molecule; no extracting a shared component before a second consumer exists.
-- No `Version=` on `PackageReference` when CPM is on.
-- No hardcoded URLs / localhost fallbacks / secrets in `appsettings.json`.
-- No choosing **Auto** without accepting the double data-path cost; if only one mode is needed, pick it outright.
-- No net10-only template flags/APIs in a net8/net9 project.
+The standards this skill's output must meet are the fe-blazor rule files, not a list here: `blazor.md` and `blazor-config.md`. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation (exit gate)
 

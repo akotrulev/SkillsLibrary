@@ -228,26 +228,7 @@ Hold accumulated state in a parent (or a scoped store); validate per step; call 
 
 ## Rules
 
-- **RHF + Zod** by default; **Server Actions + `useActionState`** for App Router server writes; both compose.
-- **One Zod schema per form**, type inferred, used on **both** client and server.
-- **`mode: 'onBlur'`** — feedback without per-keystroke noise; async rules debounced.
-- Every input: `<label htmlFor>` + `aria-invalid` + `aria-describedby` + `role="alert"`; submit `disabled` while pending + `aria-busy`; focus to first error on failure.
-- **Server `ProblemDetails.errors` mapped per field** (`setError` / `state.errors`); a `root` error only for non-field failures.
-- **Uncontrolled by default**; `Controller` for 3rd-party controls; MUI `Select`/`Autocomplete`/`DatePicker` via `Controller`.
-- **Multi-step:** schema-per-step + merged final; accumulated state in a parent/store.
-- **Large uploads bypass the server** via signed URLs.
-- Every form + interactive control carries a `data-testid` per [`test-ids`](../test-ids/SKILL.md).
-
-## What NOT to do
-
-- No `useState`-per-field for any form past one or two inputs (re-renders the whole form).
-- No `<input>` without a `<label>` (or documented `aria-label`); no error without `role="alert"`.
-- No "Something went wrong" banner when the API returned per-field errors.
-- No validation logic duplicated in the schema and in handlers; no form state in Redux/Zustand.
-- No submit without a `disabled`/`pending` guard (double-submits + duplicate writes).
-- No validate-on-every-keystroke; no async rule firing per keystroke.
-- No React-18 `useFormState` in a React 19 project (use `useActionState`); no Server Actions in a Vite SPA.
-- No file input without size/MIME guards; no large upload piped through the app server.
+The standards this skill's output must meet are the fe-react rule files `react-forms.md` and `react.md`, not a list here. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Where they and this skill disagree, the rule files win.
 
 ## Generation steps
 

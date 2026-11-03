@@ -207,6 +207,8 @@ Anything using `animation` is a **Client Component** (`'use client'`) and adds t
 
 ## Rules
 
+The general standards (cleanup, stable keys, `'use client'` on the leaf, reduced motion, `transform`/`opacity` only) are the fe-react rule files `react.md` and `react-styling.md`. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). These are the motion-specific ones:
+
 - **CSS first**; a JS library (`animation`) only for exit/layout/gesture/physics CSS can't express, kept at a `'use client'` leaf.
 - **`prefers-reduced-motion` is a hard floor** — author CSS motion as `@media (prefers-reduced-motion: no-preference)` opt-in so the resting state *is* the reduced state; branch `animation` on `useReducedMotion()`.
 - **Animate `opacity`/`transform` only** — never layout properties (reflow jank).
@@ -220,10 +222,7 @@ Anything using `animation` is a **Client Component** (`'use client'`) and adds t
 
 - No animation without a reduced-motion path — a bare `animation:`/`transition:` with no media guard, or a `animation` prop with no `useReducedMotion()` branch, fails WCAG 2.3.3.
 - No animating `height`/`top`/`margin`/`width` for motion — reflow every frame; use `transform`.
-- No array index as `key` on an animated list — breaks stagger targeting and `AnimatePresence` exit tracking (and is a re-render bug regardless).
 - No `setTimeout`-delayed unmount to fake an exit animation — use `AnimatePresence`; the manual version leaks timers.
-- No IntersectionObserver in a `useEffect` without `disconnect()` in the cleanup — leaks across navigation.
-- No `'use client'` on a whole route just to animate one leaf — push the motion component down.
 - No page-transition fallback shim — `@view-transition` and `<ViewTransition>` degrade to instant on unsupported browsers by design.
 - No motion decision made *here* — where/whether to animate is [`design/visual-identity`](../../../../design/visual-identity/SKILL.md)'s call.
 

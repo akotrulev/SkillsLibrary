@@ -5,7 +5,7 @@ description: Use when reviewing Gherkin .feature files and playwright-bdd/Cucumb
 
 # BDD / Gherkin Reviewer (TypeScript)
 
-Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin quality / living documentation) and the TypeScript step definitions + support code (binding correctness, reuse, the **state model**, async, library rules). TypeScript has two frameworks; the binding checklist below has a shared core plus **two model-specific blocks** — apply the one(s) the project uses. Returns findings in the standard table; does not rewrite code.
+Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin quality / living documentation) and the TypeScript step definitions + support code (binding correctness, reuse, the **state model**, async, library rules). TypeScript has two frameworks, web (playwright-bdd) and mobile (CucumberJS + WebdriverIO); apply the rules for the one(s) the project uses. Returns findings in the standard table; does not rewrite code.
 
 ## When to use
 
@@ -23,54 +23,18 @@ Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin qua
 
 1. Identify the framework (web playwright-bdd vs mobile CucumberJS+WDIO — check `package.json`, `playwright.config.ts` vs `wdio.conf.ts`).
 2. Read every `.feature` file and every step file + the support layer (`steps/fixtures.ts` for web; `support/world.ts` + `support/hooks.ts` for mobile). Do not skim.
-3. Walk the Gherkin checklist + the shared binding checklist + the model-specific block(s) that apply, marking each item pass / fail / N/A.
+3. Walk the rule files: the feature-file rules, then the step-definition rules for the framework in use, marking each pass / fail / N/A. The severity is the tag on the rule, never a new judgment.
 4. Produce findings in the standard table. Point to fixes; do not rewrite.
 5. Close with an "Overall" paragraph and a coverage/traceability note (every TC-ID + AC accounted for?).
 
-## Gherkin checklist (`.feature` files)
+## The checklist is the rule files
 
-- [ ] Steps are declarative — no `click`/`type`/CSS/URLs unless the mechanic is the subject under test.
-- [ ] One event under test per scenario (one `When`); no conjunction steps.
-- [ ] `Background` holds only preconditions every scenario needs; no `When`/`Then`/data in it.
-- [ ] Data-driven variants use `Scenario Outline` + `Examples`, one behavior per outline; valid/invalid split into separate `Examples` (invalid tagged `@negative`).
-- [ ] Steps reuse a canonical catalog — no near-duplicate steps differing only by a literal; one verb per concept.
-- [ ] Tags carry priority (`@p1..`), tier (`@smoke`/`@regression`), type (`@negative`/`@boundary`/`@edge`), and AC traceability (`@AC-<n>`).
-- [ ] Each scenario reads as documentation without the code; names state behavior, not data.
-- [ ] Every TC-ID / AC from the source suite maps to a scenario (no silent gaps).
-- [ ] **No `#` comments in the feature file.** A `.feature` is living documentation — if a step needs explaining, the step is wrong; if the *feature* needs explaining, use the `Feature:` description block. Only a linked defect id beside a `@wip`/skip tag is permitted (`minor`).
-- [ ] **No commented-out scenarios or steps.** A `#`-prefixed `Scenario` left in place of deletion is dead documentation that still reads as a requirement (`minor`); disable with a tag carrying a ticket instead.
+Every check, and the severity it reports, lives in one place: the qa-typescript rule files `bdd.md` (feature files and step definitions) and `qa-typescript.md` (core, for the TypeScript step and support code). Each `bdd.md` rule names which framework it binds: apply the web (playwright-bdd) or mobile (CucumberJS + WebdriverIO) rule the project uses.
 
-## Binding checklist — shared core (both frameworks)
+1. **The project's copies first**: `.claude/rules/qa-typescript/` at the project root. The team may have edited them, and its edits win.
+2. **Otherwise the plugin's copies**: `qa/typescript/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/qa-typescript:rules` installs them.
 
-- [ ] Step definitions split by domain (no mega `steps.ts`); each catalog step bound exactly once.
-- [ ] Cucumber Expressions (`{string}`/`{int}`/`{float}`/…) over regex unless regex is genuinely needed.
-- [ ] No selectors / `page.locator(...)` / `browser.$(...)` / waits in step definitions — mechanics live in page objects.
-- [ ] `Then` steps assert; `Given`/`When` don't assert; page objects don't assert (except `expectLoaded()` / `verifyPageLoaded()`).
-- [ ] `async` step bodies; every page-object call awaited; no floating promises; strict TS (no `as any` in step signatures).
-- [ ] No `page.waitForTimeout` / `browser.pause(ms)` — auto-wait + web-first/WDIO assertions only.
-- [ ] Cucumber-Expression captures typed explicitly (`(email: string)`), not `any`.
-- [ ] Cleanup implemented as fixture teardown (web) / `After` hook (mobile), not as Gherkin steps.
-- [ ] No hardcoded credentials/URLs — env vars / config.
-- [ ] **No inline comments in step definitions or hooks** — the step text above the binding is already the explanation, and a body long enough to need narration belongs in a page object. TSDoc only where the binding's contract can't be read off the step text and the method name; no commented-out bindings, no stray `TODO`/`FIXME`. Full rule, complex-flow test, and severities: [`engineering-practices/code-comments`](../../../../engineering-practices/code-comments/SKILL.md).
-
-## Binding checklist — web (playwright-bdd) model block
-
-- [ ] `Given/When/Then` come from `createBdd(test)` where `test` is the fixture-extended `test` (`steps/fixtures.ts`).
-- [ ] Steps are **arrow functions** destructuring page-object **fixtures** (`async ({ loginPage }) => …`) — **no World**, no `this`.
-- [ ] Page objects registered as fixtures in `steps/fixtures.ts`; **no `new LoginPage(page)`** inside a step.
-- [ ] Fixture object is the first argument, inline captures after it, data-table last.
-- [ ] `bddgen` runs before `playwright test`; `testDir` points at the generated dir, not `features/`.
-- [ ] Web-first assertions (`expect(locator).toHaveText(...)`) in `Then`; no one-shot `expect(await loc.textContent())`.
-
-## Binding checklist — mobile (CucumberJS + WDIO) model block
-
-- [ ] State shared via the **custom `World`** (`setWorldConstructor`, `this.login`) — **not** module-level mutable state.
-- [ ] Steps are **`function` expressions** with `this: CustomWorld` typed — **never arrow functions** (arrows lose the World).
-- [ ] Screen objects reached through `this`; **no `new LoginScreen()`** inside a step.
-- [ ] Driver/session managed by `@wdio/appium-service`; no hand-rolled Appium server start/stop.
-- [ ] `Before`/`After` hooks (with **teardown**) live in `support/`; the Cleanup handoff is an `After` hook, not steps.
-- [ ] `@cucumber/cucumber` version matches the line `@wdio/cucumber-framework` pins (no broken peer).
-- [ ] WDIO `expect` matchers (auto-retry) in `Then`; no `browser.pause` to "stabilize."
+Read both files in full before the first finding; a rule loaded on its own by the session is not enough. Never review from memory of the rules, and never add a check the files do not contain; propose it as a rule change instead. The rule files' "the codebase wins" line applies.
 
 ## Output format
 
@@ -85,12 +49,7 @@ Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin qua
 
 After the table, add an **Overall** paragraph (2–3 sentences) and a **Traceability** line (TC-IDs/ACs covered vs gaps ⚠️).
 
-## Severity guide
-
-- **blocker**: undefined/ambiguous step that fails the run; leaked browser/session; arrow-function World step that throws at runtime; ships a bug.
-- **major**: imperative/UI-coupled Gherkin; selectors or `new`/module-state in steps; wrong state model (World in playwright-bdd, or fixtures in CucumberJS); assertion in a page object; conjunction step that hides a second behavior.
-- **minor**: duplicate steps that should be parameterized; missing tags; untyped captures; naming.
-- **nit**: optional phrasing/style preferences.
+End with one line: `Rules: project .claude/rules/qa-typescript/ | plugin copy (not installed)`.
 
 ## Examples
 

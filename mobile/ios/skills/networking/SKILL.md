@@ -188,26 +188,7 @@ Pull above; push is a socket the app opens **only while foregrounded and the scr
 
 ## Rules
 
-- One concrete client; a protocol only with a second implementation; match an existing client.
-- `https` only; the base URL is configuration, not a secret; no `URLSessionDelegate` that trusts every `serverTrust`.
-- A budget on every request by endpoint class; `timedOut` fails, `cancelled` is silent.
-- Cancellation flows from `.task(id:)` / owned `Task` handles; no unowned `Task { }` for a request.
-- Retries ≤ 2 for reads, jittered, honouring `Retry-After`; none for writes without an idempotency key; none while offline; one place.
-- Decode failure is `drifted` and renders as failed.
-- `401` triggers exactly one shared refresh (an actor), then one replay, then re-auth in place.
-- Sockets closed on background and on owner exit.
-- No token, body or PII in logs.
-
-## What NOT to do
-
-- No request with the default seven-day resource timeout; no `Thread.sleep` / `DispatchSemaphore` waiting on a request.
-- No `DispatchQueue.main.async` after a request — return to `@MainActor` by isolation.
-- No `try?` on a decode; no `catch {}`; no `localizedDescription` rendered.
-- No `Alamofire` added to a project that has `URLSession` working; no second client beside the one present.
-- No protocol `APIClientProtocol` with one conformer "for testing" — inject the session (`URLProtocol` stub) or a one-method seam when the fake exists.
-- No `NSAllowsArbitraryLoads`; no hardcoded `localhost` / LAN URL in a release configuration.
-- No retry on a `POST` without an idempotency key; no fixed-interval retry without jitter.
-- No socket opened in `body` or left open in the background.
+The standards this skill's output must meet are the mobile-ios rule files, not a list here: `swift-networking.md`. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

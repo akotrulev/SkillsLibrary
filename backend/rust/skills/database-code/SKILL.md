@@ -198,25 +198,7 @@ Queries are proven only against a real engine. `#[sqlx::test]` creates a fresh d
 
 ## Rules
 
-- `query!` / `query_as!` for static SQL; `.sqlx/` committed and `prepare --check` in CI
-- Values only through binds; dynamic fragments only from closed enums
-- Pool sized against the server budget, with `acquire_timeout`
-- Every `begin()` has a `commit()`; no transaction across outbound I/O
-- Inner functions take `&mut PgConnection`
-- Version column + `rows_affected() == 0` → conflict
-- `= ANY($1)` for children; `UNNEST` / `COPY` for bulk
-- Keyset pagination; money as integer minor units (`BIGINT`), timestamps as `timestamptz`
-- Migrations forward-only, one runner, module-owned schemas in a workspace
-
-## What NOT to do
-
-- No `format!` into SQL; no `AssertSqlSafe` around anything that contains client input
-- No `query()` + `.bind()` where `query!` fits
-- No connection or transaction kept in `AppState`; no global pool in a `static`
-- No `Option<T>` added to a row struct only to make an upgrade compile
-- No editing an applied migration
-- No `SELECT *` in `query_as!` — a new column breaks the mapping, and the column list is the contract
-- No mocking `PgPool`, and no SQLite stand-in for Postgres tests
+The standards this skill's output must meet are the be-rust rule files, not a list here: `rust-persistence.md`, and `rust-tests.md` for query tests. Read the project's copy in `.claude/rules/be-rust/`, or the plugin's in `backend/rust/skills/rules/` when the project has not installed them (`/be-rust:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

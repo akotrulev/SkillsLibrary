@@ -136,11 +136,7 @@ Atom (one primitive, no domain) → molecule (a few atoms, one job) → organism
 
 ## Rules
 
-- Detect the lane first; never author below the SDK 54 floor and never up-level.
-- Never a Paper-architecture recipe as the primary path.
-- All text inside `<Text>`; no URL-as-state; no DOM assumptions.
-- Native changes go in config plugins; Expo Go is a prototype tool.
-- Public config only in `EXPO_PUBLIC_*`.
+The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `react-native.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Handoffs
 

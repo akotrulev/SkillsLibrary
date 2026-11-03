@@ -216,26 +216,7 @@ One ViewModel, one draft, a `step` in `uiState`; secrets never restore. See [`re
 
 ## Rules
 
-- One draft in `uiState`, one pure validator, one submit guarded in the ViewModel.
-- `TextFieldState` or value-based fields — match the screen, never both.
-- Keyboard type and `ImeAction` set per field; `Next` wired with `FocusRequester`.
-- `imePadding()` plus edge-to-edge so the IME never covers the focused field.
-- Errors appear on focus loss or submit, clear on edit, are text plus `isError`.
-- Server field errors map onto fields; unmapped ones show at form level.
-- `ContentType` on autofillable fields; sign-in through Credential Manager.
-- Secrets are never in `SavedStateHandle`, `rememberSaveable`, logs or analytics.
-- Every field and the submit button carry a static `testTag`.
-
-## What NOT to do
-
-- No `TextField` whose `value` is a `remember { mutableStateOf("") }` copy of ViewModel state — it desynchronises.
-- No validation inside `onValueChange` that raises errors before the user leaves the field.
-- No `error.message`, `localizedMessage` or HTTP status text in `supportingText`.
-- No submit button whose only guard is `enabled = …` — the ViewModel guards too.
-- No `Channel` / `SharedFlow` event to say "submitted" or "show error" (D26).
-- No `rememberSaveable` password; no `GlobalScope` for Credential Manager; no Google One Tap in new code.
-- No `android:windowSoftInputMode="adjustPan"` as the fix for a covered field in a Compose screen.
-- No regex or length rule inline in a composable.
+The standards this skill's output must meet are the mobile-android rule files, not a list here: `android-ui-states.md` and `android-ui-a11y.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

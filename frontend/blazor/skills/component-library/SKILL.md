@@ -63,18 +63,9 @@ These hold regardless of which reference you read:
 - **DataGrid: server-side paging/sort by default.** Every library's grid can bind an `IQueryable`/`LoadData` callback for server-side paging, filtering, and sorting — use it for anything past a few hundred rows; client-side load of a full table is the default anti-pattern. Deterministic default sort with a unique tiebreaker is a [`ui-rules`](../ui-rules/SKILL.md) rule; the grid *mechanics* are in each reference.
 - **Don't wrap library controls in `App*` wrappers** just to set defaults or carry test ids — set attributes inline (testability Rule 1); use the theme for defaults.
 
-## Anti-patterns
+## Rules
 
-| Smell | Fix |
-|---|---|
-| Two component libraries in one app | One library; migrate wholesale if changing |
-| `DialogService.Show()` / `Snackbar.Add()` from a static-SSR page | Provider must live under an interactive render mode; the calling island must be interactive |
-| Provider (`MudThemeProvider` etc.) added per page | Once, in the interactive layout root |
-| Per-component color overrides scattered across pages | One central theme / token set; dark mode from one toggle |
-| Full table loaded client-side, then paged in the browser | Server-side `LoadData`/`IQueryable` paging + sort + filter |
-| `AppButton` wrapper introduced to carry a `data-testid` | Inline `data-testid` on the library control (testability Rule 1) |
-| Mixing Tailwind utility classes *with* a component library's theme | Pick one styling authority — library theme *or* utility CSS (see [`styling`](../styling/SKILL.md)) |
-| Library major not pinned to the TFM's supported line | Pin the major; read the reference's version notes |
+The standards this skill's output must meet are the fe-blazor rule files, not a list here: `blazor.md`, `blazor-styles.md`, `blazor-markup.md` and `blazor-config.md`. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Workflow
 

@@ -278,30 +278,9 @@ k6 run -o experimental-prometheus-rw script.js
 
 Configure the remote-write endpoint via `K6_PROMETHEUS_RW_SERVER_URL`. The metrics land in Prometheus alongside the service's own metrics — `observability/dashboards` shows both on one chart.
 
-## Rules (k6-specific)
+## Rules
 
-- **Open-loop (`arrival-rate`) by default.** Closed-loop (`vus`) only when modelling a fixed concurrency cap.
-- **`thresholds` mandatory** and keyed by `{name:…}` tag for per-route gates.
-- **`tags: { name: '…' }`** on every `http.*` call — without it, `http_req_duration` averages across endpoints.
-- **`__ENV.*`** for `BASE_URL`, tokens, and tunables; never hardcode.
-- **`preAllocatedVUs`** sized realistically (rule of thumb: target RPS × p95 latency in seconds + 20% headroom). Don't `maxVUs: 10000`.
-- **`setup()` / `teardown()`** for seeded fixtures; namespace fixture ids by `__VU` + `Date.now()` to avoid parallel-run collisions.
-- **Pin k6 image** (`grafana/k6:0.49.0`); never `:latest`.
-- **No `JSON.parse(JSON.stringify(...))`** to clone — use `Object.assign({}, …)` or spread; `JSON` is hot-path expensive in VU loops.
-- **No `console.log` in the steady state** — it costs ~10% throughput at high RPS. Use `--verbose` only locally.
-
-## What NOT to do
-
-- No `http_req_duration` thresholds aggregated across all routes — always tag and threshold per route.
-- No closed-loop VU test for an RPS target.
-- No hardcoded tokens or base URLs.
-- No `sleep(0)` (zero sleep) inside hot loops — k6 already handles arrival-rate spacing; explicit `sleep` is for closed-loop pacing only.
-- No `--vus 10000 --duration 1h` "to see what happens" — bound the test or set an exit threshold.
-- No `tags: { name: '…' }` missing on `http.*` calls — per-route gates break.
-- No mixing arrival-rate scenarios with VU scenarios in the same `options.scenarios` unless you really mean it (they compete for VUs from the same pool).
-- No `check(...)` calls that don't increment a Rate or Counter — failed checks alone aren't a gate.
-- No writing to test-environment databases without `teardown()` cleanup.
-- No `import 'somepkg'` outside `k6` / `k6/*` from a script being run directly by `k6 run` — bundle via esbuild first.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `k6.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

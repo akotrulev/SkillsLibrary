@@ -170,6 +170,8 @@ SSE and WebSocket connections are **stateful and pinned to one server instance**
 
 ## Rules
 
+The general standards (cleanup, server data owned by the query cache, test ids) are the fe-react rule files `react.md` and `react-data.md`. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). These are the live-data ones:
+
 - **Open every live feature with the transport routing decision**: push → here; pull → [`data-fetching`](../data-fetching/SKILL.md).
 - **Live data is a small `'use client'` island** — the channel opens in an effect and is **always torn down on unmount** (`es.close()` / `ws.close()`, and stop the WS retry loop).
 - **Default to SSE** for one-directional push; WebSocket only when the client must send.

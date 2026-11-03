@@ -187,23 +187,7 @@ export function useWidthClass() {
 
 ## Rules
 
-- One styling authority; `StyleSheet.create`, no inline literals in list items.
-- Tokens as a typed object; purpose-named; no literals in styles.
-- No cascade: text colour on the `<Text>`; all text in `<Text>`.
-- Dark mode is an authored palette swapped by `useColorScheme()`; contrast re-verified.
-- Insets from `useSafeAreaInsets()` / `contentInsetAdjustmentBehavior`, never hardcoded.
-- Width from `useWindowDimensions()`, three classes, no orientation lock on large screens.
-- Font scaling never disabled.
-
-## What NOT to do
-
-- No inline `style={{…}}` in `renderItem`; no hardcoded hex or notch offsets.
-- No `Dimensions.get` at module scope.
-- No `SafeAreaView` around a `ScrollView` that can inset itself.
-- No Tailwind `className` on a competing `StyleSheet` colour.
-- No dark mode by hex inversion; no value-named tokens.
-- No legacy `shadow*` / `elevation` or gradient libraries on RN 0.76+.
-- No per-device-model branches.
+The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `react-native-ui.md` and `react-native-a11y.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation
 

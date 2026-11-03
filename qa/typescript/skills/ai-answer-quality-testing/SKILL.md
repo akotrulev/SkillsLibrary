@@ -187,19 +187,9 @@ mechanics; the **judge** is pinned + calibrated per `qa-typescript:ai-feature-te
 vector store, assert state, tear down) reuses `qa-typescript:db-*` discipline for the store; the
 **stochastic** noise-sensitivity check asserts a pass-rate (parent idea #4), not a single sample.
 
-## Rules (hard constraints)
+## Rules
 
-- **Decompose retrieval from generation.** Every RAG suite has stage-1 (retrieval), stage-2 (generation on fixed
-  context), and stage-3 (end-to-end triad). A failing end-to-end case must be triageable to a stage.
-- **Cover the RAG triad** — context relevance, groundedness/faithfulness, answer relevance — as the floor, plus the
-  **not-in-corpus abstention** case.
-- **The golden set carries reference contexts/chunk-ids**, not just a reference answer — recall is otherwise
-  unmeasurable. Synthetic sets are human-reviewed drafts.
-- **Deterministic retrieval metrics when labels exist** (recall@k, precision@k, MRR, NDCG) — judge-based context
-  relevance only when they don't. **Never assert the answer string.**
-- **Inherit, don't repeat, the parent skill:** the four ideas, judge model-id pinning + gold-set calibration,
-  regression-vs-stochastic (sample N≥3 for a rate), budgets-are-assertions, keys-via-env, no-PII all come from
-  `qa-typescript:ai-feature-testing`. `strict: true`; no `waitForTimeout`.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `llm-evals.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Cross-references
 

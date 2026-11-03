@@ -231,23 +231,7 @@ A multi-step flow holds **one draft** above the steps (`@State` in the owning vi
 
 ## Rules
 
-- One pure validator per form; the view renders its result.
-- Errors beside the field, as text, localized; cleared when the cause is fixed.
-- `@FocusState` order matches the visual order; Return moves on or submits; focus lands on the first invalid field.
-- Submit guards re-entry in code, disables the control, shows progress, and carries one idempotency key per draft.
-- Server field errors map to the enum; unknown fields go to a form-level message.
-- `textContentType` on every credential, address and code field; `SecureField` for secrets.
-- Every control and error text has an `accessibilityIdentifier`.
-
-## What NOT to do
-
-- No validation inside `body` that allocates or calls the network; no `Task` per keystroke.
-- No `ScrollView` + `VStack` imitating `Form`; no per-platform imitation of Material text fields.
-- No `.disabled(!isValid)` as the only feedback — the user sees a dead button and no reason.
-- No `localizedDescription` or a raw server string shown as an error.
-- No secrets in a persisted draft, `@AppStorage` or `UserDefaults`.
-- No `UIKit` `UITextField` wrapper where `TextField` + `textContentType` does the job.
-- No `Thread.sleep`-style delay to "let the keyboard settle".
+The standards this skill's output must meet are the mobile-ios rule files, not a list here: `swiftui.md` and `ios-accessibility.md`. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

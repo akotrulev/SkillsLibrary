@@ -154,21 +154,14 @@ Wrap state-mutating calls in `act(...)`; pass a `wrapper` for hooks that read co
 
 ## Rules
 
-- **Query by role/label first, `getByTestId` last** — testids are the E2E contract ([`test-ids`](../test-ids/SKILL.md)); in unit tests they're a fallback when no accessible query fits.
-- **`userEvent.setup()` + `await`** every interaction — never `fireEvent` for user actions (it skips the real event sequence). `fireEvent` only for events users can't do (a raw `scroll`, a synthetic `change` on a non-input).
-- **Semantic assertions** via `jest-dom` matchers (`toBeInTheDocument`, `toBeDisabled`, `toHaveAccessibleName`) — never snapshot a whole component's markup.
-- **One behavior per test**, `Should_X_When_Y` / `renders X when Y` naming; no `if`/`for` driving assertions — parameterize with `it.each`.
-- **Fakes/stubs over mock-everything**; mock at the module boundary; MSW for network.
-- **Async via `findBy*`/`waitFor`**, never a timer.
-- Test **logic**, not markup: if deleting the assertion leaves a tautology, delete the test.
-- **≥ 80% of the branches you wrote are covered** — see *Coverage floor* below.
+The standards this skill's output must meet are the fe-react rule file `react-tests.md`, not a list here. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Where they and this skill disagree, the rule files win. The coverage floor below is how its 80% rule is measured.
 
 ## Coverage floor — ≥ 80% of the branches you wrote
 
 The tests cover **at least 80% of the branches in the code the change wrote**: every component, hook and module it created, whole, and the functions it changed in a file that already existed. The scope is the change, never the repo — a legacy area's low number is not the excuse, and the repo-wide number is not the target.
 
 - **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — conditional rendering (`&&`, a ternary in JSX, an early `return null`), each region state (loading / loaded / failed / empty), event-handler `if`/`else`, reducer `switch` cases and their `default`, `??` and `?.`, a default prop value, a Zod refinement's pass and fail — and give each a test or an `it.each` row that asserts its effect. The slack under 100% is for branches no honest test reaches, such as the `never` default of an exhaustive `switch`.
-- **Only an asserting test counts.** A render that executes a branch without asserting what the user sees is a **major** finding — it moves the number and catches nothing. The tautology rule above applies.
+- **Only an asserting test counts.** A render that executes a branch without asserting what the user sees is a **major** finding — it moves the number and catches nothing. Test logic, not markup: if deleting the assertion leaves a tautology, delete the test.
 - **Leave out what the matrix says not to test, by name.** Markup-only components, type-only files, barrels, `*.stories.tsx` and generated API clients stay out of the measured file list, and the report names each one left out. Never reach 80% by lowering the number or by a `/* v8 ignore … */` hint over code that has behavior. An async Server Component is measured through the fetch extracted from it ([Pure-logic tests](#pure-logic-tests-no-renderer)).
 - **Measure.** A plan task's `Gate: own tests` runs this over the files it wrote; outside a plan, run it before you report (with the project's package manager — `npx`, `pnpm exec`, `yarn`; install `@vitest/coverage-v8` at the Vitest major):
 
@@ -180,18 +173,6 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
   `% Branch` on the `All files` row is the number; `Uncovered Line #s` points at the misses. **Name the files**: Vitest 4 reports only the files a test loaded, so an untested new component vanishes from the table instead of counting as 0% unless `--coverage.include` lists it.
 - **Below 80%, write the missing tests.** The uncovered lines are the list.
 - **Gate.** Inside a plan task, `Gate: own tests` runs this task's tests — the red run, then green — and the *Coverage floor* measure over the files it wrote; the last runnable task runs everything else.
-
-## Anti-patterns to avoid
-
-- **Rendering an async Server Component** — it throws; Vitest has no RSC runtime. Extract the fetch; E2E the page.
-- **Snapshot-testing a markup-only component** — locks layout churn, proves no behavior. (Pixel/visual regression is the peer `qa/typescript/skills/visual-regression`.)
-- **`fireEvent.click` for user actions** — use `userEvent`; `fireEvent` bypasses focus/pointer/keyboard sequencing.
-- **`waitForTimeout` / `setTimeout` to wait for a render** — use `findBy*` / `waitFor`.
-- **Querying by CSS class / tag / `container.querySelector`** — couples to styling; use role/label, then testid.
-- **Asserting on state via `result.current` for a rendered component** — reach through the DOM, not the instance.
-- **Testing the framework / library** — that `useState` updates, that RHF validates, that MUI renders a button. Test *your* logic.
-- **Re-implementing E2E in RTL** — mocking `next/navigation` and pretending it's a journey test. Hand real navigation to `qa-ui-typescript`.
-- **Not resetting mocks** — leaked call history across tests → order-dependent flakiness.
 
 ## Pure-logic tests (no renderer)
 
@@ -218,7 +199,7 @@ A React app is not only components. These units carry real rules, are the cheape
 - **`*.test.ts` for pure logic, `*.test.tsx` for components** — the extension is the signal, and the repo's audit greps rely on it (`standards-audit` §O).
 - Colocated beside the unit, same as component tests. Same runner, same config, no separate project.
 - Import the function directly. If you need `render()` or a provider wrapper, it's a component test — move it to `.tsx` and use RTL.
-- The rules above apply unchanged: one behavior per test, `it.each` instead of loops, no `any`, fakes over `vi.mock`, `findBy*` never needed here.
+- The rule file `react-tests.md` applies unchanged: one behavior per test, `it.each` instead of loops, no `any`, fakes over `vi.mock`, `findBy*` never needed here.
 
 ### The browser seams
 

@@ -47,11 +47,21 @@ Every skill follows the same outline. Copy the right file from `.skill-template/
 
 ## Agent structure
 
-Step-by-step orchestrator agents live in `<domain>/agents/<name>.md`. Copy `.skill-template/agent.md` and keep its section skeleton: role + **two-modes note** → Skill-loading protocol → Operating rules → **Working on existing \<X\> (brownfield)** → Steps → Related agents → Output contract (both shapes) → When uncertain. Keep the template's `Gate:` line in Operating rules verbatim: inside a plan task it overrides the agent's own exit criteria.
+Agents live in `<domain>/agents/<name>.md` and are **thin routers**: they say in what order to work and where the boundaries are, and nothing else. The standards live in the plugin's rule files, the know-how in its skills, and a plan task's close-out in the plan itself (`plan-format.md` §7). Copy `.skill-template/agent.md` and keep its skeleton: role paragraph → invariants (only where the domain has real ones) → **Every run, before writing anything** (read the rule files, orientation-cache gate, version detection, green build first, read 2–3 representative files) → **Steps** (`| # | Step | Load | Done when |`) plus one paragraph on fix and extend → **Boundaries** (peer fences; in a plan task the prompt block, the plan's `## Close-out — every task` and its `Gate:` line decide; acceptance tests are read-only) → cache update → one **Report** template. An agent does not restate a rule file, the plan-execution protocol, or a list of related agents. Reference: `backend/java/agents/be-java.md`.
 
 **Vocabulary is fixed.** An agent's own operating procedure is numbered in **steps** (`## Steps`, `| # | Step | Goal | …`); the work items any plan it writes hands out are **tasks** (flat and ordered, ids prefixed by the family of work — `C1`, `B1…Bn`, `F1…Fn` — one deliverable each) — see the Planning rules in `CLAUDE.md`. Never call either a *phase* or a *slice*, in a heading, a table, or prose.
 
-**The brownfield structure is mandatory.** Every agent must be able to orient in an existing codebase/suite/schema, fix (Mode A: reproduce → triage → smallest correct change → verify → sweep the class), and extend (Mode B: reuse existing seams, re-enter only the touched steps) — not just author from zero. That means: the two-modes note up top, the four-part `## Working on existing <X> (brownfield)` section, the `Mode: FIX | EXTEND` brownfield output contract, and the `dev:*` loading sentence (or the inlined-discipline variant when the agent's plugin doesn't depend on `dev` — see `data-architect`). An agent PR without this section is incomplete.
+**Brownfield is still mandatory, in less space.** Every agent orients in an existing codebase before changing it, fixes (reproduce → triage → smallest correct change → verify → sweep the class, loading `dev:debugging` and `dev:verify`) and extends (re-enter only the touched step, reuse the seams orientation found). Its report template has a `Mode: BUILD | FIX | EXTEND` line.
+
+## Code standards are rules, installed per project
+
+A stack's do/don't standards are **Claude Code rules**, not skill sections: files with `paths:` glob frontmatter that Claude Code loads automatically once a session (or a subagent) reads, writes or edits a matching file. Plugins cannot ship rules, so each stack plugin carries an install skill, `<stack dir>/skills/rules/`, invoked as `/<plugin>:rules` (`disable-model-invocation: true`), which copies its rule files into the project's `.claude/rules/<plugin>/`.
+
+- **Split by path, so a session loads only what its files need**: a core file for the stack's source files, plus persistence, tests, config or whatever the stack needs. Core ≤ 6k characters, every other file ≤ 2.5k.
+- Each file opens with its `paths:`, an HTML version comment, the one-line severity scale, and (core file) "the codebase wins" plus version detection. Each rule is one bullet ending in its review severity tag.
+- Where a file extension is shared with another stack in a monorepo (TypeScript, C#, Kotlin), the default globs stay narrow and the install skill finds where this stack's code really lives and proposes globs for it.
+- A skill does not restate a rule: its `## Rules` section points at the rule file. The reviewer skill's checklist **is** the rule files. Provider- or tool-specific configuration rules (an auth provider, an exporter) stay in their skill.
+- Prove new globs before merging: a scratch project with the rule files installed and an `InstructionsLoaded` hook logging to a file, then `claude -p "Read <sample files>"`; each file must load for its sample and not for a non-matching file. Reference: `backend/java/skills/rules/`.
 
 ## Writing a good `description`
 

@@ -183,26 +183,7 @@ One schema per step plus a merged final schema; the accumulated values live in a
 
 ## Rules
 
-- RHF + Zod by default; one Zod schema per form, type inferred, mirrored by the server.
-- `Controller` for every input; no `useState`-per-field; no form state in a store.
-- `mode: 'onBlur'`; async rules debounced and cancellable.
-- Submit control disabled while submitting; replayable writes carry an idempotency key.
-- Inputs carry `inputMode`, `autoComplete`, `textContentType`, `returnKeyType` and an accessible label.
-- Keyboard: scroll container, `keyboardShouldPersistTaps="handled"`, a keyboard-aware wrapper.
-- Server errors mapped to fields with `setError`; non-field errors to `root` and the banner.
-- Secrets in a form never logged, never persisted, never put in a route param.
-- Every input, error line and submit control carries a `testID` ([`test-ids`](../test-ids/SKILL.md)).
-
-## What NOT to do
-
-- No `TextInput` without a label and `inputMode` / `autoComplete`; no placeholder standing in for a label.
-- No `secureTextEntry` password with `autoComplete="off"` that blocks the password manager.
-- No `KeyboardAvoidingView` nested inside a scroll view alongside a second keyboard handler.
-- No validate-on-every-keystroke; no async rule per keystroke.
-- No submit without a disabled / pending guard; no clearing the form on a failed submit.
-- No `useFormState`, `useActionState` or `<form action>` — none exist in React Native.
-- No Zod assertion on `message` in tests — assert `issues[].path` and `code`.
-- No password or token in `AsyncStorage`, MMKV, a route param or a log line.
+The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `react-native-forms.md` and `react-native.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

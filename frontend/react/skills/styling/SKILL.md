@@ -169,24 +169,14 @@ This skill owns only the CSS *authority* rules responsive design rides on: **mob
 
 ## Rules
 
-- **One styling authority** (library style API · Tailwind · CSS Modules) — never Tailwind *and* a CSS-in-JS library; [`component-library`](../component-library/SKILL.md) picks it.
-- **CSS Modules by default for hand-written CSS**; `globals.css` holds *only* tokens + a minimal reset, never component styles.
-- **Share via `composes` or a `className` prop**, never a descendant selector reaching a child's internals; use `:global` sparingly.
-- **Design tokens as CSS custom properties**, sourced from `design/visual-identity` (primary) / `design/theme-presets` (quick-start); modules consume `var(--token)`, never literals; functional tokens **named by purpose** (`--color-danger`), distinct from brand tokens; **bridged to one source** with the library theme.
-- **Type as a system, not a font** — one modular scale + base as tokens, headings carry hierarchy globally, display sizes fluid via `clamp()`, fonts via `next/font`, two–three weights, sizes from scale tokens.
-- **Dark mode = a deliberately-authored second palette** (desaturated accents, no pure black, contrast re-verified) swapped via `next-themes`/the library toggle — never an inversion; stamped before paint, user override persisted and winning.
-- **Mobile-first responsive** (the breakpoint contract itself → [`responsive-design`](../responsive-design/SKILL.md)).
+The standards this skill's output must meet are the fe-react rule file `react-styling.md`, not a list here. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Where they and this skill disagree, the rule files win.
 
-## What NOT to do
+Beyond the rule files, this skill's own rules:
 
-- No component styles in `globals.css` ("global-stylesheet dumping") — scope them in a module.
-- No hardcoded hex/px colors in `*.module.css` or `sx` — use tokens.
-- No descendant selector reaching past a child's contract — expose a `className`/prop.
-- No Tailwind layered onto MUI/Mantine/Chakra — pick one authority.
-- No two color systems (library tokens *and* your own diverging) — bridge to one source.
-- No value-named functional tokens (`--color-red` for danger) — name by purpose.
-- No dark mode by inversion (`filter: invert()` / negated hex) — author a second palette and re-check contrast.
-- No hand-rolled theme flash-guard — use `next-themes`; no raw `<link>` Google Fonts — use `next/font`.
+- **Tokens are sourced** from `design/visual-identity` (primary) or `design/theme-presets` (quick-start); functional tokens stay distinct from brand tokens.
+- **Type as a system**: headings carry hierarchy globally; two to three weights; no raw `<link>` Google Fonts.
+- **Dark mode**: desaturated accents, no pure black; stamped before paint by `next-themes` (no hand-rolled flash guard); the user's override persisted and winning.
+- **The breakpoint contract itself** → [`responsive-design`](../responsive-design/SKILL.md).
 
 ## Validation
 

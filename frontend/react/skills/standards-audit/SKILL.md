@@ -15,6 +15,7 @@ This is **read-only analysis on product code**. The audit points; the `fe-react`
 
 1. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 19 lettered sections, every check, how to find violations, and the severity each carries. **Read it end-to-end** before Step 2; it is the audit's spine.
 2. [`references/report-template.md`](references/report-template.md) — the Round-1 and Round-N report skeletons. Read it before Step 3.
+3. The project's installed fe-react rule files, `.claude/rules/fe-react/`, when present (`/fe-react:rules` installs them). A rule the team edited or deleted there is the project's convention: a check that contradicts it is a noted deviation, not a finding.
 
 Load the **owning skill's `SKILL.md`** (named per section in the checklist) whenever a check is ambiguous, version-keyed, or you are about to write a fix direction for it. The checklist carries the invariant; the skill carries the reasoning and the correct form. When the checklist and the owning skill disagree, **the skill wins** — and that disagreement is itself worth reporting.
 

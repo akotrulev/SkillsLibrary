@@ -181,26 +181,7 @@ A single generic "No data" for all three is a defect — it tells the user nothi
 
 ## Rules
 
-- **Global `ErrorBoundary`** around `@Body` in the layout + **per-feature boundaries** around independently-failing regions.
-- **Derive the boundary** to log (structured, with context) via `OnErrorAsync`; set `MaximumErrorCount`; `Recover()` on navigation/retry; **never render `ex.Message`** in `ErrorContent`.
-- **Own the reconnection UX**: net10 `ReconnectModal` (reconnecting/reconnected/failed states) + `pauseCircuit`/`resumeCircuit` on tab visibility; net8/9 style the built-in modal; persist eviction state a user would hate to lose.
-- **`AddStandardResilienceHandler()`** on outbound `HttpClient`; retry idempotent methods only; let the breaker fail fast into a categorized `Result`.
-- **Ship WASM client errors to the server log** (rate-limited endpoint).
-- **Three-state data regions** everywhere: loading / loaded / failed **inline with retry** — never swallow a failure into a blank section.
-- **Grid failures render inline in the grid**; loading + failed states bound on the **shared renderer**.
-- **Actionable empty states** — distinguish no-records / no-filter / filter-matched-nothing.
-- **Reconnection modal and live-data status stay consistent** (don't show live data over a reconnecting circuit — coordinate with [`realtime`](../realtime/SKILL.md)).
-
-## What NOT to do
-
-- No app without a global `ErrorBoundary` (one uncaught exception = white screen / dead circuit).
-- No `ex.Message` / raw response body / stack trace rendered to a user.
-- No two-state region (loaded / not-loaded) — a failure then reads as "no data".
-- No failure surfaced *only* as a toast for a persistent region (grid/detail/section).
-- No generic "No data" covering all three empty situations.
-- No retry on a non-idempotent POST; no hand-rolled retry loop where `AddStandardResilienceHandler` fits.
-- No net10-only reconnection API (`ReconnectModal` customization, `pauseCircuit`) emitted into net8/net9 — use the tagged fallback.
-- No unlogged WASM client exception (console-only = invisible).
+The standards this skill's output must meet are the fe-blazor rule files, not a list here: `blazor.md` and `blazor-ui.md`. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation
 

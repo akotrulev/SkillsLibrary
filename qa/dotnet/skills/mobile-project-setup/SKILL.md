@@ -128,10 +128,9 @@ PLATFORM=ios DEVICE_NAME="iPhone 15" PLATFORM_VERSION=17.4 APP_PATH=/abs/App.app
 
 ## Conventions (the shell only)
 
-- **No `Thread.Sleep` / `Task.Delay`.** Use `BaseAppiumPage.Wait` (a `WebDriverWait`); add new waits there, never inline.
-- **Screen objects expose intent, not selectors**; the per-platform test id first; one screen object per screen. The only assertion in a screen object is `VerifyPageLoaded()`; the tests own every other one.
-- **Driver lifecycle** lives in `AppiumDriverFactory` + `BaseMobileTest`; tests never new-up a driver.
-- **Config / secrets**: app path, Appium URL and device from environment variables; no secrets committed.
+The standards the shell must meet are the qa-dotnet rule files, not a list here: `automation.md`, `mobile-ui.md` and `suite-config.md`. Tell the user to install them with the shell (`/qa-dotnet:rules` copies them into `.claude/rules/qa-dotnet/`); until then read the plugin's copies in `qa/dotnet/skills/rules/`. Where they and this skill's recipes disagree, the rule files win.
+
+- New waits are added to `BaseAppiumPage.Wait`, never inlined; the driver lives in `AppiumDriverFactory` + `BaseMobileTest`.
 
 Screen-object emission, locator strategy, device-farm wiring, and native-feature surfaces are owned by the `qa-mobile-dotnet` skills (`mobile-screen-explorer`, `mobile-screen-objects`, `ui-test-author/appium`, `device-cloud`, `mobile-native-features`). Defer to them.
 

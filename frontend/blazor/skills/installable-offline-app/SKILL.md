@@ -100,25 +100,7 @@ The template caches the **app** offline; it does **nothing** for your API respon
 
 ## Rules
 
-- **Offline = WASM only.** Server apps can be *installable* but never *offline*; put offline surfaces on WASM.
-- **Two service workers:** `service-worker.js` is a dev no-op; `service-worker.published.js` does the caching — offline works only in a published build.
-- **Ship the maskable icon + full manifest**; installability needs manifest + HTTPS + a registered worker.
-- **Handle the update lifecycle explicitly** — a waiting worker needs all tabs closed *or* a skip-waiting prompt; a refresh alone won't update.
-- **The template caches the shell, not your data** — add response caching / IndexedDB per endpoint for real offline.
-- **Queue offline writes**, mark them pending, replay on reconnect with a concurrency token.
-- **Surface connectivity** — offline banner, deferred-action labels; never a silent failure.
-- **Watch payload size** — precaching a bloated WASM app makes first install slow ([`performance`](../performance/SKILL.md)).
-
-## What NOT to do
-
-- No offline promises on an interactive-Server app — it can't work without the circuit.
-- No editing `service-worker.published.js` expecting it to run in `dotnet watch` — dev uses the no-op worker.
-- No "redeploy = instantly updated" assumption — implement a skip-waiting prompt or document next-launch update.
-- No cache-first over live API data without a freshness policy — users see stale or broken data.
-- No offline write that reports success — mark it pending until it actually syncs.
-- No hand-maintained cache list — let `service-worker-assets.js` (content-hashed) drive precaching.
-- No manifest without a maskable icon + `theme_color` — poor install presentation.
-- No net10 Blazor-Web-App PWA wiring assumed to "just work" — prefer standalone WASM or wire `.Client` deliberately.
+The standards this skill's output must meet are the fe-blazor rule files, not a list here: `blazor-config.md` and `blazor-js.md`. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation
 

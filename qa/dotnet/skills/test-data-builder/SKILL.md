@@ -161,31 +161,7 @@ Don't build "an order in the DB" inside the builder — that couples the builder
 
 ## Rules
 
-- Builders live under `tests/<project>/Builders/`; ObjectMothers under `tests/<project>/Mothers/`.
-- Every field has a sensible default — adding a non-nullable field doesn't ripple through 50 tests.
-- Field setters are `With<X>` / `For<X>` / `<Verb>At`.
-- One builder per aggregate; child aggregates have their own builders.
-- Defaults are deterministic literals; only id-like fields use random with reason (seeded Bogus).
-- `Build()` returns the real domain type, never the builder itself.
-- `Build()` is idempotent — calling it twice produces equal but independent instances.
-- ObjectMother helpers return a builder (so tests can refine); return a fully built object only when no test ever varies it.
-- Tests never construct domain objects with raw `new`/`{ ... }` across more than 1–2 places — extract to a builder.
-- Constructor injection only — builders never use a service locator.
-- Async never appears in the builder (no `BuildAsync`); building is pure.
-
-## What NOT to do
-
-- No inline test data literals duplicated across test files.
-- No `null` for required fields in defaults — pick a real default.
-- No randomness on fields the test asserts against.
-- No "god builder" with 30 chained methods covering 4 unrelated aggregates — split per aggregate.
-- No persistence in the builder — shape and save are separate concerns.
-- No production-code builders disguised as test builders ("we'll reuse this in prod too") — separate them.
-- No exposing mutable collections through getters — snapshot in `Build()`.
-- No defaults that violate domain invariants (e.g. negative `TotalMinor`) — the default builder must produce a valid object.
-- No `Build()` that mutates state outside the builder (no DB writes, no logging).
-- No `Build()` whose return type is `dynamic` or `object` — return the real type.
-- No `IFixture` / AutoFixture stacked on top of these builders — pick one; mixing breaks predictability.
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `test-data.md` (and `automation.md` for the tests that use the builders). Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

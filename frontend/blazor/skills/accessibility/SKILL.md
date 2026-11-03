@@ -125,23 +125,7 @@ These are the most-missed rules and they scale badly through shared renderers �
 
 ## Rules
 
-- **Semantic element first, ARIA only for the gap** — `<button>`/`<a href>`/`<dialog>`/`<label>` before any `role`/`aria-*`.
-- **Keep `FocusOnNavigate`** in `Routes.razor` with a single `<h1>` per page; hook `enhancedload` for enhanced-nav updates the Router doesn't catch.
-- **Move focus deliberately** after context changes (`FocusAsync`); trap-and-restore focus in dialogs; prefer native `<dialog>`/library dialogs that do it for you.
-- **One persistent polite live region** for async results/counts; `role="alert"` for errors only; update its text, never swap the node.
-- **Custom widgets follow the APG** key map + roving tabindex; every interactive element is `Tab`-reachable with a visible focus indicator.
-- **Every icon-only button is labeled** (`Title`/`aria-label`), fixed on the shared renderer; **never color/icon alone** for state (including the active nav item — add `aria-current="page"`); contrast checked on the **real** background and **re-checked in dark mode**; consistency within a control group.
-- **Real landmark elements** (`<nav>`/`<main>`/`<footer>`) for page regions, `aria-label` on repeated `<nav>`s; a **new-tab link** carries an `aria-label` "(opens in new tab)" suffix + `rel="noopener"`.
-
-## What NOT to do
-
-- No `<div @onclick>` where a `<button>`/`<a>` fits (no keyboard, no focus, no role).
-- No page without a focusable `<h1>` + `FocusOnNavigate` — enhanced nav then leaves screen-reader users silently stranded.
-- No focus left behind a modal, no dialog without focus trap + restore.
-- No live region swapped in at announce time (must pre-exist), no `assertive` for routine updates.
-- No custom widget with `<div>`s and click handlers instead of the APG role/keys; no `tabindex > 0`; no `outline:none` without a replacement.
-- No icon-only button without a label; no state shown by color/icon alone; no contrast checked only against white when it renders on a tinted surface.
-- **Do not run axe/Lighthouse here** — hand that to qa `accessibility-testing`.
+The standards this skill's output must meet are the fe-blazor rule files, not a list here: `blazor-markup.md` and `blazor-styles.md`. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation
 

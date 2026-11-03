@@ -274,26 +274,6 @@ public class TaxCalculatorTests
   (`qa-dotnet:responsive-testing`, `qa-dotnet:language-testing`).
 - The worker count is `[assembly: LevelOfParallelism(4)]` or `dotnet test -- NUnit.NumberOfTestWorkers=4`.
 
-## Anti-patterns
-
-- **`line.Split(',')` instead of a CSV library.** Breaks the moment a field contains a comma, a quote, or a
-  newline. *Fix:* CsvHelper `GetRecords<T>()` — RFC-4180 quoting handled.
-- **Returning `object[]` of loose values and indexing in the test.** `args[3]` is a mystery and a column
-  reorder silently breaks it. *Fix:* bind to a **typed record**; pass one typed arg.
-- **A `foreach` over rows *inside one `[Test]`*.** One failure aborts the rest, and you get **one** result
-  for N cases. *Fix:* that's what `[TestCaseSource]` replaces — one case per row, each reported.
-- **Excel for engineer-owned data.** Binary, un-diffable, un-mergeable. *Fix:* CSV or JSON in git; Excel only
-  for sheets a non-technical owner maintains.
-- **Money as Excel/CSV floating-point.** `double` round-off corrupts totals. *Fix:* **integer cents** (or
-  `decimal`); assert on those. (Use `CultureInfo.InvariantCulture` in CsvHelper so `.`/`,` decimals don't
-  flip by locale.)
-- **Unnamed cases.** `Should_ReturnTheRowsTax_When_TheRowComesFromCsv(TaxCase)` with no `.SetName` shows as `(1)`, `(2)`… *Fix:*
-  `TestCaseData(...).SetName($"…{tc}")` so the **input** is in the failure.
-- **Instance state in a `[TestCaseSource]`.** It resolves at discovery before `[SetUp]`; an instance
-  dependency is null. *Fix:* keep the source **static** and self-contained.
-- **Secrets or real PII in a committed data file.** It's in git history forever. *Fix:* synthetic data; real
-  secrets via env (cross-link `qa-dotnet:test-login-tokens`).
-
 ## Examples
 
 **End-to-end: same test body, three sources, one typed row, named failures.**
@@ -332,25 +312,14 @@ public void Should_ApplyTheRowsDiscount_When_TheOrderIsPriced(OrderCase row)
 }
 ```
 
-## Rules (hard constraints)
+## Rules
 
-- **Data lives outside the test body** — inline `[TestCase]`/source method for a handful, an external
-  CSV/JSON/Excel file (copied to output, versioned) beyond that. One body, N rows; **never** a `foreach` or
-  `if` driving assertions inside a test (CLAUDE.md — parameterize instead).
-- **Parse with a real library, bind to a typed record** — CsvHelper `GetRecords<T>()` (CSV),
-  `JsonSerializer.Deserialize` (JSON), ClosedXML `XLWorkbook` (Excel). **Never** `Split(',')`; never index a
-  loose `object[]` in the test. The record's properties expose **intent**, not column order.
-- **Each row is an independent, named case** — one logical assertion per row; the failure carries the
-  **input** (`TestCaseData(...).SetName(...)`). Rows run in any order; parallel cases hold no shared mutable
-  state. `[TestCaseSource]` is **static** and resolves at discovery.
-- **Pick the source for the shape** — CSV for flat tabular, JSON for nested, Excel **only** for
-  stakeholder-owned sheets, inline for a few. Prefer diffable CSV/JSON in git over binary Excel.
-- **Money is integer cents / `decimal`, never `double`** (round-off corrupts it); `CultureInfo.InvariantCulture`
-  for CsvHelper. No secrets or real PII in committed data files (synthetic; secrets via env —
-  `qa-dotnet:test-login-tokens`).
-- **Lazy `yield return` for huge datasets**; `ParallelScope.All` only for fixtures with no per-test instance
-  state — **never for Playwright or Appium**, whose rows stay `ParallelScope.Self` (or become fixture
-  parameters when each needs its own context). No `Thread.Sleep`; structured logging; nullable enabled.
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `test-data.md` and `automation.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
+
+## Conventions
+
+- Inline `[TestCase]` / a source method for a handful of rows; an external CSV / JSON / Excel file (copied to output, versioned) beyond that.
+- Lazy `yield return` for huge datasets. `ParallelScope.All` only for fixtures with no per-test instance state, never for Playwright or Appium, whose rows stay `ParallelScope.Self` or become fixture parameters.
 
 ## Cross-references
 

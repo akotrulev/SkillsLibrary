@@ -157,25 +157,7 @@ Sign-in is Credential Manager 1.6 (password + passkey + federated); the server o
 
 ## Rules
 
-- Permissions asked in context, after a pre-prompt; a denied screen that works; recheck on resume; never at launch.
-- Photo picker for every pick of photos and videos; `READ_MEDIA_*` only for core, broad media access.
-- Approximate location always works; precise only when needed; background location is its own later request.
-- Camera is bound to a lifecycle owner; a system capture intent is preferred when it is enough.
-- Biometrics unlock a Keystore key through a `CryptoObject`; enrolment, hardware and lockout states have screens.
-- Credential Manager for sign-in; server owns the challenge and verification.
-- Picked `Uri`s are temporary and untrusted; reads and decodes are off the main thread.
-- Declared permissions equal used permissions.
-
-## What NOT to do
-
-- No permission request in `Application.onCreate` or the first screen "to get it over with".
-- No `READ_EXTERNAL_STORAGE` / `READ_MEDIA_IMAGES` to attach a photo; no `MANAGE_EXTERNAL_STORAGE`.
-- No blank preview or crash when camera, location or biometrics are denied or absent.
-- No `BiometricPrompt` whose success callback only flips a flag; no silent fallback to a weaker check for a sensitive action.
-- No permission result cached in a singleton across process starts.
-- No Google One Tap / Google Sign-In / FIDO2 API in new code.
-- No `ACCESS_BACKGROUND_LOCATION` bundled in the same request as foreground location.
-- No `File(uri.path)` on a picker result; no decoding a full-size bitmap on the main thread.
+The standards this skill's output must meet are the mobile-android rule files, not a list here: `android-platform.md` and `android-manifest.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

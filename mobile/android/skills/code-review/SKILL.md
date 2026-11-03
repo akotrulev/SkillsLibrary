@@ -5,22 +5,31 @@ description: Use when reviewing a Kotlin, Jetpack Compose or Views diff against 
 
 # Android — Code Review
 
-A **hostile review of one diff** against the conformance checklist's rows and CLAUDE.md § Mobile code rules, then a **screenshot pass** on the running app. Findings go in the standard severity table; the review **does not rewrite** — it points, and the `mobile-android` agent (or the author) fixes. A whole-repo sweep with a saved report is [`standards-audit`](../standards-audit/SKILL.md), which reuses these checks at repo scale.
+A **hostile review of one diff** against the mobile-android rule files, then a **screenshot pass** on the running app. Findings go in the standard severity table; the review **does not rewrite** — it points, and the `mobile-android` agent (or the author) fixes. A whole-repo sweep with a saved report is [`standards-audit`](../standards-audit/SKILL.md).
+
+## The checklist is the rule files
+
+Every check, and the severity it reports, lives in one place: the mobile-android rule files `android.md` (core), `android-ui.md`, `android-ui-states.md`, `android-ui-a11y.md`, `android-views.md`, `android-data.md`, `android-platform.md`, `android-tests.md`, `android-build.md`, `android-manifest.md` and `android-kmp.md`.
+
+1. **The project's copies first**: `.claude/rules/mobile-android/` at the project root. The team may have edited them, and its edits win.
+2. **Otherwise the plugin's copies**: `mobile/android/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/mobile-android:rules` installs them.
+
+Read `android.md`, plus each other file whose `paths:` match a file under review, in full before the first finding. A rule loaded on its own by the session is not enough: a review needs every file that applies, not just the ones the session happened to open. A composable, repository or worker whose name and folder miss the default globs still gets `android-ui*.md`, `android-data.md` or `android-platform.md`: decide by what the file contains. Never review from memory of the rules, and never add a check the files do not contain; propose it as a rule change instead. Signing, store declarations, privacy and purchases are checked by the shared skills that own them (`mobile/_shared/{security,store-compliance,release,in-app-purchases}`); load the one the diff touches.
 
 ## Version lane
 
-Detect before flagging: Kotlin (`gradle/libs.versions.toml`), AGP and Gradle (`gradle/wrapper/gradle-wrapper.properties`), `compileSdk` / `targetSdk` / `minSdk`, the Compose BOM, Compose vs Views for the files in the diff, KSP vs kapt, Hilt vs manual DI, Room 2.8 vs 3, Navigation 3 vs Navigation Compose, any Kotlin Multiplatform module.
+Detect before flagging: Kotlin (`gradle/libs.versions.toml`), AGP and Gradle (`gradle/wrapper/gradle-wrapper.properties`), `compileSdk` / `targetSdk` / `minSdk`, the Compose BOM, Compose vs Views for the files in the diff, KSP vs kapt, Hilt vs manual DI, Room 2.8 vs 3, Navigation 3 vs Navigation Compose, any Kotlin Multiplatform module. The rule files' "the codebase wins" line applies: a convention the project follows consistently is not a finding.
 
 | Lane | Review consequence |
 |---|---|
-| **AGP 9 · Kotlin 2.4 · compile 37 / target 36** | The rows as written |
-| AGP 8 / Kotlin 2.0–2.3 | `[AGP9]` rows are advice for the project's own migration run, not findings on a feature diff; a *new* module applying `kotlin-android` or `kapt` on AGP 9 is A5 / A10 |
-| Views screen `[Views]` | The Views rows (D-section `views-interop` rows) apply; a Compose rule is not flagged on an XML screen, and a Views codebase is not asked to convert |
-| Navigation Compose 2.10 | `[N3]` rows (Navigation 3) are not findings; type-safe routes are correct |
-| Room 2.8 | `androidx.room3` rows are not findings; KSP and `suspend` / `Flow` DAOs still are |
-| Below minSdk 24 or a floor mismatch | One finding (A7) plus a [`migration`](../migration/SKILL.md) run |
+| **AGP 9 · Kotlin 2.4 · compile 37 / target 36** | The rules as written |
+| AGP 8 / Kotlin 2.0–2.3 | AGP 9 rules are advice for the project's own migration run, not findings on a feature diff; a *new* module applying `kotlin-android` or `kapt` on AGP 9 is a finding |
+| Views screen | `android-views.md` applies; a Compose rule is not flagged on an XML screen, and a Views codebase is not asked to convert |
+| Navigation Compose 2.10 | Navigation 3 is not asked for; type-safe routes are correct |
+| Room 2.8 | `androidx.room3` is not asked for; KSP and `suspend` / `Flow` DAOs still are |
+| Below minSdk 24 or a floor mismatch | One finding plus a [`migration`](../migration/SKILL.md) run |
 
-An API above the detected Kotlin, compileSdk or BOM is a **finding** (A1 / A7); `EncryptedSharedPreferences` in new code is a major (I-section); a `@Preview` missing on a new screen is a minor.
+An API above the detected Kotlin, compileSdk or BOM is a finding, and so is a version move inside a feature diff: reject it, it is a [`migration`](../migration/SKILL.md) run.
 
 ## When to use
 
@@ -44,60 +53,12 @@ An API above the detected Kotlin, compileSdk or BOM is a **finding** (A1 / A7); 
 
 ## Procedure
 
-1. **Map the diff to checklist sections** with the table below; open [`conformance-checklist.md`](../standards-audit/references/conformance-checklist.md) at only those sections and run each row's *Find it with* recipe **over the changed files**.
-2. **Read the code at every hit.** A grep hit is a lead, not a finding.
-3. **Verify the rule's owner** when a row is ambiguous — load the owning skill; the skill wins over the checklist, and the disagreement is reported.
-4. **Run the screenshot pass** (below) if an emulator is available; otherwise say it was not run.
-5. **Write the table**; one row per defect family with a count, not per site.
-
-| The diff touches | Sections |
-|---|---|
-| Gradle files, catalog, `gradle.properties`, R8 rules | A, B, K, L, T |
-| Composables, components, lists | C, D, E, M, N, R |
-| Views, Fragments, `ComposeView`, `AndroidView` | D (Views rows), M, N |
-| Routes, links, notifications, `assetlinks.json` | F, J, K |
-| Forms, inputs | G, M |
-| API client, sockets | H, O, K |
-| Room / DataStore / Keystore / files / WorkManager | I, K |
-| Permissions, camera, location, widgets, services, alarms | J, K, L |
-| Animation, gestures | Q, N, M |
-| String resources, formats | P |
-| ViewModels, repositories, DI modules | B, C, V |
-| Tests | S, R |
-| Purchases | X |
-| `commonMain` / a KMP module | W, C |
-
-## The rules every diff is held to (§5, in review form)
-
-| Check | Bad sign | Severity |
-|---|---|---|
-| No `!!` outside tests | `value!!` in app or library source | blocker |
-| The main thread is never blocked | `runBlocking`, `Thread.sleep`, `.get()` on a future, disk / network / Room query call on `Dispatchers.Main` or in a composable body | blocker |
-| Secrets live in Keystore-backed storage, never in the binary | A token in `SharedPreferences` / plain DataStore / `BuildConfig` / `strings.xml`; a key in `local.properties` copied into the APK | blocker |
-| TLS only | `usesCleartextTraffic="true"` or a `cleartextTrafficPermitted` with no recorded reason; a `TrustManager` / `HostnameVerifier` accepting everything | blocker |
-| Push and link payloads are validated | A route, `Intent` or `Class.forName` built from unchecked `intent.data` / `remoteMessage.data` | blocker |
-| Components are exported on purpose | `android:exported="true"` with no filter reason; an exported `ContentProvider` or `Service` with no permission; a mutable `PendingIntent` | blocker |
-| Every shipped Room schema migrates | An entity changed with no `Migration` / auto-migration; `fallbackToDestructiveMigration()` in a release path | blocker |
-| Every permission is declared and asked in context | A runtime permission used with no manifest entry; a request in `Application.onCreate` / first composition; no denied-path screen | major |
-| No `GlobalScope`; dispatchers are injected | `GlobalScope.launch`; `Dispatchers.IO` hardcoded in a class that needs a test | major |
-| Flows are collected with the lifecycle | `collectAsState()` on a ViewModel flow; `lifecycleScope.launch { flow.collect }` with no `repeatOnLifecycle` | major |
-| One `uiState` per screen; no ViewModel-to-UI events | A `Channel` / `SharedFlow` of one-shot UI events; several `StateFlow`s a screen combines by hand | major |
-| No work in composition | A network call, `Json.decode`, a large sort or `DateFormat` built in a composable body; side effects outside `LaunchedEffect` / `DisposableEffect` | major |
-| Async work is owned by its screen | A coroutine launched in a composable with no structured scope; a `viewModelScope` job never cancelled on a new request | major |
-| Every request has a timeout budget | An `OkHttpClient` built with defaults; a spinner that can run forever | major |
-| Data regions have all states | No failed / stale / offline path; a failure that blanks the toolbar and the screen; `runCatching` turning a failure into empty | major |
-| Failures surface in one persistent banner | A `Log`-only catch, a `Toast`, a snackbar that vanishes, `Text(e.message)` | major |
-| Unbounded lists are lazy, with stable keys | `Column(Modifier.verticalScroll)` over server data; `items(list)` with no `key` / `contentType`; index as key | major |
-| Every interactive element and list container has a `testTag`, and the root exposes `testTagsAsResourceId` | A `Button` / `TextField` / `LazyColumn` with none; an id built from an index, GUID or state; `contentDescription` used as an id | major |
-| Accessible | An icon-only button with no `contentDescription`; `clickable` on a `Box` with no role; text in `dp`; target < 48 dp | major |
-| Dependencies arrive by constructor | A service locator, a `companion` singleton, `Hilt` field injection in a class outside an entry point | major |
-| No unearned abstraction | An interface with one implementer; a use case that only forwards to a repository; a ViewModel that mirrors a model | major |
-| Animator duration scale honoured | Custom motion that ignores `ANIMATOR_DURATION_SCALE` / reduced motion | major |
-| Strings localized | A literal in `Text("…")`; a string built by concatenation instead of a resource with arguments | major |
-| Fakes over mocks; `runTest` in new tests; no `try` / `if`, `OR` or sleep in a test body | `mockk` for a repository; `Thread.sleep`; `assertTrue(a == x \|\| a == y)` | major |
-| `commonMain` stays platform-free `[KMP]` | `android.*` import, Hilt, or a token in shared storage | major |
-| No inline comment, no commented-out code, no `TODO` | `//` inside a body | minor |
-| A version, SDK or toolchain move inside a feature diff | `compileSdk`, `targetSdk`, AGP, Kotlin or the BOM changed beside a feature | major — reject; it is a [`migration`](../migration/SKILL.md) run |
+1. Read the rule files that apply (above), then each changed file end to end.
+2. Walk the blocker rules first: `!!`, the main thread, `GlobalScope`, secrets and logging, link and push validation, `PendingIntent`, exported components and cleartext, Room migrations. Then the rest.
+3. For a mechanical lead over the changed files, the audit's [`conformance-checklist.md`](../standards-audit/references/conformance-checklist.md) has a *Find it with* recipe per row. A grep hit is a lead, not a finding: read the code at every hit.
+4. Per finding: file and line, the rule broken, a one-sentence fix. The severity is the tag on the rule, never a new judgment. One row per defect family with a count, not per site.
+5. Run the screenshot pass (below) if an emulator is available; otherwise say it was not run.
+6. Do not rewrite. Hand off to the `mobile-android` agent or the owning skill.
 
 ## The screenshot pass (Step 5)
 
@@ -118,19 +79,12 @@ adb exec-out screencap -p > android-<screen>.png
 | major    | app/src/main/kotlin/orders/OrdersClient.kt:18 | `OkHttpClient()` with no timeout budget | Per-endpoint-class timeouts per `networking` |
 ```
 
-Close with the lane line (`Kotlin 2.4 · AGP 9.4 · compile 37 / target 36 / min 24 · Compose · Hilt`), the screenshot-pass status, and the finding counts by severity. Severities follow the checklist: blocker ships a crash, a store rejection or a hard security rule break; major breaks a § Mobile code rule where it will hurt soon; minor is style; nit is preference.
-
-## Anti-patterns to always flag
-
-- An AGP, Kotlin, SDK-level or Compose BOM move inside a feature diff — reject it; it is a [`migration`](../migration/SKILL.md) run
-- A comment that exists because a name is unclear (major — the fix is the rename)
-- A test that asserts nothing, or an `OR` in an assertion (Test code rules)
-- `try` / `catch` inside a test body
-- A migration PR that changes behaviour beside the conversion
+Close with the lane line (`Kotlin 2.4 · AGP 9.4 · compile 37 / target 36 / min 24 · Compose · Hilt`), the screenshot-pass status, the finding counts by severity, and one line: `Rules: project .claude/rules/mobile-android/ | plugin copy (not installed)`.
 
 ## Handoffs
 
-- Fix → the `mobile-android` agent (FIX or EXTEND), or the owning skill named per section
+- Fix → the `mobile-android` agent (FIX or EXTEND), or the owning feature skill
+- A rule is missing or wrong → edit the project's `.claude/rules/mobile-android/`; for every project, the plugin's `mobile/android/skills/rules/`
 - Repo-wide → [`standards-audit`](../standards-audit/SKILL.md); version moves → [`migration`](../migration/SKILL.md)
 - Lock the fix with a test → [`unit-testing`](../unit-testing/SKILL.md)
 - Missing ids → [`test-ids`](../test-ids/SKILL.md); E2E review → peer `qa-mobile-java` / `qa-mobile-dotnet` / `qa-mobile-typescript`

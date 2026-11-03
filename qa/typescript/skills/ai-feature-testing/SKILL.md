@@ -167,25 +167,9 @@ These sections live in `references/` — **read the one the task touches**:
 
 The full anti-pattern catalog (exact-string asserts, unpinned judges, quarantined model regressions, PII in cases, missing budgets — each with its fix) lives in `references/details.md`. Read it before reviewing an eval suite.
 
-## Rules (hard constraints)
+## Rules
 
-- **Never assert an exact string on a free-form generation.** Assert a **property** (`contains`/`is-json`/`regex`/
-  `similar`/`javascript`), a **rubric** (`llm-rubric`), or **grounding** (`context-faithfulness`). `equals` only
-  for genuinely fixed outputs. Climb the ladder: deterministic first, embeddings next, judge last.
-- **The judge is a versioned test artifact.** Pin the judge **model id + version** (separate from the model under
-  test), keep the rubric in a file, and **calibrate against a human-labelled gold set** (30–200) before trusting
-  it. Re-calibrate on a model bump. Design against verbosity/positional/instruction-following bias.
-- **An eval is a dataset** — one prompt × N rows (input + expected properties), each row an **independent, named**
-  case (reuse `qa-typescript:data-driven-testing` mechanics; don't reinvent parsing). One logical property per
-  case where practical.
-- **Separate regression from stochastic.** Regression: pin model + `temperature: 0` + `seed`, assert once (and
-  re-baseline on a model bump — it's not truly deterministic). Stochastic: sample **N≥3** and assert a **pass-RATE
-  threshold**, never a single sample. Model non-determinism is **not** test flakiness (not ``flaky-test-quarantine``'s retry).
-- **promptfoo is the spine; the Anthropic SDK is the in-code path.** Use promptfoo for the eval suite; the SDK +
-  in-test judge when an assertion must live in Vitest. Both honor the four ideas.
-- **Budgets are assertions** — `cost` / `latency` ceilings, capped `max_tokens`. **Keys via env**, read lazily,
-  never in `promptfooconfig.yaml` or code. **No real PII** in committed cases (synthetic). `strict: true`; no
-  `waitForTimeout`.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `llm-evals.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win. Vitest specs on the SDK path also meet `qa-typescript.md`.
 
 ## Cross-references
 

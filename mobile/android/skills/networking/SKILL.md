@@ -189,26 +189,7 @@ Pull above; push is a socket the app opens **only while a screen needs it and th
 
 ## Rules
 
-- One client and one Retrofit service per API; match an existing client.
-- `https` only; base URL is configuration, not a secret; Network Security Config owns trust.
-- A budget on every request by endpoint class; a timeout fails, `CancellationException` is rethrown and silent.
-- Cancellation flows from `viewModelScope` / `collectLatest`; no `GlobalScope`, no unowned scope.
-- Retries ≤ 2 for reads, jittered, honouring `Retry-After`; none for writes without an idempotency key; none offline; one place.
-- Decode failure is `Drifted` and renders as failed.
-- `401` triggers exactly one shared refresh (a locked `Authenticator`), then one replay, then re-auth in place.
-- Sockets closed when the screen stops.
-- No token, body or PII in logs; no logging interceptor in release.
-
-## What NOT to do
-
-- No `runBlocking` or `.execute()` on the main thread; no `Thread.sleep` waiting on a request.
-- No `NetworkOnMainThreadException` "fix" with `StrictMode` permissive policies.
-- No `catch (e: Exception)` that eats `CancellationException`; no `runCatching` around a suspend call without rethrow.
-- No `Gson` / `Moshi` added to a kotlinx.serialization project, or the reverse.
-- No `interface ApiClient` wrapping Retrofit with one implementation "for testing" — a fake of the *repository* or a `MockWebServer` is the seam.
-- No `usesCleartextTraffic="true"`; no hardcoded LAN URL in a release build type.
-- No retry on a `POST` without an idempotency key; no fixed-interval retry without jitter.
-- No socket opened in a composable body or left open in the background.
+The standards this skill's output must meet are the mobile-android rule files, not a list here: `android-data.md` and `android.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

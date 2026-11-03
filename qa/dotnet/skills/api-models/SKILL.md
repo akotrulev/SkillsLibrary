@@ -132,6 +132,10 @@ public class {Resource}ListDto
 
 ## Rules
 
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `automation.md` and `api.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
+
+## Conventions
+
 ### Naming
 
 - `{Resource}Dto` — PascalCase resource noun + `Dto` (e.g. `UserDto`, `OrderDto`).
@@ -142,13 +146,10 @@ public class {Resource}ListDto
 - DTOs live in `Models/{Api}/{Resource}Models/`. Namespace: `ApiTests.Models.{Api}.{Resource}Models`.
 - Shared within an API group → `Models/{Api}/CommonModels/`, namespace `ApiTests.Models.{Api}.CommonModels`.
 - Shared across API groups → `Models/CommonModels/`, namespace `ApiTests.Models.CommonModels`.
-- One DTO per file, one file per class.
 
 ### Properties
 
-- `[JsonPropertyName("json_key")]` on **every** property — explicitly map JSON keys.
-- Prefer default values over nullable types on response/request DTOs.
-- Type mappings:
+Type mappings (`[JsonPropertyName]` on every property, defaults over nullable):
 
   | JSON type        | C# type           | Default          |
   |------------------|-------------------|------------------|
@@ -160,11 +161,9 @@ public class {Resource}ListDto
   | array of T       | `List<T>`         | `[]`             |
   | nested object    | another DTO       | `null!`          |
 
-### Class rules
+### Usage
 
-- DTOs are plain data containers — no validation, no methods.
 - Use object initializer in tests: `new {Name}InDto { Prop = value, ... }`.
-- `System.Text.Json.Serialization` only — never `Newtonsoft.Json`.
 - Deserialization happens in tests/clients, never inside the DTO.
 
 ## Generation steps

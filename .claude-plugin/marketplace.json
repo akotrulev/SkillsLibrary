@@ -216,7 +216,8 @@
         "./qa/manual/test-plan-writer",
         "./qa/manual/test-strategy",
         "./qa/reporting/java/skills/test-reports",
-        "./qa/reporting/java/skills/flaky-test-quarantine"
+        "./qa/reporting/java/skills/flaky-test-quarantine",
+        "./qa/java/skills/rules"
       ],
       "commands": [
         "./qa/_shared/commands/security.md",
@@ -358,7 +359,8 @@
         "./qa/manual/test-plan-writer",
         "./qa/manual/test-strategy",
         "./qa/reporting/dotnet/skills/test-reports",
-        "./qa/reporting/dotnet/skills/flaky-test-quarantine"
+        "./qa/reporting/dotnet/skills/flaky-test-quarantine",
+        "./qa/dotnet/skills/rules"
       ],
       "commands": [
         "./qa/_shared/commands/security.md",
@@ -497,7 +499,8 @@
         "./qa/typescript/skills/ui-test-author/review",
         "./qa/typescript/skills/ui-test-author/selenium",
         "./qa/typescript/skills/visual-regression",
-        "./qa/typescript/skills/realtime-stream-testing"
+        "./qa/typescript/skills/realtime-stream-testing",
+        "./qa/typescript/skills/rules"
       ],
       "commands": [
         "./qa/_shared/commands/security.md",
@@ -572,7 +575,8 @@
         "./frontend/blazor/skills/styling",
         "./frontend/blazor/skills/test-ids",
         "./frontend/blazor/skills/ui-rules",
-        "./auth/auth0-blazor"
+        "./auth/auth0-blazor",
+        "./frontend/blazor/skills/rules"
       ],
       "commands": [
         "./frontend/blazor/commands/fe-blazor.md"
@@ -706,7 +710,8 @@
         "./frontend/react/skills/test-ids",
         "./frontend/react/skills/ui-rules",
         "./frontend/react/skills/data-grid",
-        "./auth/auth0-react"
+        "./auth/auth0-react",
+        "./frontend/react/skills/rules"
       ],
       "commands": [
         "./frontend/react/commands/fe-react.md",
@@ -766,7 +771,8 @@
         "./mobile/_shared/release",
         "./mobile/_shared/observability",
         "./mobile/_shared/in-app-purchases",
-        "./auth/auth0-react-native"
+        "./auth/auth0-react-native",
+        "./mobile/react-native/skills/rules"
       ],
       "commands": [
         "./mobile/react-native/commands/mobile-react-native.md",
@@ -826,7 +832,8 @@
         "./mobile/_shared/release",
         "./mobile/_shared/observability",
         "./mobile/_shared/in-app-purchases",
-        "./auth/auth0-ios"
+        "./auth/auth0-ios",
+        "./mobile/ios/skills/rules"
       ],
       "commands": [
         "./mobile/ios/commands/mobile-ios.md",
@@ -887,7 +894,8 @@
         "./mobile/_shared/release",
         "./mobile/_shared/observability",
         "./mobile/_shared/in-app-purchases",
-        "./auth/auth0-android"
+        "./auth/auth0-android",
+        "./mobile/android/skills/rules"
       ],
       "commands": [
         "./mobile/android/commands/mobile-android.md",
@@ -933,7 +941,8 @@
         "./observability/logs-traces-setup",
         "./observability/metrics-setup",
         "./observability/queries",
-        "./observability/dashboards"
+        "./observability/dashboards",
+        "./backend/dotnet/skills/rules"
       ],
       "commands": [
         "./backend/dotnet/commands/be-dotnet.md",
@@ -1025,7 +1034,8 @@
         "./observability/logs-traces-setup",
         "./observability/metrics-setup",
         "./observability/queries",
-        "./observability/dashboards"
+        "./observability/dashboards",
+        "./backend/node/skills/rules"
       ],
       "commands": [
         "./backend/node/commands/be-node.md",
@@ -1068,7 +1078,8 @@
         "./backend/python/skills/unit-testing",
         "./backend/python/skills/code-review",
         "./backend/_shared/pattern-guide",
-        "./backend/_shared/code-review"
+        "./backend/_shared/code-review",
+        "./backend/python/skills/rules"
       ],
       "commands": [
         "./backend/python/commands/be-python.md"
@@ -1115,7 +1126,8 @@
         "./observability/logs-traces-setup",
         "./observability/metrics-setup",
         "./observability/queries",
-        "./observability/dashboards"
+        "./observability/dashboards",
+        "./backend/rust/skills/rules"
       ],
       "commands": [
         "./backend/rust/commands/be-rust.md",

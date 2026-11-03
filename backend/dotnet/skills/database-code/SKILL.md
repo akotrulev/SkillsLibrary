@@ -351,40 +351,9 @@ builder.Services.AddDbContext<OrdersDbContext>(opt =>
 
 `AddDbContextPool` is available for high-throughput scenarios; profile to confirm the gain before adopting (the pool's lifetime quirks can bite).
 
-## Common anti-patterns
-
-- **Lazy loading** enabled — sneaks N+1 in everywhere
-- **`Update`** on a tracked entity ("save my changes") then a separate `Update` for the same entity in the same UoW
-- **`Find`/`First` then mutate** without checking if it was found
-- **`AsNoTracking` skipped on read paths** — measurable perf cost
-- **`Include` + projection** — defeats projection (load the included nav, then project)
-- **`ToList` before filter** — pulls everything into memory then filters in app
-- **`DbContext` reused across threads** — `DbContext` is not thread-safe
-- **Long-running `DbContext`** scope — keep them request-scoped
-- **`SaveChanges()` in a tight loop** — batch or use `ExecuteUpdate`
-
 ## Rules
 
-- One `DbContext` per bounded context
-- Sealed entities + factory methods + private collection backing fields
-- `[Timestamp]` / `xmin` concurrency tokens on every shared-write aggregate
-- `IEntityTypeConfiguration<T>` per entity; never inline configuration
-- `AsNoTracking()` for every read query
-- Projections (`Select(o => new XDto(...))`) instead of full entity hydration
-- Migrations under source control; run from pipeline, not app startup
-- DB calls instrumented via OTel; logs structured (matches `observability/structured-logging-dotnet`)
-- Connection strings from env / Key Vault (see `devops/environment-config`)
-
-## What NOT to do
-
-- No lazy loading enabled
-- No `DbContext` as singleton / per-app-lifetime (scoped only)
-- No `SaveChangesAsync` in loops
-- No `Database.Migrate()` in `Program.cs`
-- No `Find()` on a tracked context as a substitute for `FirstOrDefaultAsync` (silently inconsistent)
-- No raw SQL strings concatenated with user input (use `FromSqlInterpolated` parameter binding)
-- No mixing two providers in one `DbContext`
-- No mixing migration tools (EF migrations + DbUp + Flyway) in one project
+The standards this skill's output must meet are the be-dotnet rule files, not a list here: `dotnet-persistence.md`, plus `dotnet.md` for DI lifetimes and async. Read the project's copy in `.claude/rules/be-dotnet/`, or the plugin's in `backend/dotnet/skills/rules/` when the project has not installed them (`/be-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

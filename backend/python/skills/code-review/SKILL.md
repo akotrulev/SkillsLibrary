@@ -5,104 +5,57 @@ description: Use when reviewing Python worker or backend code for typing leaks, 
 
 # Python — Reviewer
 
-Reviews Python code against `pattern-writer`, `media-processing`, `sandboxed-worker`, `unit-testing` and the global rules in `CLAUDE.md`. Produces the findings table; does not rewrite. Loads `backend/_shared/code-review` for pattern-stacking and architecture-altitude concerns.
+Reviews Python worker code against the be-python rule files and produces a findings table. It does **not** rewrite: it points to the fix and hands off to `pattern-writer`, `media-processing` or `sandboxed-worker`. Loads `backend/_shared/code-review` for pattern-stacking and architecture-altitude concerns.
+
+## The checklist is the rule file
+
+Every check, and the severity it reports, lives in one place: the be-python rule files `python.md` (core), `python-pipeline.md`, `python-tests.md`, `python-container.md` and `python-project.md`.
+
+1. **The project's copies first**: `.claude/rules/be-python/` at the project root. The team may have edited them, and its edits win.
+2. **Otherwise the plugin's copies**: `backend/python/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/be-python:rules` installs them.
+
+Read `python.md`, plus each other file whose `paths:` match a file under review, in full before the first finding. Code that opens, parses or encodes an upload always gets `python-pipeline.md`, whatever its path. A rule loaded on its own by the session is not enough: a review needs every file that applies, not just the ones the session happened to open. Never review from memory of the rules, and never add a check the file does not contain; propose it as a rule change instead.
+
+## Version policy
+
+Detect the interpreter (`requires-python`, `.python-version`, the Dockerfile base image) and the Pillow major from `uv.lock` first. Do not flag a 3.12 project for lacking a 3.13 feature, or a Pillow 11 project for a 12-only API. The rule file's "the codebase wins" line applies: a convention the project follows consistently is not a finding.
 
 ## When to use
 
-- A diff or module submitted (validator, sanitiser, pipeline step, composition root, tests)
-- Pre-merge gate on anything under `src/` or `tests/` of the worker
+- A diff or module submitted: validator, sanitiser, pipeline step, composition root, isolation layer, tests, the worker's Dockerfile or compose service
+- A pre-merge gate on anything under the worker's `src/` or `tests/`
 - "Is this safe to point at customer uploads"
 
 ## When NOT to use
 
 - Conceptual questions → `pattern-guide`
-- Writing the fix → `pattern-writer` / `media-processing`
+- Writing the fix → `pattern-writer` / `media-processing` / `sandboxed-worker`
 - Container scanning, DAST → `qa-security`
 
-## Review checklist
+## Procedure
 
-### Typing and structure
+1. Read the rule files, then each changed file end to end.
+2. Walk the rules in this order: the core file's Hostile input section and `python-pipeline.md`, then Errors and resources, Concurrency and timeouts, then the rest. Most blockers live there.
+3. Per finding: file and line, the rule broken, a one-sentence fix. The severity is the tag on the rule, never a new judgment.
+4. Do not rewrite. Each fix names the skill section that has the recipe (`media-processing` Step 3, `sandboxed-worker` per-job isolation) rather than restating it.
 
-| Check | Bad sign | Severity |
-|---|---|---|
-| `mypy --strict` clean | `Any` in a signature, `# type: ignore` without code + reason, `cast` to silence | major |
-| Tagged unions exhaustive | `case _:` on a `Result`; `if isinstance` chains where `match` was meant | major |
-| Protocol sized to the consumer | a `Protocol` mirroring a whole concrete class | minor |
-| Frozen internal values | mutable dataclass passed across steps; a `dict` where a dataclass carries the shape | minor |
-| Composition root is the only constructor site | `new_session(...)` inside a function called per job; `Settings()` built in a module body | major |
-| No module-level mutable state | `_cache = {}`, `_session = None` + lazy init, `global` | major |
-| Unearned abstraction | ABC with one subclass, `*Manager` / `*Utils` class, a layer that forwards | major — inline it |
-| Comments per `engineering-practices/code-comments` | inline comment, commented-out code, docstring restating the signature | minor; wrong or covering-for-unclear-code → major |
-
-### Errors and control flow
-
-| Check | Bad sign | Severity |
-|---|---|---|
-| Expected outcomes are `Rejected`, bugs raise | `raise ValueError("unsupported")` for a customer's bad file; `Rejected` for a missing model file | major |
-| No swallowed exceptions | `except Exception: pass`, bare `except:`, `except ... : return None` | blocker |
-| Exception narrowed to what is handled | `except Exception` around `Image.open` when `UnidentifiedImageError` / `OSError` are the cases | major |
-| Resource lifetime | `Image.open` without `with`; a handle used after `verify()`; `BytesIO` never closed in a loop | major |
-| No blocking inside `async def` | Pillow / onnxruntime / vtracer called directly in a coroutine; no `to_thread` | major |
-| Timeouts kill processes | `signal.alarm`, `threading.Timer`, `asyncio.wait_for` around C-extension work | major |
-
-### Untrusted input (the worker's reason to exist)
-
-| Check | Bad sign | Severity |
-|---|---|---|
-| Format decided by bytes | branching on extension / declared MIME; re-labelling a polyglot | blocker |
-| Pixel ceiling explicit | `MAX_IMAGE_PIXELS = None`; no `width * height` check; relying on the default warning | blocker |
-| Truncated input rejected | `LOAD_TRUNCATED_IMAGES = True`; skipping `verify()` or `load()` | major |
-| Animated / multi-frame rejected for logo and photo classes | `n_frames` never read | major |
-| SVG parsed hardened | `xml.etree` / `lxml` instead of `defusedxml`; `forbid_dtd` missing | blocker |
-| SVG allowlisted, rejected not stripped | denylist of elements; stripping `<script>` and returning "clean"; `<style>` allowed; `href` not checked for scheme after decoding | blocker |
-| Every emitted SVG passes the sanitiser | VTracer output returned as-is | major |
-| Metadata strip is total | `im.copy()` then save; `save(exif=b"")` relied on; `**im.info` forwarded; XMP / comment untouched | blocker |
-| Orientation applied before strip | strip first, then no `exif_transpose` | major |
-| ICC kept, nothing else | profile dropped (colour shift) or `pnginfo` / `xmp` passed through | minor / major |
-| Paths confined | `Path(job.filename)` joined without `resolve().is_relative_to(job_dir)`; a path from the job opened directly | blocker |
-| No shell, no eval, no pickle | `subprocess(..., shell=True)`, `os.system`, `pickle.loads`, `yaml.load` without `SafeLoader` | blocker |
-| No network primitives | `requests` / `httpx` / `urllib` / `socket` imported anywhere in the worker | blocker |
-| Model loaded from baked weights only | download path reachable; `new_session` without `U2NET_HOME` asserted at startup | major |
-| Per-job isolation | pipeline runs in the parent; no `RLIMIT_AS` / `RLIMIT_CPU` / wall clock; `fork` start method with a loaded session | major |
-| Verdict leaks nothing | absolute paths, hostnames, tracebacks, payload bytes in the JSON or the log | major |
-| Rejection reasons closed | a free-form string where the `Literal` set is; a new reason not mirrored in the TypeScript contract | major |
-
-### Operations
-
-| Check | Bad sign | Severity |
-|---|---|---|
-| DPI graded from pixels vs print size | grade computed from `info["dpi"]` | major |
-| Dominant colours exclude transparency | `getcolors()` on RGBA including alpha < 128; no thumbnail before quantising | major / minor |
-| Ladder never upscales, both renditions from one copy | `resize` where `thumbnail` was meant; WebP and JPEG resized separately | major |
-| rembg input downsized, session reused, PNG out | full-resolution inference; session per call; cut-out saved as JPEG | major |
-| Thresholds named | `>= 300` inline; `(2048, 2048)` inline | minor |
-| Dependencies earned | numpy / opencv / cairosvg / libmagic added for one call Pillow already does | major |
-
-### Tests (`unit-testing`)
-
-| Check | Bad sign | Severity |
-|---|---|---|
-| Fixtures prove themselves | a GPS strip test whose fixture has no test asserting it carries GPS | major |
-| One expected condition | `assert reason in (...)`; `or` in an assertion | major |
-| No `try`/`except`, no `if`/`for` in a test body | any | major |
-| No `mock.patch` on the module under test | `patch("upload_worker.metadata.Image")` | major — inject a Protocol |
-| `model` tests marked and skipped honestly | a rembg test in the default lane; a skip reason that hides a missing weights file as "passed" | major |
-| Every `Rejected.reason` reachable from a test | a literal no test expects | minor |
-| Checked-in binaries | `tests/data/evil.jpg` | minor — replace with a builder |
-
-## Output
-
-The standard table from `CLAUDE.md`:
+## Output format
 
 ```
-| Severity | Location | Issue | Suggested fix |
+| Severity | Location                        | Issue                                                   | Suggested fix                                                          |
+|----------|---------------------------------|---------------------------------------------------------|------------------------------------------------------------------------|
+| blocker  | upload_worker/metadata.py:18    | `im.copy()` then `save()` keeps the JPEG comment and XMP | Rebuild with `Image.frombytes` after `exif_transpose` (`media-processing` Step 3) |
+| blocker  | upload_worker/sanitize_svg.py:9 | `xml.etree.fromstring` on the upload                    | `defusedxml` with `forbid_dtd`, `forbid_entities`, `forbid_external`    |
+| major    | upload_worker/api.py:40         | `remove(...)` called directly inside `async def`        | `await asyncio.to_thread(...)`, or keep the worker synchronous          |
+| minor    | upload_worker/dpi.py:12         | `>= 300` inline                                         | `PRINT_READY_DPI = 300`                                                 |
 ```
 
-Each fix names the skill section that has the recipe (`media-processing` Step 3, `sandboxed-worker` per-job isolation) rather than restating it. Blockers first; a review of upload-handling code with no row from the untrusted-input table should say explicitly that the table was applied and passed.
+Blockers first. A review of upload-handling code with no row from the hostile-input and pipeline rules says explicitly that they were applied and passed. End with one line: `Rules: project .claude/rules/be-python/ | plugin copy (not installed)`.
 
 ## Handoffs
 
 - Fixes → `pattern-writer` / `media-processing` / `sandboxed-worker`
 - Missing tests → `unit-testing`
+- A rule is missing or wrong → edit the project's `.claude/rules/be-python/`; for every project, the plugin's `backend/python/skills/rules/`
 - Cross-stack pattern concerns → `backend/_shared/code-review`
 - Container / image scan findings → `qa-security`, `devops/docker`

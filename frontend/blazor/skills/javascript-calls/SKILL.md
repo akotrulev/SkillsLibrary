@@ -148,26 +148,7 @@ Interop needs a live JS runtime, which **does not exist during prerender or on s
 
 ## Rules
 
-- **C# first** — write interop only for a browser API or JS library with no .NET equivalent.
-- **Collocated ES module behind `IJSObjectReference`** — never global functions or inline `<script>`.
-- **Load in `OnAfterRenderAsync(firstRender)`**, never `OnInitializedAsync` (prerender has no JS runtime).
-- **`IAsyncDisposable` always** — dispose the module and every `DotNetObjectReference`; wrap Server disposal in a `JSDisconnectedException` catch.
-- **`InvokeAsync(StateHasChanged)`** for any UI update triggered by a `[JSInvokable]` callback.
-- **`IJSInProcessObjectReference` only on WASM**, only for a measured hot path; still dispose it.
-- **Binary via stream references**, never base64-through-JSON.
-- **net10 constructor/property APIs stay version-gated**; use a module wrapper on net8/9.
-- **Components stay render-mode-agnostic** — the interactive mode is the consumer's choice.
-
-## What NOT to do
-
-- No inline `<script>` or `window.myGlobalFn` — unscoped, unmanaged, un-disposable.
-- No interop in `OnInitializedAsync` — it throws during prerender/static SSR.
-- No module or `DotNetObjectReference` without `DisposeAsync`/`Dispose` — leaks on every navigation.
-- No Server disposal without the `JSDisconnectedException` trap — a benign disconnect surfaces as an error.
-- No direct component-state mutation from a JS callback — marshal via `InvokeAsync`.
-- No `IJSInProcessRuntime` cast in a component that can render on Server or prerender — runtime failure.
-- No net10 `Get/SetPropertyAsync`/`InvokeConstructorAsync` on a net8/9 target — the API isn't there.
-- No interop to do what CSS or a native Blazor feature already does.
+The standards this skill's output must meet are the fe-blazor rule files, not a list here: `blazor.md` and `blazor-js.md`. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation
 

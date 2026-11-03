@@ -178,29 +178,17 @@ These are the most-missed rules and they scale badly through shared components �
 
 ## Rules
 
-- **Semantic element first, ARIA only for the gap** — `<button>`/`<a href>`/`<dialog>`/`<label>` before any `role`/`aria-*`.
-- **Manage focus + announce on client navigation** (single `<h1>` per page, focus `<main tabIndex={-1}>` on route change); **skip-to-content** link in the layout.
-- **Move focus deliberately** after context changes; **trap-and-restore** focus in dialogs; prefer native `<dialog>` / Radix / React Aria that do it for you.
-- **One persistent polite live region** for async results/counts; `role="alert"` for errors only; update its text, never mount it at announce time.
-- **Complex widgets come from a tested library** (Radix / React Aria / the component library) — don't hand-roll combobox/menu/tabs/tree; if you must, follow the APG + roving tabindex.
-- **Every interactive element** is `Tab`-reachable with a visible focus indicator; no `tabIndex > 0`; no `outline:none` without a replacement.
-- **Every icon-only button is labeled** (`aria-label`), fixed on the shared component; **never color/icon alone** for state (incl. active nav — add `aria-current="page"`); contrast checked on the **real** background and **re-checked in dark mode**; consistency within a control group.
-- **Images have `alt`** (`alt=""` for decorative); icons paired with text are `aria-hidden`.
-- **Real landmark elements** (`<nav>`/`<main>`/`<footer>`), `aria-label` on repeated `<nav>`s; new-tab links carry an `aria-label` "(opens in new tab)" suffix + `rel="noopener"`.
-- **`eslint-plugin-jsx-a11y`** in the dev loop (the runtime scan is QA's).
+The standards this skill's output must meet are the fe-react rule files `react.md`, `react-forms.md` and `react-styling.md`, not a list here. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Where they and this skill disagree, the rule files win.
 
-## What NOT to do
+Beyond the rule files, this skill's own rules:
 
-- No `<div onClick>` where a `<button>`/`<a>` fits; no `role="button"` div without `onKeyDown`.
-- No page without a focusable `<h1>`/`<main>` + route-change focus — client nav then leaves screen-reader users silently stranded.
-- No focus left behind a modal; no dialog without focus trap + restore; no hand-rolled combobox/menu where a library exists.
-- No live region mounted at announce time (must pre-exist); no `assertive` for routine updates.
-- No `tabIndex > 0`; no `outline:none` without a replacement; no `aria-hidden` on a focusable element.
-- No icon-only button without a label; no state shown by color/icon alone; no contrast checked only against white when it renders on a tinted/dark surface.
-- No `<img>` without `alt`; no placeholder-as-label; no `<select>` re-implemented as a `<div>`.
-- No defensive `'use client'` dragging semantic content client-side.
-- No reliance on `:hover` alone to reveal important info (tooltips, truncated-value reveals) — keyboard and touch users never trigger it; pair with focus or make it visible by default.
-- **Do not run axe/Lighthouse here** — hand that to qa `accessibility-testing`.
+- **A skip-to-content link** in the layout and **one `<h1>` per page**, so route-change focus has a target.
+- **One persistent polite live region** for async results and counts, mounted before it announces; `role="alert"` for errors only, never `assertive` for routine updates.
+- **A hand-rolled composite widget** (only where no library has one) follows the APG with a roving tabindex; never a `<select>` re-implemented as a `<div>`.
+- **`aria-current="page"`** on the active nav item; `aria-label` on repeated `<nav>`s; icons beside text are `aria-hidden`, and nothing focusable is.
+- **Contrast checked on the real background** and re-checked in dark mode; consistency within a control group.
+- **Nothing important revealed on `:hover` alone** (tooltips, truncated values); pair it with focus or show it by default.
+- **`eslint-plugin-jsx-a11y`** in the dev loop. **Do not run axe/Lighthouse here** — hand that to qa `accessibility-testing`.
 
 ## Validation
 

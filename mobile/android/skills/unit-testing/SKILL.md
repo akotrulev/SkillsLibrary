@@ -183,14 +183,7 @@ When Robolectric earns its cost, the Roborazzi record / verify loop, builders an
 
 ## Rules
 
-- JUnit 4 and fakes in every new test; JUnit 5 only where the plugin is present; no mock framework added.
-- One behaviour per test, one expected value per assertion, no `if` / `for` driving assertions — parameterize.
-- No `try` / `catch` in a test body; `assertFailsWith` or the exception reaches the runner.
-- Time, identity, randomness, configuration and I/O enter through the constructor; no interface created only for a test.
-- `runTest` + `StandardTestDispatcher`; advance the clock explicitly; **no real sleep**; tests are independent and order-free.
-- Compose tests are v2, wait for idle before asserting launched work, and test one stateless screen with hand-built state.
-- Journeys, gestures and system dialogs go to `qa-mobile-<stack>`.
-- **≥ 80% of the branches you wrote are covered** — see *Coverage floor* below.
+The standards this skill's output must meet are the mobile-android rule files, not a list here: `android-tests.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win. The coverage floor below is how its 80% rule is measured.
 
 ## Coverage floor — ≥ 80% of the branches you wrote
 
@@ -228,15 +221,6 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 
   One line per class is the number; `:app:koverHtmlReportDebug` shows the branches per function. Kover counts Kotlin's inline functions and coroutine state machines more faithfully than raw JaCoCo, which is why it is this lane's tool.
 - **Below 80%, write the missing tests.** The HTML report's missed branches are the list.
-
-## What NOT to do
-
-- No `Thread.sleep`, `delay` or `Dispatchers.setMain(UnconfinedTestDispatcher())` to make a test pass.
-- No `!!` even in a test where `assertNotNull` / `requireNotNull` would name the value in the failure.
-- No mocking of Room, DataStore, Retrofit or the repository; no `mockk<ViewModel>()`.
-- No whole-screen screenshot; no screenshot as a substitute for an assertion.
-- No v1 Compose rule in a new test; no `waitForIdle()` as a reflex around a test that does not need it.
-- No tests of getters, DTOs or forwarding wrappers; no comment narrating a test.
 
 ## Generation steps
 

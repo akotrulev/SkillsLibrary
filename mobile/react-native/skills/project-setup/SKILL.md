@@ -139,18 +139,7 @@ Keep **native dependencies in the app package** (`vendor/.../rules/monorepo-nati
 
 ## Rules
 
-- Detect the lane; never up-level; development build over Expo Go for a real app.
-- `expo install` for native packages; config plugins for native change; CNG folders never hand-edited.
-- No `@react-navigation/*` in an Expo Router app.
-- `EXPO_PUBLIC_*` is public; secrets never in the bundle.
-- Strict TS, flat ESLint and `expo-doctor` are part of the scaffold, not follow-ups.
-
-## What NOT to do
-
-- No `ios/` / `android/` hand edits in a CNG project.
-- No old-architecture flags.
-- No Expo Go as the team's only runtime for an app with native dependencies.
-- No `pnpm add react-native-*` for native packages.
+The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `expo-config.md` and `react-native.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Handoffs
 

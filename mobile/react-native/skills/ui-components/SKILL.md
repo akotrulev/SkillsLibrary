@@ -150,26 +150,7 @@ The region sits **under** the screen header, search and filters, which render re
 
 ## Rules
 
-- Native primitive over JS imitation: `Pressable`, `expo-image`, native menu, native modal.
-- Every data-bearing list is virtualized; FlashList 2 samples carry no `estimatedItemSize`.
-- Every data region has loading / loaded / failed / empty slots; failure never replaces the header or filters.
-- Strings only inside `<Text>`; conditional rendering with a boolean, never `0 && …`.
-- Touch targets ≥ 44 pt; interactive elements carry `testID` ([`test-ids`](../test-ids/SKILL.md)) and an accessible label ([`accessibility`](../accessibility/SKILL.md)).
-- Keys are stable ids; callbacks hoisted out of rows; no inline object or style literal in `renderItem`.
-- Compound component over boolean-prop sprawl; ref as a prop on React 19.
-- No server data copied into a store to feed a list — [`architecture`](../architecture/SKILL.md).
-
-## What NOT to do
-
-- No `TouchableOpacity`; no RN `Image`; no `ScrollView` + `.map` over fetched data.
-- No `estimatedItemSize` on FlashList 2; no `inverted`; no `MasonryFlashList`.
-- No JS dropdown, JS bottom sheet or hand-built lightbox where a native one exists.
-- No `SafeAreaView` around a scroller; no `paddingTop: 44`.
-- No `{n && <X/>}` with a number; no raw string in a `View`.
-- No query, no `useContext` stack, no inline style literal inside a list row.
-- No `router.push` on a `View` for navigation; no animation here (Reanimated is [`animation`](../animation/SKILL.md)'s).
-- No early `return <Error/>` above the search and filter header.
-- No `forwardRef` on React 19; no `'use client'`.
+The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `react-native-ui.md` and `react-native.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

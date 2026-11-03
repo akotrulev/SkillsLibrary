@@ -204,7 +204,7 @@ smell: tagging faster than fixing.
 - **Fighting a `waitForTimeout`-induced flake with retries.** The fixed sleep is the *cause*. *Fix:* replace
   it with auto-waiting locators / web-first assertions / `expect.poll`, then most "flakiness" disappears.
 
-## Rules (hard constraints)
+## Quarantine mechanics
 
 - **Retries follow `qa/cicd/ci-conventions`** — `retries: 0` in the canonical config; one retry only on a
   documented hotspot `describe`, dated and linked. This skill never raises the config's retries.
@@ -215,10 +215,10 @@ smell: tagging faster than fixing.
   The test keeps running.
 - **Every quarantined test carries a ticket** (`allure.issue(url, name)`) and `allure.tag('flaky')`. The tag set
   **shrinks**; review each sprint; un-fixable → **deleted**, not left to rot.
-- **A deterministic failure is a bug, not a flake** — fix the code/test; do not retry or quarantine it.
-- **No `waitForTimeout` / `setTimeout`-as-wait** — use auto-waiting locators, web-first assertions,
-  `expect.poll`. Test names are `Should_X_When_Y`; one logical assertion per test; no conditional logic in
-  tests; builders for 4+-field test data; `strict: true`.
+
+## Rules
+
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `ci-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Cross-references
 

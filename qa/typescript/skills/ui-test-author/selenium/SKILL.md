@@ -172,52 +172,15 @@ describe("Authentication", () => {
 
 `BaseTest` owns the per-test `WebDriver` via `DriverFactory` and exposes seed data.
 
-## Rules
-
-### Page object rules
-- Extend `BasePage`; pass `driver` to `super(driver)`
-- Element accessors return `Promise<WebElement>` (or `Promise<WebElement[]>`) — keep them one-liners
-- **No `@FindBy`** equivalents — explicit `findElement(By)` calls only
-- **Locator preference:** `By.css("[data-testid='…']")` (or the project's test-id attribute) → `By.id(…)` → `By.css(…)` → `By.className(…)` → `By.xpath(…)` (last resort). A fallback carries no marker in the code; it gets a `missing-testids.md` row
-- One class per page; multi-step flows in a sub-folder
-- Reusable components take a parent `WebElement` and use parent-scoped finds
-- Navigation actions return the next page object; same-page actions return `Promise<void>`
-- Page helpers are `private static` methods or module-private functions
-
-### Test rules
-- Compose a `BaseTest` helper — no class inheritance gymnastics in TS tests
-- Test names describe behavior: `"successful login lands on product page"`
-- Use Mocha `describe`/`it` (or Vitest `describe`/`test`) tags via test grep / file path for selective runs
-- Assertions live in the test, never in pages
-- Every assertion has a message: `expect(x).to.equal(y, "why this matters")`
-- **One expected condition per assertion — never an `OR`.** `expect(text).to.equal('Saved')`, never `expect(text).to.be.oneOf(['Saved', 'Success'])`, `to.match(/Saved|Success/)`, or a `||` inside an `expect`. The rule covers text, element counts, URLs, attribute values, and displayed/enabled state alike. If both outcomes are genuinely reachable the test does not know what the app should do — split it into one `it(...)` per expected outcome, generate one test per row from a case array, or pin down the correct behavior. The only exception is an explicit instruction to accept more than one value; record that instruction in a comment on the assertion.
-- **No `try`/`catch` in a test — and none in the cleanup hook.** An unexpected rejection must reach the runner; an expected one is asserted with `await expect(...).rejects` / `expect(fn).toThrow()`, which is an assertion, not error handling. Anything the test created is tracked and deleted in `afterEach` with no catch — a cleanup that fails should fail loudly rather than leak state into the next run. The suite's only catches live in **I/O helpers where narrowing one named error is the contract** — an `isDisplayed()` probe, a session-teardown helper — never a bare `catch {}` or `.catch(() => {})`, and never a catch that lets a failed action continue into the assertions.
-- **Failures name the subject.** `expect(await banner.getText(), \`success banner after saving order ${orderId}\`).toBe('Saved')`. A UI failure reported as `expected '' to be 'Saved'` with no subject is indistinguishable from a locator that matched the wrong element.
-
-### Waits
-- Default 10s wait set in `BasePage` via `driver.wait(until.X, TIMEOUT)`
-- No `await new Promise(r => setTimeout(r, n))` for synchronization
-- For conditional waits use `until.elementIsVisible`, `until.elementTextIs`, etc.
-
-### Driver lifecycle
+## Driver lifecycle
 - Always go through `DriverFactory.create()` / `quit()` — never `new Builder().forBrowser('chrome').build()` in a test
 - Browser configured via env var `BROWSER` (`chrome` | `firefox` | `edge`)
 - One driver per worker; if running Mocha `--parallel`, each worker holds its own driver
 - Selenium Manager auto-resolves drivers — do not add `chromedriver`/`geckodriver` npm packages unless pinning a version
 
-### What NOT to do
+## Rules
 
-- No `setTimeout` waits — use `driver.wait(...)`
-- No `driver.findElement` outside `BasePage`
-- No assertions inside page methods
-- No `OR` in any assertion — no `to.be.oneOf([...])`, no `||` inside an `expect`, no `/a|b/` alternation. One expected value per assertion (see Test rules)
-- No `try`/`catch` in a test or cleanup hook — expected rejections use `await expect(...).rejects`; catches live only in I/O helpers narrowing one named error (see Test rules)
-- No `@FindBy`-style decorators or PageFactory analogues
-- No XPath when a test id could be added
-- No shared mutable state on pages — instantiate fresh per test
-- No business logic in page objects
-- No hardcoded URLs/credentials — go through `env`
-- No `any` in page or test code — strict TS
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `ui-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

@@ -221,32 +221,16 @@ List tables explicitly. Don't loop over `information_schema.tables` — that tou
 
 ## Rules
 
-- Spring-managed `DataSource`; tests never new their own.
-- Seeders write; probes read; SUT does the business action. Each class has one job.
-- Probes are read-only and explicitly project columns (no `SELECT *`).
-- Every parameter is a **named parameter** (`NamedParameterJdbcTemplate`) — no string concatenation.
-- `Thread.sleep` is forbidden as an assertion wait — Awaitility (or the polling helper) with a predicate.
-- Transactional rollback by default; truncate when the SUT crosses an HTTP boundary.
-- Constructor injection only — seeders / probes never use field injection (`@Autowired` on fields).
-- Records for probe row types.
-- Java records for test data shapes (from `qa/java/skills/test-data-builder`).
-- Gradle Kotlin DSL preferred for new projects; Maven only when forced.
-- `@TestConfiguration` on probe / seeder bean wiring so it doesn't leak into production context.
+The standards seeders, probes and their tests must meet are the qa-java rule files, not a list here: `qa-java-data.md` and `qa-java.md` (core). Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-## What NOT to do
+## Conventions
 
-- No `Thread.sleep(5000)` as the assertion wait — Awaitility with a predicate.
-- No `SELECT * FROM orders WHERE id = '…'` with the value inlined — bind a parameter, project the columns you need.
-- No raw `INSERT` SQL duplicated across tests — go through a seeder backed by `qa/java/skills/test-data-builder`.
-- No `JdbcTemplate.execute("...")` with a request body literal — use `NamedParameterJdbcTemplate.update(..., Map.of(...))`.
-- No `entityManager.createNativeQuery(...)` in tests when `JdbcTemplate` would do — pick one.
-- No `EntityManagerFactory#createEntityManager` opened by the test — Spring manages it.
-- No `@Sql("classpath:seed/orders.sql")` for shaping per-test data — that hides what the test does. Use seeders + builders.
-- No `Flyway.clean()` between tests — it drops the schema. Truncate row data instead.
-- No `@Transactional` on test methods that hit the running app via HTTP — the server's transaction is separate; rollback won't undo the server's writes.
-- No reading credentials from `System.getenv` inside a test class — go through Spring properties.
-- No probe method that returns the full ORM entity for a small assertion — return a projected record.
-- No catching `DataAccessException` to assert failure modes — failures should surface and fail the test.
+- A Spring-managed `DataSource`, with probe and seeder beans wired in a `@TestConfiguration` so they never leak into the production context; credentials through Spring properties, not `System.getenv` in a test class.
+- `NamedParameterJdbcTemplate` for every statement; pick it or `EntityManager` native queries, not both, and never open an `EntityManager` in the test.
+- Transactional rollback by default; truncate when the system under test is reached over HTTP.
+- Records for probe rows and test data shapes (`qa/java/skills/test-data-builder`); seeders go through those builders, never duplicated raw `INSERT`s.
+- A `DataAccessException` is never caught to assert a failure mode; it surfaces and fails the test.
+- Gradle Kotlin DSL for new projects; Maven only when forced.
 
 ## Generation steps
 

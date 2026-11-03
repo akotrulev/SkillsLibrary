@@ -146,24 +146,7 @@ One `:app` module until a boundary hurts: build time, a feature a second app reu
 
 ## Rules
 
-- One screen ViewModel, one `uiState: StateFlow`, collected with `collectAsStateWithLifecycle`.
-- No ViewModel-to-UI events: no `SharedFlow` / `Channel` of effects exposed to the UI.
-- Repositories own data; composables never call them.
-- Use cases only when reused or a real rule; interfaces only on a second implementation (a fake counts).
-- `SavedStateHandle` for the small state that must survive process death.
-- Constructor injection; manual DI first, Hilt on KSP when earned; no locator, no static state.
-- Modules and convention plugins only on a second consumer.
-- LiveData and RxJava never in new code.
-
-## What NOT to do
-
-- Add a use case, mapper and interface for every ViewModel call.
-- Expose `MutableStateFlow`, a `Channel` or a `SharedFlow` of one-off events.
-- Hold a `Context`, `NavController` or composable in a ViewModel.
-- Keep the whole state in `rememberSaveable`, or restore a list from `SavedStateHandle`.
-- Collect a flow in `init` to push into another one; use `stateIn`.
-- Introduce Hilt, a `:domain` module and `:core:*` modules in a one-screen app.
-- Reach for MVI frameworks (Orbit, MVIKotlin) in a codebase that did not choose them.
+The standards this skill's output must meet are the mobile-android rule files, not a list here: `android.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation (exit gate)
 

@@ -19,40 +19,23 @@ Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin qua
 - "Generate / implement step definitions" → `qa/java/skills/gherkin-step-code`
 - Code is pseudocode / incomplete → ask for the real files.
 
+## The checklist is the rule file
+
+Every check, and the severity it reports, lives in one place: the qa-java rule files `qa-java-bdd.md` (feature files, glue, hooks) and `qa-java.md` (core), plus `qa-java-ui.md` when page objects are in scope.
+
+1. **The project's copies first**: `.claude/rules/qa-java/` at the project root. The team may have edited them, and its edits win.
+2. **Otherwise the plugin's copies**: `qa/java/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/qa-java:rules` installs them.
+
+Read each file whose `paths:` match a file under review, in full, before the first finding. Never review from memory of the rules, and never add a check the files do not contain; propose it as a rule change instead.
+
+**Version policy.** Detect the Cucumber BOM and the JUnit Platform engine first; the rule files' "the codebase wins" line applies.
+
 ## Procedure
 
 1. Read every `.feature` file and every glue class + the support layer (`TestContext`, `Hooks`, the runner `@Suite`/`junit-platform.properties`). Do not skim.
-2. Walk both checklists, marking each item pass / fail / N/A.
+2. Walk `qa-java-bdd.md` (feature files, then step definitions and hooks), then the core rules, marking each rule pass / fail / N/A.
 3. Produce findings in the standard table. Point to fixes; do not rewrite.
 4. Close with an "Overall" paragraph and a coverage/traceability note (every TC-ID + AC accounted for?).
-
-## Gherkin checklist (`.feature` files)
-
-- [ ] Steps are declarative — no `click`/`type`/CSS/URLs unless the mechanic is the subject under test.
-- [ ] One event under test per scenario (one `When`); no conjunction steps.
-- [ ] `Background` holds only preconditions every scenario needs; no `When`/`Then`/data in it.
-- [ ] Data-driven variants use `Scenario Outline` + `Examples`, one behavior per outline; valid/invalid split into separate `Examples` (invalid tagged `@negative`).
-- [ ] Steps reuse a canonical catalog — no near-duplicate steps differing only by a literal; one verb per concept.
-- [ ] Tags carry priority (`@p1..`), tier (`@smoke`/`@regression`), type (`@negative`/`@boundary`/`@edge`), and AC traceability (`@AC-<n>`).
-- [ ] Each scenario reads as documentation without the code; names state behavior, not data.
-- [ ] Every TC-ID / AC from the source suite maps to a scenario (no silent gaps).
-- [ ] **No `#` comments in the feature file.** A `.feature` is living documentation — if a step needs explaining, the step is wrong; if the *feature* needs explaining, use the `Feature:` description block. Only a linked defect id beside a `@wip`/skip tag is permitted (`minor`).
-- [ ] **No commented-out scenarios or steps.** A `#`-prefixed `Scenario` left in place of deletion is dead documentation that still reads as a requirement (`minor`); disable with a tag carrying a ticket instead.
-
-## Cucumber-JVM / step-definition checklist
-
-- [ ] Step definitions split by domain (no mega `Steps.java`); each catalog step bound exactly once.
-- [ ] Cucumber Expressions (`{string}`/`{int}`/…) over regex unless regex is genuinely needed.
-- [ ] Shared state injected via `TestContext` through the constructor (PicoContainer) — no static mutable state, no `ThreadLocal` in the glue, no `new`-ing page objects, no string-keyed bag for typed state.
-- [ ] No step-class inheritance to share state (Cucumber doesn't support it) — `TestContext` injection only.
-- [ ] No selectors / `page.locator(...)` / `findElement` / waits in step definitions — mechanics live in page objects.
-- [ ] `Then` steps assert (web-first `assertThat`); `Given`/`When` don't assert; page objects don't assert (except `expectLoaded()`).
-- [ ] No `Thread.sleep` / `page.waitForTimeout(...)` — auto-wait + web-first assertions (or `WebDriverWait` in the page object) only.
-- [ ] Browser/driver lifecycle in `@Before`/`@After` hooks with **teardown** (no leaked browsers/drivers); not in step constructors. Tagged hooks (`@Before("@web")`) where the project spans platforms.
-- [ ] Cleanup implemented as an `@After` hook, not as Gherkin steps.
-- [ ] Idiomatic JUnit 5 Platform runner (`@Suite` + `cucumber-junit-platform-engine`), not the deprecated JUnit 4 `@RunWith(Cucumber.class)`; glue path + plugins configured.
-- [ ] No hardcoded credentials/URLs — env vars / system properties.
-- [ ] **No inline comments in step definitions or hooks** — the step text above the binding is already the explanation, and a body long enough to need narration belongs in a page object. Javadoc only where the binding's contract can't be read off the step text and the method name; no commented-out bindings, no stray `TODO`/`FIXME`. Full rule, complex-flow test, and severities: [`engineering-practices/code-comments`](../../../../engineering-practices/code-comments/SKILL.md).
 
 ## Output format
 
@@ -66,12 +49,9 @@ Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin qua
 
 After the table, add an **Overall** paragraph (2–3 sentences) and a **Traceability** line (TC-IDs/ACs covered vs. gaps ⚠️).
 
-## Severity guide
+## Severity
 
-- **blocker**: undefined/ambiguous step that fails the run; leaked browser/driver; ships a bug.
-- **major**: imperative/UI-coupled Gherkin; selectors or `new`/static state in steps; assertion in a page object; conjunction step that hides a second behavior; deprecated JUnit 4 runner.
-- **minor**: duplicate steps that should be parameterized; missing tags; naming.
-- **nit**: optional phrasing/style preferences.
+The severity is the tag on the rule, never a new judgment. An undefined or ambiguous step that fails the run is a **blocker**: the build is broken. End with one line: `Rules: project .claude/rules/qa-java/ | plugin copy (not installed)`.
 
 ## Examples
 

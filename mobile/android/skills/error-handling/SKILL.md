@@ -147,25 +147,7 @@ Raise it from **one place per failure path** — the repository or ViewModel tha
 
 ## Rules
 
-- Every thrown error is caught where it is thrown and becomes state; `CancellationException` is rethrown; no `!!`, no `error()` for a recoverable condition.
-- Regions are one sealed `LoadState` with failed, stale and offline; a drifted response is *failed*; a failed refetch keeps the data and shows the stale marker.
-- Scope the failure to the response-dependent subtree; chrome and filter state survive.
-- Every surfaced failure also raises the persistent banner — safe-area top, no auto-dismiss, 48 dp close, deduped, one host, one raise-point per path, ≤ 3 visible, rolled up by cause.
-- `TimedOut` has its own body; cancellation renders nothing; offline is not a server error and never retries.
-- A `401` runs the ladder with in-place re-auth; `403` is permission-denied; an unsupported app version shows the forced-update screen.
-- A killed process restores small state and reloads the rest; a restored region renders stale until it revalidates.
-- An unknown write outcome is reconciled, not reported as failed; third parties fail in their own region; storage failures degrade to memory with one notice.
-- `NotFound` on a record is "gone"; empty is three kinds; every state and the banner carry a `testTag`.
-
-## What NOT to do
-
-- No two-state region; no failure only inline or only in a banner; no `catch { }` that leaves the region empty.
-- No early return from a screen that owns search and filters; no failed body over data the user is reading.
-- No auto-dismissing banner or error `Snackbar`, none behind the cutout or the IME, none with a close target under 48 dp; no banner per retry, none uncapped.
-- No request without a deadline; no failed state for a cancelled request; no retry button while offline.
-- No sign-out straight off a `401` or from a `403` / third-party `401`; no blocking update screen for a version the server still supports.
-- No ViewModel `SharedFlow` / `Channel` of error events — the banner is state.
-- No generic "No data"; no retry on a `NotFound` record; no `Throwable.message` on screen.
+The standards this skill's output must meet are the mobile-android rule files, not a list here: `android-ui-states.md`, `android-data.md` and `android.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

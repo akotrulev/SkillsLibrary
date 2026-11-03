@@ -184,24 +184,7 @@ android {
 
 ## Rules
 
-- No `org.jetbrains.kotlin.android` on AGP 9; KSP only; `android.builtInKotlin=false` is a finding.
-- `compileSdk 37` / `targetSdk 36` / `minSdk 24` written explicitly; never raised as a side effect.
-- Every version lives in `libs.versions.toml`; Compose via the BOM.
-- JDK 21 toolchain declared in Gradle, not assumed from the IDE.
-- Release is minified, R8 full mode, keep rules narrow with reasons.
-- ktlint + detekt + Lint (with compose-lints) in CI, none auto-fixing in a build.
-- One activity; `enableEdgeToEdge()`; insets in composables; back is predictive.
-- A convention plugin or module exists only on its second user.
-
-## What NOT to do
-
-- Apply `kotlin-android` "to be safe", or flip the opt-out flags to get a green build.
-- Leave `targetSdk` unset because AGP 9 defaults it.
-- Hard-code a version in a `build.gradle.kts` or add a `buildSrc` constants object.
-- Add `-keep class ** { *; }` or disable R8 to silence a crash.
-- Lock orientation, or override `onBackPressed()`.
-- Create `:core:common`, `:core:ui`, `:core:model` modules on day one.
-- Raise Kotlin, AGP or `targetSdk` while doing unrelated work.
+The standards this skill's output must meet are the mobile-android rule files, not a list here: `android-build.md` and `android-manifest.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation (exit gate)
 

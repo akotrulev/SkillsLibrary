@@ -219,31 +219,17 @@ Set explicit budgets and fail CI when they regress — an unmeasured perf rule r
 
 ## Rules
 
-- **Stable domain-id `key`** in every list; never the array index.
-- **Derive during render**; never `setState` in an effect to mirror props/state.
-- **Compiler-first memoization** on React 19; manual `React.memo`/`useMemo`/`useCallback` only where a consumer actually skips work — never blanket. **No fresh inline object/array/lambda** for a memoized child or Context value.
-- **Never define a component inside another** (new type → remount). Hoist to module scope.
-- **Split read/write Contexts**; functional `setState` to drop deps.
-- **Virtualize past ~100 rows** + server paging for large/remote sets.
-- **`useDeferredValue`/`useTransition`** for expensive input-driven renders (memo the derivation on the deferred value).
-- **RSC by default; `'use client'` on the smallest leaf** — bundle you don't ship is the cheapest win.
-- **Code-split** heavy non-critical components (`next/dynamic`/`lazy`), `ssr:false` for client-only widgets; watch barrel + third-party import cost.
-- **Parallel fetches** (`Promise.all`) and **per-section Suspense** on the server; layout-approximating skeletons (no CLS).
+The standards this skill's output must meet are the fe-react rule files `react.md` and `react-data.md`, not a list here. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Where they and this skill disagree, the rule files win.
+
+Beyond the rule files, this skill's own rules:
+
+- **Functional `setState`** to drop effect and callback deps.
+- **`useDeferredValue` / `useTransition`** for expensive input-driven renders, the derivation memoized on the deferred value.
+- **Virtualize past ~100 rows**, with server paging for large or remote sets.
+- **Code-split** heavy non-critical components (`next/dynamic` / `lazy`), `ssr:false` for client-only widgets; watch barrel and third-party import cost.
+- **Layout-approximating skeletons**, not a generic spinner (no CLS).
 - **Wire diagnostics** (Profiler, `web-vitals`, bundle analyzer) and set **explicit Core-Web-Vitals + bundle budgets** enforced in CI.
-- Measure first, optimize the proven hot path, measure again — never speculatively.
-
-## What NOT to do
-
-- No `key={index}` on a mutable list; no unstable keys.
-- No `useEffect` deriving state that could be computed in render.
-- No component defined inside a component; no fresh inline props defeating a memo.
-- No `useMemo`/`useCallback`/`React.memo` sprinkled with no memoized consumer.
-- No blanket `'use client'` on a route because one leaf is interactive — it ships the whole subtree.
-- No render-blocking heavy import (editor/chart/analytics) that could be code-split or deferred.
-- No sequential `await`s for independent data (waterfall); no single `await` blocking the whole page where a Suspense boundary fits.
-- No generic spinner where a layout-approximating skeleton avoids CLS.
-- No `window`/`Date.now()` in render (hydration mismatch = correctness + perf bug).
-- No "we optimized it" without a before/after Profiler/Lighthouse measurement.
+- **Measure first**, optimize the proven hot path, measure again — no "we optimized it" without a before/after.
 
 ## Validation
 

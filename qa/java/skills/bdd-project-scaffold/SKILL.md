@@ -250,15 +250,9 @@ For Appium, `TestContext` holds the scenario's `AppiumDriver`, built in `@Before
 
 Page objects extend the existing `BaseAppiumPage` and take the **driver**, never `TestContext`. The hook, its failure evidence and its `<feature file>.<scenario>` names (D72) are in `references/hooks.md` § Mobile hook: the files land in `build/appium-artifacts/`. Spring users would swap `cucumber-picocontainer` for `cucumber-spring` and `@CucumberContextConfiguration` instead — mention as the alternative; PicoContainer is the zero-config default.
 
-## Anti-patterns to flag
+## Rules
 
-- Putting browser/driver lifecycle in step-class constructors instead of `@Before`/`@After` hooks.
-- Static mutable state for the page/driver — share it through the injected `TestContext` (library rule: no static mutable state).
-- Missing `@After` teardown — leaks browsers/drivers.
-- Re-declaring page objects in the BDD layer instead of reusing the existing UI project's classes.
-- The deprecated JUnit 4 runner (`@RunWith(Cucumber.class)` / `@Cucumber`) — use the JUnit 5 Platform engine `@Suite`.
-- Trying to share state via step-class inheritance — Cucumber does not support it; inject `TestContext`.
-- Manually registering glue/DI — PicoContainer is zero-config; the BOM-pinned `cucumber-picocontainer` dependency is the entire wiring.
+The standards a BDD project must meet are the qa-java rule files, not a list here: `qa-java-bdd.md`, `qa-java-suite.md` (the build and the Cucumber BOM) and `qa-java.md` (core). Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's templates disagree, the rule files win. PicoContainer is zero-config: the BOM-pinned `cucumber-picocontainer` dependency is the entire wiring, and the BDD layer reuses the existing UI project's page objects rather than re-declaring them.
 
 ## Handoffs
 

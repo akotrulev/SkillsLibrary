@@ -325,39 +325,18 @@ NBomberRunner
 
 Grafana dashboards (`observability/dashboards`) then show client and server metrics on one chart.
 
-## Rules (NBomber-specific)
+## Rules
 
-- **Open-loop simulations (`Inject` / `RampingInject`)** by default. `KeepConstant` / `RampingConstant` only when modelling a fixed concurrency cap.
-- **Standalone console app**, not an NUnit / xUnit fixture — NBomber is its own runner.
-- **Single `HttpClient` reused via `HttpClientFactory.Create()`** — never `new HttpClient()` per iteration; you'll exhaust sockets within minutes.
-- **`Http.CreateRequest` + `Http.Send`** instead of raw `HttpClient.SendAsync` so per-request metrics land in the report.
-- **Async all the way** in scenario bodies — `.Result` / `.Wait()` deadlocks the runner under load.
-- **Per-step latency** via `Step.Run` when a scenario has multiple HTTP hops — without it you can't tell which hop is slow.
-- **`Environment.Exit(non-zero)`** on threshold breach so CI fails the build — pair the post-run stats check with runtime `.WithThresholds` for fail-fast + report annotations.
-- **Keep the default 30s warm-up** for production-shape runs (JIT, connection pools, caches settle). Only `.WithoutWarmUp()` for fast local iteration — warm-up numbers are noise.
-- **`DataFeed.Constant` for per-VU identity, `Random`/`Circular` otherwise** — and supply at least as many items as VU `copies`, or NBomber recycles them.
-- **`ctx.ScenarioInfo.InstanceNumber` + `ctx.InvocationNumber`** for per-iteration uniqueness without shared state; `ctx.Random` (seeded) for reproducible randomness.
-- **`WithReportFolder("perf-reports")`** — never write into the repo root; publish as a CI artifact.
-- **Constructor-injection-friendly fixtures**: production clients consumed via DI live in `Fixtures.cs`, not constructed inline in scenarios.
-- **Pin every NuGet package version** in `PerfTests.csproj`.
-- **`Env.*` static class** loads from environment variables — never hardcode `BASE_URL` / tokens.
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `performance.md` and `suite-config.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-## What NOT to do
+## Conventions
 
-- No `new HttpClient()` per iteration — single `HttpClientFactory.Create()` per scenario.
-- No `.Result` / `.Wait()` / `.GetAwaiter().GetResult()` in scenario bodies.
-- No closed-loop `KeepConstant` for an RPS target — use `Inject` / `RampingInject`.
-- No hardcoded base URLs / tokens — env vars only.
-- No `Console.WriteLine` in hot scenario paths — costs throughput; use NBomber's reporting interval instead.
-- No persistence-mutating tests against prod — staging or dedicated perf env only.
-- No reusing the same seeded fixture id across parallel runs — namespace per run id.
-- No floating NuGet versions (`NBomber Version="5.*"`).
-- No `Step.Run` per single-HTTP-call scenario — adds overhead without insight.
-- No NUnit `[Test]` wrapper around NBomber scenarios — NBomber is its own runner; you'll fight two orchestrators.
-- No mixing `NBomber.Http` with `RestSharp` in the same scenario — pick one HTTP path.
-- No `Random.Shared` for data you need reproducible across runs — use `ctx.Random` (per-VU, seeded).
-- No `DataFeed.Random` on a stateful API where each VU should hold one identity — that thrashes session state; use `DataFeed.Constant`.
-- No ignoring NBomber's default **restart-iteration-on-fail**: a failing `Step.Run` restarts the whole iteration by default, which can mask problems — set `.WithRestartIterationOnFail(false)` when you want failed iterations counted and the run to continue.
+- Per-step latency via `Step.Run` when a scenario has several HTTP hops; a single-call scenario does without it.
+- Pair the post-run stats check with runtime `.WithThresholds` for fail-fast and report annotations.
+- `ctx.ScenarioInfo.InstanceNumber` + `ctx.InvocationNumber` for per-iteration uniqueness without shared state.
+- Production clients consumed through DI live in `Fixtures.cs`, not constructed inline in scenarios. `Env.*` loads settings from environment variables.
+- A failing `Step.Run` restarts the whole iteration by default; set `.WithRestartIterationOnFail(false)` when failed iterations must be counted and the run continue.
+- `.WithoutWarmUp()` only for fast local iteration; reports under `WithReportFolder(...)`, published as a CI artifact.
 
 ## Generation steps
 

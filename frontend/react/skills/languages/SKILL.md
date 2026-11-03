@@ -128,6 +128,8 @@ new Intl.NumberFormat(locale).format(1234.5);          // 1,234.5 (en) · 1 234,
 
 ## Rules
 
+The general standards (no browser reads in render, logical properties for RTL) are the fe-react rule files `react.md` and `react-styling.md`. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). These are the i18n-specific ones:
+
 - **Distinguish globalization (formatting via `Intl`, always relevant) from localization (text swap via catalogs).**
 - **next-intl on the App Router, react-i18next on the Vite SPA** — never `next-i18next` on App Router, never two libraries at once.
 - **Keys are stable ids**, catalogs are the source of truth, never hardcode UI strings; pluralization/interpolation via ICU syntax *in the catalog*, never string concatenation in code.
@@ -146,7 +148,6 @@ new Intl.NumberFormat(locale).format(1234.5);          // 1,234.5 (en) · 1 234,
 - No hand-formatted dates/money with fixed separators — breaks in every other locale.
 - No unqualified `toLocaleDateString()`/`Intl` without a `timeZone` in SSR — server and client zones differ → hydration mismatch.
 - No `next-i18next` on the App Router — it predates RSC.
-- No RTL via `left/right` CSS — use logical properties so one stylesheet serves both directions.
 
 ## Validation
 

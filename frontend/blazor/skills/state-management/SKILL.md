@@ -237,39 +237,9 @@ For "expensive computation we'd rather not redo per request":
 
 This isn't UI state; it's server-side memoization. Keep it out of the components.
 
-## Anti-patterns
-
-- **Singleton state container in Blazor Server** — shared across users
-- **Subscribing without `IDisposable`** — handler leak
-- **Mutable `List<>` exposed publicly** — bypasses event
-- **God state container** carrying every app concern
-- **`StateHasChanged()` in event handlers when the framework would already detect** — wastes renders
-- **Server-only secrets in WASM-compiled state** (the WASM bundle ships to the browser)
-- **`OnInitializedAsync` fetch without `PersistentComponentState`** on a prerendered + interactive page — double fetch
-- **Cascading parameters carrying many fields** — re-renders descendants on every change
-
 ## Rules
 
-- `AddScoped<TState>()` for shared state in Blazor Server; same scope in WASM is fine
-- Subscriptions to events implement `IDisposable` / `IAsyncDisposable`, unsubscribe in `Dispose`
-- Read-only collection types exposed publicly
-- Split events by concern; consumers subscribe to specific events
-- Prerendered fetches persisted: `[PersistentState]` (net10) / `PersistentComponentState` (net8/net9)
-- `CascadingValue` for genuinely cross-cutting state, split by concern
-- `ProtectedBrowserStorage` for sensitive client-side state
-- No god `AppState`
-
-## What NOT to do
-
-- No `Singleton` state container in Blazor Server
-- No subscriptions without `Dispose`
-- No public `List<T>` on state containers
-- No `Fluxor` for a CRUD app
-- No `OnInitializedAsync` HTTP call without prerender persistence
-- No `[CascadingParameter]` on bulky god objects
-- No client-side state that includes secrets in WASM
-- No `StateHasChanged` after every property setter — let events do it
-- No bypassing the state container by mutating its private collections via tricks
+The standards this skill's output must meet are the fe-blazor rule file `blazor.md`, not a list here. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where it and this skill's recipes disagree, the rule file wins.
 
 ## Generation steps
 

@@ -190,21 +190,11 @@ QA's `mobile-screen-explorer` writes, per screen:
 4. Report per file: ids added, decoratives skipped, collisions, and any `accessible` grouping that hides children (rule 8).
 5. Typecheck with the project's script; with a dev build, read the page source of one screen on each platform.
 
-## Anti-patterns
+## Rules
 
-| Anti-pattern | Fix |
-|---|---|
-| `testID={`Row.${order.id}`}` | Static `Orders.Row` (rule 6) |
-| `accessibilityLabel="Login.EmailField"` or label text used as the id | `testID`; the label stays human copy |
-| `accessibilityLabel={testID}` on a `Text` | iOS reads back the id; drop it, or Android-only (Output format) |
-| Locating on Android by `~` / `content-desc` to reach a `testID` | `id=` / `resourceId`; `~` is the label |
-| `testID` on every layout `View` | Remove — it defeats view flattening |
-| `Record<Enum, string>` id map | Interpolate from the value (rule 7) |
-| kebab-case or snake_case ids | PascalCase segments |
-| Translated string, index or GUID in an id | Enum / field name |
-| `nativeID` as a test hook | `testID` |
-| Same id on two non-row elements | Sub-namespace one |
-| A wrapper component added only to carry ids | Inline `testID` |
+The standards every `testID` must meet are the mobile-react-native rule file `react-native-a11y.md`, not a list here; the sections above are how to meet them. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where it and this skill disagree, the rule file wins.
+
+Two fixes the rule file does not spell out: `accessibilityLabel={testID}` on a `Text` makes iOS read the id aloud (drop it, or keep it Android-only per *Output format*), and a locator that reaches a `testID` on Android uses `id=` / `resourceId`, never `~` / `content-desc`, which is the label.
 
 ## Handoffs
 

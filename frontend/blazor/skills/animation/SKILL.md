@@ -182,23 +182,7 @@ If a re-render can wipe the animation's target, you've picked the wrong layer �
 
 ## Rules
 
-- **CSS first**; JS interop only for observer-triggered or imperative motion CSS can't express, always with `IAsyncDisposable` teardown.
-- **`prefers-reduced-motion` is a hard floor** — author motion as `@media (prefers-reduced-motion: no-preference)` opt-in so the resting state *is* the reduced state; guard large transforms even where the browser auto-reduces.
-- **Animate `opacity`/`transform` only** — never layout properties (reflow jank).
-- **Staggered entrances via `animation-delay` from a CSS `--i` index**, capped (~8 items); use scroll reveals for below-the-fold content.
-- **Scroll reveals: `animation-timeline: view()` first**, IntersectionObserver interop as the fallback/callback path.
-- **Page transitions: opt into View Transitions** in global CSS under enhanced navigation (net8+); it degrades to instant swap with no fallback code.
-- **Never let a JS animation library fight the renderer** — hand it only nodes Blazor won't re-render into.
-
-## What NOT to do
-
-- No JS animation on nodes Blazor diffs/re-renders (the animation resets or the library and renderer desync).
-- No animation without a reduced-motion path — a bare `animation:` with no media guard fails WCAG 2.3.3.
-- No animating `height`/`top`/`margin`/`width` for motion — reflow on every frame; use `transform`.
-- No IntersectionObserver/interop module without `disconnect()` + `DisposeAsync` (leaks across navigation).
-- No `animation-delay` stagger that runs unbounded — a 40-row list reveals for 2.4s; cap it.
-- No page-transition JS shim — enhanced nav + View Transitions degrade to instant on unsupported browsers by design.
-- No motion decision made *here* — where/whether to animate is [`design/visual-identity`](../../../../design/visual-identity/SKILL.md)'s call.
+The standards this skill's output must meet are the fe-blazor rule files, not a list here: `blazor-styles.md` and `blazor-js.md`. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation
 

@@ -177,24 +177,7 @@ Features live in local packages with dependency direction `App → Features → 
 
 ## Rules
 
-- `@State` owns, `@Bindable` binds, `@Environment` reads app-wide; never two owners.
-- An `@Observable` is created with `@State` in the view that owns it.
-- A view model exists only for logic that needs a test apart from the view.
-- Initializer injection; the `App` struct is the composition root; no container, no `shared`, no locator.
-- A protocol arrives with its second implementation.
-- State that is a mode is one enum, not several booleans.
-- iOS 17+ uses `@Observable`; `ObservableObject` stays only on iOS 16 targets or existing code awaiting migration.
-- TCA is used only where the codebase already is on it.
-
-## What NOT to do
-
-- Add `XViewModel` for every `XView` by reflex, or a model whose properties mirror a struct one for one.
-- Put a network call, `UserDefaults` read or formatter setup in `body`.
-- Keep an `@Observable` in a plain `let` created inside `body`.
-- Pass `@Environment` everything; inject a service no view reads.
-- Introduce a coordinator, router object or "AppState" god-model alongside `NavigationStack(path:)`.
-- Use `@MainActor` on every type of a module already defaulting to `MainActor`.
-- Add TCA, Factory or swift-dependencies to a project that did not choose them.
+The standards this skill's output must meet are the mobile-ios rule files, not a list here: `swift.md`. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation (exit gate)
 

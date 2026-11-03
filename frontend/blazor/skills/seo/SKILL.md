@@ -108,24 +108,7 @@ Emit `schema.org` JSON-LD in a `<script type="application/ld+json">` via `<HeadC
 
 ## Rules
 
-- **Public routes default to static SSR**; interactivity per-island only, always with **prerender on** — never make core content depend on a client render mode.
-- **Per-page unique `title` + `meta description`**; set from route/model data.
-- **Open Graph + Twitter Card** on shareable pages, `og:image` absolute.
-- **One canonical link per page**, absolute, from a configured base host.
-- **Streamed content stays server-rendered** (in the response), never JS-injected — else it's invisible to crawlers.
-- **Real 404 status**: net10 `NotFoundPage` + `NavigationManager.NotFound()`; net8/9 `UseStatusCodePagesWithReExecute`; error/404 pages `noindex`.
-- **Ship `sitemap.xml` (canonical URLs only) + `robots.txt`** (allow public, disallow app/auth, link the sitemap).
-- **JSON-LD** for content that earns rich results, consistent with the visible page.
-
-## What NOT to do
-
-- No public page whose content only renders after WASM/circuit start (blank to crawlers + unfurl bots).
-- No shared/boilerplate `meta description` repeated across pages; no missing OG tags on shareable pages; no relative `og:image`.
-- No content hidden behind a *client* render that a crawler needs (streaming is fine; JS-injection is not).
-- No soft-404 (200 with "not found"); no indexable 404/error page.
-- No missing/wrong canonical; no `Disallow: /` shipped to production; no `sitemap.xml` listing non-canonical or authed URLs.
-- No JSON-LD describing content that isn't on the page.
-- **Don't** re-own the `<PageTitle>` tab-title convention (ui-rules) or its scaffold emission (generator) — only the SEO metadata content.
+The standards this skill's output must meet are the fe-blazor rule file `blazor-ui.md`, not a list here. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where it and this skill's recipes disagree, the rule file wins.
 
 ## Validation
 

@@ -100,21 +100,7 @@ Spacing, radii and sizes are a small set of named constants (a `Spacing` enum of
 
 ## Rules
 
-- Take Liquid Glass; delete custom bar backgrounds; glass belongs to the navigation layer.
-- Semantic colours and system materials first; brand colours are named catalog sets with dark variants.
-- Text styles only; custom fonts scale; spacing uses `@ScaledMetric` where tied to type.
-- Branch on size class, never on device idiom; iPad windows are resizable.
-- No colour-only meaning; contrast holds with Increase Contrast and Reduce Transparency.
-- No hex, no fixed font size, no magic spacing in views.
-
-## What NOT to do
-
-- Advise `UIDesignRequiresCompatibility` or any opt-out of Liquid Glass.
-- Layer `.ultraThinMaterial` behind a system bar, or glass on glass.
-- Build a custom tab bar instead of `TabView`.
-- Fix a Dynamic Type clip by capping the size or `lineLimit(1)`.
-- Import a web or Material palette wholesale; imitate Android widgets.
-- Assume a phone-sized or full-screen window.
+The standards this skill's output must meet are the mobile-ios rule files, not a list here: `ios-styling.md`. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation (exit gate)
 

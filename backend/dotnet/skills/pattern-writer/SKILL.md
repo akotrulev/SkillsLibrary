@@ -209,28 +209,7 @@ Add one `TestCase` per ordered module pair when a module is added; the first con
 
 ## Rules
 
-- Constructor injection only — primary constructors (`public sealed class Foo(IDep dep)`, available since .NET 8) keep boilerplate down
-- No service locator (`IServiceProvider.GetService<T>`) except in factories that legitimately need it
-- Nullable reference types enabled; no `!` to silence the compiler — fix the type
-- Records for value-shaped data, classes for behavior-bearing services
-- `sealed` by default on concrete classes — open them only when inheritance is part of the design
-- Async all the way — `CancellationToken` on every async method, threaded through
-- DI registration goes in a single `IServiceCollection` extension per area (`AddOrdersModule(this IServiceCollection)`) — never sprinkled across `Program.cs`
-- One pattern per problem — flag stacking (Repository + Specification + UoW + Mediator + Decorator on one slice) as a smell; only stack when each layer earns its keep
-- File per type; namespace matches folder; `internal` by default for implementations, `public` only on contracts the consumer needs
-
-## What NOT to do
-
-- No abstract base classes when an interface + composition does the job
-- No "I-have-one-implementation" interfaces just to "decouple" — wait for the second
-- No Repository wrapping `DbContext` 1:1 with `Get/Add/Update/Delete` — that's the `DbSet` again with extra cost
-- No CQRS without a real read/write asymmetry — the ceremony hurts more than it helps for CRUD
-- No `Task.Result` / `.Wait()` / `.GetAwaiter().GetResult()` in production code
-- No static service locator (`ServiceLocator.Current.Resolve<T>`)
-- No mutable static state in pattern implementations (constants are fine)
-- No `params object[]` on a pattern interface to "make it flexible" — design the contract for the real callers
-- No newing up dependencies inside a class — they go through the constructor
-- No `if (provider == "stripe") ... else if (provider == "adyen")` in a service when there's a factory for that
+The standards this skill's output must meet are the be-dotnet rule files, not a list here: `dotnet.md`. Read the project's copy in `.claude/rules/be-dotnet/`, or the plugin's in `backend/dotnet/skills/rules/` when the project has not installed them (`/be-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation outputs
 

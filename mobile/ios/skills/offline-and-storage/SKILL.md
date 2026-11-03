@@ -194,23 +194,7 @@ A full disk is common and caches are wiped under pressure; none of these is a cr
 
 ## Rules
 
-- One store per concern; match the project's; SwiftData only on iOS 17+.
-- Secrets in the Keychain with a `…ThisDeviceOnly` class; never in `UserDefaults`, plists or model columns.
-- Every shipped schema is versioned and has a migration stage; every migration has a test.
-- `UserDefaults` / file-timestamp / disk-space use has a matching privacy-manifest entry.
-- Model objects do not cross actors; background work is `@ModelActor` / a background context.
-- Private files carry file protection; regenerable files are excluded from backup.
-- Offline writes carry an idempotency key, replay in order through the one client, and show pending / failed.
-- A store that fails to open degrades to memory with a notice, never a crash.
-- Logout clears the store, the caches and the Keychain items.
-
-## What NOT to do
-
-- No `kSecAttrAccessibleAlways*`, no non-`ThisDeviceOnly` class without a documented restore requirement.
-- No token in `@AppStorage`, a plist, `@SceneStorage` or Core Data.
-- No SwiftData recommendation for an iOS 16 target; no rewrite of an existing Core Data / GRDB store.
-- No string-built SQL in GRDB; no `eraseDatabaseOnSchemaChange` in a release build.
-- No `@Query` over an unbounded table into a list that renders all rows.
+The standards this skill's output must meet are the mobile-ios rule files, not a list here: `swift-persistence.md`. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

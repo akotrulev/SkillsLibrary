@@ -258,20 +258,6 @@ If a generated or reviewed query contains any of the following **outside** a des
 
 Reviewer produces the standard finding table (see `CLAUDE.md`) and marks these **blocker**.
 
-## Anti-patterns
-
-- **String concatenation of values**: `jdbc.queryForObject("SELECT id FROM orders WHERE id = '" + orderId + "'", ...)` — even with a `UUID`, breaks the moment the value is a string. Use `:orderId`.
-- **`SELECT *`**: hides which columns the test depends on; every schema change touches every test.
-- **`DELETE FROM orders` in a test body**: no `WHERE`, no cleanup helper. Use the cleanup strategy from `qa/java/skills/db-testing/connection`.
-- **Hidden ORM lazy-loading in assertions**: pulling a JPA `Order` entity and reading `order.getCustomer().getName()` triggers a second query inside `@Transactional` test scope. Probe with explicit SQL.
-- **`Thread.sleep(5000)` before the assertion**: use Awaitility.
-- **`Integer.class` for `COUNT(*)`**: silently truncates on large fixtures.
-- **Logging the SQL with bound values**: leaks PII / secrets into structured logs. Log the probe *name* and IDs you already trust.
-- **`IN (...)` built by `String.join(",", ids)`**: classic injection vector even in tests. Use `ANY (:ids)` with `String[]` or `IN (:ids)` with `List`.
-- **`whereClause` parameter built from runtime input** in `DbAssertions.exists`: only literal strings owned by the test code may flow into the SQL shape.
-- **`LocalDateTime` in a probe record where the column is `timestamptz`**: timezone drift causes flakiness in CI.
-- **`@Sql("seed/orders.sql")` for per-test data**: hides what the test does; use builders + seeders.
-
 ## Examples
 
 ### Example 1 — assert one row exists with these columns
@@ -351,15 +337,15 @@ assertThat(order.getCustomer().getName()).isEqualTo("Alice");     // second quer
 
 ## Rules
 
-- Named-parameter binding only — every value flows through `Map.of(...)` or `MapSqlParameterSource`.
-- Explicit column lists in every assertion query; `record` types for projections.
-- `SELECT EXISTS (...)` for boolean checks; `COUNT(*)` returns `Long`.
-- `LIKE` patterns built in Java with `LikeEscape.escape` before binding, with `ESCAPE '\\'`.
-- `UUID` / `long` / `Instant` for `uuid` / `bigint` / `timestamptz` — no `.toString()` round-trips.
-- No `Thread.sleep` as an assertion wait — use Awaitility with the same probe.
-- No destructive verbs outside designated cleanup; refuse with the reviewer finding table.
-- Constructor injection on probe classes — no field `@Autowired`. SLF4J with message templates (`{}`), never string interpolation.
-- jOOQ only when joins / windowing earn it; always explicit `select(col, col, ...)`.
+The standards a verification query must meet are the qa-java rule files, not a list here: `qa-java-data.md` and `qa-java.md` (core). Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
+
+## Conventions
+
+- `LIKE` patterns are built in Java with `LikeEscape.escape` before binding, with `ESCAPE '\\'`; an `IN` list binds `ANY (:ids)` with a `String[]` or `IN (:ids)` with a `List`.
+- `UUID` / `long` / `Instant` for `uuid` / `bigint` / `timestamptz`, with no `.toString()` round-trips; `LocalDateTime` against a `timestamptz` column drifts by timezone in CI.
+- Only literal strings owned by the test code flow into the SQL shape (`DbAssertions.exists`' `whereClause`), never runtime input.
+- Probe with explicit SQL, not an entity whose lazy association fires a second query inside the test's transaction.
+- jOOQ only when joins or windowing earn it, always with an explicit `select(col, col, ...)`.
 
 ## Handoffs
 

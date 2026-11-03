@@ -137,41 +137,17 @@ Other removed endpoints have `mobile:` replacements that java-client 11's driver
 
 ## Rules
 
-### Page object rules
-- Extend `BaseAppiumPage`; pass `driver` to `super(driver)`. Pages take the driver, never a test context.
-- Accessors stay private; a page exposes intent (`signIn`, `title()`) and queries (`isTestIdVisible`), never a `WebElement`.
-- **One locator-constant style:** each id is `private static final String {ELEMENT}_ID` at the top of the class; a fallback is `{ELEMENT}_XPATH_FALLBACK`. Never inline a locator string in an action.
-- **Locator order:** the test id, a native query, XPath. On iOS `id`, `name` and `accessibility id` are synonyms over the element's `name`.
-- One class per screen; flows in a sub-package; repeating items as scoped components.
-- Navigation returns the destination page; same-screen actions return `void`.
-- Every page implements `verifyPageLoaded()` on its landmark. That is the only assertion in a page.
-- `isTestIdVisible` returns `false` when the element is not displayed within the timeout, and rethrows anything else.
-- Per-platform differences sit in the finder, never in an `if` inside an action.
+The standards this skill's output must meet are the qa-java rule files, not a list here: `qa-java.md` (core) and `qa-java-ui.md`. Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-### Test rules
-- Extend `BaseMobileTest`; it provides `driver`. Names are `Should_X_When_Y`. Tag with `@Test(groups = ...)`.
-- Assertions live in the test and use AssertJ (`assertThat(...).as(subject).isEqualTo(...)`); `assertSoftly` for several fields after one action. The one exception is the page's own `verifyPageLoaded`.
-- **One expected condition per assertion — never an `OR`.** No `||`, no `anyOf`, no `"a|b"` regex. When Android and iOS show different copy, that is two platform-scoped expectations. If two outcomes are both reachable, split into one `@Test` per outcome.
-- No `try`/`catch` in a test or a hook that runs a test body; expected exceptions use `assertThatThrownBy`. A catch lives only in an I/O helper that narrows one named exception (`isTestIdVisible`, `BaseMobileTest.fromDevice`).
-- No `if` or loop driving an assertion; one `@Test` per data row.
-- **Failures name the subject:** `.as("title of order %s", orderNumber)`.
+## Conventions
 
-### Waits
-- `WebDriverWait` with `ExpectedConditions` (10 s) for conditions. No `Thread.sleep` anywhere, including for transitions and animations.
-
-### Driver lifecycle
-- **Instance fields and `parallel="classes"`, no `ThreadLocal` (D8).** `BaseMobileTest` owns one `AppiumDriver` per class in `@BeforeClass(alwaysRun = true)` and quits it in `@AfterClass(alwaysRun = true)`. TestNG creates one instance per class, so each class has its own driver. A `@DataProvider(parallel = true)` is banned.
-- Parallel classes need one device each and unique `appium:systemPort`, `appium:mjpegServerPort` and `appium:wdaLocalPort` per session; `thread-count` never exceeds the device count.
-- Never instantiate `AndroidDriver` or `IOSDriver` in a test; the factory does. The server URL is `APPIUM_URL`, never hardcoded.
-
-### Failure evidence
-`BaseMobileTest` is the only failure hook. A test adds none. What it keeps and where it lands is `evidence-capture/references/appium.md`; every Allure call is allure-java 3.0 (`Allure.attachment` with `AttachmentOptions`).
-
-### What NOT to do
-- No `driver.findElement` outside `BaseAppiumPage` and components.
-- No `PageFactory`, `@FindBy` or `@AndroidFindBy`; no `TouchAction`, `resetApp` or `AppiumDriver<MobileElement>`.
-- No raw `RemoteWebElement` returns; no assertions inside actions beyond the landmark.
-- No business logic or API calls inside a page object.
+- Pages extend `BaseAppiumPage` and take the driver, never a test context. Accessors stay private; a page exposes intent (`signIn`, `title()`) and queries (`isTestIdVisible`), never a `WebElement`.
+- One locator-constant style: each id is `private static final String {ELEMENT}_ID` at the top of the class; a fallback is `{ELEMENT}_XPATH_FALLBACK`. On iOS `id`, `name` and `accessibility id` are synonyms over the element's `name`.
+- Every page implements `verifyPageLoaded()` on its landmark. `isTestIdVisible` returns `false` when the element is not displayed within the timeout and rethrows anything else.
+- Tests extend `BaseMobileTest` and assert with AssertJ (`assertThat(...).as(subject)`, `assertSoftly` for several fields). When Android and iOS show different copy, that is two platform-scoped expectations.
+- Waits are `WebDriverWait` with `ExpectedConditions` (10 s), including for transitions and animations.
+- `BaseMobileTest` owns one `AppiumDriver` per class, created in `@BeforeClass(alwaysRun = true)` and quit in `@AfterClass(alwaysRun = true)`; the factory builds `AndroidDriver` / `IOSDriver`, the server URL is `APPIUM_URL`. Parallel classes need one device each and unique `appium:systemPort`, `appium:mjpegServerPort` and `appium:wdaLocalPort` per session.
+- `BaseMobileTest` is the only failure hook; what it keeps is `evidence-capture/references/appium.md`, attached with allure-java 3 (`Allure.attachment` with `AttachmentOptions`).
 
 ## Generation steps
 

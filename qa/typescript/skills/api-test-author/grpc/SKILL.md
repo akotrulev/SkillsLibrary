@@ -263,23 +263,9 @@ one HTTP 200 carrying `{ data, errors }`; gRPC is proto/HTTP2 with the result in
 `GrpcCallResult` is the GraphQL raw-envelope analogue). Only the transport, the codegen, and where-the-result-lives
 differ.
 
-## Rules (hard constraints)
+## Rules
 
-- **The gate is the gRPC `status` code, not an HTTP status.** Assert `res.ok` (success) or the specific failure
-  `res.code` (`NOT_FOUND` / `INVALID_ARGUMENT` / `UNAUTHENTICATED` / `DEADLINE_EXCEEDED` / …) — never a 200/404.
-- **The client never rejects on a gRPC error.** `callUnary(...)` resolves a `GrpcCallResult<T>` holding the message
-  **or** the status + metadata; the spec decides whether a non-OK status was expected. No `expect().rejects` in the
-  assertion path, no decoding or assertion inside the client.
-- **Rich errors assert the `google.rpc.Status` details** (`ErrorInfo.reason`/`domain`, `BadRequest` field
-  violations) decoded from `grpc-status-details-bin` — not a bare `status` code.
-- **Assert on the typed generated message** — never hand-decode bytes; the `.proto` is the contract. Types via
-  `proto-loader-gen-types` / `qa-typescript:api-models`.
-- **A write RPC test round-trips a read** to prove persistence; data created in a spec is cleaned up in
-  `afterEach`/`afterAll` (ids tracked as created; no `try/finally` in the spec, no `try/catch` in the hook).
-- **Streaming = drain-then-assert on a bounded condition** — `for await` the `ClientReadableStream`
-  (server-streaming) or await the response callback after `call.end()` (client-streaming); bound unbounded streams
-  with `{ deadline }`. **No `setTimeout`/`waitForTimeout`.** Deep stream-lifecycle assertions →
-  `qa-typescript:realtime-stream-testing`.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `api-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Cross-references
 

@@ -315,32 +315,17 @@ Push a simulation: `./gradlew gatlingEnterprisePackage gatlingEnterpriseUpload`.
 
 Pair with Grafana for service-side correlation (`observability/dashboards`).
 
-## Rules (Gatling-specific)
+## Rules
 
-- **Open-loop (`injectOpen` with `constantUsersPerSec` / `rampUsersPerSec`)** by default. `injectClosed` only when modelling a fixed concurrency cap.
-- **`group("…")`** around every logical endpoint — assertions target `details("group")` for per-route SLO gates. No assertions on `global()` alone for latency.
-- **System properties** (`System.getProperty("baseUrl")`) wired from environment variables via the `gatling { systemProperties = ... }` block — never hardcode URLs / tokens.
-- **Feeders** for parameterized data (`csv(...).random()`); avoid baking long literal lists into the scenario body.
-- **`exec(session -> ...)` to mutate the session map**, then reference via `#{key}` placeholders in URLs / bodies — keeps simulations DRY.
-- **`StringBody` / `RawFileBody` / `ElFileBody`** for request payloads; never embed JSON via `+` string concatenation.
-- **One simulation class per scenario** named `<Name>Simulation` so Gradle's `gatlingRun-<FQN>` task name is predictable.
-- **`details("…")` per route + `global().failedRequests()`** in the `assertions(...)` block — non-zero exit fails CI.
-- **Pin `io.gatling.gradle` plugin version**; never `+`.
-- **Resources under `src/gatling/resources/`** — Gradle plugin auto-includes them on the classpath.
+The standards a simulation must meet are the qa-java rule files, not a list here: `qa-java-perf.md`, plus `qa-java-suite.md` for the build. Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-## What NOT to do
+## Conventions
 
-- No `injectClosed` (closed-loop) for an RPS-target test — use `injectOpen` with `*UsersPerSec`.
-- No assertions on `global().responseTime().percentile(95.0)` only — global mixes fast and slow routes; assert per-`details("group")`.
-- No hardcoded base URLs / tokens — system properties from env vars only.
-- No `Thread.sleep` in scenario bodies — use Gatling's `pause(Duration.ofMillis(...))` and only when closed-loop pacing demands it.
-- No persistence-mutating tests against prod — staging or dedicated perf env only.
-- No reusing the same seeded fixture id across parallel runs — namespace per run id via `perf-<uuid>`.
-- No floating Gatling plugin versions (`+` / `latest.release`).
-- No Scala simulations mixed with Java simulations in the same module — pick one.
-- No simulations without an `assertions(...)` block — that's a graph, not a gate.
-- No `repeat(1000) { exec(...) }` to fake throughput — use the injection profile for RPS targeting.
-- No mixing `http(...)` (Gatling DSL) with `RestAssured` calls inside the same scenario — wire all HTTP through Gatling so metrics are captured.
+- System properties (`System.getProperty("baseUrl")`) are fed from environment variables through the `gatling { systemProperties = ... }` block.
+- `exec(session -> ...)` mutates the session map; URLs and bodies reference it through `#{key}` placeholders, which keeps simulations DRY.
+- Feeders (`csv(...).random()`) carry parameterized data; resources live under `src/gatling/resources/`, which the Gradle plugin puts on the classpath.
+- `<Name>Simulation` keeps Gradle's `gatlingRun-<FQN>` task name predictable; a breached assertion exits non-zero and fails CI.
+- Perf runs target staging or a dedicated perf environment, never production.
 
 ## Generation steps
 

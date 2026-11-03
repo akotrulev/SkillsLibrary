@@ -34,7 +34,7 @@ When the task adds an entry point, an outbound call, a background job or a busin
 ## Boundaries
 
 - **Unit tests here, integration tests elsewhere.** A test that needs `@SpringBootTest`, `@DataJpaTest`, `@WebMvcTest`, a container or a real dependency belongs to `qa-api-java`. Schema, index and engine design beyond JPA mechanics belongs to `data-architect`.
-- **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests written by a `qa-*` task are read-only: never edit, skip or weaken one; a test you believe is wrong becomes a dated `D<n>` and stays red.
+- **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests written by a `qa-*` task are read-only: never edit, skip or weaken one; a test you believe is wrong stays as it is and red: record why as a dated `D<n>` in the plan and in your report, and still finish the task. The close-out gate rules on it.
 - **Stay in your stack.** A file outside the backend tree means the task was mis-cut: report it, don't widen your reach. Don't re-plan; that is `solution-planner`'s.
 - **Workspace.** Work in the checkout you are given; no new branch or worktree. Commit only when asked or when the plan says to.
 - One clarifying question when information is missing, never a guess. A tempting broader refactor is offered as a separate follow-up.

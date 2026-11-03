@@ -98,20 +98,6 @@ For large/remote datasets use the **`ItemsProvider`** overload so you fetch a wi
 - **Don't allocate a new reference every render** for an object/collection/lambda parameter — a fresh `new[]{…}` or inline `() =>` each render looks "changed" and re-renders the child every time. Hoist it to a field, or memoize.
 - **`<CascadingValue IsFixed="true">`** when the cascaded value never changes (a service, a fixed config). Without `IsFixed`, every consumer subscribes to change notifications and re-renders on any cascade update — `IsFixed` drops the subscription entirely. Default it to `true` for anything immutable.
 
-### Render anti-patterns
-
-| Anti-pattern | Cost | Fix |
-|---|---|---|
-| `@key="i"` (loop index) or no key on a mutable list | full teardown on reorder/insert | `@key` on the entity id |
-| New object/lambda param allocated each render | child re-renders every parent render | hoist to a field / memoize |
-| `CascadingValue` without `IsFixed` for an immutable value | every consumer re-renders on any change | `IsFixed="true"` |
-| `StateHasChanged()` in a tight loop / per stream item | render storm | batch; render on a throttled tick |
-| Heavy work in `OnParametersSet`/`BuildRenderTree` | runs every render | move to `OnInitialized`/`OnParametersSetAsync` guarded by change |
-| A 10k-row `@foreach` | whole set diffed each render | `<Virtualize>` |
-| `async void` event handler | unobserved exceptions, no re-render await | `async Task` |
-
----
-
 ## WASM startup
 
 The WASM cost is **before** first interactivity: download the runtime + your assemblies, init the runtime, load. Levers, in order of leverage:
@@ -216,28 +202,7 @@ Set explicit budgets and fail CI when they regress — an unmeasured perf rule r
 
 ## Rules
 
-- **`@key` on the entity id** in every rendered list; never the loop index.
-- **`Virtualize`** past ~100 rows; `ItemsProvider` + server paging for large/remote sets.
-- **`CascadingValue IsFixed="true"`** for anything immutable; never cascade a mutable value unfixed to a wide subtree.
-- **No new object/lambda reference allocated per render** for a child parameter — hoist/memoize.
-- **`ShouldRender` only on measured hot paths**, guarded by a real change comparison.
-- **WASM: trimming on, lazy-load rarely-visited areas, Brotli + CDN + long-immutable cache**, prerender the shell, `[PersistentState]` to avoid the double-fetch.
-- **AOT is opt-in for CPU-bound WASM only** — never a default (it worsens startup).
-- **net10 asset knobs** (`<LinkPreload>`, WASM fingerprinting, precompressed `blazor.web.js`) on net10; tagged down-level fallbacks otherwise.
-- **Interactive Server: dispose everything, sticky sessions + Azure SignalR/Redis backplane** for scale-out; bound retained disconnected circuits.
-- **Wire the component OTel meters** (net10) and set **explicit budgets** enforced in CI.
-- Measure first (diagnostics), optimize the proven hot path, measure again — never speculatively.
-
-## What NOT to do
-
-- No `@key="index"`; no unkeyed mutable lists.
-- No un-virtualized large grids; no client-side load of an entire remote dataset.
-- No `StateHasChanged()` per stream item / in a render loop (batch — [`realtime`](../realtime/SKILL.md)).
-- No AOT "for speed" on a data/CRUD UI (bigger download, slower startup).
-- No net10-only asset API emitted into a net8/net9 project.
-- No injected/captured `DbContext` or leaked subscription inflating circuit memory ([`data-fetching`](../data-fetching/SKILL.md), [`realtime`](../realtime/SKILL.md)).
-- No `async void` handlers; no heavy work in `OnParametersSet`/render.
-- No "we optimized it" without a before/after measurement.
+The standards this skill's output must meet are the fe-blazor rule files, not a list here: `blazor.md` and `blazor-config.md`. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation
 

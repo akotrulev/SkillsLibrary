@@ -301,37 +301,13 @@ The skeleton **approximates the final layout** (height, columns) so there's no l
 
 ## Rules
 
-- **RSC by default; `'use client'` opt-in per island.** Server Components fetch; Client Components interact; data crosses the boundary as serializable props. Never blanket a route client for one leaf.
-- **Every interactive element and list/grid container carries a `data-testid`** per [`test-ids`](../test-ids/SKILL.md) — PascalCase dot-separated, static row locators, never array index / id / GUID.
-- **In-app navigation is a real `<Link href>`** (`next/link`, or React Router `<Link>`/`<NavLink>` in the SPA lane) — never an `onClick` `router.push` on a `<div>`. Real links get prefetch, middle-click, open-in-new-tab, crawlability for free. Same tab by default; `target="_blank"` only for the [`ui-rules`](../ui-rules/SKILL.md) §7 exceptions, and then with `rel="noopener"` + a visible "opens in new tab" cue + an `aria-label` suffix.
-- **Every route emits a title** — `metadata`/`generateMetadata` (App Router) or `react-helmet` (SPA).
-- **Keys are stable domain ids**, never the array index.
-- **Effects have exhaustive deps and return cleanup**; subscriptions/listeners/timers are torn down.
-- **No `useEffect` for derived state** — derive during render. No effect to "sync state from props" — use `key` to remount or compute in render.
-- **Context value is `useMemo`'d**; never a fresh object literal in the provider's `value=`.
-- **`useMemo`/`useCallback` only when a real downstream memo benefits** — they cost; don't blanket them.
-- **Hooks at the top level only** — never inside `if`/`for`/early return. Custom hooks are `use`-prefixed.
-- **Ref-as-prop on React 19** (a `ref` prop, no `forwardRef`); `forwardRef` only on React 18.
-- **Strict TypeScript, no `any`**; event handlers typed (`React.ChangeEvent<HTMLInputElement>`); component files PascalCase, hooks camelCase.
-- **A11y attributes are part of the component contract** — roles, labels, `aria-*` generated with the markup, not deferred. Semantic HTML before ARIA; `<button>` for actions, never `<div onClick>`.
-- **Every data region ships loading / loaded / failed states** (Suspense + error boundary, or the three-state hook) — a failure never collapses to blank.
-- **No server data in client stores** — TanStack Query / RSC own server state; Zustand/Context own client state.
+The standards this skill's output must meet are the fe-react rule files `react.md`, `react-data.md` and `react-forms.md`, not a list here. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Where they and this skill disagree, the rule files win.
 
-## What NOT to do
+Beyond the rule files, this skill's own rules:
 
-- No blanket `'use client'` on a route because one leaf is interactive — push the boundary to the leaf.
-- No `onClick` `router.push` navigation on a `<div>`; no page/route without a title.
-- No interactive element or grid container without a `data-testid`; no per-row testid prop (hardcode the static row locator).
-- No array index as a key; no numeric id / GUID / index inside a locator.
-- No `useEffect` for derived state or to copy props into state.
-- No context `value={{ … }}` object literal without `useMemo`; no raw context exported to consumers.
-- No `any` / `@ts-ignore` to silence the compiler — fix the type.
-- No hooks called conditionally; no `forwardRef` on React 19 (use ref-as-prop); no `react-helmet` on App Router (use `metadata`).
-- No `<div onClick>` for an interactive element; no un-torn-down subscription/timer.
-- No `useMemo`/`useCallback` sprinkled "for performance" with no memoized consumer.
-- No React-19-only API (`use()`, `useActionState`, `useOptimistic`, ref-as-prop, `<title>` hoist) emitted into a React 18 project.
-- No server state duplicated into a client store.
-- No business logic in components — push into hooks / services; components render and dispatch.
+- **A context is exported through its provider and a `use*` hook**, never as the raw context.
+- **Titles**: `metadata` / `generateMetadata` on the App Router, `react-helmet` only in the SPA lane.
+- **Component files PascalCase, hooks camelCase.**
 
 ## Generation outputs
 

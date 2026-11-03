@@ -135,24 +135,7 @@ Make that possible:
 
 ## Rules
 
-- **One breakpoint set app-wide**, documented as tokens + a C# mirror; with a library, *its* values are the set.
-- **Mobile-first `min-width` only**; never `min-`+`max-` on one boundary.
-- **Intrinsic CSS (`auto-fit`/`minmax`, flex-wrap) before breakpoints; container queries for
-  container-dependent components; media queries last.**
-- **One grid container owns each region's geometry** — children span tracks, never self-position per breakpoint.
-- **Static SSR surfaces are CSS-responsive only**; C# breakpoint services on interactive surfaces, disposed
-  properly, with a prerender-safe default variant.
-- **Variant swaps: both variants testid-labeled**; DOM order = reading order when visual order changes.
-- No fixed dimensions on content regions; images `max-width: 100%`.
-
-## What NOT to do
-
-- No second (or third) breakpoint system next to the library's.
-- No magic width numbers scattered in `.razor.css` files — boundary values appear only as the documented set.
-- No per-sibling margin tuning to "re-align" elements at a breakpoint — restructure into one grid.
-- No `MudHidden`/breakpoint services on static-SSR surfaces (renders its default, silently wrong).
-- No duplicated full-page DOM variants for big surfaces — restyle one structure.
-- No desktop-first `max-width` cascades bolted onto a mobile-first codebase.
+The standards this skill's output must meet are the fe-blazor rule file `blazor-styles.md`, not a list here. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where it and this skill's recipes disagree, the rule file wins.
 
 ## Validation
 

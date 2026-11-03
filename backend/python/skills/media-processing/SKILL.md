@@ -311,22 +311,7 @@ Written as one JSON document to stdout (or the HTTP response); output files go t
 
 ## Rules
 
-- Every function takes the normalised `Image.Image`, not bytes, except the two that own bytes: `sniff` and `sanitize_svg`
-- `with Image.open(...)` always; no handle outlives its `with`
-- No format inferred from the extension; no `Image.open(path)` on a user-controlled path — open from bytes the sniffer accepted
-- Explicit `save()` argument lists; never forward `**im.info`
-- Constants for every threshold (`MAX_LONG_EDGE_FOR_INFERENCE`, `PRINT_READY_DPI`, `LADDER`)
-- No numpy, opencv, scikit-image, cairosvg, or libmagic unless the project already depends on them — each is a native decoder with its own CVE history
-
-## What NOT to do
-
-- No `bleach` / `lxml.html.clean` for SVG — one is deprecated, the other is HTML-shaped and misses SVG vectors
-- No `cairosvg` / `resvg` / a browser to rasterise user SVG inside the worker — rendering untrusted SVG is a different threat model; if a PNG preview of an SVG is needed, trace the other direction or render outside this container
-- No `Image.MAX_IMAGE_PIXELS = None`
-- No `LOAD_TRUNCATED_IMAGES = True`
-- No re-labelling a polyglot to its sniffed type
-- No stripping a bad SVG into a "safe" one
-- No model download at runtime; no `rembg` CLI subprocess where the library call exists
+The standards this skill's output must meet are the be-python rule files, not a list here: `python-pipeline.md`, with `python.md` for the code around it and `python-project.md` for a new dependency. Read the project's copies in `.claude/rules/be-python/`, or the plugin's in `backend/python/skills/rules/` when the project has not installed them (`/be-python:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Handoffs
 

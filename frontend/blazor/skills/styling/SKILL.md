@@ -175,25 +175,7 @@ This skill owns only the CSS *authority* rules responsive design rides on: **mob
 
 ## Rules
 
-- **One styling authority** (library theme · CSS isolation+tokens · Tailwind) — never Tailwind *and* a component library.
-- **CSS isolation by default**; global stylesheet holds *only* tokens + a minimal reset, never component styles.
-- **`::deep` only off an element you own**, and prefer a child `Class`/CSS-var API over reaching in.
-- **Design tokens as CSS custom properties**, sourced from `design/visual-identity` (primary) / `design/theme-presets` (quick-start); isolated CSS consumes `var(--token)`, never literals; functional tokens **named by purpose** (`--color-danger`), not value (`--color-red`), and kept distinct from brand tokens.
-- **Type as a system, not a font** — one modular scale + one base as tokens, headings carry hierarchy globally (`<h1>`–`<h4>`, one `<h1>` per page), display sizes fluid via `clamp()`, two–three weights, sizes from scale tokens never literal `px`.
-- **Dark mode = a deliberately-authored second palette** (desaturated accents, no pure black, contrast re-verified) swapped via `data-theme` + `prefers-color-scheme` — never an inversion; set before first paint, user override persisted and winning.
-- **Mobile-first responsive**, breakpoints consistent app-wide (the breakpoint contract itself → [`responsive-design`](../responsive-design/SKILL.md)).
-
-## What NOT to do
-
-- No component styles in the global stylesheet ("global-stylesheet dumping") — scope them.
-- No hardcoded hex/px colors in `.razor.css` — use tokens.
-- No `::deep` at the top of a file with no owned scoped ancestor (matches nothing).
-- No `::deep` to reach past your *own* components' parameter contracts (coupling) — expose a `Class`/variable.
-- No Tailwind layered onto MudBlazor/Fluent/Radzen — pick one authority.
-- No two color systems (library tokens *and* your own diverging) — bridge to one source.
-- No value-named functional tokens (`--color-red` for danger) — name by purpose so a theme swap keeps meaning.
-- No dark mode by inversion (`filter: invert()` / negated hex) — author a second palette and re-check contrast.
-- No dark-mode flash — stamp `data-theme` before first paint.
+The standards this skill's output must meet are the fe-blazor rule file `blazor-styles.md`, not a list here. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where it and this skill's recipes disagree, the rule file wins.
 
 ## Validation
 

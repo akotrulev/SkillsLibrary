@@ -212,13 +212,9 @@ A page object should split when **any** are true:
 - **Page returns DTOs** — that's API territory; page methods return next pages or visible text
 - **Locators in a central constants file** — couples every page change to one file
 - **Flow class with state** — flows are functions / fixtures, not stateful classes
-- **`BasePage` before a third concrete page shares real behaviour**, or a base that only holds `page`
 - **`BaseTest` doing app-specific work** — bases handle infrastructure (page, fixtures), not domain workflow
-- **Spec file instantiates pages with `new LoginPage(page)`** — use a fixture that yields the page
-- **`storageState` setup repeated in every spec** — hoist to `playwright.config.ts` project or a fixture
-- **`as any` / `as unknown as X` in page method signatures** — defeats strict TS
-- **Floating promises** in page object method bodies — enable ESLint `no-floating-promises`
-- **`page.waitForTimeout`** anywhere in the POM (always a blocker, separate from architecture)
+
+The code standards a page object must meet (no unearned `BasePage`, pages from fixtures, sign-in once per role, strict types, no floating promises, no sleeps) are the qa-typescript rule files `ui-tests.md` and `qa-typescript.md`: the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does).
 
 ## Procedure
 

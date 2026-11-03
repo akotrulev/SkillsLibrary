@@ -3,9 +3,18 @@ name: conventions-review
 description: Use when reviewing a React Native/Expo diff against plugin conventions, plus a simulator screenshot pass. Triggers "review this PR". Not for a whole-repo audit (standards-audit).
 ---
 
-# React Native / Expo — Code Review
+# React Native / Expo — Reviewer
 
-A **hostile review of one diff** against the conformance checklist's rows and CLAUDE.md § Mobile code rules, then a **screenshot pass** on the running app. Findings go in the standard severity table; the review **does not rewrite** — it points, and the `mobile-react-native` agent (or the author) fixes. A whole-repo sweep with a saved report is [`standards-audit`](../standards-audit/SKILL.md), which reuses these checks at repo scale.
+A **hostile review of one diff** against the mobile-react-native rule files, then a **screenshot pass** on the running app. Findings go in the standard severity table; the review **does not rewrite**: it points, and the `mobile-react-native` agent (or the author) fixes. A whole-repo sweep with a saved report is [`standards-audit`](../standards-audit/SKILL.md).
+
+## The checklist is the rule files
+
+Every check, and the severity it reports, lives in one place: the mobile-react-native rule files `react-native.md` (core), `react-native-ui.md`, `react-native-a11y.md`, `react-native-forms.md`, `react-native-data.md`, `react-native-routes.md`, `react-native-tests.md` and `expo-config.md`.
+
+1. **The project's copies first**: `.claude/rules/mobile-react-native/` at the project root. The team may have edited them, and its edits win.
+2. **Otherwise the plugin's copies**: `mobile/react-native/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/mobile-react-native:rules` installs them.
+
+Read `react-native.md`, plus each other file whose `paths:` match a file under review, in full before the first finding. The project's globs may be narrower than its app; judge by what the file is: a component or screen (`.tsx`) takes ui, a11y and forms, a client, store or storage module (`.ts`) takes data, a route file takes routes, a test takes tests, `app.json` / `app.config.*` / `eas.json` / a config plugin / a native folder takes `expo-config.md`. A rule loaded on its own by the session is not enough: a review needs every file that applies. Never review from memory of the rules, and never add a check the files do not contain; propose it as a rule change instead.
 
 ## Version lane
 
@@ -13,10 +22,10 @@ Detect before flagging: Expo SDK and RN (`package.json`), Expo Router or bare Re
 
 | Lane | Review consequence |
 |---|---|
-| **57 primary** | The rows as written |
+| **57 primary** | The rules as written |
 | `[SDK58]` | 58-only APIs are correct on 58 and a finding on 57; the reverse for 57 workarounds after an upgrade |
-| 55–56 / 54 floor | Apply the rows keyed to that SDK; never flag a down-level project for lacking a 57 API |
-| Below 54 | One finding (A1) plus a [`migration`](../migration/SKILL.md) run — do not review against rules it cannot meet |
+| 55–56 / 54 floor | Apply the rules keyed to that SDK; never flag a down-level project for lacking a 57 API |
+| Below 54 | One finding plus a [`migration`](../migration/SKILL.md) run — do not review against rules it cannot meet |
 
 A manual `useMemo` / `useCallback` is a finding only when the React Compiler is on; a `forwardRef` only on React 19; an `estimatedItemSize` only on FlashList 2.
 
@@ -42,50 +51,11 @@ A manual `useMemo` / `useCallback` is a finding only when the React Compiler is 
 
 ## Procedure
 
-1. **Map the diff to checklist sections** with the table below; open [`conformance-checklist.md`](../standards-audit/references/conformance-checklist.md) at only those sections and run each row's *Find it with* recipe **over the changed files**.
-2. **Read the code at every hit.** A grep hit is a lead, not a finding.
-3. **Verify the rule's owner** when a row is ambiguous — load the owning skill; the skill wins over the checklist, and the disagreement is reported.
-4. **Run the screenshot pass** (below) if a device is available; otherwise say it was not run.
-5. **Write the table**; one row per defect family with a count, not per site.
-
-| The diff touches | Sections |
-|---|---|
-| `package.json`, `app.json`, `eas.json`, config plugins | A, B, K, L, T |
-| Screens, components, lists, markup | D, E, M, N, R |
-| Routes, links, notifications | F, J, K |
-| Forms, inputs | G, M |
-| API client, queries, sockets | H, O, K |
-| Storage, caches, tokens | I, K |
-| Device APIs, permissions, native modules | J, K, L |
-| Animation, gestures | Q, N, M |
-| Strings, formatting | P |
-| State, stores, DI | C, V |
-| Tests | S, R |
-| Purchases | X |
-
-## The rules every diff is held to (§5, in review form)
-
-| Check | Bad sign | Severity |
-|---|---|---|
-| Text only inside `<Text>` | A string or `{value}` as a direct child of `View` — crashes on release | blocker |
-| Secrets stay out of the bundle | A key or token in `EXPO_PUBLIC_*`, `app.json` `extra`, or source; a token in `AsyncStorage` / MMKV | blocker |
-| Native edits live in config | A change under `ios/` or `android/` on a CNG project — the next `prebuild --clean` erases it | blocker |
-| TLS only | `usesCleartextTraffic`, `NSAllowsArbitraryLoads` without a recorded reason | blocker |
-| Links and push payloads are validated | A route built from an unchecked URL / payload field | major |
-| Every request has a timeout | `fetch` with no `AbortSignal.timeout`, a spinner that can run forever | major |
-| Data regions have all states | No failed / stale / offline path; a failure that blanks the toolbar and the screen; offline shown as a server error | major |
-| Failures surface in one persistent banner | A `console.log`-only catch, an `Alert` that vanishes, a swallowed rejection | major |
-| Unbounded lists are virtualized | `ScrollView` + `.map` over server data; `FlatList` where the project uses FlashList / Legend List | major |
-| Server state in TanStack Query | A fetched list copied into Zustand / Context | major |
-| Animation on the UI thread | `Animated` JS-driver or `setState` per frame; animating `width` / `top` instead of transform / opacity | major |
-| Focus and resume revalidate | No `focusManager` / `AppState` wiring; stale data after returning to foreground | major |
-| Every interactive element and list container has a `testID` | A `Pressable` / `TextInput` / list without one; a `testID` built from an index, GUID or state value; the accessibility label used as an id | major |
-| Accessible | An icon-only `Pressable` with no `accessibilityLabel`; `allowFontScaling={false}`; target < 44 pt | major |
-| Permissions asked in context | A permission requested on launch; no denied-path screen | major |
-| No `@react-navigation/*` in an Expo Router app (SDK 56+) | An import of it beside `expo-router` | major |
-| Compiler-aware memoization | Hand-rolled `useMemo` / `useCallback` with the Compiler on | minor |
-| No inline comment, no commented-out code, no `TODO` | `//` inside a body | minor |
-| No unearned abstraction | An interface with one implementer; a wrapper that only forwards | major |
+1. Read the rule files that apply (above), then each changed file end to end.
+2. Walk the blockers first: text outside `<Text>`, secrets and token storage, hand edits to generated native folders, cleartext traffic, concatenated SQL. Then the rest in rule-file order.
+3. Per finding: file and line, the rule broken, a one-sentence fix. The severity is the tag on the rule, never a new judgment. One row per defect family with a count, not per site.
+4. Run the screenshot pass (below) if a device is available; otherwise say it was not run.
+5. Do not rewrite. Hand off to the agent or the owning skill.
 
 ## The screenshot pass (Step 5)
 
@@ -107,19 +77,13 @@ adb exec-out screencap -p > android-<screen>.png
 | major    | src/features/orders/api.ts:14 | `fetch(url)` without a timeout budget | `AbortSignal.timeout(10_000)` per `networking` |
 ```
 
-Close with the lane line (`SDK 57 · Expo Router · Compiler on · CNG`), the screenshot-pass status, and the finding counts by severity. Severities follow the checklist: blocker ships a crash, a store rejection or a hard security rule break; major breaks a § Mobile code rule where it will hurt soon; minor is style; nit is preference.
-
-## Anti-patterns to always flag
-
-- A version upgrade or lane move inside a feature diff — reject it; it is a [`migration`](../migration/SKILL.md) run
-- A comment that exists because a name is unclear (major — the fix is the rename)
-- A test that asserts nothing, or an `OR` in an assertion (Test code rules)
-- `try` / `catch` inside a test body
+Close with the lane line (`SDK 57 · Expo Router · Compiler on · CNG`), the screenshot-pass status, the finding counts by severity, and one line: `Rules: project .claude/rules/mobile-react-native/ | plugin copy (not installed)`.
 
 ## Handoffs
 
-- Fix → the `mobile-react-native` agent (FIX or EXTEND), or the owning skill named per section
+- Fix → the `mobile-react-native` agent (FIX or EXTEND), or the owning feature skill
 - Repo-wide → [`standards-audit`](../standards-audit/SKILL.md); version moves → [`migration`](../migration/SKILL.md)
 - Lock the fix with a test → [`component-testing`](../component-testing/SKILL.md)
 - Missing ids → [`test-ids`](../test-ids/SKILL.md); E2E review → peer `qa-mobile-typescript`
 - Security proof → peer `qa-security`
+- A rule is missing or wrong → edit the project's `.claude/rules/mobile-react-native/`; for every project, the plugin's `mobile/react-native/skills/rules/`

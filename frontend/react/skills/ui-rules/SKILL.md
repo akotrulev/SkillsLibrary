@@ -211,35 +211,7 @@ This is *why* the rules above are keepable at scale, not one-offs.
 
 ## Rules
 
-- **Enums humanized in every render path** from one derived helper; sweep siblings on any fix.
-- **One canonical format per data type**, centralized (`Intl`-based); timezone labeled; hand-written pages use the shared helpers; every renderer implements the full token set.
-- **Names, not ids/GUIDs**, resolved in list renderers too; cached identity directory; human-first pickers.
-- **Deterministic server-side default sort with a unique tiebreaker** on every list; numbers right-aligned; widths capped; server paging with size options; filter/sortability parity; consistent row→detail affordance.
-- **Forms render only persisted fields** (form↔DTO↔mapper parity, mechanically checked); PKs read-only; **state via explicit actions, never an editable `Status` `<select>`**; patch/subset types; optimistic concurrency on full-replace; same guards as self-service; no column the write path never fills.
-- **Disable-don't-hide** with why-tooltips, gated by the backend's state machine; every mandated follow-up has an affordance; full state-machine reachability.
-- **Every destructive action confirms by naming the object**, verb-labeled danger-styled button; never `window.confirm`.
-- **Bulk: checkbox column + tri-state select-all scoped to the filtered page + selected-count + batch endpoints + stable test ids.**
-- **One name→one concept, one verb per operation, a title on every route, one breadcrumb source, nav-group budgets, no dead/duplicate pages.**
-- **Navigation shows the current location** (distinct active state, not color alone), groups+labels over item count, front-loaded content labels, visible top-level nav on desktop.
-- **Footer is semantic `<footer>`** with explicitly-labeled columns and utility/doormat links, sized to the site.
-- **Pick the surface deliberately** — modal only when the interruption is the value, a route (or intercepting route) when it needs a URL, same tab by default; no unrequested modals.
-- **Unify renderers; fix at the highest leverage; treat config-patch layers as framework bugs; sweep the class.**
-- **Bind loading/failed on the shared grid/region component**, with the page's search/filters/toolbar rendered above it so a failed load never unmounts them.
-
-## What NOT to do
-
-- No raw enum int / bare id-GUID / `String(value)` fallthrough shown to a user.
-- No per-page inline formatting diverging from the shared helpers; no unlabeled timezone.
-- No list without a deterministic server-side sort + tiebreaker; no full document/blob in a grid cell; no client-side load of an entire dataset.
-- No editable field the update path ignores; no editable PK; no editable `Status` `<select>` standing in for a transition; no full-replace without concurrency control.
-- No grid column the write path never populates.
-- No action that renders-then-rejects; no destructive action without an object-naming confirmation; no neutral confirm button on a danger dialog; no `window.confirm`.
-- No row-click-only multi-select; no select-all that reaches beyond the filtered page.
-- No two pages/verbs for one concept; no route without a title; no double breadcrumb source; no dead/duplicate routes.
-- No nav without a current-location indicator; no hamburger on desktop where the bar fits; no menu trimmed to a magic 7 at the cost of clear grouping.
-- No `<div>`-based footer; no vague column label ("Resources"); no marketing fat-footer on a focused web app.
-- No blocking modal for a task that needs the background visible; no modal the user didn't trigger; no `target="_blank"` without an "opens in new tab" signal + `rel="noopener"`.
-- No spot-fix of a defect that's actually a class; no third grid renderer where the shared one should be composed.
+The standards this skill's output must meet are the fe-react rule files `react.md` and `react-forms.md`, not a list here. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Where they and this skill disagree, the rule files win. Sections 1–8 above are the detail behind them, and own what the rule files leave out: bulk operations, navigation, footers, the modal-or-route choice and the systemic fix.
 
 ## Validation
 

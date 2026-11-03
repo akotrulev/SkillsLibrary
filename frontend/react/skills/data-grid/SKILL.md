@@ -134,22 +134,10 @@ Whichever lane, **`GridQuery`/`GridPage` stay the same** so the fetch layer and 
 
 ## Anti-patterns
 
-| Smell | Fix |
-|---|---|
-| Full table fetched, then paged in the browser | `manual*` flags true → server query; `total` from the server |
-| `getRowId` defaulted to the row index | Domain id — index breaks selection and test locators across pages |
-| Page count derived from `rows.length` | Server-supplied `total` |
-| Fetch failure blanks the whole grid incl. toolbar | Scope the failed body to the rows; toolbar/filters keep rendering |
-| Loading shows a centred spinner, region collapses | `pageSize` skeleton rows at full grid height |
-| Sort with no unique tiebreaker | Append the id column to every sort |
-| Column widths/visibility pushed into the URL | URL = page/sort/filters/search; preferences = `localStorage` per table id |
-| Server rows copied into Zustand/Context | Query cache owns server state |
-| `<th onClick>` for sorting | `<button>` inside `<th>` + `aria-sort` |
-| `role="grid"` added with no keyboard model | Semantic `<table>`, or implement roving tabindex fully |
-| `stockFeatures` in new v9 code | `tableFeatures({ ...only what this table uses })` |
-| shadcn's v8-shaped `data-table` example pasted into a v9 app | Take the markup, write the v9 wiring |
-| A wrapper per table (`OrdersGrid extends BaseGrid`) | One `<DataGrid>`; tables differ by columns + props |
-| Virtualization added to a 50-row table | Virtualize past ~200 rendered rows |
+Each smell is the inverse of a rule above, or of the fe-react rule files `react.md` and `react-data.md` (server state in a client store, index keys, a failure that blanks the toolbar). Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Two more, owned here:
+
+- **shadcn's v8-shaped `data-table` example pasted into a v9 app** — take the markup, write the v9 wiring.
+- **`getRowId` left to default to the row index** — return the domain id.
 
 ## Workflow
 

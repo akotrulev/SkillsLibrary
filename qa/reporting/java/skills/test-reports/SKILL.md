@@ -281,31 +281,16 @@ wins.
 
 ## Rules
 
-- allure-java **3.0.0** on every `allure-*` module, opted in through the plugin's `allureJavaVersion`; no 2.x
-  module beside it.
-- `Allure.attachment(..., AttachmentOptions.withFileExtension(ext))` for every attachment. `Allure.addAttachment(...)`
-  does not exist in 3.0.
-- One report generator: `allure-commandline` 2.46.1, as `allure.version` in Gradle and the npm pin in CI,
-  equal to `qa/cicd/ci-conventions`.
-- `AllureRestAssured` filter wired in `BaseApiClient` — the HTTP exchange attaches automatically.
-- Every test has `@Feature` + `@Story` + `@Severity`.
-- Playwright failure evidence is `BaseTest`'s; this skill adds no Playwright hook, listener or attacher.
-- `build/allure-results/` uploaded as a CI artifact on **every** run, even on test failure.
-- History preserved across runs (last 20–30 retained).
-- Report published from `main` to a stable URL; PR builds publish to a PR-scoped URL or skip publish.
-- Gradle Kotlin DSL preferred; Maven only if mandated.
+The standards this skill's output must meet are the qa-java rule files, not a list here: `qa-java-suite.md` (Allure versions, adapters, generator, categories), `qa-java.md` (the annotations on tests) and `qa-java-ci.md` (publishing on every run). Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-## What NOT to do
+## Conventions
 
-- No "always pass" wrappers around `./gradlew test` — no `continue-on-error` / `continueOnError` / `|| true` on the test step. The test step fails the build; the upload and publish steps run anyway (`if: always()` / `condition: succeededOrFailed()` / `when: always`).
-- No committing `build/allure-results/` to Git — it's an artifact.
-- No `@Feature("misc")` catch-all bucket.
-- No `@Description` that paraphrases the test name — describe behavior or link the spec.
-- No attaching secrets / PII / auth tokens — sanitize before `Allure.attachment(...)`; redact the HTTP exchange with `configureHttpExchange()`.
-- No multiple Allure adapters in the same Gradle module (e.g. `allure-testng` and `allure-jupiter` together) — pick one.
-- No 5-MB-per-test logs attached — link to Loki instead.
-- No mixing the `AllureRestAssured` filter with manually-attached request/response bodies — duplicates entries.
-- No unpinned or second Allure generator (an allure2 tarball download, a `simple-elf/allure-report-action` that bundles its own, `allure.version` left at the plugin default).
+- `Allure.attachment(..., AttachmentOptions.withFileExtension(ext))` for every attachment; `Allure.addAttachment(...)` does not exist in 3.0.
+- The generator is `allure-commandline` 2.46.1, as `allure.version` in Gradle and the npm pin in CI, equal to `qa/cicd/ci-conventions`.
+- The `AllureRestAssured` filter is wired in `BaseApiClient`, so the HTTP exchange attaches itself; redact it with `configureHttpExchange()`. Playwright failure evidence is `BaseTest`'s; this skill adds no Playwright hook, listener or attacher.
+- No `@Feature("misc")` catch-all and no `@Description` that paraphrases the test name; describe behaviour or link the spec.
+- Logs larger than a few hundred KB are linked to Loki, not attached.
+- History is preserved across runs (the last 20–30); the report publishes from `main` to a stable URL, and PR builds publish to a PR-scoped URL or skip publishing.
 
 ## Generation steps
 

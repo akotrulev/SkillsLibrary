@@ -89,88 +89,17 @@ change. The config leaves `testDir` at its default, so it finds the specs either
 
 Start from the assets: copy them, rename, and keep their shape.
 
-## Rules
-
-### Locators
-
-1. **The ladder:** `getByTestId` → `getByRole` → `getByLabel` → `getByPlaceholder` → `getByText` →
-   `getByAltText` / `getByTitle` → CSS. The first rung the element supports wins.
-2. **Test ids are PascalCase dot-separated and static** — `Login.Submit`, `OrderRow`, `OrderRow.Title` —
-   the format `fe-react` and `fe-blazor` generate. A row is picked by its content, never by an id that
-   embeds a key, an index or a state.
-3. **A fallback carries no marker in the code.** Record it in `missing-testids.md` (page, element,
-   suggested id, fallback in use). The report is the contract; no `TODO`, no comment on the locator.
-4. **Scope instead of picking.** A locator that matches many is narrowed by its component root,
-   `within()`, or `filter({ has, hasText })`. `nth()` / `first()` only where order is the behaviour, and
-   then the field name says so (`newestNotification`).
-5. `visible()` (1.63) instead of `:visible`; `frameLocator` / `contentFrame()` for iframes;
-   `addLocatorHandler` for overlays that may appear; `describe()` on composed locators.
-6. **Never assert on an `or()` locator** — it passes on either state.
-
-### Page objects
-
-- Locators are `readonly Locator` fields built in the constructor, never functions that re-query.
-- A page takes `(page: Page)`. A **component** (a region reused across pages — a form, a row, a menu)
-  takes its root `Locator` and builds its children from it, as `SignInForm` does.
-- Methods name user intent (`signIn`, `addToCart`), never the widget (`clickButton`). They are `async`
-  and return `Promise<void>`; an action that always lands on another page may return that page object.
-- The page owns its URL in `goto()`. Specs never call `page.goto`, `page.locator` or any other raw
-  `page.` method.
-- **No assertions in page objects.** They expose locators; tests assert. An optional `expectLoaded()`
-  that asserts one landmark is the only exception.
-- No shared base class until three pages share real behaviour (`page-object-design`).
-
-### Tests
-
-- **Names are `Should_X_When_Y`** (`Should_ShowInvalidCredentialsError_When_PasswordIsWrong`), grouped by
-  one `test.describe` per feature.
-- **Tags go in the details object:** `test('Should_…', { tag: '@smoke' }, …)` or on the `describe`;
-  never in the title.
-- One logical behaviour per test; every test asserts. Multiple `expect` calls are fine when they check one
-  behaviour.
-- **Web-first assertions only** (`references/assertions.md`). No one-shot read compared later
-  (`expect(await loc.textContent())…`), no boolean dance (`expect(res.ok()).toBeTruthy()`).
-- **One expected condition per assertion — never an `OR`**, and a regex alternation is an `OR`. Split the
-  outcomes, or generate one test per row.
-- **Failures name the subject:** ``await expect(banner, `success banner for order ${orderId}`).toHaveText('Saved')``.
-- **Data-driven tests generate one `test()` per row** from a case array outside the body. No `if` or
-  `for` inside a test drives assertions.
-- **No `try` / `catch` / `finally` in a test.** An expected rejection is `await expect(...).rejects`;
-  cleanup is fixture teardown.
-- **Every promise is awaited** — actions, assertions, Allure calls.
-- Tests are independent: no `test.describe.serial`, no shared mutable state. One long journey is one test
-  with `test.step` labels.
-- API responses in fixtures assert the exact status with the body: `expect(res.status(), await res.text()).toBe(201)`.
-- No hardcoded credentials, URLs or hostnames — `BASE_URL`, `E2E_USER`, `E2E_PASSWORD`.
-- No `console.log`; use `test.step` and the trace.
-
-### Waiting
-
-- No `page.waitForTimeout`. Wait on a web-first assertion, `expect.poll` or `toPass`, never a sleep.
-- No `{ waitUntil: 'networkidle' }`. Navigate, then assert a landmark.
-- No `locator.waitFor()` before an action that already auto-waits.
-- No `{ force: true }`; fix the flow (close the overlay with `addLocatorHandler`, scroll, wait for the
-  state).
-- No `waitForNavigation` (deprecated); `waitForURL` or `toHaveURL`.
-- `waitForResponse`: start the promise without `await`, perform the action, then `await` the promise.
-- No hand-rolled retry loops; `toPass({ timeout })` with short inner timeouts.
-
-### Auth and data
-
-- Sign in **once per role** in a setup project (`assets/auth.setup.ts`) and reuse the storage state
-  through `dependencies` — never sign in inside every test. A signed-out spec clears the state with
-  `test.use({ storageState: { cookies: [], origins: [] } })`.
-- Records a test needs are created through the API in a **fixture**, with a unique value per test, and
-  deleted in its teardown (`seededUser`).
-- Builders for any record with four or more fields (`qa/typescript/skills/test-data-builder`).
-
-### Config
+## Config
 
 The canonical config is `assets/playwright.config.ts`, explained in `references/config-and-fixtures.md`:
 `retries: 0` (`ci-conventions`), `forbidOnly` on CI, `fullyParallel`, `html` locally and `blob` + `junit` +
 `allure-playwright` on CI, `baseURL` from `BASE_URL`, `testIdAttribute`, the failure-evidence defaults,
 `updateSnapshots: 'none'` on CI and `'missing'` locally, and a setup project. Extend that file; never
 start a second one.
+
+## Rules
+
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `ui-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

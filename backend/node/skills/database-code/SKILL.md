@@ -380,29 +380,7 @@ registerInstrumentations({ instrumentations: [new PrismaInstrumentation()] });
 
 ## Rules
 
-- One ORM per project — Prisma default, Drizzle when SQL-composability matters
-- Schema in source control; migrations in source control; both reviewed in PRs
-- Snake_case columns via `@map`; BigInt for money; Timestamptz with precision
-- Singleton client per process
-- `select` what you need; `take` every collection query; `cursor` for paging
-- Transactions via `$transaction` for multi-step writes
-- Optimistic concurrency via a `version` column + `updateMany` (Prisma) or `@VersionColumn` (TypeORM)
-- Migrations applied via CI / pipeline, not app startup
-- OTel tracing on every DB call
-- Raw SQL via tagged templates only
-
-## What NOT to do
-
-- No `prisma.user.findUnique` without `where` (won't even compile, but worth saying — never bypass the typed where)
-- No global `prisma` reinstantiation per request
-- No `include` cascading 3 levels deep on a read endpoint
-- No string-concat in `$queryRawUnsafe` — use `$queryRaw` tagged template
-- No app-side migration on startup
-- No mixing two ORMs in one project
-- No `BigInt` serialized via `JSON.stringify` without explicit conversion
-- No long-running connections held outside a transaction
-- No `Prisma.PrismaClientKnownRequestError` swallowed silently — match on `e.code`
-- No new project on TypeORM (when Prisma / Drizzle exist)
+The standards this skill's output must meet are the be-node rule files, not a list here: `node-persistence.md` and `node.md` (errors and async). Read the project's copy in `.claude/rules/be-node/`, or the plugin's in `backend/node/skills/rules/` when the project has not installed them (`/be-node:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

@@ -198,9 +198,7 @@ calls of a failed test (`qa/typescript/skills/evidence-capture`).
 | Redirect | **raw** on a `maxRedirects: 0` context | exact `302` + the `location` header |
 | Eventually-consistent state | **raw/typed** inside `expect.poll` | `await expect.poll(async () => (await client.getById(id)).status(), { timeout: 10_000 }).toBe(200)` |
 
-## Rules
-
-### Spec structure & naming
+## Spec structure & naming
 
 - API specs live in `tests/api/{resource}/`, one file per operation, run by a dedicated `api` **project**
   (no browser, `use.baseURL` = the API root).
@@ -209,27 +207,9 @@ calls of a failed test (`qa/typescript/skills/evidence-capture`).
 - Identities are **fixtures**: a spec asks for `adminClient` in its parameter list. No `beforeAll` creating
   shared contexts, no module-level clients.
 
-### Test rules
+## Rules
 
-- Assert the **exact** status code before reading the body — `toBe(201)`, never `toBeOK()` (any 2xx passes).
-  `failOnStatusCode` stays `false` (§ Context options).
-- Happy path uses the **typed** client method; negative scenarios use the **raw** method.
-- Parse every body through its Zod schema; never read `(await response.json()).field` unparsed.
-- One logical behavior per test; `toMatchObject` (or `expect.soft`) for several fields of one response.
-- Tests are independent: per-test data, **cleanup in a fixture's teardown** (`createdUsers`) or `afterEach` —
-  never a `try`/`finally` in the test body. The suite must survive `--workers=4 --shard=2/2`.
-- Rows that differ only in data → a `for` over a const case table **generating `test(...)` calls**, outside
-  every test body (`qa/typescript/skills/data-driven-testing`) — never conditionals inside one test.
-- No `page`, no `browser` — an API spec that asks for `page` is a UI test in the wrong folder.
-- Eventual consistency → `expect.poll` / `expect(...).toPass()`, never `waitForTimeout`.
-
-### What NOT to do
-
-- No raw `request.get(...)` / `ctx.post(...)` in specs — every request goes through a `{resource}Client`.
-- No `fetch` / axios / supertest inside a Playwright project — one HTTP client, one trace.
-- No token threading per call — identity lives in the context (headers or cookies at creation).
-- No undisposed contexts; no `toBeOK()`; no `failOnStatusCode: true`; no `finally`.
-- No hardcoded base URLs or tokens — `baseURL` from the config/env, tokens via `authHelper`.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `api-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

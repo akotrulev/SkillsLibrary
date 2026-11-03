@@ -253,20 +253,9 @@ When QA's `page-objects-from-url` / `mobile-screen-explorer` hands over a report
    - Decorative elements skipped (so the user can override if any need anchoring).
    - **Locator collisions detected (same testid on two distinct elements) — these block completion.**
 
-## Anti-patterns to flag
+## Standards
 
-| Anti-pattern | Fix |
-|---|---|
-| `data-testid="@($"Row.{model.Id}")"` on a list row | Hardcode static row locator (Rule 6) |
-| `data-testid` on a layout `<div>` with no test purpose | Remove |
-| `Dictionary<TEnum, string>` mapping enum → testid | Replace with inline `$"...{enumValue}"` (Rule 7) |
-| Inline `?:` collapsing to `null` | Use `?? ""` and a named local (Rule 3) |
-| New `AppButton`/`AppTextBox` wrapper introduced just to carry testids | Set the inline attribute on the library control — its unmatched-attribute capture forwards it (Rule 1) |
-| `@attributes` dictionary for a static testid | Inline attribute — the dictionary form is for loop-dynamic values only (Rule 1) |
-| Two distinct elements sharing the same locator | Sub-namespace one of them (Rule 6) |
-| kebab-case or snake_case segments | PascalCase only |
-| Locators containing numeric IDs, GUIDs, or array indexes | Use enum names or field names; rows are addressed by index over a shared locator |
-| `aria-label` added to mirror a testid | One attribute only — a11y labels are owned by the accessibility skill, on their own merits |
+The standards this skill's output must meet are the fe-blazor rule file `blazor-markup.md`, not a list here. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where it and this skill's recipes disagree, the rule file wins. Rules 1–7 above are how its test-id rules are applied.
 
 ## References
 

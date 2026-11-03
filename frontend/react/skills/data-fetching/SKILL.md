@@ -229,33 +229,15 @@ Throwing this from a Server Component surfaces it at the nearest `error.tsx` bou
 
 ## Rules
 
+The standards this skill's output must meet are the fe-react rule files `react-data.md` and `react.md`, not a list here. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Where they and this skill disagree, the rule files win.
+
+Beyond the rule files, this skill's own rules:
+
 - **Open every data feature with the transport routing decision**: pull → here; push → [`realtime`](../realtime/SKILL.md).
-- **Fetch on the server by default** (RSC `await` + props); reach for a client TanStack Query hook only when the client owns the request lifecycle or there's no server (Vite SPA).
-- **Keep fetch logic in a data module** (`server-only` server functions · client hooks), never inline in the component; the component names the data function.
-- **Be explicit about caching** — `revalidate`/`tags`/`force-cache`/`no-store` (Next 15 default is uncached); mutate with a **Server Action** that `revalidateTag`/`revalidatePath`.
-- **No HTTP hop to your own API from a Server Component** — query the service/DB in-process; mark the module `server-only`.
-- **Prefetch+hydrate** server data needed by a Client Component; never re-fetch in `useEffect` what the server already had.
-- **Thread `AbortSignal`** into client fetches; cancel on unmount/navigation. **Compose a timeout budget** (`AbortSignal.any([signal, AbortSignal.timeout(ms)])`) on every call — client and server — set per endpoint class; keep `TimeoutError` (a failure) distinct from `AbortError` (not a failure).
-- **Key the query by every parameter it depends on** (`['orders', search, filters, page]`) so responses can't land out of order; on a bare `useEffect` fetch, guard with an ignore-flag or abort in cleanup — a stale response overwriting a newer one is a data-correctness bug, not a rendering one.
-- **Classify each call critical vs optional**: `Promise.all` only for calls that are critical together, `allSettled` the moment one is optional; gate dependent queries (`enabled`) so they neither fire with `undefined` nor spin forever when the parent failed; render partial success.
-- **[App] Scope RSC failures below the segment** — `<Suspense>` + a region boundary, or return a typed `Result` and render inline; `error.tsx` is the shell backstop, not the read handler. **Server Actions return typed errors** for expected failures instead of throwing.
-- **Checked map access; throw on unsubstituted `{placeholder}`; parse to the endpoint's real shape (Zod); contract-test against the spec.**
-- **ProblemDetails → friendly text + correlation id; raw detail logged server-side, never rendered.**
-- **Base URLs + external hosts from config**; the token is IdP-neutral, from the auth layer.
-
-## What NOT to do
-
-- No transport-specific fetch code inline in a component; no fetching in a client `useEffect` when the Server Component could fetch and pass props.
-- No `server-only` module (DB creds, secrets) imported into a `'use client'` file.
-- No `.then()`-swallowed error surfaced as a blank section (that's a three-state region — [`error-handling`](../error-handling/SKILL.md)); no raw `error.message`/response body rendered to users.
-- No unchecked map indexing of routes; no template sent with an unsubstituted placeholder; no single-object endpoint parsed as an array.
-- No hardcoded/`localhost` base URLs; no token-attaching layer hand-rolled here (it's auth's, provider-neutral).
-- No `setState` from an effect fetch with no ignore/abort guard; no query key missing a parameter the request depends on (both = a stale answer overwriting a newer one, silently).
-- No `Promise.all` spanning a critical *and* an optional call; no dependent query firing with an `undefined` parent id; no dependent region left in a skeleton because its parent failed; no whole-page error because one optional section 500'd.
-- **[App]** No failable read left to escalate to the segment's `error.tsx` when the region could own its failure; no Server Action throwing for an expected, mappable failure.
-- No call without a timeout budget; no `setTimeout`-vs-`fetch` race where `AbortSignal.timeout` fits; no timeout signal that *replaces* the library's cancel signal instead of composing with it; no `AbortError` treated as a failure.
-- No client store holding server data (that's TanStack Query/RSC — [`state-management`](../state-management/SKILL.md)); no `await` in a Client Component body.
-- No assuming `fetch` is cached on Next 15 (it isn't) — opt in explicitly.
+- **Prefetch and hydrate** server data a Client Component needs; never re-fetch in `useEffect` what the server already had.
+- **Gate dependent queries** (`enabled`) so they neither fire with an `undefined` parent id nor sit in a skeleton because the parent failed; render partial success.
+- **Timeouts are set per endpoint class**; no `setTimeout`-vs-`fetch` race where `AbortSignal.timeout` fits.
+- **The token is the auth layer's**, IdP-neutral — never a token-attaching layer hand-rolled here.
 
 ## Validation
 

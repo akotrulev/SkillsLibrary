@@ -108,7 +108,7 @@ export type UserModDto = Partial<UserInDto>;
 
 Use derivations when the relationship is genuinely "subset of fields, same names". When the wire shape diverges (e.g. server returns nested objects but PATCH takes ids), write the type explicitly.
 
-## Rules
+## Conventions
 
 ### Naming
 
@@ -146,6 +146,10 @@ Use derivations when the relationship is genuinely "subset of fields, same names
 - No classes — DTOs are TypeScript types, not classes. No methods, no decorators.
 - Construct in tests via object literal: `const body: UserInDto = { name: "x", age: 30 };`.
 - Do NOT add `tslib`-style helpers, `class-transformer` decorators, or runtime metadata. If runtime validation is needed, write a Zod schema in a separate `*.schema.ts` file and `z.infer` the type from it.
+
+## Rules
+
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `api-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

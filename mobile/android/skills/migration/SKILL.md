@@ -71,6 +71,8 @@ Order: 0 moves first when its date is near; 1 before 3–5 (Hilt 2.59+ needs AGP
 - **R8 and process death only fail in release and on a real kill.** Verify a release-config build and an `adb shell am kill` restore for every move that touches state or the build.
 - **Warnings are the work list.** Do not suppress a deprecation to finish; do not widen a keep rule to `**`.
 - **No destructive Room fallback** to get a migration through; user data is never rebuilt from nothing.
+- **One move, one unit, one commit series.** Never two moves in a change: no LiveData, Room or Navigation rewrite "while upgrading Gradle", no Java-to-Kotlin conversion and redesign in one commit, no whole-app Views-to-Compose rewrite on a branch.
+- **Room 2.8 stays Room 2.8** until the Room 3 move is chosen. **`EncryptedSharedPreferences` is migrated, never replaced by wiping the user's stored token.**
 
 ## Verification (every move, non-negotiable)
 
@@ -83,21 +85,7 @@ Order: 0 moves first when its date is near; 1 before 3–5 (Hilt 2.59+ needs AGP
 
 ## Rules
 
-- One move, one unit, one commit series; never two moves in a change.
-- AGP 9 escape hatches are listed as temporary with a removal date; AGP 10 removes them.
-- `targetSdk` is explicit and raised one level at a time, with the behaviour change tested.
-- kapt becomes KSP; `legacy-kapt` only with a dated task.
-- Room 2.8 stays Room 2.8 until the Room 3 move is chosen; the two never mix inside one database.
-- Work in the checkout given; never create a branch.
-
-## What NOT to do
-
-- Set `android.builtInKotlin=false` and call AGP 9 done.
-- Rewrite LiveData, Room and Navigation "while upgrading Gradle".
-- Raise `targetSdk` to reach a library, or leave it unset because AGP 9 defaults it to `compileSdk`.
-- Convert Java to Kotlin and redesign in the same commit.
-- Replace `EncryptedSharedPreferences` by wiping the user's stored token.
-- Migrate Views to Compose by rewriting the whole app on a branch.
+The standards this skill's output must meet are the mobile-android rule files, not a list here: `android-build.md` and `android-data.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win. The cross-move rules above are how a move is run.
 
 ## Handoffs
 

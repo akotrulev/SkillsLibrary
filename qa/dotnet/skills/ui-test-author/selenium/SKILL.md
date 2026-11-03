@@ -145,7 +145,7 @@ Multi-step flows live under `Pages/Checkout/CheckoutInformationPage.cs`, etc. Ea
 public sealed class AuthenticationTests : BaseTest
 {
     [Test, Category("Smoke")]
-    public void SuccessfulLogin()
+    public void Should_ShowTheCart_When_CredentialsAreValid()
     {
         var login = new LoginPage(Driver);
         login.GoToPage();
@@ -164,51 +164,17 @@ public sealed class AuthenticationTests : BaseTest
 
 ## Rules
 
-### Page object rules
-- Inherit `BasePage`; pass `driver` to `: base(driver)`
-- Element accessors are expression-bodied properties returning `IWebElement` / `IReadOnlyList<IWebElement>`
-- **No `PageFactory` / `[FindsBy]` attributes** — explicit `FindElement(By)` calls only
-- **Locator preference:** `data-test` → `Id` → `CssSelector` → `ClassName` → `XPath` (last resort, add a `// TODO`)
-- One class per page; multi-step flows live in a sub-folder
-- Reusable components take a parent `IWebElement` and use the parent-scoped overloads
-- Navigation methods return the next page object; same-page actions return `void`
-- Page constants and helpers (e.g. `ToSlug`) are `private static`
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `automation.md` and `web-ui.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-### Test rules
-- Inherit `BaseTest` — provides the per-test `Driver` and shared seed data
-- Test names: `SuccessfulLogin`, `CartShowsAddedProduct`, `LoginRejectsLockedUser`
-- Use `[Category("Smoke")]` to enable selective runs
-- Assertions live in the test, **never** inside page methods
-- Use `Assert.That(value, Is.X, "message")` — every failure must explain itself
-- Use `Assert.Multiple(() => { ... })` when verifying multiple fields after one user action
-- **One expected condition per assertion — never an `OR`.** `Assert.That(banner.Text, Is.EqualTo("Saved"))`, never `Is.EqualTo("Saved").Or.EqualTo("Success")`, `Is.AnyOf(...)`, `Does.Match("Saved|Success")`, or a `||` inside the condition. The rule covers text, element counts, URLs, attribute values, and displayed/enabled state alike. If both outcomes are genuinely reachable the test does not know what the app should do — split it into one `[Test]` per expected outcome, parameterize with `[TestCase]`, or pin down the correct behavior. The only exception is an explicit instruction to accept more than one value; record that instruction in a comment on the assertion.
-- **No `try`/`catch` in a test — and none in `[TearDown]`.** An unexpected exception must reach NUnit; an expected one is asserted with `Assert.Throws<T>`, which is an assertion, not error handling. Anything the test created is tracked and deleted in `[TearDown]` with no catch — a cleanup that fails should fail loudly rather than leak state into the next run. The suite's only catches live in **I/O helpers where narrowing one named exception is the contract** — an `IsDisplayed(By)` probe converting `NoSuchElementException` into `false`, a driver-quit helper — never a blanket `catch (Exception)`, and never a catch that lets a failed action continue into the assertions.
-- **Failures name the subject.** `Assert.That(banner.Text, Is.EqualTo("Saved"), $"success banner after saving order {orderId}")`. A UI failure reported as `Expected: "Saved" But was: ""` with no subject is indistinguishable from a locator that matched the wrong element.
+## Conventions
 
-### Waits
-- Default 10s wait set in `BasePage` via `WebDriverWait`
-- For conditional waits, use `IsElementVisible(By)` or a typed `wait.Until(...)`
-- **No `Thread.Sleep` / `Task.Delay` for synchronization** — only `WebDriverWait`
-
-### Driver lifecycle
-- Always go through `DriverFactory.SetDriver()` / `GetDriver()` / `QuitDriver()` — never `new ChromeDriver()` in a test
-- Browser configured via env var `BROWSER` (or appsettings) — `EnvConfig.BrowserType`
-- One driver per test via `AsyncLocal<IWebDriver>` — safe for NUnit `Parallelizable(ParallelScope.Fixtures)`
-- Selenium Manager (built into Selenium 4.6+) auto-resolves browser drivers — do not add `WebDriverManager.Net` unless you need pinned versions
-
-### What NOT to do
-
-- No `Thread.Sleep` — use `WebDriverWait`
-- No `Driver.FindElement(...)` in a page outside `BasePage`
-- No assertions inside page methods
-- No `OR` in any assertion — no `.Or.`, no `Is.AnyOf(...)`, no `||` inside `Assert.That`, no `Does.Match("a|b")` alternation. One expected value per assertion (see Test rules)
-- No `try`/`catch` in a `[Test]` or `[TearDown]` — expected exceptions use `Assert.Throws<T>`; catches live only in I/O helpers narrowing one named exception (see Test rules)
-- No `PageFactory` / `[FindsBy]` attributes — explicit `FindElement(By)` only
-- No raw XPath when a `data-test` attribute could be added to the app
-- No shared mutable state on page objects
-- No business logic in page objects (e.g. computing discounts)
-- No hardcoded URLs or credentials — use `EnvConfig` / `IConfiguration`
-- No `.Result` / `.Wait()` / `.GetAwaiter().GetResult()` — Selenium .NET is sync; if you mix async work, use `await` properly
+- Pages inherit `BasePage` and pass `driver` to `: base(driver)`; element accessors are expression-bodied properties returning `IWebElement` / `IReadOnlyList<IWebElement>`; page constants and helpers (`ToSlug`) are `private static`.
+- Locator order: `data-testid` → `Id` → `CssSelector` → `ClassName` → `XPath`. An XPath fallback is a `missing-testids.md` row, never a code marker.
+- Multi-step flows live in a sub-folder (`Pages/Checkout/`); repeating items are components scoped to a parent `IWebElement`.
+- Tests inherit `BaseTest`, which provides the per-test `Driver` and shared seed data; `[Category("Smoke")]` enables selective runs.
+- `BasePage` sets the default 10 s `WebDriverWait`; conditional waits use `IsElementVisible(By)` or a typed `wait.Until(...)`.
+- The driver goes through `DriverFactory.SetDriver()` / `GetDriver()` / `QuitDriver()`, one per test via `AsyncLocal<IWebDriver>`, which is safe for `ParallelScope.Fixtures`; the browser comes from `BROWSER` (`EnvConfig.BrowserType`). Selenium Manager resolves drivers; add `WebDriverManager.Net` only for pinned driver versions.
+- Selenium .NET is synchronous; async work mixed in is awaited properly.
 
 ## Generation steps
 

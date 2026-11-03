@@ -181,31 +181,13 @@ Don't build "an order in the DB" inside the builder — that couples the builder
 
 ## Rules
 
-- Builders live under `src/test/java/.../builders/`; ObjectMothers under `src/test/java/.../mothers/`.
-- Every field has a sensible default — adding a non-nullable field doesn't ripple through 50 tests.
-- One builder per aggregate; child aggregates have their own builders.
-- Defaults are deterministic literals; only id-like fields use random with reason (seeded DataFaker).
-- `.build()` returns the real record / domain type, never the builder.
-- `.build()` is idempotent — calling it twice produces equal but independent instances.
-- ObjectMother helpers return a builder (so tests can refine); return a built object only when no test ever varies it.
-- Tests never construct domain objects with raw `new SomeRecord(...)` literals across more than 1–2 places — extract to a builder.
-- Constructor injection only — builders never use a service locator.
-- No async / `CompletableFuture` in the builder; building is pure.
-- Lombok `@Builder` on records is the default; only switch to a hand-written builder when generic type bounds defeat Lombok.
+The standards a builder must meet are the qa-java rule files, not a list here: `qa-java-data.md` and `qa-java.md` (core). Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-## What NOT to do
+## Conventions
 
-- No inline test data literals duplicated across test files.
-- No `null` for required fields in defaults — pick a real default.
-- No randomness on fields the test asserts against.
-- No "god builder" with 30 chained methods covering 4 unrelated aggregates — split per aggregate.
-- No persistence in the builder — shape and save are separate concerns.
-- No production-code builders disguised as test builders ("we'll reuse this in prod too") — separate them; remove `Test*` prefix only when promoting deliberately.
-- No exposing `ArrayList`/mutable collections through getters — `List.copyOf` in `.build()`.
-- No defaults that violate domain invariants (e.g. negative `totalMinor`) — the default builder must produce a valid object.
-- No mixing `@Builder` with hand-written setters in the same record — pick one.
-- No AutoFixture-style "build me anything" reflection libraries on top of these builders — predictability matters.
-- No builders that throw checked exceptions from `.build()` — the default path must compile cleanly.
+- Builders live under `src/test/java/.../builders/`, ObjectMothers under `src/test/java/.../mothers/`; child aggregates have their own builders.
+- Lombok `@Builder` on records is the default; a hand-written builder only where generic type bounds defeat Lombok, and never `@Builder` mixed with hand-written setters in one record.
+- A test builder is not a production builder: promote one deliberately, dropping the `Test*` prefix, never by reuse.
 
 ## Generation steps
 

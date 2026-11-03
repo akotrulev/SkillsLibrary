@@ -163,49 +163,16 @@ public class AuthenticationTest extends BaseTest {
 
 ## Rules
 
-### Page object rules
-- Always extend `BasePage`; pass `driver` to `super(driver)`
-- Element accessors return `WebElement` (or `List<WebElement>`) — keep them one-liners (`return findElement(By...)`)
-- **No `@FindBy` / `PageFactory`** — the reference repo deliberately uses explicit `findElement(By)` calls so locators are visible in the method body
-- **Locator preference order:** `data-test` attribute → `id` → `cssSelector` → `className` → `xpath` (last resort, add `// TODO` to replace)
-- One class per page; multi-step flows live in a sub-package (e.g. `pom/checkout/`)
-- Reusable components (cards, rows) take a parent `WebElement` and use `findElement(By, parent)` overloads
-- Navigation methods (`successfulLogin`, `submitOrder`) return the next page object; same-page actions return `void`
-- Page constants and helper formatters (e.g. `toSlug`) are `private static` and scoped to the page
+The standards this skill's output must meet are the qa-java rule files, not a list here: `qa-java.md` (core) and `qa-java-ui.md`. Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-### Test rules
-- Extend `BaseTest` — it provides the per-test `WebDriver driver` and any shared `@BeforeSuite` seed data
-- Test method names describe behavior: `successfulLogin`, `cartShowsAddedProduct`, `loginRejectsLockedUser`
-- Use `@Test(groups = "Smoke" | "Regression" | ...)` to enable selective runs
-- Assertions live in the test class, **never** inside page methods. Page methods return `WebElement` / next page; the test asserts.
-- Use TestNG `Assert.assertTrue` / `assertEquals` with a message argument — every failure must explain itself
-- Use `SoftAssert` when verifying multiple fields after one user action; call `soft.assertAll()` at the end
-- **One expected condition per assertion — never an `OR`.** `assertEquals(banner.getText(), "Saved")`, never `assertTrue(t.equals("Saved") || t.equals("Success"))`, a Hamcrest `anyOf(...)` / `either(...).or(...)`, or a `"Saved|Success"` regex alternation. The rule covers text, element counts, URLs, attribute values, and displayed/enabled state alike. If both outcomes are genuinely reachable the test does not know what the app should do — split it into one `@Test` per expected outcome, drive it from a `@DataProvider`, or pin down the correct behavior. The only exception is an explicit instruction to accept more than one value; record that instruction in a comment on the assertion.
-- **No `try`/`catch` in a test — and none in `@AfterMethod`.** An unexpected exception must reach TestNG; an expected one is asserted with `assertThrows`, which is an assertion, not error handling. Anything the test created is tracked and deleted in `@AfterMethod(alwaysRun = true)` with no catch — a cleanup that fails should fail loudly rather than leak state into the next run. The suite's only catches live in **I/O helpers where narrowing one named exception is the contract** — an `isDisplayed(By)` probe converting `NoSuchElementException` into `false`, a driver-quit helper — never a blanket `catch (Exception)`, and never a catch that lets a failed action continue into the assertions.
-- **Failures name the subject.** `assertEquals(banner.getText(), "Saved", "success banner after saving order " + orderId)`. A UI failure reported as `expected [Saved] but found []` with no subject is indistinguishable from a locator that matched the wrong element.
+## Conventions
 
-### Waits
-- Default 10s implicit wait is set in `DriverFactory`
-- For conditional / explicit waits use the inherited `WebDriverWait` via `isElementVisible(By)` or write a typed `ExpectedConditions` wait
-- **No `Thread.sleep`** anywhere — including for page transitions
-
-### Driver lifecycle
-- Always go through `DriverFactory.setDriver()` / `getDriver()` / `quitDriver()` — never instantiate `ChromeDriver` directly in a test
-- Browser type is configured via `SystemPropertyUtil.getBrowserType()` — pass `-Dbrowser=firefox` to switch
-- One driver per test thread (`ThreadLocal`) — safe for parallel TestNG runs
-
-### What NOT to do
-
-- No `Thread.sleep` — use `WebDriverWait` / `ExpectedConditions`
-- No `driver.findElement(...)` in a page object — go through `findElement(By)` so future changes (logging, retries) have one place to land
-- No assertions inside page methods — page methods model the page, tests own the assertions
-- No `OR` in any assertion — no `||` inside `assertTrue`, no `anyOf`/`either().or()` matchers, no `"a|b"` regex alternation. One expected value per assertion (see Test rules)
-- No `try`/`catch` in a `@Test` or `@AfterMethod` — expected exceptions use `assertThrows`; catches live only in I/O helpers narrowing one named exception (see Test rules)
-- No `@FindBy` annotations or `PageFactory.initElements` — explicit `findElement(By)` calls only
-- No raw `xpath` when a `data-test` attribute exists — refactor the app to expose one rather than locking the test to brittle DOM structure
-- No shared mutable state on page objects — every page is constructed fresh from the test
-- No business logic in page objects (e.g. computing discounts) — model the screen, not the workflow
-- No hardcoded URLs or credentials — use `SystemPropertyUtil`
+- Pages extend `BasePage` and pass `driver` to `super(driver)`. Element accessors are one-liners through the inherited `findElement(By)` (`return findElement(By...)`), so logging or retries have one place to land; the reference repo uses explicit `findElement(By)` calls, never `@FindBy` / `PageFactory`.
+- Reusable components (cards, rows) take a parent `WebElement` and use the `findElement(By, parent)` overloads. Multi-step flows live in a sub-package (`pom/checkout/`).
+- Page constants and helper formatters (`toSlug`) are `private static` and scoped to the page.
+- Tests extend `BaseTest`, which provides the per-test `WebDriver` and any shared `@BeforeSuite` seed data. Groups: `@Test(groups = "Smoke" | "Regression" | ...)`.
+- Conditional waits use the inherited `WebDriverWait` through `isElementVisible(By)`, or a typed `ExpectedConditions` wait.
+- The driver comes from `DriverFactory.setDriver()` / `getDriver()` / `quitDriver()`, one per test thread (`ThreadLocal`). The browser is `SystemPropertyUtil.getBrowserType()` (`-Dbrowser=firefox`); URLs and credentials come from `SystemPropertyUtil`.
 
 ## Generation steps
 

@@ -232,19 +232,14 @@ There is no server render in a plain Vite SPA, so no route is crawlable — see 
 
 ## Anti-patterns
 
+Click-handler navigation, `'use client'` on a layout, `redirect()` inside `try`, an unscoped or authorizing `middleware.ts`, your own route handler fetched from a Server Component and an un-awaited `params` are rules in the fe-react rule files `react.md` and `react-data.md`. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). The routing-specific ones:
+
 | Anti-pattern | Why it's wrong | Do instead |
 |---|---|---|
-| `<div onClick={() => router.push('/x')}>` | Not focusable, no href, no middle-click, invisible to crawlers | `<Link href="/x">` |
-| `'use client'` on `layout.tsx` to use one hook | Makes the whole subtree client, kills RSC for every child | Keep the layout server; extract the interactive bit into a client leaf |
 | `template.tsx` used as the default wrapper | Remounts on every navigation — resets state, refires effects, re-animates | `layout.tsx` unless you specifically want the reset |
 | Parallel slot with no `default.tsx` | Hard navigation 404s the slot | Add `default.tsx` returning `null` |
 | Intercepting route without the real route | Refresh / share / crawler hits a dead URL | Always ship the non-intercepted `page.tsx` too |
 | `useSearchParams()` with no Suspense in a static route | Build error, or the whole route silently goes dynamic | Wrap in `<Suspense>`, or read `searchParams` on the server |
-| `redirect()` inside `try/catch` | The catch swallows the thrown redirect; navigation never happens | Call it outside the try, or re-throw |
-| `middleware.ts` with no `matcher` | Runs on static assets — cost on every request | Always scope the `matcher` |
-| Middleware treated as authorization | Bypassable; it only sees a cookie | Re-check permission where the data is returned |
-| Route handler fetched by your own Server Component | Needless HTTP hop and serialization | Call the data source directly in the RSC |
-| Reading `params.slug` without `await` on Next 15 | `params` is a Promise — you get `undefined`/a warning | `const { slug } = await params` |
 
 ## Related skills
 

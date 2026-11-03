@@ -69,7 +69,7 @@ Orders.Row             Orders.Row.Title        Orders.Row.Status
 Tabs.Orders            Notifications.Banner.Close
 ```
 
-## Rules
+## Tagging rules
 
 ### 1. Where the modifier goes
 
@@ -177,21 +177,9 @@ QA's `mobile-screen-explorer` writes, per screen, a table of `| Element | Type |
 5. Report per file: tags added, decoratives skipped, collisions, merged-semantics cases.
 6. Read one screen's page source from a dev build (UiAutomator dump / Appium inspector) and confirm `resource-id` carries the bare tag.
 
-## Anti-patterns
+## Rules
 
-| Anti-pattern | Fix |
-|---|---|
-| `testTagsAsResourceId` set per screen or per element | Once at the root (and each separate window root) |
-| `Modifier.testTag("Row.${order.id}")` | Static `Orders.Row` (rule 5) |
-| `contentDescription = "Login.EmailField"` or label text as the id | `testTag`; the label stays human copy |
-| Locating by `~` / `content-desc` to reach a tag | `UiSelector().resourceId(…)` or Maestro `id:` |
-| `testTag` on every layout `Box` | Remove — interactive elements and read anchors only |
-| `Map<Enum, String>` id table | Interpolate from the value (rule 6) |
-| snake_case or kebab-case tags in Compose | PascalCase dot-separated |
-| Translated string, index or GUID in a tag | Enum / field name |
-| Same tag on two non-row elements | Sub-namespace one |
-| A wrapper composable added only to carry tags | Inline `Modifier.testTag` |
-| Tag on a `Box` around a `Button` | Tag the `Button` (rule 8) |
+The standards a tag must meet are the mobile-android rule files, not a list here: `android-ui-a11y.md` (its Test ids section) and `android-views.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win. The tagging rules above are how they are met.
 
 ## Handoffs
 

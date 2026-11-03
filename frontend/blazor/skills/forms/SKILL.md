@@ -334,40 +334,9 @@ Validate per step in `OnValidSubmit` of the per-step form; let the user advance 
 
 For large files, upload to a signed URL (S3 presigned / Azure Blob SAS) directly from the browser, then submit only the metadata via the form — keeps the server out of the bandwidth path.
 
-## Anti-patterns
-
-- **Mixing DataAnnotations and FluentValidation** in the same model — pick one
-- **Manual `Model.Field` checks** inside `OnSubmit` instead of using the validator
-- **Submit button without `disabled` during submit** — double-submits + duplicate writes
-- **Server errors thrown into a generic banner** when the API gave you a field map
-- **Custom inputs that don't bind via `@bind`** — break two-way data flow and EditContext tracking
-- **Forms without labels** — accessibility fails immediately
-- **`OnSubmit` instead of `OnValidSubmit`** — runs even on invalid forms
-
 ## Rules
 
-- `<EditForm>` is mandatory; use `OnValidSubmit` (not `OnSubmit`)
-- One validator per model — FluentValidation default; DataAnnotations for trivial forms (on net10 with `AddValidation()` + `[ValidatableType]`, "trivial" includes nested shapes)
-- Inputs via the typed `<Input*>` components
-- Labels paired with input `id`s
-- Errors rendered with `role="alert"` (custom `FieldError` component)
-- Submit button `disabled` + `aria-busy` while submitting
-- Focus moves to first error on submission failure
-- Server `ProblemDetails.errors` mapped into `ValidationMessageStore`
-- Wizards split via `RuleSet` (FV) or per-step models
-- Large file uploads bypass the server via signed URLs
-
-## What NOT to do
-
-- No `<form>` without `<EditForm>` for any non-trivial form
-- No `OnSubmit` when `OnValidSubmit` does what you want
-- No DataAnnotations + FluentValidation together
-- No raw `<input>` without `<InputText>` / equivalent (loses EditContext binding)
-- No submit without `disabled` guard
-- No "Something went wrong" banner when the API returned per-field errors
-- No file uploads piped through the Blazor Server SignalR channel for large files — use the signed-URL pattern
-- No validation logic inside the component instead of the validator
-- No `EditForm` without a validator component (`<DataAnnotationsValidator />` or `<FluentValidationValidator />`)
+The standards this skill's output must meet are the fe-blazor rule files, not a list here: `blazor-forms.md` and `blazor-markup.md`. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

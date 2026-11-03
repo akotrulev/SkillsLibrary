@@ -175,22 +175,7 @@ Only where Expo Router is not installed: `@react-navigation/native` + `@react-na
 
 ## Rules
 
-- No `@react-navigation/*` import in an Expo Router app.
-- Native navigators only: `Stack` and native tabs; no JS stack.
-- Params validated at the screen boundary; payloads are ids.
-- `<Link href>` for in-app navigation; `router.*` for logic results.
-- Guards are client UX, never authorisation.
-- Native-tabs import path matches the SDK.
-- Modals and sheets are routes.
-
-## What NOT to do
-
-- No `onPress` + `router.push` on a `View` for navigation.
-- No objects, tokens or PII in params.
-- No `unstable-native-tabs` import on SDK 58, no `native-tabs` import on 57.
-- No guard treating `loading` as signed out.
-- No more than 5 native tabs on Android.
-- No custom JS header when native header options cover it.
+The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `react-native-routes.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Handoffs
 

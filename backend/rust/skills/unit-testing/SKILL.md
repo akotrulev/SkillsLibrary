@@ -189,22 +189,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 
 ## Rules
 
-- One logical assertion per test; the variant or value, never the message
-- No `if`/`for`/`match` driving assertions; no `?` in test bodies; no `sleep`
-- Both arms of every `Result`; each error variant reachable from a test
-- Time, ids, randomness and config passed in; outbound I/O behind a port the module owns
-- Fakes before `mockall`; never mock `PgPool` or `reqwest::Client`
-- Tests independent; no `set_var`; no shared statics
-- ≥ 80% branch coverage of the change, measured on nightly or stated as the line fallback
-
-## What NOT to do
-
-- No `#[ignore]` without a linked issue
-- No `insta` snapshot as the only assertion on a business value; no blind `cargo insta accept`
-- No test that only checks `is_ok()` / `is_err()`
-- No unit test spinning up `axum::serve`, a Testcontainer, or a real pool
-- No `#[cfg(test)]` branches in production code that change behaviour under test
-- No `mockall` expectations so strict they pin the implementation's call order when the order is not the contract
+The standards a test must meet are the be-rust rule file `rust-tests.md`, not a list here. Read it before writing a test: an inline `#[cfg(test)]` module matches none of its globs, so it does not load on its own. Use the project's copy in `.claude/rules/be-rust/`, or the plugin's in `backend/rust/skills/rules/` when the project has not installed them (`/be-rust:rules` does). Where it and this skill disagree, the rule file wins. The coverage floor above is how its 80% rule is measured.
 
 ## Generation steps
 

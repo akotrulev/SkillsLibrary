@@ -19,12 +19,12 @@ shared by every tool in the family.
 | `references/azure-pipelines.md` | Azure DevOps (house default per global rules) — YAML pipelines, environments, service connections |
 | `references/gitlab-ci.md` | Repo lives on GitLab — `.gitlab-ci.yml`, parallel matrix, GitLab Pages for reports |
 
-## Shared rules (every tool in this family)
+## Rules
 
-- The pipeline runs the same commands developers run locally — no CI-only magic.
-- Shard with fail-fast off; always publish JUnit XML + Allure results, including on failure.
-- Secrets via OIDC / the platform's secret store — never in YAML.
-- Cross-stack conventions live in `qa/cicd/ci-conventions` — load it alongside the tool reference.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `ci-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
+
+Cross-stack conventions live in `qa/cicd/ci-conventions`: load it alongside the tool reference.
+
 ## Cross-references
 
 Each `references/<tool>.md` carries its own cross-references to sibling skills (DB verification,

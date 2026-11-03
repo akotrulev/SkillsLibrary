@@ -221,13 +221,7 @@ var order = new OrderBuilder().WithStatus(OrderStatus.Shipped).Build();
 
 ## Rules
 
-- One logical assertion per test; group related ones in `Assert.Multiple` so all failures report at once.
-- Arrange–Act–Assert, visibly separated. If Arrange needs 20 lines, the design is too coupled — that's a finding, not a fixture problem.
-- Tests are independent and order-free: any test runs alone, in any order, in parallel.
-- Fake at the boundary you own; the class under test is real and constructed directly (`new`, never resolved from a container).
-- Every test the run generates must actually fail if the behavior breaks — verify RED at least once per new behavior.
-- No conditional logic, no loops driving assertions, no `try/catch` standing in for `Assert.Throws`.
-- **≥ 80% of the branches you wrote are covered** — see *Coverage floor* below. Whether the assertions are any good is still mutation score's question — **peer** `qa-dotnet:test-quality-check`.
+The standards a test must meet are the be-dotnet rule file `dotnet-tests.md`, not a list here. Read the project's copy in `.claude/rules/be-dotnet/`, or the plugin's in `backend/dotnet/skills/rules/` when the project has not installed them (`/be-dotnet:rules` does). Where it and this skill disagree, the rule file wins. The coverage floor below is how its 80% rule is measured.
 
 ## Coverage floor — ≥ 80% of the branches you wrote
 
@@ -247,18 +241,6 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 
   `Branch coverage` in `TestResults/coverage/Summary.txt` is the number; for a method changed in an existing file, that file's page in the HTML report shows its branches. `coverlet.collector` ships in the `dotnet new nunit` template — add it where the test project lacks it. ReportGenerator is the local tool `dotnet-reportgenerator-globaltool`.
 - **Below 80%, write the missing tests.** The report's uncovered branches are the list.
-
-## What NOT to do
-
-- **`UseInMemoryDatabase` to "unit-test a repository"** — the top false-confidence pattern in .NET testing. Integration lane, real engine.
-- **`WebApplicationFactory` / `Testcontainers` in this project** — that's the peer's suite; if it appears here, the fence has moved.
-- **Substituting `DbContext`, `HttpClient`, `TimeProvider`, or an SDK type** — wrap it.
-- **Asserting whole-object equality** on a record with 15 fields when the test is about one — assert the field, or the reader can't tell what broke.
-- **`[Ignore]` without a linked issue** — a quarantined test is `qa-dotnet:flaky-test-quarantine`'s process, not a comment.
-- **Testing the framework** — that `record` equality works, that FluentValidation validates, that MediatR dispatches.
-- **A test per method** instead of per behavior — a 3-branch method needs 3+ tests; a 1-branch method may need 0.
-- **Mirroring the implementation** so a behavior-preserving refactor breaks the suite. If it breaks, it was coupled to structure.
-- **Reaching for `internal`/reflection** to test a private method — extract the concept into its own class instead.
 
 ## Generation steps
 

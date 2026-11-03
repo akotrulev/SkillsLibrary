@@ -330,24 +330,9 @@ test.for(loadCsvOrderCases(ordersCsv))("Should_ApplyExpectedDiscount_When_Region
 
 The builder supplies the unchanging defaults; the row drives only what **varies**.
 
-## Rules (hard constraints)
+## Rules
 
-- **Data lives outside the test body** — inline `test.for` for a handful, an external CSV/JSON/Excel file
-  (under `tests/data/`, versioned) beyond that. One body, N rows; **never** a `for` loop or `if` branch with
-  assertions inside a single test (CLAUDE.md — generate one test per row instead).
-- **Parse with a real library, validate + coerce with Zod into a typed row** — `csv-parse` `{ columns: true }`
-  (CSV), `JSON.parse` (JSON), `xlsx` `sheet_to_json` (Excel), then `z.array(Schema).parse(...)`. **Never**
-  `split(",")`; never index a loose tuple/`any`. The schema is the one source of truth for the row type.
-- **Each row is an independent, named case** — one logical assertion per row; the title carries the **input**
-  (`$field` / `label(row)`). Rows run in any order. In Playwright, read at module scope and generate **one
-  `test()` per row**.
-- **Pick the source for the shape** — CSV for flat tabular, JSON for nested, Excel **only** for
-  stakeholder-owned sheets, inline for a few. Prefer diffable CSV/JSON in git over binary Excel.
-- **Money is integer cents, never float**; a malformed row **throws at load** (Zod), it does not flow through
-  as `NaN`. No secrets or real PII in committed data files (synthetic; secrets via env —
-  `qa-typescript:test-login-tokens`).
-- Titles are `Should_X_When_Y` plus the row's input, unique per file. No `waitForTimeout`; no inline comments;
-  page objects reach Playwright tests as fixtures; `strict: true`.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win. The anti-patterns above are this skill's know-how for loading rows: each carries its fix.
 
 ## Cross-references
 

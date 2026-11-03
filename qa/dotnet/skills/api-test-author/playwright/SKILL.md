@@ -65,7 +65,7 @@ inline in a test to avoid creating a client.
 - API calls **inside a UI test** (seed data, then drive the browser) → the UI suite's arrange step; conventions in `qa/dotnet/skills/ui-test-author/playwright`
 - Mocking/intercepting the browser's network traffic (`page.RouteAsync`) → `qa/dotnet/skills/network-mocking`
 - GraphQL / gRPC → the protocol siblings under `qa/dotnet/skills/api-test-author/`
-- Reviewing existing tests → `qa/dotnet/skills/api-test-author/review` for the cross-stack rows, plus this skill's § Review for the transport rows
+- Reviewing existing tests → `qa/dotnet/skills/api-test-author/review`, which checks against the rule files
 
 ## Base class template — the lifecycle lives here once
 
@@ -154,58 +154,19 @@ context (`Page.APIRequest` shares the page's cookies).
 
 ## Rules
 
-### Fixture structure & naming
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `automation.md` and `api.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-- `ApiTests/Tests/{Resource}Tests.cs`, one class per resource, **`Should_X_When_Y` names** (CLAUDE.md; the
-  RestSharp sibling's older `[Action]_[Condition]_[ExpectedOutcome]` shape is not used here),
-  `[AllureFeature]` on the class and `[AllureStory]`/`[AllureSeverity]` on every test, TC-ID carried in
-  `[AllureStory]` / `[Property("TmsLink", …)]`.
-- Every fixture extends `BasePlaywrightApiTest`; identity clients are built in the fixture's `[SetUp]` from
-  `NewContextAsync(token)`. Never `Playwright.CreateAsync()`, and never a context inside a test method.
-- **No `var`** — explicit types (`IAPIResponse response`, `UserDto user`, `List<UserDto> users`).
-- Meaningful client field names per identity (`userClient`, `adminClient`, `anonymousClient`) — never a generic `client`.
+## Conventions
 
-### Test rules
-
-- Everything is `async Task` — no `.Result`, `.Wait()`, or `GetAwaiter().GetResult()` anywhere.
-- Assert the **exact** status code, always, before reading the body — `(HttpStatusCode)response.Status`, never
-  `response.Ok` (it passes on any 2xx). Never rely on Playwright throwing for you (`FailOnStatusCode` stays off).
-- Happy path uses the **typed** overload; 4xx tests use the **raw** overload with `AttachBody` first, then the
-  strict `ProblemDetails` template. Never re-assert the status after a typed call.
-- NUnit assertions only; `Assert.Multiple` for two or more related assertions.
-- Request bodies with 4+ fields come from builders (`qa/dotnet/skills/test-data-builder`); DTOs are passed via
-  `DataObject` in the client (`context.PostAsync(url, new() { DataObject = dto })`) — never hand-built JSON strings in tests.
-- Tests are independent: per-test data, cleanup in the fixture's `[TearDown]` only — never a `try`/`finally` in a
-  test — and no execution-order assumptions.
-- Rows that differ only in data → `[TestCase]` / `[TestCaseSource]` (`qa/dotnet/skills/data-driven-testing`).
-
-### What NOT to do
-
-- No `context.GetAsync(...)` / `playwright.APIRequest` calls in tests — every request goes through a `{Resource}Client`.
-- No RestSharp *and* Playwright HTTP in one suite — one client stack; if RestSharp is already established, stay on the generator sibling.
-- No token threading per call — identity lives in the context (`ExtraHTTPHeaders` at creation), or in a storage
-  state shared with the UI suite for cookie-auth apps (`APIRequestNewContextOptions.StorageStatePath`).
-- No leaked resources — every context made through `NewContextAsync`, disposed by the base `[TearDown]`.
-- No `response.Ok` as the status assertion; no `Thread.Sleep`; no `.Result`/`.Wait()`.
-- No `JsonSerializer.Deserialize` in test code — typed overloads for positive tests, `Deserialize<T>(response)` for raw access. No `Newtonsoft.Json`.
-- No `var`; no FluentAssertions; no hardcoded base URLs or tokens — `ConfigurationLoader` + `Tokens`.
+- `ApiTests/Tests/{Resource}Tests.cs`, one class per resource, `[AllureFeature]` on the class and `[AllureStory]` / `[AllureSeverity]` on every test; the TC-ID rides in `[AllureStory]` or `[Property("TmsLink", …)]`.
+- Every fixture extends `BasePlaywrightApiTest`; identity clients (`userClient`, `adminClient`, `anonymousClient`) are built in the fixture's `[SetUp]` from `NewContextAsync(token)`.
+- Identity lives in the context (`ExtraHTTPHeaders` at creation), or in a storage state shared with the UI suite for a cookie-auth app (`APIRequestNewContextOptions.StorageStatePath`); a token is never threaded through each call.
+- The status is read as `(HttpStatusCode)response.Status`; DTOs go out through `DataObject` (`context.PostAsync(url, new() { DataObject = dto })`), never hand-built JSON.
+- A suite already on RestSharp stays on `qa/dotnet/skills/api-test-author/writer`; one client stack per suite.
 
 ## Review
 
-Step 4 of `qa-api-dotnet` reviews a suite this skill wrote with **`qa/dotnet/skills/api-test-author/review`'s
-cross-stack rows plus these rows** — its RestSharp-specific rows do not apply to an `IAPIRequestContext` client.
-Same table format and severities.
-
-| Check | Bad sign | Severity |
-|---|---|---|
-| One lifecycle | `Playwright.CreateAsync()` in a fixture, a `[SetUp]` or a `[OneTimeSetUp]`; a base class not derived from `PlaywrightTest` | blocker |
-| Requests go through a client | `context.GetAsync(...)` / `Playwright.APIRequest` in a test body | major |
-| Identity lives in the context | A token argument threaded through every client call | major |
-| Contexts are disposed | A context created outside `NewContextAsync`, or a base with no disposing `[TearDown]` | major |
-| Exact status, body in the message | `response.Ok`, `Expect(response).ToBeOKAsync()`, `FailOnStatusCode = true` | major |
-| Cleanup in `[TearDown]` only | `try`/`finally` (or any `catch`) in a test; a delete whose status is not asserted | major |
-| Parallelism is `ParallelScope.Self` | `ParallelScope.All`/`Children` on a fixture whose clients are instance fields | blocker |
-| Names and comments | Not `Should_X_When_Y`; an inline comment in a test or client body | minor |
+Step 4 of `qa-api-dotnet` reviews a suite this skill wrote with `qa/dotnet/skills/api-test-author/review`, which checks against the rule files above; the RestSharp-specific conventions of the `writer` sibling do not apply to an `IAPIRequestContext` client.
 
 ## Generation steps
 
@@ -230,7 +191,6 @@ Same table format and severities.
 - `qa-dotnet:api-models` / `qa-dotnet:api-client-writer` — DTOs / the client layer this skill consumes.
 - `qa-dotnet:ui-tests-playwright` — the UI suite this skill shares the Playwright dependency with.
 - `qa-dotnet:network-mocking` — browser traffic mocking, not API testing.
-- `qa-dotnet:api-tests-review` — review; its cross-stack checklist applies verbatim, and this skill's § Review
-  replaces its RestSharp rows (`qa-api-dotnet` Step 4 loads both).
+- `qa-dotnet:api-tests-review` — review against the rule files `automation.md` and `api.md`.
 - `qa-dotnet:test-login-tokens` — the tokens `NewContextAsync(token)` injects.
 - `qa-dotnet:test-reports` — Allure NUnit wiring shared with the UI suite.

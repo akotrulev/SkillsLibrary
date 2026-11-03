@@ -45,6 +45,7 @@ A, B, C, G, I, K, L, M, N (minus the tagged rows above) are **universal** — ev
 1. **[`engineering-practices/standards-audit-engine`](../../../../engineering-practices/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 steps, the hostile self-review. **Read it first.**
 2. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 14 lettered sections (A–N) and every check. **Read end-to-end** before Step 2.
 3. `engineering-practices/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Step 3.
+4. The qa-dotnet rule files the reviewers check against: the project's `.claude/rules/qa-dotnet/`, or `qa/dotnet/skills/rules/` when `/qa-dotnet:rules` has not installed them. Where the project's edited copy and the checklist disagree, the project's copy wins; report the disagreement.
 
 Load the **owning skill** (named per section in the checklist) whenever a check is ambiguous, tool-keyed, or you are about to write its fix direction. When checklist and skill disagree, **the skill wins** — and report the disagreement.
 

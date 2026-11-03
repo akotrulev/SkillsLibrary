@@ -186,24 +186,7 @@ The iOS 27 SDK makes the UIScene lifecycle mandatory; an app that builds against
 
 ## Rules
 
-- Extend UIKit in UIKit; **never propose or start a rewrite** — [`migration`](../migration/SKILL.md) does that, on request.
-- Initializer injection into controllers; weak delegates; cancelled `Task`s; no blocking the main thread.
-- Diffable data sources with stable ids; compositional layout for new collections.
-- Auto Layout with safe-area and keyboard guides; Dynamic Type via `UIFontMetrics`; ≥ 44 pt targets.
-- `UIHostingConfiguration` for SwiftUI cells; a hosting controller added as a proper child.
-- `makeUIView` once, `updateUIView` idempotent, delegates in the `Coordinator`, cleanup in `dismantleUIView`.
-- One owner of navigation per stack; `accessibilityIdentifier` on every interactive view and container.
-- A scene delegate owns the window on the iOS 27 SDK.
-
-## What NOT to do
-
-- No "this should be SwiftUI" finding; no storyboard-removal or Objective-C-bridging side quests.
-- No `UIScreen.main.bounds`, no `frame` math for adaptive layout, no `UIWebView`.
-- No `DispatchQueue.main.asyncAfter` to fix layout timing; no `layoutIfNeeded()` sprinkled to hide an ordering bug.
-- No second navigation stack inside a pushed hosting controller.
-- No SwiftUI state mutated from `updateUIView`; no `UIViewRepresentable` for something `TextField`, `Map` or `PhotosPicker` does.
-- No `@Observable` introduced into a Combine / KVO codebase as a drive-by.
-- No retain cycle through a stored closure, delegate or `Timer`.
+The standards this skill's output must meet are the mobile-ios rule files, not a list here: `uikit.md`. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

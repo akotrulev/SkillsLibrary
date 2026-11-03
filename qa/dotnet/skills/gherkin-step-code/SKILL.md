@@ -146,19 +146,9 @@ public void WhenISignInWith(string email, string password) =>
 6. Ensure the Cleanup is implemented as the `[AfterScenario]` hook (scaffold layer), not as steps.
 7. `dotnet build`, then run the features: every step bound (no undefined/ambiguous), the smoke scenario green.
 
-## Anti-patterns to flag
+## Rules
 
-- One mega step-definition file instead of per-domain classes.
-- Duplicate step methods for steps the catalog already unified — parameterize and reuse.
-- `IPage.Locator(...)`, CSS, or waits inside step definitions — promote to a page object.
-- `new LoginPage(page)` or static state inside a step — inject `ScenarioState`.
-- `ScenarioContext["x"]` string-bag for typed state — use DI.
-- Assertions inside page-object actions, or `When`/`Given` doing assertions (a "page loaded" `Expect` in a `Given` included).
-- `Thread.Sleep` / `WaitForTimeoutAsync` / `.Result` / `.Wait()`; `NetworkIdle`, `Force = true` or `WaitForNavigationAsync` in a page object a step calls.
-- An `OR` in a `Then` (`Regex("Saved|Success")`, `Is.AnyOf(...)`) — one expected outcome per step.
-- `try`/`catch` in a step or a hook.
-- Regex step expressions where a Cucumber Expression reads cleaner.
-- Implementing Cleanup as Gherkin/steps instead of an `[AfterScenario]` hook.
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `bdd.md`, `automation.md`, and `web-ui.md` or `mobile-ui.md` for the page objects the steps call. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Handoffs
 

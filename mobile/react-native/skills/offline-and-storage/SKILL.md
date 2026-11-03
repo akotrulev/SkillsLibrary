@@ -174,27 +174,7 @@ Record the chosen policy per entity in the feature's doc. A `409` keeps the user
 
 ## Rules
 
-- Secrets only in `expo-secure-store`; refresh token persisted, access token in memory.
-- MMKV 4 through `createMMKV()`; `remove()`; development build; one module-level instance per concern.
-- Relational or large data in SQLite, async API, parameterised, versioned migrations.
-- WatermelonDB is stale: never scaffolded; flagged where found.
-- The Query persister is opt-in per query, version-busted, and cleared at sign-out.
-- Offline writes carry idempotency keys, replay in order per entity and surface their state.
-- Every entity has a recorded conflict policy; default is a version check.
-- Writes can fail (disk full, quota): they throw a typed error at one boundary; the degradation is `error-handling`'s.
-- No storage call on a UI-critical path that blocks a frame; nothing sensitive in backups unless the platform class is reviewed ([`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)).
-
-## What NOT to do
-
-- No token, password or PII in AsyncStorage, MMKV, Zustand `persist`, SQLite plaintext or a file.
-- No `new MMKV()` on a v4 project; no `.delete()`; no MMKV in Expo Go.
-- No encryption key in source, `app.json` or `EXPO_PUBLIC_*`.
-- No `expo-sqlite` synchronous API in app code; no string-concatenated SQL; no edited shipped migration.
-- No persisting the whole Query cache by default; no persisted query with a secret.
-- No hand-rolled offline queue beside TanStack's persisted mutations without a recorded reason.
-- No new project on WatermelonDB.
-- No "last write wins" chosen by omission; no unbounded cache growth (set `maxAge`, size caps, an eviction rule).
-- No data left behind after sign-out.
+The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `react-native-data.md` and `react-native.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

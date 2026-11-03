@@ -205,19 +205,9 @@ For Appium, `ScenarioState` holds an `AppiumDriver` (sync API) built in `[Before
 driver factory and quit in `[AfterScenario]`; page objects extend the existing base page. Appium failure
 evidence follows `qa/dotnet/skills/evidence-capture`'s Appium reference.
 
-## Anti-patterns to flag
+## Rules
 
-- Browser/driver lifecycle in step-definition constructors instead of hooks.
-- Static mutable state for the page/driver — use the scoped `ScenarioState` via DI.
-- Missing `[AfterScenario]` teardown — leaks browsers/drivers; a teardown that keeps **no trace, screenshot or
-  video** on a failed scenario.
-- A hardcoded browser or `Headless = true` in the hook, or a context with no `BaseURL` — read the runsettings and
-  `BASE_URL`.
-- `Version=` on a `PackageReference` under CPM, or a floating / pre-1.63 Playwright pin.
-- A `catch` in a hook to "save the video anyway".
-- Re-declaring page objects in the BDD project instead of `ProjectReference`-ing the existing UI project.
-- Manual registration of `[Binding]` classes in the DI method — Reqnroll auto-registers them.
-- Using the `ScenarioContext` string-bag for state that should be typed DI.
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `bdd.md`, `automation.md` and `suite-config.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Handoffs
 

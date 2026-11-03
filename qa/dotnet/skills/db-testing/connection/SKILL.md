@@ -228,30 +228,13 @@ Redis: `FLUSHDB` is fine in test mode; never in shared environments.
 
 ## Rules
 
-- Single `DbConnectionFactory` per fixture; no `new NpgsqlConnection(...)` in tests.
-- Seeders write; probes read; SUT does the business action. Each class has one job.
-- Probes are read-only and explicitly project columns (no `SELECT *`).
-- Every parameter is bound — no string concatenation into SQL.
-- `Task.Delay` is forbidden as an assertion wait — use the polling helper with a predicate.
-- `[OneTimeSetUp]` migrates schema + initializes Respawn; `[TearDown]` resets data.
-- `[Parallelizable(ParallelScope.None)]` on integration fixtures unless the suite is verified for per-fixture isolation.
-- DI-friendly factories, seeders, probes — constructor injection only; never service-locator (`ServiceProvider.GetRequiredService` inside a test).
-- Records for probe row types (`public sealed record RefundRow(...)`).
-- Async all the way — `OpenAsync`, `QueryAsync`, `ExecuteAsync`; never `.Result` / `.Wait()` / `.GetAwaiter().GetResult()`.
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `db-verification.md` and `automation.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-## What NOT to do
+## Conventions
 
-- No `Task.Delay(5000)` as the assertion wait — poll a probe with a predicate.
-- No `SELECT * FROM orders WHERE id = '…'` with the value inlined — bind a parameter, project the columns you need.
-- No raw `INSERT` SQL duplicated across tests — go through a seeder backed by `qa/dotnet/skills/test-data-builder`.
-- No `_connection` stored as a long-lived field across tests — open per call (Npgsql pooling handles reuse).
-- No `Database.EnsureCreated()` for schema setup — use real migrations so production drift is caught.
-- No mutating production-style data without `tenant=test` / `customer=test-XXX` namespacing.
-- No reading `ConnectionString` from a global `Configuration.Get<string>(...)` lookup inside a test — go through the factory.
-- No probe method that returns the entire entity for a small assertion — return just the projected row record.
-- No `RAW("…")` EF queries when Dapper is already in scope — pick one library per concern.
-- No connection-string logging — sanitize structured logs.
-- No catching `DbException` in tests to assert failure modes — failures should surface as exceptions and fail the test; if you must, assert on the exception's code, not the message text.
+- `[OneTimeSetUp]` migrates the schema and initializes Respawn; rows are reset between tests.
+- Integration fixtures are `[Parallelizable(ParallelScope.None)]` until the suite is verified for per-fixture isolation.
+- Factories, seeders and probes are constructor-injected, never resolved from a `ServiceProvider` inside a test; probe rows are `sealed record`s; raw `INSERT`s go through a seeder backed by `qa/dotnet/skills/test-data-builder`.
 
 ## Generation steps
 

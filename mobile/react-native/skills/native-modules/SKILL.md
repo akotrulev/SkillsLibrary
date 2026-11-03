@@ -126,25 +126,7 @@ A file with `'use dom'` at the top renders **web** React inside a WebView on nat
 
 ## Rules
 
-- Climb the ladder one rung at a time; justify each step down in the PR.
-- Every native change is a config plugin or a local module; never a hand edit to generated `ios/` / `android/` in a CNG project.
-- A community module passes the maintenance check and `expo-doctor`.
-- A plugin is idempotent, tested as a pure function, and its generated output is read once.
-- Module surfaces are narrow, typed, async; Swift and Kotlin follow the two `basics`.
-- Native changes ship by build, never OTA; a module that can fail to load degrades.
-- JS-callable arguments are validated natively; no secret logged natively.
-
-## What NOT to do
-
-- No `ios/` or `android/` edit in a project whose native folders are generated.
-- No native module for what an Expo SDK module or plain JS already does.
-- No unmaintained or New-Architecture-incompatible library; no library without a config plugin and no plan.
-- No synchronous native call that waits on I/O; no work on the main thread.
-- No `AndroidManifest` / `Info.plist` change that skips the permission and compliance rules.
-- No TurboModule in an Expo-managed app where an Expo module fits.
-- No DOM component as a list row or the main navigation chrome.
-- No Swift or Kotlin written without loading the matching `basics`.
-- No `withDangerousMod` where a typed mod exists.
+The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `expo-config.md` and `react-native.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

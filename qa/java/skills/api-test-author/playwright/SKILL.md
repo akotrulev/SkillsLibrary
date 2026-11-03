@@ -206,42 +206,16 @@ Create/update flows keep the RestAssured sibling's cleanup discipline: track cre
 
 ## Rules
 
-### Class structure & naming
+The standards this skill's output must meet are the qa-java rule files, not a list here: `qa-java.md` (core) and `qa-java-api.md`. Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-- Same as the RestAssured sibling: one class per operation (`{Operation}{Resource}Test`), package follows
-  folder, `Should_X_When_Y` method names, TC-ID in `@Test(description = "TC-…")`.
-- Every class extends `BaseApiTest`; clients are built in `@BeforeClass` from `newContext(token)` with tokens
-  from `AuthHelper`. Never create a `Playwright` or a context inside a test method.
-- Identities are contexts: one client field per identity (`userClient`, `adminClient`, `anonymousClient`) —
-  never a token argument on a call, never a shared mutable client rebuilt mid-test.
+## Conventions
 
-### Test rules
-
-- Assert the **exact** status code, always, before reading the body — `assertThat(response.status()).as(response.text()).isEqualTo(404)`,
-  never `response.ok()` or `PlaywrightAssertions.assertThat(response).isOK()` (both pass on any 2xx). Never rely
-  on Playwright throwing for you: the context keeps `failOnStatusCode` at its default `false`.
-- Happy path uses the **typed** overload; negative scenarios use the **raw** `APIResponse` overload. Never
-  re-assert the status after a typed call.
-- Status codes are plain `int`s (`200`, `404`); multi-field checks compare the record DTO with AssertJ.
-- On 1.63 an `APIRequestContext` has no cookie methods: seed cookies with `setStorageStatePath` on
-  `APIRequest.NewContextOptions`, or use `page.request()`, which shares the browser context's cookies
-  (`browserContext.addCookies`). From 1.64: `addCookies` / `cookies` / `clearCookies` on the request context.
-- Request bodies with 4+ fields come from builders (`qa/java/skills/test-data-builder`); JSON bodies are passed
-  as DTOs via `RequestOptions.create().setData(dto)` inside the client — never hand-built JSON strings in tests.
-- Tests are independent: per-test data, `@AfterMethod(alwaysRun = true)` cleanup, no `dependsOnMethods`.
-- Rows that differ only in data → `@DataProvider` (`qa/java/skills/data-driven-testing`).
-
-### What NOT to do
-
-- No `ctx.get(...)` / `playwright.request()` calls in tests — every request goes through a `{Resource}Client`.
-- No RestAssured *and* Playwright HTTP in one suite — one client stack; if RestAssured is already established,
-  stay on the generator sibling.
-- No token threading per call — identity lives in the context (`setExtraHTTPHeaders` at creation), or in a
-  `storageState` file shared with the UI suite for cookie-auth apps (`APIRequest.NewContextOptions.setStorageStatePath`).
-- No leaked resources — every context disposed, `playwright.close()` in `@AfterClass(alwaysRun = true)`.
-- No `response.ok()` or `assertThat(response).isOK()` as the status assertion; no `Thread.sleep`.
-- No `ObjectMapper` in test code — deserialization lives in the client's typed overloads and error helper.
-- No hardcoded base URLs, credentials, or tokens — `ConfigurationLoader` + `AuthHelper`.
+- Same layout as the RestAssured sibling: one class per operation (`{Operation}{Resource}Test`), package follows folder, TC-ID in `@Test(description = "TC-…")`. If RestAssured is already established in the suite, stay on that sibling.
+- Every class extends `BaseApiTest`; clients are built in `@BeforeClass` from `newContext(token)` with tokens from `AuthHelper`. Never create a `Playwright` or a context inside a test method; `playwright.close()` runs in `@AfterClass(alwaysRun = true)` and every context is disposed.
+- Identities are contexts: one client field per identity (`userClient`, `adminClient`, `anonymousClient`), the identity set with `setExtraHTTPHeaders` at creation. Never a token argument on a call, never a client rebuilt mid-test. Cookie-auth apps share the UI suite's `storageState` file through `APIRequest.NewContextOptions.setStorageStatePath`.
+- The context keeps `failOnStatusCode` at its default `false`, so the test asserts the status itself: `assertThat(response.status()).as(response.text()).isEqualTo(404)`.
+- On 1.63 an `APIRequestContext` has no cookie methods: seed cookies with `setStorageStatePath`, or use `page.request()`, which shares the browser context's cookies (`browserContext.addCookies`). From 1.64: `addCookies` / `cookies` / `clearCookies` on the request context.
+- JSON bodies are DTOs passed with `RequestOptions.create().setData(dto)` inside the client; deserialization lives in the client's typed overloads and error helper.
 
 ## Generation steps
 

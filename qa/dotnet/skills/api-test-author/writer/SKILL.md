@@ -40,82 +40,29 @@ These sections live in `references/details.md` — **read it when the task touch
 
 ## Rules
 
-### Class structure (new fixtures only)
-- File: `ApiTests/Tests/{Resource}Tests.cs`
-- Class name: `{Resource}Tests` — PascalCase resource noun + `Tests` suffix (e.g. `UserTests`, `PostTests`)
-- Always inherit from `BaseApiTest`
-- Namespace: `ApiTests.Tests`
-- Decorate the class with `[TestFixture]`
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `automation.md` and `api.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-### Test method rules
-- Naming: `[Action]_[Condition]_[ExpectedOutcome]` — e.g. `GetUser_ById_ReturnsOk`, `DeleteUser_WhenNotAuthenticated_ReturnsUnauthorized`
-- Every test must have `[Test]` (or `[TestCase]`) + `[AllureFeature]` + `[AllureStory]` + `[AllureSeverity]`
-- Instantiate the client **inside** each test method. Exception: `[SetUp]` may create test data (see the Templates section in `references/details.md`)
-- Follow Arrange / Act / Assert structure within the method body
-- **No `var`** — always use explicit types for local variables when the type is known (e.g. `RestResponse response`, `WatchlistGroupDto group`, `List<UserDto> users`)
-- **Meaningful client variable names** — name the client variable after its concrete type in camelCase, not a generic `client` (e.g. `watchlistClient`, `authLoginClient`). For unauthenticated calls in negative tests, construct the client inline without storing in a variable.
+## Conventions
 
-### Auth token convention
-`BaseApiTest` exposes a single `AuthToken` property for authenticated calls. Pass it into every client constructor.
+### Fixture shape (new fixtures only)
+- File `ApiTests/Tests/{Resource}Tests.cs`; class `{Resource}Tests : BaseApiTest`, namespace `ApiTests.Tests`, `[TestFixture]` on the class.
+- The client is created inside each test from the single `AuthToken` that `BaseApiTest` exposes; an unauthenticated client gets `string.Empty` and is constructed inline. `[SetUp]` may create test data (templates in `references/details.md`).
+- Names follow the rule file (`Should_X_When_Y`); a suite already on `[Action]_[Condition]_[ExpectedOutcome]` keeps its shape. Each endpoint's anonymous test is `Should_ReturnUnauthorized_When_NotAuthenticated` (or the suite's equivalent) and uses the 401 template.
 
-For unauthenticated negative tests, pass `string.Empty` to the client constructor.
+### Assertion templates
+- **Happy path (200):** the typed overload; assert every request field on the response, every server-generated field (`Status`, `CreatedOn`, `UpdatedOn`, …), then `GetById` for the persistence round-trip. A one-field check is only for a trivial read.
+- **400 / 404 / 422:** the raw overload, `AttachBody(response)`, then status → `Deserialize<ProblemDetailsDto>(response)` → tracking fields (`TraceId`, `RequestId`, `Instance`) → `Type`, `Title`, `Status` → the `Errors` dictionary (400) or `ErrorCode` and extension fields (404/422). `TryProblem` is the lenient helper for a documented defect whose body may not parse (a 500).
+- `Deserialize<T>(response)` on `BaseApiTest` is the one place that catches `JsonException`: it rethrows with the property path, the target type and the raw body, so a parse failure reads as contract drift.
 
-### Unauthorized access coverage
-- Every endpoint must have a corresponding test that calls it **without an auth token** and asserts `HttpStatusCode.Unauthorized`
-- Pass `string.Empty` as the `AuthToken` argument to create an unauthenticated client
-- Naming convention: `{Action}_WhenNotAuthenticated_ReturnsUnauthorized` — e.g. `GetUser_WhenNotAuthenticated_ReturnsUnauthorized`
-- Use the 401 template from `references/details.md` for these tests
-
-### Assertions
-- Use **NUnit assertions only** — `Assert.That` and `Assert.Multiple`. Never FluentAssertions.
-- **One expected condition per assertion — never an `OR`.** `Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK))`, never `Is.EqualTo(HttpStatusCode.OK).Or.EqualTo(HttpStatusCode.NoContent)`; `Is.EqualTo(HttpStatusCode.BadRequest)`, never `.Or.EqualTo(HttpStatusCode.Conflict)`. The rule covers every assertion, not just status: field values, collection counts, error codes, and elapsed-time budgets are asserted against the single value the test expects. No `Is.AnyOf(...)`, no `Or`/`||` inside a constraint, no `Assert.That(x == a || x == b)`. If two outcomes are both possible, the scenario is under-specified — split it into one test per expected outcome, parameterize it via `[TestCase]`, or establish which value is correct. The only exception is an explicit instruction to accept more than one value; when that happens, state the instruction in a comment on the assertion.
-- **Positive tests use typed client overloads.** When the client has a `({args}, HttpStatusCode expected)` overload, call that overload — it asserts the status code internally and returns the deserialized DTO directly. Do not assert `response.StatusCode` in the test, and do not call `Deserialize` in the test body for positive scenarios.
-- **Apply the rich happy-path template by default for 200 responses.** Assert every request field on the response, every server-generated field (Status, CreatedOn, UpdatedOn, FailureCount, etc.), then `GetById` and assert the persistence round-trip. The minimal "just check one field" pattern is acceptable only for trivial reads where there is nothing else to verify.
-- **For 4xx errors (400 / 404 / 422), apply the strict ProblemDetails template.** Use the raw `RestResponse` overload, call `AttachBody(response)` first, then assert: status code → deserialize → tracking fields (`TraceId`, `RequestId`, `Instance`) → standard fields (`Type`, `Title`, `Status`) → `Errors` dict (400) or `ErrorCode` + extension fields (404/422). Never settle for a single status-code assertion on a 4xx that has a body.
-- **For 401 unauthorized**, a single status-code assertion is sufficient — auth middleware does not emit a `ProblemDetails` body.
-- Wrap two or more related assertions in `Assert.Multiple(() => { ... })` so all failures are reported at once.
-- Use `Deserialize<ProblemDetailsDto>(response)` (from `BaseApiTest`) for the strict template — `TryProblem` is a lenient helper used only when the body might not be parseable (e.g. tolerating a documented backend defect that returns 500).
-- Always call `AttachBody(response)` before assertions on error tests so the actual body lands in the Allure report when assertions fail.
-
-### Errors & failure messages
-- **Never swallow an error, and never write a `try`/`catch` in a test.** A `[Test]` body contains no catch blocks at all — not around the act, not around the assert, not for cleanup. An unexpected exception must reach NUnit untouched. An **expected** exception is asserted, not caught: `Assert.ThrowsAsync<T>(...)` is an assertion, not error handling.
-- **`[TearDown]` gets no `try`/`catch` either.** If the cleanup delete throws, NUnit reports a teardown error and you go fix the leak — that is the system working. A swallowed cleanup failure means the suite quietly leaks data until the environment rots.
-- **`try`/`catch` belongs in one place only: a helper that performs I/O**, where converting a specific failure into a useful message *is* the helper's contract (`Deserialize<T>`, a polling probe). It catches one named exception type, never `Exception` blanket, and rethrows or reports — it never returns a silent default.
-- **Every failure message names the subject and carries the evidence.** `Assert.That(dto.Status, Is.EqualTo("Active"), $"Account {dto.Id} status after activation")` — a bare failure printing `Expected: "Active" But was: "Pending"` with no id sends the reader hunting through logs for which record it was.
-- **A deserialization failure explains itself — inside the helper, not the test.** Always `AttachBody(response)` **before** deserializing, so the payload is in the Allure report when the parse throws. `Deserialize<T>(response)` on `BaseApiTest` is the one place that catches `JsonException`: it rethrows with the **property path** the exception carries, the target type, and the raw body — so the report reads "`GET /orders` → `$.total` expected Int32, got string" instead of a bare "The JSON value could not be converted". A parse failure is a **failed** test with a contract-drift message, never a skip and never an inconclusive.
-
-### Test data setup & cleanup
-- **Trading accounts:** Never create new accounts in tests. Fetch an existing Trading account from the logged-in user: `new AccountClient(AuthToken).GetAll(HttpStatusCode.OK).First(a => a.AccountType == "Trading")`. No `[TearDown]` needed for fetched accounts.
-- `[SetUp]` (or `[OneTimeSetUp]`) may create test data via API calls and store results in instance fields (e.g. `private {Resource}Dto testResource`).
-- If `[SetUp]` creates data, always add a `[TearDown]` that deletes it — plainly, with no `try`/`catch`. A cleanup that throws is a real problem and NUnit reports it as one.
-- **Cleanup of resources created inside the test body is registered, not inlined.** The test does not wrap itself in `try/finally`. Record the id as it is created (`_createdIds.Add(dto.Id)` on the fixture) and let `[TearDown]` delete the tracked ids. The test body stays linear — arrange, act, assert — with no control-flow scaffolding around it, and cleanup happens whether the test passed, failed, or threw.
-- Do NOT wrap the test body in try/finally as a substitute for proper `[SetUp]`/`[TearDown]` when a precondition is shared by only some tests — set the precondition up inline as a normal first step in those tests; reserve try/finally for actual cleanup of resources the test method itself created.
-- Client instances in `[SetUp]`/`[TearDown]` are disposable (create inline, don't store).
-- **Payment methods follow the tokenize → create two-step flow.** Call `PaymentMethodClient.Tokenize(accountId, PaysafeTestCards.Build(PaysafeTestCard.VisaUs1, currency), HttpStatusCode.OK)` to get a `TokenizedMethodDto`, then pass its `Token` and `Last4` into `MethodInDto` together with `Type = "Card"`, `ExpiryMonth`/`ExpiryYear` (from `PaysafeTestCards.DefaultExpiryMonth/Year`), and the currency. Never hardcode card numbers — always use the `PaysafeTestCards` enum + `Build` helper in `ApiTests/TestData/PaysafeTestCards.cs`. Clean up with `methodClient.Delete(account.Id, method.Id)` wrapped in try/catch. Use `[OneTimeSetUp]` when the method is read-only across tests; `[SetUp]` when tests mutate or delete it.
+### Test data setup and cleanup
+- `[SetUp]` / `[OneTimeSetUp]` may create data into instance fields; a `[TearDown]` deletes it. Ids created in a test body go into `_createdIds` on the fixture and `[TearDown]` deletes them.
+- A precondition only some tests need is set up inline as their first step, not in `[SetUp]`. Client instances in `[SetUp]` / `[TearDown]` are created inline, not stored.
+- **Trading accounts** are fetched, never created: `new AccountClient(AuthToken).GetAll(HttpStatusCode.OK).First(a => a.AccountType == "Trading")`; no `[TearDown]` for them.
+- **Payment methods** follow tokenize → create: `PaymentMethodClient.Tokenize(accountId, PaysafeTestCards.Build(PaysafeTestCard.VisaUs1, currency), HttpStatusCode.OK)` returns a `TokenizedMethodDto`; pass its `Token` and `Last4` into `MethodInDto` with `Type = "Card"`, `ExpiryMonth` / `ExpiryYear` (`PaysafeTestCards.DefaultExpiryMonth/Year`) and the currency. Never hardcode a card number; use the `PaysafeTestCards` enum in `ApiTests/TestData/PaysafeTestCards.cs`. Delete with `methodClient.Delete(account.Id, method.Id)` in `[TearDown]`; `[OneTimeSetUp]` when the method is read-only across tests, `[SetUp]` when tests mutate or delete it.
 
 ### Deserialization
-- For positive tests, deserialization is handled inside the client's typed overload — do not repeat it in the test
-- For negative tests or structural tests that need raw response access, use the inherited `Deserialize<T>(response)` helper from `BaseApiTest` — never call `JsonSerializer.Deserialize` directly in test code
-- If the response is a plain array, deserialize as `Deserialize<List<T>>(response)`
-- If the API returns a wrapper envelope (e.g. `{ "data": [...] }`), create a wrapper DTO (e.g. `{Resource}ListDto`) with a `Data` property — use the `qa/dotnet/skills/api-models` skill to generate it
-
-### What NOT to do
-- No `var` — use explicit types for all local variables
-- No generic `client` variable name — use the concrete type name in camelCase (e.g. `watchlistClient`, not `client`)
-- No `Thread.Sleep()` or manual delays
-- No `OR` in any assertion — no `.Or.`, no `Is.AnyOf(...)`, no `||` inside an `Assert.That` condition. One expected value per assertion (see Assertions)
-- No `try`/`catch` in a test method or in `[TearDown]` — none, for any reason including cleanup. Expected exceptions use `Assert.ThrowsAsync<T>`; catches live only in I/O helpers (see Errors & failure messages)
-- No `try`/`finally` wrapping a test body for cleanup — track created ids and delete them in `[TearDown]`
-- No bare deserialization failures — attach the body first and fail with the property path and payload, not a raw `JsonException` trace
-- No inter-test dependencies — tests must not rely on state created, modified, or deleted by another test; each test is self-contained
-- No `[SetUp]` for preconditions shared by only some tests — if not all tests in the fixture need it, set it up inline as a normal first step in those tests. (Per-test cleanup of resources the test method itself created IS allowed — and expected — to use try/finally; see Test data setup & cleanup.)
-- No "minimal" 4xx tests that only assert `response.StatusCode` when the response carries a `ProblemDetails` body — apply the strict template instead so failures pinpoint the missing field. The single-status-code shortcut applies only to 401 unauthorized.
-- No shared mutable client instances between tests
-- No hardcoded base URLs or credentials — always use `ConfigurationLoader`
-- No FluentAssertions (`.Should()`, `AssertionScope`) — use `Assert.That` and `Assert.Multiple` only
-- No `Newtonsoft.Json` — use `System.Text.Json` only
-- No direct `JsonSerializer.Deserialize` in test code — use the typed client overload for positive tests, or `Deserialize<T>(response)` from `BaseApiTest` when raw access is needed
-- No deserialization in raw `RestResponse` client methods — only typed overloads (those accepting `HttpStatusCode expected`) may deserialize and return the DTO
+- Positive tests get the DTO from the typed overload; negative or structural tests use `Deserialize<T>(response)`.
+- A plain array is `Deserialize<List<T>>(response)`; an envelope (`{ "data": [...] }`) gets a `{Resource}ListDto` with a `Data` property, generated with `qa/dotnet/skills/api-models`.
 
 ## Generation steps
 

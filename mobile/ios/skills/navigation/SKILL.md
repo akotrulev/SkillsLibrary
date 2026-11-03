@@ -167,23 +167,7 @@ Paths of `Codable` routes survive relaunch via `@SceneStorage` (store the encode
 
 ## Rules
 
-- `NavigationStack(path:)` with typed `Hashable` routes carrying ids; `navigationDestination(for:)` at the stack root.
-- In-app navigation is `NavigationLink(value:)`; code-driven navigation appends to the path.
-- Each tab owns its stack; selection is an enum.
-- `NavigationSplitView` for sidebar layouts; no idiom branching.
-- `.sheet(item:)`, a close affordance, its own stack when it navigates.
-- One pure, validated URL → route function; untrusted input ignored safely.
-- Guards are client UX; the server authorises.
-- No `NavigationView`, no `NavigationLink(destination:)`, no `presentationMode`.
-
-## What NOT to do
-
-- Pass a model object through a route, or rely on the previous screen's loaded data.
-- Wrap a `TabView` in one `NavigationStack`, or share a path across tabs.
-- Build a custom tab bar, navigation bar or back button.
-- Register `navigationDestination` inside a `List` row or a lazily-created view.
-- Add a router / coordinator class for one stack.
-- Trust a URL's components or open a sheet for an unvalidated id.
+The standards this skill's output must meet are the mobile-ios rule files, not a list here: `swiftui.md` and `swift.md`. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation (exit gate)
 

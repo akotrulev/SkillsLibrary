@@ -305,30 +305,7 @@ The first contract task writes the config and the script; a later task that need
 
 ## Rules
 
-- TypeScript **strict** mode (`tsconfig`: `strict: true`, `noUncheckedIndexedAccess: true`, `exactOptionalPropertyTypes: true`)
-- No `any`, no `as unknown as X`; use unknown + narrowing
-- Discriminated unions for sums; exhaustive `switch` with `never` check
-- `Result<T, E>` for domain failures; throw for bugs / true exceptions
-- Branded types for ids that cross boundaries
-- Zod (or equivalent) for runtime validation at every external boundary
-- ESM modules; no CommonJS in new code (`"type": "module"` in package.json)
-- Constructor injection for classes; closures for functional modules
-- No mutable module-level state (configuration constants are fine after `loadConfig`)
-- Async errors via `Result` or thrown — never both within a single function
-
-## What NOT to do
-
-- No `any` / `@ts-ignore` to silence
-- No `Optional`-ish wrappers around values — `T | null` (or `Result`) plus `noUncheckedIndexedAccess` is the TS way
-- No class for what a function does (no `new StringUtils().capitalize(...)`)
-- No `new Promise((res, rej) => ...)` to wrap an already-promise-returning API
-- No `.then()` chains for new code; `async/await`
-- No `throw` in domain code when a `Result` would let the caller handle the case
-- No reading `process.env` outside `loadConfig`
-- No global singletons mutated at runtime
-- No nullable booleans (`isActive: boolean | undefined`) — pick a default
-- No `enum` (use string union types or `as const` objects)
-- No `namespace` keyword in modules — use modules
+The standards this skill's output must meet are the be-node rule files, not a list here: `node.md`, plus `node-config.md` for `tsconfig.json` and `package.json`. Read the project's copy in `.claude/rules/be-node/`, or the plugin's in `backend/node/skills/rules/` when the project has not installed them (`/be-node:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation outputs
 

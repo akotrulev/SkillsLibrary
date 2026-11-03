@@ -272,23 +272,7 @@ Retry belongs only around I/O that can transiently fail; there is none inside a 
 
 ## Rules
 
-- `mypy --strict` clean; no `Any` escaping a boundary, no `# type: ignore` without an error code and a reason
-- Frozen `dataclass(slots=True)` for internal values; pydantic only at the boundary
-- `pathlib.Path` everywhere; never string concatenation for paths
-- `match` with no wildcard on every tagged union
-- Constructor injection via dataclass fields or keyword arguments; no module-level mutable state; no `global`
-- `with` for every file, image, and session handle Pillow or the OS hands you
-- Synchronous code for CPU-bound work; `asyncio` only in an I/O adapter, bridging with `asyncio.to_thread`
-- Logging via `logging` + JSON formatter; message templates; no `print` in library code
-
-## What NOT to do
-
-- No `from x import *`, no circular imports papered over with function-level imports
-- No `except Exception: pass`; no bare `except:`; catch the exception you can act on and re-raise or return `Rejected`
-- No mutable default arguments; no `Optional[X]` where a default exists
-- No `subprocess` with `shell=True`; no `os.system`; no `eval`/`exec`/`pickle.loads` on anything from a job
-- No `Singleton`, `Manager`, `Utils` classes; no `ABC` with one subclass
-- No `time.sleep` for synchronisation; no `signal.alarm` as a timeout for C-extension work (see `pattern-guide`)
+The standards this skill's output must meet are the be-python rule files, not a list here: `python.md`, and `python-project.md` for `pyproject.toml`. Read the project's copies in `.claude/rules/be-python/`, or the plugin's in `backend/python/skills/rules/` when the project has not installed them (`/be-python:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation outputs
 

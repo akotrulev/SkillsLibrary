@@ -288,17 +288,9 @@ Feature: BDD rig smoke
     Then the login screen is shown
 ```
 
-## Anti-patterns to flag
+## Rules
 
-- **Web:** pointing Playwright `testDir` at `features/` instead of the **generated** dir from `defineBddConfig` — bddgen output is what runs.
-- **Web:** introducing a World or a DI container — playwright-bdd uses fixtures; reaching for `setWorldConstructor` here is wrong.
-- **Mobile:** sharing state via module-level mutable variables instead of the World — violates "no static mutable state."
-- **Mobile:** launching/quitting the Appium server by hand instead of `@wdio/appium-service`.
-- **Mobile:** an `@cucumber/cucumber` version outside the range `@wdio/cucumber-framework` takes as a peer — broken peer deps.
-- Putting browser/driver lifecycle in a step body instead of a fixture (web) / `Before` hook (mobile).
-- Missing teardown — leaked browser contexts (web) or app sessions (mobile).
-- Re-declaring page objects in the BDD project instead of importing the existing UI project.
-- Implementing the Cleanup as Gherkin steps instead of fixture teardown (web) / `After` hook (mobile).
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `bdd.md` and `qa-typescript.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Handoffs
 

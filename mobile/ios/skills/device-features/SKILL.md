@@ -164,24 +164,7 @@ enum BiometricError: Error { case unavailable }
 
 ## Rules
 
-- A permission-free system picker before a permission; one specific, localized purpose string per resource.
-- Ask only from `notDetermined`, after an in-context pre-prompt, never at launch.
-- The denied and restricted states are working screens with an alternative and a Settings route, rechecked on foreground.
-- Sessions, location updates and contexts end with the screen; nothing runs while backgrounded unless declared.
-- Heavy work (capture start, image decode, large file copy) is off the main actor.
-- Biometrics release a Keychain secret; a boolean alone gates nothing that matters.
-- Location asks When In Use, at the accuracy the feature needs.
-- Test ids on the pre-prompt, denied and picker controls.
-
-## What NOT to do
-
-- No permission prompt at app launch or on the first screen "to get it over with".
-- No generic purpose strings ("We need your location"), no missing keys, no `NSLocationAlwaysAndWhenInUse…` for a foreground feature.
-- No hand-built photo grid asking for full library access where `PhotosPicker` fits.
-- No `startRunning()` on the main thread; no capture session left running behind a pushed screen.
-- No `LAContext.evaluatePolicy` result as the only protection of a stored secret.
-- No `canOpenURL:` probing; no reading `UIPasteboard` at launch.
-- No dead end on denial — a button that does nothing or an empty screen.
+The standards this skill's output must meet are the mobile-ios rule files, not a list here: `swift.md`, `xcode-config.md` and `swift-persistence.md`. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

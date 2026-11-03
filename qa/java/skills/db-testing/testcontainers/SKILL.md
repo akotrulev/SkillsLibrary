@@ -189,42 +189,15 @@ new GenericContainer<>("ghcr.io/myco/legacy-app:1.4.0")
 
 ## Rules
 
-### Fixture structure
-- One container per JVM via `static final` field. Test fixtures inherit a base that injects via `@DynamicPropertySource`.
-- Per-test reset via `@DataSet(cleanBefore = true)` (db-rider) is the default; `@Sql` scripts are fine for simple cases.
-- Never use Spring's `@Transactional` rollback for HTTP integration tests — the SUT's TX runs in a separate connection from the test thread.
+The standards a Testcontainers fixture must meet are the qa-java rule files, not a list here: `qa-java-data.md`, `qa-java-suite.md` (TestNG parallelism) and `qa-java.md` (core). Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-### Image pinning
-- Specific tags only (`postgres:17.2`). Document production version in a comment.
+## Conventions
 
-### Schema lifecycle
-- Flyway / Liquibase runs once at Spring context startup. Disable JPA `ddl-auto: validate` (or `none`) in the test profile — schema comes from migrations.
-- Never `hibernate.hbm2ddl.auto=create-drop` in integration tests.
-
-### Row reset
-- Default: db-rider `@DataSet(cleanBefore=true)` per test. Faster and FK-safe.
-- Spring `@Sql(scripts="cleanup.sql", executionPhase=AFTER_TEST_METHOD)` for trivial cleanups.
-- For Mongo, drop collections in `@AfterMethod`.
-
-### Connection injection
-- `@DynamicPropertySource` only. No `application-test.yml` with hardcoded URLs.
-- Never log the JDBC URL (secrets policy).
-
-### Parallelism
-- TestNG `parallel="false"` at the suite level for integration tests. Containers are expensive.
-- If parallelising: one container per class via `@BeforeClass` (no shared static), and prove isolation.
-
-### Diagnostics
-- On failure, attach container logs to the report: `POSTGRES.getLogs()` → Allure via `Allure.attachment(name, content)` (allure-java 3.0) in a TestNG `IInvokedMethodListener`.
-
-### What NOT to do
-- No `Thread.sleep` — use the module's wait strategy.
-- No `latest` image tags.
-- No hardcoded JDBC URLs — always via `@DynamicPropertySource`.
-- No H2 mixed with Testcontainers in the same suite.
-- No `hbm2ddl.auto=create` — drift from production schema.
-- No connection strings in log lines.
-- No starting a container in `@BeforeMethod` — that's per-test container; use static or `@BeforeClass`.
+- One container per JVM through a `static final` field; fixtures inherit a base that injects through `@DynamicPropertySource`. Parallel classes get one container each in `@BeforeClass`, and prove their isolation.
+- Pin the image (`postgres:17.2`) and record the production version beside it.
+- Flyway or Liquibase runs once at context start-up; the test profile sets `ddl-auto: validate` or `none`.
+- Row reset: db-rider `@DataSet(cleanBefore = true)` per test by default; Spring `@Sql(scripts = "cleanup.sql", executionPhase = AFTER_TEST_METHOD)` for trivial cleanups; drop Mongo collections in `@AfterMethod`.
+- On failure, attach the container logs to Allure (`POSTGRES.getLogs()` through `Allure.attachment`, allure-java 3) from a TestNG `IInvokedMethodListener`.
 
 ## Generation steps
 

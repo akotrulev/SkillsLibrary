@@ -40,16 +40,7 @@ An API newer than the deployment target needs `#available`; never raise the targ
 
 ## Rules
 
-1. **State changes, not animation calls.** Mutate state inside `withAnimation { }`; the view's difference between two states is what animates. Never drive a frame loop from a `Timer`.
-2. **Animate `offset`, `scale`, `opacity`, `rotationEffect` and colour** — they are composited, not re-laid-out. An animated `frame`, `padding` or a changing text length re-runs layout every frame; for a collapsing panel animate `opacity` and a transition, and let layout settle once.
-3. **`.animation(_:value:)` always carries `value:`.** The value-less `.animation(_:)` is deprecated and animates every change under it, including ones you did not mean. Apply it as close to the changed property as possible, not on a root container.
-4. **A transition needs a conditional.** `.transition(_:)` only runs when the view is inserted or removed inside `withAnimation` or `.animation(_:value:)`; `if show { Card().transition(.opacity) }`. Pair `.move(edge:)` with `.opacity` (`.asymmetric` when entry and exit differ).
-5. **Work in `body` is a performance bug, doubly so while animating.** No formatting, sorting or allocation inside a view that re-evaluates every frame — derive it outside ([`ui-components`](../ui-components/SKILL.md)).
-6. **Keep ids stable.** `ForEach(items)` over `Identifiable` models with stable domain ids; an index or `UUID()` per render restarts every row's identity and animates a flash instead of a move.
-7. **Reduce Motion replaces movement, it does not remove feedback.** Under the setting a slide becomes a fade (or nothing), a looping effect stops, parallax goes — and the state change itself still happens, visibly. This is the High-severity corpus rule.
-8. **Springs for physical responses, short ease for state.** A system `.smooth` / `.snappy` spring for gesture-driven or interruptible motion; `.easeInOut(duration: 0.2)`-class for a plain reveal. Durations come from the project's motion tokens when it has them.
-9. **A gesture-only action has an accessible alternative.** Swipe-to-delete also appears as a `.swipeActions` button or an `accessibilityAction`; a drag handle is reachable by VoiceOver adjustments ([`accessibility`](../accessibility/SKILL.md)).
-10. **Test ids and labels survive animation.** A view that is a tap target and moves still carries `accessibilityIdentifier` and a label ([`test-ids`](../test-ids/SKILL.md)).
+The standards this skill's output must meet are the mobile-ios rule files, not a list here: `ios-styling.md` (Motion) and `ios-accessibility.md`. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## State-driven animation and the Reduce Motion floor
 
@@ -84,6 +75,8 @@ struct ExpandableCard: View {
 
 ## Transitions, hero moves and symbols
 
+- **Springs for physical responses, short ease for state.** A system `.smooth` / `.snappy` spring for gesture-driven or interruptible motion; `.easeInOut(duration: 0.2)`-class for a plain reveal. Durations come from the project's motion tokens when it has them.
+- **A transition runs on insertion or removal** inside `withAnimation` or `.animation(_:value:)`: `if show { Card().transition(.opacity) }`. Pair `.move(edge:)` with `.opacity` (`.asymmetric` when entry and exit differ). For a collapsing panel animate `opacity` and a transition, and let layout settle once.
 - **`matchedGeometryEffect(id:in:)`** needs a shared `@Namespace` and **exactly one source view per id at a time**; two on screen together flicker. It moves a view within one view tree (an expanding card), not across a navigation push.
 - **Across a push (iOS 18)**: `matchedTransitionSource(id:in:)` on the origin and `.navigationTransition(.zoom(sourceID:in:))` on the destination — the system owns the morph and the interactive swipe-back. On iOS 17 a plain push is correct; do not hand-build a fake hero.
 - **Symbols**: `.symbolEffect(.bounce, value: count)` for a one-shot, `.symbolEffect(.pulse, isActive: isLoading)` for a state — and stop it when `isActive` goes false. `.contentTransition(.numericText())` for a counter, `.contentTransition(.symbolEffect)` for an icon swap.

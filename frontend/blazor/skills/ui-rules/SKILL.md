@@ -205,34 +205,7 @@ This is *why* the rules above are keepable at scale, not one-offs.
 
 ## Rules
 
-- **Enums humanized in every render path** from one derived helper; sweep siblings on any fix.
-- **One canonical format per data type**, centralized; timezone labeled; hand-written pages use the shared helpers; every renderer implements the full token set.
-- **Names, not GUIDs**, resolved in list renderers too; cached identity directory; human-first pickers.
-- **Deterministic server-side default sort with a unique tiebreaker** on every list; numbers right-aligned; widths capped; server paging with size options; filter/sortability parity; consistent row→detail affordance.
-- **Forms render only persisted fields** (form↔DTO↔mapper parity, mechanically checked); PKs read-only; **state via explicit actions, never an editable `Status`**; patch/subset DTOs; optimistic concurrency on full-PUT; same guards as self-service; no column the write path never fills.
-- **Disable-don't-hide** with why-tooltips, gated by the backend's state machine; every mandated follow-up has an affordance; full state-machine reachability.
-- **Every destructive action confirms by naming the object**, verb-labeled danger-styled button.
-- **Bulk: checkbox column + tri-state select-all scoped to the filtered page + selected-count + batch endpoints + stable test ids.**
-- **One name→one concept, one verb per operation, `<PageTitle>` everywhere, one breadcrumb source, nav-group budgets, no dead/duplicate pages.**
-- **Navigation shows the current location** (distinct active state, not color alone), groups+labels over item count, front-loaded content labels, visible top-level nav on desktop.
-- **Footer is semantic `<footer>`** with explicitly-labeled columns and utility/doormat links, sized to the site (fat vs slim).
-- **Pick the surface deliberately** — modal only when the interruption is the value, a page when it needs a URL, same tab by default; no unrequested modals.
-- **Unify renderers; fix at the highest leverage; treat descriptor patches as generator bugs; sweep the class.**
-
-## What NOT to do
-
-- No raw enum int / bare GUID / `.ToString()` fallthrough shown to a user.
-- No per-page `string.Format` diverging from the shared format helpers; no unlabeled timezone.
-- No list without a deterministic server-side sort + tiebreaker; no full document/blob in a grid cell; no client-side load of an entire dataset.
-- No editable field the update path ignores; no editable PK; no editable `Status` dropdown standing in for a transition action; no full-PUT without concurrency control.
-- No grid column the write path never populates.
-- No action that renders-then-rejects; no destructive action without an object-naming confirmation; no neutral confirm button on a danger dialog.
-- No row-click-only multi-select; no select-all that reaches beyond the filtered page.
-- No two pages/verbs for one concept; no missing `<PageTitle>`; no double breadcrumb source; no dead/duplicate routes.
-- No nav without a current-location indicator; no hamburger on desktop where the bar fits; no menu trimmed to a magic 7 at the cost of clear grouping.
-- No `<div>`-based footer; no vague column label ("Resources") hiding its links; no marketing fat-footer on a focused web app.
-- No blocking modal for a task that needs the background visible; no modal the user didn't trigger; no `target="_blank"` without an "opens in new tab" signal + `rel="noopener"`.
-- No spot-fix of a defect that's actually a class; no third grid renderer where the shared one should be composed.
+The standards this skill's output must meet are the fe-blazor rule files, not a list here: `blazor-ui.md`, `blazor-forms.md` and `blazor-markup.md`. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation
 

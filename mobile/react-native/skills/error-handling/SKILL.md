@@ -162,23 +162,7 @@ Raise it from **one place per failure path** — `QueryCache.onError` / `Mutatio
 
 ## Rules
 
-- Root `ErrorBoundary` export, one per independently failing route, `react-error-boundary` per independent widget; each reports a reference id and offers retry. Never render `error.message`, a stack or a body.
-- Three-state regions plus stale and offline; a drifted response is *failed*; a failed refetch keeps the data and shows the stale marker.
-- Scope the failure to the response-dependent subtree; chrome and filter state survive.
-- Every surfaced failure also raises the persistent banner — safe-area top, no auto-dismiss, 44 pt close, deduped, one provider, one raise-point per path, ≤ 3 visible, rolled up by cause.
-- `TimeoutError` has its own body; `AbortError` renders nothing; offline is not a server error and never retries.
-- A 401 runs the ladder with in-place re-auth; 403 is permission-denied. OTA skew prompts and reloads once, never over unsaved work.
-- An unknown write outcome is reconciled, not reported as failed; third parties fail in their own boundary; storage failures degrade to memory with one notice.
-- 404 on a record is "gone"; empty is three kinds; every state and the banner carry a `testID`.
-
-## What NOT to do
-
-- No app without a root `ErrorBoundary`; no console-only report; no two-state region; no failure only inline or only in a banner.
-- No early `return <Error/>` from a container that owns search and filters; no failed body over data the user is reading.
-- No auto-dismissing banner, none behind the notch or keyboard, none with a close target under 44 pt; no banner per retry, none uncapped.
-- No request without a deadline; no failed state for `AbortError`; no retry button while offline.
-- No unguarded `Updates.reloadAsync()`; no sign-out straight off a 401 or from a 403 / third-party 401.
-- No generic "No data"; no retry on a 404 record.
+The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `react-native.md`, `react-native-routes.md` and `react-native-data.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

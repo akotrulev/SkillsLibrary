@@ -141,24 +141,7 @@ Both are mandatory against the iOS 27 SDK (TN3187).
 
 ## Rules
 
-- `SWIFT_VERSION = 6` and warnings-as-errors are **set in the xcconfig**, not inherited.
-- One module = one local package once a boundary earns it; direction `App → Features → Core`.
-- Default isolation `MainActor` in the app target only; packages stay `nonisolated`.
-- One xcconfig per environment; no secret in xcconfig, `Info.plist` or the bundle.
-- `xcrun swift-format` formats, SwiftLint lints; both in CI.
-- Tuist / XcodeGen present → edit the manifest, regenerate; never the generated `.pbxproj`.
-- A privacy manifest and a String Catalog exist before the first feature.
-- Never raise the deployment target or language mode of an existing module as a side effect.
-
-## What NOT to do
-
-- Trust the template's `SWIFT_VERSION` or flip a Swift 5 project to 6 in one commit.
-- Put `MainActor` default isolation on a package.
-- Branch on `#if DEBUG` / `#if STAGING` through feature code instead of reading config once.
-- Add CocoaPods to a new project, or a dependency for something the SDK does.
-- Commit `Local.xcconfig`, a `.p12`, an API secret or a `GoogleService-Info.plist` with server keys.
-- Run SwiftLint's `--fix` in a build phase.
-- Add a `Common` / `Utils` package that every module imports.
+The standards this skill's output must meet are the mobile-ios rule files, not a list here: `xcode-config.md`. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation (exit gate)
 

@@ -237,26 +237,7 @@ The **three-state region** that renders this failure inline (with retry) is [`er
 
 ## Rules
 
-- **Open every data feature with the transport routing decision** (above): pull → here; push → [`realtime`](../realtime/SKILL.md).
-- **One render-mode-agnostic interface**; server-direct and `HttpClient` implementations registered per project. The component depends only on the interface.
-- **`IDbContextFactory`, never a captured/injected `DbContext`** in the server lane (circuit scope outlives a request).
-- **No HTTP hop to your own API from the server lane** — call the service in-process.
-- **`[PersistentState]`** (net10) / `PersistentComponentState` (net8/9) on every prerendered fetch; `??=` guard.
-- **`[StreamRendering]`** for slow static-SSR paths; **`HybridCache`** (net9+) on the server implementation for slow reads.
-- **Thread a `CancellationToken`** from the component through the client/EF Core; cancel on dispose.
-- **`TryGetValue` + diagnosable message; throw on unsubstituted `{placeholder}`; deserialize to the endpoint's real shape; contract-test against the spec.**
-- **ProblemDetails mapped to friendly text + correlation id; raw detail logged server-side, never rendered.**
-- **Base addresses + external hosts from configuration**; the **IdP-agnostic** token handler comes from the auth skill (Auth0 *or* Cognito).
-
-## What NOT to do
-
-- No render-mode-specific data code inside the component; no `@rendermode` deciding a fetch path — inject the interface.
-- No injected/captured `DbContext`; no `.Result`/`.Wait()` on the data calls (async all the way — global rule).
-- No double-fetch left unguarded on prerender.
-- No raw `ex.Message`/response body rendered to users; no failure swallowed into a blank section (that's a three-state region, [`error-handling`](../error-handling/SKILL.md)).
-- No direct dictionary indexing of routes; no template sent with an unsubstituted placeholder; no single-object endpoint deserialized as an array.
-- No hardcoded/`localhost` base URLs; no token-attaching handler hand-rolled here (it's auth's, provider-neutral).
-- No net10-only API (`[PersistentState]`, `HybridCache` net9+) emitted into a lower TFM.
+The standards this skill's output must meet are the fe-blazor rule files, not a list here: `blazor.md` and `blazor-config.md`. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation
 

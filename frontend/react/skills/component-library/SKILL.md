@@ -72,16 +72,7 @@ These hold regardless of which reference you read:
 
 ## Anti-patterns
 
-| Smell | Fix |
-|---|---|
-| Two component libraries in one app | One library; migrate wholesale if changing |
-| Library `<Button onClick>` / `useDialog` in a Server Component | Move it under a `'use client'` boundary; provider is a client island |
-| `ThemeProvider`/`MantineProvider` added per page | Once, in a client `Providers` component off the root layout |
-| Per-component color overrides scattered across pages | One central theme / token set; dark mode from one toggle |
-| Full table loaded client-side, then paged in the browser | Server-side callback (`onPaginationModelChange`/`onSortChange`) → `data-fetching` query |
-| `AppButton` wrapper introduced to carry a `data-testid` | Inline `data-testid` on the library control (testability Rule 1) |
-| Tailwind utility classes mixed *with* a CSS-in-JS library's theme | Pick one styling authority — library theme *or* Tailwind (see [`styling`](../styling/SKILL.md)) |
-| Library major not pinned to the React/Next line | Pin the major; read the reference's version notes |
+The smells (two libraries, a library control in a Server Component, a provider per page, scattered colour overrides, a client-paged full table, an `AppButton` testid wrapper, Tailwind atop a CSS-in-JS theme) are the inverse of the cross-cutting rules above and of the fe-react rule files `react.md` and `react-styling.md` (project copies in `.claude/rules/fe-react/`, or `frontend/react/skills/rules/`; `/fe-react:rules` installs them). One more, owned here: **pin the library's major to the React/Next line** and read the reference's version notes.
 
 ## Workflow
 

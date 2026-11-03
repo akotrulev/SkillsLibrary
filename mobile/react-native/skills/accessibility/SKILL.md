@@ -119,26 +119,7 @@ useEffect(() => {
 
 ## Rules
 
-- Every interactive element: a role, an accessible name that says what it does, state in `aria-*`, a target ≥ 44 pt / 48 dp, and a `testID`.
-- Icon-only controls always carry a label; decorative images are hidden; informative ones are described.
-- State is never in the label text; the role is never in the label.
-- Headings are marked; related content is one stop; the reading order matches the visual order.
-- Focus moves in and out of modals and returns to the trigger; results and errors are announced without stealing focus.
-- Every gesture has an `accessibilityActions` alternative.
-- Text scales; no `allowFontScaling={false}`; layouts survive the largest sizes.
-- Contrast and non-colour cues hold in light and dark; Reduce Motion is honoured.
-- One prop family per element (`role` + `aria-*`, or the older `accessibility*`), consistent with the project.
-
-## What NOT to do
-
-- No `View` + gesture handler as a button; no `Pressable` without a role and a name; no icon-only control without a label.
-- No placeholder as the only label; no "button", "image of" or state words in a label.
-- No `allowFontScaling={false}`, no fixed text-container heights, no clipped text at large sizes.
-- No `accessible={false}` on something a user must reach; no `aria-hidden` on content that is on screen.
-- No swipe-only or drag-only operation without `accessibilityActions`.
-- No announcement per keystroke or per render; no focus stolen from a field by a banner.
-- No colour-only error or selection; no contrast checked in light mode only.
-- No second accessibility prop family mixed onto one element.
+The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `react-native-a11y.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

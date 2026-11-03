@@ -60,28 +60,11 @@ Want a broad accessible set on a Tailwind core, or leaving NativeBase?
 
 NativeBase is deprecated — never pick it.
 
-## Cross-cutting rules (every option)
+## Rules
 
-- **One option per app.** Migrate wholesale, never screen by screen.
-- **Mount the provider once at the root** — `src/app/_layout.tsx` in Expo Router. There is no `'use client'` boundary on device; the only rule is "above every consumer".
-- **Theme once, centrally.** One theme or token set at the root; per-component colour overrides are a smell. Dark mode is a token swap driven by `useColorScheme()`, never per-component conditionals. The palette source is `design/visual-identity` (or a `design/theme-presets` preset); [`styling`](../styling/SKILL.md) maps it to tokens.
-- **Styling authority follows the choice** (table above). Never two authorities on one element — a `className` plus a competing `StyleSheet` colour fails review.
-- **`testID` goes inline on the control** — no `App*` wrapper just to carry it ([`test-ids`](../test-ids/SKILL.md)).
-- **Compatibility is a gate.** Install with `npx expo install`, run `npx expo-doctor`. A library with native code needs a development build, not Expo Go ([`project-setup`](../project-setup/SKILL.md)).
-- **Platform conventions first.** A Material kit on iOS imitates the other platform — choose Paper for an Android-first product, not by default. Design facts: `design/ui-ux-pro-max` (`--stack react-native`); where it disagrees with a reference here, the corpus wins.
+The standards a kit choice and its wiring must meet are the mobile-react-native rule files, not a list here: `react-native-ui.md` and `expo-config.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-## Anti-patterns
-
-| Smell | Fix |
-|---|---|
-| Two kits in one app | One; migrate wholesale |
-| NativeBase in new work | gluestack v5 |
-| Provider added per screen | Once, in the root layout |
-| Colour overrides scattered across screens | Central theme + `useColorScheme()` |
-| `className` + `StyleSheet` colour on one element | Pick one authority |
-| NativeWind v5 RC in production with no recorded reason | v4.2, or record the decision |
-| Kit chosen without `expo-doctor` | Run it before committing |
-| `AppButton` wrapper added to carry a `testID` | Inline `testID` |
+Two facts the rule files leave to this skill: the provider goes above every consumer, which in Expo Router is the root `_layout.tsx` (there is no `'use client'` boundary on device), and the palette comes from `design/visual-identity` (or a `design/theme-presets` preset), mapped to tokens by [`styling`](../styling/SKILL.md). Design facts come from `design/ui-ux-pro-max` (`--stack react-native`); where it disagrees with a reference here, the corpus wins.
 
 ## Workflow
 
@@ -90,13 +73,6 @@ NativeBase is deprecated — never pick it.
 3. Install with `npx expo install`; wire the provider at the root.
 4. Theme from the palette via [`styling`](../styling/SKILL.md); wire dark mode off `useColorScheme()`.
 5. Verify: a themed screen on both platforms, dark mode flips with no per-component edit, `expo-doctor` clean, `testID` lands on the native view.
-
-## Rules
-
-- Default is StyleSheet + Expo UI; a kit must earn its place by a need that exists now.
-- One option, one provider, one authority.
-- New Architecture compatibility is checked, not assumed.
-- Record RC choices (NativeWind v5) as a decision.
 
 ## Handoffs
 

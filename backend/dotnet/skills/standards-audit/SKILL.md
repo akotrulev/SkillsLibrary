@@ -17,7 +17,7 @@ State the mode — Mode A (baseline) or Mode B (re-audit) — and the target pat
 2. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 14 lettered sections (A–N) and every check. **Read end-to-end** before Step 2.
 3. `engineering-practices/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Step 3.
 
-Load the **owning skill** (named per section in the checklist) whenever a check is ambiguous, version-keyed, or you are about to write its fix direction. When checklist and skill disagree, **the skill wins** — and report the disagreement.
+Load the **owning skill** (named per section in the checklist) whenever a check is ambiguous, version-keyed, or you are about to write its fix direction. The per-file form of these conventions is the be-dotnet rule files (`.claude/rules/be-dotnet/`, else `backend/dotnet/skills/rules/`). When the checklist and a rule file or skill disagree, **the rule file, then the skill, wins** — and report the disagreement.
 
 Report path: `docs/audits/<NNN>-be-dotnet-conformance-r<N>.md`.
 
@@ -25,7 +25,7 @@ Report path: `docs/audits/<NNN>-be-dotnet-conformance-r<N>.md`.
 
 | Job | Owner |
 |---|---|
-| Review one file / one diff, inline severity table, no artifact | [`code-review`](../code-review/SKILL.md) — this skill **reuses its checklists at repo scale** |
+| Review one file / one diff, inline severity table, no artifact | [`code-review`](../code-review/SKILL.md) — it checks a diff against the rule files; this skill sweeps the whole service |
 | Code vs a written spec / stories / ACs | `dev:audit-spec` (or the `code-auditor` agent) |
 | "How does feature X actually work / where is it defective" | `dev:audit-feature` |
 | Auditing the **test suite** that covers this service | **peer** `qa-dotnet:standards-audit` — this skill audits production code only |

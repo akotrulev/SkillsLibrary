@@ -119,10 +119,7 @@ CI gates on the run's threshold result (NBomber returns a failed status when an 
 
 ## Conventions (the shell only)
 
-- **Console app, one scenario per file** under `Scenarios/`; `Program.cs` only registers and runs.
-- **Thresholds are explicit and SLA-derived** (p95/p99 latency, error rate) — a run with no failing threshold is not a passing perf test, it's an unasserted one.
-- **Config-driven load**: virtual users, ramp, duration, base URL from per-project `appsettings.<env>.json` — never hard-coded in scenarios.
-- **Reuse, don't reimplement, the API client**: when composing with the API module, point scenarios at `TestCore`'s typed clients instead of raw `HttpClient`.
+The standards the shell must meet are the qa-dotnet rule files, not a list here: `performance.md` and `suite-config.md`. Tell the user to install them with the shell (`/qa-dotnet:rules` copies them into `.claude/rules/qa-dotnet/`); until then read the plugin's copies in `qa/dotnet/skills/rules/`. Where they and this skill's recipes disagree, the rule files win.
 
 Scenario shapes, injection profiles, threshold tuning, and the review checklist are owned by `qa-performance-dotnet` (`load-testing`) and `qa/_shared/performance`. Defer to them.
 

@@ -132,24 +132,7 @@ export default function RootLayout() {
 
 ## Rules
 
-- Measure on a release build on a real mid-range device; every change carries before and after numbers.
-- Every list is virtualized; rows are cheap, get primitives or stable items, and have stable keys.
-- No inline objects, closures or pre-mapped data crossing into a list.
-- Compiler on → no memoization for render cost; keep it only where identity is a contract.
-- Images are right-sized and go through `expo-image`.
-- Startup is measured in production, with a budget; the first screen renders before heavy modules load.
-- The bundle is analysed with Atlas before it is trimmed; barrel imports of large libraries are leaf imports.
-- No JS-thread blocking work; no leak left in an effect.
-
-## What NOT to do
-
-- No `ScrollView` + `.map` for data of unknown size; no `FlatList` where FlashList or Legend List is already the project's.
-- No `useMemo` / `useCallback` / `memo` sprinkled "for performance" on a compiler-on project; no turning the compiler on or off as a side effect.
-- No `.value` on a shared value in a compiler-on project; no `props.fn()` / `router.push` dotted calls in a handler the compiler must key.
-- No query, heavy `useMemo` or several contexts inside a list row.
-- No full-resolution image in a thumbnail; no remote image through `<Image>` without a cache.
-- No timing on a dev build or a simulator; no optimisation without a number.
-- No analytics or crash SDK `init` that blocks first render; no second crash reporter to measure startup.
+The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `react-native-ui.md` and `react-native.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

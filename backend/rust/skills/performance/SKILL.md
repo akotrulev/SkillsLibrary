@@ -165,21 +165,7 @@ Measure it — allocator wins are workload-specific, and jemalloc can raise RSS.
 
 ## Rules
 
-- No optimization without a before/after number from the same benchmark or load test
-- Profile release builds with `line-tables-only` debug info and frame pointers
-- Fix the top frame, then re-measure
-- Hot-path allocation, cloning, hashing and buffering are the first suspects; `unsafe` is the last resort and needs a benchmark plus a `// SAFETY:` comment (`pattern-guide` → `unsafe`)
-- `panic = "abort"` and `target-cpu=native` only with their caveats accepted in writing
-- Keep the regression benchmark once a hot path is fixed
-
-## What NOT to do
-
-- No `get_unchecked` / `unsafe` to remove a bounds check the optimizer could hoist with a slice
-- No `FxHashMap` on attacker-controlled keys
-- No profiling a debug build; no benchmarking with a single tiny input
-- No `#[inline(always)]` on large functions to "help" the compiler
-- No allocator swap or LTO change without a measurement
-- No replacing readable code with clever code for a frame that is under 1% of the profile
+The standards this skill's output must meet are the be-rust rule files, not a list here: `rust.md` (Performance, `unsafe`) and `cargo.md` (release profile, allocator, `panic`, `target-cpu`), plus `rust-tests.md` for benchmarks. Read the project's copy in `.claude/rules/be-rust/`, or the plugin's in `backend/rust/skills/rules/` when the project has not installed them (`/be-rust:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Handoffs
 

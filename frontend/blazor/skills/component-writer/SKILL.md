@@ -366,38 +366,7 @@ For complex validation (cross-field, async): swap `DataAnnotationsValidator` for
 
 ## Rules
 
-- **EventCallback** (or `EventCallback<T>`) for every event parameter — never `Action` / `Func<T, Task>`
-- Components that subscribe to state / events implement `IDisposable` (or `IAsyncDisposable`) and **always unsubscribe**
-- `OnAfterRenderAsync(firstRender: true)` for any DOM-touching JS interop; never in `OnInitializedAsync`
-- Persist any prerendered data fetch: `[PersistentState]` (net10) / `PersistentComponentState` (net8/net9)
-- **Static SSR by default; interactivity opt-in per surface.** The `@rendermode` is set by the consumer at the call site — emitted components are **render-mode-agnostic** (no `@rendermode` inside a reusable component)
-- **Every interactive element and list/grid container carries a `data-testid`** per the `frontend/blazor/skills/test-ids` convention (PascalCase dot-separated, static row locators, no ids/GUIDs/indexes) — zero locator collisions
-- **In-app navigation is a real anchor** (`<a href="...">`, or `NavLink`) — never a click-handler-only button calling `NavigateTo`. **Default to the same tab** (new tabs break Back and disorient); emit `target="_blank"` only for the deliberate exceptions [`ui-rules`](../ui-rules/SKILL.md) §7 lists, and when you do, emit the full affordance: `rel="noopener"` **plus** a visible "opens in new tab" cue and an `aria-label` suffix — see the recipe below
-- **Every page scaffold emits `<PageTitle>`**
-- Cascading values split by concern; `IsFixed="true"` when the cascaded reference doesn't change
-- State containers as **scoped** DI services; events with `Changed` (or specific event names) raised on mutation
-- JS lives in `.razor.js` modules next to the component
-- DI registrations in `Program.cs` (Server) and `Program.cs` of the WASM project — both for shared services
-- Constructor / `@inject` field initialization for dependencies; never `Activator.CreateInstance`
-
-## What NOT to do
-
-- No `Action` / `Func` as `[Parameter]` for events — `EventCallback` forces correct re-render
-- No subscriptions without `Dispose` cleanup
-- No JS interop in `OnInitializedAsync`
-- No double-fetch on prerender boundary — `[PersistentState]` (net10) / `PersistentComponentState` (net8/net9)
-- No `@rendermode` hardcoded inside a reusable component — the consumer decides
-- No click-handler-only navigation buttons; no page without `<PageTitle>`; no interactive element without a `data-testid`
-- No `target="_blank"` on internal routes, and none anywhere without `rel="noopener"` + a visible "opens in new tab" cue + an `aria-label` suffix
-- No net10-only APIs (`[PersistentState]`, `NotFoundPage`, `AddValidation()`) emitted into a net8/net9 project
-- No mutable static fields holding component state
-- No `StateHasChanged()` calls right after a state container update — the container's event already triggers it
-- No `[CascadingParameter]` on bulky god objects — split by concern
-- No mixing render modes on the same component without a clear reason
-- No `@bind` without `@bind:event="oninput"` if you actually want input-time updates (default is `onchange`)
-- No business logic in components — push into services / handlers; components render and dispatch
-- No `IDisposable` skipped just because the page "feels short-lived" — leaks add up
-- No `await` on Tasks without `ConfigureAwait(false)` in shared library code (Blazor app code is fine without)
+The standards this skill's output must meet are the fe-blazor rule files, not a list here: `blazor.md` and `blazor-markup.md`. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation outputs
 

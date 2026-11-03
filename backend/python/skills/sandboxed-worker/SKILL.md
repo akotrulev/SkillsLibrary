@@ -200,21 +200,7 @@ plus a default-deny egress `NetworkPolicy` for the pod and an `emptyDir` with `m
 
 ## Rules
 
-- No outbound route at runtime: `network_mode: none` or an `internal: true` network, verified by a CI check that tries to connect out and expects failure
-- Weights baked at build, checksum-verified; runtime never downloads
-- Non-root numeric UID, `read_only: true`, `cap_drop: [ALL]`, `no-new-privileges`, `tmpfs` scratch with `noexec`
-- Every job in a child process with `RLIMIT_AS`, `RLIMIT_CPU`, `RLIMIT_FSIZE`, `RLIMIT_NPROC` and a wall-clock kill
-- All limits come from `Settings` (`pattern-writer`), set in compose / the manifest, never hard-coded in Python
-- The worker accepts bytes and a job description; it never accepts a URL, a path outside `/job`, or a shell string
-
-## What NOT to do
-
-- No `pip install` in the runtime stage; no `apt-get` beyond what a wheel needs at runtime (`libgomp1` only if `ldd` on the onnxruntime `.so` proves it is missing)
-- No `--privileged`, no `/var/run/docker.sock` mount, no `hostNetwork`
-- No `network_mode: host`, no `ports:` on the worker in either shape
-- No model download on first use; no `HEALTHCHECK` that performs inference
-- No `fork` start method with a loaded onnxruntime session; no `threading.Timer` as the job timeout
-- No shared writable volume between jobs; one directory per job, deleted with it
+The standards this skill's output must meet are the be-python rule files, not a list here: `python-container.md` for the image and the service, `python-pipeline.md` for the per-job isolation code. Read the project's copies in `.claude/rules/be-python/`, or the plugin's in `backend/python/skills/rules/` when the project has not installed them (`/be-python:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation
 

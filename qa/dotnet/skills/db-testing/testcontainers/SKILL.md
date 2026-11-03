@@ -214,49 +214,18 @@ new ContainerBuilder()
 
 ## Rules
 
-### Fixture structure
-- One fixture base per engine. Concrete `[TestFixture]` classes inherit from it.
-- Container is `static readonly` inside the fixture base. One instance per test assembly is acceptable; one per fixture is the default.
-- `[OneTimeSetUp]` returns `Task` and is `await`-able. **No `.Result` / `.Wait()`** (global rule).
-- Dispose the container in `[OneTimeTearDown]` even on test failure — `DisposeAsync` is idempotent.
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `db-verification.md` and `automation.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-### Image pinning
-- Use a specific tag tied to the production version. `postgres:17.2`, not `postgres:latest`, not `postgres:17`.
-- Record the production version in the fixture file's header comment with the date pinned.
-- Bump the tag in a dedicated PR so the diff is reviewable.
+## Conventions
 
-### Schema lifecycle
-- Migrate once at `[OneTimeSetUp]`. Do not migrate per test.
-- Migration source is the same `DbContext` (or `Flyway` / `FluentMigrator`) that runs in production. Never a bespoke "test schema".
-- For seed data that every test needs, seed *after* migrations in `[OneTimeSetUp]` and exclude those tables from Respawn via `TablesToIgnore`.
-
-### Row reset
-- Default: Respawn in `[SetUp]`. Faster than truncate, respects FK ordering.
-- Use transactional rollback only when the entire test (including the SUT) participates in one ambient `TransactionScope`. Most ASP.NET Core stacks do not — Respawn is safer.
-- For Mongo/Redis, drop collections / flush DB in `[SetUp]`.
-
-### Connection string handling
-- Read it from the container (`Container.GetConnectionString()`) and inject via `WebApplicationFactory.UseSetting("ConnectionStrings:AppDb", ...)`.
-- Never echo a connection string into logs, Allure attachments, or test names.
-- Never hardcode `"Host=localhost;Port=5432"` — the port is assigned by Docker and varies per run.
-
-### Parallelism
-- Default: serial fixtures (`[assembly: LevelOfParallelism(1)]`). Containers are expensive; parallel fixtures stack RAM.
-- If you must parallelize: one container *per fixture*, not shared. Verify Respawn isolation by running the suite twice in a row.
-
-### Diagnostics
-- On test failure, attach the container's stdout/stderr to Allure: `await Container.GetLogsAsync()` → `AllureLifecycle.Instance.AddAttachment("postgres.log", "text/plain", bytes)`.
-- Pair with `qa/reporting/dotnet/skills/test-reports` for the publish step.
-
-### What NOT to do
-- No `Task.Delay` / `Thread.Sleep` waiting for the DB. Use the module's built-in wait strategy.
-- No `latest` image tags.
-- No hardcoded host/port — always derive from `Container.GetConnectionString()`.
-- No mixing of in-memory and Testcontainers providers in the same fixture.
-- No `Database.EnsureCreated()` — it bypasses migrations and drifts from production schema.
-- No connection-string strings in test names or log lines (secrets policy).
-- No starting a container in `[SetUp]` — that's per-test container creation; use `[OneTimeSetUp]`.
-- No swallowing `OneTimeSetUp` exceptions — let NUnit mark the fixture as errored so CI fails loudly.
+- One fixture base per engine; concrete `[TestFixture]` classes inherit it. The container is `static readonly` in the base; one per fixture by default, one per assembly is acceptable. `DisposeAsync` in `[OneTimeTearDown]` is idempotent.
+- Record the production version the tag is pinned to, with the date, and bump the tag in a dedicated PR.
+- Migrate once in `[OneTimeSetUp]` with the same `DbContext` / Flyway / FluentMigrator that production runs; seed data every test needs after the migrations and exclude those tables from Respawn (`TablesToIgnore`).
+- Respawn by default; transactional rollback only when the whole test, SUT included, runs in one ambient `TransactionScope`. Mongo / Redis: drop collections or flush in `[SetUp]`.
+- The connection string is read from `Container.GetConnectionString()` and injected with `WebApplicationFactory.UseSetting("ConnectionStrings:AppDb", ...)`.
+- Default to serial fixtures (`[assembly: LevelOfParallelism(1)]`); to parallelize, one container per fixture, and prove Respawn isolation by running the suite twice in a row.
+- On failure attach `await Container.GetLogsAsync()` to Allure (`postgres.log`); the publish step is `qa/reporting/dotnet/skills/test-reports`.
+- Wait for the database with the module's built-in wait strategy; never mix in-memory and Testcontainers providers in one fixture.
 
 ## Generation steps
 

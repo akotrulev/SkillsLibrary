@@ -264,13 +264,7 @@ const shipped = anOrder({ status: 'Shipped' });
 
 ## Rules
 
-- One logical assertion per test; group related expectations on one object with `toMatchObject`.
-- Arrange–Act–Assert, visibly separated. A 20-line arrange is a coupling finding.
-- Tests are independent and order-free; `clearMocks`/`restoreMocks` on.
-- The unit under test is real and constructed directly — never resolved from a DI container.
-- Verify RED once per new behavior.
-- `strict: true` applies; no `any`, no `as unknown as`.
-- **≥ 80% of the branches you wrote are covered** — see *Coverage floor* below. Assertion quality is still a mutation-score question (see Handoffs).
+The standards a test must meet are the be-node rule file `node-tests.md`, plus `node-config.md` for the Vitest config, not a list here. Read the project's copy in `.claude/rules/be-node/`, or the plugin's in `backend/node/skills/rules/` when the project has not installed them (`/be-node:rules` does). Where it and this skill disagree, the rule file wins. The coverage floor below is how its 80% rule is measured.
 
 ## Coverage floor — ≥ 80% of the branches you wrote
 
@@ -288,19 +282,6 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 
   `% Branch` on the `All files` row is the number; `Uncovered Line #s` points at the misses. **Name the files**: Vitest 4 reports only the files a test loaded, so an untested new module vanishes from the table instead of counting as 0% unless `--coverage.include` lists it. `@vitest/coverage-v8` matches the Vitest major.
 - **Below 80%, write the missing tests.** The uncovered lines are the list.
-
-## What NOT to do
-
-- **`mockDeep<PrismaClient>()`** to "unit-test the repository" — proves nothing about SQL. Integration lane.
-- **supertest / `app.init()` / `createTestingModule().compile()` + full app** in this lane — that's the peer's suite.
-- **An in-memory SQLite standing in for Postgres** — dialect differences make it a false-negative machine.
-- **`vi.mock` where a constructor parameter would do** — module mocking couples the test to the import graph.
-- **`as any` to satisfy a fake** — narrow the interface instead.
-- **Snapshot-testing an object** as the only assertion — it locks shape, proves no behavior, and gets blind-updated with `-u`.
-- **Testing only the `ok` branch** of a `Result`.
-- **`it.skip` without a linked issue** — quarantine is the reporting peer's process.
-- **Testing the framework** — that Zod validates, that Nest injects, that `structuredClone` clones.
-- **Reaching into a module's private state** via `// @ts-expect-error` — extract the concept instead.
 
 ## Generation steps
 

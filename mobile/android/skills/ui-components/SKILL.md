@@ -147,24 +147,7 @@ Design facts — spacing, touch targets (48 dp), component choice — are `desig
 
 ## Rules
 
-- Screen composable takes the ViewModel; every composable below it is stateless with `modifier` first among optional parameters, applied to the root.
-- State down, events up; hoist to the lowest common parent.
-- Lazy lists use `key` (stable id) and `contentType` for mixed rows.
-- Effects use the API in the table; every `LaunchedEffect` has meaningful keys, every registration disposes.
-- Material 3 components, not imitations; Expressive only on 1.5 or an existing opt-in.
-- Each data region renders loading / loaded / failed / stale / offline, scoped to the region, with a persistent error banner.
-- Previews for reusable composables, no live data.
-
-## What NOT to do
-
-- Pass a `ViewModel` or `NavController` down the tree.
-- Use `remember` for business state, or `rememberSaveable` for a list.
-- Use the list index as a key, or `LaunchedEffect(Unit)` as a default.
-- Sort, format or parse in the composable body.
-- Apply `modifier` to a child, or accept two modifiers.
-- Show `error.message`, or collapse a failure into a blank list.
-- Wrap a `LazyColumn` in `Column(verticalScroll)`.
-- Add `@Stable` / `@Immutable` as a reflex.
+The standards this skill's output must meet are the mobile-android rule files, not a list here: `android-ui.md` and `android-ui-states.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation (exit gate)
 
