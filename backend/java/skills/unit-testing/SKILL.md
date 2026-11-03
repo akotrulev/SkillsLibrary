@@ -244,13 +244,7 @@ var order = anOrder().withStatus(SHIPPED).build();
 
 ## Rules
 
-- One logical assertion per test; `assertThat(x).satisfies(…)` or AssertJ's `assertAll`-style chaining to group related checks on one object.
-- Arrange–Act–Assert, visibly separated. 20 lines of arrange = a coupling finding, not a fixture problem.
-- Tests are independent and order-free; any test runs alone, in any order.
-- The class under test is **real and constructed directly** — never resolved from a context.
-- Verify RED once per new behavior.
-- No `if`/`for` driving assertions; no `try/catch` standing in for `assertThatThrownBy`.
-- **≥ 80% of the branches you wrote are covered** — see *Coverage floor* below. Assertion quality is still measured by mutation score (**peer** `qa-java:test-quality-check`, PIT).
+The standards a test must meet are the be-java rule file `java-tests.md`, not a list here. Read the project's copy in `.claude/rules/be-java/`, or the plugin's in `backend/java/skills/rules/` when the project has not installed them (`/be-java:rules` does). Where it and this skill disagree, the rule file wins. The coverage floor below is how its 80% rule is measured.
 
 ## Coverage floor — ≥ 80% of the branches you wrote
 
@@ -277,19 +271,6 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 
   Branch coverage is `BRANCH_COVERED ÷ (BRANCH_COVERED + BRANCH_MISSED)` — the CSV's 7th and 6th columns — summed over the changed classes; for a method changed in an existing class, the class's page under `build/reports/jacoco/test/html/` shows its branches. On Maven, `jacoco-maven-plugin` (`prepare-agent` + `report`) writes the same CSV to `target/site/jacoco/jacoco.csv`.
 - **Below 80%, write the missing tests.** The report's missed branches are the list.
-
-## What NOT to do
-
-- **`@SpringBootTest` / `@DataJpaTest` / `@WebMvcTest` in this project** — the fence has moved; that's the peer's suite.
-- **H2 or any in-memory DB standing in for the real engine** — dialect differences make it a false-negative machine. Real engine, integration lane.
-- **Mocking `EntityManager`/`JpaRepository` to "test the repository"** — you'd be asserting Mockito's behavior.
-- **`@MockBean`** — it exists to replace a bean *in a context*; if you're using it, you're in the peer's lane.
-- **`lenient()` sprinkled to silence strict stubs** — fix the stub.
-- **`verify(...)` with `any()` everywhere** — proves the call happened, not that it was right.
-- **`isEqualTo` on `BigDecimal`** — see above.
-- **`@Disabled` without a linked issue** — quarantine is `qa-java:flaky-test-quarantine`'s process.
-- **Testing the framework** — that records have equals, that Jackson serializes, that Spring injects.
-- **Reflection to reach a private method** — extract the concept into its own class instead.
 
 ## Generation steps
 

@@ -328,29 +328,7 @@ spring:
 
 ## Rules
 
-- One repository per aggregate; derived queries + `@Query` for projections; `@EntityGraph` for eager-where-needed
-- `@Transactional` on services only; `readOnly = true` for reads
-- `@Version` on every shared-write aggregate
-- `ddl-auto: validate`; Flyway owns DDL
-- `EnumType.STRING` always
-- Snake_case columns; explicit names; explicit indexes via migrations (not Hibernate annotations)
-- Unmodifiable collections exposed from entities
-- Factory methods + protected no-args ctor on entities
-- DTO projections for reads that don't need the full entity
-- OTel-traced DB calls; N+1 surfaced via tracing + dev SQL logging
-
-## What NOT to do
-
-- No `FetchType.EAGER` globally
-- No `@Data` Lombok on entities — generates broken `equals`/`hashCode` and `toString` that pulls lazy associations
-- No `cascade = ALL` on `@ManyToOne` — destroys parents you didn't intend to
-- No `@Transactional` on controllers
-- No self-invocation of `@Transactional` methods within the same class
-- No long-running transactions (no HTTP / Kafka / Redis inside `@Transactional`)
-- No `ddl-auto: update` / `create` in any environment beyond a developer laptop
-- No string-concat SQL in `JdbcTemplate` — parameter binding only
-- No mixing Flyway and Hibernate-DDL ownership
-- No swallowing `OptimisticLockingFailureException` silently
+The standards this skill's output must meet are the be-java rule files, not a list here: `java.md` (transactions) and `java-persistence.md`. Read the project's copy in `.claude/rules/be-java/`, or the plugin's in `backend/java/skills/rules/` when the project has not installed them (`/be-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

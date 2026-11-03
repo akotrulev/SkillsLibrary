@@ -260,29 +260,7 @@ Add one ArchUnit rule per ordered module pair when ArchUnit is the tool; Spring 
 
 ## Rules
 
-- **Constructor injection** only; never `@Autowired` on fields/setters
-- **`final` fields** in injected dependencies (becomes default for records / Lombok `@RequiredArgsConstructor`)
-- **Records** for value-shaped data; **classes** for behavior-bearing services
-- **`sealed`/`permits`** for closed sums / state machines; pattern matching for dispatch
-- **No static mutable state** (constants fine)
-- **Async**: virtual threads (`spring.threads.virtual.enabled=true` in Boot 3.2+) make blocking I/O viable; use `@Async` for fire-and-forget; reactive only when you've measured the need
-- One DI registration block per module (`@Configuration` class), not scattered across the codebase
-- One pattern per problem — flag stacking
-- File per type; package by feature (vertical slice) preferred over package by layer
-
-## What NOT to do
-
-- No field injection (`@Autowired private XService x;`) — constructor only
-- No `Optional` for fields — only return types
-- No `null` returns where `Optional.empty()` or a sealed `Result` type fits
-- No "I-have-one-impl" interfaces; wait for the second
-- No `Repository` wrapping `JpaRepository` 1:1 with `Get/Save/Delete`
-- No CQRS for CRUD slices — direct service + repository is fine
-- No `Thread.sleep` in production code; no busy-waits
-- No `RuntimeException` thrown to control flow when a sealed result type would do
-- No mutable static fields (constants `static final` are fine)
-- No `@Value("${prop}")` sprinkled — use `@ConfigurationProperties`
-- No swallowing `InterruptedException` without re-interrupting — `Thread.currentThread().interrupt();`
+The standards this skill's output must meet are the be-java rule files, not a list here: `java.md`. Read the project's copy in `.claude/rules/be-java/`, or the plugin's in `backend/java/skills/rules/` when the project has not installed them (`/be-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation outputs
 

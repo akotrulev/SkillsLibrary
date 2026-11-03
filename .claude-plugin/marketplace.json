@@ -973,6 +973,7 @@
         "./backend/java/skills/unit-testing",
         "./backend/java/skills/auth0",
         "./backend/java/skills/cognito",
+        "./backend/java/skills/rules",
         "./backend/_shared/pattern-guide",
         "./backend/_shared/code-review",
         "./observability/opentelemetry-java",
