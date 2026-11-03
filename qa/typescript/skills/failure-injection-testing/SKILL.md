@@ -1,6 +1,6 @@
 ---
 name: failure-injection-testing
-description: Use when writing fault-injection / resilience tests in Node / TypeScript / Vitest with Toxiproxy via Testcontainers — inject latency, drops, bandwidth caps on a dependency and assert the app degrades gracefully. Triggers: "test the app survives a slow database", "assert the circuit breaker opens". Do NOT use for happy-path DB tests (`qa-typescript:db-testcontainers`), mocking HTTP traffic (`qa-typescript:network-mocking`), or load (`qa-typescript:load-testing`).
+description: Use when writing fault-injection tests in TypeScript with Toxiproxy via Testcontainers to assert graceful degradation. Triggers "survive a slow database". Not for load (load-testing).
 ---
 
 # QA — Chaos / Fault-Injection Testing (TypeScript / Toxiproxy + Testcontainers + Vitest)

@@ -1,6 +1,6 @@
 ---
 name: accessibility
-description: Use when a SwiftUI or UIKit screen must work with VoiceOver, Dynamic Type through the accessibility sizes, Reduce Motion and Differentiate Without Color — labels, traits, values, grouping, rotors, custom actions, focus, announcements, touch targets. Triggers "VoiceOver reads the wrong thing", "text clips at large sizes", "announce the result". Do NOT use for scanning (`qa-mobile-<stack>`), field errors (`-forms`) or animation mechanics (`-animation`).
+description: Use when a SwiftUI or UIKit screen must work with VoiceOver, Dynamic Type and Reduce Motion. Triggers "VoiceOver reads the wrong thing". Not for a11y scanning (qa-mobile-typescript).
 ---
 
 # iOS — Accessibility

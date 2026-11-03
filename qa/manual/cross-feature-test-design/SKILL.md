@@ -1,6 +1,6 @@
 ---
 name: cross-feature-test-design
-description: Use when test cases must cover how a feature affects others — reaction chains, foreign events in shared states, shared data (CRUD, def-use), schedules and time boundaries, duplicate or concurrent delivery, invariants — from a basis with Connections. Triggers: "what else should we test when X changes", "test the side effects of Y", "cross-feature test cases". Do NOT use for field-level EP/BVA or single-feature rules (`test-design-techniques`) or formatting the suite (`test-case-writer`).
+description: Use when test cases must cover a feature's effects on others; reaction chains, shared data, schedules, concurrency. Triggers "test the side effects of Y". Not for EP/BVA (test-design-techniques).
 ---
 
 # QA — Cross-Feature Test Design

@@ -1,6 +1,6 @@
 ---
 name: forms
-description: Use when building or fixing a Compose form — text-field state, validation timing, KeyboardOptions and KeyboardActions field order, autofill ContentType and Credential Manager, IME insets, submit state, server errors mapped onto fields. Triggers "build a sign-up form", "keyboard hides the field", "autofill not offered", "server errors don't land on fields". Do NOT use for the request (`mobile-android:networking`), state ownership (`-architecture`) or XML forms (`-views-interop`).
+description: Use when building or fixing a Jetpack Compose form (validation, keyboard order, autofill, server errors on fields). Triggers "build a sign-up form". Not for the request (networking).
 ---
 
 # Android — Forms

@@ -1,6 +1,6 @@
 ---
 name: inhouse-framework-conventions
-description: Use when working in the Java 21 Accelerator test automation framework (Gradle + TestNG + RestAssured + Playwright + Appium, JSON-driven screens) or any consumer of it. Triggers: "add a test to the Java Accelerator", "scaffold a screen for the Java Appium suite", "create a Playwright page object for X in Accelerator". Not for a suite outside the Accelerator (`qa-java:page-object-design`, `qa-java:ui-tests-playwright`).
+description: Use when working in the Java Accelerator test framework (JSON-driven page objects) or a consumer of it. Triggers "add a test to the Accelerator". Not for suites outside it (page-object-design).
 ---
 
 # Accelerator Conventions (Java)

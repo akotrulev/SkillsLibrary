@@ -1,6 +1,6 @@
 ---
 name: privilege-escalation
-description: Use to elevate a foothold's privilege on a single host during an authorized penetration test — user shell to root/SYSTEM via SUID/sudo/kernel chains (Linux) or token/service chains (Windows). Triggers "escalate this foothold to root", "from www-data to root". Not for gaining the foothold (`penetration-testing:initial-access`), moving hosts (`penetration-testing:lateral-movement`), or infra posture benchmarks (`infra-security-tester`). Owned/lab targets only, under a committed scope file.
+description: Use when elevating a foothold to root or SYSTEM on one host in an authorized pentest (SUID, sudo, kernel, tokens). Triggers "escalate this foothold to root". Not for moving hosts (lateral-movement).
 ---
 
 # Penetration Testing — Privilege Escalation (linPEAS/winPEAS · GTFOBins/LOLBAS · kernel/sudo/SUID chains)

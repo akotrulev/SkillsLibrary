@@ -1,6 +1,6 @@
 ---
 name: doc-feature-trace
-description: Use when one functional area of an existing backend must be read in depth to recover what it actually does — following every entry point through auth, validation, domain rules, persistence and failure into seven file:line-evidenced inventories. Triggers "trace how this area works", "what business rules are in this module". Do NOT use to split a codebase into areas first (`dev:doc-codebase-survey`), write documentation (`dev:doc-business-model`), or find defects (`dev:audit-feature`).
+description: Use when one area of an existing backend must be traced in depth into file:line-evidenced inventories. Triggers "trace how this area works". Not for writing the docs (doc-business-model).
 ---
 
 # Feature Trace — recovering behavior from code

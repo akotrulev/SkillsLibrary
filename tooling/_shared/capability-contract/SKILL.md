@@ -1,6 +1,6 @@
 ---
 name: capability-contract
-description: Use when a project (or part of it) must become an agent-drivable surface — derive the capabilities, typed input/output contracts, flows and runtime dependencies into a reviewable contract document. Triggers "expose this project to an agent", "what tools should the MCP have", "spec the CLI commands". Do NOT use to implement the surface (`tooling:mcp-builder` / `tooling:cli-builder`), to plan a REST API (`dev:plan-api-surface`), or to document a feature for humans (`dev:doc-feature-trace`).
+description: Use when deriving a project's agent-drivable capabilities into a typed contract before building an MCP or CLI. Triggers "what tools should the MCP have". Not for building it (mcp-builder).
 ---
 
 # Capability Contract — what the tool exposes, before it exists

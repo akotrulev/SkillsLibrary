@@ -1,6 +1,6 @@
 ---
 name: visual-regression
-description: Use when a Java/TestNG Playwright suite must catch unintended visual change — screenshots compared against committed baselines with an image comparator, Percy, or Applitools Eyes. Triggers "add visual regression tests", "screenshot diff this page", "update the visual baselines", "the layout broke and no functional test caught it". Do NOT use for breakpoint layout (qa-java:responsive-testing), accessibility scans (qa-java:accessibility-testing) or failure screenshots (qa-java:evidence-capture).
+description: Use when a Java/TestNG Playwright suite must catch visual change (screenshot baselines, Percy, Applitools). Triggers "add visual regression tests". Not for breakpoint layout (responsive-testing).
 ---
 
 # QA — Visual Regression (Java / Playwright 1.63)

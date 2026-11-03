@@ -1,6 +1,6 @@
 ---
 name: styling
-description: Use when styling SwiftUI — Liquid Glass (forced by the iOS 27 SDK) on system chrome and custom glass surfaces, semantic colours, Dynamic Type text styles, asset-catalog colour and image tokens, dark mode, size classes, resizable iPad windows. Triggers "custom colours", "my bar looks flat", "support iPad", "Dynamic Type clips". Do NOT use for view structure (`mobile-ios:ui-components`), routes (`-navigation`) or motion (`-animation`).
+description: Use when styling SwiftUI (Liquid Glass, semantic colours, Dynamic Type, dark mode, iPad size classes). Triggers "dark mode". Not for component structure (ui-components).
 ---
 
 # iOS — Styling, Liquid Glass and Adaptive Layout

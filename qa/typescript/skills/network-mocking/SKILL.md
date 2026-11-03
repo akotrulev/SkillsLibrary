@@ -1,6 +1,6 @@
 ---
 name: network-mocking
-description: Use when Playwright Test (TypeScript) UI tests must intercept, mock, throttle or assert browser network traffic, or a non-Playwright client needs a MITM proxy. Triggers "mock this XHR in the UI test", "replay a HAR", "simulate slow 3G or offline", "assert the page called endpoint X", "check the security headers". Do NOT use for API tests without a browser (qa-typescript:api-tests), load-level throttling (performance) or WebSocket/SSE streams (qa-typescript:realtime-stream-testing).
+description: Use when TypeScript UI tests must mock, throttle or assert browser traffic (Playwright routes, HAR, MITM). Triggers "mock this XHR". Not for WebSocket/SSE (realtime-stream-testing).
 ---
 
 # QA — Network Mocking and Monitoring (TypeScript / Playwright 1.64)

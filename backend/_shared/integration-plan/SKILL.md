@@ -1,6 +1,6 @@
 ---
 name: plan-integrations
-description: Use when a planned backend needs its external dependencies specified — every system it calls, with auth, config keys (never values), limits, retry/circuit-breaker policy, and local-dev/test strategy. Triggers "what external services do we depend on", "what API keys do we need", "how do we handle it when the provider is down". Do NOT use to provision secret stores (`devops-engineer`), write client code (`be-<stack>`), or plan this service's own endpoints (`dev:plan-api-surface`).
+description: Use when a planned backend needs its external dependencies specified (auth, config keys, limits, retries). Triggers "what external services do we depend on". Not for own endpoints (plan-api-surface).
 ---
 
 # Integration Plan — the external dependency register

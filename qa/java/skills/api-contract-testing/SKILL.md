@@ -1,6 +1,6 @@
 ---
 name: api-contract-testing
-description: Use when setting up consumer-driven contract testing with Pact in a Java 21 + Spring Boot 3 service (Pact-JVM, JUnit 5) — synchronous HTTP, message (Kafka/SQS/RabbitMQ) or bi-directional (OpenAPI) contracts. Triggers: "set up Pact-JVM for our Spring Boot service", "verify our Java provider against Y's contract", "message pact for our Kafka consumer". Do NOT use for a single API's own tests (`qa-java:api-tests`) or broker plumbing (`qa-java:messaging-testing`).
+description: Use when setting up consumer-driven contract tests with Pact in a Java service (Pact-JVM). Triggers "set up Pact". Not for one API's own tests (api-tests).
 ---
 
 # QA — Contract Testing with Pact (Java / Pact-JVM)

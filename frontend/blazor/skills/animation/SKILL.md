@@ -1,6 +1,6 @@
 ---
 name: animation
-description: Use when adding animation/motion to a Blazor app (.NET 8/9/10) — CSS transitions/keyframes in `.razor.css` isolation over JS, `prefers-reduced-motion` as a hard floor, staggered reveals, scroll reveals (CSS `animation-timeline` first), View Transitions. Triggers: "animate this component / page-load sequence", "fade elements in on scroll", "add a page transition". Do NOT use to decide WHETHER motion serves the design (`design/visual-identity`) or CSS-isolation setup (`styling`).
+description: Use when animating a Blazor UI (.razor.css transitions, reduced motion, scroll reveals, View Transitions). Triggers "fade elements in on scroll". Not for motion design (motion).
 ---
 
 # Blazor — Motion

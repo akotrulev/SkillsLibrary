@@ -1,6 +1,6 @@
 ---
 name: project-setup
-description: Use when creating or hardening an iOS app on Xcode 27 — Swift 6 mode set explicitly (the template still says 5.0), warnings as errors, local Swift packages as modules, xcconfig per environment, swift-format + SwiftLint, test plans, scene lifecycle, launch screen, String Catalog, PrivacyInfo.xcprivacy. Triggers "new iOS app", "split into packages", "set up xcconfig". Do NOT use for signing and CI (`mobile-<stack>:release`), state design (`-architecture`) or screens (`-ui-components`).
+description: Use when creating or hardening an iOS app in Xcode (Swift 6 mode, local packages, xcconfig, SwiftLint). Triggers "new iOS app". Not for signing and CI (release).
 ---
 
 # iOS — Project Setup

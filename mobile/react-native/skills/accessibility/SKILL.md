@@ -1,6 +1,6 @@
 ---
 name: accessibility
-description: Use when a React Native screen must work with VoiceOver, TalkBack, large text and Reduce Motion — role / label / state props, the aria-* equivalents, focus and announcements, custom actions, touch targets, font scaling, contrast. Triggers "make this screen accessible", "VoiceOver reads the wrong thing", "text is cut off at large sizes", "announce the result". Do NOT use for scanning (`qa-mobile-typescript`), form errors (`-forms`) or motion mechanics (`-animation`).
+description: Use when a React Native screen must work with VoiceOver, TalkBack and large text. Triggers "VoiceOver reads the wrong thing". Not for a11y scanning (qa-mobile-typescript).
 ---
 
 # React Native — Accessibility

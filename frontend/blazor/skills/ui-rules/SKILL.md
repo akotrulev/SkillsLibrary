@@ -1,6 +1,6 @@
 ---
 name: ui-rules
-description: Use on every data-driven feature build for UI correctness — display (humanized enums, one format per type, names not raw GUIDs), table ergonomics (deterministic sort, server paging, filter parity), CRUD semantics (form↔DTO parity, read-only PKs, optimistic concurrency), disable-don't-hide, confirmations, IA. Triggers: "review this grid/form", "the enum shows as a number", "an edit discards a field". Do NOT use for fetch mechanics (`data-fetching`) or error states (`error-handling`).
+description: Use when building a data-driven Blazor feature, for UI correctness (humanized enums, formats, stable sort, paging, CRUD parity). Triggers "enum shows as a number". Not for fetching (data-fetching).
 ---
 
 # Blazor — UI Conventions (data-driven correctness)

@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: Use when deciding where state and logic live in a SwiftUI app — MV by default with @Observable models and services, a view model only when logic needs a test apart from the view, @State / @Binding / @Bindable / @Environment ownership, initializer injection with no container. Triggers "MVVM or not", "where does this state go". Do NOT use for fetch mechanics (`mobile-ios:networking`), persistence (`-offline-and-storage`) or routes (`-navigation`). TCA is an existing-codebase lane.
+description: Use when deciding where state and logic live in a SwiftUI app (@Observable models, view models only when earned). Triggers "MVVM or not". Not for API calls (networking).
 ---
 
 # iOS — Architecture and State

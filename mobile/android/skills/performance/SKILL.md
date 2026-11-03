@@ -1,6 +1,6 @@
 ---
 name: performance
-description: Use when an Android app janks, hangs, launches slowly, hits ANRs or leaks — Baseline and Startup Profiles, Macrobenchmark, AGP 9 R8 keep-rule strictness, App Startup, Android vitals thresholds, Compose recomposition tracing, Perfetto, StrictMode. Triggers "scroll jank", "slow cold start", "ANR rate", "R8 broke release". Do NOT use for crash-reporter setup (`mobile-<stack>:observability`) or animation design (`-animation`).
+description: Use when an Android app janks, starts slowly, hits ANRs or leaks (Baseline Profiles, Macrobenchmark, R8, Perfetto). Triggers "slow cold start". Not for crash reporting (observability).
 ---
 
 # Android — Performance

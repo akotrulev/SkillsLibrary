@@ -1,6 +1,6 @@
 ---
 name: corpus
-description: Use when a design decision needs the vendored design corpus — styles, palettes, font pairings, UX guidelines, icons, landing patterns, motion presets, chart types, stack UI rules — or a `--design-system` block from a brief. Every `design/` skill queries it first. Triggers "what palette for a fintech dashboard", "pick a font pairing", "generate a design system", "what does the UX corpus say about X". Not for the judgment layered on top — that stays with the owning `design/*` skill.
+description: Use when a design decision needs the vendored corpus (styles, palettes, font pairings, UX guidelines, icons). Triggers "pick a font pairing". Not for the judgment on top (visual-identity).
 metadata:
   author: nextlevelbuilder
   version: "2.13.0"

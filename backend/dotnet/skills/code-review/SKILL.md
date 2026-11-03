@@ -1,6 +1,6 @@
 ---
 name: conventions-review
-description: Use when the user asks to review C# / .NET (10 primary, 8-9 supported) code for design-pattern misuse, over-abstraction, hidden coupling, async violations, or DI anti-patterns. Triggers: "review this for pattern misuse", "is this CQRS justified", "check for service-locator usage", "spot smells in this service", "review my DI registration". Do NOT use for explanations (use `backend/dotnet/skills/pattern-guide`) or for generating new code (use `backend/dotnet/skills/pattern-writer`).
+description: Use when reviewing C#/.NET code for pattern misuse, over-abstraction, async or DI anti-patterns. Triggers "review this .NET service", "is this CQRS justified". Not for explanations (patterns).
 ---
 
 # .NET Design Patterns — Reviewer

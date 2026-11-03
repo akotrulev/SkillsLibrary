@@ -1,6 +1,6 @@
 ---
 name: permission-testing
-description: Use when authoring **functional access-control tests** in Node 24 / TypeScript (Vitest + fetch) covering the scanner blind spot — BOLA/IDOR, BFLA, property-level authz. Triggers "test for IDOR", "check broken object-level authorization", "can user A read user B's records", "build an authorization matrix", "cross-tenant leak test". Do NOT use for scanner-driven DAST (use `qa-typescript:passive-scan`) or minting test tokens (use `qa-typescript:test-login-tokens`).
+description: Use when writing access-control tests in TypeScript (Vitest + fetch) for BOLA/IDOR and BFLA. Triggers "test for IDOR", "can user A read user B's data". Not for scanner DAST (passive-scan).
 ---
 
 # Security Testing — Access Control / Authorization Matrix (TypeScript / Vitest)

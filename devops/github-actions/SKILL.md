@@ -1,6 +1,6 @@
 ---
 name: github-actions
-description: Use when the user asks to write, review, or modify GitHub Actions workflows for build/test/deploy of Java, .NET, or TypeScript projects. Triggers: "write a GitHub Actions workflow for X", "add a deploy job to .github/workflows/Y.yml". Do NOT use for GitLab CI (`devops/gitlab-ci`), Azure Pipelines (`devops/azure-pipelines`), or IaC (`devops/infrastructure-as-code`). Do NOT use for the test-suite CI lane — `qa-cicd-{java,dotnet,typescript}` owns that; this skill owns the build/deploy lane.
+description: Use when writing or modifying GitHub Actions workflows for build, test and deploy. Triggers "write a GitHub Actions workflow", "add a deploy job". Not for test-suite CI lanes (ci-pipelines).
 ---
 
 # DevOps — GitHub Actions

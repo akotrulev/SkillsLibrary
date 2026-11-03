@@ -1,6 +1,6 @@
 ---
 name: source-audit
-description: Use for an agent-driven, source-first security audit of a codebase — coverage-ledger hunters, adversarial verifiers, schema-validated findings; Cloudflare's vendored workflow plus house overrides. Triggers "security audit this codebase", "find vulnerabilities in ./src", "white-box security review". Do NOT use for a CI scanner gate (`code-scan`), to prove a finding on a running env (`exploit-validation`), or to audit governance artifacts (`standards-audit`).
+description: Use when running an agent-driven, source-first security audit of a codebase with verified findings. Triggers "security audit this codebase", "white-box review". Not for a CI SAST gate (code-scan).
 ---
 
 # Security Testing — Source Audit

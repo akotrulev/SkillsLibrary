@@ -1,6 +1,6 @@
 ---
 name: mobile-app-crawler
-description: Use when a TypeScript (WebdriverIO) suite must crawl MANY screens of a live mobile app (Appium MCP) into a resumable screen map. Triggers "crawl the app", "we explored the app already, now build the POMs". Do NOT use for a single screen (`qa-typescript:mobile-screen-explorer`), a screen object (`qa-typescript:mobile-screen-objects`), the folder tree (`qa-typescript:page-object-design`), tests (`qa-typescript:ui-tests-appium`), or web apps (`qa-typescript:page-objects-from-url`).
+description: Use when a WebdriverIO mobile suite must crawl many screens of a live app via the Appium MCP into a resumable screen map. Triggers "crawl the app". Not for one screen (mobile-screen-explorer).
 ---
 
 # QA — Appium App Crawler (TypeScript)

@@ -1,6 +1,6 @@
 ---
 name: docker
-description: Use when the user asks to author or improve Dockerfiles / container images for .NET / Java / Node services, build multi-stage images, choose a base image, pin versions, optimize layers, set non-root + healthcheck, or wire image scanning. Triggers: "write a Dockerfile for X", "shrink this image", "what base image should we use". Do NOT use for orchestration (`devops/kubernetes`), pipelines (`devops/{github-actions,gitlab-ci,azure-pipelines}`), or app deploy (`devops/{aws,azure}-deployment`).
+description: Use when writing or improving Dockerfiles for .NET/Java/Node services (multi-stage, base image, non-root). Triggers "write a Dockerfile", "shrink this image". Not for orchestration (kubernetes).
 ---
 
 # DevOps — Docker

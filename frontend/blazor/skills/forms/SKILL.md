@@ -1,6 +1,6 @@
 ---
 name: forms
-description: Use when building or improving a Blazor form (.NET 8/9/10) — `EditForm`, `DataAnnotationsValidator`, `AddValidation()` + `[ValidatableType]` (net10), `FluentValidationValidator`, async validation, ProblemDetails error mapping, uploads, wizards, a11y. Triggers: "build a Blazor form for X", "wire FluentValidation in Blazor", "server-side errors on a Blazor form". Do NOT use for state management (`state-management`), component scaffolding (`component-writer`), or React (its sibling).
+description: Use when building or fixing a Blazor form (EditForm, DataAnnotations, FluentValidation, server-error mapping). Triggers "build a form for X", "wire FluentValidation". Not for state (state-management).
 ---
 
 # Blazor Forms

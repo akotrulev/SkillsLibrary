@@ -1,6 +1,6 @@
 ---
 name: performance-project-setup
-description: Use when starting a load/performance test project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, local setup, and run commands for a standalone NBomber console suite. Composable with the api/ui/mobile dotnet scaffolds. Triggers "scaffold a performance test project", "set up an NBomber suite from scratch", "what versions for a C# load test framework". Not for authoring the load scenarios (`load-testing`).
+description: Use when starting an NBomber load test project from zero in .NET (layout, package versions, run commands). Triggers "set up an NBomber suite". Not for writing load scenarios (load-testing).
 ---
 
 # Performance Test Project Scaffold (C# / .NET 10)

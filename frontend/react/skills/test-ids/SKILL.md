@@ -1,6 +1,6 @@
 ---
 name: test-ids
-description: Use when adding, auditing, or fixing `data-testid` attributes in pages/components so UI suites can target the app — including consuming a `missing-testids.md` report from QA's `page-objects-from-url`. Covers per-library attribute mechanics (MUI `slotProps`, Mantine/Chakra rest-props, shadcn/none). Triggers "add testids to this page", "audit the data-testids", "the E2E test can't find this element". Not for writing the UI tests (`qa-ui-typescript`).
+description: Use when adding, auditing or fixing data-testid attributes in React pages for UI suites. Triggers "add testids to this page", "audit the data-testids". Not for page objects (page-objects-from-url).
 ---
 
 # React — Testability (`data-testid` writer)

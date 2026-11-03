@@ -1,6 +1,6 @@
 ---
 name: cloud-incident-response
-description: Use to respond to and recover from a security incident in a cloud account/tenant/project (AWS/Azure/GCP) — triage the alert that already fired, acquire forensic evidence before any destructive step, contain by identity and network, eradicate the foothold, and recover from clean backups — plus BCDR (RTO/RPO, multi-region failover, restore drills) as a reference. Blue-team, language-agnostic. Triggers "we got a GuardDuty/Sentinel/SCC alert, what now", "acquire a forensic snapshot of this instance", "run the compromised-credential runbook". Not for authoring the detection (`detection-engineering`), proving it fired (`detection-validation`), app telemetry (`observability`), or defensive posture benchmarking (`cloud-posture`). This skill owns RESPOND + RECOVER, not detect.
+description: Use when responding to a cloud security incident on AWS, Azure or GCP (triage, forensics, containment, recovery, BCDR). Triggers "we got a GuardDuty alert". Not for detections (detection-engineering).
 ---
 
 # Security Governance — Cloud Incident Response (runbook · forensics · BCDR)

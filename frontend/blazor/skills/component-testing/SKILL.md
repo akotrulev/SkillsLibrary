@@ -1,6 +1,6 @@
 ---
 name: component-testing
-description: Use when writing dev-side tests for Blazor — bUnit v2 for anything that renders, plain NUnit/xUnit for anything that doesn't, to the ≥ 80% branch-coverage floor on changed code. Triggers: "unit-test this Blazor component", "write bUnit tests", "mock IJSRuntime in a component test", "test this validator", "test my state container". Do NOT use for E2E/browser journeys (the `qa-ui-dotnet` peer) or data-testid authoring (`test-ids`).
+description: Use when a Blazor component or front-end logic needs a unit test (bUnit, NUnit or xUnit). Triggers "unit-test this component". Not for E2E journeys (ui-tests-playwright).
 ---
 
 # Blazor — Component & Pure-Logic Testing (bUnit v2)

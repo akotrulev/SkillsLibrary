@@ -1,6 +1,6 @@
 ---
 name: device-cloud
-description: Use when the user needs the **real-device-cloud specifics** of running Java Appium tests on a mobile device farm. Triggers: "upload our app to BrowserStack App Automate and run the Appium Java tests", "run our TestNG mobile suite across a real-device matrix", "test biometric login on a real device on BrowserStack". Not for web grids (`qa-java:browser-cloud-setup`) or OS-surface features (`qa-java:mobile-native-features`).
+description: Use when running Java Appium tests on a real-device cloud (app upload, device matrix, parallel runs). Triggers "run on BrowserStack devices". Not for web grids (browser-cloud-setup).
 ---
 
 # QA — Mobile Device Farm (Java: Appium java-client on a real-device cloud)

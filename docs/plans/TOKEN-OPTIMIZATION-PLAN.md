@@ -2,7 +2,7 @@
 
 **Goal:** cut the context cost of installing/using any plugin, without deleting content — relocate depth to lazy-loaded `references/`, trim always-on catalog text, slim agent prompts.
 
-**Status (2026-09-26, `python3 tools/token-audit.py`, folded from the retired `docs/plans/token-optimization-progress.md`):** live. Budgets: skill `description` ≤ 500 chars · agent `description` ≤ 650 · SKILL.md body ≤ 16,000 · agent file ≤ 14,000. Skill descriptions over budget **0** · agent descriptions **0** (plan 001 cleared the last 45) · SKILL.md bodies **109** · agent files **51** — **160** size violations, all relocation-to-`references/` work. The script exits non-zero until they are gone. Next: its own numbered plan (plan 001, O7).
+**Status (2026-09-26, `python3 tools/token-audit.py`, folded from the retired `docs/plans/token-optimization-progress.md`):** live. Budgets: skill `description` ≤ 200 chars (500 until 2026-11-03) · agent `description` ≤ 650 · SKILL.md body ≤ 16,000 · agent file ≤ 14,000. Skill descriptions over budget **0** · agent descriptions **0** (plan 001 cleared the last 45) · SKILL.md bodies **109** · agent files **51** — **160** size violations, all relocation-to-`references/` work. The script exits non-zero until they are gone. Next: its own numbered plan (plan 001, O7).
 
 **Current (2026-07-25) — the two plugins worked so far:**
 
@@ -23,7 +23,7 @@
 Three cost layers: (1) **always-on** — every registered skill's `description` + every agent's description is injected into every session; (2) **per-invocation** — the SKILL.md body; (3) **agent-run compounding** — agent prompt + 2–5 full skills per phase. `references/` are lazy — already correct, don't touch that design.
 
 **Budgets (enforced by the audit script):**
-- skill `description` ≤ 500 chars (trigger phrases + one-line fence stay; enumerations move to the body)
+- skill `description` ≤ 200 chars ("Use when" + 1–2 triggers + one "Not for" fence; enumerations move to the body). *Cut from 500 on 2026-11-03: a project enabling ~200 skills at ~470 chars overflowed Claude Code's skill-listing budget (~1% of context), which drops descriptions from the least-used skills, so those skills stopped auto-triggering. All 481 registered descriptions were rewritten to ≤ 200.*
 - SKILL.md body ≤ 16,000 chars (deep sections → `references/details.md`, per the existing library rule). *Recalibrated from 12K during Phase 2: the library's router-shape skills run 12–16K by design; 16K catches the genuine outliers without churning the healthy middle.*
 - agent file ≤ 14,000 chars
 

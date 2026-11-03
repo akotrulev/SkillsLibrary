@@ -1,6 +1,6 @@
 ---
 name: ui-components
-description: Use when writing Jetpack Compose UI — stateless composables with hoisted state, modifier as the first optional parameter, previews, lazy-list key and contentType, stability, side-effect APIs, Material 3 components, loading / loaded / failed regions. Triggers "build this screen", "why does it recompose", "LaunchedEffect keys". Do NOT use for ViewModels (`mobile-android:architecture`), theme tokens (`-styling`), routes (`-navigation`) or XML Views (`-views-interop`).
+description: Use when writing Jetpack Compose UI (stateless composables, previews, lazy lists, side effects, Material 3). Triggers "build this screen". Not for state ownership (architecture).
 ---
 
 # Android — UI Components (Compose)

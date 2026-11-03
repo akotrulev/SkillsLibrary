@@ -1,6 +1,6 @@
 ---
 name: browser-cloud-setup
-description: Use when the user needs to run Java Playwright (web) or Appium java-client (mobile) tests on a **hosted cloud grid**. Triggers: "run our Playwright Java tests on BrowserStack", "wire Appium java-client to Sauce Labs", "set up LambdaTest caps for our TestNG Appium tests". Not for real-device app upload and device matrices (`qa-java:device-cloud`) or writing the tests (`qa-java:ui-tests-playwright`).
+description: Use when running Java Playwright or Appium tests on a hosted grid (BrowserStack, Sauce Labs, LambdaTest). Triggers "run our tests on BrowserStack". Not for real-device matrices (device-cloud).
 ---
 
 # QA — Cloud Grid Config (Java: Playwright + Appium java-client)

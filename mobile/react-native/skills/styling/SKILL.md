@@ -1,6 +1,6 @@
 ---
 name: styling
-description: Use when styling or adapting layout in an Expo SDK 57 app — `StyleSheet.create`, typed tokens, `useColorScheme` dark mode, type scale, safe-area insets, `useWindowDimensions`, tablets, foldables, the one-styling-authority rule. Triggers "set up tokens", "dark mode", "content under the notch", "work on iPad / foldable". Do NOT use for a kit's theme (`mobile-react-native:component-library`), palette choice (`design/visual-identity`), screens (`-ui-components`) or web CSS.
+description: Use when styling an Expo/React Native app (StyleSheet, typed tokens, dark mode, safe areas, tablets). Triggers "dark mode". Not for a UI kit's theme (component-library).
 ---
 
 # React Native — Styling and Adaptive Layout

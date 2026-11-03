@@ -1,6 +1,6 @@
 ---
 name: plan-delivery
-description: Use when a design pack (blueprint, data model, API surface, integrations, epic map) must become an ordered task list — one flat sequence, each task with one deliverable, stack and agent, plus streams and a reconcile against half-built code. Triggers "what order do we build this in", "turn the plan into tasks". Do NOT use to size tasks or write prompts (`dev:plan-session-budget`), plan epic parallelism (`dev:plan-epic-map`), write code (`be-<stack>`) or audit code (`code-auditor`).
+description: Use when a design pack must become an ordered task list, one deliverable, stack and agent per task. Triggers "what order do we build this in". Not for sizing or prompts (plan-session-budget).
 ---
 
 # Delivery Plan — the ordered, agent-bound task list

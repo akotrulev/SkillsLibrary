@@ -1,6 +1,6 @@
 ---
 name: metrics
-description: Use when setting up the metrics backend of the Grafana stack — Prometheus (single-cluster) or Mimir (multi-cluster / long-retention) — ingest from the OTel Collector, exemplar storage, rule deployment, retention + cardinality tuning. Triggers: "set up Prometheus", "deploy Mimir", "long-term metrics storage", "enable exemplars". Do NOT use for query/rule syntax (`queries`), dashboards (`dashboards`), logs+traces (`logs-traces-setup`), or instrumentation (`opentelemetry-{stack}`).
+description: Use when setting up Prometheus or Mimir as the Grafana metrics backend (ingest, exemplars, retention, cardinality). Triggers "set up Prometheus", "deploy Mimir". Not for Loki or Tempo (logs-traces).
 ---
 
 # Observability — Prometheus / Mimir Setup

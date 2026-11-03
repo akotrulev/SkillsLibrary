@@ -1,6 +1,6 @@
 ---
 name: passive-scan
-description: Use when adding an OWASP ZAP **baseline** (passive) DAST scan as a CI gate for a Node 24 / TypeScript / Vitest pipeline. Triggers "add a DAST gate to CI", "run ZAP against our running app", "scan for missing security headers", "passive security scan on every PR". Do NOT use for active/injection scanning (`qa-<stack>:active-scan`), known-CVE matching (`qa-<stack>:known-vuln-scan`), TLS config (`qa-<stack>:certificate-scan`), or BOLA/IDOR logic (`qa-typescript:permission-testing`).
+description: Use when adding an OWASP ZAP baseline (passive) DAST scan as a CI gate for a TypeScript pipeline. Triggers "add a DAST gate to CI". Not for active injection scans (active-scan).
 ---
 
 # Security Testing — OWASP ZAP Baseline Scan (TypeScript)

@@ -1,6 +1,6 @@
 ---
 name: theme-presets
-description: Use to apply one of 10 preset color+font themes as primitive-tier starting values for an artifact (deck, doc, HTML page) or a quick-start web-app palette — when a brief does not warrant a bespoke identity. Triggers: "apply a preset theme", "style this deck/page with a theme", "quick theme". Do NOT use to INVENT a bespoke identity (`design/visual-identity`), match an EXISTING brand (`design/brand-import`), or for token tier discipline (`design/design-tokens`).
+description: Use when applying one of 10 preset color+font themes to a deck, doc, HTML page or quick-start app. Triggers "apply a preset theme", "quick theme". Not for a bespoke identity (visual-identity).
 metadata:
   version: "1.1.0"
 ---

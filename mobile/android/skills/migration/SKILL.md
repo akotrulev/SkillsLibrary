@@ -1,6 +1,6 @@
 ---
 name: migration
-description: Use when an Android project changes lane — AGP 8 → 9 (built-in Kotlin, compilerOptions, kapt → KSP), Views → Compose, Java → Kotlin, Groovy → KTS, LiveData / RxJava → Flow, Dagger → Hilt, Navigation Compose → Navigation 3, Room 2 → 3, a targetSdk raise, EncryptedSharedPreferences replacement. Triggers "move us to AGP 9", "kapt fails", "drop LiveData". Do NOT use for feature work, a new app (`mobile-android:project-setup`) or a minor dependency bump.
+description: Use when an Android project changes lane (AGP 9, Views to Compose, kapt to KSP, LiveData to Flow). Triggers "move us to AGP 9". Not for a new app (project-setup).
 ---
 
 # Android — Migration

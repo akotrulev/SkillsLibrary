@@ -1,6 +1,6 @@
 ---
 name: standards-audit
-description: Use to audit a whole Android app (Kotlin, Compose, Views, KMP) against the mobile-android plugin's conventions — version lane, structure, UI, navigation, data, device code, accessibility, resilience, test ids, security and store fragments — as a saved, re-runnable report in `docs/audits/`. Read-only. Triggers "audit our Android app against the plugin conventions". Do NOT use to review one diff (`mobile-android:conventions-review`) or check code against a spec (`code-auditor`).
+description: Use when auditing a whole Android app (Kotlin, Compose, Views, KMP) against mobile-android conventions; read-only report. Triggers "audit our Android app". Not for one diff (conventions-review).
 ---
 
 # mobile-android Conformance Audit

@@ -1,6 +1,6 @@
 ---
 name: component-testing
-description: Use when a component, custom hook, or any front-end logic needs a dev-side test — Vitest + React Testing Library for anything that renders, plain Vitest for anything that doesn't, to the ≥ 80% branch-coverage floor on changed code. Triggers "unit-test this component", "test my custom hook", "test my Zod schema", "test this formatter", "test my Zustand store", "an update was not wrapped in act". Not for E2E journeys (the `qa-ui-typescript` peer).
+description: Use when a React component, hook or front-end logic needs a unit test (Vitest + React Testing Library). Triggers "unit-test this component". Not for E2E journeys (ui-tests-playwright).
 ---
 
 # React — Component & Pure-Logic Testing (Vitest + React Testing Library)

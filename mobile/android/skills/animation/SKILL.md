@@ -1,6 +1,6 @@
 ---
 name: animation
-description: Use when a Compose app needs motion or gestures — AnimatedVisibility, animate*AsState, Transition, AnimatedContent, shared-element transitions, predictive-back animation, drag and swipe gestures — and the Reduce Motion floor (animator duration scale). Triggers "animate this", "hero transition", "swipe to dismiss", "respect remove animations". Do NOT use for route structure (`mobile-android:navigation`), Views animators (`-views-interop`), or what to animate (design).
+description: Use when a Jetpack Compose app needs motion or gestures (shared elements, predictive back, swipe) honoring reduced motion. Triggers "animate this". Not for whether to animate (design:motion).
 ---
 
 # Android — Animation and Gestures

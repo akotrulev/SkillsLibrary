@@ -1,6 +1,6 @@
 ---
 name: accessibility-testing
-description: Use when a Java 21 / TestNG Playwright suite must scan for accessibility violations — axe-core inside UI flows, or Lighthouse scores for public pages. Triggers "add a11y tests", "scan for WCAG 2.2 violations", "fail CI on accessibility regressions", "set an accessibility budget". Do NOT use for the app's own accessibility implementation (the fe-* accessibility skill), pixel diffs (qa-java:visual-regression) or breakpoint layout (qa-java:responsive-testing).
+description: Use when a Java/TestNG Playwright suite must scan for WCAG violations with axe-core or Lighthouse. Triggers "add a11y tests". Not for pixel diffs (visual-regression).
 ---
 
 # QA — Accessibility Testing (Java / Playwright 1.63)

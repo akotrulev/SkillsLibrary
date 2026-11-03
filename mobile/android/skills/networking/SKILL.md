@@ -1,6 +1,6 @@
 ---
 name: networking
-description: Use when an Android app must call an API — Retrofit 3 + OkHttp (Ktor 3.6 in the KMP lane), kotlinx.serialization, timeout budgets per endpoint class, coroutine cancellation, bounded retries with Retry-After, no retry offline, ProblemDetails, OkHttp Authenticator refresh, WebSocket, Network Security Config. Triggers "request hangs on cell", "retry storm", "refresh token race". Do NOT use for the failure UI (`mobile-android:error-handling`), forms, or Room (`-offline-and-storage`).
+description: Use when an Android app calls an API (Retrofit + OkHttp or Ktor; timeouts, retries, token refresh). Triggers "request hangs on cell". Not for the failure UI (error-handling).
 ---
 
 # Android — Networking

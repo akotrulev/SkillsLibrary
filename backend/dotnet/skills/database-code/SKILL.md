@@ -1,6 +1,6 @@
 ---
 name: persistence
-description: Use when setting up or refactoring persistence in .NET (10 primary, 8-9) — EF Core `DbContext` design, configurations, migrations, query patterns, transactions, optimistic concurrency, tuning. Triggers: "set up EF Core for X", "AsNoTracking vs tracking", "EF migrations workflow", "row version concurrency", "this LINQ query is slow". Do NOT use for raw-SQL data access (`data/<db>`), cross-engine migrations (`data/_shared/migrations`), or Java / Node persistence.
+description: Use when setting up or refactoring .NET persistence with EF Core (DbContext, migrations, transactions, tuning). Triggers "set up EF Core", "this LINQ query is slow". Not for raw SQL (postgresql).
 ---
 
 # .NET — Persistence with EF Core

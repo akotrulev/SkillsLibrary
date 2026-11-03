@@ -1,6 +1,6 @@
 ---
 name: db-verification-queries
-description: Use when writing or reviewing a safe verification query for tests in Java 21 / Spring Boot 3 — assert a row exists, add a `COUNT(*)` check, review test SQL for guardrails, or poll for an eventually-consistent row. Triggers "write a verification query for this test", "assert this row exists", "review my test SQL", "wait for an eventually-consistent row". Do NOT use for connection/seeding/cleanup (use `qa-java:db-connection`), or container lifecycle (use `qa-java:db-testcontainers`).
+description: Use when writing or reviewing safe verification SQL in Java tests (row exists, COUNT, polling). Triggers "review my test SQL". Not for seeding or cleanup (db-connection).
 ---
 
 # QA — DB Testing Query Author (Java 21 + Spring Boot 3)

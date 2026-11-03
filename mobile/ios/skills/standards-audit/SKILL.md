@@ -1,6 +1,6 @@
 ---
 name: standards-audit
-description: Use to audit a whole iOS app (Swift, SwiftUI, UIKit) against the mobile-ios plugin's conventions — version lane, structure, UI, navigation, data, device and extension code, accessibility, resilience, test ids, security and store fragments — as a saved, re-runnable report in `docs/audits/`. Read-only. Triggers "audit our iOS app against the plugin conventions". Do NOT use to review one diff (`mobile-ios:conventions-review`) or check code against a spec (`code-auditor`).
+description: Use when auditing a whole iOS app (Swift, SwiftUI, UIKit) against mobile-ios conventions; read-only report. Triggers "audit our iOS app". Not for one diff (conventions-review).
 ---
 
 # mobile-ios Conformance Audit

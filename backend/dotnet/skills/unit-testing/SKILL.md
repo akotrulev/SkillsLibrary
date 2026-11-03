@@ -1,6 +1,6 @@
 ---
 name: unit-testing
-description: Use when backend C# logic needs a dev-side unit test — NUnit 4 + NSubstitute + FakeTimeProvider: the five untestable seams, fakes-over-mocks, async assertions, the ≥ 80% branch-coverage floor on changed code. In-process, no HTTP, container, or real database. Triggers "unit-test this handler", "test this validator/calculator", "how do I fake the clock in a test". Do NOT use for contract/integration tests through the transport (`qa-api-dotnet`), mutation scoring (`qa-dotnet:test-quality-check`), or Blazor (`fe-blazor:component-testing`).
+description: Use when C# backend logic needs a unit test with NUnit + NSubstitute (seams, fakes, coverage floor). Triggers "unit-test this handler", "fake the clock". Not for HTTP tests (api-tests).
 ---
 
 # .NET — Unit Testing (NUnit 4 + NSubstitute)

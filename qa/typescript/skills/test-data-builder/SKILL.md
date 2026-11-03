@@ -1,6 +1,6 @@
 ---
 name: test-data-builder
-description: Use when the user asks to create test data factories or ObjectMothers in a Node + TypeScript test project to replace duplicated inline literals across tests with named, intention-revealing factories. Triggers: "create a builder for User in TS", "set up test data for X in Vitest", "extract this fixture into a factory". Do NOT use for many-row data files (`qa-typescript:data-driven-testing`) or database seeding (`qa-typescript:db-connection`).
+description: Use when creating test data builders/ObjectMothers in a TypeScript test project to replace duplicated literals. Triggers "create a builder for User". Not for row data files (data-driven-testing).
 ---
 
 # QA — Test Data Builder / ObjectMother (TypeScript / Node 24)

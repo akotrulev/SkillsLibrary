@@ -1,6 +1,6 @@
 ---
 name: api-tests-grpc
-description: Use when scaffolding black-box **gRPC** API tests in Java 21 with grpc-java + TestNG against a deployed, proto-defined HTTP/2 service. Triggers: "write a gRPC test for RPC X", "assert the StatusRuntimeException status code", "test a server-streaming RPC". Do NOT use for REST (`qa-java:api-tests`) or GraphQL (`qa-java:api-tests-graphql`).
+description: Use when writing black-box gRPC API tests in Java (grpc-java + TestNG) against a proto-defined service. Triggers "write a gRPC test for RPC X". Not for REST (api-tests).
 ---
 
 # QA — gRPC API Test Writer (Java 21 / grpc-java + TestNG)

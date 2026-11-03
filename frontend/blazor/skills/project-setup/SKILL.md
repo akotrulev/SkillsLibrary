@@ -1,6 +1,6 @@
 ---
 name: project-setup
-description: Use when standing up a Blazor Web App in .NET 8/9/10 — choose the interactivity model, lay out the server + `.Client` split, pick a render mode per surface, wire nullable/warnings-as-errors/CPM/`.editorconfig`. Triggers: "create a new Blazor project", "scaffold a Blazor Web App", "which render mode should this app use". Do NOT use to scaffold components into an existing solution (`component-writer`), wire data fetching (`data-fetching`), or add a component library (`component-library`).
+description: Use when standing up a new Blazor Web App from zero (interactivity model, .Client split, render modes). Triggers "create a new Blazor project". Not for an existing app (component-writer).
 ---
 
 # Blazor — Project Scaffold

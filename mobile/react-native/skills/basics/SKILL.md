@@ -1,6 +1,6 @@
 ---
 name: concepts
-description: Use when explaining or checking React Native + Expo fundamentals on SDK 57 — New Architecture, Hermes V1, JS/UI/worklet threads, React Compiler, the web-React to RN map (no RSC, DOM, CSS cascade or SEO), Expo as the framework. Triggers "RN equivalent of X", "why no server component", "JS thread vs UI thread", "Expo Go vs dev build". Do NOT use for scaffolding (`mobile-react-native:project-setup`), routes (`-navigation`), screens (`-ui-components`) or React web (`fe-react:concepts`).
+description: Use when explaining React Native + Expo fundamentals (New Architecture, Hermes, threads, web React vs RN). Triggers "RN equivalent of X". Not for reviewing a diff (conventions-review).
 ---
 
 # React Native / Expo — Basics

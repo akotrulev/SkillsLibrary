@@ -1,6 +1,6 @@
 ---
 name: accessibility
-description: Use when a Compose or Views screen must work with TalkBack, font scale to 200%, Switch Access and the animator duration scale — semantics, contentDescription, merged descendants, roles, state descriptions, custom actions, focus, live regions, 48 dp targets. Triggers "TalkBack reads the wrong thing", "text clips at large font", "announce the result". Do NOT use for scanning (`qa-mobile-<stack>`), field errors (`-forms`) or animation mechanics (`-animation`).
+description: Use when a Jetpack Compose or Views screen must work with TalkBack, large font and Switch Access. Triggers "TalkBack reads the wrong thing". Not for a11y scanning (qa-mobile-typescript).
 ---
 
 # Android — Accessibility

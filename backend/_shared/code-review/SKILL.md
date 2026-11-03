@@ -1,6 +1,6 @@
 ---
 name: architecture-review
-description: Use when the user asks for a language-agnostic critique of pattern usage — pattern stacking, premature abstraction, missing abstractions where they'd help, layering violations. Triggers: "audit our use of patterns", "is this architecture overdesigned", "where are we under-abstracting", "review this for cross-cutting smells". Do NOT use for stack-specific syntax-level reviews (use `backend/<stack>/skills/code-review`).
+description: Use when critiquing pattern usage across stacks (pattern stacking, premature abstraction, layering). Triggers "is this architecture overdesigned". Not for stack-level review (conventions-review).
 ---
 
 # Design Patterns — Shared Reviewer (language-agnostic)

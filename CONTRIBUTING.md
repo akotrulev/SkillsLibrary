@@ -57,14 +57,17 @@ Step-by-step orchestrator agents live in `<domain>/agents/<name>.md`. Copy `.ski
 
 This is the highest-leverage line in the whole skill. Claude reads only descriptions when deciding which skills are relevant — if the description is vague, the skill won't trigger; if it's too broad, it'll trigger for the wrong things.
 
+Every enabled skill's description is sent on every request, inside a listing budget of about 1% of the context window. When the listing overflows, Claude Code drops descriptions, starting with the least-used skills. Those skills then show as bare names and never trigger. A project enables several plugins with about 200 skills between them, so the budget per skill is small.
+
 Rules:
-- Start with "Use when..." and list concrete trigger phrases.
-- Include the stack/language if the skill is stack-specific.
-- Include an explicit "Do NOT use for..." clause to disambiguate from siblings.
-- Stay within ≤ 500 characters for a skill and ≤ 650 for an agent — `tools/token-audit.py` enforces both. Trim restated detail, never the Do-NOT clause.
+- **≤ 200 characters for a skill** and ≤ 650 for an agent. `tools/token-audit.py` enforces both.
+- Start with "Use when..." and the key use case. Name the stack or tool if the skill is stack-specific, since those words drive matching.
+- Then one or two quoted trigger phrases, written `Triggers "a", "b".` Never write `Triggers:`. A colon followed by a space breaks a plain YAML scalar.
+- End with one "Not for X (sibling)." clause naming the closest confusable sibling in the same plugin.
+- Leave enumerations, version lists and scope prose to the body.
 
 Good:
-> Use when the user asks to write, derive, or generate formal test cases from requirements, user stories, or acceptance criteria. Triggers: "write test cases for X", "derive test scenarios from these ACs". Do NOT use for exploratory test charters (use qa/exploratory-charter-writer) or for writing automation code (use qa/api-test-author or qa/ui-test-author).
+> Use when deriving formal manual test cases from requirements, stories or ACs. Triggers "write test cases for X", "derive scenarios from these ACs". Not for exploratory charters (exploratory-charter-writer).
 
 Bad:
 > Helps with test cases.
@@ -111,7 +114,7 @@ Skills are versioned via git. If you make a breaking change to a skill's output 
 ## Pull request checklist
 
 - [ ] New skill follows the template
-- [ ] Description starts with "Use when..." and includes a "Do NOT use for..." clause
+- [ ] Description is ≤ 200 characters, starts with "Use when..." and ends with a "Not for..." clause
 - [ ] At least one full example in the skill
 - [ ] Tested with 3+ trigger phrases
 - [ ] Listed in the appropriate section of the root `README.md` status table

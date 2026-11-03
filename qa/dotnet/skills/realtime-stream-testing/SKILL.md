@@ -1,6 +1,6 @@
 ---
 name: realtime-stream-testing
-description: Use when testing WebSocket or SSE streams in .NET 10 (8-9) / NUnit — protocol clients (`ClientWebSocket`, SignalR `HubConnection`, SSE over `HttpClient`) draining frames into a channel and asserting on conditions (never sleeps), plus Playwright .NET for in-browser frames. Triggers "test our WebSocket endpoint", "assert the SSE stream emits X", "SignalR hub test". Not for request/response HTTP (`api-test-author/writer`).
+description: Use when testing WebSocket or SSE streams in .NET/NUnit with protocol clients or Playwright, asserting frames without sleeps. Triggers "test our WebSocket endpoint". Not for plain HTTP (api-tests).
 ---
 
 # WebSocket & SSE Testing (.NET 10 / NUnit) — **canonical stack**

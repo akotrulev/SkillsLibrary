@@ -1,6 +1,6 @@
 ---
 name: routing
-description: Use when adding, nesting, or debugging routes in a Next.js App Router app — file conventions (`page`/`layout`/`template`/`loading`/`not-found`/`route`), parallel (`@slot`) and intercepting (`(.)`) modal routes, `middleware.ts` gating. Triggers "add a route/page for X", "make this a modal route", "my layout remounts on every navigation", "protect these routes with middleware". Not for project setup (`project-setup`), fetching in a route (`data-fetching`), or metadata (`seo`).
+description: Use when adding, nesting or debugging Next.js App Router routes (layouts, parallel and intercepting modal routes, middleware). Triggers "make this a modal route". Not for metadata (seo).
 ---
 
 # React — Routing & Navigation (Next.js App Router)

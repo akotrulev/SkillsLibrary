@@ -1,6 +1,6 @@
 ---
 name: data-fetching
-description: Use when a component must FETCH or WRITE request/response data — Server Component `fetch` vs client TanStack Query, Server Actions, ProblemDetails→UI mapping, timeout budgets, Suspense streaming. Triggers "how should this component load data", "Server Action to create X", "revalidate after a mutation", "our fetches stopped being cached", "one dead widget takes the whole page down". Not for server-pushed data (`realtime`), forms UX (`forms`), or where fetched state lives (`state-management`).
+description: Use when a React component fetches or writes data (Server Component fetch, TanStack Query, Server Actions, Suspense). Triggers "how should this load data". Not for pushed data (realtime).
 ---
 
 # React — Data Access (request/response lane)

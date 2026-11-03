@@ -1,6 +1,6 @@
 ---
 name: notebooklm
-description: Use to query the user's own Google NotebookLM notebooks for source-grounded, citation-backed answers from Gemini, through a vendored browser-automation tool. Triggers "ask my NotebookLM", "query my notebook", a notebooklm.google.com URL. Do NOT use in the web UI, for a notebook holding anything sensitive, or to ground a framework or API question in official docs (`source-grounding`).
+description: Use when querying the user's own Google NotebookLM notebooks for cited answers via browser automation. Triggers "ask my NotebookLM". Not for grounding in official docs (source-grounding).
 ---
 
 # NotebookLM

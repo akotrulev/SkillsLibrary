@@ -1,6 +1,6 @@
 ---
 name: passive-scan
-description: Use when adding an OWASP ZAP baseline (passive) DAST scan as a CI build gate for a Java 21 / TestNG pipeline — passive rules only, no attack payloads, fail on new alerts above a threshold. Triggers "add a DAST gate to CI", "run ZAP against our running app", "scan for missing security headers", "passive security scan on every PR". Do NOT use for active/injection scanning (use `qa-<stack>:active-scan`), or BOLA/IDOR logic (use `qa-java:permission-testing`).
+description: Use when adding an OWASP ZAP baseline (passive) DAST scan as a CI gate for a Java pipeline. Triggers "add a DAST gate to CI". Not for active injection scans (active-scan).
 ---
 
 # Security Testing — OWASP ZAP Baseline Scan (Java / TestNG)

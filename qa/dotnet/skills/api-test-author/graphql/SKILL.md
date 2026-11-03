@@ -1,6 +1,6 @@
 ---
 name: api-tests-graphql
-description: Use when scaffolding black-box GraphQL API tests in .NET 10 (8-9) with NUnit + `HttpClient` + `System.Text.Json` — POST /graphql, assert on the `{data, errors}` envelope (status is 200 even on error), typed records per selection set. Triggers "write GraphQL API tests", "test this mutation", "assert the errors envelope". Not for REST (`api-test-author/writer`) or gRPC (`api-test-author/grpc`).
+description: Use when writing black-box GraphQL API tests in .NET (NUnit + HttpClient), asserting the data/errors envelope. Triggers "write a GraphQL test for X". Not for REST (api-tests).
 ---
 
 # QA — GraphQL API Test Writer (.NET 8 / NUnit + HttpClient + System.Text.Json)

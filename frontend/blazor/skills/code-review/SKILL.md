@@ -1,6 +1,6 @@
 ---
 name: conventions-review
-description: Use when reviewing Blazor code (.NET 8/9/10) — component misuse, lifecycle bugs, missing dispose, double-fetch on prerender, `Action` instead of `EventCallback`, mis-scoped or hardcoded render modes, missing data-testids, UI-correctness smells, JS interop pitfalls. Triggers: "review this Blazor page", "why does this fetch twice", "audit JS interop", "audit the testids". Do NOT use for explanations (`basics`), generating code (`component-writer`), or non-Blazor .NET (`backend/dotnet`'s reviewer).
+description: Use when reviewing Blazor code (lifecycle bugs, missing dispose, prerender double-fetch, render modes, JS interop). Triggers "review this Blazor page". Not for writing code (component-writer).
 ---
 
 # Blazor Design Patterns — Reviewer

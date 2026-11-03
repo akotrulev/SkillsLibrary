@@ -1,6 +1,6 @@
 ---
 name: api-tests-review
-description: Use when the user asks to review existing TypeScript API test code (Vitest + native fetch + Zod) for quality. Triggers: "review this Vitest API spec", "look at getUser.spec.ts", "spot issues in this {resource}Client.ts". Do NOT use for writing new tests (`qa-typescript:api-tests`) or reviewing UI tests (`qa-typescript:ui-tests-review`).
+description: Use when reviewing existing TypeScript API test code (Vitest + fetch + Zod) for quality. Triggers "review this API test". Not for writing new tests (api-tests).
 ---
 
 # QA — API Test Reviewer (TypeScript / Vitest + fetch + Zod)

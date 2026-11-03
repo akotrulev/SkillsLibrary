@@ -1,6 +1,6 @@
 ---
 name: api-project-setup
-description: Use when starting an API test-automation project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, local setup, and run commands for a standalone RestSharp + NUnit suite. Composable with the ui/mobile/performance dotnet scaffolds. Triggers "scaffold an API test project", "set up a .NET API test suite from scratch", "create the solution structure for API tests". Not for adding tests to an existing suite (`api-test-author/writer`).
+description: Use when starting a RestSharp + NUnit API test project from zero in .NET (layout, package versions, run commands). Triggers "scaffold an API test project". Not for adding tests (api-tests).
 ---
 
 # API Test Project Scaffold (C# / .NET 10)

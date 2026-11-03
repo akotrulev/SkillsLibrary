@@ -1,6 +1,6 @@
 ---
 name: ui-tests-maestro
-description: Use when a project runs Maestro for mobile E2E (typically Expo / React Native) and a flow, subflow or `.maestro/` workspace must be written, tagged, run in CI or reviewed. Triggers "write a Maestro flow for X", "add a subflow", "run Maestro in EAS Workflows", "Maestro JUnit report". Do NOT use for Appium/WebdriverIO tests (`qa-typescript:ui-tests-appium`), web UI (`qa-typescript:ui-tests-playwright`) or live-screen discovery (`qa-typescript:mobile-screen-explorer`).
+description: Use when writing, tagging, running in CI or reviewing Maestro mobile E2E flows (typically Expo/React Native). Triggers "write a Maestro flow for X". Not for Appium/WebdriverIO tests (ui-tests-appium).
 ---
 
 # QA — Maestro Flow Author (TypeScript lane)

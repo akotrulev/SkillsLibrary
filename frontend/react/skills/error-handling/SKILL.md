@@ -1,6 +1,6 @@
 ---
 name: error-handling
-description: Use when a failure must not blank the screen — error boundary placement, retry on idempotent calls only, timeout budgets, loading/loaded/failed/stale data regions, the persistent error notification, mid-session 401 recovery. Triggers "an unhandled error blanks my app", "add error boundaries", "the grid shows empty when the API 500s", "the spinner never stops", "the session expired and my form was gone". Not for PRODUCING the categorized error (`data-fetching` — this RENDERS it).
+description: Use when a React failure must not blank the screen (error boundaries, safe retries, failed regions, 401 recovery). Triggers "an error blanks my app". Not for producing the error (data-fetching).
 ---
 
 # React — Error Resilience

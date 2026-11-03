@@ -1,6 +1,6 @@
 ---
 name: ui-code-audit
-description: Use for a CODE-level UI audit — read UI source files and flag violations of the vendored Vercel Web Interface Guidelines: missing aria-labels, `<div onClick>` navigation, unlabeled inputs, `transition: all`. Runs offline against the pinned snapshot. Triggers "audit my UI code against web interface guidelines", "pre-ship UI code audit", "review this markup before we ship". Not for experience-level review (`design:ux-review`) or axe/Lighthouse scanning (qa `accessibility-testing`).
+description: Use when auditing UI source against the Vercel Web Interface Guidelines (aria-labels, div onClick, unlabeled inputs). Triggers "pre-ship UI code audit". Not for UX review (ux-review).
 metadata:
   author: vercel
   version: "1.1.0"

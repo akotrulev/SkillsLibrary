@@ -1,6 +1,6 @@
 ---
 name: auth0
-description: Use when adding/fixing Auth0 sign-in in a React Native / Expo app with `react-native-auth0` — Universal Login in the system browser (PKCE), universal / App Link callback, credentials manager, biometric unlock, refresh rotation, logout. Triggers "add Auth0 login", "callback never returns to the app", "biometric unlock". Do NOT use for Auth0 concepts (`auth/_shared/auth0-concepts`), native Swift/Kotlin apps (`mobile-ios:auth0` / `mobile-android:auth0`), or React web (`fe-react:auth0`).
+description: Use when adding or fixing Auth0 login in a React Native or Expo app (react-native-auth0, PKCE, credentials, biometrics). Triggers "add Auth0 login". Not for tenant setup or OIDC theory.
 ---
 
 # Auth — Auth0 in React Native / Expo

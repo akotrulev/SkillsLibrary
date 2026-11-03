@@ -1,6 +1,6 @@
 ---
 name: patterns-apply
-description: Use when scaffolding Rust backend code into the active repo — an axum + tokio service or crate skeleton (Cargo.toml, lints, toolchain), typed config, thiserror errors mapped to RFC 9457 problems, newtype ids, AppState, handlers, router layers, crate-per-module boundaries. Triggers "scaffold a Rust service", "add an endpoint in axum", "error type for this crate". Do NOT use for explanations (`pattern-guide`), reviews (`code-review`), or SQL (`database-code`).
+description: Use when scaffolding Rust backend code (axum + tokio skeleton, typed config, thiserror errors, handlers). Triggers "scaffold a Rust service". Not for explanations (patterns).
 ---
 
 # Rust — Generator

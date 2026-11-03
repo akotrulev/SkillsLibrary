@@ -1,6 +1,6 @@
 ---
 name: cloud-attack-gcp
-description: Use to exploit an authorized GCP project after `cloud-recon-enumeration` has mapped its surface — IAM/resource enumeration, service-account impersonation & key abuse, privilege-escalation chains via the IAM Credentials API, and Cloud Storage bucket attacks. Triggers "escalate privileges in this GCP project", "what can this service account become", "test our GCS buckets for public exposure". Not for GCP recon (`cloud-recon-enumeration`), AWS (`cloud-attack-aws`) or Azure (`cloud-attack-azure`) exploitation, or defensive GCP posture scanning (`devops:cloud-posture`). Owned/lab GCP projects only, under a committed cloud scope file.
+description: Use when exploiting an authorized GCP project after recon (service-account impersonation, IAM privesc, GCS buckets). Triggers "escalate in this GCP project". Not for recon (cloud-recon-enumeration).
 ---
 
 # Penetration Testing — GCP Exploitation (IAM privesc · service-account impersonation · GCS buckets)

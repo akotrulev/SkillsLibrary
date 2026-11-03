@@ -1,6 +1,6 @@
 ---
 name: api-tests-graphql
-description: Use when scaffolding black-box **GraphQL** API tests in Node 24 (22 supported) / TypeScript with Vitest, native `fetch`, and Zod. Triggers: "write a GraphQL test for query/mutation X", "assert the errors array on a GraphQL response", "test partial GraphQL data + errors". Do NOT use for REST (`qa-typescript:api-tests`) or gRPC (`qa-typescript:api-tests-grpc`).
+description: Use when writing black-box GraphQL API tests in TypeScript (Vitest + fetch + Zod), asserting the data/errors envelope. Triggers "write a GraphQL test for X". Not for REST (api-tests).
 ---
 
 # QA — GraphQL API Test Writer (TypeScript / Vitest + fetch + Zod)

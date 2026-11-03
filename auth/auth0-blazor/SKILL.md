@@ -1,6 +1,6 @@
 ---
 name: auth0
-description: Use when setting up or modifying Auth0 in Blazor Server or WASM — OpenIdConnect for Server (Authorization Code + PKCE), `WebAssembly.Authentication` for WASM — including Server session lifecycle (revalidating auth-state provider, refresh tokens on circuits, logout revocation). Triggers: "add Auth0 to Blazor Server", "Blazor WASM Auth0 login", "user stays logged in after logout". Do NOT use for plain APIs (`backend/dotnet/skills/auth0`), React (`auth/auth0-react`), or concepts (`auth0-concepts`).
+description: Use when adding or fixing Auth0 login in a Blazor Server or WASM app (OpenIdConnect with PKCE, session refresh, logout). Triggers "add Auth0 login". Not for tenant setup or OIDC theory.
 ---
 
 # Auth — Auth0 in Blazor (Server & WebAssembly)

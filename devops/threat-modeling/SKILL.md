@@ -1,6 +1,6 @@
 ---
 name: threat-modeling
-description: Use to threat-model a system BEFORE testing it — DFDs, STRIDE-per-element, attack trees, and a threat register routing each threat to the lane that tests it. Triggers "threat model this service", "STRIDE analysis", "what should the security assessment cover". Do NOT use to run a scanner or benchmark (`devops/{k8s-security,iac-security,cloud-posture,container-runtime-security}`), to attack (`qa-security`, `penetration-tester`), or to plan an assessment (`security-test-planner`).
+description: Use when threat-modeling a system before testing it (DFDs, STRIDE, attack trees, threat register). Triggers "threat model this service". Not for running scanners (kubernetes-security).
 ---
 
 # DevOps — Threat Modeling (STRIDE · DFD · Attack Trees)

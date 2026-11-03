@@ -1,6 +1,6 @@
 ---
 name: tokens
-description: Use when building or auditing the variable layer a design system runs on — primitive → semantic → component token tiers, the color/type/spacing/radius/elevation scales, dark mode as a semantic swap. Owns the discipline `design:visual-identity` feeds and `styling` consumes. Triggers "set up design tokens", "define the spacing/type scale", "hardcoded hex values everywhere". Not for palette/type CHOICE (`design:visual-identity`) or CSS mechanics (the stack's `styling`).
+description: Use when building or auditing design tokens (primitive, semantic, component tiers, scales, dark mode as a swap). Triggers "set up design tokens". Not for palette or type choice (visual-identity).
 ---
 
 # Design Tokens — the token system discipline

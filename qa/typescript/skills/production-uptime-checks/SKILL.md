@@ -1,6 +1,6 @@
 ---
 name: production-uptime-checks
-description: Use when authoring synthetic monitoring as code in Node 24 (22 supported) / TypeScript — scheduled API and Playwright-based browser checks against live staging/prod via Checkly (`@checkly/cli`). The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code". Not for pre-merge CI gates (`qa-typescript:ci-pipelines`) or load testing (`qa-typescript:load-testing`).
+description: Use when authoring synthetic monitoring as code in TypeScript with Checkly against live staging/prod. Triggers "add a prod uptime check". Not for pre-merge CI gates (ci-pipelines).
 ---
 
 # Synthetic Monitoring as Code (Checkly · Node 24 / TypeScript) — **canonical stack**

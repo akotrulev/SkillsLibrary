@@ -1,6 +1,6 @@
 ---
 name: unit-testing
-description: Use when Python worker or backend logic needs a dev-side pytest test — what deserves one, the seams to inject (time, model session, filesystem), self-proving hostile fixture builders (GPS JPEG, decompression bomb, polyglot, script SVG), rejection tables, the `model` marker, the ≥ 80% branch-coverage floor on changed code. In-process only. Triggers "unit-test the validator", "build a hostile fixture". Do NOT use for the container-level contract the TypeScript side calls (`qa-api-typescript`) or image scanning (`qa-security`).
+description: Use when Python backend or worker logic needs a unit test with pytest (seams, hostile fixtures, coverage floor). Triggers "unit-test the validator". Not for HTTP tests (api-tests).
 ---
 
 # Python — Unit Testing (pytest)

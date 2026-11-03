@@ -1,6 +1,6 @@
 ---
 name: flaky-test-quarantine
-description: Use when flaky tests in a Java 21 / TestNG suite must be detected, **quarantined** and reported. Triggers: "this test is flaky, stop it blocking the pipeline", "quarantine the flaky tests but keep running them", "find which TestNG tests are flaky". Not for Allure wiring (`qa-java:test-reports`), the pipeline lanes (`qa-java:ci-pipelines`), or fixing test logic (the owning qa-*-java agent).
+description: Use when detecting and quarantining flaky tests in a Java TestNG suite while still running them. Triggers "this test is flaky, stop it blocking the pipeline". Not for Allure wiring (test-reports).
 ---
 
 # Flaky-Test Quarantine (Java 21 / TestNG) — **canonical stack**

@@ -1,6 +1,6 @@
 ---
 name: plan-data-model
-description: Use when an approved backend blueprint needs its DB structure planned — entity catalog, per-table column specs with keys/constraints/indexes, cross-cutting conventions, an ER diagram, and an ordered migration sequence. Triggers "plan the database structure", "what tables do we need", "what migrations and in what order". Do NOT use to write DDL/migrations/ORM code (`be-<stack>`), design indexing/partitioning/RLS depth (`data-architect`), or plan endpoints (`dev:plan-api-surface`).
+description: Use when an approved blueprint needs its database planned (entities, columns, keys, indexes, migration order). Triggers "what tables do we need". Not for endpoints (plan-api-surface).
 ---
 
 # Data Model Plan — the logical DB structure

@@ -1,6 +1,6 @@
 ---
 name: controls-validation
-description: Use when proving an infrastructure security control is not just CONFIGURED but actually WORKING. Static-config checks run anywhere; live-probe checks need read access to OWNED infra plus a recorded, expiring authorization line. Triggers "prove our secrets aren't in env vars", "verify TLS is actually enforced", "retest the remediated findings". Not for CSPM sweeps (`devops:cloud-posture`), cert quality (`qa-<stack>:certificate-scan`), or git-history secrets (`qa-<stack>:secrets-scan`).
+description: Use when proving an infrastructure security control actually works, not just that it is configured. Triggers "verify TLS is actually enforced". Not for CSPM sweeps (cloud-posture).
 ---
 
 # DevOps — Infrastructure Controls Validation

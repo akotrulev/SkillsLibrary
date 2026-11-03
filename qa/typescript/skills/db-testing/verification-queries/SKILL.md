@@ -1,6 +1,6 @@
 ---
 name: db-verification-queries
-description: Use when writing or reviewing a **safe verification query** for tests in Node 24 / TypeScript — assert a row exists, add a `COUNT(*)` check, review test SQL for guardrails, or poll for a row. Triggers "write a verification query for this test", "assert this row exists from the test", "review my test SQL", "wait for an eventually-consistent row". Do NOT use for connection/seeding/cleanup (use `qa-typescript:db-connection`) or container lifecycle (use `qa-typescript:db-testcontainers`).
+description: Use when writing or reviewing safe verification SQL in TypeScript tests (row exists, COUNT, polling). Triggers "review my test SQL". Not for seeding or cleanup (db-connection).
 ---
 
 # QA — DB Testing Query Author (TypeScript / Node 24)

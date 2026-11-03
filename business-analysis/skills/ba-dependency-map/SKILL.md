@@ -1,6 +1,6 @@
 ---
 name: dependency-map
-description: Use when a project's business model needs its connections: every trigger (API call, schedule, timeout, webhook, internal event) with the reactions it sets off across features, the data features share (CRUD matrix), and the invariants those writes threaten — persisted to docs/business-model/. Triggers: "what else happens when X", "who else uses this data", "map the events and jobs". Do NOT use for one entity's lifecycle (`state-grid`), rule tables (`decision-table`), or test cases (qa).
+description: Use when mapping a business model's connections (triggers, cross-feature reactions, shared data, invariants). Triggers "what else happens when X". Not for one entity's lifecycle (state-grid).
 ---
 
 # BA — Dependency Mapper

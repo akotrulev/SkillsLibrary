@@ -1,6 +1,6 @@
 ---
 name: visual-regression
-description: Use when a .NET/NUnit Playwright suite must catch unintended visual change — screenshots against committed baselines with an image comparer, Percy, or Applitools Eyes. Triggers "add visual regression tests", "screenshot diff this page", "update the visual baselines", "the layout broke and no functional test caught it". Do NOT use for breakpoint layout (qa-dotnet:responsive-testing), accessibility scans (qa-dotnet:accessibility-testing) or failure screenshots (qa-dotnet:evidence-capture).
+description: Use when a .NET/NUnit Playwright suite must catch visual change (screenshot baselines, Percy, Applitools). Triggers "add visual regression tests". Not for breakpoint layout (responsive-testing).
 ---
 
 # QA — Visual Regression (.NET 10 / Playwright 1.63)

@@ -1,6 +1,6 @@
 ---
 name: production-uptime-checks
-description: Use when authoring synthetic monitoring as code from the JVM stack — scheduled probe checks (HTTP/ping/DNS/TCP) and scripted checks against live staging/prod via Grafana Cloud Synthetic Monitoring + Terraform. The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code". Not for pre-merge CI gates (`qa-java:ci-pipelines`) or load testing (`qa-java:load-testing`).
+description: Use when authoring synthetic monitoring as code in Java with Grafana Synthetic Monitoring against live staging/prod. Triggers "add a prod uptime check". Not for pre-merge CI gates (ci-pipelines).
 ---
 
 # Synthetic Monitoring as Code (Grafana Cloud Synthetic Monitoring · Java 21)

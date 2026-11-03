@@ -1,6 +1,6 @@
 ---
 name: preference-data
-description: Use when building preference / alignment data for a small LLM — chosen/rejected pairs for DPO/ORPO, KTO labels, ranking data, on-policy sampling, and constitutional self-critique pairs. Triggers: "make DPO pairs", "build preference data", "chosen/rejected dataset", "on-policy preference data for my model", "constitutional AI self-critique pairs". Do NOT use for SFT/instruction data (`instruction-sft`), eval sets (`eval-sets`), or judge/generation mechanics (`synthetic-generation`).
+description: Use when building preference data for a small LLM (DPO/ORPO chosen/rejected pairs, KTO labels, rankings). Triggers "make DPO pairs". Not for SFT data (instruction-sft).
 ---
 
 # Training Data — Preference / Alignment

@@ -1,6 +1,6 @@
 ---
 name: webmcp-testing
-description: Use when a web app registers WebMCP tools (`document.modelContext`, declarative forms) and a UI suite must test them — registration and lifecycle, schema quality, the `execute()` contract, annotation truthfulness, UI-path parity, security. Triggers: "test our WebMCP tools", "page.webmcp", "which tools does this page register". Do NOT use for LLM/agent evals (`ai-feature-testing`), building an MCP server (`tooling` `tooling:mcp-builder`), or prompt-injection attacks (`qa-security`).
+description: Use when a web app registers WebMCP tools (document.modelContext) and a UI suite must test registration, schemas, execute(). Triggers "test our WebMCP tools". Not for LLM evals (ai-feature-testing).
 ---
 
 # WebMCP testing (shared)

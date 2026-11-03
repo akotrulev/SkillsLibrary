@@ -1,6 +1,6 @@
 ---
 name: passive-scan
-description: Use when adding an OWASP ZAP baseline (passive) DAST scan as a CI build gate for a .NET / NUnit pipeline — spider a running app for a bounded time and run ZAP's passive rules (headers, cookie flags, info leaks) with no attack payloads, failing on new alerts above a threshold. Triggers "add a DAST gate to CI", "run ZAP against our running app", "scan for missing security headers". Not for active scanning (`active-scan`), known CVEs (`nuclei`), or TLS config (`certificate-scan`).
+description: Use when adding an OWASP ZAP baseline (passive) DAST scan as a CI gate for a .NET pipeline. Triggers "add a DAST gate to CI". Not for active injection scans (active-scan).
 ---
 
 # Security Testing — OWASP ZAP Baseline Scan (.NET / NUnit)

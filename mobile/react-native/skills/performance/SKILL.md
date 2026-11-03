@@ -1,6 +1,6 @@
 ---
 name: performance
-description: Use when an Expo SDK 57 app janks, starts slowly or ships a heavy bundle — the vendored list rules (virtualize, stable references, item types), the React Compiler and manual memoization, startup via expo-observe, Expo Atlas bundle analysis, React Native DevTools, Hermes, images. Triggers "list scrolls slowly", "cold start is slow", "bundle is huge", "do I still need useMemo". Do NOT use for animation (`mobile-react-native:animation`) or failure UI.
+description: Use when an Expo/React Native app janks, starts slowly or ships a heavy bundle (lists, React Compiler, Expo Atlas). Triggers "slow cold start". Not for crash reporting (observability).
 ---
 
 # React Native — Performance

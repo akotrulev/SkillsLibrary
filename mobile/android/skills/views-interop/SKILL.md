@@ -1,6 +1,6 @@
 ---
 name: views-interop
-description: Use when the Android codebase is XML Views or mixes Views and Compose — ViewBinding, Fragments and view lifecycle, RecyclerView with ListAdapter, ComposeView with DisposeOnViewTreeLifecycleDestroyed, AndroidView, edge-to-edge in Views. Triggers "add a screen to this Views app", "embed Compose in a Fragment", "wrap a View in Compose", "ComposeView leaks". Do NOT use for a new Compose screen (`mobile-android:ui-components`) or a rewrite (`-migration`).
+description: Use when an Android codebase uses XML Views or mixes Views and Compose (Fragments, RecyclerView, ComposeView). Triggers "embed Compose in a Fragment". Not for a new Compose screen (ui-components).
 ---
 
 # Android — Views and Interop

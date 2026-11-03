@@ -1,6 +1,6 @@
 ---
 name: push-and-deep-links
-description: Use when an iOS app needs push or local notifications, or opens from a link — APNs registration, UNUserNotificationCenter permission and delegate, notification service extension, universal links (entitlement + apple-app-site-association), URL-scheme caution. Triggers "add push", "tap opens the order", "link opens the app", "AASA". Do NOT use for route structure (`mobile-ios:navigation`), camera or location (`-device-features`), or the server that sends.
+description: Use when an iOS app needs push or local notifications (APNs) or opens from universal links. Triggers "add push", "link opens the app". Not for route structure (navigation).
 ---
 
 # iOS — Notifications and Links

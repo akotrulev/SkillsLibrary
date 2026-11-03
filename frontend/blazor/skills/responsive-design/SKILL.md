@@ -1,6 +1,6 @@
 ---
 name: responsive-design
-description: Use when making a Blazor app (.NET 8/9/10) responsive — the breakpoint contract (tokens + one C# mirror), library grid (MudGrid/FluentGrid/Radzen) vs your own CSS Grid/Flexbox, alignment across breakpoint flips, container queries, and the render-mode caveat (static SSR = CSS-only). Triggers: "make this page responsive", "define our breakpoints", "the layout breaks on tablet", "MudGrid or CSS grid". Do NOT use for token/dark-mode mechanics (`styling`) or testing (qa `responsive-testing`).
+description: Use when a Blazor layout must adapt across screen sizes (breakpoints, MudGrid vs CSS Grid, container queries). Triggers "make this page responsive". Not for tokens or dark mode (styling).
 ---
 
 # Blazor — Responsive design (breakpoints, grids, cross-breakpoint alignment)

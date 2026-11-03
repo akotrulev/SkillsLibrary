@@ -1,6 +1,6 @@
 ---
 name: iconography
-description: Use when choosing, using, or auditing icons and OG/social imagery as a SYSTEM — one icon family per product, the library decision (Phosphor default, per the vendored corpus · Heroicons · Lucide · Material Symbols), inline-SVG discipline, icon-vs-label choice, OG-image craft. Triggers: "which icon library", "our icons look inconsistent", "make an OG/social image". Do NOT use for the token system (`design/design-tokens`), palette/type taste (`design/visual-identity`), or a logo.
+description: Use when choosing or auditing icons and OG/social images as a system (one family, Phosphor, Lucide, inline SVG). Triggers "which icon library", "make an OG image". Not for tokens (tokens).
 ---
 
 # Iconography — icons and social imagery as a system

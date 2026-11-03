@@ -1,6 +1,6 @@
 ---
 name: performance
-description: Use when Rust code is slow, allocates too much, or builds slowly — benchmark (criterion, divan, gungraun), profile (samply, perf, heaptrack, tokio-console), fix allocations, clones, hashing, buffering, async stalls; tune release profiles, PGO, allocators and compile times. Triggers "this endpoint is slow", "profile my Rust", "builds take forever". Do NOT use for SQL tuning (`database-code`, `data/*`) or correctness reviews (`code-review`).
+description: Use when Rust code is slow, allocates too much or builds slowly (benchmarks, profiling, release tuning). Triggers "profile my Rust", "builds take forever". Not for SQL tuning (persistence).
 ---
 
 # Rust — Performance

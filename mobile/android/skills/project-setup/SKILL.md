@@ -1,6 +1,6 @@
 ---
 name: project-setup
-description: Use when creating or hardening an Android app on AGP 9 — built-in Kotlin (no kotlin-android plugin), version catalog, explicit targetSdk, compile 37 / target 36 / min 24, JDK 21 toolchain, KSP not kapt, R8 full mode, detekt + ktlint, edge-to-edge, predictive back. Triggers "new Android app", "set up Gradle", "kapt fails on AGP 9". Do NOT use for signing and CI (`mobile-<stack>:release`), state design (`-architecture`) or screens (`-ui-components`).
+description: Use when creating or hardening an Android app on AGP 9 (version catalog, KSP, R8, detekt, edge-to-edge). Triggers "new Android app". Not for signing and CI (release).
 ---
 
 # Android — Project Setup

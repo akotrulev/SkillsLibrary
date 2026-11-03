@@ -1,6 +1,6 @@
 ---
 name: patterns
-description: Use when explaining or looking up a design pattern in TypeScript (strict mode) for Node / NestJS / Express backends. Triggers: "what is the strategy pattern in TS", "tagged union vs class hierarchy", "branded types for ids", "result type vs exceptions". Do NOT use for scaffolding (`pattern-writer`), reviews (`code-review`), or React-specific patterns (`frontend/react/skills/basics`).
+description: Use when explaining a design pattern in Node/TypeScript (tagged unions, branded ids, Result types). Triggers "result type vs exceptions". Not for scaffolding (patterns-apply).
 ---
 
 # TypeScript Design Patterns — Reference

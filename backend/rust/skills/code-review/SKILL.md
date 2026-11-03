@@ -1,6 +1,6 @@
 ---
 name: conventions-review
-description: Use when reviewing Rust service or library code for panics in production paths, error-type leaks, needless clones, locks held across .await, blocking on the runtime, unbounded channels, unchecked casts and overflow, undocumented unsafe, secret-leaking Debug, and missing tests. Triggers "review this Rust module", "is this idiomatic Rust", "check this axum handler". Do NOT use for explanations (`pattern-guide`), generating the fix (`pattern-writer`), or profiling (`performance`).
+description: Use when reviewing Rust code for production panics, needless clones, locks across .await or blocking the runtime. Triggers "review this Rust module". Not for explanations (patterns).
 ---
 
 # Rust — Reviewer

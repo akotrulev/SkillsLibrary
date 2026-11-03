@@ -1,6 +1,6 @@
 ---
 name: standards-audit
-description: Use to audit a repo's defensive-security artifacts against the security-governance plugin's conventions — Sigma detections, CSP/headers/WAF policy, secret-store wiring and rotation runbooks, the compliance evidence register — as a saved, re-runnable findings report in `docs/audits/`. Read-only; never fixes. Triggers "audit our detections against the conventions", "conformance audit of our security hardening". Do NOT use to run a scan or exploit, or to audit application code.
+description: Use when auditing defensive-security artifacts (Sigma, CSP/WAF, secret stores, compliance register) against plugin conventions. Triggers "audit our detections". Not for app code (source-audit).
 ---
 
 # security-governance Conformance Audit

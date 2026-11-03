@@ -1,6 +1,6 @@
 ---
 name: i18n
-description: Use when an iOS app must support more than one language or region — String Catalogs (.xcstrings), String(localized:), plural and device variations, FormatStyle for numbers, dates and money, RTL layout, per-app language, localized purpose strings. Triggers "add Spanish", "translate the app", "Arabic layout flips", "date shows wrong format". Do NOT use for copy voice (`design:ux-writing`), text scale (`mobile-ios:accessibility`) or the web (`fe-react:i18n`).
+description: Use when an iOS app must support more languages or regions (String Catalogs, plurals, FormatStyle, RTL). Triggers "translate the app". Not for copy wording (design:ux-writing).
 ---
 
 # iOS — Localization and Globalization

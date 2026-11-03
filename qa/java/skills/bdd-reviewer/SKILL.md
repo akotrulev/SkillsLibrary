@@ -1,6 +1,6 @@
 ---
 name: bdd-reviewer
-description: Use when reviewing or auditing existing Gherkin .feature files and Cucumber-JVM step definitions in Java for living-documentation quality, step reusability, and correct binding/DI/lifecycle. Triggers: "review these feature files", "audit our Cucumber step definitions", "are these Gherkin scenarios good", "check our BDD layer". Do NOT use to generate features (use `qa/_shared/bdd/feature-file-writer`) or step definitions (use `qa/java/skills/gherkin-step-code`).
+description: Use when reviewing Gherkin .feature files and Cucumber-JVM steps in Java for reuse and binding. Triggers "review these feature files". Not for generating steps (gherkin-step-code).
 ---
 
 # Cucumber-JVM / Gherkin Reviewer (Java 21)

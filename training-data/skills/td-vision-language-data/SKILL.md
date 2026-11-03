@@ -1,6 +1,6 @@
 ---
 name: vision-language-data
-description: Use when building image-text training data for a small vision-language model (VLM) — captioning, visual QA, OCR, region grounding, and multi-image/interleaved data. Triggers: "build VLM training data", "image captioning dataset", "visual QA / VQA data", "OCR training data", "grounding / bounding-box data for a VLM", "multimodal SFT". Do NOT use for text-only data (`training-data:instruction-sft` etc.), or the base record envelope/splits (`training-data:dataset-formats`).
+description: Use when building image-text training data for a small VLM (captioning, VQA, OCR, grounding). Triggers "build VLM training data", "image captioning dataset". Not for text-only data (instruction-sft).
 ---
 
 # Training Data — Vision-Language (VLM)

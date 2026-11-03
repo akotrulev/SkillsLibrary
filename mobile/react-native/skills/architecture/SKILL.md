@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: Use when laying out or choosing state in an Expo SDK 57 app — feature-first folders, server state in TanStack Query 5, client state in Zustand 5 or Context, route params as state, React Compiler effects. Triggers "what state library", "Zustand vs Context", "I'm prop-drilling", "persist across restarts". Do NOT use for fetch mechanics (`mobile-react-native:networking`), forms (`-forms`), offline queues (`-offline-and-storage`) or route params (`-navigation`).
+description: Use when deciding folders and where state lives in an Expo/React Native app (TanStack Query, Zustand, Context). Triggers "Zustand vs Context". Not for API calls (networking).
 ---
 
 # React Native — Architecture and State

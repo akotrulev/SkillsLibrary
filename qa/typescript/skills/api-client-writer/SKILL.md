@@ -1,6 +1,6 @@
 ---
 name: api-client-writer
-description: Use when the user asks to create a new API client module (`{resource}Client.ts`) in a TypeScript API test project (Vitest + native `fetch` + Zod, Node 24 (22 supported), strict TS). Triggers: "write an API client for X", "add a {resource}Client", "scaffold the TS client for /api/{path}". Do NOT use for the Zod schemas / DTO types (`qa-typescript:api-models`) or the specs that call the client (`qa-typescript:api-tests`).
+description: Use when creating an API client class ({resource}Client.ts) in a TypeScript API test project. Triggers "write an API client for X". Not for DTOs (api-models).
 ---
 
 # qa-typescript:api-client-writer

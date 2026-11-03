@@ -1,6 +1,6 @@
 ---
 name: mobile-project-setup
-description: Use when starting a mobile (iOS/Android) test project from zero in TypeScript — Node 24, WebdriverIO 10 + Mocha, exact pins, Appium 3 server + drivers + emulator setup, capabilities from environment variables, a first smoke run. Triggers "scaffold a mobile test project", "set up a WebdriverIO Appium suite from scratch". Do NOT use for authoring screens or tests (`ui-test-author/appium`), or device clouds (`device-cloud`).
+description: Use when starting a mobile test project from zero in TypeScript (WebdriverIO + Appium 3, pins, emulator). Triggers "scaffold a mobile test project". Not for writing tests (ui-tests-appium).
 ---
 
 # Mobile Test Project Scaffold (TypeScript, WebdriverIO 10)

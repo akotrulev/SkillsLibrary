@@ -1,6 +1,6 @@
 ---
 name: charts
-description: Use when charts live INSIDE a product UI that already has a brand — an analytics screen or embedded dashboard. Adds a viz palette deliberately disjoint from the app's brand and status colors so a series never reads as "error", the do-not list (pie past 5 categories, dual axes, 3D), and stat-tile/KPI-row layout. Triggers "design our analytics screen", "add charts to this dashboard", "our chart colors clash with the brand". Not for ops/RED-USE dashboards (`grafana-dashboards`).
+description: Use when designing charts inside a branded product UI (analytics screens) with a viz palette apart from brand and status colors. Triggers "chart colors clash". Not for ops dashboards (dashboards).
 ---
 
 # Data Visualization — chart & dashboard design

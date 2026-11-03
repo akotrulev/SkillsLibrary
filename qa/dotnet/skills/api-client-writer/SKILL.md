@@ -1,6 +1,6 @@
 ---
 name: api-client-writer
-description: Use when the user asks to create a new API client or `*Client.cs` file in the Accelerator `ApiTests` project (RestSharp, .NET 10 (8-9 supported)). Triggers: "write an API client for X", "add a Client.cs for the {resource} endpoints", "scaffold {Resource}Client". Do NOT use for DTOs (`qa-dotnet:api-models`) or the tests themselves (`qa-dotnet:api-tests`).
+description: Use when creating an API client class (*Client.cs) in a .NET API test project. Triggers "write an API client for X". Not for DTOs (api-models).
 ---
 
 # qa-dotnet:api-client-writer

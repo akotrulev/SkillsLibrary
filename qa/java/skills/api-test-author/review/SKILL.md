@@ -1,6 +1,6 @@
 ---
 name: api-tests-review
-description: Use when the user asks to review existing Java API test code (RestAssured + TestNG) for quality. Triggers: "review this RestAssured test", "look at OrderTest.java", "spot issues in this {Resource}Client class". Do NOT use for writing new tests (`qa-java:api-tests`) or measuring test quality with mutation testing (`qa-java:test-quality-check`).
+description: Use when reviewing existing Java API test code (RestAssured + TestNG) for quality. Triggers "review this API test". Not for writing new tests (api-tests).
 ---
 
 # QA — API Test Reviewer (Java / RestAssured + TestNG)

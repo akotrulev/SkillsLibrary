@@ -1,6 +1,6 @@
 ---
 name: project-setup
-description: Use when standing up or configuring an Expo SDK 57 app — `create-expo-app` default template, development builds over Expo Go, CNG and `prebuild --clean`, config plugins, `src/app` layout, strict TS, flat ESLint, `expo-doctor`, EAS Build/Submit/Update/Workflows, pnpm monorepos. Triggers "new Expo app", "add a config plugin", "dev build vs Expo Go". Do NOT use for signing and rollout (`mobile-<stack>:release`), routes (`-navigation`), screens (`-ui-components`) or kits (`-component-library`).
+description: Use when creating or configuring an Expo app (create-expo-app, dev builds, prebuild, config plugins, EAS). Triggers "new Expo app". Not for signing and CI (release).
 ---
 
 # React Native / Expo — Project Setup

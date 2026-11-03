@@ -1,6 +1,6 @@
 ---
 name: realtime
-description: Use when a surface needs LIVE / server-pushed data — SSE from a route handler + `EventSource` hook, a WebSocket hook with backoff reconnection, the snapshot→live-channel handoff, connection-status affordance, TanStack Query invalidate-on-message. Triggers: "push updates to the UI", "SSE / WebSocket in React", "live dashboard/chat", "reconnect UX", "the socket reconnects in a loop". Do NOT use for request/response fetching (`data-fetching`) or the error/reconnect UI itself (`error-handling`).
+description: Use when a React surface needs live server-pushed data (SSE, WebSocket hooks with reconnect, live handoff). Triggers "push updates to the UI". Not for request/response fetching (data-fetching).
 ---
 
 # React — Realtime (live / push lane)

@@ -1,6 +1,6 @@
 ---
 name: conventions-review
-description: Use when reviewing Python 3.12–3.14 worker or backend code for typing leaks, swallowed exceptions, module state, blocking async, unsafe subprocess/path/deserialisation, Pillow metadata mistakes, SVG sanitiser gaps, missing per-job isolation. Triggers "review this Python module", "is this worker hardened". Do NOT use for explanations (`pattern-guide`), generating code (`pattern-writer` / `media-processing`), or the Dockerfile beyond its checklist row (`sandboxed-worker`).
+description: Use when reviewing Python worker or backend code for typing leaks, swallowed exceptions, blocking async or unsafe I/O. Triggers "review this Python module". Not for explanations (patterns).
 ---
 
 # Python — Reviewer

@@ -1,6 +1,6 @@
 ---
 name: azure-deployment
-description: Use when the user asks to deploy a service to Azure — Container Apps (default), Functions, App Service, Static Web Apps, or AKS. Triggers: "deploy this .NET service to Azure Container Apps", "ship an Azure Function from a Node TS handler", "host the React SPA on Static Web Apps", "switch this from App Service to Container Apps". Do NOT use for AWS (`devops/aws-deployment`), IaC scripts (`devops/infrastructure-as-code`), or pipeline YAML (`devops/{github-actions,gitlab-ci,azure-pipelines}`).
+description: Use when deploying a service to Azure (Container Apps, Functions, App Service, Static Web Apps, AKS). Triggers "deploy to Azure Container Apps". Not for AWS (aws-deployment).
 ---
 
 # DevOps — Azure Deployment

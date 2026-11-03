@@ -1,6 +1,6 @@
 ---
 name: data-driven-testing
-description: Use when one Java 21 / TestNG test body must run against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize this test with external test data". Do NOT use for building the objects themselves (`qa-java:test-data-builder`).
+description: Use when one Java/TestNG test must run over many rows from an external CSV, JSON or spreadsheet. Triggers "run this test for every row". Not for building test objects (test-data-builder).
 ---
 
 # Data-Driven Testing (Java 21 / TestNG) — **canonical stack**

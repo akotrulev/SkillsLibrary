@@ -1,6 +1,6 @@
 ---
 name: in-app-purchases
-description: Use when an app sells anything inside the app — subscriptions, consumables, unlocks — on iOS, Android or React Native. Triggers "add a subscription", "restore purchases", "refund but still has access", "Apple rejected under 3.1.1". Server-owned entitlements, restore, refund notifications, store payment policy, cancel symmetry. Do NOT use for signing/rollout (`mobile-<stack>:release`), privacy/store forms (`mobile-<stack>:store-compliance`), or paywall visual design.
+description: Use when an iOS, Android or React Native app sells subscriptions or unlocks in-app (entitlements, restore, refunds). Triggers "restore purchases". Not for store rules (store-compliance).
 ---
 
 # Mobile — In-App Purchases

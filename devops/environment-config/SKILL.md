@@ -1,6 +1,6 @@
 ---
 name: environment-config
-description: Use when the user asks to manage environment configuration, secrets, and per-environment overrides across .NET / Java / Node services — typed config classes, secret stores (Key Vault, AWS Secrets Manager, Vault), config layering, schema validation, hot-reload. Triggers: "set up config for X", "where do secrets go", "validate config at startup". Do NOT use for pipeline authoring (`devops/{github-actions,gitlab-ci,azure-pipelines}`) or cloud deploy (`devops/{aws,azure}-deployment`).
+description: Use when managing per-environment config and secrets (typed config, Key Vault, Secrets Manager, Vault). Triggers "where do secrets go", "validate config at startup". Not for IaC (iac).
 ---
 
 # DevOps — Environment Configuration & Secrets

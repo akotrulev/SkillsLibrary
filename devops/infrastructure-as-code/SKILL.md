@@ -1,6 +1,6 @@
 ---
 name: iac
-description: Use when the user asks to author Infrastructure as Code with Bicep (Azure) or Terraform (multi-cloud / AWS). Triggers: "write Bicep for X", "Terraform module for Y", "should this be Bicep or Terraform", "module structure for our IaC repo". Do NOT use for pipeline YAML (`devops/{github-actions,gitlab-ci,azure-pipelines}`), app deploys (`devops/{aws,azure}-deployment`), or app-level config (`devops/environment-config`).
+description: Use when authoring Infrastructure as Code in Terraform or Bicep (modules, repo layout). Triggers "Terraform module for X", "should this be Bicep or Terraform". Not for scanning IaC (iac-security).
 ---
 
 # DevOps — Infrastructure as Code (Bicep & Terraform)

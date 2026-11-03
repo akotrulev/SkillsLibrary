@@ -1,6 +1,6 @@
 ---
 name: dependency-scan
-description: Use when wiring SCA (dependency-vulnerability scanning) as a CI gate for a Java build — OWASP Dependency-Check Gradle plugin scanning the direct + transitive tree against CVE feeds, failing above a CVSS threshold, with a ticketed suppression file. Triggers: "fail the build on vulnerable dependencies", "add dependency scanning", "gate new CVEs". Not for runtime DAST → `security-testing/passive-scan`.
+description: Use when wiring SCA as a CI gate for a Java build (OWASP Dependency-Check), failing on vulnerable packages. Triggers "fail the build on vulnerable dependencies". Not for runtime DAST (passive-scan).
 ---
 
 # Security Testing — Dependency Scanning / SCA (Java)

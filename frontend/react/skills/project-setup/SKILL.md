@@ -1,6 +1,6 @@
 ---
 name: project-setup
-description: Use when standing up a new app from zero — Next.js 15 App Router (primary) or Vite SPA (fallback) — rendering strategy per route, server/client boundary, feature folders, strict TS, ESLint/Prettier, typed env config. Triggers "create a new React/Next.js project", "scaffold a Next.js App Router app", "which rendering strategy for this route". Not for scaffolding into an existing app (`component-writer`), the route tree (`routing`), or upgrades (`migration`).
+description: Use when standing up a new React app from zero (Next.js App Router or Vite SPA, rendering strategy, strict TS). Triggers "create a new React project". Not for an existing app (component-writer).
 ---
 
 # React — Project Scaffold

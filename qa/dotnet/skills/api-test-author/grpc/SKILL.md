@@ -1,6 +1,6 @@
 ---
 name: api-tests-grpc
-description: Use when scaffolding black-box **gRPC** API tests in .NET 10 (8-9 supported) with Grpc.Net.Client + NUnit against a deployed, proto-defined HTTP/2 service. Triggers: "write a gRPC test for RPC X", "assert the RpcException StatusCode", "test a server-streaming RPC". Do NOT use for REST (`qa-dotnet:api-tests`) or GraphQL (`qa-dotnet:api-tests-graphql`).
+description: Use when writing black-box gRPC API tests in .NET (Grpc.Net.Client + NUnit) against a proto-defined service. Triggers "write a gRPC test for RPC X". Not for REST (api-tests).
 ---
 
 # QA — gRPC API Test Writer (.NET 8 / Grpc.Net.Client + NUnit)

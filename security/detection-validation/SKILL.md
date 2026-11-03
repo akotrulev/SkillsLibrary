@@ -1,6 +1,6 @@
 ---
 name: detection-validation
-description: Use to assert that the rule or alert meant to catch a simulated MITRE ATT&CK technique actually fired, by querying the log/alert store in the detonation window — the blue half of a purple-team run answering "are our detections working?". Gates every assertion on a telemetry backend. Triggers "did our SIEM catch T1003?", "validate the detection fired". Not for running the technique (`penetration-testing:atomic-simulation`) or authoring it (`security-governance:detection-engineering`).
+description: Use when asserting the alert for a simulated ATT&CK technique actually fired, by querying the log/alert store. Triggers "did our SIEM catch T1003?". Not for running the technique (atomic-simulation).
 ---
 
 # Purple Team — Detection Validation (assert the guardrail actually fired)

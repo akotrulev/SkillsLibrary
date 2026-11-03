@@ -1,6 +1,6 @@
 ---
 name: system-integration
-description: Use when an iOS app reaches outside its own screens — App Intents and App Shortcuts, WidgetKit widgets and controls, Live Activities, BGTaskScheduler, BGContinuedProcessingTask, background URLSession. Triggers "add a widget", "Siri / Shortcuts action", "Live Activity for delivery", "run work in the background", "upload after the app closes". Do NOT use for push setup (`mobile-ios:push-and-deep-links`), foreground networking (`-networking`) or SwiftData (`-offline-and-storage`).
+description: Use when an iOS app works outside its screens (App Intents, WidgetKit, Live Activities, background tasks). Triggers "add a widget". Not for push (push-and-deep-links).
 ---
 
 # iOS — System Integration

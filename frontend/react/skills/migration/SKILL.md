@@ -1,6 +1,6 @@
 ---
 name: migration
-description: Use when upgrading a React or Next.js codebase across a major — React 18→19 (removed APIs, `forwardRef`, React Compiler) or Next 14→15 (async `params`/`searchParams`/`cookies()`, caching defaults flipped) — or porting Pages Router→App Router incrementally. Covers the official codemods and what they miss. Triggers "upgrade us to React 19", "migrate to Next 15", "move off the Pages Router", "params is a Promise now". Not for a fresh project (`project-setup`).
+description: Use when upgrading React or Next.js across a major (React 18 to 19, Next 14 to 15, Pages to App Router) via codemods. Triggers "upgrade us to React 19". Not for a fresh project (project-setup).
 ---
 
 # React — Version Migration

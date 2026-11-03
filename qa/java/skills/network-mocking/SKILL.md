@@ -1,6 +1,6 @@
 ---
 name: network-mocking
-description: Use when Java/TestNG UI tests must intercept, mock, slow down or assert browser network traffic — Playwright routes, CDP throttling, or an out-of-browser MITM proxy for Selenium/Appium. Triggers "mock this XHR in the UI test", "simulate slow 3G/offline", "replay a HAR", "assert the page called endpoint X", "check the security headers". Do NOT use for API tests without a browser (qa-java:api-tests), load (qa-java:load-testing) or WebSocket/SSE streams (qa-java:realtime-stream-testing).
+description: Use when Java/TestNG UI tests must mock, throttle or assert browser traffic (Playwright routes, HAR, MITM). Triggers "mock this XHR". Not for WebSocket/SSE (realtime-stream-testing).
 ---
 
 # QA — Network Mocking (Java / Playwright 1.63)

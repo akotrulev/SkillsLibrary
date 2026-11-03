@@ -1,6 +1,6 @@
 ---
 name: detection-engineering
-description: Use to author and test security detections as code — Sigma rules and alert-as-code that catch attacker behavior in logs at runtime, mapped to MITRE ATT&CK and unit-tested against sample logs. Blue-team, language-agnostic. Triggers "write a Sigma rule", "turn this pentest finding into a detection". Not for scanning code (`qa-security`), running the attack (`penetration-tester`), validating a detection fires (`purple-team-engineer`), or app dashboards (`observability`).
+description: Use when authoring security detections as code (Sigma rules, alert-as-code) mapped to MITRE ATT&CK and tested on logs. Triggers "write a Sigma rule". Not for checking it fires (detection-validation).
 ---
 
 # Security Governance — Detection Engineering (Sigma · alert-as-code · ATT&CK-mapped)

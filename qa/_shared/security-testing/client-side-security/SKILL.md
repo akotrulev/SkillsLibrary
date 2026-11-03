@@ -1,6 +1,6 @@
 ---
 name: client-side-security
-description: Use for dynamic client-side security testing the server-side scanners are blind to — DOM-based XSS, CSP validation, and SPA-specific DAST. Language-agnostic, runs against an owned/authorized non-prod env. Triggers "test for DOM XSS", "does our CSP actually block injection", "SPA security scan", "validate our security headers", "client-side prototype pollution". Do NOT use for server-side injection (`active-scan`/`exploit-validation`) or access-control (`permission-testing`).
+description: Use when testing client-side security that server scanners miss; DOM XSS, CSP validation, SPA DAST on non-prod. Triggers "test for DOM XSS". Not for server-side injection (active-scan).
 ---
 
 # Security Testing — Client-Side Security (DOM XSS · CSP validation · SPA DAST)

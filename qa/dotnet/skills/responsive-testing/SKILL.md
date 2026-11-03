@@ -1,6 +1,6 @@
 ---
 name: responsive-testing
-description: Use when testing responsive layout/breakpoint behavior in .NET 10 (8-9) with Playwright .NET + NUnit — drive the viewport across the app's real CSS breakpoints (read from its token/theme source, never guessed), assert the layout variant at breakpoint−1 and breakpoint (BVA), verify geometry via bounding boxes. Triggers "test the responsive design", "assert the nav collapses to a hamburger", "test around the breakpoints". Not for pixel diffs (`visual-regression`).
+description: Use when testing responsive layout in .NET with Playwright, driving the viewport across real breakpoints. Triggers "test around the breakpoints". Not for pixel diffs (visual-regression).
 ---
 
 # QA — Responsive / Breakpoint Testing (.NET 10 / Playwright 1.63 + NUnit)

@@ -1,6 +1,6 @@
 ---
 name: plan-blueprint
-description: Use when turning a business case, requirements set, or loose direction into an approved HIGH-LEVEL backend plan — areas, architecture, stack, and a routing map binding each area to the agent that builds it. Ends in a blocking human approval gate before any detail. Triggers "plan the backend for…", "which agents should build what". Do NOT use for the detail pack (the `dev:plan-*` detail skills), requirements (`requirements-author`), schema depth (`data-architect`), or code (`be-<stack>`).
+description: Use when turning requirements into an approved high-level backend plan (areas, architecture, stack, agent routing). Triggers "plan the backend for X". Not for the detail pack (plan-data-model).
 ---
 
 # Solution Blueprint — the high-level backend plan

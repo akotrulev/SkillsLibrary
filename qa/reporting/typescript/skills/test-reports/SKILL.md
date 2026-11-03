@@ -1,6 +1,6 @@
 ---
 name: test-reports
-description: Use when setting up Allure reporting for a TypeScript test suite (Vitest + native fetch, Playwright TS, WebdriverIO TS). Triggers: "set up Allure for our Vitest project", "wire Allure in Playwright config", "publish Allure report from our Node CI". Not for flaky-test quarantine (`qa-typescript:flaky-test-quarantine`) or pipeline YAML (`qa-typescript:ci-pipelines`).
+description: Use when setting up Allure reporting for a TypeScript test suite (Vitest, Playwright, WebdriverIO). Triggers "set up Allure for our Vitest project". Not for flaky tests (flaky-test-quarantine).
 ---
 
 # QA — Allure Reporting (TypeScript / Vitest, Playwright, WebdriverIO)

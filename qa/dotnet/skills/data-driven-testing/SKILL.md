@@ -1,6 +1,6 @@
 ---
 name: data-driven-testing
-description: Use when one .NET 10 (8-9) / NUnit test body must run against many rows of data from an external file. Triggers "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize this NUnit test with external test data". Not for building the objects themselves (`test-data-builder`).
+description: Use when one .NET/NUnit test must run over many rows from an external CSV, JSON or spreadsheet. Triggers "run this test for every row". Not for building test objects (test-data-builder).
 ---
 
 # Data-Driven Testing (.NET 10 / NUnit)

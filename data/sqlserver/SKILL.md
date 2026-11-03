@@ -1,6 +1,6 @@
 ---
 name: sqlserver
-description: Use when designing tables, securing data (roles/RLS/Always Encrypted/Ledger), writing T-SQL queries or migrations, choosing indexes, caching, or tuning SQL Server / Azure SQL from a .NET / Java / Node backend. Pick the topic in the routing table, then read its reference. Triggers: "design a SQL Server schema", "row-level security", "this T-SQL is slow", "Azure SQL tier choice". Do NOT use for other engines, cross-engine modeling (`data/_shared/schema-design`), or DB tests (qa `db-testing`).
+description: Use when designing, securing (RLS, Always Encrypted), querying or tuning SQL Server or Azure SQL. Triggers "this T-SQL is slow". Not for cross-engine modeling (schema-design).
 ---
 
 # Data — SQL Server / Azure SQL

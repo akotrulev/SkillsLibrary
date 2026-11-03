@@ -1,6 +1,6 @@
 ---
 name: motion
-description: Use when deciding what a UI's motion is — the intensity tier (subtle / standard / complex), which of the 17 vendored presets fits each trigger (hover, scroll reveal, page transition, skeleton…), and each one's duration/easing/cleanup contract, from the corpus's `gsap` domain. Triggers "what animation should this have", "our animations feel random", "how long should this transition be". Not for whether motion serves the brief (`design:visual-identity`) or how it is coded (a stack's `animation`).
+description: Use when deciding a UI's motion design (intensity tier, preset per trigger, duration and easing). Triggers "what animation should this have". Not for coding it (animation).
 ---
 
 # Motion design — the tier, the preset, the floor

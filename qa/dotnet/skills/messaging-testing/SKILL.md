@@ -1,6 +1,6 @@
 ---
 name: messaging-testing
-description: Use when a .NET / NUnit test suite must produce, consume, or assert messages against the project's broker — Kafka/Redpanda, AWS SQS/SNS, RabbitMQ, or Azure Service Bus. Triggers "assert the service published event X", "test the consumer's side-effect", "DLQ/DLT assertions", "seed a topic/queue in a test". Pick the broker in the matrix, then read its reference file. Not for HTTP APIs (`api-test-author/writer`), message contracts (`api-contract-testing`), or email (`email-testing`).
+description: Use when a .NET/NUnit suite must produce, consume or assert broker messages (Kafka, SQS, RabbitMQ, Service Bus). Triggers "assert event X was published". Not for contracts (api-contract-testing).
 ---
 
 # QA — Messaging Testing (.NET 8 / C#)

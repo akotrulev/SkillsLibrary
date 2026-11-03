@@ -1,6 +1,6 @@
 ---
 name: ux-review
-description: Use when reviewing a built UI, screenshot, mockup, or Figma flow at EXPERIENCE altitude — captures its own evidence, then Nielsen's 10 heuristics, flow friction, IA and the responsiveness budget, against `experience-plan.md` if one exists; outputs a severity-tabled findings list. Triggers "review the UX", "heuristic evaluation", "is this flow confusing". Not for code-level UI audit (`design:ui-code-audit`), a11y scans (qa `accessibility-testing`), or copy voice (`design:ux-writing`).
+description: Use when reviewing a built UI, screenshot, mockup or Figma flow for UX (Nielsen heuristics, flow friction, IA). Triggers "review the UX". Not for UI code audits (ui-code-audit).
 ---
 
 # UX heuristics — experience-level review

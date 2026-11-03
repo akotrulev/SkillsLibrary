@@ -1,6 +1,6 @@
 ---
 name: networking
-description: Use when an Expo SDK 57 app must call an API — fetch + TanStack Query 5, focusManager on AppState, onlineManager on NetInfo, AbortSignal timeout budgets, bounded retries with Retry-After, no retry offline, ProblemDetails, token refresh, WebSocket / SSE paused on background. Triggers "request hangs on cell", "retry storm", "refresh token race". Do NOT use for the failure UI (`mobile-react-native:error-handling`), forms, or persisted caches (`-offline-and-storage`).
+description: Use when an Expo/React Native app calls an API (fetch + TanStack Query; timeouts, retries, token refresh). Triggers "request hangs on cell". Not for the failure UI (error-handling).
 ---
 
 # React Native — Networking

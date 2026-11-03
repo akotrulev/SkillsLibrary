@@ -1,6 +1,6 @@
 ---
 name: source-grounding
-description: Use before deciding a framework, library, API or version-bound question, so the answer rests on the official doc for the detected version and cites it. Triggers: "which API should I use", "is this deprecated", "what's the current way to", "check the docs first", writing framework-specific code from memory. Do NOT use for design facts — style, palette, type, UX rules (use design/ui-ux-pro-max) — or for version-independent logic such as loops, renames and moves.
+description: Use when answering a framework, library, API or version-bound question; cite the official docs for that version. Triggers "is this deprecated", "check the docs first". Not for design facts (corpus).
 ---
 
 # Source Grounding

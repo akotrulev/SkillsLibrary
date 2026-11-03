@@ -1,6 +1,6 @@
 ---
 name: navigation
-description: Use when adding screens, tabs or deep links in Compose — Navigation 3 (NavDisplay, back stack you own, typed NavKey routes) for new apps; Navigation Compose 2.10 type-safe routes for existing ones; adaptive scenes, App Links mapped to a route, predictive back. Triggers "add a screen", "navigate after save", "deep link into a detail". Do NOT use for assetlinks.json and push links (`mobile-android:push-and-deep-links`) or ViewModel state (`-architecture`).
+description: Use when adding screens, tabs or deep-link routes in Jetpack Compose (Navigation 3, predictive back). Triggers "add a screen". Not for push and link setup (push-and-deep-links).
 ---
 
 # Android — Navigation

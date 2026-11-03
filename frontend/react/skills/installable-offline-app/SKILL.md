@@ -1,6 +1,6 @@
 ---
 name: pwa
-description: Use when the app must be installable and/or work offline — manifest, service worker via Serwist (Next.js) or `vite-plugin-pwa`, precache vs runtime caching, the update lifecycle (a waiting worker needs skip-waiting), offline UX with queued writes, and that API/RSC data isn't cached by default. Triggers: "make this installable", "add offline support", "PWA won't update after deploy", "add to home screen". Do NOT use for server-side caching (`data-fetching`) or live-data reconnection (`realtime`).
+description: Use when a React or Next.js app must be installable or work offline (manifest, Serwist or vite-plugin-pwa, updates). Triggers "make this installable". Not for live reconnection (realtime).
 ---
 
 # React — PWA & Offline

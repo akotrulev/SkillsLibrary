@@ -1,6 +1,6 @@
 ---
 name: cloud-posture
-description: Use when checking a LIVE cloud account's security posture (CSPM) across AWS/Azure/GCP with Prowler and ScoutSuite. Reads a cloud account via credentials, so it needs recorded, expiring, read-only authorization against an OWNED account. Triggers "scan our AWS account for misconfigurations", "CIS benchmark on our Azure subscription". Not for pre-deploy IaC (`iac-security`), running K8s (`kubernetes-security`), image/OS CVEs (`qa-<stack>:image-infra-scan`), or repo gates (`devops-auditor`).
+description: Use when scanning a live, owned AWS/Azure/GCP account for misconfiguration (CSPM) with Prowler or ScoutSuite. Triggers "scan our AWS account for misconfigurations". Not for IaC (iac-security).
 ---
 
 # DevOps — Cloud Security Posture (Prowler / ScoutSuite)

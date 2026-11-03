@@ -1,6 +1,6 @@
 ---
 name: flaky-test-quarantine
-description: Use when flaky tests in a Node 24 (22 supported) + TypeScript suite (Playwright e2e, Vitest unit) must be detected, **quarantined** and reported. Triggers: "this Playwright test is flaky, stop it blocking CI", "quarantine our flaky e2e tests but keep running them", "find which Playwright tests are flaky". Not for Allure wiring (`qa-typescript:test-reports`), the pipeline lanes (`qa-typescript:ci-pipelines`), or fixing test logic (the owning qa-*-typescript agent).
+description: Use when detecting and quarantining flaky tests in a TypeScript Playwright or Vitest suite while still running them. Triggers "this Playwright test is flaky". Not for Allure wiring (test-reports).
 ---
 
 # Flaky-Test Quarantine (Node 24 + TypeScript / Playwright + Vitest)

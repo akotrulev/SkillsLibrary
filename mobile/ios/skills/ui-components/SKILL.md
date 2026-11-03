@@ -1,6 +1,6 @@
 ---
 name: ui-components
-description: Use when writing SwiftUI views — small views, #Preview, .task for loads cancelled with the view, loading / loaded / failed / stale / offline regions, List and lazy stacks, SF Symbols, no work in body. Triggers "build this screen", "view is slow to render", "load data when it appears", "add a preview". Do NOT use for state ownership (`mobile-ios:architecture`), theming (`-styling`), routes (`-navigation`), forms (`-forms`) or UIKit (`-uikit`).
+description: Use when writing SwiftUI views (small views, previews, .task loads, lists, SF Symbols). Triggers "build this screen". Not for state ownership (architecture).
 ---
 
 # iOS — SwiftUI Views

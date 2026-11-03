@@ -1,6 +1,6 @@
 ---
 name: auth0
-description: Use when setting up or modifying Auth0 in a React 19/18 + TypeScript app — two lanes: `@auth0/nextjs-auth0` for the Next.js App Router (middleware, server-side session in RSC/Actions/handlers) and `@auth0/auth0-react` for a Vite/CRA SPA (Auth Code + PKCE, protected routes). Triggers "add Auth0 login", "protect a route", "read the session in a Server Component", "attach the access token to fetch". Not for backend token validation or provider concepts (`auth0-concepts`).
+description: Use when adding or fixing Auth0 login in a React or Next.js app (nextjs-auth0 session, or auth0-react SPA with PKCE). Triggers "add Auth0 login". Not for tenant setup or OIDC theory.
 ---
 
 # Auth — Auth0 in React

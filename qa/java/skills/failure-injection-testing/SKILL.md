@@ -1,6 +1,6 @@
 ---
 name: failure-injection-testing
-description: Use when writing fault-injection / resilience tests in Java 21 / TestNG with Toxiproxy via Testcontainers — inject latency, drops, and bandwidth caps on a dependency (DB, API, broker, cache) and assert the app degrades gracefully. Triggers: "test the app survives a slow database", "inject a connection drop", "assert the circuit breaker opens". Do NOT use for load/throughput testing (`qa-java:load-testing`).
+description: Use when writing fault-injection tests in Java/TestNG with Toxiproxy via Testcontainers to assert graceful degradation. Triggers "survive a slow database". Not for load (load-testing).
 ---
 
 # QA — Chaos / Fault-Injection Testing (Java 21 / Toxiproxy + Testcontainers + TestNG)

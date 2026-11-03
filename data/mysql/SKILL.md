@@ -1,6 +1,6 @@
 ---
 name: mysql
-description: Use when designing tables, securing data (privileges/tenancy/encryption), writing queries or migrations, choosing indexes, caching, or tuning MySQL / MariaDB / Aurora MySQL from a .NET / Java / Node backend. Pick the topic in the routing table, then read its reference. Triggers: "design a MySQL schema", "multi-tenant isolation without RLS", "this MySQL query is slow". Do NOT use for other engines, cross-engine modeling (`data/_shared/schema-design`), or DB tests (qa `db-testing`).
+description: Use when designing, securing, querying, migrating or tuning MySQL, MariaDB or Aurora MySQL. Triggers "design a MySQL schema", "this MySQL query is slow". Not for cross-engine modeling (schema-design).
 ---
 
 # Data — MySQL / MariaDB / Aurora MySQL

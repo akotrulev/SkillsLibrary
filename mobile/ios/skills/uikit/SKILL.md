@@ -1,6 +1,6 @@
 ---
 name: uikit
-description: Use when the iOS codebase is UIKit or mixes UIKit and SwiftUI — view controllers, Auto Layout, diffable data sources, UIKit Observation tracking, UIHostingController / UIHostingConfiguration / UIViewRepresentable seams both ways, and the UIScene lifecycle move (TN3187). Triggers "add a screen to this UIKit app", "embed SwiftUI", "wrap a UIKit view", "scene delegate". Do NOT use for new SwiftUI screens (`mobile-ios:ui-components`) or rewrites (`-migration`).
+description: Use when an iOS codebase uses UIKit or mixes UIKit and SwiftUI (view controllers, Auto Layout, hosting seams). Triggers "embed SwiftUI". Not for a new SwiftUI screen (ui-components).
 ---
 
 # iOS — UIKit

@@ -1,6 +1,6 @@
 ---
 name: forms
-description: Use when building or fixing a SwiftUI form — Form and sections, @FocusState field order, validation timing, textContentType for autofill and passkeys, keyboard toolbar, submit state, server errors mapped onto fields. Triggers "build a sign-up form", "keyboard hides the field", "autofill not offered", "server errors don't land on fields". Do NOT use for the request itself (`mobile-ios:networking`), state ownership (`-architecture`) or UIKit forms (`-uikit`).
+description: Use when building or fixing a SwiftUI form (@FocusState order, validation, autofill, server errors on fields). Triggers "build a sign-up form". Not for the request (networking).
 ---
 
 # iOS — Forms

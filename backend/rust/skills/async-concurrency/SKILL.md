@@ -1,6 +1,6 @@
 ---
 name: async-concurrency
-description: Use when writing or fixing async and concurrent Rust on tokio — spawning and owning tasks, cancellation and graceful shutdown, select! cancel safety, locks vs channels vs actors, blocking and CPU work off the runtime, backpressure, timeouts, Send errors. Triggers "future is not Send", "deadlock in my axum handler", "how do I shut down cleanly", "tokio Mutex or std Mutex". Do NOT use for general idioms (`pattern-guide`), query code (`database-code`), or profiling (`performance`).
+description: Use when writing or fixing async Rust on tokio (cancellation, shutdown, select! safety, locks vs channels). Triggers "future is not Send", "tokio Mutex or std Mutex". Not for profiling (performance).
 ---
 
 # Rust — Async and Concurrency on Tokio

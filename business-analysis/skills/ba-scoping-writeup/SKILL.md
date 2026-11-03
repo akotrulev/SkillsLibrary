@@ -1,6 +1,6 @@
 ---
 name: scoping
-description: Use when turning a vague business problem, stakeholder request, or feature idea into a structured single-initiative scoping writeup. Carries the elicitation question bank for thin briefs. Triggers: "do a BA writeup for X", "help me scope this initiative", "we got a PRD/BRD — what's actually in scope". Do NOT use for writing user stories (`stories`), cross-feature conflict checks (`conflict-check`), or single-doc test distillation (`qa/manual/requirements-breakdown`).
+description: Use when turning a vague business problem or stakeholder request into a single-initiative scoping writeup. Triggers "help me scope this initiative". Not for user stories (stories).
 ---
 
 # Initiative Scoping

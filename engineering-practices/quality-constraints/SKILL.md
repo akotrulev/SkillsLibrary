@@ -1,6 +1,6 @@
 ---
 name: quality-constraints
-description: Use while implementing, to keep the agent from quietly lowering the quality bar to reach green. Lists what must not be done and the evidence that proves it wasn't. Triggers: "don't weaken the tests", "keep the bar", an agent silencing a check, skipping a test, adding a suppression, editing an acceptance test, or dropping coverage to finish a task. Do NOT use for end-of-work completion evidence (use dev:verify) or for choosing a coverage number (CLAUDE.md fixes it at 80% of branches).
+description: Use when implementing, to stop the bar dropping to reach green (skipped tests, suppressions, lost coverage). Triggers "don't weaken the tests", "keep the bar". Not for completion evidence (verify).
 ---
 
 # Quality Constraints

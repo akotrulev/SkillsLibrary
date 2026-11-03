@@ -1,6 +1,6 @@
 ---
 name: auth0
-description: Use when adding/fixing Auth0 sign-in in a native Kotlin / Jetpack Compose Android app with Auth0.Android — Universal Login in Custom Tabs (PKCE), App Links callback, SecureCredentialsManager (Keystore), biometric unlock, refresh rotation, logout, passkeys. Triggers "add Auth0 login", "browser doesn't return", "biometric prompt for stored credentials". Do NOT use for Auth0 concepts (`auth/_shared/auth0-concepts`), React Native (`mobile-react-native:auth0`), or iOS (`mobile-ios:auth0`).
+description: Use when adding or fixing Auth0 login in a native Kotlin/Compose Android app (Auth0.Android, PKCE, credentials, biometrics). Triggers "add Auth0 login". Not for tenant setup or OIDC theory.
 ---
 
 # Auth — Auth0 in Android (Kotlin)

@@ -1,6 +1,6 @@
 ---
 name: standards-audit
-description: Use to audit a whole React/Next.js codebase against the fe-react plugin's own conventions, producing a saved, re-runnable findings report in `docs/audits/`. Read-only — it never fixes. Triggers "audit our codebase against the plugin conventions", "does this app follow the fe-react rules", "re-audit — what did we fix since last round". Not for one diff (`fe-react:conventions-review`), code vs a product spec (`dev:audit-spec`), or fixing anything (the `fe-react` agent).
+description: Use when auditing a whole React/Next.js codebase against the fe-react conventions, read-only, saved to docs/audits/. Triggers "audit our codebase". Not for one diff (conventions-review).
 ---
 
 # fe-react Conformance Audit

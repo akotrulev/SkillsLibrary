@@ -1,6 +1,6 @@
 ---
 name: cloud-recon-enumeration
-description: Use to map a cloud account's control-plane attack surface at the start of an authorized cloud pentest — public storage/DNS surface, the instance metadata service, IAM/principal/permission enumeration, OIDC/federation trust — provider-agnostic (AWS/Azure/GCP), under a committed cloud scope file. Triggers "enumerate our AWS account", "recon this authorized cloud tenant", "what can this credential do". Not for network/host recon (`recon-enumeration`), defensive posture benchmarking (`devops:cloud-posture`), or provider-specific exploitation (`cloud-attack-aws` / `cloud-attack-azure` / `cloud-attack-gcp`). Owned/lab accounts only, under a committed cloud scope file.
+description: Use when mapping an authorized cloud account's attack surface at pentest start (storage, metadata, IAM, federation). Triggers "what can this credential do". Not for network recon (recon-enumeration).
 ---
 
 # Penetration Testing — Cloud Recon & Enumeration (ScoutSuite · cloud_enum · metadata service · enumerate-iam)

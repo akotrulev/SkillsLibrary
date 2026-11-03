@@ -1,6 +1,6 @@
 ---
 name: messaging-testing
-description: Use when a Node 24 / TypeScript / Vitest suite must produce, consume, or assert messages against the project's broker (Kafka, SQS/SNS, RabbitMQ, Service Bus). Triggers "assert the service published event X", "test the consumer's side-effect", "DLQ/DLT assertions", "seed a topic in a test". Do NOT use for HTTP API assertions (use `qa-typescript:api-tests`), for message-contract verification (use `qa-typescript:api-contract-testing`), or for email (use `qa-typescript:email-testing`).
+description: Use when a TypeScript suite must produce, consume or assert broker messages (Kafka, SQS, RabbitMQ, Service Bus). Triggers "assert event X was published". Not for contracts (api-contract-testing).
 ---
 
 # QA — Messaging Testing (TypeScript)

@@ -1,6 +1,6 @@
 ---
 name: standards-audit
-description: Use to audit a whole React Native / Expo app against the mobile-react-native plugin's conventions — version lane, structure, UI, navigation, data, native code, accessibility, resilience, test ids, security and store fragments — as a saved, re-runnable report in `docs/audits/`. Read-only. Triggers "audit our RN app against the plugin conventions". Do NOT use to review one diff (`mobile-react-native:conventions-review`) or check code against a spec (`code-auditor`).
+description: Use when auditing a whole React Native/Expo app against mobile-react-native conventions; read-only report. Triggers "audit our RN app". Not for one diff (conventions-review).
 ---
 
 # mobile-react-native Conformance Audit

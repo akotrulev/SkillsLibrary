@@ -1,6 +1,6 @@
 ---
 name: kotlin-multiplatform
-description: Use when Kotlin code must be shared between Android and iOS — shared logic by default (Room, DataStore, Ktor, kotlinx.serialization, KMP ViewModel, Koin or Metro), the com.android.kotlin.multiplatform.library plugin on AGP 9, the iOS framework and Swift export (alpha), Compose Multiplatform as opt-in shared UI. Triggers "share this with iOS", "set up KMP", "Hilt in a shared module". Do NOT use for the Swift consumer code (`mobile-ios`) or Android-only work.
+description: Use when sharing Kotlin code between Android and iOS with Kotlin Multiplatform (KMP), incl. opt-in Compose Multiplatform. Triggers "set up KMP". Not for the Swift side of the iOS app.
 ---
 
 # Android — Kotlin Multiplatform

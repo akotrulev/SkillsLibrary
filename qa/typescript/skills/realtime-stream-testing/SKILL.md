@@ -1,6 +1,6 @@
 ---
 name: realtime-stream-testing
-description: Use when testing real-time **WebSocket** and **Server-Sent-Events (SSE)** streams in Node 24 (22 supported) + TypeScript (Vitest / Playwright). Triggers: "test our WebSocket chat endpoint with ws", "assert the server pushes N SSE events then closes", "wait for a websocket frame without a setTimeout". Do NOT use for request/response HTTP (`qa-typescript:api-tests`) or broker messages (`qa-typescript:messaging-testing`).
+description: Use when testing WebSocket or SSE streams in TypeScript with protocol clients or Playwright, asserting frames without sleeps. Triggers "test our WebSocket endpoint". Not for plain HTTP (api-tests).
 ---
 
 # WebSocket & SSE Testing (Node 24 + TypeScript) — **ported from the canonical `qa-dotnet:realtime-stream-testing`**

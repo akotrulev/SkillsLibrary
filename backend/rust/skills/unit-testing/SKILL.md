@@ -1,6 +1,6 @@
 ---
 name: unit-testing
-description: Use when Rust logic needs a dev-side unit test — #[cfg(test)] modules on cargo test or nextest, the untestable seams (time, ids, randomness, config, outbound I/O), fakes before mockall, rstest, proptest, paused tokio time, both arms of every Result, the 80% branch floor via cargo-llvm-cov. In-process only. Triggers "unit-test this Rust module", "fake the clock in tokio". Do NOT use for #[sqlx::test] or router/HTTP tests (`database-code`, peers).
+description: Use when Rust logic needs a unit test with cargo test or nextest (seams, proptest, paused tokio time, coverage floor). Triggers "unit-test this Rust module". Not for sqlx tests (persistence).
 ---
 
 # Rust — Unit Testing (`cargo test` / nextest)

@@ -1,6 +1,6 @@
 ---
 name: flaky-test-quarantine
-description: Use when flaky tests in a .NET 10 (8/9 supported) / NUnit suite must be detected, **quarantined** and reported. Triggers: "this NUnit test is flaky, stop it blocking CI", "quarantine our flaky tests but keep running them", "find which NUnit tests are flaky". Not for Allure wiring (`qa-dotnet:test-reports`), the pipeline lanes themselves (`qa-dotnet:ci-pipelines`), or fixing the test's logic (the owning qa-*-dotnet agent).
+description: Use when detecting and quarantining flaky tests in a .NET NUnit suite while still running them. Triggers "this NUnit test is flaky", "quarantine our flaky tests". Not for Allure wiring (test-reports).
 ---
 
 # Flaky-Test Quarantine (.NET 10 / NUnit)

@@ -1,6 +1,6 @@
 ---
 name: api-tests-playwright
-description: Use when the user asks to write Java API tests through Playwright's APIRequestContext (playwright-java + TestNG + Jackson) — usually because the project already runs Playwright-Java for UI and wants one dependency and one report. Triggers: "write API tests with Playwright in Java", "use APIRequestContext for endpoint X", "add API coverage to our Playwright Java suite". Do NOT use for API suites without Playwright (`qa-java:api-tests`, the RestAssured default).
+description: Use when writing Java API tests via Playwright's APIRequestContext, when the suite already runs Playwright. Triggers "write API tests with Playwright". Not for plain API suites (api-tests).
 ---
 
 # QA — API Test Writer (Java / Playwright APIRequestContext + TestNG)

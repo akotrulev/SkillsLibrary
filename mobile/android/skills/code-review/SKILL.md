@@ -1,6 +1,6 @@
 ---
 name: conventions-review
-description: Use when reviewing a Kotlin / Compose / Views diff — `!!`, blocked main thread, `GlobalScope`, lifecycle-blind collection, ViewModel events, work in composition, missing timeouts and failed states, secrets outside Keystore storage, exported components, unvalidated links, untagged elements — plus an emulator screenshot pass. Triggers "review this screen", "review this PR". Do NOT use for a whole-repo audit (`mobile-android:standards-audit`), explanations or writing code.
+description: Use when reviewing a Kotlin, Jetpack Compose or Views diff against plugin conventions, plus an emulator screenshot pass. Triggers "review this PR". Not for a whole-repo audit (standards-audit).
 ---
 
 # Android — Code Review

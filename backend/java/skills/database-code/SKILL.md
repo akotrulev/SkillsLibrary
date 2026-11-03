@@ -1,6 +1,6 @@
 ---
 name: persistence
-description: Use when setting up or refactoring persistence in a Spring Boot 3 service — JPA/Hibernate, Spring Data, entity design, transactions, optimistic locking, query patterns, tuning. Triggers: "set up JPA for X", "Spring Data repository", "@Transactional boundaries", "@Version optimistic locking", "N+1 in Hibernate". Do NOT use for raw-SQL data access (`data/<db>`), cross-engine migrations (`data/_shared/migrations`), or .NET / Node persistence.
+description: Use when setting up or refactoring Spring Boot persistence with JPA/Hibernate (entities, transactions, locking, tuning). Triggers "set up JPA", "N+1 in Hibernate". Not for raw SQL (postgresql).
 ---
 
 # Java — Persistence with JPA / Hibernate + Spring Data

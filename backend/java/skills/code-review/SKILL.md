@@ -1,6 +1,6 @@
 ---
 name: conventions-review
-description: Use when reviewing Java 21 / Spring Boot 3 code for design-pattern misuse, over-abstraction, threading violations, transactional boundary bugs, DI anti-patterns, or modern-Java omissions (no records / sealed types). Triggers: "review this for pattern misuse", "is this CQRS justified", "check for @Transactional misuse". Do NOT use for explanations (`pattern-guide`) or generating new code (`pattern-writer`).
+description: Use when reviewing Java/Spring Boot code for pattern misuse, @Transactional, threading or DI anti-patterns. Triggers "review this Spring service". Not for explanations (patterns).
 ---
 
 # Java Design Patterns — Reviewer

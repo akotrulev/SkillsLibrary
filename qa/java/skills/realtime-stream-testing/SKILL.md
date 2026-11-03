@@ -1,6 +1,6 @@
 ---
 name: realtime-stream-testing
-description: Use when testing WebSocket or SSE streams in Java 21 / TestNG — protocol clients (OkHttp WebSocket/SSE, Spring STOMP, WebClient + StepVerifier) draining frames into a queue and asserting on conditions (Awaitility, never sleeps), plus Playwright for in-browser frames. Triggers: "test our WebSocket endpoint", "assert the SSE stream emits X", "real-time updates test". Do NOT use for request/response HTTP (`qa-java:api-tests`).
+description: Use when testing WebSocket or SSE streams in Java/TestNG with protocol clients or Playwright, asserting frames without sleeps. Triggers "test our WebSocket endpoint". Not for plain HTTP (api-tests).
 ---
 
 # WebSocket & SSE Testing (Java 21 / TestNG / Playwright 1.63)

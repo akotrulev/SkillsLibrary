@@ -1,6 +1,6 @@
 ---
 name: plan-api-surface
-description: Use when a planned data model needs its API surface specified — a service → resource → endpoint table with typed request/response bodies, the shared validation/error catalog, and pagination/versioning contract. Triggers "what endpoints do we need", "plan the API surface", "spec the REST contract". Do NOT use to write controllers/DTOs/clients (`be-<stack>`), write API tests (`qa-api-<stack>`), manage an OpenAPI file (`qa/_shared/api-spec-assets`), or plan tables (`dev:plan-data-model`).
+description: Use when a planned data model needs its API surface specified (endpoints, typed bodies, errors, paging). Triggers "plan the API surface", "what endpoints do we need". Not for tables (plan-data-model).
 ---
 
 # API Surface Plan — the contract, before the code

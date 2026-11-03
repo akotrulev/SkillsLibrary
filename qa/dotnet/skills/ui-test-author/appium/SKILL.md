@@ -1,6 +1,6 @@
 ---
 name: ui-tests-appium
-description: Use when the user asks to scaffold a .NET (C#) + Appium 3 (Appium.WebDriver 9) page object or NUnit mobile UI test, following the BaseAppiumPage / AppiumDriverFactory / BaseMobileTest pattern. Triggers: "create a C# Appium page object for X", "add a .NET mobile page for screen Y", "write an Appium NUnit test for Z", "swipe / WebView / failure evidence in Appium C#". Do NOT use for exploring a live screen (`mobile-screen-explorer`) or OS-surface features (`mobile-native-features`).
+description: Use when scaffolding a .NET Appium 3 (Appium.WebDriver) page object or mobile UI test. Triggers "write an Appium test for X". Not for exploring a live screen (mobile-screen-explorer).
 ---
 
 # QA — Appium .NET Page Object & Test Generator

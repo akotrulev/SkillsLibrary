@@ -1,6 +1,6 @@
 ---
 name: hardening
-description: Use to author the controls that turn misconfiguration findings into fixes — a strict Content-Security-Policy, the OWASP secure-headers set, and WAF rules (OWASP CRS on Coraza/ModSecurity). The authoring half of the fe-* / client-side-security handshake — author here, test there. Triggers "write a strict CSP", "harden our security headers". Not for testing the CSP blocks (`client-side-security`), nonce wiring (`fe-react`/`fe-blazor`), or exploiting a missing header (`penetration-tester`).
+description: Use when authoring security controls (strict CSP, OWASP secure headers, WAF rules with OWASP CRS). Triggers "write a strict CSP". Not for testing that they block (client-side-security).
 ---
 
 # Security Governance — Security Hardening (CSP · secure headers · WAF rules)

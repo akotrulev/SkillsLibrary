@@ -1,6 +1,6 @@
 ---
 name: knowledge-base
-description: Use when reading or updating a project's persistent business-model knowledge base (docs/business-model/) — the shared protocol every business-analysis skill loads before modeling flows, states, decisions, or sweeping for feature conflicts. Triggers: "read the KB before answering", "check what the KB already says about X", "initialise docs/business-model/ for this repo". Do NOT use for code/architecture memory (that's the repo's CLAUDE.md) or test artifacts (qa/*).
+description: Use when reading or updating the business-model knowledge base (docs/business-model/) before any BA modeling. Triggers "read the KB first". Not for the connection map (dependency-map).
 ---
 
 # BA — Project Knowledge (the KB protocol)

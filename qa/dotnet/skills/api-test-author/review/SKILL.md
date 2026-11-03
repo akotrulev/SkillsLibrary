@@ -1,6 +1,6 @@
 ---
 name: api-tests-review
-description: Use when the user asks to review existing .NET API test code (NUnit + RestSharp) for quality. Triggers: "review this API test", "look at OrderTests.cs", "spot issues in this *Action / client class". Not for generating new tests → `api-test-author/writer`.
+description: Use when reviewing existing .NET API test code (NUnit + RestSharp) for quality. Triggers "review this API test". Not for writing new tests (api-tests).
 ---
 
 # QA — API Test Reviewer (.NET / NUnit + RestSharp)

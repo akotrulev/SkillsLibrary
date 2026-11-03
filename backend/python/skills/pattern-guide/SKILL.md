@@ -1,6 +1,6 @@
 ---
 name: patterns
-description: Use when a Python backend / worker question is at the concept altitude — which idiom fits (Protocol vs ABC, dataclass vs pydantic, Result union vs exception, generator vs list) and whether a pattern is earned. Triggers "Protocol or ABC", "Result type or raise in Python", "is a repository justified here", "dataclass or pydantic model". Do NOT use to scaffold code (`pattern-writer`), review a diff (`code-review`), or for the media pipeline itself (`media-processing`).
+description: Use when explaining a design pattern in Python (Protocol vs ABC, dataclass vs pydantic, Result vs raise). Triggers "Protocol or ABC", "dataclass or pydantic". Not for scaffolding (patterns-apply).
 ---
 
 # Python Design Patterns — Reference

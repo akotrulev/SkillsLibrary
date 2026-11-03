@@ -1,6 +1,6 @@
 ---
 name: structured-logging
-description: Use when setting up or refactoring logging in a .NET service (10 primary, 8/9) with Serilog — message templates, enrichers, sinks to console/Loki/Seq/App Insights, correlation, sensitive-data masking. Triggers: "set up Serilog", "configure structured logging in .NET", "ship logs to Loki", "add correlation IDs". Do NOT use for Java/Node (their siblings) or tracing/metrics (`opentelemetry-dotnet`).
+description: Use when setting up structured logging in a .NET service with Serilog (JSON, correlation IDs, Loki, redaction). Triggers "set up Serilog". Not for traces or metrics (opentelemetry).
 ---
 
 # Observability — Serilog Structured Logging (.NET 10 primary / 8-9 supported)

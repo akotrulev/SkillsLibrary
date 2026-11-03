@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: Use when deciding where state and logic live in a Compose app — repositories, one screen ViewModel with one uiState StateFlow, no ViewModel-to-UI events, use cases only in big apps, Hilt or manual DI, SavedStateHandle for process death, modules only when earned. Triggers "ViewModel or not", "how do I show a snackbar from the ViewModel". Do NOT use for Retrofit (`mobile-android:networking`), Room (`-offline-and-storage`) or routes (`-navigation`).
+description: Use when deciding where state and logic live in a Jetpack Compose app (ViewModel + StateFlow, repositories, Hilt). Triggers "ViewModel or not". Not for API calls (networking).
 ---
 
 # Android — Architecture and State

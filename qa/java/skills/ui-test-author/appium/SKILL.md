@@ -1,6 +1,6 @@
 ---
 name: ui-tests-appium
-description: Use when the user asks to scaffold a Java + Appium 3 (java-client 11) page object or TestNG mobile UI test, following the base-page / driver-factory / TestNG pattern. Triggers: "create an Appium page object for X in Java", "add a Java mobile page for screen Y", "write an Appium TestNG test for Z", "swipe / WebView / failure evidence in Appium Java". Do NOT use for exploring a live screen (`qa-java:mobile-screen-explorer`) or OS-surface features (`qa-java:mobile-native-features`).
+description: Use when scaffolding a Java Appium 3 (java-client) page object or mobile UI test. Triggers "write an Appium test for X". Not for exploring a live screen (mobile-screen-explorer).
 ---
 
 # QA — Appium Java Page Object & Test Generator

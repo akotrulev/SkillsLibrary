@@ -1,6 +1,6 @@
 ---
 name: audit-spec
-description: Use when a written spec — or a pile of user stories / ACs / tickets — must become one deduped requirement register, each verdicted against the code (Met/Partial/Missing/Divergent/Unverifiable) with `file:line` evidence. Triggers "check the implementation against this spec", "which acceptance criteria are not built yet", "build a requirement register from these tickets". Multi-spec, saved to `docs/audits/` → the `code-auditor` agent (SPEC lane). Not for spec-less features (`dev:audit-feature`).
+description: Use when verdicting a spec, stories or ACs against the code as a requirement register with file:line evidence. Triggers "check the code against this spec". Not for spec-less features (audit-feature).
 ---
 
 # Spec-Compliance Audit

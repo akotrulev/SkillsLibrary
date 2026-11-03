@@ -1,6 +1,6 @@
 ---
 name: security
-description: Use when writing or reviewing mobile app code that stores data, talks to a server, handles auth tokens, opens links, hosts a WebView or exports components — secure coding keyed to OWASP MASVS 2.1, MASWE and MASTG. Triggers "where do tokens live", "is this safe to ship", "review mobile security". Do NOT use for scanning a built APK/IPA (qa `mobile-app-scan`), device testing (`mobile-runtime-testing`), or store rules (`mobile-<stack>:store-compliance`).
+description: Use when iOS, Android or React Native code stores data, handles tokens, opens links or hosts a WebView (MASVS). Triggers "where do tokens live". Not for scanning a built APK/IPA (mobile-app-scan).
 ---
 
 # Mobile — Secure Coding (MASVS 2.1)

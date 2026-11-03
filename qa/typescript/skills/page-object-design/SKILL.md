@@ -1,6 +1,6 @@
 ---
 name: page-object-design
-description: Use when the user is designing the page object structure for a TypeScript UI test project. Triggers: "design page objects for app X in TypeScript", "how should I structure pages/ for Playwright TS", "split this giant POM module". Do NOT use for extracting a POM from a live URL (`qa-typescript:page-objects-from-url`), mobile screens (`qa-typescript:mobile-screen-objects`), or writing specs (`qa-typescript:ui-tests-playwright`).
+description: Use when designing the page object structure for a TypeScript UI test project. Triggers "design page objects for app X". Not for a POM from a live URL (page-objects-from-url).
 ---
 
 # QA — Page Object Architect (TypeScript)

@@ -1,6 +1,6 @@
 ---
 name: mobile-screen-objects
-description: Use when the user wants a TypeScript (WebdriverIO) Appium page object created or updated from elements already discovered on a live screen. Triggers: "create a page object for the Login screen", "add a page for the … screen", "implement the … page". Do NOT use for discovering elements on a live screen (`qa-typescript:mobile-screen-explorer`) or writing the test itself (`qa-typescript:ui-tests-appium`).
+description: Use when creating or updating a WebdriverIO Appium page object from live-screen elements. Triggers "create a page object for the Login screen". Not for finding elements (mobile-screen-explorer).
 ---
 
 # QA — Appium Page Object Builder (TypeScript)

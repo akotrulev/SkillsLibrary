@@ -1,6 +1,6 @@
 ---
 name: performance
-description: Use when an iOS app hangs, drops frames, launches slowly, leaks memory or ships heavy — Instruments (SwiftUI, Time Profiler, Hangs, Hitches, Allocations, App Launch, Swift Tasks), hang and launch budgets, work off the main actor, SwiftUI body cost, MetricKit by version, app size. Triggers "UI freezes", "scroll jank", "slow cold start". Do NOT use for crash-reporter setup (`mobile-<stack>:observability`) or animation design (`-animation`).
+description: Use when an iOS app hangs, drops frames, starts slowly or leaks (Instruments, launch budgets, MetricKit). Triggers "slow cold start". Not for crash reporting (observability).
 ---
 
 # iOS — Performance

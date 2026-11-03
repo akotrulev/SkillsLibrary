@@ -1,6 +1,6 @@
 ---
 name: production-uptime-checks
-description: Use when authoring synthetic monitoring as code from the .NET / Azure stack — scheduled availability tests and scripted checks against live staging/prod via Azure Application Insights. The "is it up right now" layer, distinct from CI pre-merge tests. Triggers: "add a prod uptime check", "synthetic monitor for the login flow", "monitoring as code". Not for pre-merge CI gates (`qa-dotnet:ci-pipelines`) or load testing (`qa-dotnet:load-testing`).
+description: Use when authoring synthetic monitoring as code in .NET with Azure Application Insights against live staging/prod. Triggers "add a prod uptime check". Not for pre-merge CI gates (ci-pipelines).
 ---
 
 # Synthetic Monitoring as Code (Azure App Insights · .NET 10) — **ported from the TypeScript/Checkly canonical**

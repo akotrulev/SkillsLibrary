@@ -1,6 +1,6 @@
 ---
 name: app-structure
-description: Use when DESIGNING how an application is used, before it is built — task inventory → IA, app shell, page anatomy, form layout, density, accelerators, notifications, onboarding, the responsiveness budget, as a decision block. Triggers "design the navigation", "what should the app shell be", "lay out this page". Not for judging a built UI (`design:ux-review`), data-display correctness (the stack's `ui-rules`), words (`design:ux-writing`), or the look (`design:visual-identity`).
+description: Use when designing how an app is used before it is built (IA, app shell, navigation, page anatomy, onboarding). Triggers "design the navigation". Not for reviewing a built UI (ux-review).
 ---
 
 # UX patterns — designing how the app is used

@@ -1,6 +1,6 @@
 ---
 name: error-handling
-description: Use when a Blazor app (.NET 8/9/10) must fail safely and recover — `ErrorBoundary` placement, `OnErrorAsync` logging, interactive-Server reconnection UX (net10 `ReconnectModal`, circuit pause/resume), Polly on `HttpClient`, three-state data regions with retry, actionable empty states. Triggers: "an unhandled exception blanks my app", "add error boundaries", "show a reconnect UI when the circuit drops". Do NOT use to PRODUCE the categorized error (`data-fetching` — this RENDERS it).
+description: Use when a Blazor failure must not blank the screen (ErrorBoundary, reconnect UX, Polly retries, failed regions). Triggers "an error blanks my app". Not for producing the error (data-fetching).
 ---
 
 # Blazor — Error Resilience

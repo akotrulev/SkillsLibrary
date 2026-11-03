@@ -1,6 +1,6 @@
 ---
 name: opentelemetry
-description: Use when instrumenting a Rust service (tokio + axum) with OpenTelemetry — tracing + tracing-opentelemetry, OTLP traces/metrics/logs to a Collector, the subscriber registry, W3C propagation in and out, HTTP RED metrics, provider shutdown. Triggers "add OpenTelemetry to this Rust service", "trace context not propagating in axum", "add a counter in Rust", "spans missing in Tempo". Do NOT use for .NET/Java/Node (their siblings) or log field shaping (`structured-logging-rust`).
+description: Use when instrumenting a Rust axum service with OpenTelemetry (traces, metrics, log correlation, OTLP). Triggers "spans missing in Tempo". Not for log shaping (structured-logging).
 ---
 
 # Observability — OpenTelemetry (Rust, tokio + axum)

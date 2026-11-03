@@ -1,6 +1,6 @@
 ---
 name: offline-and-storage
-description: Use when an Expo SDK 57 app must persist anything — expo-secure-store for secrets, MMKV 4 createMMKV() for preferences, expo-sqlite / op-sqlite for relational data, TanStack Query cache persistence, an offline mutation queue, sync and conflicts. Triggers "where do I store the token", "work offline", "persist the cache", "MMKV v4". Do NOT use for the request layer (`mobile-react-native:networking`) or the storage-full UI (`-error-handling`).
+description: Use when an Expo/React Native app must persist data (secure-store, MMKV, SQLite, cache persistence, offline queue). Triggers "where do I store this". Not for fetch mechanics (networking).
 ---
 
 # React Native — Offline and Storage

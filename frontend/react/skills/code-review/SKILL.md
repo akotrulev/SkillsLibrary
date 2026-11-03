@@ -1,6 +1,6 @@
 ---
 name: conventions-review
-description: Use when reviewing React code — misplaced `'use client'`, hook-rule violations, `useEffect`-to-derive-state, missing cleanup, index keys, hydration mismatches, un-memoized context, server data in a client store, `<div onClick>` navigation, missing testids. Triggers "review this component/page", "why does this re-render", "is this 'use client' in the right place", "Rendered more hooks than during the previous render". Not for explanations (`basics`) or generating code (`component-writer`).
+description: Use when reviewing React code (misplaced 'use client', hook rules, effect-derived state, index keys, hydration bugs). Triggers "review this component". Not for writing code (component-writer).
 ---
 
 # React Design Patterns — Reviewer (TypeScript)

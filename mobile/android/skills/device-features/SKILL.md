@@ -1,6 +1,6 @@
 ---
 name: device-features
-description: Use when an Android app touches device capabilities — runtime permissions with a pre-prompt and denied path, the photo picker, CameraX, precise vs approximate location, BiometricPrompt, Credential Manager and passkeys, SAF, ACCESS_LOCAL_NETWORK. Triggers "ask for camera access", "pick a photo", "denied path". Do NOT use for push and links (`mobile-android:push-and-deep-links`), widgets (`-system-integration`) or Keystore storage (`-offline-and-storage`).
+description: Use when an Android app uses camera, photos, location, biometrics or files, with runtime permissions. Triggers "ask for camera access", "pick a photo". Not for push or links (push-and-deep-links).
 ---
 
 # Android — Device Features

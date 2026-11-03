@@ -1,6 +1,6 @@
 ---
 name: iac-security
-description: Use when scanning Infrastructure-as-Code for misconfiguration beyond Trivy's built-in checks — deep Terraform, `terraform plan`, and org-specific policy-as-code (Checkov, OPA/Conftest). Triggers "scan our Terraform for misconfig", "add Checkov to CI", "OPA/Conftest policy for our Helm charts". Not for a live cluster (`devops:kubernetes-security`), a live cloud account (`devops:cloud-posture`), plugin-rule conformance (`devops-auditor`), or the built-in IaC gate (`qa-<stack>:image-infra-scan`).
+description: Use when scanning Terraform or Helm for misconfiguration with Checkov or OPA/Conftest policy-as-code. Triggers "scan our Terraform for misconfig". Not for a live account (cloud-posture).
 ---
 
 # DevOps — IaC Security (Checkov & policy-as-code)

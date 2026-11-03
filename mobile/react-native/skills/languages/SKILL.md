@@ -1,6 +1,6 @@
 ---
 name: i18n
-description: Use when an Expo SDK 57 app must support more than one language or region — expo-localization, i18next or Lingui catalogs, ICU plurals, hoisted Intl formatters, RTL via I18nManager, per-app language on iOS and Android, localized purpose strings. Triggers "add Spanish", "translate the app", "Arabic layout flips", "date shows wrong format". Do NOT use for web i18n routing (`fe-react:i18n`), copy voice (`design:ux-writing`), or text scale (`-accessibility`).
+description: Use when an Expo/React Native app must support more languages or regions (expo-localization, i18next, plurals, RTL). Triggers "translate the app". Not for copy wording (design:ux-writing).
 ---
 
 # React Native — Localization and Globalization

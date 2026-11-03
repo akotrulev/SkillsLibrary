@@ -1,6 +1,6 @@
 ---
 name: container-runtime-security
-description: Use to test the RUNNING cluster's attack surface and runtime behaviour. kube-hunter probes a live cluster from an attacker's viewpoint (authorization-gated `--active` mode); Falco detects container escape at syscall level. Triggers "probe our running cluster", "is our cluster exploitable from a pod", "deploy Falco". Not for static image/IaC scanning (`qa-<stack>:image-infra-scan`), CIS scoring of manifests (`devops:kubernetes-security`), or app exploitation (`qa-security`).
+description: Use when testing a running Kubernetes cluster's attack surface (kube-hunter, Falco), authorization-gated. Triggers "probe our running cluster". Not for CIS scoring (kubernetes-security).
 ---
 
 # DevOps — Container & Runtime Security (kube-hunter · Falco)

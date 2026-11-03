@@ -1,6 +1,6 @@
 ---
 name: test-ids
-description: Use when adding, auditing or fixing test ids so Appium and Maestro can target a Compose or Views app — Modifier.testTag with testTagsAsResourceId at the root, android:id in Views, static row ids, PascalCase naming, never contentDescription as an id. Triggers "add test tags", "E2E can't find this element", "content-desc vs testTag", a `missing-testids.md`. Do NOT use for writing device tests (`qa-mobile-*`).
+description: Use when adding test ids (testTag, android:id) so Appium and Maestro can target a Compose or Views app. Triggers "E2E can't find this element". Not for writing device tests (qa-mobile-typescript).
 ---
 
 # Android — Testability (`testTag` writer)

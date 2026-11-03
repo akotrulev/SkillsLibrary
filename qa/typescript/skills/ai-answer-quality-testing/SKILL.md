@@ -1,6 +1,6 @@
 ---
 name: ai-answer-quality-testing
-description: Use when testing a RAG feature from a Node 24 / TypeScript suite — decompose RETRIEVAL from GENERATION so a bad answer is localized, then assert the RAG triad (context relevance · groundedness · answer relevance) plus retrieval-ranking metrics. Triggers: "test our RAG pipeline", "is the answer grounded in the retrieved chunks", "evaluate context precision/recall". Do NOT use for non-RAG LLM output (`qa-typescript:ai-feature-testing`) or deterministic API tests (`qa-typescript:api-tests`).
+description: Use when testing a RAG feature from a TypeScript suite, retrieval apart from generation (RAG triad, Ragas). Triggers "test our RAG pipeline". Not for non-RAG LLM evals (ai-feature-testing).
 ---
 
 # RAG Testing (Node 24 / TypeScript — retrieval ⊕ generation, Ragas-spined)

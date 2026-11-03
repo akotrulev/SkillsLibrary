@@ -1,6 +1,6 @@
 ---
 name: ai-feature-testing
-description: Use when testing LLM-generated output (chatbot, RAG answer, summarizer, extraction, tool-using agent) from a .NET / NUnit suite — property, rubric (LLM-as-judge), and grounding assertions with promptfoo (default) or DeepEval as the eval spine; never exact-string equality. Triggers "test our chatbot", "eval prompt outputs", "assert the answer is grounded in the retrieved context", "G-Eval / faithfulness metric", "red-team the model". Not for RAG retrieval metrics (`ai-answer-quality-testing`).
+description: Use when testing LLM output from a .NET/NUnit suite with rubric and grounding asserts (promptfoo, DeepEval). Triggers "test our chatbot". Not for RAG metrics (ai-answer-quality-testing).
 ---
 
 # LLM-App Testing (.NET 8 / NUnit — promptfoo via Process + Microsoft.Extensions.AI)

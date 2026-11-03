@@ -1,6 +1,6 @@
 ---
 name: api-models
-description: Use when the user asks to create a new DTO / model / response interface in a TypeScript test project (Node 24 (22 supported) + TS strict, typically alongside supertest or axios). Triggers: "add a {Resource}Dto in TS", "create the InDto / ModDto types", "scaffold the wrapper DTO for paginated {resource} in TS". Do NOT use for the client module (`qa-typescript:api-client-writer`) or the test specs (`qa-typescript:api-tests`).
+description: Use when creating a DTO or response model in a TypeScript API test project (Zod). Triggers "add an OrderDto". Not for the client class (api-client-writer).
 ---
 
 # qa-typescript:api-models

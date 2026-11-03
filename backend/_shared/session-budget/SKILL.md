@@ -1,6 +1,6 @@
 ---
 name: plan-session-budget
-description: Use when plan tasks need sizing to one session each, or each task needs a ready-to-paste prompt. Estimates a task's context cost, grows or splits it toward the session target, and writes the plan's `## Prompts — one per task` section. Triggers "how big should this task be", "is this one session", "what do I paste next". Do NOT use to sequence tasks (`dev:plan-delivery`), group them into epics (`dev:plan-epic-map`), or execute one (Plan Queue, as the task's named agent).
+description: Use when sizing plan tasks to one session each or writing each task's paste-ready prompt. Triggers "is this one session", "what do I paste next". Not for sequencing tasks (plan-delivery).
 ---
 
 # Session Budget — one task, one session, one prompt

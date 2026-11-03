@@ -1,6 +1,6 @@
 ---
 name: data-fetching
-description: Use when a Blazor component must FETCH or WRITE data (.NET 8/9/10) — typed `HttpClient` for WASM vs server-direct services/`IDbContextFactory` for interactive SSR behind one render-mode-agnostic interface, ProblemDetails→UI mapping, `[PersistentState]` to kill the prerender double-fetch. Triggers: "how should this component load data", "avoid the double fetch on prerender", "one data interface for Server and WASM". Do NOT use for live data (`realtime`) or auth wiring (`auth/auth0-blazor`).
+description: Use when a Blazor component fetches or writes data (typed HttpClient, one service for Server and WASM, PersistentState). Triggers "how should this load data". Not for pushed data (realtime).
 ---
 
 # Blazor — Data Access (request/response lane)

@@ -1,6 +1,6 @@
 ---
 name: networking
-description: Use when an iOS app must call an API — URLSession async/await + Codable, one concrete client, timeout budgets per endpoint class, Task cancellation, bounded retries with Retry-After, no retry offline, ProblemDetails, a token-refresh actor, URLSessionWebSocketTask. Triggers "request hangs on cell", "retry storm", "refresh token race". Do NOT use for the failure UI (`mobile-ios:error-handling`), forms, or persistence (`-offline-and-storage`).
+description: Use when an iOS app calls an API (URLSession + Codable; timeouts, retries, token refresh). Triggers "request hangs on cell". Not for the failure UI (error-handling).
 ---
 
 # iOS — Networking

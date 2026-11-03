@@ -1,6 +1,6 @@
 ---
 name: mobile-native-features
-description: Use when the user needs to test the **device-native, OS-level capabilities** a mobile app uses that a normal Appium page-object UI test doesn't exercise. Triggers: "test our deep link opens the right screen in Appium Java", "handle the camera/location permission dialog", "test Face ID / fingerprint login on the simulator". Not for device-cloud wiring (`qa-java:device-cloud`) or ordinary screen flows (`qa-java:ui-tests-appium`).
+description: Use when Java Appium tests must cover OS features (permissions, push, deep links, biometrics). Triggers "test our deep link", "test Face ID login". Not for plain screen flows (ui-tests-appium).
 ---
 
 # QA — Mobile Native Features (Java: java-client 11 + Appium 3 + TestNG)

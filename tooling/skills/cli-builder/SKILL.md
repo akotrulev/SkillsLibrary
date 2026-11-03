@@ -1,6 +1,6 @@
 ---
 name: cli-builder
-description: Use when a project's capabilities must be driven from a terminal or a script — render a confirmed capability contract as a subcommand CLI with typed flags, a `--json` mode, meaningful exit codes, and a smoke test. Triggers "build a CLI for this project", "expose these functions as commands", "we need a command-line tool for X". Do NOT use to derive the capabilities first (`tooling:capability-contract`), to build an MCP surface (`tooling:mcp-builder`), or to write CI pipeline YAML (`devops/*`).
+description: Use when rendering a confirmed capability contract as a subcommand CLI (typed flags, --json, exit codes, smoke test). Triggers "build a CLI for this project". Not for an MCP server (mcp-builder).
 ---
 
 # CLI Builder — the contract, rendered as commands

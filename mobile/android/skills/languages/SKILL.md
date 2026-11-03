@@ -1,6 +1,6 @@
 ---
 name: i18n
-description: Use when an Android app must support more than one language or region — string resources, plurals, per-app language (LocaleConfig, AppCompatDelegate / LocaleManager), RTL layout, locale-aware number, date and money formatting. Triggers "add a language", "plural is wrong", "RTL layout broken", "let the user pick a language". Do NOT use for wording and tone (`design:ux-writing`), text scaling (`mobile-android:accessibility`), or Play listing text (`mobile-<stack>:release`).
+description: Use when an Android app must support more languages or regions (string resources, plurals, RTL, locale formats). Triggers "translate the app". Not for copy wording (design:ux-writing).
 ---
 
 # Android — Localization and Globalization

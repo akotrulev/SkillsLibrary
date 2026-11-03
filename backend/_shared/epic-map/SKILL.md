@@ -1,6 +1,6 @@
 ---
 name: plan-epic-map
-description: Use when a backlog's epics need arranging into what can be built at the same time — cross-epic dependencies, the disjoint-file-set parallelism rule, and the wave table that says how many sessions an operator can open at once. Triggers "which epics can run in parallel", "what has to land first", "how many lanes does this plan have". Do NOT use to write epics (`business-analysis:epics`), to order tasks (`dev:plan-delivery`), or to size them (`dev:plan-session-budget`).
+description: Use when arranging epics into parallel waves by cross-epic dependencies and disjoint files. Triggers "which epics can run in parallel". Not for ordering tasks (plan-delivery).
 ---
 
 # Epic Map — what can be built at the same time

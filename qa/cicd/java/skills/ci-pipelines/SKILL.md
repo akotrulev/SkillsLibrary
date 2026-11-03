@@ -1,6 +1,6 @@
 ---
 name: ci-pipelines
-description: Use when wiring a test suite into CI — shard matrix, JUnit + Allure publishing, performance gates, OIDC secrets — on GitHub Actions, Azure Pipelines, or GitLab CI. Triggers: "add a CI pipeline for the tests", "shard the suite in CI", "publish Allure from the pipeline". The repo's CI host picks the tool; read its reference file. Not for the cross-CI rules (`qa-<stack>:ci-conventions`), Allure adapter wiring or quarantine (the qa-reporting agents), or deploy pipelines (the devops plugin).
+description: Use when wiring a test suite into CI on GitHub Actions, Azure Pipelines or GitLab; shards, Allure publishing, OIDC. Triggers "add a CI pipeline for the tests". Not for cross-CI rules (ci-conventions).
 ---
 
 # QA — CI Pipelines (Java 21)

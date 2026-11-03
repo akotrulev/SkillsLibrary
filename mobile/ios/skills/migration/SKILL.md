@@ -1,6 +1,6 @@
 ---
 name: migration
-description: Use when an iOS project changes lane — Swift 5 → 6 per module, ObservableObject → @Observable, Combine → async / Observations, UIKit → SwiftUI screen by screen, Objective-C → Swift, CocoaPods → SPM before the 2026-12-02 trunk freeze, the iOS 27 SDK's forced changes, a deployment-target raise. Triggers "move us to Swift 6", "drop CocoaPods", "we link iOS 27 next month". Do NOT use for feature work, a fresh app (`mobile-ios:project-setup`) or a minor dependency bump.
+description: Use when an iOS project changes lane (Swift 6, @Observable, UIKit to SwiftUI, CocoaPods to SPM). Triggers "move us to Swift 6". Not for a new app (project-setup).
 ---
 
 # iOS — Migration

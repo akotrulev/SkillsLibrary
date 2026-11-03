@@ -1,6 +1,6 @@
 ---
 name: doc-business-model
-description: Use when traced backend behavior must be written for a non-engineer in the docs/business-model/ KB under knowledge-base's contract — one document per area: overview, setup, how it works, a worked example, open questions, a file:line evidence table. Triggers "write up what this system does for users", "turn this trace into business documentation". Do NOT use to trace the code first (`doc-feature-trace`), author requirements (`requirements-author`), or write findings (`audit-feature`).
+description: Use when traced backend behavior must be written for non-engineers in docs/business-model/, one doc per area. Triggers "turn this trace into business docs". Not for tracing code (doc-feature-trace).
 ---
 
 # Business Documentation — the write-up a non-engineer can use

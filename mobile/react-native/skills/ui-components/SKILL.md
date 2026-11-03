@@ -1,6 +1,6 @@
 ---
 name: ui-components
-description: Use when writing or fixing a screen or component in an Expo SDK 57 app — Pressable, expo-image, FlashList 2 / Legend List, native menus and modals, text-in-Text, compound components, the loading / loaded / failed region in markup, empty states. Triggers "build this screen", "my list janks", "image flickers", "native menu". Do NOT use for routes (`mobile-react-native:navigation`), animation (`-animation`), theming (`-styling`) or the failure UI (`-error-handling`).
+description: Use when writing an Expo/React Native screen or component (Pressable, expo-image, FlashList, native menus). Triggers "build this screen". Not for state ownership (architecture).
 ---
 
 # React Native — UI Components

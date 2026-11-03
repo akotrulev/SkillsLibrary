@@ -1,6 +1,6 @@
 ---
 name: mobile-project-setup
-description: Use when starting a mobile (iOS/Android) test-automation project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, Appium 3 server + drivers + emulator setup, run commands for a standalone Appium NUnit suite. Composable with the api/ui/performance dotnet scaffolds. Triggers "scaffold a mobile test project", "set up a .NET Appium suite from scratch". Not for authoring screens or tests (`ui-test-author/appium`).
+description: Use when starting a mobile test project from zero in .NET (NUnit + Appium 3, pins, emulator). Triggers "scaffold a mobile test project". Not for writing tests (ui-tests-appium).
 ---
 
 # Mobile Test Project Scaffold (C# / .NET 10)

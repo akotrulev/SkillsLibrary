@@ -1,6 +1,6 @@
 ---
 name: ui-tests-review
-description: Use when the user asks to review existing Java UI test code or page objects. Triggers: "review this Playwright Java spec", "look at this Selenium page object", "is this Appium Java test any good". Do NOT use for writing new tests (`qa-java:ui-tests-playwright`) or reviewing a Gherkin/Cucumber layer (`qa-java:bdd-reviewer`).
+description: Use when reviewing existing Java UI test code or page objects (Playwright, Selenium, Appium). Triggers "review this Playwright spec". Not for writing new tests (ui-tests-playwright).
 ---
 
 # QA — UI Test & Page Object Reviewer (Java)

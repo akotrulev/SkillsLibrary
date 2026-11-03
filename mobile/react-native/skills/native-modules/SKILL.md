@@ -1,6 +1,6 @@
 ---
 name: native-modules
-description: Use when an Expo SDK 57 app needs native code — the ladder (Expo SDK module, maintained community module, Expo Modules API in Swift / Kotlin, Nitro / TurboModule in bare), config plugins for every native change, Expo UI, DOM components. Triggers "is there a native module for", "write a Swift module", "edit Info.plist", "config plugin". Do NOT use for camera, location or push features (`mobile-react-native:device-features`, `-notifications-and-links`) or project setup.
+description: Use when an Expo/React Native app needs native code (Expo Modules API in Swift/Kotlin, TurboModules, config plugins). Triggers "write a Swift module". Not for camera or location (device-features).
 ---
 
 # React Native — Native Modules

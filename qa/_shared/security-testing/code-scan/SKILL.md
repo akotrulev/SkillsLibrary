@@ -1,6 +1,6 @@
 ---
 name: code-scan
-description: Use when adding static application security testing (SAST) with Opengrep/Semgrep rulesets as a PR gate — scan source for injection, crypto, and auth flaws; language-agnostic CLI/Docker, no running app needed. Triggers: "add SAST", "run Semgrep in CI", "static security scan". Not for dependency CVEs → the stack's `security-testing/dependency-scan`.
+description: Use when adding SAST with Opengrep/Semgrep as a PR gate for injection, crypto and auth flaws in source. Triggers "add SAST", "run Semgrep in CI". Not for dependency CVEs (dependency-scan).
 ---
 
 # Security Testing — SAST (Static Application Security Testing, shared)

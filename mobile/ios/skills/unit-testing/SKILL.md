@@ -1,6 +1,6 @@
 ---
 name: unit-testing
-description: Use when Swift logic needs a dev-side test — Swift Testing (@Test, #expect, #require, parameterized arguments, confirmation, traits) with fakes over mocks, clock and UUID seams, URLProtocol stubs, @Observable models, region states, snapshot tests of single views, the ≥ 80% coverage floor on changed code (line coverage — Xcode reports no branches). XCTest only for UI automation, performance and Objective-C exceptions. Triggers "unit-test this model", "fake the clock", "test the 401 ladder". Do NOT use for device journeys (`qa-mobile-<stack>`).
+description: Use when Swift logic needs a dev-side unit test (Swift Testing, fakes, clock seams, URLProtocol stubs). Triggers "unit-test this model". Not for device journeys (qa-mobile-typescript).
 ---
 
 # iOS — Unit Testing (Swift Testing)

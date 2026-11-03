@@ -1,6 +1,6 @@
 ---
 name: error-handling
-description: Use when a failure must not blank a SwiftUI screen — loading/loaded/failed/stale/offline regions, failure scoped below search and filters, the safe-area error banner, timeouts rendered, 401 re-auth in place, forced update on version skew, scenePhase resume, write failures, third-party failures, full-disk degradation. Triggers "list empty when API fails", "session expired mid-form". Do NOT use for producing the APIError or retries (`mobile-ios:networking`).
+description: Use when a failure must not blank a SwiftUI screen (failed/stale/offline regions, error banner, 401 re-auth). Triggers "list empty when API fails". Not for retries (networking).
 ---
 
 # iOS — Error Resilience

@@ -1,6 +1,6 @@
 ---
 name: cloud-attack-aws
-description: Use to exploit an authorized AWS account after `cloud-recon-enumeration` has mapped its surface — IAM privilege-escalation paths, EC2 metadata/user-data/snapshot credential theft, S3 abuse, RDS snapshot/public-access testing, and CloudTrail/GuardDuty detection-surface awareness. Triggers "escalate privileges in this AWS account", "what can this access key become", "test our S3 buckets and EC2 metadata exposure". Not for AWS recon (`cloud-recon-enumeration`), Azure (`cloud-attack-azure`) or GCP (`cloud-attack-gcp`) exploitation, defensive AWS posture scanning (`devops:cloud-posture`), network foothold (`initial-access`), or purple-team detonation (`atomic-simulation`). Owned/lab AWS accounts only, under a committed cloud scope file.
+description: Use when exploiting an authorized AWS account after recon (IAM privesc, EC2 metadata credentials, S3, RDS). Triggers "what can this access key become". Not for recon (cloud-recon-enumeration).
 ---
 
 # Penetration Testing — AWS Exploitation (IAM privesc · EC2/S3/RDS · Pacu/CloudFox/PMapper)

@@ -1,6 +1,6 @@
 ---
 name: messaging-testing
-description: Use when a Java 21 / TestNG test suite must produce, consume, or assert messages against the project's broker — Kafka/Redpanda, AWS SQS/SNS, RabbitMQ, or Azure Service Bus. Triggers "assert the service published event X", "test the consumer's side-effect", "DLQ/DLT assertions", "seed a topic/queue in a test". Do NOT use for HTTP API assertions (use `qa-java:api-tests`), for message-contract verification (use `qa-java:api-contract-testing`), or for email (use `qa-java:email-testing`).
+description: Use when a Java/TestNG suite must produce, consume or assert broker messages (Kafka, SQS, RabbitMQ, Service Bus). Triggers "assert event X was published". Not for contracts (api-contract-testing).
 ---
 
 # QA — Messaging Testing (Java 21)

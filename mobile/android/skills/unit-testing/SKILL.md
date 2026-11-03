@@ -1,6 +1,6 @@
 ---
 name: unit-testing
-description: Use when Kotlin or Compose logic needs a dev-side test — JUnit 4 (JUnit 5 only where the mannodermaus plugin is present), fakes over mocks, runTest with StandardTestDispatcher, Turbine for Flow, ViewModel and region-state tests, MockWebServer, Robolectric, Compose UI test v2 (its dispatcher change), accessibility checks, Roborazzi, the ≥ 80% branch-coverage floor on changed code (Kover). Triggers "unit-test this ViewModel", "my Compose test broke after v2". Do NOT use for device journeys (`qa-mobile-<stack>`).
+description: Use when Kotlin or Compose logic needs a dev-side unit test (JUnit, runTest, Turbine, Robolectric, Kover). Triggers "unit-test this ViewModel". Not for device journeys (qa-mobile-typescript).
 ---
 
 # Android — Unit Testing (JUnit 4 + fakes)

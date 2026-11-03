@@ -1,6 +1,6 @@
 ---
 name: dark-patterns
-description: Use when a flow asks for money, consent, data, or permission, or is reviewed for deceptive design — symmetry (cancel as easy as subscribe), consent granularity, pricing disclosure, permission priming, and the dark-pattern taxonomy prohibited under DSA Art. 25 and FTC §5. Triggers "review this checkout/cancellation flow", "is this a dark pattern", "cookie consent design", "how do we ask for this permission". Not for the words themselves (`design:ux-writing`) or auth mechanics (a stack's `auth0`).
+description: Use when a flow asks for money, consent, data or permissions, or is reviewed for dark patterns (DSA, FTC). Triggers "is this a dark pattern". Not for UI copy (ux-writing).
 ---
 
 # Ethical patterns — the flows that ask for something

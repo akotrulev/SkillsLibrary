@@ -1,6 +1,6 @@
 ---
 name: patterns
-description: Use when explaining a design pattern or idiom in Rust (edition 2024 primary, 2021 supported) — ownership in signatures, enum vs trait vs generic dispatch, newtype, typestate, builder, RAII guards, thiserror vs anyhow, shared state. Triggers "enum or trait object here", "how should this fn take its args", "Arc<Mutex> or a channel". Do NOT use for scaffolding (`pattern-writer`), reviews (`code-review`), or async runtime rules (`async-concurrency`).
+description: Use when explaining a design pattern in Rust (enum vs trait dispatch, newtype, typestate, builder). Triggers "enum or trait object here". Not for scaffolding (patterns-apply).
 ---
 
 # Rust Design Patterns — Reference

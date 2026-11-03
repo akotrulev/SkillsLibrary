@@ -1,6 +1,6 @@
 ---
 name: image-infra-scan
-description: Use when scanning the layers application SCA cannot see — base-OS packages inside a container image, the image as shipped (embedded secrets, `USER root`), and IaC (Terraform, Kubernetes manifests, Helm, Dockerfiles) — with Trivy as a CI build gate. Language-agnostic, any stack. Triggers "scan our image for CVEs", "add Trivy to the pipeline", "scan our Terraform/K8s manifests", "generate an SBOM". Not for lockfile CVEs (`dependency-scan`), a running app (`zap-*`), or source flaws (`sast`).
+description: Use when scanning container images and IaC (Terraform, K8s, Helm) with Trivy as a CI gate, or making an SBOM. Triggers "add Trivy to the pipeline". Not for lockfile CVEs (dependency-scan).
 ---
 
 # Security Testing — Container & IaC Scanning (Trivy)

@@ -1,6 +1,6 @@
 ---
 name: language-testing
-description: Use when writing i18n/localization tests in Node / TypeScript — Playwright pinned to a locale, asserting via the app's i18next/FormatJS catalog by key (never hardcoded literals), native `Intl` for number/date/currency formats, pseudo-localization and RTL checks. Triggers: "write an i18n test", "test German/Arabic rendering", "assert currency formatting per locale". Not for the app's own localization wiring (`fe-react:i18n`) or breakpoint layout (`qa-typescript:responsive-testing`).
+description: Use when writing i18n tests in TypeScript, Playwright pinned to a locale, asserting by i18next/FormatJS key. Triggers "test German/Arabic rendering". Not for breakpoints (responsive-testing).
 ---
 
 # QA — i18n / Localization Testing (TypeScript / Playwright 1.64 + Vitest + Intl)

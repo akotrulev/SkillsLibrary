@@ -1,6 +1,6 @@
 ---
 name: data-quality
-description: Use when cleaning, filtering, deduplicating, or decontaminating a training dataset — the gate every dataset passes before training. Triggers: "dedup this corpus", "check for eval contamination", "filter low-quality examples", "scrub PII from the SFT data", "balance the dataset by topic". Do NOT use for record schema (`training-data:dataset-formats`), synthesis (`training-data:synthetic-generation`), or corpus collection (`training-data:pretraining-corpus`).
+description: Use when cleaning, filtering, deduplicating, decontaminating or PII-scrubbing a training dataset. Triggers "dedup this corpus", "check for eval contamination". Not for record schema (dataset-formats).
 ---
 
 # Training Data — Quality, Dedup & Decontamination (cross-stage)

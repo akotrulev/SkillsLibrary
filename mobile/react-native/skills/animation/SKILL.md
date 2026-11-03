@@ -1,6 +1,6 @@
 ---
 name: animation
-description: Use when an Expo SDK 57 app needs motion or gestures — Reanimated 4 + react-native-worklets, Gesture Handler 2.32 on SDK 57 vs 3.x on SDK 58 (different APIs), layout and entering/exiting animations, UI-thread-only props, Reduce Motion. Triggers "animate this", "swipe to dismiss", "drag", "press feedback janks", "gesture callback renamed". Do NOT use for whether to animate (`design:motion`), navigation transitions (`-navigation`), or list performance (`-performance`).
+description: Use when an Expo/React Native app needs motion or gestures (Reanimated 4, Gesture Handler) honoring Reduce Motion. Triggers "animate this". Not for whether to animate (design:motion).
 ---
 
 # React Native — Animation and Gestures

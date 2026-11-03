@@ -1,6 +1,6 @@
 ---
 name: certificate-scan
-description: Use when gating an endpoint's TLS/SSL handshake in CI — deprecated protocols (SSLv2/3, TLS 1.0/1.1), weak ciphers, broken forward secrecy, certificate validity/chain/expiry, and known issues — with sslyze (lead, native Mozilla-policy gate) or testssl.sh. Read-only; the one scan safe against production. Triggers "scan our TLS config", "check for weak ciphers", "when does our cert expire", "fail CI on deprecated TLS". Not for HTTP headers/cookies (`passive-scan`) or app CVEs (`sast`).
+description: Use when gating an endpoint's TLS config in CI with sslyze or testssl.sh; weak ciphers, old protocols, cert expiry. Triggers "scan our TLS config". Not for HTTP headers (passive-scan).
 ---
 
 # Security Testing — TLS / SSL Configuration Scanning (shared)

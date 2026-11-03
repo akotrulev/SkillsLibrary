@@ -1,6 +1,6 @@
 ---
 name: animation
-description: Use when a SwiftUI (or UIKit) app needs motion or gestures — withAnimation, animation(_:value:), transitions, matchedGeometryEffect and zoom navigation transitions, PhaseAnimator, keyframeAnimator, DragGesture, and the Reduce Motion floor. Triggers "animate this", "swipe to dismiss", "drag", "hero transition", "respect reduce motion". Do NOT use for whether to animate (`design:motion`), screen navigation (`mobile-ios:navigation`) or jank profiling (`-performance`).
+description: Use when a SwiftUI app needs motion or gestures (withAnimation, matchedGeometryEffect, DragGesture) honoring Reduce Motion. Triggers "animate this". Not for whether to animate (design:motion).
 ---
 
 # iOS — Animation and Gestures

@@ -1,6 +1,6 @@
 ---
 name: load-testing
-description: Use when the user asks to design or author Gatling performance / load tests in Java 21 (Gatling 3.11+ Java DSL). Triggers: "write a Gatling simulation for X", "Gatling spike test for our Java service", "ramp profile in Gatling Java DSL". Not for fault injection under normal load (`qa-java:failure-injection-testing`) or uptime probes (`qa-java:production-uptime-checks`).
+description: Use when designing or writing Gatling load/performance tests in Java (average, spike, ramp). Triggers "write a Gatling test for endpoint X". Not for fault injection (failure-injection-testing).
 ---
 
 # QA — Performance Testing with Gatling (Java 21)

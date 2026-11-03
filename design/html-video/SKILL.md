@@ -1,6 +1,6 @@
 ---
 name: html-video
-description: Use when HTML/CSS/animation must become an MP4 file — a product demo, walkthrough or motion-graphic asset rendered from markup. Routes to HyperFrames' own `/hyperframes` skill when installed; otherwise gives the install line, prerequisites, the minimal composition shape and the render command, then stops. Triggers "render this to video", "make an MP4 from HTML", "demo video from markup". Not for deciding what the motion is (`design:motion`) or for in-app animation code (a stack's `animation`).
+description: Use when rendering HTML/CSS animation to an MP4 (product demo, walkthrough) via HyperFrames. Triggers "render this to video", "make an MP4 from HTML". Not for deciding the motion (motion).
 ---
 
 # HTML → MP4 — route to HyperFrames

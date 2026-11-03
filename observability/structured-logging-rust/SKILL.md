@@ -1,6 +1,6 @@
 ---
 name: structured-logging
-description: Use when shaping logs in a Rust service with tracing — event fields vs messages, levels, the JSON stdout layer, EnvFilter / RUST_LOG, trace_id on every line, error source chains, redacting secrets, logging panics. Triggers "structured logging in Rust", "my Rust logs are not JSON", "logs have no trace id", "how do I log an error with its cause". Do NOT use for OTel export, spans and metrics (`opentelemetry-rust`) or for .NET/Java/Node (their siblings).
+description: Use when setting up structured logging in a Rust service with tracing (JSON, correlation IDs, Loki, redaction). Triggers "my Rust logs are not JSON". Not for traces or metrics (opentelemetry).
 ---
 
 # Observability — Structured Logging (Rust, `tracing`)

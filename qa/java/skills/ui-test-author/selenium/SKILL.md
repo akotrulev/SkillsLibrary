@@ -1,6 +1,6 @@
 ---
 name: ui-tests-selenium
-description: Use when the user asks to scaffold a Java + Selenium 4 page object or TestNG UI test, following the BasePage / DriverFactory / TestNG pattern. Triggers: "create a Selenium page object for X", "add a Java page for screen Y", "write a Selenium UI test for Z". Not for Playwright projects (`qa-java:ui-tests-playwright`) or reviewing existing tests (`qa-java:ui-tests-review`).
+description: Use when scaffolding a Java Selenium 4 page object or TestNG UI test (BasePage pattern). Triggers "create a Selenium page object for X". Not for Playwright projects (ui-tests-playwright).
 ---
 
 # QA — Selenium Java Page Object & Test Generator

@@ -1,6 +1,6 @@
 ---
 name: data-driven-testing
-description: Use when one Node 24 (22 supported) / TypeScript test body must run against **many rows of data sourced from an external file**. Triggers: "run this test for every row in a CSV / spreadsheet", "data-drive these tests from a JSON file", "parameterize these Playwright/Vitest tests with external data". Do NOT use for building single test objects (`qa-typescript:test-data-builder`) or seeding a database (`qa-typescript:db-connection`).
+description: Use when one TypeScript test must run over many rows from an external CSV, JSON or spreadsheet. Triggers "run this test for every row". Not for building test objects (test-data-builder).
 ---
 
 # Data-Driven Testing (Node 24 / TypeScript — Vitest + Playwright)

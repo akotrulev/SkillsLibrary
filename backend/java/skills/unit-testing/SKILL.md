@@ -1,6 +1,6 @@
 ---
 name: unit-testing
-description: Use when backend Java logic needs a dev-side unit test — JUnit 5 + Mockito + AssertJ with no Spring context: what deserves a test, the five untestable seams (Clock, id, randomness, config, outbound I/O), fakes-over-mocks, parameterized cases, async, the ≥ 80% branch-coverage floor on changed code. In-process, no container, no real database. Triggers "unit-test this service", "test this validator/calculator", "how do I fake the clock in a Java test". Do NOT use for anything that boots a Spring context — that's the `qa-api-java` peer's.
+description: Use when Java backend logic needs a unit test with JUnit 5 + Mockito, no Spring context (seams, fakes, coverage floor). Triggers "unit-test this service". Not for HTTP tests (api-tests).
 ---
 
 # Java — Unit Testing (JUnit 5 + Mockito + AssertJ)

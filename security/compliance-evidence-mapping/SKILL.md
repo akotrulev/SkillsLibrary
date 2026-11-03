@@ -1,6 +1,6 @@
 ---
 name: compliance-evidence-mapping
-description: Use to map the library's security controls and tests (scanners, gates, ASVS, ATT&CK coverage, hardening, detections) to compliance-framework evidence — SOC 2, PCI DSS 4.0.1, GDPR, ISO 27001:2022 — as an evidence register plus a gap list. Triggers "map our controls to SOC 2 / PCI / ISO", "compliance gap analysis". Not for running the controls (the scan/test lanes), authoring them (`hardening`/`detection-engineering`), or certifying compliance (a human auditor/QSA).
+description: Use when mapping security controls and tests to compliance evidence (SOC 2, PCI DSS, GDPR, ISO 27001) with a gap list. Triggers "map our controls to SOC 2". Not for authoring controls (hardening).
 ---
 
 # Security Governance — Compliance Evidence Mapping (SOC 2 · PCI DSS · GDPR · ISO 27001 · ASVS)

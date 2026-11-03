@@ -1,6 +1,6 @@
 ---
 name: device-features
-description: Use when an Expo SDK 57 app must reach hardware or OS services — expo-camera, expo-image-picker, expo-location, expo-local-authentication, haptics, sharing, file system, expo-background-task — and ask for the permission first. Triggers "scan a QR code", "pick a photo", "use the user's location", "Face ID login", "permission denied dead end". Do NOT use for push or links (`-notifications-and-links`), custom native code (`-native-modules`), or secret storage (`-offline-and-storage`).
+description: Use when an Expo/React Native app uses camera, photos, location, biometrics or files via expo-* modules. Triggers "ask for camera access", "pick a photo". Not for push or links (push-and-deep-links).
 ---
 
 # React Native — Device Features and Permissions

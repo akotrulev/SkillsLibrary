@@ -1,6 +1,6 @@
 ---
 name: auth0
-description: Use when adding/fixing Auth0 sign-in in a native Swift / SwiftUI iOS app with Auth0.swift — Universal Login via ASWebAuthenticationSession (PKCE), universal-link callback, CredentialsManager on the Keychain, biometric unlock, refresh rotation, logout. Triggers "add Auth0 login", "callback doesn't return", "Face ID for stored credentials". Do NOT use for Auth0 concepts (`auth/_shared/auth0-concepts`), React Native (`mobile-react-native:auth0`), or Android (`mobile-android:auth0`).
+description: Use when adding or fixing Auth0 login in a native Swift/SwiftUI iOS app (Auth0.swift, PKCE, Keychain, biometrics). Triggers "add Auth0 login". Not for tenant setup or OIDC theory.
 ---
 
 # Auth — Auth0 in iOS (Swift)

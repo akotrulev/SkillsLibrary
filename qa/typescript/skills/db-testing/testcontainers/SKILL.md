@@ -1,6 +1,6 @@
 ---
 name: db-testcontainers
-description: Use when the user asks to scaffold TypeScript (Vitest / Jest) integration tests backed by a real database (Postgres / SQL Server / MongoDB / Redis) via the `testcontainers` npm package. Triggers: "spin up Postgres for these tests", "Testcontainers fixture in Vitest", "stop using in-memory pg-mem". Do NOT use for SQL query authoring guardrails → `db-testing/verification-queries`.
+description: Use when scaffolding TypeScript integration tests on a real database via Testcontainers. Triggers "spin up Postgres for these tests". Not for an existing DB (db-connection).
 ---
 
 # QA — DB Testing with Testcontainers (TypeScript)

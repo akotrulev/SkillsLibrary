@@ -1,6 +1,6 @@
 ---
 name: api-fuzzing
-description: Use when fuzzing an API from its OpenAPI/GraphQL schema with Schemathesis — property-based generated requests that catch 5xx crashes and contract violations, wired as a CI gate. Language-agnostic (CLI/Docker), any stack. Triggers: "fuzz our API", "schema-based negative testing", "run Schemathesis in CI". Not for authorization/BOLA (`permission-testing`) or a crawling DAST scan (`active-scan`).
+description: Use when fuzzing an API from its OpenAPI/GraphQL schema with Schemathesis as a CI gate for 5xx and contract violations. Triggers "fuzz our API". Not for authorization/BOLA (permission-testing).
 ---
 
 # Security Testing — API Fuzzing (Schemathesis, shared)

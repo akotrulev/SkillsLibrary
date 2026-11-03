@@ -1,6 +1,6 @@
 ---
 name: ui-project-setup
-description: Use when starting a web-UI test-automation project from zero in C# / .NET 10 (8-9) — solution layout, exact package versions, browser/local setup, and run commands for a standalone Playwright (default) or Selenium NUnit suite. Composable with the api/mobile/performance dotnet scaffolds. Triggers "scaffold a UI test project", "set up a .NET Playwright suite from scratch", "create the solution structure for UI tests". Not for authoring pages or tests (`ui-test-author/playwright`).
+description: Use when starting a web-UI test project from zero in .NET (Playwright or Selenium, NUnit, versions). Triggers "scaffold a UI test project". Not for writing tests (ui-tests-playwright).
 ---
 
 # UI Test Project Scaffold (C# / .NET 10)

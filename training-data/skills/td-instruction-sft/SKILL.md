@@ -1,6 +1,6 @@
 ---
 name: instruction-sft
-description: Use when building supervised fine-tuning (SFT) data for a small LLM — single/multi-turn chat, instruction/response pairs, tool-use traces, and system prompts. Triggers: "build an SFT dataset", "make instruction-tuning data", "multi-turn chat data for fine-tuning", "tool-use / function-calling training traces", "convert our support logs into SFT data". Do NOT use for pretraining text (`pretraining-corpus`), preference/DPO data (`preference-data`), or eval sets (`eval-sets`).
+description: Use when building SFT data for a small LLM (chat, instruction/response pairs, tool-use traces). Triggers "build an SFT dataset". Not for preference data (preference-data).
 ---
 
 # Training Data — Instruction / SFT

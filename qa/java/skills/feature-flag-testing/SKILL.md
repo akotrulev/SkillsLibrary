@@ -1,6 +1,6 @@
 ---
 name: feature-flag-testing
-description: Use when testing feature-flagged code in Java 21 / TestNG — pin flag state in-process with OpenFeature's `InMemoryProvider` or LaunchDarkly's `TestData` fixture (never a live flag service), cover BOTH sides of every flag, drive targeting through the evaluation context. Triggers: "test a feature flag", "test both sides of a flag", "pin a flag state in tests". Do NOT use for the API/UI assertions inside a branch (`qa-java:api-tests`).
+description: Use when testing feature-flagged code in Java/TestNG, pinning flags in-process (OpenFeature, LaunchDarkly) on both sides. Triggers "test both sides of a flag". Not for endpoint tests (api-tests).
 ---
 
 # QA — Feature-Flag Testing (Java 21 / OpenFeature + LaunchDarkly `TestData` + TestNG) — **canonical stack**

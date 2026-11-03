@@ -1,6 +1,6 @@
 ---
 name: observability
-description: Use when a mobile app needs crash reporting, traces, logs or metrics — choosing the crash reporter, OpenTelemetry on device, the ingest path to Grafana, sampling, resource attributes, PII scrubbing. Triggers "add crash reporting", "send app telemetry to Grafana", "which OTel SDK for React Native". Do NOT use for the Collector, Loki, Tempo or Mimir setup (`observability-engineer-<stack>`), release symbols (`mobile-<stack>:release`), or secure storage (`mobile-<stack>:security`).
+description: Use when an iOS, Android or React Native app needs crash reporting or OpenTelemetry telemetry to Grafana. Triggers "add crash reporting". Not for the Loki/Tempo backend (logs-traces).
 ---
 
 # Mobile — Observability

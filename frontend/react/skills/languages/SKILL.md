@@ -1,6 +1,6 @@
 ---
 name: i18n
-description: Use when the UI must ship in more than one language or culture — next-intl on the App Router (`[locale]` routing, `useTranslations` vs `getTranslations`) vs react-i18next on Vite, message catalogs as source of truth, locale switch, number/date/money via `Intl`, RTL via `dir`. Triggers "add multi-language support", "dates in the wrong locale", "locale routing", "hardcoded strings everywhere". Not for display-format policy (`ui-rules`).
+description: Use when a React UI ships in several languages (next-intl or react-i18next, locale routing, Intl formats, RTL). Triggers "add multi-language support". Not for display-format policy (ui-rules).
 ---
 
 # React — Localization & Globalization

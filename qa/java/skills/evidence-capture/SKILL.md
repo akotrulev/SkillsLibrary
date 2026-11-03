@@ -1,6 +1,6 @@
 ---
 name: evidence-capture
-description: Use when a Playwright Java (TestNG) suite or agent session must keep evidence — failure screenshots, video, screencast receipts, traces, HAR — or a failure's trace must be read before a fix. Triggers "keep trace and video on failure", "record a screencast of this flow", "open the trace for this failing test", "capture evidence via Playwright MCP". Do NOT use for writing tests or BaseTest (ui-test-author/playwright), Allure wiring (test-reports) or visual baselines (visual-regression).
+description: Use when a Playwright Java (TestNG) suite must keep failure evidence (screenshots, video, trace, HAR). Triggers "keep trace on failure". Not for visual baselines (visual-regression).
 ---
 
 # QA — Evidence Capture (Java / Playwright 1.63 + TestNG)

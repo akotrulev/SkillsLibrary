@@ -1,6 +1,6 @@
 ---
 name: conventions-review
-description: Use when reviewing TypeScript code (Node / NestJS / Express, strict mode) for type-safety leaks, async correctness, pattern misuse, missing discriminated-union exhaustiveness, or runtime-validation gaps. Triggers: "review this TS service", "audit for `any` usage", "is this CQRS justified", "check runtime validation at boundaries". Do NOT use for explanations (`pattern-guide`), generating code (`pattern-writer`), or React (`frontend/react/skills/code-review`).
+description: Use when reviewing Node/TypeScript backend code for type-safety leaks, async bugs or missing runtime validation. Triggers "review this TS service". Not for explanations (patterns).
 ---
 
 # TypeScript Design Patterns — Reviewer

@@ -1,6 +1,6 @@
 ---
 name: component-library
-description: Use when choosing or wiring a React Native UI layer on SDK 57 — StyleSheet + Expo UI (default), NativeWind, Tamagui, Unistyles, gluestack or React Native Paper — plus provider, theme, dark mode and New Architecture fit. Triggers "which RN component library", "set up NativeWind / Unistyles / Paper", "do we need a UI kit". Do NOT use for hand-written tokens (`mobile-react-native:styling`), screens (`-ui-components`), `testID` rules (`-test-ids`) or web libraries (`fe-react:component-library`).
+description: Use when choosing or wiring a React Native UI kit and theme (Expo UI, NativeWind, Tamagui, Unistyles, Paper). Triggers "which RN component library". Not for hand-written tokens (styling).
 ---
 
 # React Native — Component Library (one-of-N)

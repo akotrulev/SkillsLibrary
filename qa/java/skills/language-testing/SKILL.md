@@ -1,6 +1,6 @@
 ---
 name: language-testing
-description: Use when writing i18n/localization tests in Java 21 — Playwright-Java + TestNG pinned to a locale, asserting via the app's own `ResourceBundle` catalog by key, plus ICU4J formatting, pseudo-localization, and RTL checks. Triggers "write an i18n test in Java", "test German/Arabic rendering with Playwright-Java", "check RTL layout". Do NOT use for the frontend's own localization wiring (the `fe-*` `localization` skill), or for breakpoint layout (`qa-java:responsive-testing`).
+description: Use when writing i18n tests in Java, Playwright pinned to a locale, asserting by ResourceBundle key. Triggers "test German/Arabic rendering". Not for breakpoints (responsive-testing).
 ---
 
 # QA — i18n / Localization Testing (Java 21 / Playwright 1.63 + TestNG + ICU4J)

@@ -1,6 +1,6 @@
 ---
 name: plan-experience
-description: Use when an approved blueprint with user-facing areas needs its experience planned before the API — actors and tasks, journeys with steps counted, the screen map and app shell, per-screen specs, and the screen ↔ endpoint matrix. Triggers "plan the screens", "what does the user actually see", "design the navigation". Do NOT use to build the UI (`fe-<stack>`), judge a built UI (`design:ux-review`), plan tables (`dev:plan-data-model`) or endpoints (`dev:plan-api-surface`).
+description: Use when an approved blueprint needs its UX planned (actors, journeys, screen map, screen specs, screen-endpoint matrix). Triggers "plan the screens". Not for endpoints (plan-api-surface).
 ---
 
 # Experience Plan — what the user sees, before the API exists

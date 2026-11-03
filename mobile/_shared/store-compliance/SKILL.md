@@ -1,6 +1,6 @@
 ---
 name: store-compliance
-description: Use when a mobile app is about to ship or changes what it does — before a release, on adding a permission, SDK, account system, tracking or purchases, or near a store deadline. Triggers "will App Store review pass this", "Play rejected the update", "do we need a privacy manifest", "account deletion rules". Do NOT use for signing and rollout (`mobile-<stack>:release`), IAP mechanics (`mobile-<stack>:in-app-purchases`), or scanning a built binary (qa `mobile-app-scan`).
+description: Use when an iOS, Android or React Native app ships or adds permissions, SDKs, accounts, tracking or IAP; App Store/Play review rules. Triggers "will review pass this". Not for signing (release).
 ---
 
 # Mobile — Store Compliance

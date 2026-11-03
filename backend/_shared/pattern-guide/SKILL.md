@@ -1,6 +1,6 @@
 ---
 name: pattern-catalog
-description: Use when explaining a design pattern in language-agnostic terms — intent, when to use, when not to, trade-offs, what it looks like across stacks. Triggers: "what is the Strategy pattern", "when should I use Repository", "compare CQRS to plain service+repo", "should I use the Saga pattern here". Do NOT use for stack-specific code, scaffolding, or reviewing (`backend/<stack>/skills/{reference,generator,reviewer}`).
+description: Use when explaining a design pattern language-agnostically (intent, when to use, trade-offs). Triggers "what is the Strategy pattern", "when to use Repository". Not for stack code (patterns).
 ---
 
 # Design Patterns — Shared Reference (language-agnostic)

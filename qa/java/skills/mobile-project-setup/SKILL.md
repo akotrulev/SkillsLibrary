@@ -1,6 +1,6 @@
 ---
 name: mobile-project-setup
-description: Use when starting a mobile (iOS/Android) test project from zero in Java 21 — Gradle layout, exact pins, Appium 3 server + drivers + emulator setup, capabilities from environment variables, a first smoke run on TestNG + java-client 11. Triggers "scaffold a mobile test project", "set up a Java Appium suite from scratch". Do NOT use for authoring screens or tests (`ui-test-author/appium`) or for device clouds (`device-cloud`).
+description: Use when starting a mobile test project from zero in Java (TestNG + Appium 3, pins, emulator). Triggers "scaffold a mobile test project". Not for writing tests (ui-tests-appium).
 ---
 
 # Mobile Test Project Scaffold (Java 21)

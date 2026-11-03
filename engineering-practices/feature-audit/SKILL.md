@@ -1,6 +1,6 @@
 ---
 name: audit-feature
-description: Use when ONE feature or area of an existing codebase must be traced with no spec in hand — what it does, which validations and gates it enforces, and where it is defective. Triggers "how does feature X actually work", "what validations does the checkout flow have", "map this module's integrations", "find the defects in this area". Multi-feature and saved to `docs/audits/` → the `code-auditor` agent (its FEATURE lane). Not for verifying a written spec (`dev:audit-spec`).
+description: Use when tracing one existing feature with no spec (what it does, its validations, its defects). Triggers "how does feature X actually work", "find the defects here". Not for spec checks (audit-spec).
 ---
 
 # Feature Audit

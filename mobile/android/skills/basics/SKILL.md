@@ -1,6 +1,6 @@
 ---
 name: concepts
-description: Use when writing or reviewing Kotlin — conventions, null safety, val and data classes, sealed interfaces for state, structured concurrency, injected dispatchers, Flow vs StateFlow vs SharedFlow, context parameters. Triggers "idiomatic Kotlin?", "can I use !!", "StateFlow or SharedFlow", "which dispatcher", "GlobalScope". Also the Expo native-module Kotlin standard. Do NOT use for project setup, Compose screens, or networking (`mobile-android:project-setup`, `-ui-components`, `-networking`).
+description: Use when writing or reviewing idiomatic Kotlin (null safety, coroutines, dispatchers, Flow vs StateFlow). Triggers "can I use !!". Not for reviewing a diff (conventions-review).
 ---
 
 # Android — The Kotlin Coding Standard

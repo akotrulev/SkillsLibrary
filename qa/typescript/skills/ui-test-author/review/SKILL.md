@@ -1,6 +1,6 @@
 ---
 name: ui-tests-review
-description: Use when the user asks to review existing TypeScript UI test code or page objects. Triggers: "review this Playwright spec", "look at this page object class", "is this WebdriverIO test any good". Do NOT use for writing new tests (`qa-typescript:ui-tests-playwright`) or reviewing a Gherkin layer (`qa-typescript:bdd-reviewer`).
+description: Use when reviewing existing TypeScript UI test code or page objects (Playwright, Selenium, Appium). Triggers "review this Playwright spec". Not for writing new tests (ui-tests-playwright).
 ---
 
 # QA — UI Test & Page Object Reviewer (TypeScript)

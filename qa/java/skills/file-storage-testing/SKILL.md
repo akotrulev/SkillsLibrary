@@ -1,6 +1,6 @@
 ---
 name: file-storage-testing
-description: Use when a Java 21 / TestNG test suite must assert object-storage side-effects — AWS S3 via LocalStack or Azure Blob via Azurite: uploads, downloads, presigned/SAS URLs, storage-triggered events. Triggers "assert the export landed in the bucket", "test the presigned-URL flow", "verify blob metadata/tier". Do NOT use for database assertions (use `qa-java:db-connection`), or for broker messages (use `qa-java:messaging-testing`).
+description: Use when a Java/TestNG suite must assert object-storage side-effects (S3 via LocalStack, Blob via Azurite). Triggers "assert the file landed in the bucket". Not for DB asserts (db-connection).
 ---
 
 # QA — File Storage Testing (Java 21)

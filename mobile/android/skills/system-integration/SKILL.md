@@ -1,6 +1,6 @@
 ---
 name: system-integration
-description: Use when an Android app must do work or appear outside its screens — WorkManager (periodic, expedited, constraints), foreground services with a type and Play declaration, Glance widgets, shortcuts, exact-alarm policy, API 37 background-audio rule. Triggers "sync in the background", "keep uploading", "add a widget", "schedule a reminder". Do NOT use for push and links (`mobile-android:push-and-deep-links`), offline data design (`-offline-and-storage`), or permissions (`-device-features`).
+description: Use when an Android app works outside its screens (WorkManager, foreground services, Glance widgets, alarms). Triggers "add a widget". Not for push (push-and-deep-links).
 ---
 
 # Android — System Integration

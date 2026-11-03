@@ -1,6 +1,6 @@
 ---
 name: failure-injection-testing
-description: Use when writing fault-injection / resilience tests in .NET 10 (8-9) / NUnit with Toxiproxy via Testcontainers (`Toxiproxy.Net`) — inject latency, drops, and bandwidth caps on a dependency (DB, API, broker, cache) and assert the app degrades gracefully. Triggers "test the app survives a slow database", "inject a connection drop", "assert the circuit breaker opens". Not for load/throughput testing (`load-testing`).
+description: Use when writing fault-injection tests in .NET/NUnit with Toxiproxy via Testcontainers to assert graceful degradation. Triggers "survive a slow database". Not for load (load-testing).
 ---
 
 # QA — Chaos / Fault-Injection Testing (.NET 8 / Toxiproxy + Testcontainers + NUnit)

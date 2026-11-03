@@ -1,6 +1,6 @@
 ---
 name: forms
-description: Use when building or fixing a form in an Expo SDK 57 app — React Hook Form 7 + Zod 4, keyboard avoidance, input modes and autofill, secure fields, double-submit guard, ProblemDetails errors mapped with setError. Triggers "build a sign-up form", "keyboard covers the input", "server errors aren't on the fields", "autofill password". Do NOT use for fetch mechanics (`mobile-react-native:networking`), state placement (`-architecture`) or the failure banner (`-error-handling`).
+description: Use when building or fixing an Expo/React Native form (React Hook Form + Zod, keyboard avoidance, server errors on fields). Triggers "build a sign-up form". Not for the request (networking).
 ---
 
 # React Native — Forms

@@ -1,6 +1,6 @@
 ---
 name: mobile-screen-explorer
-description: Use when a TypeScript mobile suite needs to explore the open Android/iOS app on a device or emulator through the Appium MCP server. Triggers "explore this screen", "what's on the current screen", "find the locators for X", "inventory this app screen". Do NOT use to emit the screen object from that inventory (use `qa-typescript:mobile-screen-objects`), to author the mobile test itself (use `qa-typescript:ui-tests-appium`), or for web pages (use `qa-typescript:page-objects-from-url`).
+description: Use when a WebdriverIO mobile suite must explore the open app screen via the Appium MCP and derive locators. Triggers "explore this screen". Not for writing the screen object (mobile-screen-objects).
 ---
 
 # QA — Appium Live-App Explorer (TypeScript)

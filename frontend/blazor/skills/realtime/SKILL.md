@@ -1,6 +1,6 @@
 ---
 name: realtime
-description: Use when a Blazor surface (.NET 8/9/10) needs LIVE / server-pushed data — interactive-Server circuit push (`InvokeAsync(StateHasChanged)`), the WASM SignalR client (`HubConnection`, `WithStatefulReconnect`), raw WebSocket/SSE feeds, the prerender-snapshot→live-channel handoff. Triggers: "push updates to the UI", "SignalR in Blazor", "live dashboard/chat", "background job updates a component". Do NOT use for request/response fetching (`data-fetching`) or the reconnect modal UI (`error-handling`).
+description: Use when a Blazor surface needs live server-pushed data (circuit push, SignalR, WebSocket/SSE). Triggers "push updates to the UI". Not for request/response fetching (data-fetching).
 ---
 
 # Blazor — Realtime (live / push lane)

@@ -1,6 +1,6 @@
 ---
 name: dashboards
-description: Use when designing or building a Grafana dashboard — panel layout, queries, alerts, RED / USE / Four-Golden-Signals methods, exemplars (logs ↔ traces), variables/templating. Triggers: "build a dashboard for service X", "RED dashboard", "wire log → trace navigation". Do NOT use for instrumenting code (`opentelemetry-{stack}`) or the underlying query syntax (`queries`).
+description: Use when designing or building a Grafana dashboard (layout, RED/USE methods, alerts, variables, exemplars). Triggers "build a dashboard for service X". Not for LogQL/PromQL syntax (queries).
 ---
 
 # Observability — Grafana Dashboards

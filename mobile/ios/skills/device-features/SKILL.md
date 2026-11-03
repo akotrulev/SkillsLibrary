@@ -1,6 +1,6 @@
 ---
 name: device-features
-description: Use when an iOS app touches device capabilities — permissions with Info.plist usage strings and a pre-prompt, PhotosPicker, AVFoundation camera, Core Location, LocalAuthentication, haptics, ShareLink, fileImporter. Triggers "ask for camera access", "pick a photo", "get the user's location", "Face ID to unlock", "denied path". Do NOT use for push and links (`mobile-ios:push-and-deep-links`), widgets and background work (`-system-integration`) or Keychain (`-offline-and-storage`).
+description: Use when an iOS app uses camera, photos, location, Face ID or files, with permission prompts. Triggers "ask for camera access", "pick a photo". Not for push or links (push-and-deep-links).
 ---
 
 # iOS — Device Features

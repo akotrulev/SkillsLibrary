@@ -1,6 +1,6 @@
 ---
 name: api-tests-grpc
-description: Use when scaffolding black-box **gRPC** API tests in Node 24 (22 supported) / TypeScript with Vitest + `@grpc/grpc-js` + `@grpc/proto-loader` against a deployed, proto-defined HTTP/2 service. Triggers: "write a gRPC test for RPC X", "assert the ServiceError code", "test a server-streaming RPC". Do NOT use for REST (`qa-typescript:api-tests`) or GraphQL (`qa-typescript:api-tests-graphql`).
+description: Use when writing black-box gRPC API tests in TypeScript (@grpc/grpc-js + Vitest) against a proto-defined service. Triggers "write a gRPC test for RPC X". Not for REST (api-tests).
 ---
 
 # QA — gRPC API Test Writer (TypeScript / Vitest + @grpc/grpc-js)

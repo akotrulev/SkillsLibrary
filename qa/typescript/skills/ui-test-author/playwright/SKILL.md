@@ -1,6 +1,6 @@
 ---
 name: ui-tests-playwright
-description: Use when the user asks to scaffold Playwright UI tests in TypeScript — specs, page objects, fixtures, playwright.config.ts, auth setup, locator scoping with within(), web-first assertions, or device and mobile-web emulation. Triggers "write a Playwright test for X in TypeScript", "add a Playwright page object for screen Y", "set up playwright.config.ts". Do NOT use for API tests on the Playwright runner (`qa-typescript:api-tests-playwright`) or reviewing specs (`qa-typescript:ui-tests-review`).
+description: Use when scaffolding Playwright UI tests in TypeScript (specs, page objects, signed-in state, web-first assertions). Triggers "write a Playwright test for X". Not for Selenium (ui-tests-selenium).
 ---
 
 # QA — Playwright Test & Page Object Generator (TypeScript)

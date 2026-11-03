@@ -1,6 +1,6 @@
 ---
 name: api-models
-description: Use when the user asks to create a new DTO / model class / response object in a Java test project (Java 21 + Jackson, typically alongside RestAssured). Triggers: "add a {Resource}Dto in Java", "create the InDto / ModDto record", "scaffold the wrapper DTO for paginated {resource} in Java". Do NOT use for the client that calls the endpoint (`qa-java:api-client-writer`) or the test itself (`qa-java:api-tests`).
+description: Use when creating a DTO or response model in a Java API test project (Jackson). Triggers "add an OrderDto". Not for the client class (api-client-writer).
 ---
 
 # qa-java:api-models

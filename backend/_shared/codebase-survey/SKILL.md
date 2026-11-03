@@ -1,6 +1,6 @@
 ---
 name: doc-codebase-survey
-description: Use when an existing backend must be split into functional areas before it can be documented — inventory every entry point and external surface, group them by business capability (not technical layer), then confirm the split with the human. Triggers "split this codebase into areas", "what are the functional areas here". Do NOT use to trace one area in depth (`dev:doc-feature-trace`), write documentation (`dev:doc-business-model`), or find defects (`dev:audit-feature`).
+description: Use when splitting an existing backend into functional areas by business capability before documenting it. Triggers "split this codebase into areas". Not for tracing one area (doc-feature-trace).
 ---
 
 # Codebase Survey — the area map and the reading plan

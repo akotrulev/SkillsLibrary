@@ -1,6 +1,6 @@
 ---
 name: secrets-hardening
-description: Use to fix the secret after it is found — rotation runbooks, wiring the app to a secret store (Vault / cloud secret manager / SOPS / ESO), and preventing recurrence (pre-commit + CI gates, dynamic credentials). The defensive complement to secrets-scan, which only detects. Triggers "rotate this leaked credential", "wire the app to a secret store". Not for detecting secrets (`secrets-scan`), typed app config (`devops:environment-config`), or exploiting a recovered secret (`penetration-tester`).
+description: Use when fixing a found secret (rotation runbooks, Vault or cloud secret store wiring, recurrence gates). Triggers "rotate this leaked credential". Not for detecting secrets (secrets-scan).
 ---
 
 # Security Governance — Secrets Hardening (rotation runbooks · secret-store wiring · recurrence prevention)

@@ -1,6 +1,6 @@
 ---
 name: pwa
-description: Use when making a Blazor WebAssembly app an installable PWA and/or offline-capable (.NET 8/9/10) — the manifest, the two-service-worker model, cache-first strategy, the update lifecycle (updates apply only after ALL tabs close — surface a prompt), offline UX, and that API data isn't cached by the template. Triggers: "make this installable", "add offline support", "PWA won't update after deploy". Do NOT use for interactive-Server apps (the circuit can't run offline).
+description: Use when a Blazor WebAssembly app must be installable or work offline (manifest, service worker, updates). Triggers "make this installable". Not for live reconnection (realtime).
 ---
 
 # Blazor — PWA & Offline

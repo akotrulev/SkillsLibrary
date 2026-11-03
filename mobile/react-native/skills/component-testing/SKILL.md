@@ -1,6 +1,6 @@
 ---
 name: component-testing
-description: Use when a React Native component, hook or logic needs a dev-side test — Jest + jest-expo + React Native Testing Library 14 (async render/fireEvent/act) for anything that renders, plain Jest for anything that doesn't, native modules faked at the boundary, the ≥ 80% branch-coverage floor on changed code. Triggers "unit-test this screen", "test my hook", "RNTL v14 migration", "jest can't find native module". Do NOT use for device journeys (`qa-mobile-typescript`) or Vitest (not viable in RN).
+description: Use when a React Native component, hook or logic needs a dev-side unit test (Jest + jest-expo + RNTL). Triggers "unit-test this screen". Not for device journeys (qa-mobile-typescript).
 ---
 
 # React Native — Component & Pure-Logic Testing (Jest + RNTL 14)

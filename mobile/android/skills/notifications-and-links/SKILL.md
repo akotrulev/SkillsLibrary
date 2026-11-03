@@ -1,6 +1,6 @@
 ---
 name: push-and-deep-links
-description: Use when an Android app needs push or local notifications, or opens from a link — FCM registration, notification channels, POST_NOTIFICATIONS, tap routing, immutable PendingIntent, full-screen-intent policy, App Links verification (assetlinks.json). Triggers "add push", "tap opens the order", "link opens the app". Do NOT use for the URI-to-keys parser (`mobile-android:navigation`), runtime permissions generally (`-device-features`), or the sending server.
+description: Use when an Android app needs push or local notifications (FCM, channels) or opens from App Links. Triggers "add push", "link opens the app". Not for route structure (navigation).
 ---
 
 # Android — Notifications and Links

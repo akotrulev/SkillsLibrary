@@ -1,6 +1,6 @@
 ---
 name: ui-tests-review
-description: Use when the user asks to review existing .NET UI test code or page objects. Triggers: "review this Playwright C# spec", "look at this NUnit page object", "is this Appium .NET test any good". Do NOT use for writing new tests (`qa-dotnet:ui-tests-playwright`) or a whole-suite audit (`qa-dotnet:standards-audit`).
+description: Use when reviewing existing .NET UI test code or page objects (Playwright, Selenium, Appium). Triggers "review this Playwright spec". Not for writing new tests (ui-tests-playwright).
 ---
 
 # QA — UI Test & Page Object Reviewer (.NET / C#)

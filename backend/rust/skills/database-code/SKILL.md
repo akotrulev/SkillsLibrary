@@ -1,6 +1,6 @@
 ---
 name: persistence
-description: Use when setting up or changing persistence in a Rust service — sqlx (default) with compile-checked queries, offline .sqlx metadata, migrations, pool sizing, transactions, optimistic concurrency, N+1 and bulk-insert fixes, dynamic SQL safely under sqlx 0.9's SqlSafeStr; diesel or sea-orm when the repo already uses them. Triggers "add a sqlx query", "set up migrations in Rust", "transaction in sqlx", "query! fails in CI". Do NOT use for schema/DDL/index design (`data/*`) or non-Rust persistence.
+description: Use when setting up or refactoring Rust persistence with sqlx, diesel or sea-orm (queries, migrations, transactions, tuning). Triggers "add a sqlx query". Not for raw SQL (postgresql).
 ---
 
 # Rust — Persistence with sqlx (default), diesel, sea-orm

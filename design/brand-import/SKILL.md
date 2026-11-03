@@ -1,6 +1,6 @@
 ---
 name: brand-import
-description: Use when a project starts from an EXISTING brand — a brand book, style guide, logo, or "our colors are X and Y" — that must become a working token system: normalize into primitive→semantic tiers, gap-fill what the brand never specified in its own voice. Triggers: "we have a brand book, turn it into tokens", "match our existing brand". Do NOT use to invent an identity (`design/visual-identity`), for presets (`design/theme-presets`), or token naming (`design/design-tokens`).
+description: Use when turning an existing brand book, logo or colors into a working token system. Triggers "turn our brand book into tokens", "match our brand". Not for inventing an identity (visual-identity).
 ---
 
 # Brand Intake — an existing brand becomes a token system

@@ -1,7 +1,7 @@
 ---
 name: <skill-name>
 # name rule: topic only — no domain or stack prefix, unique within its plugin, not a reserved name (CONTRIBUTING.md, "Names and registration")
-description: Use when the user asks to review, audit, critique, or check existing <stack> code for <concern>. Triggers: "review this for X", "is this idiomatic", "audit this code". Do NOT use for explaining concepts (use <sibling reference>) or generating new code (use <sibling generator>).
+description: Use when reviewing existing <stack> code for <concern>. Triggers "review this for X", "is this idiomatic". Not for generating new code (<sibling generator>).
 ---
 
 # <Skill Title>

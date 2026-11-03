@@ -1,6 +1,6 @@
 ---
 name: animation
-description: Use when an element must animate — CSS transitions/keyframes in CSS Modules first, `prefers-reduced-motion` as a hard floor, staggered and scroll reveals, the React exit-animation gap (`animation` `AnimatePresence` or View Transitions), route transitions. Triggers "animate this page-load sequence", "fade elements in on scroll", "the exit animation never plays". Not for deciding WHETHER motion serves the design (`design:visual-identity`).
+description: Use when animating a React UI (CSS Modules transitions, reduced motion, scroll reveals, exit animations). Triggers "fade elements in on scroll". Not for motion design (motion).
 ---
 
 # React — Motion

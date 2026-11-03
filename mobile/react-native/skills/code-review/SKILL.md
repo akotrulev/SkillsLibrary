@@ -1,6 +1,6 @@
 ---
 name: conventions-review
-description: Use when reviewing a React Native / Expo diff — text outside `<Text>`, hand-edited `ios/` or `android/`, un-virtualized lists, missing timeouts and failed states, untagged elements, secrets in `EXPO_PUBLIC_*`, unvalidated links, motion off the UI thread — plus a simulator screenshot pass. Triggers "review this screen", "review this PR", "is this RN code ok". Do NOT use for a whole-repo audit (`mobile-react-native:standards-audit`), explanations (`-basics`) or writing code.
+description: Use when reviewing a React Native/Expo diff against plugin conventions, plus a simulator screenshot pass. Triggers "review this PR". Not for a whole-repo audit (standards-audit).
 ---
 
 # React Native / Expo — Code Review

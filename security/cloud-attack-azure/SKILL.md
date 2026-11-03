@@ -1,6 +1,6 @@
 ---
 name: cloud-attack-azure
-description: Use to exploit an authorized Azure/Entra tenant after `cloud-recon-enumeration` has mapped its surface — Entra ID enumeration & abuse, managed-identity/service-principal token theft, Key Vault data-plane access, Azure RBAC privilege escalation, and Sentinel/Defender detection-surface awareness. Triggers "escalate in this Azure subscription", "what can this managed identity reach", "test our Key Vault and Entra app registrations". Not for Azure recon (`cloud-recon-enumeration`), AWS (`cloud-attack-aws`) or GCP (`cloud-attack-gcp`) exploitation, defensive Azure posture scanning (`devops:cloud-posture`), network foothold (`initial-access`), or purple-team detonation (`atomic-simulation`). Owned/lab Azure tenants only, under a committed cloud scope file.
+description: Use when exploiting an authorized Azure/Entra tenant after recon (managed-identity tokens, Key Vault, RBAC privesc). Triggers "escalate in this Azure tenant". Not for recon (cloud-recon-enumeration).
 ---
 
 # Penetration Testing — Azure Exploitation (Entra ID · managed identity · Key Vault · Azure RBAC)

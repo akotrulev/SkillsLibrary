@@ -1,6 +1,6 @@
 ---
 name: page-object-design
-description: Use when the user is designing the page object structure for a .NET UI test project. Triggers: "design page objects for app X in C#", "how should I structure Pages/ for our NUnit suite", "split this giant ILocator-heavy page". Do NOT use for extracting locators from a live URL (`qa-dotnet:page-objects-from-url`) or Appium screens (`qa-dotnet:mobile-screen-objects`).
+description: Use when designing the page object structure for a .NET UI test project. Triggers "design page objects for app X". Not for a POM from a live URL (page-objects-from-url).
 ---
 
 # QA — Page Object Architect (.NET / C#)

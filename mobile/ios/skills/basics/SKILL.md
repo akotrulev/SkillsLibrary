@@ -1,6 +1,6 @@
 ---
 name: concepts
-description: Use when writing or reviewing Swift — API Design Guidelines naming, value vs reference types, optionals, errors, access control, the Swift 6 concurrency standard (default isolation, Sendable, cancellation), Observation, os.Logger. Triggers "is this Swift idiomatic", "@MainActor by default or not", "can I use !", "Sendable error". Also the Expo native-module Swift standard. Do NOT use for project setup, SwiftUI screens, or networking (`mobile-ios:project-setup`, `-ui-components`, `-networking`).
+description: Use when writing or reviewing idiomatic Swift (optionals, errors, Swift 6 concurrency, Sendable). Triggers "is this Swift idiomatic". Not for reviewing a diff (conventions-review).
 ---
 
 # iOS — The Swift Coding Standard

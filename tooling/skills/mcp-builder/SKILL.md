@@ -1,6 +1,6 @@
 ---
 name: mcp-builder
-description: Use when a project's capabilities must reach agents as an MCP server — render a confirmed capability contract as a schema-validated server: one tool per capability, one envelope, actionable errors, a smoke test. Triggers "build an MCP for this project", "expose these functions as MCP tools". Do NOT use to derive capabilities (`tooling:capability-contract`), for a terminal surface (`tooling:cli-builder`), or to wrap a third-party API with no local codebase (vendor `ai-development/mcp-builder`).
+description: Use when rendering a confirmed capability contract as a schema-validated MCP server, one tool per capability. Triggers "build an MCP for this project". Not for a terminal surface (cli-builder).
 ---
 
 # MCP Builder — the contract, rendered as tools

@@ -1,6 +1,6 @@
 ---
 name: navigation
-description: Use when adding or fixing routes in an Expo Router app on SDK 57 — file routes, typed routes, dynamic params, protected routes, modals and sheets, native tabs, linking config; also the React Navigation 7.5 lane for bare RN. Triggers "add a screen", "protect these routes", "make this a modal", "native tabs", "typed href". Do NOT use for links from push or the system (`mobile-react-native:push-and-deep-links`), project setup (`-project-setup`) or fetching (`-networking`).
+description: Use when adding screens, tabs or deep-link routes in Expo Router (typed and protected routes, modals). Triggers "add a screen". Not for push and link setup (push-and-deep-links).
 ---
 
 # React Native — Navigation (Expo Router)

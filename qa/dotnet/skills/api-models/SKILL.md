@@ -1,6 +1,6 @@
 ---
 name: api-models
-description: Use when creating a new DTO, model class, or response object in a .NET 10 (8-9) / System.Text.Json API test project. Triggers "add a {Resource}Dto", "create the InDto / ModDto for the {resource} endpoint", "scaffold the wrapper DTO for paginated {resource}". Not for the client that calls the endpoint (`api-client-writer`) or the test itself (`api-test-author/writer`).
+description: Use when creating a DTO or response model in a .NET API test project (System.Text.Json). Triggers "add an OrderDto". Not for the client class (api-client-writer).
 ---
 
 # qa-dotnet:api-models

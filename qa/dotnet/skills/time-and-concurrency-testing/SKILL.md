@@ -1,6 +1,6 @@
 ---
 name: time-and-concurrency-testing
-description: Use when a .NET 10 (8–9) / NUnit API suite must run a scheduled job on demand, control the clock at a time boundary, fire concurrent requests, or deliver a message or webhook twice — the temporal, concurrency and idempotency cases of a cross-feature suite. Triggers: "run the nightly job in a test", "freeze the clock at the cut-off", "two requests at once", "message delivered twice". Do NOT use for broker plumbing (`messaging-testing`) or fault injection (`failure-injection-testing`).
+description: Use when a .NET/NUnit API suite must run a scheduled job, freeze the clock, race requests or redeliver a message. Triggers "freeze the clock". Not for fault injection (failure-injection-testing).
 ---
 
 # QA — Time and Concurrency Testing (.NET 10 + WebApplicationFactory / NUnit)

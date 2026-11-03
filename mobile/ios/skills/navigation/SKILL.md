@@ -1,6 +1,6 @@
 ---
 name: navigation
-description: Use when adding routes or containers in SwiftUI — NavigationStack(path:) with typed routes, NavigationSplitView, sheets and full-screen covers, TabView with the Tab API, and onOpenURL mapped to a route. Triggers "add a screen", "navigate programmatically", "deep link into a detail", "tabs on iPad". Do NOT use for push and universal-link setup (`mobile-ios:push-and-deep-links`), state ownership (`-architecture`) or view structure (`-ui-components`).
+description: Use when adding screens, tabs or deep-link routes in SwiftUI (NavigationStack, sheets, TabView, onOpenURL). Triggers "add a screen". Not for push and link setup (push-and-deep-links).
 ---
 
 # iOS — Navigation

@@ -1,6 +1,6 @@
 ---
 name: styling
-description: Use when writing the CSS yourself — CSS Modules + `composes`, design tokens as CSS custom properties bridged to the library theme, type scale (`clamp()`, `next/font`), dark mode via next-themes, and the one-authority decision (Tailwind on the default shadcn lane vs MUI `theme`+`sx` vs CSS Modules — never two at once). Triggers "scope this component's CSS", "dark mode with next-themes", "my styles leak between components". Not for the library's own theme object (`component-library`).
+description: Use when writing CSS for a React app (CSS Modules, tokens as custom properties, type scale, dark mode). Triggers "scope this component's CSS". Not for library theming (component-library).
 ---
 
 # React — Styling (CSS Modules, tokens, dark mode, the styling authority)

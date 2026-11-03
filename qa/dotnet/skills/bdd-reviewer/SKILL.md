@@ -1,6 +1,6 @@
 ---
 name: bdd-reviewer
-description: Use when reviewing or auditing existing Gherkin `.feature` files and Reqnroll step definitions in C#/.NET for living-documentation quality, step reusability, and correct binding/DI/lifecycle. Triggers "review these feature files", "audit our Reqnroll step definitions", "are these Gherkin scenarios good", "check our BDD layer". Not for generating features (`feature-file-writer`) or step definitions (`gherkin-step-code`).
+description: Use when reviewing Gherkin .feature files and Reqnroll steps in .NET for reuse and binding. Triggers "review these feature files". Not for generating steps (gherkin-step-code).
 ---
 
 # Reqnroll / Gherkin Reviewer (C# / .NET 10)

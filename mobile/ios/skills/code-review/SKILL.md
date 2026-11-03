@@ -1,6 +1,6 @@
 ---
 name: conventions-review
-description: Use when reviewing a Swift / SwiftUI / UIKit diff — force unwraps, blocking the main thread, Swift 6 isolation escape hatches, work in `body`, missing timeouts and failed states, secrets outside the Keychain, unvalidated links and push payloads, untagged elements — plus a simulator screenshot pass. Triggers "review this screen", "review this PR", "is this Swift ok". Do NOT use for a whole-repo audit (`mobile-ios:standards-audit`), explanations (`-basics`) or writing code.
+description: Use when reviewing a Swift, SwiftUI or UIKit diff against plugin conventions, plus a simulator screenshot pass. Triggers "review this PR". Not for a whole-repo audit (standards-audit).
 ---
 
 # iOS — Code Review

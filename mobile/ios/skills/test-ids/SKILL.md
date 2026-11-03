@@ -1,6 +1,6 @@
 ---
 name: test-ids
-description: Use when adding, auditing or fixing `accessibilityIdentifier` so Appium (XCUITest driver) and Maestro can target an iOS app — including consuming a `missing-testids.md` from QA's screen explorer. Covers SwiftUI and UIKit, static row ids, PascalCase naming, grouping that hides children, never accessibilityLabel as an id. Triggers "add test ids", "E2E can't find this element". Do NOT use for writing the device tests (`qa-mobile-<stack>`).
+description: Use when adding accessibilityIdentifier so Appium and Maestro can target a SwiftUI or UIKit app. Triggers "E2E can't find this element". Not for writing device tests (qa-mobile-typescript).
 ---
 
 # iOS — Testability (`accessibilityIdentifier` writer)

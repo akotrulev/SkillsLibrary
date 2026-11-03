@@ -1,6 +1,6 @@
 ---
 name: email-testing
-description: Use when a Java 21 / TestNG test suite must capture and assert email the SUT sends — local SMTP sink (Mailpit), hosted inbox (Mailosaur), real Gmail over IMAP, or SendGrid sandbox-send. Triggers "assert the welcome email was sent", "extract the OTP/reset link from the email", "test email content/recipients". Do NOT use for broker messages (use `qa-java:messaging-testing`), or for in-app notification UI (use `qa-java:ui-tests-playwright`).
+description: Use when a Java/TestNG suite must capture and assert email the SUT sends (Mailpit, Mailosaur, IMAP). Triggers "assert the welcome email was sent". Not for broker messages (messaging-testing).
 ---
 
 # QA — Email Testing (Java 21)

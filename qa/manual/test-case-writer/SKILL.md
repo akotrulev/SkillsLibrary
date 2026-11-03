@@ -1,6 +1,6 @@
 ---
 name: test-case-writer
-description: Use when the user asks to write, derive, or generate formal test cases from requirements, user stories, acceptance criteria, or feature specs. Triggers: "write test cases for X", "derive test scenarios from these ACs", "turn these ACs into runnable case scripts". Do NOT use for a feature test plan (scope/harness/artifacts) — that is test-plan-writer.
+description: Use when writing or deriving formal test cases from requirements, user stories, ACs or specs. Triggers "write test cases for X", "derive scenarios from ACs". Not for a test plan (test-plan-writer).
 ---
 
 # QA Test Case Writer

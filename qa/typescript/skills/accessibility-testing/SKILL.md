@@ -1,6 +1,6 @@
 ---
 name: accessibility-testing
-description: Use when a Playwright Test (TypeScript) suite must scan for accessibility violations — axe-core inside UI flows, or Lighthouse CI scores. Triggers "add a11y tests", "scan for WCAG 2.2 violations", "fail CI on accessibility regressions", "set an accessibility budget". Do NOT use for the app's own accessibility implementation (the fe-* accessibility skill), pixel diffs (qa-typescript:visual-regression) or breakpoint layout (qa-typescript:responsive-testing).
+description: Use when a TypeScript Playwright suite must scan for WCAG violations with axe-core or Lighthouse. Triggers "add a11y tests". Not for pixel diffs (visual-regression).
 ---
 
 # QA — Accessibility Testing (TypeScript / Playwright 1.64)

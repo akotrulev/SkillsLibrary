@@ -1,6 +1,6 @@
 ---
 name: accessibility-testing
-description: Use when a .NET/NUnit Playwright suite must scan for accessibility violations — axe-core per UI state at WCAG 2.2 AA (Deque.AxeCore.Playwright) or Lighthouse category scores. Triggers "add a11y tests", "scan for WCAG violations", "fail CI on accessibility regressions", "set an accessibility budget". Do NOT use for the app's own a11y implementation (the fe-* stack's accessibility skill), pixel diffs (qa-dotnet:visual-regression) or breakpoints (qa-dotnet:responsive-testing).
+description: Use when a .NET/NUnit Playwright suite must scan for WCAG violations with axe-core or Lighthouse. Triggers "add a11y tests". Not for pixel diffs (visual-regression).
 ---
 
 # QA — Accessibility Testing (.NET 10 / Playwright 1.63)

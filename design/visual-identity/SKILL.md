@@ -1,6 +1,6 @@
 ---
 name: visual-identity
-description: Use when a shipping web app needs its visual identity — one per-brief direction (palette, type, spacing, layout, motion) handed down as tokens; a MARKETING page gets a hero and one aesthetic risk, an APPLICATION the modern-app recipe. Triggers "give this app a look", "make this UI not look AI-generated", "pick a palette and fonts". Not for CSS mechanics (the stack's `styling`), token naming (`design:tokens`), a brand book (`design:brand-import`), or presets (`design:theme-presets`).
+description: Use when a web app or marketing page needs its visual identity (palette, type, spacing, layout) as tokens. Triggers "give this app a look", "pick a palette". Not for token naming (tokens).
 ---
 
 # Frontend Design

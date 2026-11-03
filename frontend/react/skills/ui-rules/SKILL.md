@@ -1,6 +1,6 @@
 ---
 name: ui-rules
-description: Use on every data-driven feature build for UI correctness — display (humanized enums, one format per type, names not raw ids), table ergonomics (deterministic sort, server paging, filter parity), CRUD semantics (form↔DTO parity, read-only PKs, optimistic concurrency), disable-don't-hide, confirmations, IA. Triggers "review this grid/form", "the enum shows as a number", "an edit discards a field", "the list order changes every refresh". Not for fetch mechanics (`data-fetching`).
+description: Use when building a data-driven React feature, for UI correctness (humanized enums, formats, stable sort, paging, CRUD parity). Triggers "enum shows as a number". Not for fetching (data-fetching).
 ---
 
 # React — UI Conventions (data-driven correctness)

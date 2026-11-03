@@ -1,6 +1,6 @@
 ---
 name: ai-experience
-description: Use when designing how an AI or agent feature behaves on screen — streaming and tool-call visibility, stop/interrupt, approval-with-context, confidence display, correction, AI labelling, and the AI-specific states. Triggers "design the chat/assistant UI", "how should the agent show what it's doing", "show a confidence score?". Not for the transport (a stack's `realtime`/`data-fetching`), prompt/model work (`ai-development`), or testing an LLM feature (qa `ai-feature-testing`).
+description: Use when designing how an AI or agent feature behaves on screen (streaming, tool calls, stop, approvals, confidence). Triggers "design the chat UI". Not for LLM testing (ai-feature-testing).
 ---
 
 # AI experience — designing what the agent shows

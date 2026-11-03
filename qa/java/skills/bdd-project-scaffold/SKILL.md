@@ -1,6 +1,6 @@
 ---
 name: bdd-project-setup
-description: Use when adding the Cucumber-JVM BDD layer onto a Java 21 UI/mobile test project, or standing up a Cucumber-JVM + JUnit 5 project from zero. Triggers: "set up Cucumber", "add a BDD layer to our Playwright/Selenium/Appium tests in Java", "wire Cucumber DI and hooks". Do NOT use to write feature files (`feature-file-writer`), generate step definitions (`gherkin-step-code`), or build page objects (`page-object-design`).
+description: Use when adding a Cucumber-JVM BDD layer to a Java UI/mobile test project or starting one. Triggers "set up Cucumber". Not for step definitions (gherkin-step-code).
 ---
 
 # Cucumber-JVM BDD Project Scaffold (Java 21)

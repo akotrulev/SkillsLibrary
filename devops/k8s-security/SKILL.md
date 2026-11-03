@@ -1,6 +1,6 @@
 ---
 name: kubernetes-security
-description: Use when benchmarking or probing the security posture of Kubernetes — CIS scoring, framework mapping, config validation, and active validation that RBAC, NetworkPolicy, Pod Security Standards, and secrets-at-rest hold. Triggers "run CIS benchmark on our cluster", "audit our K8s RBAC", "are our network policies actually enforcing". Do NOT use for authoring manifests (`devops/kubernetes`), image or IaC CVEs (`qa-<stack>:image-infra-scan`), or plugin-rule conformance (`devops-auditor`).
+description: Use when benchmarking or validating Kubernetes security (CIS, RBAC, NetworkPolicy, Pod Security). Triggers "run CIS benchmark on our cluster". Not for manifests (kubernetes).
 ---
 
 # DevOps — Kubernetes Security Posture (kube-bench · Kubescape · Polaris · kube-score)

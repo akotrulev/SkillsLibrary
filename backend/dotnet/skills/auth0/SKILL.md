@@ -1,6 +1,6 @@
 ---
 name: auth0
-description: Use when setting up or modifying Auth0 in an ASP.NET Core service (.NET 10 primary, 8/9) — JWT bearer validation, RBAC policies, Authorization Code + PKCE for server-rendered web, Client Credentials M2M, custom claim mapping. Triggers: "add Auth0 to my ASP.NET Core API", "validate Auth0 JWTs in .NET", "wire [Authorize(Policy=...)] for permissions". Do NOT use for SPA flows (`auth/auth0-react` / `auth/auth0-blazor`), Cognito (the `cognito` sibling), or concepts (`auth/_shared/auth0-concepts`).
+description: Use when adding Auth0 to an ASP.NET Core API (JWT validation, RBAC policies, M2M). Triggers "add Auth0 to my ASP.NET Core API", "validate Auth0 JWTs". Not for Cognito (cognito).
 ---
 
 # Auth — Auth0 in ASP.NET Core (.NET 10 primary / 8-9 supported)

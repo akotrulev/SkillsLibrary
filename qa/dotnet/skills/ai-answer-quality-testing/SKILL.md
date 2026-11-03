@@ -1,6 +1,6 @@
 ---
 name: ai-answer-quality-testing
-description: Use when testing a RAG feature from a .NET / NUnit suite — decompose RETRIEVAL from GENERATION so a bad answer is localized, then assert the RAG triad (context relevance · groundedness · answer relevance) plus retrieval-ranking metrics; Ragas (default), DeepEval or promptfoo. Triggers "test our RAG pipeline", "is the answer grounded in the retrieved chunks", "evaluate context precision/recall", "build a RAG golden set". Not for non-RAG LLM evals (`qa-dotnet:ai-feature-testing`).
+description: Use when testing a RAG feature from a .NET/NUnit suite, retrieval apart from generation (RAG triad, Ragas). Triggers "test our RAG pipeline". Not for non-RAG LLM evals (ai-feature-testing).
 ---
 
 # RAG Testing (.NET 8 / NUnit — retrieval ⊕ generation, Ragas-spined)

@@ -1,6 +1,6 @@
 ---
 name: error-handling
-description: Use when a failure must not blank a Compose screen — loading/loaded/failed/stale/offline regions, failure scoped below search and filters, the safe-area error banner, timeouts rendered, 401 re-auth in place, forced update on version skew, lifecycle resume, process-death restore, write failures, third-party failures, full-disk degradation. Triggers "list empty when API fails", "session expired mid-form". Do NOT use for producing the ApiError or retries (`mobile-android:networking`).
+description: Use when a failure must not blank a Jetpack Compose screen (failed/stale/offline regions, error banner, 401 re-auth). Triggers "list empty when API fails". Not for retries (networking).
 ---
 
 # Android — Error Resilience

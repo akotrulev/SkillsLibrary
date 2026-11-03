@@ -1,6 +1,6 @@
 ---
 name: release
-description: Use when a mobile build must be versioned, signed, uploaded, rolled out or patched over the air — build numbers, signing without secrets in the repo, TestFlight and Play tracks, phased rollout and halt, EAS Update, symbol upload. Triggers "how do we sign in CI", "halt the rollout", "can we ship this OTA". Do NOT use for pipeline YAML (`devops-engineer`), CI test wiring (`qa-cicd-<stack>`), or store rules (`mobile-<stack>:store-compliance`).
+description: Use when an iOS, Android or React Native build is signed, uploaded, rolled out or shipped OTA (TestFlight, Play, EAS Update). Triggers "halt the rollout". Not for store rules (store-compliance).
 ---
 
 # Mobile — Release and Signing

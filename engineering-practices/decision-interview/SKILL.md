@@ -1,6 +1,6 @@
 ---
 name: decision-interview
-description: Use when a design or plan already has a shape and the user wants every open decision closed before work starts. Triggers: "grill me on this", "stress-test this design", "interview me until nothing is open", "poke holes in this plan", "what haven't I decided?". Runs one question at a time in a single session and ends when no branch is open. Do NOT use for a loose ask with no design yet or one spanning several capabilities (`/dev:refine`, `requirements-author`), for exploring approaches from scratch (`/dev:design`), or to answer a factual question.
+description: Use when a design or plan has a shape and every open decision must be closed, one question at a time. Triggers "grill me on this", "poke holes in this plan". Not for a fresh idea (design).
 ---
 
 # Decision Interview

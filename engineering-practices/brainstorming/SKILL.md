@@ -1,6 +1,6 @@
 ---
 name: design
-description: Use when turning an ad-hoc idea or one feature request into an approved design/spec before any code is written. Triggers "let's build X", "add a feature that…", "help me design…", "how should we approach…". Chains into `dev:plan-feature`; command `/dev:design`. Do NOT use when the *what* is still loose or spans several capabilities (`/dev:refine`, `requirements-author`), while a step-by-step agent runs its own design gate, for pure Q&A, or once a design is approved.
+description: Use when turning an idea or one feature request into an approved design or spec before code. Triggers "let's build X", "help me design this". Not for an already-approved design (plan-feature).
 ---
 
 # Brainstorming Ideas Into Designs

@@ -1,6 +1,6 @@
 ---
 name: unit-testing
-description: Use when backend TypeScript logic needs a dev-side unit test — Vitest (Jest when the repo uses it): what deserves a test, the five untestable seams (time, id, randomness, config, outbound I/O), DI over `vi.mock`, both branches of every `Result<T,E>`, Zod schema tests, the ≥ 80% branch-coverage floor on changed code. In-process, no HTTP, container, or real database. Triggers "unit-test this service", "test this Zod schema", "how do I fake the clock in Vitest". Do NOT use for supertest/HTTP-level or integration tests (`qa-api-typescript`).
+description: Use when TypeScript backend logic needs a unit test with Vitest (seams, DI over vi.mock, coverage floor). Triggers "unit-test this service", "fake the clock". Not for HTTP tests (api-tests).
 ---
 
 # Node — Unit Testing (Vitest + TypeScript strict)

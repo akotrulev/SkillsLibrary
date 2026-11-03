@@ -1,6 +1,6 @@
 ---
 name: gherkin-step-code
-description: Use when turning Gherkin .feature files into TypeScript step definitions implemented against existing Page Object Models — playwright-bdd (createBdd + fixtures) for web, CucumberJS + WebdriverIO for mobile. Triggers: "generate step definitions for these features", "bind these Gherkin steps to our page objects in TS". Do NOT use to write the .feature files (`feature-file-writer`), scaffold the project (`bdd-project-scaffold`), or build page objects.
+description: Use when turning Gherkin .feature files into playwright-bdd/CucumberJS steps in TypeScript bound to page objects. Triggers "generate step definitions". Not for writing .feature files (feature-files).
 ---
 
 # BDD Step Bindings + POM Implementation (TypeScript)

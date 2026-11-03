@@ -1,6 +1,6 @@
 ---
 name: push-and-deep-links
-description: Use when an Expo SDK 57 app needs push or local notifications, or opens from a link — expo-notifications (permission, Android 13+ runtime prompt, channels, Expo / APNs / FCM tokens, tap routing), universal links and Android App Links through Expo Router. Triggers "add push", "tap opens the order", "link opens the app", "assetlinks". Do NOT use for hardware permissions (`-device-features`), route structure (`-navigation`), or the server that sends.
+description: Use when an Expo/React Native app needs push or local notifications (expo-notifications) or opens from a link. Triggers "add push", "link opens the app". Not for route structure (navigation).
 ---
 
 # React Native — Notifications and Links

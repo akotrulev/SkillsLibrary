@@ -1,6 +1,6 @@
 ---
 name: offline-and-storage
-description: Use when an Android app must persist data — Room 3 (KSP, SQLiteDriver) for new code and Room 2.8 as a lane, DataStore, Keystore + Tink in place of the deprecated EncryptedSharedPreferences, backup rules, WorkManager sync, Paging 3, offline-first repositories. Triggers "where do I store this", "migrate the schema", "token storage", "works offline". Do NOT use for fetch mechanics (`mobile-android:networking`) or the offline UI (`-error-handling`).
+description: Use when an Android app must persist data (Room, DataStore, Keystore secrets, WorkManager sync, offline-first). Triggers "where do I store this". Not for fetch mechanics (networking).
 ---
 
 # Android — Offline and Storage

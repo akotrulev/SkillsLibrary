@@ -1,6 +1,6 @@
 ---
 name: verify
-description: Use when about to claim work is complete, fixed, or passing, before committing or creating PRs — requires running verification commands and confirming output before any success claim; evidence before assertions. Triggers: before saying "done"/"fixed"/"tests pass", before committing/pushing/opening a PR. Do NOT skip it because a check "should" pass — that is exactly when it applies.
+description: Use when about to claim work is done, fixed or passing, or before committing or a PR; run the checks first. Triggers "done", "tests pass". Not for holding the bar mid-work (quality-constraints).
 ---
 
 # Verification Before Completion

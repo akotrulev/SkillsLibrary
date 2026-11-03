@@ -1,6 +1,6 @@
 ---
 name: supply-chain-security
-description: Use when signing container images/artifacts, verifying SLSA provenance / attestations, attesting an SBOM, verifying signatures at deploy time, defending against dependency-confusion/typosquat, or hardening build-pipeline integrity — the OWASP A08 surface. Triggers "sign our images", "SLSA level 3", "dependency confusion". Do NOT use for CVE scanning or SBOM generation (`qa-<stack>:image-infra-scan`), IaC misconfig (`devops:iac-security`), Dockerfile authoring (`devops:docker`), or CI YAML.
+description: Use when signing images, verifying SLSA provenance and attestations, or defending against dependency confusion. Triggers "sign our images", "SLSA level 3". Not for CVE scanning (image-infra-scan).
 ---
 
 # DevOps — Supply-Chain Security (Signing, Provenance & Build Integrity)

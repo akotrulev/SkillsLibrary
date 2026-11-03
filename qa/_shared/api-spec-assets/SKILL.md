@@ -1,6 +1,6 @@
 ---
 name: api-spec-assets
-description: Use when an OpenAPI/Swagger spec is handed to an API test suite — store it as a dated, committed asset, and on every later update derive from `git diff` exactly which DTOs and clients must change. Cross-stack. Triggers "here is the swagger json", "the API changed — update our DTOs/clients", "update from the diff". Do NOT use to author the DTOs/clients themselves (`api-models` / `api-client-writer`), to write tests (`api-test-author/*`), or for Pact contracts (`api-contract-testing`).
+description: Use when an OpenAPI/Swagger spec arrives for an API test suite; store it dated and diff updates into DTO/client changes. Triggers "here is the swagger json". Not for writing DTOs (api-models).
 ---
 
 # QA — API Spec Assets & Diff-Driven Updates (Shared)

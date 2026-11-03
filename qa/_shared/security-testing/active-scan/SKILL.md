@@ -1,6 +1,6 @@
 ---
 name: active-scan
-description: Use when running an ACTIVE / full DAST scan against a running app you own — injecting SQLi/XSS/path-traversal payloads — driven by ZAP's YAML Automation Framework. Never run against production or a shared environment. Triggers "run an active DAST scan", "set up a ZAP full scan", "attack our API from its OpenAPI spec", "add a pre-release DAST gate". Not for the passive PR gate (`passive-scan`), known CVEs (`nuclei`), or authz (`permission-testing`).
+description: Use when running an active DAST scan with ZAP against an owned non-prod app, injecting SQLi/XSS payloads. Triggers "run an active DAST scan". Not for the passive PR gate (passive-scan).
 ---
 
 # Security Testing — ZAP Automation Framework (active / full DAST, shared)

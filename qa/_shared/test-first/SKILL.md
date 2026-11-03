@@ -1,6 +1,6 @@
 ---
 name: test-first
-description: Use when a plan's `Q` task writes the acceptance tests before the implementation exists — against the contract's stubs, which answer `501 not-implemented`, or a screen's placeholder. Cross-stack. Triggers "write the acceptance tests before the implementation", "a Q task", "red on not-implemented". Do NOT use for tests of built code (the agent's own modes) or unit tests (the be, fe and mobile testing skills).
+description: Use when a plan's Q task writes acceptance tests before the implementation, red against 501 not-implemented stubs. Triggers "write the acceptance tests first". Not for unit tests (unit-testing).
 ---
 
 # QA — Test-First Acceptance Tests (Shared)

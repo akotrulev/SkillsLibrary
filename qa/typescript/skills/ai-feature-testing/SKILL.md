@@ -1,6 +1,6 @@
 ---
 name: ai-feature-testing
-description: Use when testing LLM-generated output (chatbot, summarizer, extraction, tool-using agent) from a TypeScript suite — property, rubric (LLM-as-judge) and grounding assertions on a promptfoo (default) or DeepEval spine; never exact-string equality. Triggers: "test our chatbot", "eval prompt outputs", "deepeval / G-Eval / faithfulness metric". Do NOT use for RAG retrieval-vs-generation metrics (`qa-typescript:ai-answer-quality-testing`) or deterministic API tests (`qa-typescript:api-tests`).
+description: Use when testing LLM output from a TypeScript suite with rubric and grounding asserts (promptfoo, DeepEval). Triggers "test our chatbot". Not for RAG metrics (ai-answer-quality-testing).
 ---
 
 # LLM-App Testing (Node 24 / TypeScript — promptfoo + Anthropic SDK)

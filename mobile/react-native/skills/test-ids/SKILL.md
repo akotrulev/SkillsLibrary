@@ -1,6 +1,6 @@
 ---
 name: test-ids
-description: Use when adding, auditing or fixing `testID` props so Appium and Maestro can target an Expo SDK 57 app — including consuming a `missing-testids.md` from QA's screen explorer. Covers how testID surfaces on iOS and Android, static row ids, PascalCase naming, never accessibilityLabel as an id. Triggers "add testIDs", "E2E can't find this element", "content-desc vs testID". Do NOT use for writing the device tests (`qa-mobile-typescript`).
+description: Use when adding testID props so Appium and Maestro can target an Expo/React Native app. Triggers "E2E can't find this element". Not for writing device tests (qa-mobile-typescript).
 ---
 
 # React Native — Testability (`testID` writer)

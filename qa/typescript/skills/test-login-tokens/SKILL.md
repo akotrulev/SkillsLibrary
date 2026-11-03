@@ -1,6 +1,6 @@
 ---
 name: test-login-tokens
-description: Use when the user asks to obtain Auth0 access tokens *for automated tests* in TypeScript (Vitest / Jest / Playwright). Triggers: "get an Auth0 M2M token for my API tests", "log in a test user without the UI", "mint an Auth0 token for a test user". Do NOT use for Auth0 in the app itself (`auth/_shared/auth0-concepts`) or UI login journeys (`qa-typescript:ui-tests-playwright`).
+description: Use when obtaining Auth0 access tokens for automated TypeScript tests (M2M, or a test user without the UI). Triggers "get an Auth0 M2M token". Not for UI login journeys (ui-tests-playwright).
 ---
 
 # QA — Auth0 Test Tokens (TypeScript)

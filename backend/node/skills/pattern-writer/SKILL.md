@@ -1,6 +1,6 @@
 ---
 name: patterns-apply
-description: Use when scaffolding a TypeScript pattern (strict mode) into the active Node / NestJS / Express repo. Triggers: "scaffold a strategy with discriminated union", "create a Result type for X", "introduce branded types for ids", "type-safe config via Zod". Do NOT use for explanations (`pattern-guide`), reviews (`code-review`), or React (`frontend/react/skills/component-writer`).
+description: Use when scaffolding a design pattern into a Node/TypeScript repo (union strategy, Result type, branded ids). Triggers "create a Result type". Not for explanations (patterns).
 ---
 
 # TypeScript Design Patterns — Generator

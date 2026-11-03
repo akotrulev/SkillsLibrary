@@ -1,6 +1,6 @@
 ---
 name: error-handling
-description: Use when a failure must not blank an Expo SDK 57 screen — expo-router ErrorBoundary, loading/loaded/failed/stale/offline regions, the safe-area error banner, timeouts rendered, 401 re-auth in place, OTA-update skew, app resume, mutation and third-party failures, storage-full degradation. Triggers "app goes white on error", "list empty when API fails", "session expired mid-form". Do NOT use for producing the AppError or retries (`mobile-react-native:networking`).
+description: Use when a failure must not blank an Expo/React Native screen (failed/stale/offline regions, error banner, 401 re-auth). Triggers "list empty when API fails". Not for retries (networking).
 ---
 
 # React Native — Error Resilience

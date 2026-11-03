@@ -1,6 +1,6 @@
 ---
 name: offline-and-storage
-description: Use when an iOS app must persist data — SwiftData (iOS 17+) with VersionedSchema migrations, Core Data / GRDB where present, Keychain accessibility classes, UserDefaults and its Required Reason, file protection, caches vs backup, an offline write queue. Triggers "where do I store this", "migrate the schema", "token storage", "works offline". Do NOT use for fetch mechanics (`mobile-ios:networking`) or the offline UI (`-error-handling`).
+description: Use when an iOS app must persist data (SwiftData, Core Data, Keychain, UserDefaults, offline write queue). Triggers "where do I store this". Not for fetch mechanics (networking).
 ---
 
 # iOS — Offline and Storage

@@ -1,6 +1,6 @@
 ---
 name: debugging
-description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes — find root cause first, fix the cause not the symptom. Triggers: "this test is failing", "debug this", "why is X breaking", "the fix didn't work". Pairs with `dev:verify` (confirm the fix). Do NOT use for designing new work (`dev:design`) or known-cause changes needing no investigation.
+description: Use when hitting any bug, test failure or unexpected behavior, before proposing fixes; find the root cause. Triggers "this test is failing", "why is X breaking". Not for new work (design).
 ---
 
 # Systematic Debugging

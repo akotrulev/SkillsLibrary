@@ -1,6 +1,6 @@
 ---
 name: styling
-description: Use when theming a Compose app — Material 3 theme and tokens (1.4 stable vs Expressive in 1.5), dynamic colour, typography in sp, window size classes and adaptive layout, large-screen rules at target 36 / 37, edge-to-edge insets. Triggers "set up the theme", "dark mode", "tablet layout", "status bar overlaps". Do NOT use for component structure (`mobile-android:ui-components`), routes (`-navigation`) or TalkBack (`-accessibility`).
+description: Use when theming a Jetpack Compose app (Material 3 tokens, dynamic colour, dark mode, adaptive layout, insets). Triggers "dark mode". Not for component structure (ui-components).
 ---
 
 # Android — Styling, Theming and Adaptive Layout

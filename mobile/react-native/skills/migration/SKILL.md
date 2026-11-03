@@ -1,6 +1,6 @@
 ---
 name: migration
-description: Use when an Expo / React Native project changes lane — an Expo SDK upgrade (one SDK per change), moving from the legacy to the New Architecture on SDK 54, bare → Expo (`install-expo-modules`, adopting prebuild), or embedding RN in an existing native app (`expo-brownfield`, Callstack). Triggers "upgrade to SDK 57", "we are on SDK 52", "adopt CNG", "add React Native to our iOS app". Do NOT use for feature work, minor bumps or a fresh app (`mobile-react-native:project-setup`).
+description: Use when an Expo/React Native project changes lane (Expo SDK upgrade, New Architecture, bare to Expo). Triggers "upgrade to SDK 57". Not for a new app (project-setup).
 ---
 
 # React Native / Expo — Migration

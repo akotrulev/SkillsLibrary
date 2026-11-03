@@ -1,6 +1,6 @@
 ---
 name: landing-patterns
-description: Use when structuring a MARKETING page — section order, primary-CTA placement, color strategy, effects and conversion rules from the 34 vendored landing patterns, picked from the product type rather than defaulting to hero-features-CTA. Triggers "structure the landing page", "what sections should this page have", "where does the CTA go", "design the pricing/waitlist page". Not for the look itself (`design:visual-identity`) or an application's IA (`design:app-structure`).
+description: Use when structuring a marketing or landing page (section order, CTA placement, conversion rules). Triggers "structure the landing page", "where does the CTA go". Not for app IA (app-structure).
 ---
 
 # Landing patterns — the section order a marketing page earns
