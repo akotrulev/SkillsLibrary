@@ -5,7 +5,7 @@ description: Use when turning requirements into a BPMN-style Mermaid business fl
 
 # BA — Flow Mapper
 
-Turns requirements into a **business-flow model that forces the questions the prose never answers**: what happens on failure? who acts at this step? where does the timeout path go? which branches rejoin? The model is a reasoning instrument, not documentation — every authoring rule below exists because prose requirements systematically hide a class of gap that the diagram makes impossible to hide.
+Turns requirements into a **business-flow model that forces the questions the prose never answers**: what happens on failure? who acts at this step? where does the timeout path go? which branches rejoin? The model is a reasoning instrument, not documentation — every standard it must meet exists because prose requirements systematically hide a class of gap that the diagram makes impossible to hide.
 
 The notation is a **Mermaid flowchart** (text-based, diffable, token-cheap, renders in GitHub/artifacts) with **BPMN's discipline borrowed as authoring rules** — not BPMN XML.
 
@@ -27,16 +27,9 @@ The notation is a **Mermaid flowchart** (text-based, diffable, token-cheap, rend
 
 Per `business-analysis/skills/ba-project-memory`: **read first** (`INDEX.md` + any existing flow files this feature touches + `glossary.md` for the terms it uses), **update after** (the flow file, `INDEX.md`, `active-context.md`). Extending an existing flow beats creating a near-duplicate — check the INDEX before authoring `flows/<new>.md`.
 
-## Authoring rules (the BPMN discipline)
+## Standards (the BPMN discipline)
 
-1. **Named actors.** Every action belongs to an actor (customer, reviewer, payment provider, scheduler, *the system*). Use Mermaid `subgraph` blocks as swimlanes when more than one actor acts. An action with no actor is a finding — flag it, don't guess.
-2. **Explicit start and end events.** Every flow starts from a named trigger ("Customer submits order", "Nightly job runs") and every path terminates in a named outcome. **No dead ends** — a path that just stops is a gap finding.
-3. **Every decision node enumerates its full outcome set — including the failure exit.** LLMs and prose authors both systematically under-generate branches. A diamond with only a "yes" arrow is wrong. `Valid? -->|yes| … -->|no| …` at minimum; if the requirements don't say what "no" does, that's an Open question, not an omitted arrow.
-4. **Every merge states which paths rejoin.** When branches converge, the join node names what's true at that point regardless of the path taken. If the branches leave the world in different states, they don't actually rejoin — model separate ends.
-5. **Boundary events are modeled, not ignored.** Timeout, cancellation, and external failure (payment declined, webhook never arrives) are first-class exits from the step they interrupt. Ask per waiting step: *what if the answer never comes?*
-6. **Steps carry precondition → action → postcondition** (in the step notes table, not the diagram): what must be true to enter, what the step does, what's true after. This keeps flows testable and is what `qa/manual/requirements-breakdown` mines.
-7. **Node IDs are stable.** `FLOW-001.3` = flow 1, node 3. Use the node number as the Mermaid node id (`n3` ↔ `FLOW-001.3`) so the diagram and the steps table cross-reference mechanically. Referenced by findings, state models, and test bases — never renumber on edit; new nodes take the next free number.
-8. **Glossary terms only.** If the requirements use a term two ways, or the flow needs a term the glossary defines differently, that's terminology drift — flag it and route to `glossary.md`.
+What a flow file must meet (named actors and swimlanes, a start trigger and named outcomes with no dead ends, every decision exit labelled including failure, timeout and never-arrives exits, merges that state what rejoins, stable `FLOW-nnn.k` node ids, the precondition → action → postcondition steps table, glossary terms only) is the business-analysis rule files, not a list here: `business-model-flows.md` plus the core `business-model.md`. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win. They are also this skill's quality bar.
 
 ## The event-timeline pass (do this before drawing)
 
@@ -86,17 +79,6 @@ Order Placed → Stock Reserved → Payment Captured *(pivotal — hands to fulf
 ## Open questions
 - ❓ [TBD - source silent] What happens to the reservation if the customer abandons before payment? ⚠️ Assumption: released after 15 min `#inferred`
 ````
-
-## Quality bar
-
-- [ ] Every decision node has **all** exits labeled, including failure/no
-- [ ] Every path ends in a named outcome — no dead ends
-- [ ] Every waiting step has its timeout/cancel/never-arrives exit
-- [ ] Every action has an actor; multi-actor flows use subgraph swimlanes
-- [ ] Steps table carries precondition → action → postcondition with sources
-- [ ] Event timeline present; pivotal events marked; hotspots logged as open questions
-- [ ] Node IDs stable; new nodes appended, existing never renumbered
-- [ ] KB updated per the contract (flow file + INDEX + active-context)
 
 ## Anti-example
 

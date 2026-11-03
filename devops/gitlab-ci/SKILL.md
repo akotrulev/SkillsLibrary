@@ -305,29 +305,15 @@ test:
 
 ## Rules
 
-- One responsibility per job — don't fold `build && test && deploy` into a single `script:`. `needs:` makes them parallelize anyway.
-- Pipeline DAG via `needs:` — declare actual dependencies, don't rely on stage order alone (it under-parallelizes)
-- Pin all base images by tag (`node:24-alpine`, `eclipse-temurin:21-jdk`) — never `:latest`
-- Pin language versions to what the project targets (`dotnet-version: '10.0.x'`); take the pnpm version from `package.json` `packageManager` via `corepack prepare --activate` — never double-pin it in CI
-- Mask & protect secrets in **CI/CD variables** (group-level when shared); protected = only runs from protected branches
-- Use `reports:` (`junit`, `coverage_report`, `dotenv`, `sast`) — they make the MR view useful
-- `artifacts: when: always` for test results so failed builds still publish them
-- `rules:` (modern) over `only:`/`except:` (legacy) — be consistent
-- Restrict job runners with `tags:` when self-hosted; never let `deploy:prod` run on a shared runner
-- Every job has a clear `stage:` and the stage list is declared once at the top
+The standards this skill's output must meet are the devops rule files, not a list here: `pipelines.md` (deploy gating, protected secrets, runners for prod, no `allow_failure`, caches, `needs:`) and `devops.md` (`id_tokens` + OIDC, image and version pinning). Read the project's copy in `.claude/rules/devops/`, or the plugin's in `devops/rules/` when the project has not installed them (`/devops:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-## What NOT to do
+## GitLab-specific pitfalls
 
-- No static cloud credentials in CI/CD variables — `id_tokens` + OIDC
-- No `image: <something>:latest` — pin
-- No `script:` without an `extends:` when 3+ jobs share the same setup
-- No `before_script:` redefining the same env vars repeatedly — push into a `.template` and `extends:`
-- No deploy job that runs on every MR commit — gate via `rules:` on branch/tag and `environment:`
-- No `allow_failure: true` to silence flaky jobs — fix the flake or quarantine the test
-- No `when: always` on every job — pipeline costs explode and broken MRs auto-fan-out
-- No `cache:` without a `key:` based on lockfile content — sticky caches mask broken installs
-- No long-lived runner with mutable state (Docker socket, host volume) for production deploys — use isolated runners
-- No `Bash`-heavy `script:` blocks — extract to `./scripts/*.sh` and run them; that script can be invoked locally too
+- Use `reports:` (`junit`, `coverage_report`, `dotenv`, `sast`); they make the MR view useful.
+- `rules:` over the legacy `only:`/`except:`, consistently.
+- Every job has a `stage:`, and the stage list is declared once at the top.
+- Setup shared by three or more jobs goes into a `.template` used through `extends:`, not repeated `before_script:` blocks.
+- No `when: always` on every job: pipeline cost explodes and broken MRs fan out.
 
 ## Generation steps
 

@@ -112,20 +112,9 @@ These are enumerated, not committed — refinement produces the real INVEST stor
 
 Nothing technical belongs in the document: no cross-team contract section, no API list, no data shapes. Those are `solution-planner`'s artifacts (`api-surface.md`, `data-model.md`) and they cite the epic, not the other way round.
 
-## Anti-patterns to flag
+## Standards
 
-- **A plain-English section with technology in it.** "Members will be able to book from the new sessions endpoint" is the technical epic again, one layer down. Name what the person does, never what serves it.
-- **A plain-English section that is a summary of the sections below.** It restates the slicing strategy and the story list in softer words and tells the reader nothing they could not get from the table. The section exists to say what is being built and how it connects — if it says neither, delete it and write it properly.
-- **"How it fits" that only lists dependencies.** "Blocked by E1, blocks E4" is section 8's job and it is already there. This paragraph says what a person can do afterwards that they could not before, and what this leans on that already exists.
-- **Tech-only outcome.** "Migrate to v3 of the library" is not an epic outcome unless you can name the user-facing benefit and metric. Otherwise it's a tech-debt task on a roadmap.
-- **Outcome-less epic.** "Improvements to the orders area" — what improves, by how much?
-- **God epic.** Several capabilities, ten dependencies, no slicing — it's a program, not an epic; needs to be split.
-- **Window drift.** "Originally Q1, slipped to Q3, still tracking" — at slip #2, replan as two epics.
-- **Slice that ships nothing.** A first slice a person cannot use means nothing ships. Pull in the thinnest complete capability.
-- **Stories pre-committed in the epic.** Story sizing happens in refinement; the epic enumerates *anticipated* stories, with permission to revise.
-- **Out-of-scope = "not in the epic"**, no rationale. Each deferred item needs a one-liner on why.
-- **An invented success number.** "Shipping" is not a measure, and neither is a target nobody stated — an unknown is `[TBD — who decides]` plus an open question.
-- **Risks copy-pasted from the requirements.** Epics introduce new risks (sequencing, parallel work) — surface those, don't just inherit.
+What an epic must and must never contain (one measurable outcome, the plain-English section with no technology, no tech-only or outcome-less epics, a named slicing axis with no layer slices, reasoned out-of-scope, two-way dependencies, the epic's own risks, a binary Definition of Done, a held delivery window, never an invented number) is the business-analysis rule file `backlog-epics.md`, not a list here. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win.
 
 ## Examples — outcome shapes
 
@@ -179,32 +168,6 @@ An epic is one capability a person gets. Size follows from that, not from a cale
 | One capability with several actors or data variations | **One epic**, sliced by actor or variation |
 | Two capabilities that happen to share an area | **Two epics** — one outcome each, "parallel" dependency noted |
 | A capability spanning several delivery windows | **Split by window**, each part usable on its own and with its own outcome line |
-
-## Rules
-
-- One outcome per epic, written in WHO / DO WHAT / SO THAT MEASURABLE CHANGE form
-- **Every epic carries its plain-English section** — the As-a / I-want / So-that line, what gets built, and how it fits with everything else — and that section names no technology at all
-- **The "how it fits" paragraph names other epics by what they are**, not only by id, and says what becomes possible after this one that was not before
-- Slicing strategy named (workflow / role / read-before-write / data variation) — applied consistently across stories
-- Every epic is usable end to end by its first 2–3 stories
-- Out-of-scope itemized, each with rationale and pointer to the follow-up
-- Success measure stated with baseline + target, or `[TBD — who decides]` plus an open question — never invented
-- Dependencies named bidirectionally (blocked-by, blocks, parallel)
-- Risks owned at the epic level, with mitigation
-- Definition of Done is a binary checklist — no subjective items
-- Story enumeration is *anticipated*, not committed — refinement produces the real INVEST stories
-- Where a delivery window is stated, a slip is a replan, never a silent extension
-
-## What NOT to do
-
-- No invented success numbers — an unknown measure is an open question, not a reason to stop
-- No "platform improvements" epics with no user-facing outcome
-- No epic or anticipated story that is one layer of a capability ("API only", "UI only")
-- No copy-pasted risks from the requirements — add epic-level risks
-- No DoD items like "tested" — the test gate is the QA peers' to define, not the epic's
-- No epic written for the team's convenience that produces nothing for the user (re-orgs of code that doesn't ship value)
-- No mixing two outcomes in one epic — they are two epics
-- No technology anywhere in the document
 
 ## Generation steps
 

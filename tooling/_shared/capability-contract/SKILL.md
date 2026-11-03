@@ -176,13 +176,6 @@ Everything the code answers, answer from the code. Do not ask the user to confir
 
 ---
 
-## Anti-patterns
+## Rules
 
-| Anti-pattern | Why it fails | Instead |
-|---|---|---|
-| One `execute` tool taking a free-text command | The agent has to guess a grammar you never documented; nothing is validated | One capability per operation, typed |
-| A capability per HTTP route, mechanically | Ships `GET /health` and three paginated variants of the same list as separate tools | Map to intent, collapse variants, cut the unconsumed |
-| Untyped `object` / `any` inputs | Moves validation from the schema to a runtime error the agent cannot pre-empt | Type every field; enumerate every enum |
-| Errors as free prose | Agent cannot branch on them and retries blindly | Fixed code vocabulary + a "what next" column |
-| Secrets as parameters | Leaks credentials into transcripts and shell history | Process config, read at startup |
-| No flows section | Agent has tools but no idea in what order | Step 5 is not optional |
+The standards a contract must meet are the tooling rule file `tool-contract.md`, not a list here: the capability table, ids, kinds and gates, contract blocks, flows, secrets, and the envelope, error, paging and wire-type contract from `references/output-contract.md`. Read the project's copy in `.claude/rules/tooling/`, or the plugin's in `tooling/skills/rules/` when the project has not installed it (`/tooling:rules` does). Where it and this skill disagree, the rule file wins.

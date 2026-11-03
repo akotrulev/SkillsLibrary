@@ -295,6 +295,7 @@ first line, below. Then one line saying which prompts are live, then `---`, then
 
 ````
 Depends on: B2, Q1
+Agent: be-node · Stack: be
 
 You are `be-node`. Task B3 of docs/plans/030-agent-model-effort-benchmark.md: turn a recorded run
 into REPORT.md, with cost per quote first. Then close the work out.
@@ -327,6 +328,19 @@ Close out per the plan's "Close-out — every task" before you stop.
 ````
 `````
 
+**The headings and the first lines are machine-read** — Plan Queue scans `docs/plans/**/*.md` for a
+`## Prompts` section and takes one task per `###` heading inside it — so their shape is fixed:
+
+- **The heading is `### <id> — <title> (<agent>, <stack>)`.** The id is the first token (`B3`, `A3b`,
+  `T6b`); never prefix it with `Prompt ` or `Task `. The trailing parenthetical is the agent and the
+  stack, passed to `--agent` when the install has that agent; any other trailing parenthetical is read
+  as part of the title, so section references (`§9`) stay out of it.
+- **The body comes first**: the heading, one blank line, then the fenced block (or a blockquote). A
+  table or a "why this exists" paragraph between them hides the task from the queue, so that material
+  goes after the block. A heading with no body is a placeholder, not a task.
+- **Nothing else is a `###` inside `## Prompts`.** Notes that belong after the prompts go under a `##`
+  heading of their own, or the queue lists them as tasks.
+
 Rules:
 
 - **The first line of every block is `Depends on: <ids>`** — ids only, comma-separated, or
@@ -334,7 +348,10 @@ Rules:
   those tasks are done, so prose on that line becomes ids nobody has, and a plan never relies on what a
   missing line means. It names the task's **prerequisites** (the block's `**Depends on:**`) **and every
   earlier task whose `Files` overlap its own or that builds the same tree** (§4); an edge already implied
-  through another task may be left out of both.
+  through another task may be left out of both. It names **this plan's** ids only: a cross-plan
+  reference (`114 B1`) is read as this plan's `B1`, so an order between plans goes in the preamble and
+  the header's `Status:` instead. A mid-line `· Depends on:` is not read.
+- **The second line is `Agent: <agent> · Stack: <stack>`**, the same pair as the heading's parenthetical.
 - **Built from the task's own block, copied rather than paraphrased.** The deliverable, the files and
   the gate are the task's; the prompt adds only the **reading order** and the **traps** — the two to
   four things specific to that task: the convention that is easy to miss, the file that looks like the
@@ -351,12 +368,25 @@ Rules:
   earlier task lands — the shape of a file it has not created, an id it will assign, a decision it will
   make — do not invent it at plan time. Leave the line
   `**Blocked on <id>** — <id> writes this prompt when it lands, from <what it will then know>.`
-  and **the blocking task writes that prompt as part of finishing, before it stops.** The plan says so
-  in the blocking task's bullets and in its own prompt block.
-- **A landed task's prompt is deleted**, and the line above the blocks says which are gone:
-  *"B1 and B2 have landed, and their prompts are deleted — a prompt for a finished task is a thing
-  someone runs by mistake."* The live prompt set is the plan's progress indicator: what is left to run
-  is exactly what is still written down.
+  and **the blocking task writes that prompt as part of finishing, before it stops** — including a
+  prompt in **another plan**, where the dependency crosses one. The plan says so in the blocking task's
+  bullets and in its own prompt block, naming which prompts and in which plan. A task that leaves its
+  dependants promptless has emptied the queue and left the plan looking finished when it is not.
+- **A landed task's prompt is deleted once its work is committed — never before**, in a small
+  follow-up commit of its own (`docs: delete <id>'s prompt (<plan>)`), never in the work commit and
+  never while the work is still uncommitted. A session that dies mid-task leaves the prompt in the plan,
+  so the task is still on the queue. Do not stop between the two commits: a prompt for a finished task
+  is a thing someone runs by mistake. The line above the blocks says which are gone — *"B1 and B2 have
+  landed, and their prompts are deleted."* The live prompt set is the plan's progress indicator: what is
+  left to run is exactly what is still written down.
+- **Under Plan Queue, when the queue says other tasks of the plan are running beside you**, do not
+  commit, stash, reset or check out: delete your prompt as your last edit, and the queue's commit carries
+  the work and the deletion together. This is the one exception to the follow-up commit.
+- **Every gate a prompt names runs locally, in the session running that task.** A prompt never sends a
+  build, a test run or a container gate to another machine, and never tells a task to `ssh`, to push
+  before a gate or to copy the tree anywhere. A prompt that says otherwise is stale: rewrite it in place.
+- **Plans run side by side, but only one close-out gate at a time** where the gate binds fixed ports;
+  a prompt that starts a gate names the ports it uses and how to move them.
 - **Every block ends with the close-out.** Its reading list names `## Close-out — every task` last, and
   its final line is the close-out instruction — see §7. It is how a queued session learns to write
   its `As built` note, maintain the blocks below it, and file the plan.
@@ -386,22 +416,30 @@ block and the line that says which have landed.
 3. **The blocks below yours** — rewrite, in place, every prompt block whose assumptions your work
    changed (a renamed file, a changed signature, a moved gate), and write any block left
    `Blocked on <your id>` from what you now know.
-4. **Your own block** — delete it, and update the line above the blocks that says which have landed.
-   Stopping mid-task: keep it, with a `Picking up from:` line. Blocked: keep it, naming the blocker and
-   its owner.
-5. **Status** — rewrite the header `**Status:**` line: what is built, what is next, what is built but
+4. **Status** — rewrite the header `**Status:**` line: what is built, what is next, what is built but
    unverified. When a task is running beside you, leave it: the next task that waits for you rewrites it.
-6. **Filing** — if your deletion left no blocks, rewrite `**Status:**` one final time (what the plan
-   delivered, what is still unverified) and `git mv` this plan into `docs/plans/implemented/`, same
-   name and number — a `solution-planner` pack moves its whole initiative folder.
-7. **Commit** — the code, its tests and these plan edits together, in one commit, adding only your own
-   files, by path — never `git add -A`.
+5. **Commit the work** — the code, its tests and these plan edits together, on the current branch (under
+   Plan Queue, the plan's branch in its worktree; never check out the default branch), adding only your
+   own files, by path — never `git add -A`. Your prompt block is still in the plan.
+6. **Merge, last task only** — if this plan runs on its own branch, merge the default branch into it
+   now, resolve every conflict by keeping both sides' rows, re-run the failing suites if code conflicted,
+   and commit the merge, so the plan merges back cleanly.
+7. **Your own block** — only now delete it, and update the line above the blocks that says which have
+   landed, in a follow-up commit of its own: `docs: delete <id>'s prompt (<plan>)`. Do not stop between
+   the two commits. Stopping mid-task: keep it, with a `Picking up from:` line. Blocked: keep it, naming
+   the blocker and its owner. When the queue says other tasks of this plan are running beside you, do
+   not commit, stash, reset or check out at all: make this deletion your last edit, and the queue
+   commits the work and the deletion together.
+8. **Filing** — if your deletion left no blocks, rewrite `**Status:**` one final time (what the plan
+   delivered, what is still unverified), `git mv` this plan into `docs/plans/implemented/`, same name and
+   number — a `solution-planner` pack moves its whole initiative folder — and add its row to that
+   folder's README where there is one, in the same follow-up commit.
 ````
 
 Every prompt block ends its reading list with this section and closes with the line
 `Close out per the plan's "Close-out — every task" before you stop.` The section is the same in
 every plan; a plan does not edit it, and a task does not skip a step because it "changed nothing" —
-step 4 and step 5 always apply.
+steps 4, 5 and 7 always apply.
 
 ## 8. A finished plan is moved to `docs/plans/implemented/`
 
@@ -416,7 +454,9 @@ that files the plan. Before it stops, it:
    A `solution-planner` pack moves its **whole initiative folder**:
    `docs/plans/003-workshop-booking/` → `docs/plans/implemented/003-workshop-booking/`, with every
    artifact in it, so the plan never loses the pack it cites.
-3. Commits the move with the task's own commit, and says in its report where the plan went.
+3. Adds the plan's row to `docs/plans/implemented/README.md` where the project keeps one.
+4. Commits the move in the follow-up commit that deletes its prompt (§7 step 7), and says in its report
+   where the plan went.
 
 **`docs/plans/` is what is in flight; `docs/plans/implemented/` is what landed.** That is the whole
 point of the move: the live folder answers "what is being built" by being listed, without anyone

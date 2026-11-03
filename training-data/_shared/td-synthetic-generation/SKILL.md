@@ -84,14 +84,16 @@ Generate a first response, then ask the teacher to critique it against a stated 
 - **Generate small, validate, then scale.** Produce 200, run them through dedup + judge + a human eyeball, tune the prompts, *then* generate 200k. Generating the full set first and discovering the prompt was subtly wrong is the expensive mistake.
 - **Estimate before running**: tokens/record × records × price, both generation and judging. Put the estimate in front of the human before a large batch.
 
-## Hard rules
+## Rules
 
-- **Diversity is engineered at the seed stage** (crossed axes + grounding + prompt rotation + sampling temperature), never hoped for at the end.
-- **Every synthetic record is `synthetic:<exact-model-id>` + batch id + `synthetic-review-required`.** It is a draft, not verified truth.
-- **The judge is pinned and calibrated** against human labels before it is trusted at scale; its reasons are kept for audit.
-- **Synthetic batches are deduped and decontaminated** through `training-data:data-quality` — the teacher is a contamination source.
-- **Generate small → validate → scale.** Never generate the full set before validating the prompt on a sample.
-- **Respect the teacher model's terms of use**, decided and recorded before generating at scale.
+The standards this skill's output must meet are the training-data rule files, not a list here: `datasets.md` (synthetic provenance, judge metadata, dedup and decontamination of every batch) and `dataset-docs.md` (the teacher-terms decision and judge agreement in the card). Read the project's copy in `.claude/rules/training-data/`, or the plugin's in `training-data/skills/rules/` when the project has not installed them (`/training-data:rules` does). Where they and this skill disagree, the rule files win.
+
+Beyond the files, the process this skill holds to:
+
+- **Diversity is engineered at the seed stage** (crossed axes, grounding, prompt rotation, sampling temperature), never hoped for at the end.
+- **The judge is calibrated against human labels before it is trusted at scale.**
+- **Generate small, validate, then scale.** Never generate the full set before validating the prompt on a sample.
+- **Check the teacher model's terms of use** for the intended use before generating at scale.
 
 ## References
 

@@ -331,7 +331,7 @@ assert something about a running system that only exists after the deploy.
   is pure static misconfig it stays with the auditor; where it needs a live probe it is this skill's.
 - `devops:environment-config` — the **authoring half of family 1**: the three-layer model, secret stores,
   Managed Identity / IAM Role binding, startup validation, rotation strategy. It writes the control; this
-  validates it. Its "What NOT to do" list is literally this skill's `SEC-*` check list.
+  validates it. The standards it writes to (the devops rule files `config.md` and `devops.md`) are literally this skill's `SEC-*` check list.
 - `qa-<stack>:secrets-scan` — Gitleaks / TruffleHog over the **repo and its git history**. Orthogonal:
   that finds a secret that was *committed*; this finds a secret that is *live in a running workload's
   environment*. A repo can be clean while every pod leaks.

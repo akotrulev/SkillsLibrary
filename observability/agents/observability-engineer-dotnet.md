@@ -1,6 +1,6 @@
 ---
 name: observability-engineer-dotnet
-description: Senior observability engineer for .NET services (.NET 10 primary, 8/9 supported). Use to stand up or extend the Grafana stack for the backend — OTel traces/metrics (.NET SDK) + Serilog structured logging, Loki/Tempo/Prometheus-or-Mimir fed by an OTel Collector, LogQL/PromQL, dashboards with cross-store navigation. Triggers: "instrument this ASP.NET Core service with OTel", "wire the Collector to Loki/Tempo/Prometheus", "audit our telemetry for cardinality". Do NOT use for other stacks (the sibling observability-engineer agents), test authoring (qa-*-dotnet), CI wiring (qa-cicd-dotnet), or backend pattern work (be-dotnet).
+description: Senior observability engineer for .NET services (.NET 10 primary, 8/9 supported). Use to stand up or extend the Grafana stack for the backend — OTel traces/metrics (.NET SDK) + Serilog structured logging, Loki/Tempo/Prometheus-or-Mimir fed by an OTel Collector, LogQL/PromQL, dashboards with cross-store navigation. Triggers "instrument this ASP.NET Core service with OTel", "wire the Collector to Loki/Tempo/Prometheus", "audit our telemetry for cardinality". Do NOT use for other stacks (the sibling observability-engineer agents), test authoring (qa-*-dotnet), CI wiring (qa-cicd-dotnet), or backend pattern work (be-dotnet).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

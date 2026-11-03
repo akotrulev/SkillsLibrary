@@ -5,7 +5,7 @@ description: Use when designing, securing (RLS, Always Encrypted), querying or t
 
 # Data — SQL Server / Azure SQL
 
-One registered skill, five topic references. This file routes and holds the rules shared by every topic: version policy, connections/pooling, migration discipline, and the hard rules. **Read the matching `references/<topic>.md` end-to-end before writing any code.** These split by *topic*, not by tool — a task may need two files (a new multi-tenant schema = `data-modeling.md` + `security.md`).
+One registered skill, five topic references. This file routes and holds the rules shared by every topic: version policy, connections/pooling, migration discipline, and a pointer to the data rule files that hold the hard rules. **Read the matching `references/<topic>.md` end-to-end before writing any code.** These split by *topic*, not by tool — a task may need two files (a new multi-tenant schema = `data-modeling.md` + `security.md`).
 
 ## Routing table
 
@@ -117,29 +117,12 @@ Parameterize every query: `pool.request().input('id', sql.BigInt, id).query('SEL
 
 ## Rules
 
-- Schema changes only via the migration tool; never SSMS in prod.
-- Separate roles/schemas: migrations get DDL, runtime gets DML only, nobody's app connects as `db_owner` (`references/security.md`).
+The standards for SQL, schema and migration files are the data rule files, not a list here: `data.md`, `data-migrations.md` and `data-sqlserver.md`. Read the project's copy in `.claude/rules/data/`, or the plugin's in `data/rules/` when the project has not installed them (`/data:rules` does). Where they and this skill's recipes disagree, the rule files win.
+
+Connection and operations rules no file carries:
+
 - `Encrypt=True`; Entra ID auth where possible, else short-lived passwords from Key Vault.
-- Parameterized queries only — no string concatenation, ever.
-- `datetime2(7)` for events (never legacy `datetime`); `datetimeoffset(7)` when the zone must be preserved; store UTC.
-- `READ COMMITTED` with **`READ_COMMITTED_SNAPSHOT ON`** as the default isolation (no reader-writer blocking) — the safe Azure SQL default.
-- Every collection query has a `TOP`/`OFFSET…FETCH`; keyset pagination over deep `OFFSET`.
-- Explicit columns — no `SELECT *` in code.
-- `rowversion` column + optimistic concurrency for shared rows (EF Core uses it natively).
-- Query Store enabled in prod with a storage cap; `NOLOCK` reviewed and rejected unless documented as accepting dirty reads.
-
-## What NOT to do
-
-- No `IDENTITY` + `SEQUENCE` for the same logical key.
-- No `NEWID()` as a clustered-PK default — heavy fragmentation; use `NEWSEQUENTIALID()` or a `bigint IDENTITY` surrogate with a non-clustered PK on the GUID.
-- No legacy `datetime`; `datetime2(7)`.
-- No `NOLOCK` in business/financial queries — ever (dirty + missing/double reads).
-- No `SELECT *` in app code; no `OFFSET 1000000 ROWS FETCH 20`.
-- No application code issuing DDL — migrations only.
-- No `DBCC SHRINKDATABASE` as routine maintenance — it fragments every index.
-- No app role with `db_owner`; runtime is `db_datareader` + `db_datawriter` (or EXECUTE-on-procs only).
-- No mixing collations across joined columns without intent — implicit conversion kills seeks.
-- No `mssql` backup-by-BACPAC as the production strategy — use native backups / managed PITR.
+- No BACPAC as the production backup strategy — native backups / managed PITR.
 
 ## Generation steps
 

@@ -74,14 +74,9 @@ Eval quality outweighs eval size — **a few hundred carefully-verified items be
 
 Eval items in the `training-data:dataset-formats` eval shape (`messages` + `reference` + `eval` block + optional `canary`), a frozen `test.jsonl`, and an eval card documenting: item types, scoring method, the pinned judge + calibration result, coverage table, contamination rate found, and the public benchmarks included.
 
-## Hard rules
+## Rules
 
-- **The eval set is frozen, isolated, and the decontamination target.** Never tune on it; iterate on a separate dev set.
-- **Seed canary strings** so leakage is provable.
-- **Prefer deterministic scoring**; reserve LLM-judge for open-ended items and pin + calibrate it.
-- **Cover every capability the model claims** (per-bucket score table), including safety and the tuned failure modes.
-- **Human-verify gold answers**, especially synthetic ones — a wrong gold answer punishes a right model.
-- **Report the contamination rate** found against this eval in every model's card.
+The standards this skill's output must meet are the training-data rule files, not a list here: `eval-sets.md` (frozen split, canaries, gold answers, scoring, coverage) and `datasets.md`. Read the project's copy in `.claude/rules/training-data/`, or the plugin's in `training-data/skills/rules/` when the project has not installed them (`/training-data:rules` does). Where they and this skill disagree, the rule files win.
 
 ## Fences
 

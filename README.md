@@ -55,6 +55,27 @@ Install at user scope, keep every `skills-library` plugin `false` in `~/.claude/
 
 **List `dev` (and `design` for `fe-*` / `mobile-*`) explicitly.** A dependency is installed with its dependent, but an explicit `false` at user scope still wins: with the global `false` above, `claude plugin list` run inside the project shows `dev` and `design` disabled unless the project enables them itself (verified 2026-10-11). Check a project with `claude plugin list --json` from its root.
 
+### Install the rules, once per project
+
+A plugin's coding and document standards are **Claude Code rules**: files with `paths:` frontmatter that load on their own once a session (or a subagent) reads or edits a matching file, so a session pays only for the standards its files need. Plugins cannot ship rules, so each plugin that has them carries an install command that copies them into `.claude/rules/<plugin>/`. Run it once per enabled plugin and commit the folder; re-run it after a plugin update to compare (it never overwrites a copy the team edited without asking).
+
+| Command | Loads when a session touches |
+|---|---|
+| `/be-dotnet:rules` · `/be-java:rules` · `/be-node:rules` · `/be-python:rules` · `/be-rust:rules` | the stack's source, persistence, test and config files |
+| `/fe-react:rules` · `/fe-blazor:rules` | components, styles, tests, config |
+| `/mobile-ios:rules` · `/mobile-android:rules` · `/mobile-react-native:rules` | the app's source, UI, persistence, tests, localisation |
+| `/qa-java:rules` · `/qa-dotnet:rules` · `/qa-typescript:rules` | test suites, page objects, API clients, test CI jobs |
+| `/data:rules` | SQL, schema and migration files (engine files only for the engines the project uses) |
+| `/devops:rules` | Dockerfiles, compose, Kubernetes/Helm, Terraform/Bicep, build and deploy pipelines, env/config files |
+| `/dev:rules` | `docs/plans/*.md`, `docs/audits/` rounds, `docs/features/` documents |
+| `/business-analysis:rules` | `docs/business-model/**`, and a plan folder's `requirements.md` / `epics.md` / `stories.md` |
+| `/design:rules` | design-token files and UI message catalogs |
+| `/security-governance:rules` | `docs/security/**`, detection rules, WAF/CRS config |
+| `/training-data:rules` | dataset `*.jsonl` and manifests, dataset cards and audits |
+| `/tooling:rules` | `docs/specs/*-tool-contract.md` |
+
+Each install also finds where the project really keeps those files and proposes wider globs, and lists any line of the project's `CLAUDE.md` that disagrees; the project wins. `penetration-testing` has no rules: its engagement records are gated by its agents. A rule shows in `/memory` once the session has read a matching file.
+
 ### Typing names
 
 Skills and commands are `/<plugin>:<name>`. A bare `/<name>` works while only one enabled plugin has that name; when two do (for example `forms` in `fe-react` and `mobile-react-native`), type the plugin-qualified form. A plugin's front-door command is the plugin's own name (`/fe-react`, `/be-java`, `/data`, `/devops`), so a bare `/fe-react` keeps working. Skill names are the topic only — the plugin namespace already carries the domain and the stack.

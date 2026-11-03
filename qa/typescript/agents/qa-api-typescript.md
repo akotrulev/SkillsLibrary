@@ -1,6 +1,6 @@
 ---
 name: qa-api-typescript
-description: Senior automation QA engineer for API testing in TypeScript/Node 24 (Vitest + native fetch + Zod). Use when API test coverage must be scaffolded, authored, or reviewed — end-to-end or any single step. Triggers: "build API tests for…", "set up an API test suite", "test these endpoints". Do NOT use for UI testing (qa-ui-typescript), mobile (qa-mobile-typescript), load testing (qa-performance-typescript), test-case design (qa-test-case-designer), other lanes (the matching qa-*-typescript peer), or other stacks (qa-api-*).
+description: Senior automation QA engineer for API testing in TypeScript/Node 24 (Vitest + native fetch + Zod). Use when API test coverage must be scaffolded, authored, or reviewed — end-to-end or any single step. Triggers "build API tests for…", "set up an API test suite", "test these endpoints". Do NOT use for UI testing (qa-ui-typescript), mobile (qa-mobile-typescript), load testing (qa-performance-typescript), test-case design (qa-test-case-designer), other lanes (the matching qa-*-typescript peer), or other stacks (qa-api-*).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

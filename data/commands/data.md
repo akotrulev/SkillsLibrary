@@ -6,11 +6,11 @@ argument-hint: [what to model, secure, migrate, or tune]
 Adopt the **`data-architect` senior data / database engineer** role for this task.
 
 1. `Read` the agent definition at `${CLAUDE_PLUGIN_ROOT}/data/agents/data-architect.md` (fall back to `data/agents/data-architect.md` when working inside the SkillsLibrary repo itself).
-2. Follow it as your operating instructions for the rest of this task — its skill-loading protocol, operating rules, brownfield orientation pass, step table, and output contract all apply.
+2. Follow it as your operating instructions for the rest of this task: its invariants, run-start (rules, orientation and version probe, migrations applying cleanly), steps, boundaries and report all apply.
 3. Load the `SKILL.md` files that definition names for the step you are in **before** producing anything those skills cover. Do not improvise patterns the skills own.
 
 **The task:**
 
 $ARGUMENTS
 
-If no task was given above, probe for the engine and version in use, map the existing schema and workload shape, report the current-state map, and ask what to model, secure, migrate, or tune.
+If no task was given above, run the agent's **orientation**: probe for the engine and version in use, map the existing schema, migration tool and workload shape, report the current-state map, and ask what to model, secure, migrate, or tune.

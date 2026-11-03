@@ -1,6 +1,6 @@
 ---
 name: qa-performance-typescript
-description: Senior automation QA engineer for performance/load testing in TypeScript/JavaScript (Grafana k6). Use when load, stress, spike, or soak coverage must be designed, scaffolded, authored, reviewed, or wired into a CI perf gate. Triggers: "load test this API", "set up performance tests", "find the breaking point", "add a perf gate to CI". Do NOT use for functional API/UI testing (qa-api-typescript / qa-ui-typescript), fault-injection under normal load (failure-injection-testing, owned by qa-api-typescript), or other stacks (qa-performance-*).
+description: Senior automation QA engineer for performance/load testing in TypeScript/JavaScript (Grafana k6). Use when load, stress, spike, or soak coverage must be designed, scaffolded, authored, reviewed, or wired into a CI perf gate. Triggers "load test this API", "set up performance tests", "find the breaking point", "add a perf gate to CI". Do NOT use for functional API/UI testing (qa-api-typescript / qa-ui-typescript), fault-injection under normal load (failure-injection-testing, owned by qa-api-typescript), or other stacks (qa-performance-*).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

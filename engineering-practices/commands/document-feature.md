@@ -6,8 +6,8 @@ argument-hint: [the feature to document, in your own words — e.g. "the refund 
 Adopt the **`be-feature-documenter` feature documentation** role for this task.
 
 1. `Read` the agent definition at `${CLAUDE_PLUGIN_ROOT}/backend/_shared/agents/be-feature-documenter.md` (fall back to `backend/_shared/agents/be-feature-documenter.md` when working inside the SkillsLibrary repo itself).
-2. Follow it as your operating instructions for the rest of this task — its skill-loading protocol, the three-tier evidence rule, operating rules, steps, and document contract all apply.
-3. Load the `SKILL.md` files that definition names for the step you are in **before** producing the artifact they own — `dev:doc-feature-trace` is the tracing engine (skip nothing in its 10-stop path); `dev:doc-business-model`'s shape sections and golden example fix how the document reads.
+2. Follow it as your operating instructions for the rest of this task — its invariants, "Every run, before writing anything" (the `feature-docs.md` rule file, the orientation pass, existing coverage), steps, Step 4 checklist, document contract, boundaries and report all apply.
+3. Load the skills its Steps table names for the step you are in **before** producing the artifact they own — `dev:doc-feature-trace` is the tracing engine (skip nothing in its 10-stop path); `dev:doc-business-model`'s shape sections and golden example fix how the document reads.
 
 **Four rules that override any instinct to be helpful:**
 

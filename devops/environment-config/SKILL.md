@@ -219,27 +219,17 @@ In the app, **don't cache secrets indefinitely**. Either:
 
 ## Rules
 
-- **Three layers, last wins** — defaults → per-env non-secret → secrets
-- **Secrets in a secret store**; never in repo, never in CI/CD variables, never in env vars set by `helm install`
-- **Managed Identity / IAM Role** for the app to access the secret store
-- **Validation at startup**; service crashes early on missing or invalid config
-- **Typed config object** consumed throughout the app; **no direct `process.env.X` / `IConfiguration["X"]` reads in business code**
-- **Per-env files / values** committed (non-secret)
-- **One secret store per environment**, not a mixture
-- **Refresh strategy** documented per app (restart-on-change vs `IOptionsMonitor` vs poll)
-- **Naming convention** consistent (`Service:Section:Key`)
+The standards this skill's output must meet are the devops rule files, not a list here: `config.md` (layers, committed versus ignored files, encrypted secrets, no demo defaults, store per environment, naming) and `devops.md` (no secret in committed files, Managed Identity, the store is not deployment YAML). Read the project's copy in `.claude/rules/devops/`, or the plugin's in `devops/rules/` when the project has not installed them (`/devops:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-## What NOT to do
+## In the application code
 
-- No secrets in `appsettings.json` / `application.yml` / `.env` checked into Git
-- No "encrypted in repo" secrets without a SOPS / Sealed-Secrets pipeline that decrypts at deploy
-- No `process.env.X` reads scattered in business code
-- No "we'll inject the secret as an env var in the deployment YAML" — that's not a secret store, that's a glorified config map
-- No service principal client secrets when Managed Identity / IAM is available
-- No `IOptionsSnapshot<T>` consumed by a singleton (lifetime mismatch — won't refresh)
-- No long-cached secret with no rotation strategy
-- No silent fallbacks (`process.env.API_KEY ?? "demo-key"`) — fail loud
-- No `null` / empty-string defaults for required config
+These hold in the service's source, where the backend plugins' rule files also carry them:
+
+- One typed config object consumed throughout; no `process.env.X` or `IConfiguration["X"]` reads in business code.
+- Validation at startup: the service crashes early on missing or invalid config (see above).
+- No silent fallback (`process.env.API_KEY ?? "demo-key"`): fail loud.
+- No `IOptionsSnapshot<T>` consumed by a singleton: the lifetime mismatch never refreshes.
+- A refresh strategy is documented per app (restart-on-change, `IOptionsMonitor`, poll), and no secret is cached long without a rotation strategy.
 
 ## Generation steps
 

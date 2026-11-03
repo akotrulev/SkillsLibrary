@@ -80,16 +80,9 @@ Turns a scoped requirement into a set of INVEST-quality user stories with Gherki
 <the requirements.md §4 lines and business rules this story realises — never implementation hints, designs or contracts; those are solution-planner's>
 ```
 
-**No technology in a story.** No table, endpoint, screen, component or library — the AC describe what a person observes. A business-imposed constraint lives in `requirements.md` §5 and is cited, not restated.
+## Standards
 
-## Anti-patterns to flag
-
-- **"As a user" with no role.** Every system has multiple roles; pick one.
-- **"So that the system can..."** — value flows to a *person*, not the system.
-- **AC that restates the story.** "Then the user can do X" with no observable check.
-- **Story that ships only one layer of a capability** ("the endpoint", "the screen"). It cannot be demoed; merge it back into the capability it belongs to.
-- **AC list with `And` chaining 5 behaviors.** Each one is a separate scenario.
-- **Story that can't be demoed.** If there's nothing to show the stakeholder, it isn't a user story — it's a technical task.
+What every story must meet (the `US<n>` id and parent epic, a specific role and a so-that that names value to a person, INVEST, no layer stories, one-behaviour Given / When / Then with an observable Then, separate non-functional AC, validations with their violation outcome, no technology, story-level out of scope and dependencies) is the business-analysis rule file `backlog-stories.md`, not a list here. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win.
 
 ## Handoffs
 

@@ -230,27 +230,15 @@ Avoid for: a small number of services, a team new to k8s, or "we might need k8s 
 
 ## Rules
 
-- Multi-AZ everything in prod — min 2 tasks per service across 2 AZs; ALB across all 3 AZs
-- Health checks point at `/health` (or equivalent); separate from `/ready` if needed for k8s-style readiness
-- Image tags are immutable (`:sha-abc123`), never `:latest` in production
-- Secrets via Secrets Manager / Parameter Store, injected as env vars by the execution role
-- All outbound from private subnets goes through NAT (or VPC endpoints) — no public IPs on tasks
-- Cost guardrails: AWS Budgets per project; CloudWatch billing alarm at 80% of expected
-- Deletion protection on RDS, S3 buckets with content, CloudFront distributions
-- One AWS account per environment (Org with prod / staging / dev accounts); cross-account IAM for shared services
+The standards this skill's output must meet are the devops rule files, not a list here: `iac.md` (multi-AZ minimum, no public buckets, no open ingress, deletion protection, secrets in Secrets Manager, one account per environment) and `devops.md` (roles not keys, least privilege, immutable tags). Read the project's copy in `.claude/rules/devops/`, or the plugin's in `devops/rules/` when the project has not installed them (`/devops:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-## What NOT to do
+## Platform defaults
 
-- No AWS access keys baked into images or env vars — IAM roles only
-- No public S3 buckets — OAC + CloudFront
-- No `:latest` tags in production deploys
-- No IAM policies with `Action: "*"` and `Resource: "*"`
-- No `0.0.0.0/0` ingress on a task security group — ALB SG only
-- No single-task ECS service in production — min 2, spread across AZs
-- No Lambda for long-running batch (> 15 min) — Step Functions / ECS / Batch
-- No App Runner for production-critical services that need VPC-private dependencies or multi-container — graduate to ECS
-- No CloudFront distribution serving an S3 bucket via origin URL (public access enabled) — always OAC
-- No region pinning to `us-east-1` for non-CloudFront resources just because it's "the default" — pick a region near users / compliance boundary
+- ALB across all three AZs in production; health checks on `/health`, with a separate `/ready` where readiness differs.
+- Cost guardrails: an AWS Budget per project and a billing alarm at 80% of expected.
+- No Lambda for batch work over 15 minutes: Step Functions, ECS or Batch.
+- No App Runner for a production-critical service that needs VPC-private dependencies or several containers: graduate to ECS.
+- No region pinned to `us-east-1` for non-CloudFront resources by default: pick the region near users or the compliance boundary.
 
 ## Generation steps
 

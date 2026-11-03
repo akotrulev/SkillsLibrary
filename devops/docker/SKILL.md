@@ -32,18 +32,6 @@ Authors production-grade Dockerfiles for the library's three backend stacks (.NE
 4. **Image registry**: ECR / ACR / GHCR / Docker Hub
 5. **Security posture**: minimal vs distroless vs Alpine; scan threshold (block on `critical` by default)
 
-## Universal rules
-
-- **Multi-stage builds** — `builder` stage compiles; runtime stage carries only the artifact
-- **Pin every tag** — `mcr.microsoft.com/dotnet/aspnet:8.0.10-alpine3.20`, never `:latest`
-- **Non-root user** — `USER 1000:1000` in the runtime stage
-- **Health declared** — every long-running service has a `/health` endpoint; a Dockerfile `HEALTHCHECK` only where the image actually has a probe tool (shell-less/minimal images use platform probes instead — see Healthchecks)
-- **OCI labels** — `org.opencontainers.image.{title,description,source,version,revision,licenses}`
-- **`.dockerignore`** to keep the build context small (no `node_modules`, no `bin`/`obj`, no `.git`, no `coverage`)
-- **No secrets baked in** — runtime config from env / Key Vault / Secrets Manager
-- **Build with `--platform` explicit** — `--platform=linux/amd64,linux/arm64` for multi-arch
-- **Scan in CI** — Trivy / Grype / cloud-native scanner; fail the build on `critical` CVEs in the runtime image
-
 ## Stack templates
 
 ### .NET (ASP.NET Core) — net10 primary, net8/9 tagged
@@ -334,30 +322,7 @@ If you're well above these, look at: extra packages in the runtime stage, dev de
 
 ## Rules
 
-- Multi-stage builds always
-- Pinned base image tags (digest pinning for highest security: `image@sha256:...`)
-- Non-root user in runtime stage
-- OCI labels (title, description, source, version, revision, licenses)
-- Health declared — `HEALTHCHECK` where the image has a probe tool, platform probes on shell-less images
-- `.dockerignore` keeps context small
-- No secrets in image (env, build args used for config only when non-sensitive)
-- Image scan in CI; block on critical CVEs
-- `--platform=linux/amd64,linux/arm64` for multi-arch
-- BuildKit features used (cache mounts for restores; `--mount=type=cache`)
-
-## What NOT to do
-
-- No `:latest` tags
-- No root user in runtime
-- No `RUN apt-get update && apt-get install …` without `--no-install-recommends` and `&& rm -rf /var/lib/apt/lists/*` cleanup
-- No copying `.env` / secret files into the image
-- No `npm install` / `dotnet restore` without lockfile mode
-- No `ADD https://…` to fetch artifacts at build time without checksums
-- No `COPY . .` before installing dependencies — defeats layer caching
-- No mixing `apt` and `apk` in one image
-- No `CMD` followed by a string with shell expansion (`"npm start"`) when you can `CMD ["node", "dist/main.js"]` — exec form forwards signals correctly
-- No production image based on `*-sdk` / `*-jdk` — use the runtime image only
-- No image > 1 GB for an app service — almost always a misconfigured build
+The standards this skill's output must meet are the devops rule files, not a list here: `docker.md` (stages, user, health, layers, `.dockerignore`, labels, compose) and `devops.md` (pinning, secrets). Read the project's copy in `.claude/rules/devops/`, or the plugin's in `devops/rules/` when the project has not installed them (`/devops:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

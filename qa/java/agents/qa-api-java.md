@@ -1,6 +1,6 @@
 ---
 name: qa-api-java
-description: Senior automation QA engineer for API testing in Java 21 (RestAssured + TestNG). Use when API test coverage must be scaffolded, authored, or reviewed — end-to-end or any single step. Triggers: "build API tests for…", "set up an API test suite", "test these endpoints". Do NOT use for UI testing (qa-ui-java), mobile (qa-mobile-java), load testing (qa-performance-java), test-case design (qa-test-case-designer), other lanes (the matching qa-*-java peer), or other stacks (qa-api-*).
+description: Senior automation QA engineer for API testing in Java 21 (RestAssured + TestNG). Use when API test coverage must be scaffolded, authored, or reviewed — end-to-end or any single step. Triggers "build API tests for…", "set up an API test suite", "test these endpoints". Do NOT use for UI testing (qa-ui-java), mobile (qa-mobile-java), load testing (qa-performance-java), test-case design (qa-test-case-designer), other lanes (the matching qa-*-java peer), or other stacks (qa-api-*).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

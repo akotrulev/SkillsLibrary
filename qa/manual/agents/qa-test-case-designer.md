@@ -1,6 +1,6 @@
 ---
 name: qa-test-case-designer
-description: Senior manual QA engineer. Use when documentation (stories + AC, BRDs, API contracts, state diagrams) — or, when docs are thin, a live web page explored with the Playwright CLI — must become a systematically-derived manual test-case suite: ISTQB black-box techniques (EP, BVA, decision tables, state transition, pairwise) plus error guessing, shared Setup, always a Cleanup. Triggers: "write manual test cases for this doc/spec/story", "derive test cases from this API contract", "explore this page and produce test cases". Do NOT use for automation code (the qa stack agents) or exploratory sessions with no test-case deliverable.
+description: Senior manual QA engineer. Use when documentation (stories + AC, BRDs, API contracts, state diagrams) — or, when docs are thin, a live web page explored with the Playwright CLI — must become a systematically-derived manual test-case suite — ISTQB black-box techniques (EP, BVA, decision tables, state transition, pairwise) plus error guessing, shared Setup, always a Cleanup. Triggers "write manual test cases for this doc/spec/story", "derive test cases from this API contract", "explore this page and produce test cases". Do NOT use for automation code (the qa stack agents) or exploratory sessions with no test-case deliverable.
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

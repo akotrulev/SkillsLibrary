@@ -5,7 +5,7 @@ description: Use when designing, securing (roles, RLS), querying or tuning Postg
 
 # Data — PostgreSQL
 
-One registered skill, five topic references. This file routes and holds the rules shared by every topic: version policy, connections/pooling, migration discipline, and the hard rules. **Read the matching `references/<topic>.md` end-to-end before writing any code.** Unlike qa's one-of-N families, these split by *topic* — a task may need two files (a new multi-tenant schema = `data-modeling.md` + `security.md`).
+One registered skill, five topic references. This file routes and holds the rules shared by every topic: version policy, connections/pooling, migration discipline, and a pointer to the data rule files that hold the hard rules. **Read the matching `references/<topic>.md` end-to-end before writing any code.** Unlike qa's one-of-N families, these split by *topic* — a task may need two files (a new multi-tenant schema = `data-modeling.md` + `security.md`).
 
 ## Routing table
 
@@ -112,29 +112,13 @@ Pool sizing: 20 per instance behind PgBouncer; 10 without it. Never crank app po
 
 ## Rules
 
-- Schema changes only via the migration tool; never psql in prod.
-- Separate roles: migrations get DDL, runtime gets DML only, nobody logs in as the owner (`references/security.md`).
-- `sslmode=verify-full` + SCRAM-SHA-256; connection strings in env/secret store only.
-- Parameterized queries only — no SQL string concatenation, ever.
-- `timestamptz` always; `text` over `varchar(n)` unless `n` is a real domain constraint.
-- Every collection query has a `LIMIT`; keyset pagination over `OFFSET` past ~10k rows.
-- Explicit columns — no `SELECT *` in code.
-- `statement_timeout` set per app role so a runaway query can't run for hours.
-- Explicit isolation level when it matters; default `READ COMMITTED` otherwise.
-- `SELECT ... FOR UPDATE` only with `LIMIT` (or unique predicate) inside a short transaction; `SKIP LOCKED` for queues.
+The standards for SQL, schema and migration files are the data rule files, not a list here: `data.md`, `data-migrations.md` and `data-postgresql.md`. Read the project's copy in `.claude/rules/data/`, or the plugin's in `data/rules/` when the project has not installed them (`/data:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-## What NOT to do
+Connection and operations rules no file carries:
 
-- No `serial`/`bigserial` — `GENERATED ALWAYS AS IDENTITY`.
-- No `timestamp without time zone` for events.
-- No application code issuing DDL.
-- No unbatched `DELETE`/`UPDATE` touching millions of rows in one transaction.
-- No `CREATE INDEX` without `CONCURRENTLY` on a hot production table.
-- No native `CREATE TYPE ... AS ENUM` without an evolution plan (`references/data-modeling.md`).
-- No FK column left unindexed (Postgres does NOT auto-index FK columns — `references/data-modeling.md`).
-- No app login as table owner / superuser; no `GRANT ALL` to runtime roles.
+- `sslmode=verify-full` + SCRAM-SHA-256 on every connection; connection strings in env / secret store only.
+- An explicit isolation level where it matters; `READ COMMITTED` otherwise.
 - No `pg_dump` as the production backup strategy — PITR / managed snapshots.
-- No fixing sequence gaps — gaps from rollbacks are normal and expected.
 
 ## Generation steps
 

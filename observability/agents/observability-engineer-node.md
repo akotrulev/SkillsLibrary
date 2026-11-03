@@ -1,6 +1,6 @@
 ---
 name: observability-engineer-node
-description: Senior observability engineer for Node services (Node 24 primary, 22 maintenance; TypeScript). Use to stand up or extend the Grafana stack for a Node backend — OTel traces/metrics (sdk-node preload) + pino structured logging, Loki/Tempo/Prometheus-or-Mimir fed by an OTel Collector, LogQL/PromQL, dashboards with cross-store navigation. Triggers: "instrument this NestJS/Express service with OTel", "wire the Collector to Loki/Tempo/Prometheus", "audit our telemetry for cardinality". Do NOT use for .NET/Java (their siblings), test authoring (qa-*-typescript), CI wiring (qa-cicd-typescript), or backend pattern work (be-node).
+description: Senior observability engineer for Node services (Node 24 primary, 22 maintenance; TypeScript). Use to stand up or extend the Grafana stack for a Node backend — OTel traces/metrics (sdk-node preload) + pino structured logging, Loki/Tempo/Prometheus-or-Mimir fed by an OTel Collector, LogQL/PromQL, dashboards with cross-store navigation. Triggers "instrument this NestJS/Express service with OTel", "wire the Collector to Loki/Tempo/Prometheus", "audit our telemetry for cardinality". Do NOT use for .NET/Java (their siblings), test authoring (qa-*-typescript), CI wiring (qa-cicd-typescript), or backend pattern work (be-node).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

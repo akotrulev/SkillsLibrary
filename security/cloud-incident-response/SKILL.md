@@ -116,18 +116,9 @@ Per-cloud acquisition commands, isolation moves, and the tool invocations live i
 - **Assuming the Azure Sentinel→Defender migration is finished.** Sign-in logs and some connectors still live in Log Analytics in 2026. *Fix:* author both the Log-Analytics (KQL) and Defender-portal paths.
 - **An untested backup treated as a recovery capability.** It is a hope until a drill proves it. *Fix:* see `references/cloud-resilience.md` — the restore/DR drill is the control SOC 2 A1.3 / ISO A.5.30 test for.
 
-## Hard rules
+## Rules
 
-- **This skill owns RESPOND + RECOVER, not detect.** It consumes `detection-engineering`'s rules and `detection-validation`'s proof-of-firing; it authors no detection and re-proves none. A found detection gap is routed, not filled here.
-- **Acquire before you destroy.** Memory → disk → logs, in order of volatility, **before** any isolation or termination. Cloud evidence is ephemeral; this reorders the whole runbook.
-- **Contain the identity, not just the host.** A credential works from anywhere — deny the principal and revoke live sessions/tokens, in addition to network isolation.
-- **Telemetry is the precondition.** Control-plane + identity + network + detection logs, in an **immutable, out-of-band** store the attacker cannot reach. No durable attacker-inaccessible logs → it is reconstruction, not IR; say so and route to `observability` / `detection-engineering`.
-- **Anchor to NIST SP 800-61r3 AND PICERL.** r3 (CSF 2.0 Respond/Recover) frames the governance; PICERL frames the runbook. Never cite r2's five-phase cycle as current.
-- **Cover both Azure paths** — Log Analytics (KQL) and the Defender portal — because the Sentinel→Defender migration is incomplete in 2026.
-- **Preserve, don't power off** — `stop` not `terminate`, termination protection on, `DeleteOnTermination` off, detach from orchestration so nothing recycles the evidence host.
-- **Chain of custody on every artifact** — logged acquisition, SHA-256 hash at acquisition and after copy, forensics account + forensics-owned key + object-lock/legal-hold, access to the evidence store itself logged.
-- **Rebuild, don't clean** — restore from images/snapshots predating compromise; rotate **all** potentially exposed secrets, not only the one observed.
-- **Redaction** — a recovered key, token, secret, or sensitive record captured as evidence is reported as *that it was recovered and its blast radius*, never its value; nothing sensitive committed.
+The standards an incident-response runbook must meet are the security-governance rule files, not a list here: `runbooks.md` (NIST SP 800-61r3 and PICERL, acquire before destroy, contain the identity, chain of custody, rebuild not clean, the telemetry precondition, both Azure paths, route detection gaps) and `security-governance.md` (redaction). Read the project's copy in `.claude/rules/security-governance/`, or the plugin's in `security/rules-security-governance/` when the project has not installed them (`/security-governance:rules` does). They hold during a live response too, not only when a runbook file is edited. Where they and this skill's recipes disagree, the rule files win.
 
 ## Cross-references
 

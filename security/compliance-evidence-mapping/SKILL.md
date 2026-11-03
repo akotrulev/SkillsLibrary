@@ -55,25 +55,9 @@ Every row carries the **evidence artifact path** (the SARIF, the test report, th
 5. **Emit the register** (Markdown for humans; OSCAL where consumed) + the prioritized **gap list**, each gap routed to its closing lane.
 6. **Hand to `security-architect`** — the register + gaps are a layer of the posture picture; the CISO view frames it in NIST CSF 2.0.
 
-## Anti-patterns
+## Rules
 
-- **Inventing the crosswalk.** Hand-mapping "PCI 6.x ↔ ISO A.8.y" without the SCF authority produces silent, confident compliance errors. *Fix:* use the SCF (or OSCAL-published) mapping as the authority.
-- **Marking a requirement "met" from a config file's existence.** Mapped ≠ effective. *Fix:* tier `#present` with the artifact; effectiveness is `infra-controls-validation`'s / the test lane's proof.
-- **Mapping to a framework the org isn't pursuing.** A GDPR column for a US-only, no-EU-data product is noise that dilutes the real gaps. *Fix:* scope to the frameworks in play.
-- **Mapping to a stale framework version.** ISO 27001:2013 (114 controls) is invalid; PCI 3.2.1 is retired; SOC 2 without the 2022 revised points of focus. *Fix:* pin the current versions in the table above.
-- **Certifying.** This skill produces the evidence pack; it is not an attestation. *Fix:* a human auditor/QSA/lead-implementer certifies — state that the output is *evidence for* their assessment, not a pass.
-- **A register with no artifact paths.** "We have SAST" is a claim; the SARIF at `path:line` is evidence. *Fix:* every row points at the artifact an auditor can open.
-- **Treating ASVS as a compliance framework to certify against.** ASVS is a verification standard and the bridge; the certifiable frameworks are SOC 2/PCI/ISO. *Fix:* use ASVS to say *what was verified and at which level*, then map that onto the certifiable requirement.
-
-## Hard rules
-
-- **Map, don't certify** — the output is an evidence pack + gap list for a human auditor; it is never a compliance attestation.
-- **Evidence is tiered from the artifact** `#present`/`#partial`/`#gap`, read this session — mapped ≠ effective; a green pipeline is a lead, the artifact is evidence.
-- **Use the SCF/OSCAL crosswalk as the authority** — never hand-invent a framework-to-framework mapping.
-- **Pin current framework versions** — SOC 2 (2017 TSC + 2022 points of focus) · PCI **4.0.1** · ISO **27001:2022** (93 controls) · GDPR (2016/679) · ASVS **5.0** (as the bridge, with the verified level stated).
-- **Scope to the frameworks in play** — no speculative columns.
-- **Every row names the evidence artifact and, for gaps, the closing lane** — the gap list is the point; each gap is routed, not just recorded.
-- **Emit human (Markdown) + machine (OSCAL where consumed)** — machine-readable mapping is the direction of travel (FedRAMP OSCAL mandate 2026-09-30).
+The standards this skill's output must meet are the security-governance rule files, not a list here: `compliance.md` (the register and gap list) and `security-governance.md` (the edition pins, evidence read this session). Read the project's copy in `.claude/rules/security-governance/`, or the plugin's in `security/rules-security-governance/` when the project has not installed them (`/security-governance:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Cross-references
 

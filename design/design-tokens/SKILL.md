@@ -81,6 +81,10 @@ Dark mode and brand variants are a **semantic remap only — primitives never fo
 - **W3C DTCG JSON (`$value` / `$type`, `{color.brand.500}` references) only when a pipeline exists** — i.e. Style Dictionary / Terrazzo / Tokens Studio generating platform outputs (CSS + iOS + Android) from one source, or a Figma↔code token sync. The DTCG format reached its first stable version (2025.10) and every major tool reads it, so it's the right *interchange* format — but it's a build input, not something a browser consumes directly. Don't stand up a token pipeline for a single-platform web app that only needs CSS; that's tooling for its own sake.
 - Whichever shape ships, the **tier model and naming rules are identical** — DTCG groups are just the JSON encoding of primitive/semantic/component.
 
+## Rules
+
+The standards the token file must meet (this skill's, plus the brand-fidelity and chart-colour rules of `brand-import` and `charts`) are the design rule file `design-tokens.md`, which also loads on its own when a session edits that file. Read the project's copy in `.claude/rules/design/`, or the plugin's in `design/rules/` when the project has not installed them (`/design:rules` does). Where it and this skill disagree, the rule file wins. The checklist below stays: it is the form `/design:audit` sweeps as section B.
+
 ## Review checklist
 
 - Every literal value lives in a **primitive**; no raw hex / px / ms below that tier.

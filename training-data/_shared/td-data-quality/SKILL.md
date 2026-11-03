@@ -91,13 +91,9 @@ A dataset's *composition* is training signal — the model learns the distributi
 - **SFT/preference balance** — cap any single topic, template, persona, or `source` so it can't dominate; a set that is 60% "write a poem" makes a poem model. Use the `meta` tags from `training-data:dataset-formats` to measure and cap.
 - **Report the composition table** in the card (count by `meta.topic` / `source` / `difficulty`) — skew you can't see is skew you ship.
 
-## Hard rules
+## Rules
 
-- **Decontamination runs last and always.** A dataset that hasn't been checked against its eval targets is not shippable, and its eval numbers are not trustworthy.
-- **Near-dedup, not just exact.** Split by dedup cluster so near-duplicates never straddle the train/test line.
-- **Keep dropped records with reasons** until the dataset is validated — a filter you can't inspect is a filter you can't trust.
-- **PII/secrets are removed before training**; the redaction strategy is a recorded decision.
-- **Every drop count and the final composition go in the dataset card.** Silent filtering is unreproducible filtering.
+The standards this skill's output must meet are the training-data rule files, not a list here: `datasets.md` (dedup, splits, decontamination, PII, rejects, composition) and `dataset-docs.md` (drop counts and rates in the card). Read the project's copy in `.claude/rules/training-data/`, or the plugin's in `training-data/skills/rules/` when the project has not installed them (`/training-data:rules` does). Where they and this skill disagree, the rule files win.
 
 ## References
 

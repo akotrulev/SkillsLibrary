@@ -84,16 +84,9 @@ Cell = target state `(owning feature id)` · `—` = illegal by decision · `?` 
 - ⚠️ Assumption: archival skips Submitted orders `#inferred`
 ```
 
-## Quality bar
+## Standards
 
-- [ ] One model per entity — the new feature was overlaid, not given its own copy
-- [ ] Every `state × event` cell filled: target, `—`, or `?` — no blanks
-- [ ] Every legal transition names its owning feature; double-owners and orphans flagged
-- [ ] Lifecycle jobs (expiry, archival, cleanup) included as events — not just user actions
-- [ ] Guards recorded with owner + source; guard conflicts flagged
-- [ ] Every finding carries a boundary condition
-- [ ] States are business terms, glossary-checked
-- [ ] KB updated per the contract (entity file + INDEX + active-context)
+The quality bar is the business-analysis rule files, not a list here: `business-model-entities.md` (one shared model per entity, every cell filled, one owning feature per transition, lifecycle jobs as events, guards with owner and source, a boundary condition per finding) plus the core `business-model.md`. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win.
 
 ## Anti-example
 

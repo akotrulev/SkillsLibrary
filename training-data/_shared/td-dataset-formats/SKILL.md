@@ -147,15 +147,9 @@ Every dataset ships a `docs/datasets/<name>-card.md` before it is considered don
 
 An undocumented dataset is an unusable dataset six months later — the card is how the next person (and the trained model's evaluators) knows what the model actually saw.
 
-## Hard rules
+## Rules
 
-- **JSONL, one example per line, UTF-8.** No wrapping array. Parquet is export-only.
-- **Every record has `id`, `source`, `license`, `created_at`.** A missing license is a finding.
-- **Store structured `messages`; never bake the chat template into `content`.** (Pretraining raw text excepted.)
-- **VLM images are referenced by relative path to a content-hashed file; never base64 in the JSONL, never a remote URL.**
-- **Splits are drawn by dedup cluster before tuning and frozen; the test split is the decontamination target.**
-- **Ids are stable and never reused across regenerations.**
-- **No dataset is done without its card.**
+The standards this skill's output must meet are the training-data rule files, not a list here: `datasets.md` (records, envelope, splits, layout) and `dataset-docs.md` (the card). Read the project's copy in `.claude/rules/training-data/`, or the plugin's in `training-data/skills/rules/` when the project has not installed them (`/training-data:rules` does). Where they and this skill disagree, the rule files win.
 
 ## References
 

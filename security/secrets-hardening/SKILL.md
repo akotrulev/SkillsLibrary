@@ -62,25 +62,17 @@ This skill decides the store and the pattern; the language-specific binding is t
 - **`be-*` / `fe-*`** — the DI registration of the typed secret client, the `IHttpClientFactory`/SDK credential provider reading the store.
 - This skill states *"read `DB_PASSWORD` from Vault path `secret/data/app/db`, TTL 1h, dynamic"* — they write the code that does it.
 
-## Anti-patterns
+## Rules
 
-- **Deleting the committed line without rotating.** The secret is still in history and already compromised. *Fix:* rotate at source first (the inherited hard rule), then purge history if required.
-- **Single in-place overwrite rotation.** Overwriting the one live secret races every running instance — some hit the old, some the new, requests fail mid-rotation. *Fix:* the two-slot dual-secret pattern (create → roll → verify → revoke).
-- **Rotating a static key when a dynamic credential exists.** You keep the long-lived-secret risk and add rotation toil. *Fix:* Vault dynamic secrets / OIDC-assumed cloud roles — no persistent secret to rotate.
-- **SOPS as the enterprise answer.** Repo access + key access = all secrets; key governance is the unsolved hard part. *Fix:* a real store with per-secret access control, leasing, and audit at scale; SOPS only for small teams with strict KMS governance.
-- **A rotation runbook with no verify step.** Revoking the old credential before confirming consumers moved causes the outage you were avoiding. *Fix:* step 3 (verify traffic on the new credential) gates step 4 (revoke).
-- **Logging the rotated value "for debugging."** The rotation log is an audit trail, not a secret store. *Fix:* log who/when/why, never the value; loot-redaction applies to your own runbooks too.
-- **Hardening the store but leaving the leak channel open.** A perfect Vault setup plus a committed `.env` is not hardened. *Fix:* the pre-commit + CI gate + runtime injection close the channel.
+The standards a rotation runbook must meet are the security-governance rule files, not a list here: `runbooks.md` (two-slot rotation, verify before revoke, rotate first and purge second, never log the value, owner and RTO) and `security-governance.md` (redaction). Read the project's copy in `.claude/rules/security-governance/`, or the plugin's in `security/rules-security-governance/` when the project has not installed them (`/security-governance:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-## Hard rules
+The store-choice rules stay here, because the files they govern (app config, IaC, CI) belong to other plugins:
 
-- **Rotate first, purge second** (inherited from `secrets-scan`) — a committed secret is compromised; rotate at source before deleting/purging history.
-- **Two-slot rotation, never in-place overwrite** — create → roll consumers → verify → revoke; a verify step gates revocation.
-- **Prefer dynamic/short-lived over static-and-rotated** — Vault dynamic secrets / OIDC-assumed roles bound a leak to minutes; rotate a static secret only when no dynamic credential is available. **No static cloud keys** (the `devops` invariant).
-- **Close the leak channel** — inject from the store at runtime so there is no committed secret; back it with a pre-commit hook + the `secrets-scan` CI gate.
-- **Least privilege + a TTL** on every issued credential; a named owner and a defined RTO per credential type.
-- **Never log the value** — the rotation/audit log records who/when/why; the report states blast radius, never contents (loot redaction).
-- **This skill decides the store + runbook; the app-side binding hands off** to `devops:environment-config` / `be-*` / `fe-*`.
+- **Prefer dynamic or short-lived credentials over static-and-rotated.** Vault dynamic secrets and OIDC-assumed roles bound a leak to minutes; rotate a static secret only when no dynamic credential is available. **No static cloud keys** (the `devops` invariant).
+- **Close the leak channel.** Inject from the store at runtime so nothing is committed, backed by a pre-commit hook and the `secrets-scan` CI gate. A hardened store beside a committed `.env` is not hardened.
+- **Least privilege and a TTL** on every issued credential.
+- **SOPS only for small teams with stated KMS key governance**; at scale, a store with per-secret access control, leasing and audit.
+- **This skill decides the store and the runbook; the app-side binding hands off** to `devops:environment-config` / `be-*` / `fe-*`.
 
 ## Cross-references
 

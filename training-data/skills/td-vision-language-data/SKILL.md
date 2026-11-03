@@ -68,14 +68,15 @@ Public: VQAv2, TextVQA, DocVQA, ChartQA, MMMU, POPE (hallucination). Build a dom
 
 Route through `training-data:data-quality` (text dedup/PII/decontam) *and* the image passes above (content-hash dedup, pHash near-dup, load-validation, CLIP-alignment for pretraining, EXIF/PII strip). Split by dedup cluster over **both** the text and the image (an image and its paraphrased caption both go to one split). Output in the VLM record shape, images content-hashed in `images/`, everything in the card including the coordinate convention, resolution target, and image-license breakdown.
 
-## Hard rules
+## Rules
 
-- **Image-text correspondence is the first quality bar** — CLIP-filter pretraining pairs, ground SFT answers in the pixels, judge preference with a VLM that sees the image.
-- **Images referenced by content-hashed relative path**, deduped by content and perceptual hash; **decontaminate images**, not just text.
-- **Grounding uses one stated coordinate convention** recorded in the card.
-- **Validate every image loads and keep task-appropriate resolution**; drop broken images and their records.
-- **Strip image PII/EXIF**; track image licenses separately from caption licenses.
-- **Include unanswerable/negative visual cases** — the top VLM failure is hallucinating objects that aren't there.
+The standards this skill's output must meet are the training-data rule files, not a list here: `datasets.md` (image references, hashing, image dedup and decontamination, EXIF, licenses, coordinates) and `eval-sets.md` (unanswerable visual cases). Read the project's copy in `.claude/rules/training-data/`, or the plugin's in `training-data/skills/rules/` when the project has not installed them (`/training-data:rules` does). Where they and this skill disagree, the rule files win.
+
+Beyond the files, the process this skill holds to:
+
+- **Image-text correspondence is the first quality bar**: CLIP-filter pretraining pairs, ground SFT answers in the pixels, judge preference with a VLM that sees the image.
+- **Keep a task-appropriate resolution**; drop broken images with their records.
+- **Include unanswerable and negative visual cases** in training data too: the top VLM failure is hallucinating objects that are not there.
 
 ## References
 

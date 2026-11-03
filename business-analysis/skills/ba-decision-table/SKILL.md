@@ -41,9 +41,7 @@ The hit policy is the table's declared rule about **multiple matches**. Choosing
 | **Priority (P)** | declared priority among outputs wins | same, with explicit priorities instead of row order |
 | **Collect (C, C+, C<, C>, C#)** | all matches combine via an aggregation operator (list, sum, min, max, count) | **stacking policies** — discounts, fees, limits. The operator IS the stacking rule; two benefit-granting features writing into one Collect table with no declared operator = the missing-stacking-rule conflict |
 
-**Rules of use:**
-- Author toward **U**. Escalate to F/P only when the business has *actually decided* precedence (record the source); escalate to C only when combination is *actually intended* (record the operator and its source).
-- A needed-but-undeclared precedence or operator is a **business decision to escalate**, never a technical default to invent. `[TBD - needs business decision]` in the table header, finding filed.
+Author toward **U**; when to escalate to F, P or C, and what an undecided policy becomes, is in `business-model-decisions.md` (below).
 
 ## Procedure
 
@@ -89,16 +87,9 @@ The hit policy is the table's declared rule about **multiple matches**. Choosing
 - ❓ DEC-002: is "total" pre- or post-discount for the $100 threshold? Sources disagree. [TBD] ⚠️ Assumption: post-discount `#inferred`
 ```
 
-## Quality bar
+## Standards
 
-- [ ] One merged table per decision point — new rules joined the existing table
-- [ ] Hit policy declared, **sourced to a business decision** (or `[TBD]` + finding, never invented)
-- [ ] Every rule row tagged with owning feature + source
-- [ ] Inputs glossary-checked; partitions explicit
-- [ ] Completeness check run — every gap filed with its concrete input combination
-- [ ] Overlap check run — every contradiction filed; redundancies marked for merge
-- [ ] Collect tables name their aggregation operator with a source
-- [ ] KB updated per the contract (decision file + INDEX + active-context)
+The quality bar is the business-analysis rule files, not a list here: `business-model-decisions.md` (one merged table per decision point, a sourced hit policy or `[TBD]` plus a finding, owner and source per row, glossary-checked inputs, both checks recorded) plus the core `business-model.md`. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win.
 
 ## Anti-example
 

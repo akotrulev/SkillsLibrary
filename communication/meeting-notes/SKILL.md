@@ -1,6 +1,6 @@
 ---
 name: communication-meeting-notes
-description: Use when the user needs a meeting written up as decisions and action items — refinement sessions, steercos, workshops, postmortem reviews — from rough notes, a transcript, or a recap dictated after the fact. Triggers: "write up the minutes", "capture the decisions from this refinement", "turn this transcript into action items", "start a decision log for the project". Do NOT use for status updates to stakeholders (use communication/stakeholder-updates), scoping an initiative raised in the meeting (use business-analysis/skills/ba-scoping-writeup), or the postmortem document itself (use communication/incident-postmortem — this skill only captures its review meeting).
+description: Use when the user needs a meeting written up as decisions and action items — refinement sessions, steercos, workshops, postmortem reviews — from rough notes, a transcript, or a recap dictated after the fact. Triggers "write up the minutes", "capture the decisions from this refinement", "turn this transcript into action items", "start a decision log for the project". Do NOT use for status updates to stakeholders (use communication/stakeholder-updates), scoping an initiative raised in the meeting (use business-analysis/skills/ba-scoping-writeup), or the postmortem document itself (use communication/incident-postmortem — this skill only captures its review meeting).
 ---
 
 # Meeting Notes & Decision Log

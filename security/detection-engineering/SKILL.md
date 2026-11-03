@@ -95,25 +95,9 @@ Detections are software artifacts. The lifecycle, in a Git repo with CI (GitHub 
 
 **Alert-as-code beyond Sigma.** Where a detection can't be expressed in Sigma (a SIEM-native ML job, a Sentinel Analytics rule, an Elastic detection-engine rule with an exception list), keep it *as code* anyway: Elastic detection rules via the Detections API in Git, Sentinel Analytics rules as Bicep/ARM, Splunk `savedsearches.conf` in a version-controlled app. The medium changes; the discipline (reviewed, tested, promotable, rollback-able, ATT&CK-tagged) does not.
 
-## Anti-patterns
+## Rules
 
-- **Enabling the whole SigmaHQ ruleset.** 3,000 rules firing at once is alert fatigue, not coverage — analysts mute the channel and miss the real one. *Fix:* start from your threat model's techniques; import the matching community rules, tune them, and grow deliberately.
-- **A detection with no telemetry source.** The rule converts cleanly and never fires because the log field it queries is never collected. *Fix:* verify the `logsource` is actually shipped (name `observability-engineer-*` / `queries` to confirm the pipeline) before claiming the technique covered.
-- **Authoring in the SIEM console.** A rule clicked into Splunk/Sentinel has no review, no test, no version history, no rollback. *Fix:* author as Sigma/alert-as-code in Git; the console is a deploy target, not the source of truth.
-- **Mapping to a stale ATT&CK version.** A rule tagged `attack.defense-evasion` is mis-mapped after v19's Stealth/Defense-Impairment split. *Fix:* pin the ATT&CK version in the repo; re-map on upgrade.
-- **Shipping a rule with no false-positive test.** It looks like coverage and pages the analyst at 3am on a backup job. *Fix:* the true-AND-false sample test is a merge gate, not a nicety.
-- **Claiming coverage without validation.** "We have a rule for T1003" ≠ "we detect T1003." *Fix:* the rule is a hypothesis until `purple-team-engineer` proves it fires; state which techniques are *authored* vs *validated*.
-- **A real secret/host in a test log sample.** Detection test fixtures often come from real incident logs. *Fix:* redact per the loot rule; nothing sensitive committed.
-
-## Hard rules
-
-- **Every detection maps to ≥1 ATT&CK technique**, and the **ATT&CK version is pinned** in the repo (v19 current; re-map on upgrade — technique/tactic ids move).
-- **No detection without a telemetry source** — confirm the log is collected; green ≠ covered. A missing source is a documented gap routed to `observability-engineer-*`.
-- **Unit-test every rule against a true-AND-benign sample before deploy** — fire on the attack, stay quiet on the benign; this is a merge gate.
-- **Detection-as-code, not click-ops** — versioned, PR-reviewed, tested, promotable, rollback-able; the SIEM console is a deploy target only.
-- **Authored ≠ validated** — state which techniques are authored vs proven-firing; validation is `purple-team-engineer`'s. Detection engineering is half of a two-half loop.
-- **Tune for precision** — a stated false-positive per rule; an untuned noisy rule that gets muted is worse than none.
-- **Redaction** — test log samples carry no real secret/PII; pin tool versions (sigma-cli 3.1.0; the 1.x line it superseded is two majors behind); the community ruleset is a baseline to extend, never enabled wholesale.
+The standards this skill's output must meet are the security-governance rule files, not a list here: `detections.md` (rule anatomy, tests, the pipeline) and `security-governance.md` (the ATT&CK and tooling pins, fixture redaction). Read the project's copy in `.claude/rules/security-governance/`, or the plugin's in `security/rules-security-governance/` when the project has not installed them (`/security-governance:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Cross-references
 

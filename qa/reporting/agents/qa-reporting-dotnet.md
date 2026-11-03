@@ -1,6 +1,6 @@
 ---
 name: qa-reporting-dotnet
-description: Senior automation QA engineer for test reporting & flake management in .NET 10, 8/9 supported (Allure + NUnit). Use when Allure reporting must be wired, tests tagged/categorized by finding (severity / owner / feature / issue links), or flaky tests detected, retried, and quarantined. Triggers: "set up Allure for our tests", "tag these tests by severity/feature", "this test is flaky, quarantine it but keep running it". Do NOT use to author tests (the qa-*-dotnet agents), build the pipeline itself (qa-cicd-dotnet), or for other stacks (qa-reporting-*).
+description: Senior automation QA engineer for test reporting & flake management in .NET 10, 8/9 supported (Allure + NUnit). Use when Allure reporting must be wired, tests tagged/categorized by finding (severity / owner / feature / issue links), or flaky tests detected, retried, and quarantined. Triggers "set up Allure for our tests", "tag these tests by severity/feature", "this test is flaky, quarantine it but keep running it". Do NOT use to author tests (the qa-*-dotnet agents), build the pipeline itself (qa-cicd-dotnet), or for other stacks (qa-reporting-*).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

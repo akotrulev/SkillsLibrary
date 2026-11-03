@@ -5,7 +5,7 @@ description: Use when designing, securing, querying, migrating or tuning MySQL, 
 
 # Data — MySQL / MariaDB / Aurora MySQL
 
-One registered skill, five topic references. This file routes and holds the rules shared by every topic: version policy, connections/pooling, migration discipline, and the hard rules. **Read the matching `references/<topic>.md` end-to-end before writing any code.** These split by *topic*, not by tool — a task may need two files (a new multi-tenant schema = `data-modeling.md` + `security.md`).
+One registered skill, five topic references. This file routes and holds the rules shared by every topic: version policy, connections/pooling, migration discipline, and a pointer to the data rule files that hold the hard rules. **Read the matching `references/<topic>.md` end-to-end before writing any code.** These split by *topic*, not by tool — a task may need two files (a new multi-tenant schema = `data-modeling.md` + `security.md`).
 
 ## Routing table
 
@@ -121,29 +121,12 @@ Use `pool.execute('SELECT ... WHERE id = ?', [id])` — parameterized via the dr
 
 ## Rules
 
-- Schema changes only via the migration tool (or pt-osc/gh-ost); never `mysql` CLI ad-hoc DDL in prod.
-- Least-privilege grants: migrations get DDL, runtime gets DML only, nobody uses `root`/`SUPER` (`references/security.md`).
-- TLS with **identity verification** (`sslMode=VERIFY_IDENTITY` / `SslMode=VerifyFull` / `rejectUnauthorized:true`) — plain `REQUIRED` encrypts but doesn't verify the cert (MITM); IAM auth on managed where supported.
-- Parameterized queries only — no string concatenation, ever.
-- `utf8mb4` charset universally; reject `utf8`.
-- `DATETIME(6)` for events (store UTC); `TIMESTAMP` only where the 2038 cliff and silent TZ conversion don't matter.
-- `BIGINT UNSIGNED AUTO_INCREMENT` surrogate PK; `BINARY(16)` UUIDv7 for distributed/client-generated ids — never `CHAR(36)`.
-- Every collection query has a `LIMIT`; keyset pagination over deep `OFFSET`.
-- Explicit columns — no `SELECT *` in code.
-- Default isolation `REPEATABLE READ` (InnoDB) is fine for OLTP — know about gap locks / phantom behavior; `max_execution_time` hint caps runaway `SELECT`s.
+The standards for SQL, schema and migration files are the data rule files, not a list here: `data.md`, `data-migrations.md` and `data-mysql.md`. Read the project's copy in `.claude/rules/data/`, or the plugin's in `data/rules/` when the project has not installed them (`/data:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-## What NOT to do
+Connection and operations rules no file carries:
 
-- No `MyISAM` for new schemas (no transactions, no FKs, table-level locks).
-- No `utf8` (3-byte) — always `utf8mb4`.
-- No `CHAR(36)` UUIDs, and no **random** UUID (v4) as the clustered PK — it fragments InnoDB's primary (`references/data-modeling.md`).
-- No `SELECT *` in app code; no `OFFSET 1000000 LIMIT 20`.
-- No application code issuing DDL — migrations / pt-osc / gh-ost only.
-- No `query_cache_size` tuning — the query cache was removed in 8.0.
-- No `ANALYZE TABLE` on a cron — InnoDB updates stats automatically.
-- No FK constraints "disabled for performance" without a plan to re-enable.
-- No long-lived transactions — they pin the undo log and block purge (`references/performance.md`).
-- No app account with `SUPER`/`ALL PRIVILEGES`; granular grants only.
+- TLS with **identity verification** (`sslMode=VERIFY_IDENTITY` / `SslMode=VerifyFull` / `rejectUnauthorized:true`) — plain `REQUIRED` encrypts but doesn't verify the cert; IAM auth on managed where supported.
+- Default `REPEATABLE READ` (InnoDB) is fine for OLTP — know its gap-lock / phantom behavior.
 - No `mysqldump` as the production backup strategy — managed snapshots / PITR / Percona XtraBackup.
 
 ## Generation steps

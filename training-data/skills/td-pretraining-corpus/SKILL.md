@@ -79,13 +79,14 @@ The final blend of sources is a design decision, not an accident of what you col
 - Split off a small `val`/`test` by dedup cluster (`training-data:dataset-formats`) so you can measure held-out loss.
 - Write the token count (via the target tokenizer) into the manifest and card.
 
-## Hard rules
+## Rules
 
-- **Size the corpus to the model and state the token budget.** Count with the real tokenizer, not words.
-- **Extraction quality is checked on samples** before scaling — silent extraction failure poisons everything downstream.
-- **Both dedup passes** (document + substring) and **decontamination-last** are mandatory for pretraining.
-- **The mixing blend is a documented decision**, reported as a source × token × % table in the card.
-- **Every document keeps its source + license.** Unlicensed data is a finding.
+The standards this skill's output must meet are the training-data rule files, not a list here: `datasets.md` (records, provenance, decontamination) and `dataset-docs.md` (token budget and mixing blend in the card). Read the project's copy in `.claude/rules/training-data/`, or the plugin's in `training-data/skills/rules/` when the project has not installed them (`/training-data:rules` does). Where they and this skill disagree, the rule files win.
+
+Beyond the files, the process this skill holds to:
+
+- **Extraction quality is checked on samples** before scaling; silent extraction failure poisons everything downstream.
+- **Both dedup passes**: document-level MinHash and substring (suffix-array) dedup.
 
 ## References
 

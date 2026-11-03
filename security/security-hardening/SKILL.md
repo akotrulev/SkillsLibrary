@@ -74,26 +74,9 @@ The WAF is the edge control that blocks attack traffic before it reaches the app
 - **Tune with the paranoia level (PL1–PL4) and anomaly scoring.** Start at **PL1** in **`DetectionOnly`** mode, watch for false positives against real traffic, tune exclusions, *then* raise the PL and switch to blocking. Deploying CRS at PL2+ in blocking mode on day one breaks legitimate traffic and gets the WAF disabled — the same failure mode as an untuned detection.
 - WAF rules are **as-code**: the CRS config, custom rules, and exclusions live in Git, reviewed and version-controlled; deploy hands off to `devops-engineer` (ingress/edge). A WAF clicked into a cloud console has no review or rollback.
 
-## Anti-patterns
+## Rules
 
-- **Calling a clean CSP string "hardened."** It validates the text, not enforcement — report-only, a `<meta>` override, or a route missing the header all parse clean and block nothing. *Fix:* hand it to `client-side-security` for the dynamic block-proof; author is not test.
-- **An allowlist CSP instead of nonce + `strict-dynamic`.** Origin allowlists are routinely bypassed (JSONP/redirects on an allowed host). *Fix:* nonce-based `script-src` with `strict-dynamic`.
-- **A static or reused nonce.** A nonce that doesn't change per request is decoration. *Fix:* the app emits a fresh CSPRNG nonce per response; this skill states the contract, `fe-*` wires it.
-- **Flipping CSP straight to enforce on production.** It breaks legitimate inline handlers/scripts and gets rolled back wholesale. *Fix:* `Report-Only` first, collect + tune, then enforce.
-- **CRS at PL2+ blocking on day one.** False positives break real traffic and the WAF gets disabled — worse than no WAF. *Fix:* PL1 `DetectionOnly` → tune → raise PL → block.
-- **`report-uri` only.** Deprecated; violations may not be collected. *Fix:* `report-to` + `Reporting-Endpoints`; monitor the endpoint.
-- **Treating the WAF as the fix.** A WAF rule that blocks SQLi hides, not fixes, the injectable query. *Fix:* WAF is defense-in-depth; the code fix routes to `be-*`, the DOM-sink fix to `fe-*`.
-- **`HSTS preload` / `COEP require-corp` cargo-culted.** Both are one-way doors that break things when not warranted. *Fix:* author them only when the prerequisites hold, and state the prerequisite.
-
-## Hard rules
-
-- **Author-then-test** — the CSP/header set is not "hardened" until `client-side-security` proves it blocks in a real browser and the report lands. Author here; test there.
-- **CSP: nonce + `strict-dynamic`**, per-request nonce (wiring handed to `fe-*`), the hard-stop directives (`object-src`/`base-uri`/`frame-ancestors` `'none'`), `report-to`+`Reporting-Endpoints` (not `report-uri`), **Report-Only → enforce** rollout.
-- **The full OWASP Secure Headers baseline**, each authored with intent; HSTS `preload` and COEP only when their prerequisites hold, and stated.
-- **WAF: CRS 4.x on Coraza (preferred) / ModSecurity** — pinned to either the current release (**v4.29.0**) or the **v4.25.x LTS** line, stated explicitly; never floating `latest`, never CRS 3.x, PL1 `DetectionOnly` → tune → raise → block; rules as-code in Git.
-- **Defense in depth, never the fix** — the WAF/header fronts the vulnerability; the code/DOM-sink fix still routes to `be-*` / `fe-*`.
-- **Policy here, wiring there** — this skill authors the language-agnostic policy; per-framework middleware and nonce emission hand off to `fe-react`/`fe-blazor`/`be-*`/`devops-engineer`.
-- **PCI 6.4.3 / 11.6.1** on payment pages: name them when card data is in scope; a strict CSP + SRI + reporting endpoint serves both.
+The standards this skill's output must meet are the security-governance rule files, not a list here: `hardening.md` (CSP, the secure-headers baseline, CRS rollout) and `security-governance.md` (pins, "a policy that parses is not a policy that blocks"). Read the project's copy in `.claude/rules/security-governance/`, or the plugin's in `security/rules-security-governance/` when the project has not installed them (`/security-governance:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Cross-references
 

@@ -95,15 +95,11 @@ Copy is read aloud by screen readers and out of visual context — never lean on
 - No copy leans on a **visual reference** ("the green button", "the box below"); link/button text describes its **destination or effect**, never "Click here" / "Read more".
 - Destructive confirmations name the **specific object** and its verb ("Delete invoice #4821"), and the buttons carry that verb — **never "Yes" / "No"**.
 
-## What NOT to do
+## Rules
 
-- No "Submit"/"OK"/"Proceed"/"Click here" — say what happens.
-- No system vocabulary in user-facing copy (entity/principal/payload/null/exception).
-- No apology or blame in errors, no vague "Something went wrong" with no next step, no raw exception text (that leak is `error-resilience`'s rule; the voice is yours).
-- No blank empty state, and no single generic empty message for all three empty cases.
-- No name drift — a concept called different things on different screens, or an action that changes its name mid-flow.
-- No Title Case / ALL CAPS labels, no filler ("please simply just").
-- Do not invent the *structure* here — the slots (which errors, which empty states, which confirmations) come from `ui-rules` / `error-resilience`; you fill them.
+The standards copy must meet are the design rule file `ui-copy.md`, not a list here; it also loads on its own when a session edits a message catalog. Read the project's copy in `.claude/rules/design/`, or the plugin's in `design/rules/` when the project has not installed them (`/design:rules` does). Where it and this skill disagree, the rule file wins. The checklist above stays: it is the form `/design:audit` sweeps as section H, and its check numbers are that audit's finding ids.
+
+Beyond the rule file: do not invent the *structure* here. The slots (which errors, which empty states, which confirmations) come from `ui-rules` / `error-resilience`; you fill them.
 
 ## Handoffs
 

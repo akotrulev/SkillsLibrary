@@ -72,11 +72,7 @@ Where a cell names a feature, it uses the feature-identity rule: `E<n>` or `AREA
   - `scheduled`: runs inside a schedule over the selection named in *Guard*.
   - `best effort`: loss is acceptable, and *Source* names the decision that says so.
 - **On failure** is one of: `rolls back` · `retried <n>× then <dead-letter | alert | drop>` · `compensates: <what>` · `unhandled` · `?`. The last two are findings.
-- **Rules:**
-  - Every column header of an entity grid is a trigger id.
-  - Every `event` trigger has at least one reaction, or *Source* says `terminal by decision`. Otherwise it is an *unconsumed event* finding.
-  - Every reaction's *When* exists. A reaction nothing fires is an *orphan* finding.
-  - A cycle of reactions with no guard that breaks it is a conflict class 6 finding (circular dependency).
+- The rules every row must meet (grid columns are triggers, consumed events, fired reactions, broken cycles) are in `business-model-connections.md` (below).
 
 ## `shared-data.md` — the CRUD matrix and the shared fields
 
@@ -115,18 +111,9 @@ Where a cell names a feature, it uses the feature-identity rule: `E<n>` or `AREA
 
 Every finding goes to `business-analysis/skills/ba-feature-conflict-check` for severity and resolution recording; none is resolved here. An edge a source is silent on is `[TBD - source silent]`, never a guessed `yes` or `in request`.
 
-## Quality bar
+## Standards
 
-- [ ] Every trigger names its kind; every `schedule` names its timezone or `?`
-- [ ] Every entity-grid column header is a trigger id
-- [ ] Every reaction carries guard, owner, effects, emits, mode and on-failure, with a source
-- [ ] Effects use the four forms; no prose in the Effects column
-- [ ] Unconsumed events, orphan reactions and cycles checked and filed
-- [ ] CRUD matrix limited to entities two or more features touch; every empty cell is `by decision` or a finding
-- [ ] Every invariant lists all threatening reactions and states enforcement per reaction
-- [ ] Every finding carries a boundary condition
-- [ ] No test cases, techniques or coverage anywhere in the files
-- [ ] KB updated per the contract (three files + INDEX + active-context)
+The quality bar for the three files is the business-analysis rule files, not a list here: `business-model-connections.md` (closed vocabularies for kind, effects, mode and on-failure; every reaction column filled; the shared-data and invariant limits; silence as `[TBD - source silent]`) plus the core `business-model.md`. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win. Neither file holds test cases, techniques or coverage.
 
 ## Anti-example
 

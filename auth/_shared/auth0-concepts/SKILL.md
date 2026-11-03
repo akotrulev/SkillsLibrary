@@ -1,6 +1,6 @@
 ---
 name: auth0-concepts
-description: Use when explaining Auth0-specific concepts before picking a stack recipe — tenants, applications, APIs, the `audience` parameter, RBAC, organizations, namespaced custom claims, Actions, connections. The Auth0 layer on top of `oidc-concepts`. Triggers: "what's an Auth0 API vs application", "why is my Auth0 token opaque", "RBAC with Auth0". Do NOT use for generic OAuth/OIDC theory (`oidc-concepts`), Cognito (`cognito-*`), or stack implementation (the stack's auth0 skill).
+description: Use when explaining Auth0-specific concepts before picking a stack recipe — tenants, applications, APIs, the `audience` parameter, RBAC, organizations, namespaced custom claims, Actions, connections. The Auth0 layer on top of `oidc-concepts`. Triggers "what's an Auth0 API vs application", "why is my Auth0 token opaque", "RBAC with Auth0". Do NOT use for generic OAuth/OIDC theory (`oidc-concepts`), Cognito (`cognito-*`), or stack implementation (the stack's auth0 skill).
 ---
 
 # Auth0 — Concepts (Shared)

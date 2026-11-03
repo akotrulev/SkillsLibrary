@@ -1,6 +1,6 @@
 ---
 name: communication-stakeholder-updates
-description: Use when the user needs to write a status update, weekly report, or async stakeholder summary aimed at non-engineers (PM, leadership, customers). Triggers: "write the weekly update", "summarize this sprint for leadership", "draft the customer-facing release note", "what should I tell the steerco". Do NOT use for engineering changelogs / commit summaries, or for formal BA writeups (use business-analysis/skills/ba-scoping-writeup).
+description: Use when the user needs to write a status update, weekly report, or async stakeholder summary aimed at non-engineers (PM, leadership, customers). Triggers "write the weekly update", "summarize this sprint for leadership", "draft the customer-facing release note", "what should I tell the steerco". Do NOT use for engineering changelogs / commit summaries, or for formal BA writeups (use business-analysis/skills/ba-scoping-writeup).
 ---
 
 # Stakeholder Updates

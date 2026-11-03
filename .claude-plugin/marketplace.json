@@ -49,7 +49,8 @@
         "./backend/_shared/session-budget",
         "./backend/_shared/codebase-survey",
         "./backend/_shared/feature-trace",
-        "./backend/_shared/business-documentation"
+        "./backend/_shared/business-documentation",
+        "./engineering-practices/rules"
       ],
       "agents": [
         "./engineering-practices/agents/code-auditor.md",
@@ -100,7 +101,8 @@
         "./design/ux-patterns",
         "./design/ux-review",
         "./design/ux-writing",
-        "./design/visual-identity"
+        "./design/visual-identity",
+        "./design/rules"
       ],
       "agents": [
         "./design/agents/design-auditor.md"
@@ -614,7 +616,8 @@
         "./data/redis",
         "./data/dynamodb",
         "./data/cosmosdb",
-        "./data/elasticsearch"
+        "./data/elasticsearch",
+        "./data/rules"
       ],
       "commands": [
         "./data/commands/data.md"
@@ -654,7 +657,8 @@
         "./business-analysis/skills/ba-entity-state-grid",
         "./business-analysis/skills/ba-decision-table",
         "./business-analysis/skills/ba-dependency-map",
-        "./business-analysis/skills/ba-feature-conflict-check"
+        "./business-analysis/skills/ba-feature-conflict-check",
+        "./business-analysis/skills/rules"
       ],
       "commands": [
         "./business-analysis/commands/business-analysis.md"
@@ -1177,7 +1181,8 @@
         "./devops/container-runtime-security",
         "./devops/cloud-posture",
         "./devops/supply-chain-security",
-        "./devops/infra-controls-validation"
+        "./devops/infra-controls-validation",
+        "./devops/rules"
       ],
       "commands": [
         "./devops/commands/devops.md",
@@ -1261,7 +1266,8 @@
         "./security/security-hardening",
         "./security/compliance-evidence-mapping",
         "./security/cloud-incident-response",
-        "./security/standards-audit"
+        "./security/standards-audit",
+        "./security/rules-security-governance"
       ],
       "commands": [
         "./security/commands/architect.md",
@@ -1297,7 +1303,8 @@
         "./training-data/skills/td-instruction-sft",
         "./training-data/skills/td-preference-data",
         "./training-data/skills/td-eval-sets",
-        "./training-data/skills/td-vision-language-data"
+        "./training-data/skills/td-vision-language-data",
+        "./training-data/skills/rules"
       ],
       "commands": [
         "./training-data/commands/training-data.md",
@@ -1328,7 +1335,8 @@
       "skills": [
         "./tooling/_shared/capability-contract",
         "./tooling/skills/mcp-builder",
-        "./tooling/skills/cli-builder"
+        "./tooling/skills/cli-builder",
+        "./tooling/skills/rules"
       ],
       "commands": [
         "./tooling/commands/tooling.md"

@@ -57,13 +57,9 @@ The default evidence source is **reading code**. Running anything (build, tests,
 - Without opt-in, a behavior you cannot settle by reading is `Unverifiable` — and the report names exactly what execution would settle ("running the checkout integration test would confirm the rounding path").
 - With opt-in, execution **corroborates** a code trace; it never replaces it. A passing test upgrades `#inferred` to `#confirmed` only when you have also read the code path the test exercises — a green test against unread code proves the test passes, not that the requirement is met as specified.
 
-## Evidence rules (non-negotiable)
+## Evidence rules
 
-1. **Every verdict cites `file:line` you actually read.** A grep hit is a lead, not evidence — open the file and trace the path before citing it.
-2. **Tag the confidence:** `#confirmed` = the behavior is traced through the code path end-to-end; `#inferred` = naming, config, or convention suggests it but the path wasn't fully traced. An `#inferred` chain of more than one link is a guess — downgrade the verdict.
-3. **Negative claims name the search.** A `Missing` verdict states *where you looked* (paths, symbols, grep patterns) — "not implemented" without a documented search is unfalsifiable.
-4. **Never assert from naming alone.** `ValidateOrder()` existing does not mean orders are validated per the spec — read the body.
-5. **The spec is not evidence about the code, and the code is not evidence about the spec.** Comments and docstrings claiming compliance count as `#inferred` at best.
+The evidence, id and round standards every register and report must meet are the dev rule file `audits.md`, not a list here. Read the project's copy in `.claude/rules/dev/`, or the plugin's in `engineering-practices/rules/` when the project has not installed them (`/dev:rules` does). Where it and this skill disagree, the rule file wins. A grep hit is a lead, not evidence: open the file and trace the path before citing it. A `Missing` verdict states where you looked, and the spec is never evidence about the code, nor the code about the spec.
 
 ## Inputs needed
 
@@ -158,7 +154,7 @@ Work through the register **section by section**. For each requirement: locate t
 |---|---|---|
 | **Met** | The code does what the requirement says, in every branch that matters | `#confirmed` trace; cite the path |
 | **Partial** | Some of the behavior exists; a case/branch/constraint is absent | Cite what exists *and* what's missing |
-| **Missing** | No implementation found | The documented search (rule 3) |
+| **Missing** | No implementation found | The documented search: paths, symbols, grep patterns |
 | **Divergent** | The code deliberately does something *else* — different rule, different flow | Cite both behaviors side by side; **escalate, don't judge** — this is candidate spec-drift, and whether the spec or the code is right is the owner's call |
 | **Unverifiable** | Static reading can't settle it (runtime config, external service, timing, unfalsifiable wording) | Name exactly what would settle it — the execute-opt-in hook, or the spec rewrite |
 
@@ -344,11 +340,9 @@ The rollup under each section is the deliverable stakeholders actually read. Rul
 
 ## Rules
 
+The register and report standards (append-only ids, the three finding classes, Resolved only on a fresh re-trace, a decision owner for every conflict) are the dev rule file `audits.md`; see Evidence rules above for where to read it. Beyond it:
+
 - **Strictly read-only** on product code and the spec. The register and reports are the only files this skill writes. Offer a remediation plan; never apply it here.
-- The register is **append-only and never renumbered.** IDs are the contract that makes rounds comparable; breaking them silently invalidates every trend the reports claim.
-- Verdicts are per requirement; never a blended "mostly compliant" for the batch. Section summaries characterize, they don't verdict.
-- **Findings are listed under exactly one of three classes — Data issues / Code issues / Logical conflicts** — and all three headings appear in every round (`None.` when empty) so rounds compare class by class. Class is orthogonal to severity.
-- `Divergent` is never resolved by the auditor — deciding whether spec or code is right is a business call; the audit's job is to make the divergence undeniable. Same for a `⚠️ CONFLICT` pair from consolidation: both entries are verdicted, neither is dropped.
-- **Resolved is a claim you make only after re-reading the code this round.** No commit message, ticket status, or passing test earns it on its own.
+- Verdicts are per requirement; never a blended "mostly compliant" for the batch. Section summaries characterize, they don't verdict. Both entries of a `⚠️ CONFLICT` pair are verdicted; neither is dropped.
 - A red build/test state discovered on arrival is a finding to report, not yours to fix.
 - If the sources are too vague to consolidate at all, stop and say so — route to `qa/manual/requirements-breakdown` or the spec owner rather than auditing a guess.

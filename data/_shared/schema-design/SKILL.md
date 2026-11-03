@@ -192,30 +192,7 @@ This table is the **decision**. The modeling *mechanics* that flow from it — e
 
 ## Rules
 
-- One id per row, generated at insert; **UUID v7 default for distributed**, `bigint` IDENTITY for single-engine OLTP
-- All timestamps UTC with TZ-aware types
-- **Money as `bigint` minor units + currency `CHAR(3)`**
-- Booleans as boolean, not int
-- Enums as strings constrained by check/validator, lookup table when values grow
-- Default to **hard delete** + audit table; soft delete only with explicit justification
-- Multi-tenant default: shared schema + tenant column + RLS; always carry `tenant_id`
-- `created_at` and `updated_at` populated by the engine / ORM, never by client input
-- Naming consistent across the project; codified in a style guide
-- Every table has a PK; every FK has an explicit `ON DELETE` action
-
-## What NOT to do
-
-- No floats for money
-- No `timestamp without time zone` (Postgres) / `datetime` (SQL Server) / `TIMESTAMP` (MySQL legacy) for events
-- No native engine ENUM unless you're prepared to live with the constraints
-- No `is_active` AND `is_deleted` AND `is_archived` — pick one state model
-- No "soft delete on every table" as a default
-- No multi-tenant tables without `tenant_id` (or row-level security tied to it)
-- No client-supplied `updated_at` accepted in writes
-- No FK without an explicit `ON DELETE` action
-- No `UUID v4` as a clustered PK on a write-heavy table (fragmentation) — `UUID v7` / `NEWSEQUENTIALID()` instead
-- No mixing naming conventions within one project
-- No "this column might be useful later" placeholders — add columns when you need them
+The standards this skill's output must meet on SQL, schema and migration files are the data rule file `data.md`, plus the engine's file (`data-postgresql.md`, `data-sqlserver.md`, `data-mysql.md`), not a list here. Read the project's copy in `.claude/rules/data/`, or the plugin's in `data/rules/` when the project has not installed them (`/data:rules` does). Where they and this skill's recipes disagree, the rule files win. For document stores, the same conventions hold with this skill's document naming (`camelCase`) and embed-vs-reference table.
 
 ## Generation steps
 

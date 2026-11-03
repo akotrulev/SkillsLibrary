@@ -74,14 +74,13 @@ Route every SFT record through `training-data:data-quality`: PII scrub, near-ded
 
 90/5/5 or a fixed held-out test, split by dedup cluster, frozen (`training-data:dataset-formats`). The test split doubles as an instruction-following eval — hand its shape to `training-data:eval-sets` if you want scored metrics.
 
-## Hard rules
+## Rules
 
-- **Coverage before volume.** Design the task distribution first; report the composition table. A few thousand excellent diverse examples beat a hundred thousand mediocre ones.
-- **Only the assistant turn is the target** — clean role boundaries so the trainer can mask user/system tokens.
-- **Structured `messages`, never a pre-applied chat template.**
-- **Tool-call arguments validate against the tool schema**; include not-call and error-recovery cases.
-- **Real + synthetic blended**, every synthetic record flagged `synthetic-review-required`.
-- **Decontaminate against evals** (public SFT sets especially) before shipping.
+The standards this skill's output must meet are the training-data rule files, not a list here: `datasets.md` (chat and tool records, synthetic flags, decontamination) and `dataset-docs.md` (the composition table). Read the project's copy in `.claude/rules/training-data/`, or the plugin's in `training-data/skills/rules/` when the project has not installed them (`/training-data:rules` does). Where they and this skill disagree, the rule files win.
+
+Beyond the files, the process this skill holds to:
+
+- **Coverage before volume.** Design the task distribution first; a few thousand excellent, diverse examples beat a hundred thousand mediocre ones.
 
 ## References
 

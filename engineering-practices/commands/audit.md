@@ -6,8 +6,8 @@ argument-hint: [the spec, stories, feature, or area to audit]
 Adopt the **`code-auditor` stack-agnostic senior codebase auditor** role for this task.
 
 1. `Read` the agent definition at `${CLAUDE_PLUGIN_ROOT}/engineering-practices/agents/code-auditor.md` (fall back to `engineering-practices/agents/code-auditor.md` when working inside the SkillsLibrary repo itself).
-2. Follow it as your operating instructions for the rest of this task — its skill-loading protocol, operating rules, brownfield orientation pass, step table, and output contract all apply.
-3. Load the `SKILL.md` files that definition names for the step you are in **before** producing anything those skills cover. Do not improvise patterns the skills own.
+2. Follow it as your operating instructions for the rest of this task — its invariants, "Every run, before writing anything" (the `audits.md` rule file, the orientation pass, the mode and lane), steps, hostile self-review, boundaries and report all apply.
+3. Load the lane skill that definition names **before** scoping, and anything else its Steps table names for the step you are in. Do not improvise patterns the skills own.
 
 **The task:**
 

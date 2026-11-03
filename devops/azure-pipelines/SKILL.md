@@ -338,29 +338,16 @@ Publish the raw results as a pipeline artifact here; the **report generation/pub
 
 ## Rules
 
-- Multi-stage with explicit `dependsOn:` — don't conflate `Build`, `Test`, and `Deploy`
-- One `deployment:` job per target environment; approvals live on the Environment, not in YAML
-- Pin all task versions explicitly (`UseDotNet@2`, `Cache@2`, `AzureCLI@2`) — `@*` floats
-- Pin language versions to what the project targets (`10.0.x`, `21`, `24.x`); take the pnpm version from `package.json` `packageManager` via `corepack prepare --activate` — never double-pin it in CI
-- Use `Cache@2` keyed on lockfile content — sticky caches mask broken installs
-- `condition: succeededOrFailed()` on result-publishing tasks so failed builds still upload reports
-- Service connections use Workload Identity Federation (Azure) / OIDC (AWS) — no service principal secrets
-- Self-hosted agents use `demands:` to ensure the right capabilities; never run prod deploys on a shared default pool
-- Every step has a clear `displayName:` — anonymous steps in a 200-line log are unreadable
-- Variable groups link to Key Vault for secrets; YAML never references plaintext credentials
+The standards this skill's output must meet are the devops rule files, not a list here: `pipelines.md` (deploy gating, Key Vault-linked secrets, `demands:` and pools for prod, `continueOnError`, caches, `displayName:`) and `devops.md` (Workload Identity Federation, task and version pinning, `--locked-mode`). Read the project's copy in `.claude/rules/devops/`, or the plugin's in `devops/rules/` when the project has not installed them (`/devops:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-## What NOT to do
+## Azure Pipelines-specific pitfalls
 
-- No service principal client secret in a variable group when WIF is available — migrate the service connection
-- No `vmImage: ubuntu-latest` for prod deploys requiring network reach into a private VNet — use a self-hosted agent
-- No `condition: always()` on deploy steps — it bypasses upstream failure
-- No `dependsOn:` chains that flatten parallelism (`B dependsOn A, C dependsOn B` when `C` only really needs `A`)
-- No `${{ }}` template expressions in places that need runtime values (`$( )` for runtime, `${{ }}` for compile-time)
-- No `script:` block longer than ~10 lines — extract to `scripts/*.sh` / `*.ps1` and call them
-- No `continueOnError: true` to hide a flaky step — fix or quarantine
-- No `displayName:` left as the default task title — name what it does in context
-- No mixing of classic build definitions and YAML in the same project — migrate fully, the dual model produces accidents
-- No `dotnet restore` without `--locked-mode` if a lockfile exists — defeats the purpose of the lockfile
+- One `deployment:` job per target environment; approvals live on the Environment, not in YAML.
+- No `vmImage: ubuntu-latest` for a prod deploy that needs to reach a private VNet: use a self-hosted agent.
+- `${{ }}` is compile-time and `$( )` is runtime; never a template expression where a runtime value is needed.
+- No `dependsOn:` chains that flatten parallelism (`C` depends on `B` when it only needs `A`).
+- No `displayName:` left as the default task title.
+- No classic build definitions beside YAML in one project: migrate fully.
 
 ## Generation steps
 

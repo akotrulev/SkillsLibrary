@@ -1,6 +1,6 @@
 ---
 name: communication-incident-postmortem
-description: Use when the user needs to write up an incident after it's resolved — a blameless postmortem / incident review / RCA document for internal learning or a sanitized customer-facing RCA. Triggers: "write the postmortem for yesterday's outage", "incident review doc for INC-123", "RCA writeup the customer asked for", "what should the incident report cover". Do NOT use for live incident response or runbooks (out of scope), filing the defect that caused it (use qa/manual/bug-report-writer), or routine status updates (use communication/stakeholder-updates).
+description: Use when the user needs to write up an incident after it's resolved — a blameless postmortem / incident review / RCA document for internal learning or a sanitized customer-facing RCA. Triggers "write the postmortem for yesterday's outage", "incident review doc for INC-123", "RCA writeup the customer asked for", "what should the incident report cover". Do NOT use for live incident response or runbooks (out of scope), filing the defect that caused it (use qa/manual/bug-report-writer), or routine status updates (use communication/stakeholder-updates).
 ---
 
 # Incident Postmortem

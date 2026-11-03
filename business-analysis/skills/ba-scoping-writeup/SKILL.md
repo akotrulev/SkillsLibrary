@@ -109,14 +109,9 @@ This is the shape of `requirements.md`. Ten sections, this order, none dropped �
 - [ ] <question> — owner: <name> — blocks: <what>
 ```
 
-## Anti-patterns to flag
+## Standards
 
-- **Solution disguised as requirement.** "Add a button that..." — challenge it; what problem does the button solve?
-- **Technology in §4.** "Store bookings in a new table" is a design decision, not a capability. Record what the actor can do; the mechanism is `solution-planner`'s.
-- **Unfalsifiable success metric.** "Better performance" with no number or baseline.
-- **Single-axis risk.** "Risk: medium" with no separation of likelihood and impact.
-- **Missing decision-maker.** If no one has authority to approve scope, the analysis will not converge.
-- **Scope = everything stakeholder mentioned.** A BA who never says "out of scope" isn't doing analysis.
+What the document must and must never contain (the ten sections, the verbatim ask, the problem before any solution, no technology in §4, a named decision-maker, a real success measure or an open question, three-column scope, assumptions and two-axis risks) is the business-analysis rule file `backlog-requirements.md`, not a list here. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win.
 
 ## Handoffs
 

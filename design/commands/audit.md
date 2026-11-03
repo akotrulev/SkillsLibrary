@@ -7,17 +7,11 @@ Run a **full design audit** on this project as the **`design-auditor`** agent.
 
 Sixteen lettered sections, A–P: visual identity · token system · IA & shell · Nielsen heuristics · flow friction · responsiveness budget · UI-code guidelines · copy voice · charts · iconography · brand fidelity · **design-time accessibility (WCAG 2.2)** · **ethical patterns** · **AI experience** · **motion** · **landing structure**. Five are applicability-gated — N only where the app ships an AI or agent feature, M only where it asks for money, consent, data, or a device permission, O only where anything animates, P only where a marketing page ships.
 
-1. `Read` the agent definition at `${CLAUDE_PLUGIN_ROOT}/design/agents/design-auditor.md` (fall back to `design/agents/design-auditor.md` when working inside the SkillsLibrary repo itself), then follow it as your operating instructions for the rest of this task.
-2. Load `engineering-practices/agent-orientation-cache` first, then `engineering-practices/standards-audit-engine` for the Mode A/B procedure, the evidence rules, and `references/report-template.md`.
+1. `Read` the agent definition at `${CLAUDE_PLUGIN_ROOT}/design/agents/design-auditor.md` (fall back to `design/agents/design-auditor.md` when working inside the SkillsLibrary repo itself).
+2. Follow it as your operating instructions for the rest of this task: its invariants (read-only, the browser contract, the artifact and permanent IDs, the corpus as source of truth), every-run start (rules, orientation, engine and corpus, round, evidence mode and driver), sections, steps, re-audit paragraph, boundaries and report all apply.
 3. Load each section's owning `design/<skill>/SKILL.md` **before sweeping that section** — its `## Review checklist` is the section's rule set and its check numbers are the finding IDs.
-4. Query the vendored `design/ui-ux-pro-max` corpus per section and **cite the row** — it is the source of truth, a row's severity is the finding's severity, and a zero-result search is neither a finding nor a pass.
-5. Check `docs/audits/` first: a prior `…-design-audit-r<N>.md` means **Mode B (re-audit)** — reuse its section letters and finding IDs verbatim, never renumber. Otherwise **Mode A (baseline)**.
 
-**Declare the evidence mode and the capture driver before judging anything.** Sections A · C · D · E · F are about pixels: with a running app, capture each primary task end to end at desktop **and** the narrowest supported width — through the **Playwright MCP** by default, falling back to **Claude in Chrome** (`mcp__claude-in-chrome__*`) when Playwright is absent or the app is only reachable through the user's own session. With only screenshots, sweep just those screens; with neither, mark those sections **Unverifiable** and say so — never quietly downgrade this to a code audit.
-
-**Driving Chrome means driving the user's real browser**, so the read-only contract extends to it: work in a new tab, prefer a local or staging target, never complete a destructive or state-changing action against real data (walk up to the final control, capture it, stop), never trigger a native `alert`/`confirm` dialog — read the handler in source instead — and record the driver, environment, and account context in the report header.
-
-**Read-only.** `Write`/`Edit` are for the report under `docs/audits/` and the orientation cache, nothing else — never fix, restyle, or "quickly correct" anything found, however trivial. Findings carry a one-line fix direction and the owning design skill; the `fe-blazor` / `fe-react` agent applies them in a separate run.
+**Read-only.** `Write`/`Edit` are for the report under `docs/audits/` and the orientation cache, nothing else; the `fe-*` / `mobile-*` agent applies fixes in a separate run. Driving Claude in Chrome means driving the user's real browser: the agent's browser contract applies in full.
 
 **Scope limiter / how to reach the app (optional):**
 
@@ -25,4 +19,4 @@ $ARGUMENTS
 
 If nothing was given above, ask once how to start or reach the app (and whether to drive it), then audit the whole UI: build the applicability matrix and sweep every applicable section A–P.
 
-When done, report the agent's output contract (stack · evidence mode · applicability · coverage · report path · finding counts by severity · cross-altitude count · highest-leverage item) and the path to the saved report.
+When done, relay the agent's report block (stack · evidence mode · driver · applicability · coverage · report path · finding counts by severity · cross-altitude count · highest-leverage item) and the path to the saved report.

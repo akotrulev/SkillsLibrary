@@ -284,27 +284,14 @@ Upload the raw results as an artifact here; the **report generation/publishing p
 
 ## Rules
 
-- `permissions:` block at the top, restricting to the minimum each job needs. Default `read-all` is sloppy.
-- Pin actions to a major version (e.g. `checkout@v6`) at minimum; pin to a SHA when the action runs with elevated permissions. Old action majors also run on deprecated runner Node versions — keep majors current
-- Use `secrets.*` for true secrets; use `vars.*` for non-secret config (region, app name, role ARN)
-- Use **Environments** (Settings → Environments) for any deploy job; gate prod with required reviewers
-- `if: always()` on test-result upload steps so failures still publish artifacts
-- One workflow per purpose (`ci.yml`, `release.yml`, `deploy-prod.yml`) — don't bolt release logic onto the CI workflow with cascading `if:` conditions
-- Pin Node / Java / .NET versions explicitly — never use a `latest` tag
-- `--frozen-lockfile` / `--locked` / equivalent for every package manager
-- Step `name:` is mandatory — anonymous steps are unreadable in failure logs
+The standards this skill's output must meet are the devops rule files, not a list here: `pipelines.md` (permissions, action pinning, deploy gating, secrets scope, step names) and `devops.md` (OIDC only, runtime and lockfile pinning). Read the project's copy in `.claude/rules/devops/`, or the plugin's in `devops/rules/` when the project has not installed them (`/devops:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-## What NOT to do
+## GitHub-specific pitfalls
 
-- No `${{ secrets.AWS_ACCESS_KEY_ID }}` / `secrets.AZURE_CLIENT_SECRET` long-lived credentials — OIDC only
-- No `actions/checkout@master` or `@main` — pin to a tag
-- No `continue-on-error: true` on a step you want to actually pass — it silently lies
-- No `working-directory: ${{ github.workspace }}/...` everywhere — set it once at the job level
-- No deploy job that runs on PRs — guard with `if: github.event_name == 'push' && github.ref == 'refs/heads/main'`
-- No installing dependencies with `npm install` (mutates lockfile) — `ci` / `--frozen-lockfile`
-- No `cron:` schedules at minute 0 — every popular scheduler fires there; offset by a few minutes to avoid runner queueing
-- No `runs-on: self-hosted` without naming a specific labeled runner group — `self-hosted` alone picks any
-- No secrets in `env:` at the workflow level — they leak into every step; scope to the job/step that needs them
+- `secrets.*` for true secrets, `vars.*` for non-secret config (region, app name, role ARN).
+- Set `working-directory` once at the job level, not on every step.
+- No `cron:` at minute 0: every popular scheduler fires there, so offset by a few minutes.
+- No bare `runs-on: self-hosted`: name a labelled runner group.
 
 ## Generation steps
 

@@ -398,34 +398,7 @@ GitOps replaces `kubectl apply` from CI. Pipelines author the change; the cluste
 
 ## Rules
 
-- Every workload has `requests` and (usually) `limits`
-- Every pod has all three probes (startup / readiness / liveness)
-- Every pod is non-root with read-only root filesystem
-- Every pod has `seccompProfile: RuntimeDefault` + dropped capabilities
-- Every workload has an HPA + PDB (PDB even for single-replica when applicable)
-- Every service has a NetworkPolicy (default-deny + explicit allow)
-- Every workload uses Workload Identity / IRSA — no service principal / IAM keys in `Secret`
-- Secrets mounted via CSI driver or External Secrets Operator
-- Labels follow `app.kubernetes.io/*` recommended set
-- Image tags pinned (immutable `:sha-abc123`); never `:latest`
-- Topology spread across zones
-- `terminationGracePeriodSeconds` + `preStop` sleep for graceful shutdown
-
-## What NOT to do
-
-- No pods without `requests`
-- No `:latest` image tags
-- No root user; no privileged containers
-- No long-lived `Secret` objects holding cloud credentials
-- No `hostNetwork` / `hostPID` / `hostIPC` without a documented reason
-- No `imagePullPolicy: Always` for SHA-tagged images — `IfNotPresent` saves pulls
-- No services without NetworkPolicy in a zero-trust posture
-- No `nodeSelector` for "scheduling fairness" — use topology spread
-- No skipping PDBs on multi-replica workloads
-- No mixing `kubectl apply` from CI and GitOps reconciliation — pick one
-- No giant Helm charts that template everything — keep templates close to the resources; flat is better than clever
-- No `subPath` mounts without `subPathExpr` for parameterization
-- No `kubectl patch` in CI as a substitute for declarative config
+The standards this skill's output must meet are the devops rule files, not a list here: `kubernetes.md` and `devops.md` (identity, pinning, one deployer, no `kubectl patch`). Read the project's copy in `.claude/rules/devops/`, or the plugin's in `devops/rules/` when the project has not installed them (`/devops:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

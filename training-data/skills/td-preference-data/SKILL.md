@@ -70,14 +70,14 @@ Route pairs through `training-data:data-quality`: dedup prompts, PII scrub, deco
 
 Split by prompt dedup cluster so the same prompt never straddles train/test (`training-data:dataset-formats`). A held-out preference test lets you measure preference accuracy after tuning.
 
-## Hard rules
+## Rules
 
-- **One trainer format per file** (DPO-style paired *or* KTO-style labeled), decided first.
-- **`rejected` is plausibly worse, not garbage** — the margin is the signal.
-- **Ties are dropped**, not labeled; a judge decision that flips on swap is a tie.
-- **Length/format bias is measured and controlled** — otherwise you tune a padding machine.
-- **Prefer on-policy pairs** (sampled from the student) for real alignment; re-sample each round.
-- **Judge pinned + calibrated**, reasons kept for audit; prompts decontaminated against evals.
+The standards this skill's output must meet are the training-data rule files, not a list here: `datasets.md` (one format per file, continuations, margin and ties, judge metadata, decontamination). Read the project's copy in `.claude/rules/training-data/`, or the plugin's in `training-data/skills/rules/` when the project has not installed them (`/training-data:rules` does). Where they and this skill disagree, the rule files win.
+
+Beyond the files, the process this skill holds to:
+
+- **Length and format bias are measured and controlled**, or the tuning makes a padding machine.
+- **Prefer on-policy pairs** (sampled from the student) for real alignment, re-sampled each round.
 
 ## Fences
 

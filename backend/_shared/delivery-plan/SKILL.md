@@ -460,12 +460,12 @@ is the progress indicator — what is left to run is exactly what is still writt
 what a block is built from: a task block with `Epic` / `Story` / `Stack` / `Agent` / `Skills` /
 `Files` / `Budget` / `Gate` filled in, and a streams table that says which lanes exist.
 
-**Every block's first line is `Depends on: <ids>`** — ids only, comma-separated, or `none` (`plan-format.md` §6) — derived from the task as Step 3 says: stream predecessor, cross-stream edges, file and build-tree overlaps. The last runnable task waits for every task nothing else waits for. The task table gains a `Runs beside` column naming, per task, the tasks it can run in parallel with (different streams, disjoint files, different trees), and the preamble says it in one line: "After C1, B1 → B2 run beside Q1; F1 waits for both; F2 runs the whole set."
+**Every block is headed `### <id> — <title> (<agent>, <stack>)` with its body directly below; its first line is `Depends on: <ids>`** — this plan's ids only, comma-separated, or `none` — and its second `Agent: <agent> · Stack: <stack>` (`plan-format.md` §6). The dependencies are derived from the task as Step 3 says: stream predecessor, cross-stream edges, file and build-tree overlaps. The last runnable task waits for every task nothing else waits for. The task table gains a `Runs beside` column naming, per task, the tasks it can run in parallel with (different streams, disjoint files, different trees), and the preamble says it in one line: "After C1, B1 → B2 run beside Q1; F1 waits for both; F2 runs the whole set."
 
 Close the header note by naming the two duties an executing agent has, so neither is a surprise: **the
 record goes into its task's `As built` note and the header `Status:` line; the next session's prompt is
 the block in `## Prompts — one per task` — rewritten where what landed differs from what it assumes,
-and deleted when its own task lands.**
+and deleted, in a follow-up commit, once its own task's work is committed.**
 
 **Directly above `## Prompts — one per task`, write `## Close-out — every task`**, copied verbatim from
 `plan-format.md` §7. A session opened from a prompt block loads nothing the block does not name, so
@@ -528,7 +528,7 @@ file to keep in step with it. Three things carry the record, and every executing
 
 | When | What the executing agent writes |
 |---|---|
-| Finishing a task | Its own gate, green. A dated `**As built:**` note on the task block — what differed from the plan, the ids and names it assigned, what is built but unverified, and the `file:line` or command output that proves the deliverable exists. Then it **deletes its own prompt block**, and rewrites the prompt blocks below it wherever what it landed differs from what they assume |
+| Finishing a task | Its own gate, green. A dated `**As built:**` note on the task block — what differed from the plan, the ids and names it assigned, what is built but unverified, and the `file:line` or command output that proves the deliverable exists. It rewrites the prompt blocks below it wherever what it landed differs from what they assume, commits, and then **deletes its own prompt block** in a follow-up commit (`plan-format.md` §7) |
 | Finishing a task another task's prompt was blocked on | The blocked prompt block itself, from what it now knows — that duty is a bullet on this task and a line in its own prompt |
 | Finishing the last runnable task | The whole set, in run order, with the failures **fixed here** rather than handed back — a branch-coverage shortfall under the 80% floor included, closed by writing tests, and the figure recorded; then the close-out: the docs, the repository-state note, and the honest list of what is built but unverified |
 | Stopping mid-task | The header `**Status:**` line names the task and what remains; a `**Progress:**` line on the task block lists the bullets not yet done. The prompt block **stays** and gains a `Picking up from:` line |
@@ -540,25 +540,7 @@ file to keep in step with it. Three things carry the record, and every executing
 And the header `**Status:**` line is rewritten by **every** session that lands anything: what is built,
 what is next, and what is built but unverified.
 
-Rules:
-
-- **The deliverable is what done means.** A task is done when its stated deliverable exists, not when
-  its bullets were performed. Every bullet satisfied with the deliverable absent is a partial — say so
-  in `Status:` and leave the prompt block in place.
-- **Evidence, not assertion.** An `As built` note carries the `file:line` or the command output that
-  proves it, produced in the session that wrote it. The rule the reconcile runs on applies first to the
-  person writing the note.
-- **`As built` notes are append-only.** They are added, never edited or deleted — a task that regresses
-  gets a second dated note, not a corrected one. Distributed across the tasks, they are what makes
-  *"what has been done"* answerable without reading git.
-- **Decisions and deviations go in `## Decisions`**, because they outlive the session that made them. A
-  deviation that lives only in a rewritten prompt is gone by Monday.
-- **Never delete a task that turned out to be unnecessary.** Mark it, say why, keep the id. A task that
-  vanishes reads as a task that was forgotten. (A task's *prompt* is deleted when the task lands —
-  that is the opposite case, and it is the point.)
-- **An `As built` note is still a lead to a cold agent.** One written last month is re-verified against
-  the code on a RESUME, per the reconcile procedure below. Recording it well makes that reconcile
-  cheap; it does not replace it.
+The standards those records meet (done means the deliverable exists, `As built` notes append-only with evidence read in the session that wrote them, divergences in `## Decisions`, an unnecessary task marked and kept) are the dev rule file `plans.md`, not a list here. Read the project's copy in `.claude/rules/dev/`, or the plugin's in `engineering-practices/rules/` when the project has not installed it (`/dev:rules` does); a project's own plan rules in its `CLAUDE.md` win. An `As built` note is still a lead to a cold agent: a RESUME re-verifies it against the code, per the reconcile procedure below.
 
 ---
 
@@ -623,8 +605,9 @@ that lands anything.>
 > task> runs the whole set once more and measures the coverage floor over the whole plan's change. A plan
 > stopped halfway has each landed task's own tests green, but the whole suite has not run.
 > **Update this document as you work** — the dated `As built` note on your task, the `Status:` line
-> above, and `## Decisions` for anything you built differently — then **delete your own prompt block**
-> and rewrite the ones below yours wherever what you landed differs from what they assume.
+> above, and `## Decisions` for anything you built differently — rewrite the prompt blocks below yours
+> wherever what you landed differs from what they assume, commit, and only then **delete your own prompt
+> block**, in a follow-up commit ("Close-out — every task").
 
 ## 1. What already exists, and what is missing
 <!-- | Need | Today (file:line, or — on greenfield) | Gap | — one row per thing this plan delivers -->
@@ -725,8 +708,8 @@ that lands anything.>
 - **→ `dev:plan-session-budget`** — sizes these tasks, writes the `Budget:` lines back onto them, and
   authors `## Prompts — one per task` inside this document.
 - **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `be-rust` / `fe-react` / `fe-blazor`** — execute the
-  tasks bound to them, write the `As built` note and the `Status:` line, delete their own prompt block
-  and rewrite the ones below it.
+  tasks bound to them, write the `As built` note and the `Status:` line, rewrite the prompt blocks below theirs,
+  and delete their own block in a follow-up commit once the work is committed.
 - **→ Mission Control** — paste the document, point at the repo.
 - **→ `data-architect` / `tooling-engineer` / `devops-engineer` / `observability-engineer-<stack>` /
   `qa-*`** — the tasks bound to them, run as peers.

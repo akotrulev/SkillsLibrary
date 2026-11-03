@@ -9,7 +9,7 @@ Run a **security-governance conformance audit** on this repository: sweep the de
 2. `Read` the stack skill at `${CLAUDE_PLUGIN_ROOT}/security/standards-audit/SKILL.md` (fall back to `security/standards-audit/SKILL.md`), then its `references/conformance-checklist.md` **end-to-end**.
 3. Follow them exactly — the standards-pin gate, the applicability matrix, the section-by-section sweep (A–N), the evidence rules, the report template, and the hostile self-review all apply.
 4. Check `docs/audits/` first: a prior `…-security-governance-conformance-r<N>.md` means **Mode B (re-audit)** — reuse its section letters and finding IDs verbatim, never renumber. Otherwise **Mode A (baseline)**.
-5. Load the owning `security/<skill>/SKILL.md` whenever a check is ambiguous, version-keyed, or you are about to write its fix direction.
+5. Load the owning `security/<skill>/SKILL.md` whenever a check is ambiguous, version-keyed, or you are about to write its fix direction, and read the project's installed rule files in `.claude/rules/security-governance/` when present: a rule the team edited there is the project's convention, so a check that contradicts it is a noted deviation, not a finding.
 
 **Read-only.** `Write`/`Edit` are for the report under `docs/audits/` and nothing else — never fix, rotate, reformat, or "quickly correct" anything found, however trivial. Findings carry a one-line fix direction and the owning skill; `security-architect` applies them in a separate run.
 

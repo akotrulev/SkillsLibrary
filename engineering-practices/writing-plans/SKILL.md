@@ -222,8 +222,11 @@ none — it is a number someone will trust.
 Both shapes are specified in [`./references/plan-format.md`](./references/plan-format.md) §4 and §6.
 Four rules are easy to get wrong and expensive when you do:
 
-- **Every prompt block's first line is `Depends on: <ids>`** — ids only, comma-separated, or
-  `Depends on: none` when the task can start at once (format reference §6). It is the task block's
+- **Plan Queue reads the heading and the first two lines.** The heading is
+  `### <id> — <title> (<agent>, <stack>)`, then one blank line and the body, nothing between; nothing
+  else is a `###` under `## Prompts`. The body's first line is `Depends on: <ids>` — this plan's ids
+  only, comma-separated, or `Depends on: none` when the task can start at once — and its second is
+  `Agent: <agent> · Stack: <stack>` (format reference §6). It is the task block's
   `**Depends on:**` reduced to ids, overlap edges included; a program reads it, so no prose on that line.
   The last runnable task waits for every task that nothing else waits for. The prompts table carries a
   `Runs beside` column, and the preamble says what runs together in one line — "After C1, B1 → B2 run
@@ -253,12 +256,9 @@ Four rules are easy to get wrong and expensive when you do:
   deletion leaves no blocks; where a blocked task will still be holding a block, say so in the last
   runnable block: that plan stays in `docs/plans/` until it clears.
 
-## No Placeholders
+## Rules
 
-The format reference §9 lists what is never in a plan. The two worth repeating while you write:
-**"similar to B2" is not content** — the executing session may read the tasks out of order, so repeat
-it — and **a `**Status:**` line that says "in progress"** without saying what is built and what is
-unverified is worse than no status at all.
+The standards a plan must meet are the dev rule file `plans.md`, not a list here: the document, its tasks, its prompts and the close-out every task runs. Read the project's copy in `.claude/rules/dev/`, or the plugin's in `engineering-practices/rules/` when the project has not installed it (`/dev:rules` does). Where the project's `CLAUDE.md` states its own plan rules, those win; where this skill and the rule file disagree, the rule file wins. The full shape, with the template, stays in [`./references/plan-format.md`](./references/plan-format.md), and §9 there is the placeholder scan.
 
 ## Self-Review
 
@@ -319,20 +319,3 @@ worktree, one prompt block per session, in order, and each session closes out pe
 `## Close-out — every task`. Tasks whose `Depends on:` lines allow it run in parallel in that one
 working tree — the preamble's runs-together line says which — and each commits only its own files, by
 path, and re-reads the plan before its close-out edits.
-
-## Remember
-
-- Read `./references/plan-format.md` before writing; it is the document contract
-- Ground the plan in `## 1.`'s gap table, then decide the work in the numbered sections, then cut tasks
-- Tasks flat and ordered, ids prefixed by family — no slices, no phases, no grouping layer
-- One deliverable, one stack, one agent, one budget with drivers, one `Depends on` line per task and per prompt, overlap edges included
-- Every task gates what it built and leaves its own tests green; the last runnable task runs the whole
-  set once more and fixes what it finds — including a branch-coverage shortfall under the 80% floor,
-  which it closes by writing tests
-- One paste-ready prompt per task, rewritten in place by any task that changes what it assumes; a
-  prompt that cannot be written yet is written by the task that unblocks it
-- A landed task's prompt is deleted; the live prompt set is the progress indicator, and the task that
-  deletes the last one rewrites `Status:` and moves the plan into `docs/plans/implemented/`
-- `## Close-out — every task` sits above the prompts, verbatim, and every block ends by pointing at it
-- `**Status:**` at the top is maintained, and names what is built but unverified
-- Exact file paths, exact commands, real values — always

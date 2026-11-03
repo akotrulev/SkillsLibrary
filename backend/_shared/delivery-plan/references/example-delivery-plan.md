@@ -391,7 +391,9 @@ red until `B7` resolves it with the user. *(2026-08-02)*
 
 ## Close-out — every task
 
-Before you stop, in this order, in this file:
+Before you stop, in this order, in this file. Another task may be running in this working tree:
+re-read this file immediately before these edits, and touch only your own task block, your own prompt
+block and the line that says which have landed.
 
 1. **As built** — append a dated `**As built (YYYY-MM-DD):**` bullet to your task block: what differed
    from the plan, the ids and names you assigned, what is built but unverified, and the `file:line` or
@@ -401,15 +403,24 @@ Before you stop, in this order, in this file:
 3. **The blocks below yours** — rewrite, in place, every prompt block whose assumptions your work
    changed (a renamed file, a changed signature, a moved gate), and write any block left
    `Blocked on <your id>` from what you now know.
-4. **Your own block** — delete it, and update the line above the blocks that says which have landed.
-   Stopping mid-task: keep it, with a `Picking up from:` line. Blocked: keep it, naming the blocker and
-   its owner.
-5. **Status** — rewrite the header `**Status:**` line: what is built, what is next, what is built but
-   unverified.
-6. **Filing** — if your deletion left no blocks, rewrite `**Status:**` one final time (what the plan
-   delivered, what is still unverified) and `git mv` this plan into `docs/plans/implemented/`, same
-   name and number — a `solution-planner` pack moves its whole initiative folder.
-7. **Commit** — the code, its tests and these plan edits together, in one commit.
+4. **Status** — rewrite the header `**Status:**` line: what is built, what is next, what is built but
+   unverified. When a task is running beside you, leave it: the next task that waits for you rewrites it.
+5. **Commit the work** — the code, its tests and these plan edits together, on the current branch (under
+   Plan Queue, the plan's branch in its worktree; never check out the default branch), adding only your
+   own files, by path — never `git add -A`. Your prompt block is still in the plan.
+6. **Merge, last task only** — if this plan runs on its own branch, merge the default branch into it
+   now, resolve every conflict by keeping both sides' rows, re-run the failing suites if code conflicted,
+   and commit the merge, so the plan merges back cleanly.
+7. **Your own block** — only now delete it, and update the line above the blocks that says which have
+   landed, in a follow-up commit of its own: `docs: delete <id>'s prompt (<plan>)`. Do not stop between
+   the two commits. Stopping mid-task: keep it, with a `Picking up from:` line. Blocked: keep it, naming
+   the blocker and its owner. When the queue says other tasks of this plan are running beside you, do
+   not commit, stash, reset or check out at all: make this deletion your last edit, and the queue
+   commits the work and the deletion together.
+8. **Filing** — if your deletion left no blocks, rewrite `**Status:**` one final time (what the plan
+   delivered, what is still unverified), `git mv` this plan into `docs/plans/implemented/`, same name and
+   number — a `solution-planner` pack moves its whole initiative folder — and add its row to that
+   folder's README where there is one, in the same follow-up commit.
 
 ## Prompts — one per task
 
@@ -456,9 +467,12 @@ finished task is a thing someone runs by mistake. `B2` (held, partial), `F2`, `Q
 
 ---
 
-### B2 — Bookings resource (be-dotnet, be) — held, partial
+### B2 — Bookings resource, held and partial (be-dotnet, be)
 
 ````
+Depends on: Q1, C7, C3, C4, C9
+Agent: be-dotnet · Stack: be
+
 You are `be-dotnet`. Task B2 of docs/plans/003-workshop-booking/delivery-plan.md: finish the Bookings
 resource.
 

@@ -143,29 +143,7 @@ NoSQL engines lack `ALTER`. Migration moves:
 
 ## Rules
 
-- One logical change per migration file
-- Versioned, sortable names (timestamp or sequence)
-- Migrations execute in the **CI/CD pipeline** as a pre-deploy step, never on app startup
-- Plain SQL or simple JS — avoid heavy abstractions
-- Forward-only; corrective migrations
-- Backfills batched, resumable, observable
-- Schema and data migrations split per file
-- Expand-contract across releases; no collapsed phases
-- The migration runner has its own DB role with DDL privileges; the app runtime role has DML only
-- One migration tool per project — never mix
-
-## What NOT to do
-
-- No app-startup migrations in production
-- No DDL + DML in the same migration file
-- No `DROP COLUMN` in the same release that stops writing to it
-- No `ALTER TABLE ... NOT NULL` on a large table without prior backfill
-- No `CREATE INDEX` without the engine's online option (`CONCURRENTLY` / `WITH (ONLINE = ON)` / `ALGORITHM=INPLACE`) on a hot table
-- No down-migrations relied on in production
-- No "manual SQL run by the DBA" outside the migration tool — every change is auditable
-- No backfill run from a developer laptop — pipeline / worker only
-- No migration that locks a hot table for the duration of a multi-million-row update
-- No migrations PR with > 1 logical change — split it
+The standards this skill's output must meet are the data rule files, not a list here: `data-migrations.md` and `data.md`, plus the engine's file (`data-postgresql.md`, `data-sqlserver.md`, `data-mysql.md`). Read the project's copy in `.claude/rules/data/`, or the plugin's in `data/rules/` when the project has not installed them (`/data:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

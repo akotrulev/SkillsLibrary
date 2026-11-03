@@ -68,20 +68,9 @@ docs/business-model/
 
 Re-read **all** files, reconcile drift against the current requirements/codebase reality the user points at, prune stale entries, and re-verify `#inferred` items. Report what changed.
 
-## Authoring rules (apply to every artifact)
+## Authoring standards
 
-- **Size discipline.** Any file approaching ~2,000 words splits by topic; `INDEX.md` stays one line per artifact. Critical facts near the top of each file.
-- **Short declarative statements**, not essays. "Refunds allowed within 30 days (BRD §6)" — not a paragraph.
-- **Stable IDs + traceability.** Every artifact carries an ID (`AREA-`, `FLOW-`, `ENT-`, `DEC-`, `CONF-`, `EVT-`, `RX-`, `INV-` + number); flow nodes are `FLOW-nnn.k`, decision-table rule rows are table-local `R1, R2…` under their `DEC-` id. Everything cites its source requirement — a story as `US<n>` (plus `AC<k>` where one criterion is meant), an epic as `E<n>`, otherwise the BRD section or contract path. IDs are never reused after deletion.
-- **Feature identity.** Wherever an artifact names the feature that *owns* a transition, rule or step, the feature is an id with a label, never a bare word: the epic from the initiative that introduced it (`E2 booking`), or the area for code-derived artifacts (`AREA-003 ordering`). Two initiatives may both have an `E2`, so the label carries the initiative folder when it is not obvious (`E2 booking · 004-workshop`). A free-text feature name with no id is a traceability gap, because nothing downstream can find the story set behind it.
-- **Annotation grammar** (uniform across artifacts):
-  - `[TBD - reason]` — known unknown, waiting on a decision
-  - `⚠️ Assumption:` — stated but unconfirmed; must be resolvable to a source or removed at refresh
-  - `~~old~~ → new` — versioned change, keep one generation of history inline
-  - Confidence tags: `#confirmed` (sourced to a requirement/stakeholder decision) · `#inferred` (derived by analysis, plausible but unverified) · `#observed` (seen in the implementation or the live system, not in any doc)
-- **Record decisions with rationale.** A conflict resolution in `interaction-map.md` is a *business decision* — record who/what decided and why, not just the outcome.
-- **Skip what the repo already records.** Code structure, API shapes derivable from contracts in-repo, git history. The KB records what the software must *do* and how features *interact* — nothing else.
-- **Header on every artifact file.** Each `areas/<area>.md`, `flows/<flow>.md`, `entities/<entity>.md`, `decisions/<point>.md` file (and `system-overview.md`, `events.md`, `shared-data.md`, `invariants.md`) opens with `**Created:** <YYYY-MM-DD>` and `**Owned by:** \`<the owning skill>\`` (e.g. `business-analysis:process-flow`; `dev:doc-business-model` for `areas/` and `system-overview.md`); on every later update, add `**Last updated:** <YYYY-MM-DD> by \`<skill>\`` beneath it rather than overwriting the creation line.
+The standards every KB file must meet (what the KB holds, ids and traceability, feature identity, the annotation grammar, headers, provenance, recording decisions) are the business-analysis rule files, not a list here: `business-model.md` for every file under `docs/business-model/`, plus `business-model-flows.md`, `business-model-entities.md`, `business-model-decisions.md`, `business-model-connections.md` and `business-model-interactions.md` for those files. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win. Installed, they load in any session that touches the KB, so a plan task or `be-documenter` editing a KB file keeps it consistent without loading this skill.
 
 ## INDEX.md format
 
@@ -133,6 +122,7 @@ When no `docs/business-model/` exists and the user wants one:
 1. Confirm the path (default `docs/business-model/`; respect an existing docs convention if the project has one).
 2. Create `INDEX.md`, `glossary.md`, `active-context.md`, `interaction-map.md` with headers and empty sections (`events.md`, `shared-data.md` and `invariants.md` are created by `business-analysis:dependency-map` on first use) — plus the `areas/`, `flows/`, `entities/`, `decisions/` directories.
 3. Do **not** backfill the whole model speculatively. The KB accretes as features are analyzed; seed it only with what the current task's analysis actually produces.
+4. Offer `/business-analysis:rules`, so the KB's standards load in every later session that edits it.
 
 **The one exception — evidence-based backfill from code.** The `be-documenter` agent deliberately populates the KB in bulk by reading an existing implementation. That does not violate the rule above, because the rule forbids *speculation*, not *volume*: every statement it writes is `#observed` with a `file:line` read that session, or `#inferred` and simultaneously raised as an open question. In `areas/` documents those tags and citations sit in the **closing evidence table** rather than inline — the body reads as a product spec (overview · setup · how it works · worked example · open questions) — but the tag per statement is still mandatory there. It never writes `#confirmed` — promotion is a human act — and it never overwrites a `#confirmed` entry, since a human's confirmation outranks a trace. See `backend/_shared/business-documentation`.
 

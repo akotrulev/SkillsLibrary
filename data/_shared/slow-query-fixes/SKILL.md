@@ -158,29 +158,15 @@ The universal triage above is the frame. Each engine's plan-reading, index types
 
 ## Rules
 
-- Walk the triage in order; don't skip plan reading
-- Indexes designed per query pattern, not per column
-- Compose indexes via ESR (Equality / Sort / Range)
-- Partial / filtered indexes for skewed data
-- Projection discipline — never `*` in app code
-- Keyset pagination above ~10k rows
-- N+1 caught at code-review time, not in prod
-- Statement timeouts so runaway queries don't run for hours
-- Stats kept fresh on hot tables
-- Cache only when the cost of staleness < cost of compute
+The query standards for SQL files (bound parameters, explicit columns, bounded queries, keyset paging, SARGable predicates, per-pattern indexes, no dirty reads) are the data rule file `data.md` plus the engine's file, not a list here. Read the project's copy in `.claude/rules/data/`, or the plugin's in `data/rules/` when the project has not installed them (`/data:rules` does). The tuning discipline stays here:
 
-## What NOT to do
-
-- No `SELECT *`
-- No unbounded queries
-- No `OFFSET` deep paging
-- No "index everything" as a strategy
-- No `NOLOCK` / dirty reads as a perf strategy
-- No N+1 left in the codebase after review
-- No "the DB will figure it out" attitude — read the plan
-- No caching to mask a missing index
-- No assuming the optimizer is right about stats — verify
-- No tuning by adding hints before fixing the underlying query / index / data
+- Walk the triage in order and read the plan before changing anything; confirm with a re-run plan after.
+- Partial / filtered indexes for skewed data.
+- No hints before fixing the query, index or data; never assume the optimizer's statistics are right — verify, and keep them fresh on hot tables.
+- Statement timeouts so runaway queries can't run for hours.
+- N+1 caught at code-review time; none left after review.
+- Cache only when the cost of staleness is below the cost of compute, never to mask a missing index.
+- Document stores and DynamoDB keep the same projection, bounding and paging discipline (see each engine skill).
 
 ## Generation steps
 

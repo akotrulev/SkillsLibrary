@@ -49,15 +49,9 @@ This skill is the **FEATURE lane** of the `code-auditor` agent, and carries both
 
 Same policy as `dev:audit-spec`: evidence is **read code** by default; running builds/tests or probing a live app is an explicit per-audit opt-in that corroborates a code trace but never replaces it.
 
-## Evidence rules (non-negotiable)
+## Evidence rules
 
-Identical to `dev:audit-spec` — keep the two skills' discipline aligned:
-
-1. Every claim cites `file:line` you actually read; a grep hit is a lead, not evidence.
-2. Tag `#confirmed` (path traced end-to-end) vs `#inferred` (naming/config/convention); an inference chain of more than one link is a guess — say so.
-3. Negative claims ("X is never validated") name the search performed.
-4. Never assert from naming alone — read the body.
-5. Comments and docs claiming behavior are `#inferred` at best.
+The evidence, id and round standards every report must meet are the dev rule file `audits.md`, shared with `dev:audit-spec`, not a list here. Read the project's copy in `.claude/rules/dev/`, or the plugin's in `engineering-practices/rules/` when the project has not installed them (`/dev:rules` does). Where it and this skill disagree, the rule file wins. A grep hit is a lead, not evidence; a negative claim ("X is never validated") names the search performed.
 
 ## Inputs needed
 
@@ -90,7 +84,7 @@ Map the feature's territory: entry points (endpoints, handlers, jobs, consumers,
 Read the code — 2–3 representative files first to calibrate the project's conventions, then the surface's actual paths. Collect:
 
 - **Functionality narrative** — what the surface actually does, traced, in a few sentences per path. Where the code and its naming/docs disagree, the code wins and the disagreement is a finding.
-- **Validations & gates** — every check the surface enforces: input validation, guards/preconditions, authn/authz checks, feature flags, idempotency keys, concurrency/locking, rate limits, error paths and what each failure does. Also record the *absences* the driving question makes relevant (rule 3: name the search).
+- **Validations & gates** — every check the surface enforces: input validation, guards/preconditions, authn/authz checks, feature flags, idempotency keys, concurrency/locking, rate limits, error paths and what each failure does. Also record the *absences* the driving question makes relevant, each naming the search.
 - **Integration map** — who calls it, what it calls, events published/consumed, shared tables/contracts, config it reads. Note the *trust assumptions* at each boundary (what inbound data is assumed already-validated/normalized — the classic audit payload).
 
 ### 4. Findings
@@ -296,12 +290,9 @@ The rollup under each surface is the deliverable stakeholders actually read. Rul
 
 ## Rules
 
+The report standards (permanent surface letters and finding ids, Resolved only on a fresh re-trace, the three finding classes, leverage-ordered sequencing, unknowns to Open questions) are the dev rule file `audits.md`; see Evidence rules above for where to read it. Beyond it:
+
 - **Strictly read-only** on product code. The audit reports are the only files this skill writes. Offer remediation direction; never apply it here.
-- **Surface letters and finding IDs are permanent across rounds** — continue the sequence, never renumber or reuse. They are the contract that makes the trend claims real.
-- **Resolved is a claim you make only after re-reading the code this round.** No commit message, ticket status, or passing test earns it on its own.
 - Every finding answers the driving question or is explicitly marked adjacent.
-- **Findings are listed under exactly one of three classes — Data issues / Code issues / Logical conflicts** — and all three headings appear in every round (`None.` when empty) so rounds compare class by class. Class is orthogonal to severity and to defect family.
-- Unknowns are legitimate: what you couldn't settle goes in *Open questions*, never silently guessed (an audit that admits its limits is trusted; one that doesn't is checked).
 - A red build/test state on arrival is a finding, not yours to fix.
-- Sequencing is by leverage, not severity — say why each item is where it is.
 - The report is a first-class test-basis input: write findings so `qa/manual/requirements-breakdown` can consume them (observable behavior, boundaries, states — boundary conditions in findings are BVA seeds).

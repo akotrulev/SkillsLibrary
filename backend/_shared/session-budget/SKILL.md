@@ -192,29 +192,17 @@ Two things stay this skill's to get right, because the close-out section cannot 
 
 ## Rules
 
+The standards the `**Budget:**` lines and the prompt blocks must meet (drivers itemized, sections never whole artifacts, one task per block, a blocked task keeping its block, a landed task's block deleted, the last block's filing duty, every code block naming its own gate) are the dev rule file `plans.md`, not a list here. Read the project's copy in `.claude/rules/dev/`, or the plugin's in `engineering-practices/rules/` when the project has not installed it (`/dev:rules` does); a project's own plan rules in its `CLAUDE.md` win. Three sizing rules are this skill's own:
+
 - **Estimate before authoring is finished, not after.** The number is an input to how the task is written. Producing a task list and then measuring it turns the estimate into trivia.
-- **Never cite a whole artifact in a prompt.** Sections, always. `data-model.md` is 40k of context; the two entity blocks the task needs are 4k.
 - **The floor is not negotiable and not divisible.** Two tasks in one session do not pay one floor — they are one task, or they are two sessions.
 - **An unknown file size is 3k, and it is written as an assumption.** Do not silently guess a number that reads like a measurement.
-- **A task that cannot be run gets a line, not silence.** "Blocked on H1 (Stripe sandbox credentials — owner: Ana)" is the answer to "what do I paste next" for it, and it stays in the section.
-- **A prompt that cannot be written yet is written by the task that unblocks it**, never guessed at plan time — and that duty is on the blocking task, not in a note nobody owns.
-- **The last block carries the filing duty.** Deleting it is what finishes the plan, so it says to
-  rewrite `Status:` and move the plan into `docs/plans/implemented/`. A block that ends without it
-  leaves finished plans sitting in the live folder, which is the one thing that folder is for.
-- **Every code block names its own gate, and the whole set runs once, on the last runnable task.** A code block whose gate runs nothing is a defect: its failure surfaces in the last task, where it is slowest to fix. An intermediate block that runs the unfiltered whole suite is a defect too.
-- **The prompt names one task.** A block that hands over two tasks is a block that will get half-done and then re-derived from scratch.
-
-## Anti-patterns
 
 | Anti-pattern | Why it fails |
 |---|---|
 | Splitting a coherent task to land under the target | Produces two tasks neither of which can be verified alone, and a half-written seam between them |
 | Padding a task with unrelated work to reach the target | A bucket with one number on it; the second deliverable gets dropped when the session runs long |
-| `Budget: ~95k` with nothing behind it | Unfalsifiable. The itemized drivers are what make it checkable and re-derivable |
-| A prompt that says "read the plan pack" | The session spends its budget reading and its output suffers for it |
 | Leaving the prompts section for the end of the session | It is the one part of the plan whose whole value is being current. Maintain it as the task closes |
-| Deleting a blocked task's block | The task looks finished. A blocked task keeps its block and states its blocker and owner |
-| Keeping a landed task's block "for the record" | Someone runs it again. The record is the `As built` note; the live prompt set is what is left to do |
 
 ## Self-check
 

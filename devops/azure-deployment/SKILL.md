@@ -213,27 +213,17 @@ Same logic as EKS — only when k8s expertise + workload complexity justify it. 
 
 ## Rules
 
-- One Azure subscription per environment (or at least separate resource groups with strict RBAC); Management Groups at the org level for policy
-- **Azure Policy** enforces guardrails — deny public IPs on PaaS, enforce private endpoints on storage, require tags
-- All resources tagged: `env`, `service`, `owner`, `cost_center`
-- Min 2 replicas in production; multi-AZ where the service tier supports it
-- Image tags immutable (`:sha-abc123`); never `:latest`
-- Secrets in Key Vault, referenced by Managed Identity; never in app settings as plaintext
-- Public ingress is **Application Gateway** or **Front Door** with WAF; internal ingress within the VNet
-- Cost guardrails: Cost Management budgets per RG; alerts at 80% of expected; reservation purchases for predictable workloads
+The standards this skill's output must meet are the devops rule files, not a list here: `iac.md` (tags, minimum replicas, no public storage, no open ingress, Key Vault per environment, one subscription per environment) and `devops.md` (Managed Identity not secrets, immutable tags). Read the project's copy in `.claude/rules/devops/`, or the plugin's in `devops/rules/` when the project has not installed them (`/devops:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
-## What NOT to do
+## Platform defaults
 
-- No service principal secrets in app config — Managed Identity only
-- No public Storage Account / Blob with anonymous read (except deliberate static site origins fronted by Front Door)
-- No `:latest` image tags in production
-- No `0.0.0.0` rules in NSGs — restrict by source ASG or IP
-- No single-replica Container App in production
-- No Functions Consumption for endpoints that can't tolerate occasional cold starts (use Premium / Flex)
-- No App Service deploy without slot-and-swap once you have prod traffic
-- No Static Web Apps with auth gated only by `staticwebapp.config.json` for sensitive content — pair with Auth0 / Entra ID and validate in the API
-- No "shared Key Vault across all envs" — separate per env
-- No AKS for a 3-service team — Container Apps will scale further than you'd guess
+- Management Groups at the org level, with **Azure Policy** enforcing guardrails: deny public IPs on PaaS, require private endpoints on storage, require tags.
+- Public ingress through **Application Gateway** or **Front Door** with WAF; internal ingress stays in the VNet.
+- Cost guardrails: Cost Management budgets per resource group, alerts at 80% of expected, reservations for predictable workloads.
+- No Functions Consumption plan for an endpoint that cannot tolerate occasional cold starts: Premium or Flex.
+- No App Service deploy without slot-and-swap once there is production traffic.
+- No Static Web Apps content gated only by `staticwebapp.config.json` when it is sensitive: pair with Auth0 or Entra ID and validate in the API.
+- No AKS for a three-service team: Container Apps scales further than expected.
 
 ## Generation steps
 

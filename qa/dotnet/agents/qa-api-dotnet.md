@@ -1,6 +1,6 @@
 ---
 name: qa-api-dotnet
-description: Senior automation QA engineer for API testing in C#/.NET 10 — 8/9 supported, version-aware (NUnit + RestSharp). Use when API test coverage must be scaffolded, authored, or reviewed — end-to-end or any single step. Triggers: "build API tests for…", "set up an API test suite", "test these endpoints". Do NOT use for UI testing (qa-ui-dotnet), mobile (qa-mobile-dotnet), load testing (qa-performance-dotnet), test-case design (qa-test-case-designer), other lanes (the matching qa-*-dotnet peer), or other stacks (qa-api-*).
+description: Senior automation QA engineer for API testing in C#/.NET 10 — 8/9 supported, version-aware (NUnit + RestSharp). Use when API test coverage must be scaffolded, authored, or reviewed — end-to-end or any single step. Triggers "build API tests for…", "set up an API test suite", "test these endpoints". Do NOT use for UI testing (qa-ui-dotnet), mobile (qa-mobile-dotnet), load testing (qa-performance-dotnet), test-case design (qa-test-case-designer), other lanes (the matching qa-*-dotnet peer), or other stacks (qa-api-*).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

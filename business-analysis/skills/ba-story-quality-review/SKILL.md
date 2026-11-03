@@ -33,32 +33,12 @@ Ask only what's missing, at most 2–3 questions:
 
 ## Review checklist
 
-Apply per story. Each failed check becomes one finding row with a severity.
+Apply per story; each failed check becomes one finding row with a severity. The per-story checks (story shape, INVEST, acceptance-criteria quality, testability, no technology) are the business-analysis rule files `backlog-stories.md`, and `backlog-epics.md` for epics, not a list here:
 
-**Story shape**
-- As-a / I-want / So-that present; role is specific ("logged-in admin", not "user")
-- The *so-that* names value to a person, not "so the system can…"
-- It's a story, not a technical task — something demoable to a stakeholder
+1. **The project's copies first**: `.claude/rules/business-analysis/`. The team may have edited them, and its edits win.
+2. **Otherwise the plugin's copies**: `business-analysis/skills/rules/`. Say in the report that the project has no installed rules and that `/business-analysis:rules` installs them.
 
-**INVEST**
-- **I**ndependent — shippable without siblings in the same batch; hidden coupling is a finding
-- **N**egotiable — intent, not an implementation spec in disguise
-- **V**aluable — the so-that survives a stakeholder sniff test
-- **E**stimable — enough info to size; unanswered design questions are findings
-- **S**mall — fits a sprint; two capabilities in one story is a split candidate. A story that ships only one *layer* of a capability ("the API", "the screen") is not small, it is undemoable — verdict **Not a story**, fix is to merge it back
-- **T**estable — every AC objectively verifiable
-
-**Acceptance criteria quality**
-- Given / When / Then; one behavior per scenario; no `And` chains hiding multiple behaviors
-- Observable outcome in every Then — "user can do X" with no observable check is a finding
-- Functional vs non-functional AC separated and both present where relevant (performance, a11y, audit)
-- No AC that merely restates the story title
-
-**Testability (what blocks `requirements-breakdown` downstream)**
-- Validations state field, rule, **and** outcome on violation — a rule with no violation behavior is *silent*
-- No unfalsifiable words ("fast", "user-friendly", "recently") without a number
-- Contradictions between AC, or between story and linked epic, are flagged — never silently resolved
-- Out-of-scope stated; absent means reviewers will assume everything is in scope
+Read them in full before the first finding; never review from memory of the rules, and never add a check the files do not contain (propose it as a rule change instead). For a backlog from outside `docs/plans/` (a tracker export, a client document), skip the id, heading and `Source` rules and judge the rest. A layer-only story gets the verdict **Not a story**.
 
 **Backlog hygiene (batch reviews only)**
 - Duplicate or overlapping stories

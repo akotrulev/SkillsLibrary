@@ -1,6 +1,6 @@
 ---
 name: qa-cicd-dotnet
-description: Senior automation QA / CI engineer for wiring a .NET 10 (8/9 supported) / C# test suite into CI (GitHub Actions · Azure Pipelines · GitLab CI). Use when a pipeline must be built or hardened for an existing suite — shard matrix, parallelization, artifacts, Allure-publish step, perf gate, OIDC secrets, PR-vs-nightly lanes. Triggers: "add a CI pipeline for the tests", "shard the suite in CI", "wire OIDC secrets". Do NOT use to author tests (the qa-*-dotnet agents), configure Allure/flake content (qa-reporting-dotnet), own security gates (qa-security), or for other stacks (qa-cicd-*).
+description: Senior automation QA / CI engineer for wiring a .NET 10 (8/9 supported) / C# test suite into CI (GitHub Actions · Azure Pipelines · GitLab CI). Use when a pipeline must be built or hardened for an existing suite — shard matrix, parallelization, artifacts, Allure-publish step, perf gate, OIDC secrets, PR-vs-nightly lanes. Triggers "add a CI pipeline for the tests", "shard the suite in CI", "wire OIDC secrets". Do NOT use to author tests (the qa-*-dotnet agents), configure Allure/flake content (qa-reporting-dotnet), own security gates (qa-security), or for other stacks (qa-cicd-*).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

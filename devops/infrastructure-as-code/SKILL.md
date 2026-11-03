@@ -261,18 +261,6 @@ output "fqdn" { value = azurerm_container_app.this.latest_revision_fqdn }
 
 Same idea, HCL syntax. Variables typed; defaults explicit; `dynamic` blocks for repeated nested structures.
 
-## Common rules (both tools)
-
-- **Module per logical resource group** (Container App + its deps, Postgres + firewall + replica, etc.). One thing per module.
-- **Inputs typed and described**; outputs documented
-- **No magic strings** for resource names — derive from a name prefix variable for predictability
-- **Tags everywhere** — `env`, `service`, `owner`, `cost_center` mandatory
-- **Identity-based auth** — Managed Identity (Azure), IAM Role + OIDC (AWS); never service principal client secrets or IAM access keys in IaC inputs
-- **State remote + locked** (Terraform); Bicep operates on the deployment, but maintain a deployment-history convention
-- **Plan-before-apply** in every pipeline; require human approval on apply for prod
-- **No `terraform apply` from a developer laptop against prod** — pipeline only
-- **Drift detection**: scheduled plan run that fails if real state ≠ code
-
 ## Workspaces / stacks per environment
 
 - Terraform: separate **workspaces or state files** per env; never share state across envs
@@ -302,30 +290,7 @@ Either way: **one resource per env** — don't try to "deploy the same module tw
 
 ## Rules
 
-- One IaC tool per project — Bicep or Terraform, not both
-- Modules small, single-purpose, versioned
-- Tags mandatory on every resource (env, service, owner, cost_center)
-- State remote + locked (Terraform); deployment history convention (Bicep)
-- Identity-based cloud auth (Managed Identity / IAM Role) — no client secrets / access keys
-- Plan-before-apply in pipeline; human approval on prod
-- One environment per state / scope
-- `prevent_destroy` on irreversible resources
-- Drift detected by a scheduled plan
-- Pipeline runs `fmt`/`validate`/`lint`/`tfsec` on PRs
-
-## What NOT to do
-
-- No local state in Git
-- No `terraform apply` from a laptop against prod
-- No mixing Bicep and Terraform on the same resources
-- No shared state across environments
-- No mutable cloud changes outside IaC — every change goes through a PR
-- No IAM access keys / SP secrets as IaC inputs
-- No untagged resources
-- No `for_each` over a list when it should be a map keyed by stable identifier (causes destroy/recreate on reorder)
-- No `count = var.enabled ? 1 : 0` for optional resources without `lifecycle.ignore_changes` planning
-- No `null_resource` / `local-exec` doing work IaC should do declaratively
-- No hard-coded resource names — use prefixes + variables
+The standards this skill's output must meet are the devops rule files, not a list here: `iac.md` (state, modules, tags, deletion protection, exposure, suppressions), `devops.md` (one tool per resource, no static keys, provider pins, no portal changes) and `pipelines.md` (plan on PR, approval on prod apply, scheduled drift plan). Read the project's copy in `.claude/rules/devops/`, or the plugin's in `devops/rules/` when the project has not installed them (`/devops:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 
