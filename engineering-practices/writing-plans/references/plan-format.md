@@ -177,7 +177,9 @@ failed, through the project's rerun-failed path where it has one, and run the wh
 close. Never rerun the whole set to check one fix: each full run costs minutes, and the loop is where a
 close-out spends its time. A failure that moves between runs — green, red, green — is a defect in
 isolation (shared data, test order) or in the gate's scheduling (suites competing for one machine). Fix
-that; never rerun until it happens to pass.
+it in the code, in shared setup the task owns, or in the gate script; never rerun until it happens to
+pass. When the defect sits inside an acceptance test or fixture a `Q` task wrote, it is read-only (§4):
+it is a test the task believes wrong, a dated `D<n>` with both readings, and it stays as it is.
 
 **The `Gate:` line takes one of three forms:**
 

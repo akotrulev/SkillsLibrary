@@ -186,8 +186,9 @@ attributing it is part of this task. Say in your `As built` note which task each
 The fix loop: run the whole set once; reproduce each failure with `<the narrowest rerun — one spec, one
 filter>`, fix it and see it green there; then `<the project's rerun-failed command>`; then the whole set
 once more to close. Never rerun the whole set to check one fix. A failure that moves between runs is a
-defect in isolation (shared data, test order) or in the gate's scheduling: fix that, never rerun until it
-happens to pass.
+defect in isolation (shared data, test order) or in the gate's scheduling: fix it in the code, shared
+setup you own or the gate script, never rerun until it happens to pass. Inside an acceptance test or
+fixture a `Q` task wrote it is read-only: record a dated `D<n>` with both readings and leave the test.
 A coverage shortfall is fixed by writing the missing tests — never by excluding a file that has logic
 or lowering the number; record the figure per stack and every file left out.
 
