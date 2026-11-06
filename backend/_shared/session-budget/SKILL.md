@@ -148,9 +148,12 @@ everything that session needs and names nothing it does not:
 - **The gate line.** `Gate: own tests — <commands>` on every block that writes code or tests: a `Q`
   block expects **red** for the recorded reason (or, when its app cannot start in one command, proves the
   tests load and list), and any other code block expects **green**, then the coverage-floor measure over
-  the files it wrote. `Gate: none — <why nothing here is runnable>` only on a block with nothing runnable.
-  The last block carries the project's own commands for the whole set in run order, and the instruction
-  to **fix what they find rather than hand it back**.
+  the files it wrote. An implementation block's commands also rerun every acceptance test an earlier task
+  turned green in the same app, through the runner the last block's gate uses (the project's gate script,
+  scoped), never a bespoke command. `Gate: none — <why nothing here is runnable>` only on a block with
+  nothing runnable. The last block carries the project's own commands for the whole set in run order, the
+  instruction to **fix what they find rather than hand it back**, and the fix loop (plan format §5) with
+  the project's narrowest-rerun and rerun-failed commands filled in.
 - **A `Q` block** reads the endpoint blocks it tests by section (`api-surface.md` §5.2, not §5), the
   validation catalog's standard set, the ACs it proves (`stories.md` US7–US9), and the OpenAPI asset's
   path from the contract task's `As built`. Its traps are red for the right reason — red on the

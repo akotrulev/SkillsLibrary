@@ -236,9 +236,11 @@ Four rules are easy to get wrong and expensive when you do:
   reference §5). A `Q` task expects red for the recorded reason; a `Q` task whose app cannot start in one
   command proves its tests load and list (Playwright's `--list`), and the task that serves each journey
   turns it green. An implementation task expects green, and the acceptance tests are read-only to it
-  (format reference §4). `**Gate: none**` is only for a task with nothing runnable, and it says so. The
-  last runnable task runs the whole set once more, in run order, and **fixes what it finds rather than
-  handing it back**. When the plan writes code, it ends with the **coverage floor** (format reference §5):
+  (format reference §4); its commands also rerun every acceptance test an earlier task turned green in the
+  same app, through the runner the last task's gate uses (the project's gate script, scoped), never a
+  bespoke command. `**Gate: none**` is only for a task with nothing runnable, and it says so. The last
+  runnable task runs the whole set once more, in run order, and **fixes what it finds rather than handing
+  it back** by the fix loop (format reference §5), which its block spells out. When the plan writes code, it ends with the **coverage floor** (format reference §5):
   ≥ 80% branch coverage of the code the plan wrote, short of which that task writes the missing tests.
   Every task before it measures that floor over its own files — each one's bullets name the branches its
   tests must reach, as `OrderServiceTests` does in the format reference's deliverable table.
@@ -289,8 +291,10 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
    either merged or left alone deliberately.
 11. **Gate check:** every code task's `**Gate: own tests**` names its commands, filtered and never the
     unfiltered suite; a code task whose gate runs nothing is a defect. `**Gate: none**` appears only on a
-    task with nothing runnable, which says so. The last runnable task runs the whole set: its commands are
-    the project's own and in run order, it ends with the coverage floor (format reference §5) when the
+    task with nothing runnable, which says so. Every implementation task after the first that serves an
+    app reruns the acceptance tests earlier tasks turned green there, through the runner the last task's
+    gate uses. The last runnable task runs the whole set: its commands are the project's own and in run
+    order, its block spells out the fix loop, it ends with the coverage floor (format reference §5) when the
     plan writes code, and it holds no feature work when the plan has any. What a halfway stop leaves is
     stated in the plan.
 12. **Filing check:** where a blocked task will outlive the last runnable one, the last runnable block

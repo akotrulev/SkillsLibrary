@@ -166,10 +166,18 @@ stands in the way whichever task caused it. Its `**Gate:**` line names those exa
 run the project's whole suite, lint or typecheck beyond what those commands include.
 
 **The last runnable task runs the whole set once more across the plan**, ending with the coverage floor
-when the plan writes code, retries only what failed where the project has a way to, **fixes what it finds
-rather than handing it back**, and carries the docs and close-out: it is the only session that knows what
-actually landed and what is built but unverified, and a session that only writes markdown is the wasted
-agent switch this rule exists to remove. It holds no feature work when the plan has any.
+when the plan writes code, **fixes what it finds rather than handing it back** by the fix loop below, and
+carries the docs and close-out: it is the only session that knows what actually landed and what is built
+but unverified, and a session that only writes markdown is the wasted agent switch this rule exists to
+remove. It holds no feature work when the plan has any.
+
+**The last task's fix loop.** Run the whole set once. Reproduce each failure with the narrowest command
+that shows it — one spec file, one test filter — fix it, and see it green there. Then rerun only what
+failed, through the project's rerun-failed path where it has one, and run the whole set once more to
+close. Never rerun the whole set to check one fix: each full run costs minutes, and the loop is where a
+close-out spends its time. A failure that moves between runs — green, red, green — is a defect in
+isolation (shared data, test order) or in the gate's scheduling (suites competing for one machine). Fix
+that; never rerun until it happens to pass.
 
 **The `Gate:` line takes one of three forms:**
 
@@ -188,10 +196,18 @@ agent switch this rule exists to remove. It holds no feature work when the plan 
   task's commands build what it touched, run its unit tests and the acceptance tests it must turn green,
   then the coverage-floor measure over the files it wrote** (the table below, scoped to those files), so a
   shortfall is closed in the session that wrote the code.
+- **An implementation task also reruns every acceptance test an earlier task of the plan already turned
+  green in the same app or service** — the plan's acceptance files, filtered, never the whole suite. A task
+  that breaks an earlier task's tests then finds out in its own session, not in the last one, where every
+  such failure arrives at once and each fix costs a full run.
 - **When the acceptance tests need a running service**, the command starts it the project's own way
   (a Testcontainers fixture, the compose file, Playwright's `webServer`), and the block says so. A `Q` task
   whose app cannot start in one command proves its tests load and list (Playwright's `--list`, or the
   runner's equivalent), and the task that serves each journey turns it green.
+- **Acceptance tests run through the runner the last task's gate uses** — the project's gate script,
+  scoped to those tests, where it has one — so the build, the data, the parallelism and the load match. A
+  test that is green under a bespoke command and red in the gate was never green. Where the project has no
+  such script, the command is the one the last task's gate line runs, filtered.
 - **A failure that stands in a task's way is its to fix**, whichever task caused it, and `As built` names
   that task. A red build at a task boundary is a finding about the task that left it.
 - **A test the task believes wrong is the one thing that stays red** (§4): it is a dated `D<n>`, and the

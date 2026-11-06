@@ -51,9 +51,10 @@ for it: the tests it wrote, the acceptance tests it writes or must turn green (o
 they need one), and the coverage measure over the files it wrote. It leaves them green, fixing what stands
 in the way whichever task caused it. Its `**Gate:**` line names those exact commands. It does not run the
 project's whole suite, lint or typecheck beyond what those commands include. The last runnable task runs
-the whole set once more across the plan, ending with the coverage floor when the plan writes code, retries
-only what failed where the project has a way to, **fixes what it finds rather than handing it back**, and
-carries the docs and close-out. It holds no feature work when the plan has any. A plan stopped halfway has
+the whole set once more across the plan, ending with the coverage floor when the plan writes code, and
+**fixes what it finds rather than handing it back** by the fix loop (plan format §5), and carries the docs
+and close-out. An implementation task's gate also reruns the acceptance tests earlier tasks turned green
+in the same app, through the runner the last task's gate uses, so that loop stays short. It holds no feature work when the plan has any. A plan stopped halfway has
 each landed task's own tests green, but the whole suite has not run. See Step 4.
 
 And one property decides the shape of the sequence: **how the plan will be executed**. User-facing work

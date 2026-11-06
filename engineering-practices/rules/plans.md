@@ -4,7 +4,7 @@ paths:
   - "docs/plans/*/delivery-plan.md"
 ---
 
-<!-- dev rules v2 (2026-11-03): plans. Installed by /dev:rules; edit to fit this project, re-run to compare with the plugin's copy. -->
+<!-- dev rules v3 (2026-11-06): plans. Installed by /dev:rules; edit to fit this project, re-run to compare with the plugin's copy. -->
 
 # Plan document standards
 
@@ -29,6 +29,8 @@ Apply to every plan you write, edit, run a task from, or review. Severity: **blo
 - `**Depends on:**` points backwards only and names every earlier task whose files overlap or that builds the same tree. *blocker*
 - `**Budget:**` is `~<n>k` with its drivers itemized; over ~150k it names a split inside its own stack. *minor*
 - `**Gate: own tests**` names filtered commands (scoped build, its tests, coverage over its files), never the whole suite; `**Gate: none**` says why. The last task runs the whole set, the ≥ 80% branch floor over the plan's code and the telemetry smoke when service behaviour changed, fixes what it finds, and holds no feature work. *major*
+- An implementation task's gate also reruns every acceptance test an earlier task of the plan turned green in the same app, and runs acceptance tests through the runner the last task's gate uses (the project's gate script, scoped), never a bespoke command whose build, data or load differs. *major*
+- The last task's gate carries the fix loop: the whole set once; each failure reproduced and fixed with the narrowest command; only the failed rerun; the whole set once more to close. Never a full run to check one fix; a failure that moves between runs is an isolation or scheduling defect to fix, never retried until green. *major*
 - Order: contract, schema, shared types and stubs answering `501 not-implemented`; then the `Q` acceptance tests, red on the stubs; then backend, shared packages, frontend and mobile. Human prerequisites come first. *major*
 - `**Not in <id>:**` names what belongs elsewhere. A stack-cut task that cannot be demonstrated says so; never a fake success or an empty list. *major*
 - Acceptance tests a `Q` task wrote are read-only to every later task but the gate. A test you believe wrong stays red, recorded as a dated `D<n>` with both readings. *blocker*
