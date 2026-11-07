@@ -15,7 +15,7 @@ way. Mission Control reads this repo as its agent/skill catalog, via
 `MISSION_CONTROL_LIBRARY_ROOT` pointing at a checkout of SkillsLibrary
 (previously it defaulted to `../..` from inside `tools/mission-control`).
 
-The catalog contract Mission Control depends on is the one in `AGENTS.md`: agent
+The catalog contract Mission Control depends on is the one in `CLAUDE.md`: agent
 definitions under `<domain>/agents/*.md` and skills under `<domain>/**/SKILL.md`,
 with `docs/plans/<NNN>-<initiative>/delivery-plan.md` as the ingestion format
 that `solution-planner` produces. Changing either of those shapes is a breaking change

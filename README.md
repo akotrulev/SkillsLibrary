@@ -248,7 +248,7 @@ The ten skills (`/business-analysis:scoping`, `/business-analysis:epics`, `/busi
 
 1. Clone or submodule this repo into your project.
 2. Reference skills from your project's `CLAUDE.md` or `.claude/settings.json`, or symlink the folders you need into your project's `.claude/skills/`.
-3. The global rules in [`AGENTS.md`](AGENTS.md) (loaded by Claude Code through `CLAUDE.md`) apply to every skill in the library.
+3. The global rules in [`CLAUDE.md`](CLAUDE.md) apply to every skill in the library.
 
 This supports **one stack per project**: the unprefixed skill names of two stacks collide outside a plugin namespace.
 
