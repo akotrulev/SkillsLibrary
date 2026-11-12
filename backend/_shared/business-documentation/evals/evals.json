@@ -1,0 +1,51 @@
+{
+  "skill_name": "doc-business-model",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Document the credit pricing and overage charges feature of the fixture",
+      "expected_output": "be-feature-documenter (via /dev:document-feature) writes a three-level set under docs/features/ of a git-committed copy of evals/fixture/: <feature>.md, <feature>.behind-the-scenes.md, <feature>.technical.md, matching the golden examples in shape.",
+      "files": [
+        "evals/fixture/"
+      ],
+      "expectations": [
+        "Exactly three files for the feature exist under docs/features/: the guide, *.behind-the-scenes.md and *.technical.md",
+        "`python3 scripts/doc-lint.py --dir <output dir>` exits 0",
+        "The exact values £6.00, 8 credits, 24 hours and 3 credits appear in the Level 1 guide",
+        "The Level 1 worked example contains the arithmetic line for the Masterclass booking with 6 of 8 credits used: shortfall 1 credit × £6.00 = £6.00, and the result is correct",
+        "No `#confirmed` tier tag appears in any file except the one sentence in Level 3's `How to read this` legend that says it is never written",
+        "Level 1 contains no HTTP status code, no file name (*.cs, *.json), no class name (e.g. CreditPricingService, BookingCancelledHandler, OverageChargeJob, Outbox) and neither the word 'handler' nor 'outbox'",
+        "Level 3 has a Finding that a redelivered booking confirmation is priced twice (no idempotency key), with a boundary condition (e.g. delivery fails after the save, the retry spends credits / accrues overage a second time)",
+        "Neither Level 1 nor Level 2 calls the missing idempotency a defect, risk or finding (Level 2 may state at-least-once delivery neutrally)",
+        "Level 3 reports that no telemetry exists beyond a single start-up log line (Telemetry section states the search that found nothing)",
+        "Level 1 uses the client terms 'Session credits', 'Overage' and 'Monthly allowance'",
+        "Level 1 quotes the exact refusal text \"That plan name is already taken\"",
+        "Level 2 names the parts by plain role names (no class names) and Level 3 maps each of those role names to its class/file",
+        "All three files carry the same commit sha in their Derived from line, and each carries an Audience line (Level 1 shareable, Levels 2 and 3 internal)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Document the system in AREA mode. Scope: the credits area (plans, session tiers, booking pricing, cancellation returns, monthly overage posting) - the credits area is confirmed as one area, proceed.",
+      "expected_output": "be-documenter (via /dev:document-system) writes a three-level set for the credits area under docs/business-model/areas/ of a git-committed copy of evals/fixture/.",
+      "files": [
+        "evals/fixture/"
+      ],
+      "expectations": [
+        "Exactly three files for the credits area exist under docs/business-model/areas/: the guide, *.behind-the-scenes.md and *.technical.md",
+        "`python3 scripts/doc-lint.py --dir <output dir>` exits 0",
+        "The exact values £6.00, 8 credits, 24 hours and 3 credits appear in the Level 1 guide",
+        "The Level 1 worked example contains the arithmetic line for the Masterclass booking with 6 of 8 credits used: shortfall 1 credit × £6.00 = £6.00, and the result is correct",
+        "No `#confirmed` tier tag appears in any file except the one sentence in Level 3's `How to read this` legend that says it is never written",
+        "Level 1 contains no HTTP status code, no file name (*.cs, *.json), no class name (e.g. CreditPricingService, BookingCancelledHandler, OverageChargeJob, Outbox) and neither the word 'handler' nor 'outbox'",
+        "Level 3 has a Finding that a redelivered booking confirmation is priced twice (no idempotency key), with a boundary condition (e.g. delivery fails after the save, the retry spends credits / accrues overage a second time)",
+        "Neither Level 1 nor Level 2 calls the missing idempotency a defect, risk or finding (Level 2 may state at-least-once delivery neutrally)",
+        "Level 3 reports that no telemetry exists beyond a single start-up log line (Telemetry section states the search that found nothing)",
+        "Level 1 uses the client terms 'Session credits', 'Overage' and 'Monthly allowance'",
+        "Level 1 quotes the exact refusal text \"That plan name is already taken\"",
+        "Level 2 names the parts by plain role names (no class names) and Level 3 maps each of those role names to its class/file",
+        "All three files carry the same commit sha in their Derived from line, and each carries an Audience line (Level 1 shareable, Levels 2 and 3 internal)"
+      ]
+    }
+  ]
+}

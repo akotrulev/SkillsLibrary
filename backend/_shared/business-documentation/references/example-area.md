@@ -1,8 +1,8 @@
-# Golden example — `areas/<area>.md`
+# Golden example, Level 1 — `areas/<area>.md` (the guide)
 
-The filled example for `dev:doc-business-model`: one area document as a `be-documenter` run would write it into `docs/business-model/areas/credits-and-charges.md`. The system is the same **workshop-booking** toy the planner examples build — imagined here as an *inherited* codebase being documented after the fact. **Shape, tone, the example discipline and the evidence table are normative; domain content and citations are illustrative.**
+The Level 1 example for `dev:doc-business-model`: one area guide as a `be-documenter` run would write it into `docs/business-model/areas/credits-and-charges.md`. The system is the same **workshop-booking** toy the planner examples build — imagined here as an *inherited* codebase being documented after the fact. **Shape, tone and the example discipline are normative; domain content and citations are illustrative.**
 
-Note what the example demonstrates: a body that reads like a product spec — plain headings, numbered steps, formulas written as plain-text math with `Where:`, one running cast, and a worked example whose arithmetic carries through to the final result — with every `file:line`, tier tag and code noun confined to the closing table. Optional sections that do not apply (there is no *Scope* section here because the area applies to every member) are dropped, and the search that proved it is a row in the table.
+Note what the example demonstrates: a document a client can read top to bottom — plain headings, numbered steps, formulas written as plain-text math with `Where:`, one running cast, and a worked example whose arithmetic carries through to the final result — with **no** `file:line`, tier tag, code noun, defect word or evidence table, and with the client's own words throughout (credits, sessions, the exact messages staff see) (those are Level 3: [example-technical.md](example-technical.md); the connections and failure handling are Level 2: [example-behind-the-scenes.md](example-behind-the-scenes.md)). Optional sections that do not apply (there is no *Scope* section here because the area applies to every member) are dropped, and the search that proved it is a row in Level 3's evidence index.
 
 ---
 
@@ -11,6 +11,8 @@ Note what the example demonstrates: a body that reads like a product spec — pl
 **Created:** 2026-08-02
 **Owned by:** `dev:doc-business-model`
 **Derived from:** code by `be-documenter` @ `a3f9c21` on 2026-08-02
+**Audience:** shareable
+**Levels:** [Guide](credits-and-charges.md) · [Behind the scenes](credits-and-charges.behind-the-scenes.md) · [Technical reference](credits-and-charges.technical.md)
 **Models:** [FLOW-004 pricing a booking] · [ENT-003 accrued charge lifecycle] · [DEC-002 credit / overage split]
 
 ## Overview
@@ -37,6 +39,11 @@ Validations:
 - Monthly credits is a whole number, 0 or more; both overage rates are 0 or more.
 - Every session has exactly one tier.
 - Changing a tier's cost or a plan's rate affects future bookings only — nothing already booked is re-priced.
+
+| Situation | What staff see | What happens |
+|---|---|---|
+| A plan is saved with a name another plan already has | “That plan name is already taken.” | Nothing is saved |
+| Monthly credits or a rate is below 0 | “Monthly credits must be 0 or more.” / “Overage rate must be 0 or more.” | Nothing is saved |
 
 Fixed in the system today, not configurable: the late-cancellation cut-off (24 hours before the session starts), the posting moment (the 1st of the month at 00:00), and the rule that unused credits do not carry over.
 
@@ -142,34 +149,7 @@ Walking through the two lines that matter:
 | Q3 | Is the 24-hour late-cancellation cut-off a policy you chose, and is it yours to change? | It is fixed in the system, not configurable |
 | Q4 | A late cancellation forfeits the credits but carries no fee. Was a fee intended? | The forfeiture is the only consequence today |
 
-## Where this lives in the code
+## Going deeper
 
-| Section | Statement | Evidence | Tier |
-|---|---|---|---|
-| Overview | Overage accrues during the month, posted once at month start | `OverageChargeJob.cs:40` | `#observed` |
-| Overview | Bookings are priced at the moment they are made and never re-priced | `CreditPricingService.cs:31`; no re-pricing path (search: `Reprice`, `Recalculate` under `src/Credits/`) | `#observed` |
-| Overview | The feature exists so that members can book beyond their plan without being refused | comment at `CreditPricingService.cs:9`; **Q1** | `#inferred` |
-| Setup | Plan: name, monthly credits, overage rate | `MembershipPlan.cs:8-14` | `#observed` |
-| Setup | Member overage override; precedence member → plan | `CreditPricingService.cs:48` | `#observed` |
-| Setup | Credits per seat on the session tier | `SessionTier.cs:11` | `#observed` |
-| Setup | Plan name unique | `migrations/007:22` | `#observed` |
-| Setup | Credits whole number ≥ 0; rates ≥ 0 | `MembershipPlanValidator.cs:15-19` | `#observed` |
-| Setup | Tier/rate changes affect future bookings only | `CreditPricingService.cs:31` (cost copied onto the booking at pricing time) | `#observed` |
-| Setup | 24 h cut-off, posting at 00:00 on the 1st, no roll-over — fixed in code | `BookingCancelledHandler.cs:19` · `OverageChargeJob.cs:12` · `OverageChargeJob.cs:58`; **Q1**, **Q3** | `#observed` |
-| Setup | No *Scope* section — the area applies to every member | search: `Eligib`, `AppliesTo` under `src/Credits/` — none | `#observed` |
-| Booking a seat | Steps 1–5, including the partial-cover split | `CreditPricingService.cs:31-61`; [DEC-002] | `#observed` |
-| Booking a seat | A booking is never refused for lack of credits | `CreditPricingService.cs:55` (no refusal branch) | `#observed` |
-| Cancelling | ≥ 24 h or staff → credits returned and the booking's accrual removed | `BookingCancelledHandler.cs:19-33` | `#observed` |
-| Cancelling | Member < 24 h → nothing returned | `BookingCancelledHandler.cs:27` | `#observed` |
-| Cancelling | Returned credits never re-price an earlier accrual | no reader of returned credits outside future pricing (search: `ReturnedCredits` under `src/`); **Q2** | `#observed` |
-| Monthly posting | One charge per member; accruals marked posted; credits used reset to 0 | `OverageChargeJob.cs:40-58`; [ENT-003] | `#observed` |
-| Monthly posting | Zero-sum months post nothing | `OverageChargeJob.cs:44` | `#observed` |
-| How it connects | A confirmed booking is priced (EVT-005 → RX-004) | `CreditPricingService.cs:31`; `BookingConfirmed.cs:6` | `#observed` |
-| How it connects | A cancelled booking, by member or staff, has its credits returned (EVT-006 → RX-006) | `BookingCancelledHandler.cs:19-33`; `BookingCancelled.cs:8` | `#observed` |
-| How it connects | A staff session cancellation cancels each confirmed booking and emits one cancellation per booking (EVT-004 → RX-005 → EVT-006) | `SessionService.cs:70-96` | `#observed` |
-| How it connects | Pricing and returns run after the booking change is saved; pricing is retried 3 times and then parked, the return has no failure path; at-least-once, no idempotency key found (RX-004, RX-006; INV-004) | `Outbox.cs:22`; `BookingCancelledHandler.cs:19-33`; no key (search: `IdempotencyKey`, `Processed` under `src/`) | `#observed` |
-| How it connects | Nothing outside the area is set off | search: `Publish`, `Emit`, `Outbox.Add` under `src/Credits/` — none | `#observed` |
-| How it connects | This area only reads bookings owned by Bookings (RX-004, RX-006); credits used is written only by pricing, return and posting (RX-004, RX-006, RX-007) | `CreditPricingService.cs:31`, `BookingCancelledHandler.cs:19`, `OverageChargeJob.cs:58`; no other writer (search: `CreditsUsed` under `src/`) | `#observed` |
-| Who can do what | Member sees own balances only | `CreditEndpoints.cs:21` (`credits:own`) | `#observed` |
-| Who can do what | Staff manage plans, tiers, overrides; staff cancellations always return credits | `PlanAdminEndpoints.cs:17` (`workshops:manage`) · `BookingCancelledHandler.cs:21` | `#observed` |
-| Open questions | Late cancellation forfeits credits, no fee | `BookingCancelledHandler.cs:27`; no fee path (search: `LateFee`, `Penalty` under `src/`); **Q4** | `#observed` |
+**Behind the scenes:** how the parts connect, what runs when, what happens when something fails — [credits-and-charges.behind-the-scenes.md](credits-and-charges.behind-the-scenes.md)
+**Technical reference:** for developers — [credits-and-charges.technical.md](credits-and-charges.technical.md)

@@ -5,11 +5,11 @@ description: Use when one area of an existing backend must be traced in depth in
 
 # Feature Trace — recovering behavior from code
 
-Depth, one area at a time. The output is not prose — it is **structured evidence**: seven inventories, every item tagged with the file and line it came from, ready for `dev:doc-business-model` to turn into something a business reader can use.
+Depth, one area at a time. The output is not prose — it is **structured evidence**: nine inventories, every item tagged with the file and line it came from, ready for `dev:doc-business-model` to turn into three documents — a plain-language guide, a plain-language behind-the-scenes account, and a technical reference. Gather for all three readers in the one trace: the guide needs the rules and the formulas, the behind-the-scenes document needs the Edges (who tells whom, when, what happens on failure), and the technical reference needs everything with its exact names, paths, contracts, configuration, tests and telemetry. A second trace for a second reader is the waste this skill exists to prevent.
 
 The discipline that makes it worth doing: **separate what the code does from what you think it means.** Every item you extract is `#observed` with a `file:line` read this session. Intent is a separate, clearly-marked layer — and where intent is not recoverable, the honest output is the behavior plus a question.
 
-**Prerequisite:** a confirmed area from `dev:doc-codebase-survey`, with its entry points and its assigned depth.
+**Prerequisite:** a confirmed area from `dev:doc-codebase-survey`, with its entry points and its assigned depth — or, on a `be-feature-documenter` run, the confirmed Step 1 scope table.
 
 ## When to use
 
@@ -54,10 +54,10 @@ For **every** entry point in the area, walk this path in order. Each stop answer
 
 **Follow the call, do not skim the file.** A handler that reads as five clean lines routinely delegates to a service holding twenty conditions. Depth `full` means you followed those calls to where decisions are actually made; depth `shallow` means you stopped at stop 5 and said so.
 
-## The seven inventories
+## The nine inventories
 
 ### 1. Capabilities
-What a user or system can make this area do. One line each, as a verb phrase in business language, with its actor and its entry point.
+What a user or system can make this area do. One line each, as a verb phrase in business language, with its actor and its entry point. Record the entry point's **contract** in one line (request → response, or the schema file that already holds it) and its **authorization** string (policy, permission, scope) — the technical reference needs both.
 
 > "A customer can cancel an order that has not yet shipped (`OrdersController.cs:88`)" `#observed`
 
@@ -72,7 +72,7 @@ Every condition, threshold, calculation and eligibility test the code enforces. 
 Write the rule as the business would state it. **Record the number, not a rounding of it** — "30 days" not "about a month" — because the exact value is usually the thing someone needs to check.
 
 ### 3. Validations & gates
-Authorization checks, input validation, precondition checks, state guards. Each with what happens when it fails, in user terms. This inventory doubles as the security-review starting map and as the negative-test matrix downstream.
+Authorization checks, input validation, precondition checks, state guards. Each with what happens when it fails, in user terms **and** the technical outcome (status code or problem type, exception type). Where the person sees a message, **quote the exact refusal text verbatim** with its source (`"You can't cancel within 24 hours of the session."` — `Resources/Bookings.en.resx:12`); "none shown — searched …" when the failure reaches the user as a bare status. This inventory doubles as the security-review starting map and as the negative-test matrix downstream.
 
 ### 4. Entity states & transitions
 Per entity the area owns: the states, what moves between them, who can trigger each move, and what is blocked. Recovered from enums, status columns, guard clauses, and the transitions the code *refuses*.
@@ -96,6 +96,17 @@ Where this area touches another, one hop out and no further. For every emitted e
 - **A mode or guarantee the code does not show is `?`.** A library name alone proves nothing: record at-least-once only where a retry, redelivery or missing acknowledgement is visible in the code or its configuration.
 - **A negative claim names its search**: "no consumer of `BookingCancelled` — searched `BookingCancelled`, `booking.cancelled` under `src/`".
 - Stop at one hop. The consumer's own emitted events are recorded as the consumer's row when its area is traced.
+- **Also record, for the behind-the-scenes document:** what is inside the transaction and what runs after commit; the retry count and what happens after the last retry; whether any idempotency key, lock or version column guards the write; and how long a reaction usually takes where the code shows a delay, schedule or poll interval. Anything the code does not show is `?`.
+
+### 8. Configuration & switches
+Every configuration key, option class, environment variable name, feature flag and hard-coded constant that changes behaviour: where it is defined, its default, what it changes, whether it differs per environment or tenant. **Names only — never record a secret's value.** A constant that looks like it should be configurable (a cut-off, a rate, a window) is recorded with its number and is an open question. "None — searched …" is a valid result and is recorded.
+
+### 9. Tests & telemetry
+The existing tests that cover the area (path and line, what each covers, what no test covers — boundaries especially) and the telemetry the code emits (log events at decision points, spans, metrics; the library and names). Tests are evidence of intent, never of behaviour. A missing test or missing telemetry is a technical finding, not documentation.
+
+## Harvest the client's words
+
+Alongside the nine inventories, record the words the client already uses, so the guide speaks them instead of the code's names. Look in UI copy, translation and resource files, email and notification templates, validation messages, error and problem-detail text, enum display names, and domain terms in docs and test names. Each term goes in the record's `Client vocabulary` table with where it was seen and the code name it maps to; a code name with no client term found is recorded with the search. `references/trace-recipes.md` has the per-stack searches.
 
 ## Evidence rules
 
@@ -113,7 +124,8 @@ You are tracing, not auditing — but you will find things. Handle them like thi
 | Found | Do |
 |---|---|
 | A defect (wrong calculation, missing check, unhandled failure) | Record it as a **finding to report**, with evidence. Do not fix it, do not switch to auditing, and do not write it into the business documentation as if it were intended behavior |
-| Unreachable code (no route, dead flag, no caller) | Record it as unreachable. **Do not document it as a capability** — this is the most common way generated documentation goes wrong |
+| Unreachable code (no route, dead flag, no caller anywhere) | Record it as unreachable. **Do not document it as a capability** — this is the most common way generated documentation goes wrong |
+| A trigger whose caller is outside the repository (a message nothing here publishes, a handler another service calls) | **Not unreachable.** Document it as a capability, record the missing caller as a finding and as the open question "who triggers this?" |
 | Two rules that contradict each other | Record both with evidence; escalate. `business-analyst` owns which one wins |
 | A rule whose purpose is unrecoverable | Record the behavior, add an open question. This is a normal, expected outcome — not a failure of the trace |
 | Something that should obviously change | Note it, route it to the owning `be-<stack>` agent. You do not change code |
@@ -132,7 +144,7 @@ You are tracing, not auditing — but you will find things. Handle them like thi
 | # | Rule | Condition | Effect | Evidence | Tier |
 
 ### Validations & gates
-| # | Check | Applies to | On failure (user-visible) | Evidence |
+| # | Check | Applies to | On failure (user-visible) | Exact message shown (verbatim, source) | Evidence |
 
 ### Entity states
 | Entity | States | Transitions (trigger → from → to) | Refused transitions | Evidence |
@@ -145,6 +157,15 @@ You are tracing, not auditing — but you will find things. Handle them like thi
 
 ### Edges
 | # | Entry point | Kind | Reads | Writes | Also written by | Emits | Reacted to by (one hop out) | Mode | On failure | Evidence |
+
+### Configuration & switches
+| # | Key / constant | Defined at | Default | Effect | Varies by | Evidence |
+
+### Tests & telemetry
+| # | Kind (test / log / span / metric) | Name / path | Covers | Gap | Evidence |
+
+### Client vocabulary
+| Client term | Where seen | Code name |
 
 ### Intent notes (`#inferred`)
 | Observation | Probable purpose | Basis (comment / test / commit / naming) | Question for the business |
@@ -165,6 +186,9 @@ You are tracing, not auditing — but you will find things. Handle them like thi
 8. Every emitted event has its reactors recorded, or a negative search that names what was searched.
 9. Every written field is listed with its readers and its other writers, jobs' queries included.
 10. Every reaction states its mode and failure behavior, or `?` — never a guessed guarantee.
+11. Configuration and constants are inventoried (or a negative search is recorded), and no secret value is written down.
+12. Tests and telemetry are inventoried, with their gaps, or a negative search is recorded.
+13. The client's words are harvested into `Client vocabulary`, and every user-facing refusal in Validations & gates quotes its exact text and source (or names the search that found none).
 
 ## Handoffs
 
@@ -172,8 +196,8 @@ You are tracing, not auditing — but you will find things. Handle them like thi
 - **→ `business-analysis:state-grid`** — inventory 4 becomes `ENT-nnn` state × event grids; the refused transitions are its `—` cells with meaning.
 - **→ `business-analysis:decision-table`** — inventory 5 becomes `DEC-nnn` tables with a declared hit policy; the completeness check exposes the input combinations the code never handles.
 - **→ `business-analysis:dependency-map`** — the Edges inventories become `events.md`, `shared-data.md` and `invariants.md`; a `be-documenter` run writes them, `be-feature-documenter` does not.
-- **→ `dev:doc-business-model`** — all seven inventories become the area's end-user write-up; Edges become its *How it connects* section.
-- **→ `code-auditor`** — the findings list, when it turns out to be the interesting part.
+- **→ `dev:doc-business-model`** — all nine inventories become the area's three documents: capabilities, rules and decisions the guide, in the client's vocabulary and quoting the exact refusal text; Edges the guide's *How it connects* and the whole of *Behind the scenes*; every inventory, with exact names, the technical reference.
+- **→ `code-auditor`** — the findings list, when it turns out to be the interesting part; it lands in the technical reference's Findings, never in the plain-language levels.
 - **→ `qa-test-case-designer`** — the rules and validations are a test basis; the thresholds are BVA seeds.
 
 ## Version policy

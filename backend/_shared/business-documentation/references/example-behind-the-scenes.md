@@ -1,0 +1,128 @@
+# Golden example, Level 2 — `areas/<area>.behind-the-scenes.md`
+
+The Level 2 example for `dev:doc-business-model`: the same **Session credits & charges** area as [example-area.md](example-area.md), written for a project manager or support lead who wants to know how the work gets done. Same cast (Ana, Ben), same numbers, same Q-ids — nothing here re-explains a rule; it adds the parts, the timing and the failure handling. **Shape, tone and the language limits are normative; domain content is illustrative.** Every statement has a row in the Level 3 evidence index ([example-technical.md](example-technical.md)).
+
+Note what the example demonstrates: plain role names for the parts, used the same way throughout; only the lanes each flow actually uses (straight away · a moment later · on a schedule — *Monthly posting* has just one); an honest *Timing and ordering* section that says what the system does **not** guarantee; a failure table whose "Nothing is done about it" is a valid answer; no class names, file names, status codes or framework words; and behaviour stated neutrally — what happens, never whether it is right. The verdict on the double return lives only in Level 3's Findings (F1), which the evidence index cites. In a `be-documenter` run the diagram shows only who tells whom; the pricing branches are FLOW-004 and are not redrawn.
+
+---
+
+# Session credits & charges — Behind the scenes
+
+**Created:** 2026-08-02
+**Owned by:** `dev:doc-business-model`
+**Derived from:** code by `be-documenter` @ `a3f9c21` on 2026-08-02
+**Audience:** internal
+**Levels:** [Guide](credits-and-charges.md) · [Behind the scenes](credits-and-charges.behind-the-scenes.md) · [Technical reference](credits-and-charges.technical.md)
+
+## At a glance
+
+When a booking is made or cancelled, the **booking service** saves it and then tells the **credits service** in the background. The credits service works out what the booking costs, updates the member's credits and, if the member has run out, notes an overage charge. Once a month, the **monthly billing job** adds up the notes, charges each member once, and resets everyone's credits. Nothing here talks to an outside service. The pricing decision's branches are drawn once, in FLOW-004; the picture below shows only who tells whom.
+
+```mermaid
+flowchart LR
+  S[Scheduling service] -- "session cancelled by staff: one cancellation per booking" --> B[Booking service]
+  B -- "booking confirmed / cancelled" --> C[Credits service]
+  C -- "credits used, overage notes" --> M[(Member record)]
+  J[Monthly billing job] -- "reads overage notes, resets credits" --> M
+  J -- "one overage charge per member" --> L[(Accounts ledger)]
+```
+
+## The parts involved
+
+| Part | What it does here | Runs when |
+|---|---|---|
+| Booking service | Saves and cancels bookings; the one that tells the credits service | When a member or staff books or cancels |
+| Scheduling service | Cancels a whole session on staff's say-so, which cancels every booking on it | When staff press *Cancel session* |
+| Credits service | Prices a booking, spends and returns credits, notes overages | A moment after a booking is saved or cancelled |
+| Monthly billing job | Turns the month's overage notes into one charge per member and resets credits | The 1st of every month at 00:00 |
+| Member record | Holds the member's plan, personal overage rate and *credits used* | Always (a record, not a process) |
+| Accounts ledger | Holds the charges members owe | Always |
+
+## What happens behind the scenes
+
+### Booking a seat
+
+**Straight away (while the member waits)**
+
+1. The booking service checks the seat, saves the booking and shows the member their confirmation.
+
+**A moment later (in the background)**
+
+2. The booking service tells the credits service "booking confirmed". How soon it arrives is not visible from the code (Q8).
+3. The credits service copies the tier's cost onto the booking, works out whether the member has enough credits, and updates *credits used* on the member record.
+4. If there was a shortfall, it adds an overage note to the booking. Nothing is charged yet.
+
+**What the member notices if a later step fails:** nothing at confirmation. If the credits service cannot do its part, the booking exists with no cost on it, and the member's credits look unchanged until someone sets it right (see *When parts fail or are slow*).
+
+### Cancelling a booking
+
+**Straight away (while the person cancelling waits)**
+
+1. The booking service marks the booking cancelled and shows the member a confirmation.
+
+**A moment later (in the background)**
+
+2. The booking service tells the credits service "booking cancelled", saying whether it was the member or staff.
+3. The credits service decides: credits come back and the booking's overage note is removed, or (late cancellation by a member) nothing changes. It updates *credits used*. It does not check whether it has already handled this cancellation, so if the "booking cancelled" message arrives twice, the credits are returned twice.
+
+When **staff cancel a whole session**, the scheduling service cancels each booking on it one by one, so every affected member goes through steps 1–3 and gets their credits back.
+
+**What the member notices if a later step fails:** the cancellation looks complete, but their credits are not returned. There is no message about it.
+
+### Monthly posting
+
+**On a schedule**
+
+1. At 00:00 on the 1st the monthly billing job goes through every member.
+2. For each member with overage notes not yet charged, it adds them up and writes one charge to the accounts ledger, marking the notes as charged.
+3. It then resets the member's *credits used* to 0, whether or not there was a charge.
+
+**What the member notices if it fails:** the charge arrives late, or credits are not reset when the month begins. The job does not report its own failures.
+
+## What is remembered, and where
+
+| Information | Kept as | Who may change it |
+|---|---|---|
+| Plan, monthly credits, overage rate | On the plan | Staff only |
+| Personal overage rate | On the member record | Staff only |
+| Cost of a booking in credits | A line on the booking, copied at the moment it is priced | The credits service, once |
+| Credits used this month | On the member record | Only the three flows in this area: pricing, return, monthly reset |
+| Overage notes | A line attached to the booking | The credits service (adds, removes); the monthly billing job (marks charged) |
+| The monthly charge | A line in the accounts ledger | The monthly billing job |
+
+## Timing and ordering
+
+- **Pricing happens after the booking is saved**, not before. For a moment a booking exists that has not been priced.
+- **The cost is copied onto the booking when it is priced**, so a later change to a tier's cost or a plan's rate never touches earlier bookings.
+- **The same "booking confirmed" message can be delivered more than once**, and nothing checks whether it has been priced already. A repeat spends the credits, and accrues the overage, a second time.
+- **Order between a booking and its cancellation is not guaranteed** by anything in the code. Whether a cancellation can reach the credits service before the booking has been priced is not visible from the code (Q5).
+- **The monthly reset and a booking made at the same moment** are not coordinated: a booking priced just before 00:00 on the 1st counts against the old month, one priced just after against the new.
+
+## When parts fail or are slow
+
+| Situation | What happens | What people notice | Fixes itself? |
+|---|---|---|---|
+| The credits service fails while pricing a booking | Tried 3 times, then set aside | The booking has no cost; credits unchanged | No — needs a person to look at the set-aside item |
+| The credits service fails while returning credits | Nothing is retried and nothing is recorded | Credits are not returned; no message | No |
+| The monthly billing job fails part way | Members already done keep their charge; the rest are not processed | Some members charged, others not, credits reset for some only | No — nothing re-runs it |
+| A cancellation message is delivered twice | The credits are returned twice | Credits used can go below what was spent | No |
+
+## Settings and switches
+
+No settings or switches change this area's behaviour between environments. The 24-hour cut-off, the posting time and the no-roll-over rule are fixed in the system (Q3).
+
+## If you change this
+
+- **Changing the cost or rate of a tier or plan** affects only future bookings; a report that recomputes from the plan will disagree with what was charged.
+- **Anything else that changes *credits used*** would be a second writer: today only this area's three flows write it, and the monthly reset assumes that.
+- **The booking service's "cancelled" message** is what returns credits. A new way of cancelling a booking must send it, or credits will not come back.
+- **The accounts ledger** receives one line per member per month from this area.
+
+## Open questions
+
+| # | Question | Why it matters |
+|---|---|---|
+| Q5 | Can a cancellation ever reach the credits service before the booking has been priced? | If so, credits could be returned that were never spent |
+| Q6 | The monthly job does not report failures and nothing re-runs it. Who is expected to notice a missed month? | A silent failure here means members are not charged or reset |
+| Q7 | Pricing is retried and then set aside; who looks at what is set aside, and how often? | Set-aside bookings stay unpriced until someone does |
+| Q8 | How soon after a booking is the credits service told? | A member can see stale credits until it is; the code sets no target |

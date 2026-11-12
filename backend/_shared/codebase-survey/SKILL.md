@@ -103,17 +103,19 @@ The order matters, and not for tidiness:
 
 Then, per area, state the plan:
 
-| Area | Entry points | Depth | Primary evidence | Est. |
-|---|---|---|---|---|
-| Identity & access | 6 HTTP, 1 job | full | auth policies, user entity, registration flow | 1 pass |
-| Ordering | 12 HTTP, 2 jobs, 1 consumer | full | order aggregate, state transitions, `OrderService` | 2 passes |
-| Reporting | 9 HTTP | shallow | read-only projections; rules live upstream | 1 pass |
+| Area | Entry points | Depth | Primary evidence | Estimate (tokens) | Batch |
+|---|---|---|---|---|---|
+| Identity & access | 6 HTTP, 1 job | full | auth policies, user entity, registration flow | ≈ 1,800 lines → 55k | 1 |
+| Ordering | 12 HTTP, 2 jobs, 1 consumer | full | order aggregate, state transitions, `OrderService` | ≈ 4,500 lines → 87k | 2 |
+| Reporting | 9 HTTP | shallow | read-only projections; rules live upstream | ≈ 900 lines → 44k | 1 |
+
+**Estimate each area's run cost** with the rule of thumb `estimate ≈ traced source lines × 12 + 3 documents × 6,000 + 45,000 overhead (loading the skills, references and golden examples)` (traced lines: the files the area's entry points reach, counted with `wc -l`), then **batch areas so each batch stays ≤ 100k tokens** — the session budget is 150k, and the margin is for reading output back. An area that alone exceeds 100k is split before it is batched.
 
 **Depth is a real choice.** `full` (every rule, every branch, every failure path) for areas where the business logic lives; `shallow` (capabilities and actors only) for pass-through, read-only, or CRUD-only areas. Documenting a read-only reporting area to the same depth as a pricing engine wastes the run's budget on the part with the fewest rules.
 
 ### Step 5 — Confirm with the human (blocking)
 
-Present in **one message**: the area table, the coverage ledger summary, the reading order with its reason, the depth per area, and what is parked. Then ask.
+Present in **one message**: the area table, the coverage ledger summary, the reading order with its reason, the depth and token estimate per area, the batches (each ≤ 100k), and what is parked. Then ask.
 
 Confirm these three things specifically, because they are the ones that are expensive to change later:
 
@@ -146,8 +148,8 @@ If the human has no opinion (common — they may know the business but not the c
 |---|---|---|---|
 
 ## Reading plan
-| Order | Area | Depth | Primary evidence | Why this position |
-|---|---|---|---|---|
+| Order | Area | Depth | Primary evidence | Estimate (tokens) | Batch | Why this position |
+|---|---|---|---|---|---|---|
 
 ## Parked
 | Surface | Why | Revisit when |
@@ -166,7 +168,7 @@ If the human has no opinion (common — they may know the business but not the c
 3. Every area has at least one entry point and at least one plausible human or system actor.
 4. Cross-cutting concerns are in Foundations, not in `areas/`.
 5. The reading order puts identity/actors first and consumers last, and says why.
-6. Depth is assigned per area and justified, not uniform by default.
+6. Depth is assigned per area and justified, not uniform by default; every area carries a token estimate and no batch exceeds 100k.
 7. The split was **confirmed** — or the human declined to weigh in, and the low-confidence names are marked `#inferred`.
 
 ## Handoffs

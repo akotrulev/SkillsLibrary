@@ -30,8 +30,11 @@ Lives **in the target repo**, versioned with the code, diffable and PR-reviewabl
 docs/business-model/
 ├── INDEX.md              # loaded first, every session — one line per artifact + relevance hook
 ├── glossary.md           # canonical terms; the terminology-drift defense
-├── system-overview.md    # what the system is, for whom, the area map + cross-area journeys — owned by dev:doc-business-model
-├── areas/<area>.md       # one functional area per file (AREA-nnn): overview, setup, how it works, worked example, open questions, closing evidence table — owned by dev:doc-business-model
+├── system-overview.md    # what the system is, for whom, the area map + cross-area journeys — plain-language guide, owned by dev:doc-business-model
+├── system-overview.behind-the-scenes.md / .technical.md   # the same at two deeper levels — owned by dev:doc-business-model
+├── areas/<area>.md       # one functional area per file (AREA-nnn), the plain-language guide: overview, setup, how it works, worked example, open questions — owned by dev:doc-business-model
+├── areas/<area>.behind-the-scenes.md   # the same area, plain language: how the parts connect, timing, failures
+├── areas/<area>.technical.md           # the same area for developers and AI: code names, contracts, data, closing evidence index
 ├── flows/<flow>.md       # one business flow per file (FLOW-nnn) — owned by business-analysis:process-flow
 ├── entities/<entity>.md  # one state model per business entity (ENT-nnn) — owned by business-analysis:state-grid
 ├── decisions/<point>.md  # one merged decision table per shared decision point (DEC-nnn) — owned by business-analysis:decision-table
@@ -124,7 +127,7 @@ When no `docs/business-model/` exists and the user wants one:
 3. Do **not** backfill the whole model speculatively. The KB accretes as features are analyzed; seed it only with what the current task's analysis actually produces.
 4. Offer `/business-analysis:rules`, so the KB's standards load in every later session that edits it.
 
-**The one exception — evidence-based backfill from code.** The `be-documenter` agent deliberately populates the KB in bulk by reading an existing implementation. That does not violate the rule above, because the rule forbids *speculation*, not *volume*: every statement it writes is `#observed` with a `file:line` read that session, or `#inferred` and simultaneously raised as an open question. In `areas/` documents those tags and citations sit in the **closing evidence table** rather than inline — the body reads as a product spec (overview · setup · how it works · worked example · open questions) — but the tag per statement is still mandatory there. It never writes `#confirmed` — promotion is a human act — and it never overwrites a `#confirmed` entry, since a human's confirmation outranks a trace. See `backend/_shared/business-documentation`.
+**The one exception — evidence-based backfill from code.** The `be-documenter` agent deliberately populates the KB in bulk by reading an existing implementation. That does not violate the rule above, because the rule forbids *speculation*, not *volume*: every statement it writes is `#observed` with a `file:line` read that session, or `#inferred` and simultaneously raised as an open question. In `areas/` those tags and citations sit in the **evidence index of the area's `.technical.md`** rather than inline — the guide reads as a product spec (overview · setup · how it works · worked example · open questions) and the behind-the-scenes file as plain-language connections — but the tag per statement is still mandatory there. It never writes `#confirmed` — promotion is a human act — and it never overwrites a `#confirmed` entry, since a human's confirmation outranks a trace. See `backend/_shared/business-documentation`.
 
 ## Provenance — telling generated from hand-authored
 

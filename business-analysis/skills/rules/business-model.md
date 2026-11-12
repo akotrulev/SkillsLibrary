@@ -33,7 +33,7 @@ Apply these to every file you write, edit or review under `docs/business-model/`
 - Confidence tags: `#confirmed` (sourced to a requirement or a stakeholder decision), `#inferred` (derived, unverified), `#observed` (seen in the code or the live system, in no document). *major*
 - What a source does not say is `[TBD]`, `?` or an open question, never a filled-in guess. *blocker*
 - Only a person promotes an entry to `#confirmed`. A code trace never writes it and never overwrites a `#confirmed` entry; a contradiction goes to `active-context.md` and is escalated. *blocker*
-- In `areas/` and `system-overview.md` (owned by `dev:doc-business-model`), tags and `file:line` sit only in the closing evidence table, not in the prose. *minor*
+- `areas/<area>.md` and `system-overview.md` (owned by `dev:doc-business-model`) are the plain-language guide and carry no tags, `file:line` or code names; `<name>.behind-the-scenes.md` is plain language about how the parts connect; tags and `file:line` sit only in `<name>.technical.md`, in its evidence index. The three files of an area are one artifact: one `INDEX.md` line names all three, each carries `**Audience:**` (`shareable` on the guide, `internal` on the other two; only a person promotes one) and its own `Derived from` stamp, and when any one changes all three are re-checked and re-stamped with the same sha. *minor*
 
 ## Headers and provenance
 
@@ -43,7 +43,7 @@ Apply these to every file you write, edit or review under `docs/business-model/`
 ## Writing and deciding
 
 - Short declarative statements with their source ("Refunds allowed within 30 days (BRD §6)"), critical facts near the top of each file. *minor*
-- A file nearing about 2,000 words splits by topic. *minor*
+- A file nearing about 2,000 words splits by topic; a `.technical.md` file may run to about 4,000. *minor*
 - Glossary terms only. A term used with two meanings is a terminology-drift finding, never a silent merge; a new term goes to `glossary.md` with its source. *major*
 - Precedence, stacking operators and exclusions are business decisions: present the options, record who decided, when and why in `interaction-map.md`. Never pick one yourself. *blocker*
 - Every finding names its boundary condition: the concrete scenario where it bites. Without one it is a suspicion, not a finding. *major*

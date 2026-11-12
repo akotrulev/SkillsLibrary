@@ -14,7 +14,7 @@ Every `*.md` beside this SKILL.md, except SKILL.md itself, is a rule file. The o
 |---|---|
 | `plans.md`: the plan document, its tasks, its prompts and the close-out every task runs | `docs/plans/*.md`, `docs/plans/*/delivery-plan.md` |
 | `audits.md`: rounds never rewritten, permanent `NNN` and finding ids, Resolved only in a new round after re-reading the code, evidence rules, the three finding classes | `docs/audits/*-requirements.md`, `docs/audits/*-audit-r*.md` |
-| `feature-docs.md`: business language above the evidence table, every statement backed by an evidence row, never `#confirmed` or an invented purpose, the worked example, updated in place when the code changes | `docs/features/*-*.md` (skips `INVENTORY.md`) |
+| `feature-docs.md`: three levels (client guide, behind the scenes, technical reference), plain language in the first two, every statement backed by an evidence-index row, never `#confirmed` or an invented purpose, the worked example, updated in place when the code changes | `docs/features/*-*.md` (skips `INVENTORY.md`) |
 
 Finished plans in `docs/plans/implemented/` match no glob on purpose: later work reads them often and never edits them. The other files of a planning pack get no dev rule: `requirements.md`, `epics.md` and `stories.md` are the business-analysis plugin's (`/business-analysis:rules`), and the detail artifacts (`blueprint.md`, `data-model.md`, …) are written only by `solution-planner`, which loads their skills.
 

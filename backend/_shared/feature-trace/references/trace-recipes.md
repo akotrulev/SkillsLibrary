@@ -95,6 +95,9 @@ grep -rn 'HasCheckConstraint\|HasIndex\|IsUnique\|HasDefaultValue\|OnDelete\|Has
 grep -rn 'Math.Round\|MidpointRounding\|DateTime.Now\|DateTime.Today\|TimeZoneInfo\|\.First()\|\.OrderBy' --include=*.cs src/
 # GraphQL + gRPC entry points — only if the survey found these surfaces
 grep -rn '\[Query\]\|\[Mutation\]\|\[Subscription\]\|QueryType\|MutationType\|MapGraphQL\|MapGrpcService\|ServerCallContext' --include=*.cs src/
+# client vocabulary — resources, localizers, validation and problem-detail text, enum display names, templates
+find src/ -name '*.resx' -o -name '*.cshtml' -o -name '*.liquid' -o -name '*.hbs'
+grep -rn 'IStringLocalizer\|IHtmlLocalizer\|WithMessage(\|ErrorMessage =\|ProblemDetails\|Title =\|Detail =\|\[Display(Name\|\[Description(' --include=*.cs src/
 ```
 
 `HasQueryFilter` is worth its own pass — it is where soft-delete and tenancy filters live, and it silently changes the meaning of *every* query in the area.
@@ -118,6 +121,9 @@ grep -rn '@Column(\|@Table(\|uniqueConstraints\|@Version\|@Where\|@SQLRestrictio
 grep -rn '@Transactional' --include=*.java src/
 # GraphQL + gRPC entry points — only if the survey found these surfaces
 grep -rn '@QueryMapping\|@MutationMapping\|@SchemaMapping\|@SubscriptionMapping\|DataFetcher\|@GrpcService\|extends .*ImplBase' --include=*.java src/
+# client vocabulary — message bundles, constraint messages, problem details, templates
+find src/ -name 'messages*.properties' -o -name 'ValidationMessages*.properties' -o -path '*templates*' -name '*.html'
+grep -rn 'message = "\|MessageSource\|getMessage(\|ProblemDetail\|setTitle(\|setDetail(\|forStatusAndDetail' --include=*.java src/
 ```
 
 `@Where` / `@SQLRestriction` are the Hibernate equivalent of a global query filter — same warning as .NET's.
@@ -141,6 +147,9 @@ grep -rn '@@unique\|@unique\|@default\|onDelete\|@relation\|uniqueIndex(\|\.defa
 grep -rn 'toFixed\|Math.round\|new Date()\|Date.now()\|\.sort(\|\[0\]' --include=*.ts src/
 # GraphQL + gRPC entry points — only if the survey found these surfaces
 grep -rn '@Resolver\|@Query(\|@Mutation(\|@ResolveField\|@Subscription(\|@GrpcMethod\|@GrpcStreamMethod\|loadPackageDefinition' --include=*.ts src/
+# client vocabulary — i18n/locales JSON, class-validator and Zod messages, exception text, templates
+find . -path ./node_modules -prune -o \( -path '*locales*' -o -path '*i18n*' \) -name '*.json' -print
+grep -rn "message: ['\"]\|{ message\|i18n\.t(\|\bt(['\"]\|new \w*Exception(['\"]\|\.hbs\|\.mjml" --include=*.ts src/
 ```
 
 Prisma's `schema.prisma` is a single high-value read: constraints, defaults, cascades and the full relational model in one file.

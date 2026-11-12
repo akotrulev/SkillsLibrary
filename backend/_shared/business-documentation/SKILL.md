@@ -1,66 +1,96 @@
 ---
 name: doc-business-model
-description: Use when traced backend behavior must be written for non-engineers in docs/business-model/, one doc per area. Triggers "turn this trace into business docs". Not for tracing code (doc-feature-trace).
+description: Use when traced backend behavior must be written up at three levels — a plain-language client guide, a plain-language "behind the scenes" account of how the parts connect, and a technical reference for developers and AI — one set per area in docs/business-model/. Triggers "turn this trace into docs", "write the client guide and the technical reference". Not for tracing code (doc-feature-trace).
 ---
 
-# Business Documentation — the write-up a non-engineer can use
+# Business Documentation — one trace, three documents, three readers
 
-The last mile, and the one where reverse documentation usually fails: turning accurate technical evidence into something a product manager, support lead, or new stakeholder can actually read — without inventing anything the evidence does not support.
+The same accurate evidence has to serve a client who has never seen the code, a project or support lead who needs to know how the pieces hang together, and a developer or AI agent who must change it safely. One document cannot serve all three. So every area (and every feature) is written **three times, from one trace, at three levels**:
 
-Three disciplines carry the whole skill:
+| Level | File | Reader | Audience | Language | Answers |
+|---|---|---|---|---|---|
+| **1 — Guide** | `<name>.md` | Client, product owner, support | `shareable` | Plain. No technical talk at all | What is this, how is it set up, what happens when I use it, show me with numbers |
+| **2 — Behind the scenes** | `<name>.behind-the-scenes.md` | Project manager, analyst, ops | `internal` | Plain, with a few everyday technical words | Which parts are involved, who tells whom, what happens now and later, what is kept where, what happens when a part fails |
+| **3 — Technical reference** | `<name>.technical.md` | Developers and AI agents | `internal` | Fully technical: code names, paths, contracts, `file:line`, tiers | Where is it, what exactly does it do, what breaks if I change it, how do I know |
 
-1. **Write in the user's words, not the code's.** The reader does not know what a handler is. "An order cannot be cancelled once it has shipped" — never "`CancelOrderHandler` throws when `status == Shipped`".
-2. **Never let inference pass as fact — but keep the grammar out of the prose.** `#observed` is what the code does; `#inferred` is what you think it is for. Both tiers, and every `file:line`, live in the **closing evidence table** — the body reads like a product spec. In the body an inferred purpose is written as uncertainty ("appears to exist so that…"), and every inferred purpose is *also* a row in the open-questions list — which, for a business reader, is often the most valuable output of the whole run.
-3. **Simple, flows, examples.** Every document reads the same way: what the feature is → how it is set up → what happens, step by step, when it runs → **a full worked example with real numbers**. A reader who reads only the example still understands the feature. Short sections, plain headings, no apparatus.
+Each level links to the other two from its header. A higher level never repeats the lower one's explanations — it links to them.
 
-**Prerequisites:** a confirmed area map (`dev:doc-codebase-survey`) and per-area evidence (`dev:doc-feature-trace`). **Load `business-analysis:knowledge-base` first** — it owns the KB layout, IDs, annotation grammar, and the read-first/update-after contract that governs every file written here.
+**Load the level references only when writing that level:**
+
+| Writing | Load |
+|---|---|
+| Level 1 (any set) | nothing extra — the shape is below |
+| Level 2 | [`references/level-2-behind-the-scenes.md`](references/level-2-behind-the-scenes.md) |
+| Level 3 | [`references/level-3-technical.md`](references/level-3-technical.md) |
+| `system-overview*.md` | [`references/system-overview.md`](references/system-overview.md) |
+| Checking tone or shape against a model | the matching golden example (below) |
+
+Six disciplines carry the whole skill:
+
+1. **Write for the level's reader, and stay at that level.** Level 1 never says "handler"; Level 2 never says `OrderService.Cancel`; Level 3 never says "the part that looks after bookings" without the class name beside it.
+2. **Never let inference pass as fact — and keep the grammar in Level 3.** `#observed` is what the code does; `#inferred` is what you think it is for. Tiers and every `file:line` live in Level 3's **evidence index**; in Levels 1 and 2 an inferred purpose reads as uncertainty ("appears to exist so that…") and is a row in Open questions.
+3. **Simple, flows, examples.** Level 1 reads the same way every time: what it is → how it is set up → what happens, step by step → **a full worked example with real numbers**.
+4. **One fact, one home.** A statement is explained at the level where its reader needs it and cited at the others. The three levels never contradict each other; when evidence changes one, all three are re-checked and re-stamped.
+5. **Level 3 carries the proof for all three.** Every parameter, formula, threshold, step, branch, connection, timing and failure claim in Levels 1 and 2 has a row in Level 3's evidence index. Level 3 is never skipped.
+6. **Levels 1 and 2 describe; only Level 3 judges.** Behaviour is stated factually and neutrally ("the credits are returned twice"). The words *bug, defect, flaw, broken, wrong, mistake, vulnerability* and *should have* never appear in Levels 1 or 2; classifying something as a defect happens only in Level 3's Findings, and a Level 2 statement that is also a finding has an evidence-index row citing it (`see **F1**`). Level 2 is `internal` because it is frank about failure, not because it is allowed to editorialise.
+
+**Prerequisites:** a confirmed area map (`dev:doc-codebase-survey`) and per-area evidence (`dev:doc-feature-trace`), including its `Client vocabulary` table and the verbatim refusal texts in inventory 3. **When `docs/business-model/` exists or is being written, load `business-analysis:knowledge-base` first** — it owns the KB layout, IDs, annotation grammar, and the read-first/update-after contract; a standalone feature run without a KB skips it.
+
+**The golden examples are illustrations, never sources.** Every fact, number, currency, message and actor in a document comes from this run's trace. A claim that appears in an example but that the trace did not find (a currency symbol, who sets a rate, a message text) is not written — it becomes an open question.
 
 ## When to use
 
-- Steps 4–5 of a `be-documenter` run
+- Steps 4–5 of a `be-documenter` run, and Step 3 of a `be-feature-documenter` run
 - A traced area needs its write-up refreshed after the code moved
 
 ## When NOT to use
 
-- The code has not been traced yet → `dev:doc-feature-trace`. Writing documentation from a skim is how invented rules get into a document people then trust
-- The deliverable is requirements for work *to be done* → `requirements-author` (it authors intent; this recovers it)
-- The deliverable is defects → `dev:audit-feature`
-- The deliverable is one feature as a standalone file outside the KB → `be-feature-documenter` (same shape, `docs/features/`)
+- The code has not been traced yet → `dev:doc-feature-trace`
+- The deliverable is requirements for work *to be done* → `requirements-author`
+- The deliverable is defects → `dev:audit-feature`. Defects found while tracing go in Level 3's Findings, never into Levels 1 or 2
 
 ## Output — into the KB, under its contract
 
-Everything lands in **`docs/business-model/`** in the target repo, per `business-analysis:knowledge-base`:
+Everything lands in **`docs/business-model/`**, per `business-analysis:knowledge-base`. A standalone feature (`be-feature-documenter`) uses the same three-file set under `docs/features/` with `<NNN>-<slug>` as the name.
 
 | File | Owner | This skill's role |
 |---|---|---|
-| `areas/<area>.md` (`AREA-nnn`) | **this skill** | One document per area, in the shape below |
-| `system-overview.md` | **this skill** | What the system is, for whom, the area map, the end-to-end flows that cross areas |
-| `glossary.md` | shared | Terms found in code + the code-name → business-name mapping |
-| `INDEX.md`, `active-context.md` | shared | Updated per the KB's update-after contract |
-| `events.md`, `shared-data.md`, `invariants.md` | `business-analysis:dependency-map` | **Not yours.** Written by `be-documenter` in Step 3 from the Edges inventories |
-| `flows/`, `entities/`, `decisions/` | `business-analysis:process-flow` · `business-analysis:state-grid` · `business-analysis:decision-table` | **Not yours.** Produced by those skills in Step 3; you link to them by ID |
+| `areas/<area>.md` (`AREA-nnn`) | **this skill** | Level 1 — the guide |
+| `areas/<area>.behind-the-scenes.md` | **this skill** | Level 2 |
+| `areas/<area>.technical.md` | **this skill** | Level 3 |
+| `system-overview.md`, `.behind-the-scenes.md`, `.technical.md` | **this skill** | The same three levels for the whole system |
+| `glossary.md` | shared | Terms, the client's own words, and the business ↔ code mapping |
+| `INDEX.md`, `active-context.md` | shared | Updated per the KB contract. **One `INDEX.md` line per area**, naming all three files |
+| `events.md`, `shared-data.md`, `invariants.md` | `business-analysis:dependency-map` | **Not yours.** Levels 2 and 3 cite them by id |
+| `flows/`, `entities/`, `decisions/` | `process-flow` · `state-grid` · `decision-table` | **Not yours.** You link to them by ID |
 
-**The header block and provenance stamp are mandatory** on every file this skill writes — the `Created`/`Owned by` lines per `business-analysis:knowledge-base`'s header rule, then the stamp:
+### Header block
+
+Mandatory on **every file** of a set, in this order:
 
 ```markdown
 **Created:** YYYY-MM-DD
 **Owned by:** `dev:doc-business-model`
 **Derived from:** code by `be-documenter` @ `<commit sha>` on YYYY-MM-DD
+**Audience:** shareable | internal
+**Levels:** [Guide](<name>.md) · [Behind the scenes](<name>.behind-the-scenes.md) · [Technical reference](<name>.technical.md)
 ```
 
-On a later update, add `**Last updated:** YYYY-MM-DD by \`<skill>\`` beneath the creation line rather than overwriting it. A reader must be able to tell generated content from hand-authored content at a glance; the stamp is the only apparatus the document carries above the evidence table.
+- **Audience** is `shareable` on Level 1 and `internal` on Levels 2 and 3. A person may promote Level 2 to `shareable` after reading it; an agent never does. Feature documents use the feature header (`**Generated by …**`) and carry the same `**Audience:**` line.
+- **Each file carries its own `Derived from` stamp.** The three files of a set always carry the **same sha** after a run: when any one is updated, all three are re-checked and re-stamped, and each gets `**Last updated:** YYYY-MM-DD by \`<skill>\`` beneath its creation line (the creation line is never overwritten).
+- **Never overwrite a `#confirmed` entry.** If your evidence contradicts it, record the contradiction in `active-context.md` and escalate it.
 
-**Never overwrite a `#confirmed` entry.** A human confirmed it; it outranks your trace. If your evidence contradicts it, record the contradiction in `active-context.md` and escalate it in the report.
-
-**A filled golden example area document is at `references/example-area.md`** — the shared `workshop-booking` toy system, imagined as an inherited codebase. Shape, tone, example discipline and the evidence table there are normative; the domain content and citations are illustrative.
+**Golden examples** — the `workshop-booking` toy system as an inherited codebase, one area at all three levels: [`references/example-area.md`](references/example-area.md) (Level 1), [`references/example-behind-the-scenes.md`](references/example-behind-the-scenes.md) (Level 2), [`references/example-technical.md`](references/example-technical.md) (Level 3). Shape, tone, example discipline and the evidence index are normative; the domain content is illustrative.
 
 ---
 
-## The area document — the shape
+## Level 1 — the guide
+
+The client-facing document. If a sentence would make a non-technical client ask "what does that mean?", it does not belong here.
 
 ```markdown
 # AREA-nnn — <Area name>
-**Created:** … · **Owned by:** … · **Derived from:** …
+<header block — Audience: shareable>
 **Models:** [FLOW-nnn …] · [ENT-nnn …] · [DEC-nnn …]
 
 ## Overview
@@ -68,232 +98,124 @@ On a later update, add `**Last updated:** YYYY-MM-DD by \`<skill>\`` beneath the
 ## Setup                      ← only when something is configurable
 ## How it works
 ### <Flow — named by its trigger or by what the user does>
-### <Flow …>
 ## How it connects             ← only when something crosses the area boundary
 ## Example
 ## Who can do what            ← only when more than one kind of user, or admin actions exist
 ## Open questions
-## Where this lives in the code
+## Going deeper               ← links to Level 2 and Level 3
 ```
 
-Optional sections are **dropped** when they do not apply — never padded. The negative search that proved it ("no configuration: searched `options`, `settings`, `config` under `src/`") is one row in the evidence table, so absence still reads as verified.
+Optional sections are **dropped** when they do not apply — never padded. The negative search that proved it is one row in Level 3's evidence index. **There is no evidence table in Level 1.** Under about 2,000 words.
 
-### Overview
+**The client's words.** Name things the way the client's own product names them — the button labels, screen titles, email wording and messages harvested in the trace's `Client vocabulary` table — not the way the code names them. "Credits", "session", "Cancel booking" if that is what the screen says. Every term used goes to the glossary with its code name.
 
-Two to four sentences. What the feature is and why it exists, in the user's words. If one rule governs everything below, state it here as **Important:** — "Fees are calculated per fill, not per order", "Short positions are not supported today; the formula accounts for them anyway". An inferred purpose reads as uncertainty here and is a row in Open questions.
-
-### Scope
-
-What the feature applies to and what it does not — instrument types, account kinds, countries, user kinds — as short bullets. Eligibility rules belong here ("applies only to companies incorporated in the UK, not merely listed there"). **Boundaries** close the section: "Does not decide product prices — that is **Catalog** (AREA-002)". Boundaries are the cheapest lines to write and the ones that prevent the most wrong assumptions.
-
-### Setup
-
-The configurable parameters, as a table:
-
-| Parameter | Description | Example |
-|---|---|---|
-| Stress % drop | Simulated fall applied to a net long position | 50% |
-| Exposure fee % | Annualised fee charged on the resulting deficit | 25% |
-
-Rules for the section:
-
-- Where configuration is **layered**, name the levels and the precedence in one line: "the most specific plan wins — account, then account group, then default".
-- **Validations** as a short list under the table: "Group name must be unique", "An instrument can belong to one group only".
-- A value that is **hard-coded** rather than configured is still stated, with its number, where it applies in *How it works*; the evidence table says it is fixed in code — which is usually also an open question (*should it be configurable?*).
+- **Overview** — two to four sentences: what it is and why it exists, in the client's words. One rule that governs everything below is stated as **Important:**. An inferred purpose reads as uncertainty and is an open question.
+- **Scope** — what it applies to and what it does not, as short bullets, closed by **Boundaries** ("Does not decide prices — that is **Catalog** (AREA-002)").
+- **Setup** — a `| Parameter | Description | Example |` table. Layered configuration names its levels and precedence in one line ("the most specific wins — member, then plan"); validations as a short list under the table; a **hard-coded** value is still stated with its number (Level 3 records that it is fixed, usually also an open question).
+- **How it connects** — three short lists in business words, from the Edges inventory: **Starts from**, **Sets off**, **Shares**. Areas by `AREA-nnn` and label. The *how* is Level 2; ids and delivery mode are Level 3.
 
 ### How it works
 
-One sub-section per **flow**. A flow is one trigger: something a user does, a schedule (end of day, first business day of the month), or an event (a fill, a withdrawal). Each flow has the same shape:
+One sub-section per **flow** — one trigger: something a user does, a schedule, or an event. Each has the same shape:
 
 ```markdown
 ### Daily accrual
 
 **Trigger:** end of day, for every account holding a margin loan.
 
-1. Work out the loaned amount per instrument for the day — the amount at start of day plus any amount opened during the day.
+1. Work out the loaned amount per instrument for the day.
 2. Pick the account's markup tier from the total loaned amount in that currency.
 3. Base & account interest = Total loaned amount × (Base rate + Account markup) / Day count
-4. Instrument interest = SUM over instruments of (Loaned amount for the instrument × Instrument markup) / Day count
-5. Accrued daily interest = Base & account interest + Instrument interest
 
    Where: *Day count* is the currency's convention (360 or 365); *Account markup* is the tier matched in step 2.
 
 **Result:** one accrual line per currency on the account's ledger. Nothing is charged yet.
-**Does not run when:** the account has no loan in that currency — nothing is recorded.
 ```
 
-- **Numbered steps, business verbs.** A step says what happens to the business, not which service was called. Steps are ordered as the code runs them.
-- **A step that computes something shows the formula on its own line**: `Name = expression`, then `Where:` defining each term the first time it appears. Plain-text math — `×` or `*`, `SUM`, `MIN`, `ABS`, `ROUNDUP(x, 2)` — never code. **Rounding, day-count conventions and currency conversion are part of the formula**, never left implicit; the exact number, never a rounding of it.
-- **Branches inline.** "If the deficit is 0, stop here — no fee is charged." A combination the code never handles is stated as such ("a sell with no fill price is not handled"), not papered over.
-- **Result is mandatory.** What changes for the user or the account: the transaction posted, the state the record ends in, the message shown. It is the payoff of the flow and the line support will quote.
-- **What stops it / what the user sees** — only where the code refuses with a user-visible outcome — a short table: Situation · What the user sees · What happens. Drop it when there is nothing to show.
-- **One flow per trigger, not per endpoint.** Three endpoints that make up one checkout are one flow. Link a `FLOW-nnn` / `DEC-nnn` by ID where the path branches heavily; never duplicate the diagram.
-
-### How it connects
-
-Three short lists in business words, from the Edges inventory: **Starts from** (which other areas' actions or schedules start this one), **Sets off** (what this area causes elsewhere), **Shares** (data other areas also change or read). Name areas by `AREA-nnn` and label. The `EVT-`/`RX-` ids, code and the delivery mode live in the evidence table. Nothing crosses the boundary: drop the section and record the negative search as a row.
+- **Numbered steps, business verbs**, in the order the code runs them. The evidence index cites them as `<Flow heading> · step N`, so keep the numbering stable.
+- **A computing step shows its formula on its own line** — `Name = expression`, then `Where:`. Plain-text math (`×`, `SUM`, `MIN`, `ROUNDUP(x, 2)`), never code. Rounding, day-count conventions and currency conversion are part of the formula; the exact number, never a rounding of it.
+- **Branches inline.** "If the deficit is 0, stop here." A combination the code never handles is stated as such.
+- **Result is mandatory** — what changes for the user: the charge posted, the state the record ends in, the message shown.
+- **What stops it** — only where the code refuses with a user-visible outcome: a `Situation | What the user sees | What happens` table. *What the user sees* **quotes the exact message** from the trace's inventory 3 ("“This session is full”"), never a paraphrase. Drop the table when nothing is refused.
+- **One flow per trigger, not per endpoint.** Link a `FLOW-nnn` / `DEC-nnn` where the path branches heavily; never duplicate the diagram.
 
 ### Example
 
-**Mandatory** whenever the area has a calculation, a threshold, a tiered or layered configuration, or anything time-based; otherwise a short scenario walk-through. It is not decoration — it is how the reader checks they understood the rule, and how you check you understood the code.
+**Mandatory** whenever there is a calculation, a threshold, a tiered or layered configuration, or anything time-based; otherwise a short scenario walk-through.
 
-Shape:
+1. **Setup** — the concrete configuration and data, as small tables mirroring *Setup* with values filled in.
+2. **The steps, with real numbers carried through** — "Stock group NAV = 27,500 + 11,025 = 38,525" — to the final result.
+3. **Time-based flows as a timeline** — one row per day or event.
 
-1. **Setup** — the concrete configuration and data the example uses, as small tables mirroring the *Setup* section with values filled in (the plans, the rates, the positions, the account).
-2. **The steps from *How it works*, each with real numbers carried through** — "Stock group NAV = 27,500 + 11,025 = 38,525" — down to the final result.
-3. **Time-based flows as a timeline** — one row per day or event: what happened, the running values, what was accrued or posted.
+Every number used as a rule is the code's exact value; every arithmetic line is shown and recomputed before handing off; invent only the incidental (names, dates, quantities), one running cast and one data set; an example illustrates, never extends — where the code is silent, the example stops and the gap is an open question.
 
-Rules:
+### Who can do what, Open questions, Going deeper
 
-- **Every number used as a rule is the code's exact value.** A rounded or invented threshold is a new rule, stated to a reader who cannot check it.
-- **Every arithmetic line is shown and is correct** — recompute the whole example before handing off. A wrong example teaches a wrong rule with great confidence.
-- **Invent only the incidental** — names, dates, quantities. One running cast and one data set across the whole document; the reader learns them once.
-- **An example illustrates, it never extends.** If the code does not say what happens on day 31, the example stops at day 30 and the gap is an open question.
-
-### Who can do what
-
-Only when more than one kind of user reaches the area, or admin actions exist:
-
-| Who | Can |
-|---|---|
-| Member | Book and cancel own sessions; sees own credit balance |
-| Staff | Cancel anyone's booking; define plans, session tiers, member overrides; upload the FTT list from CSV |
-
-Admin actions as a short list when there are several. How the system recognises each actor (a permission string, a role claim) is evidence-table material, not body.
-
-### Open questions
-
-Everything the code cannot answer, phrased so a business person can answer it:
-
-| # | Question | Why it matters |
-|---|---|---|
-| Q1 | Is the 30-day refund window a policy decision, a legal requirement, or a card-scheme constraint? | Determines whether it can be changed and by whom |
-| Q2 | Late cancellations are recorded but nothing uses them — is a consequence planned? | Members are flagged with no effect; either build the consequence or stop recording |
-
-Every inferred purpose, every hard-coded number whose origin is unknown, every case the code leaves unhandled. Ask about the **rule**, not the code — "Is the 30-day window ours to change?" is exactly what the reader knows.
-
-### Where this lives in the code
-
-The evidence table — the only place in the file for `file:line`, tier tags, class names, table names, status codes and framework nouns. A reader can hide this section and lose nothing but the proof.
-
-| Section | Statement | Evidence | Tier |
-|---|---|---|---|
-| Setup | Exposure fee % is defined per group | `ExposureGroup.cs:14` | `#observed` |
-| How it works — Fee | Deficit = ABS(MIN(0, Equity − Total exposure risk)) | `ExposureFeeCalculator.cs:62` | `#observed` |
-| How it works — Fee | Day base comes from the currency's margin-interest setup | `ExposureFeeCalculator.cs:71` → `CurrencySettings.cs:30` | `#observed` |
-| Overview | The fee exists to cover losses on margin loans in volatile markets | comment at `ExposureFeeCalculator.cs:9`; **Q1** | `#inferred` |
-| Setup | No per-account override of the fee % | search: `AccountExposure`, `FeeOverride` under `src/` — none | `#observed` |
-
-Rules: **every parameter, formula, threshold, step and branch in the body has a row**; an `#observed` row carries `file:line` read this session; an `#inferred` row names its open question; a negative claim names its search. One row per statement, short — this table is an index, not a second document.
+- **Who can do what** — `| Who | Can |`, only when there is more than one kind of user or admin actions exist. How the system recognises each actor is Level 3.
+- **Open questions** — `| # | Question | Why it matters |`, numbered `Q1…` (Level 2 continues the numbering). Every inferred purpose, every hard-coded number of unknown origin, every unhandled case — asked about the **rule**, not the code.
+- **Going deeper** — two lines, last in the document, linking Level 2 and Level 3.
 
 ---
 
-## Language discipline
+## Language discipline — by level
 
-The rule that makes the difference between documentation the business uses and documentation it politely ignores:
+The same fact, three ways:
 
-| Do not write | Write |
-|---|---|
-| "Returns 409 when the status is not Pending" | "You can only cancel an order that has not yet shipped" |
-| "`OrderService.Cancel` validates `TenantId`" | "Agents can only cancel orders belonging to their own organisation" |
-| "The `orders` table has a unique index on `(tenant_id, order_number)`" | "Order numbers are unique within an organisation" |
-| "Throws `InsufficientStockException`" | "The order is rejected and the customer is told the item is unavailable" |
-| "`Math.Ceiling(qty * price * rate * 100) / 100`" | "SEC fee = ROUNDUP(Qty × Fill price × SEC rate, 2)" |
-
-Banned everywhere above the evidence table: class names, method names, table and column names, HTTP status codes, exception types, framework nouns. Formulas are plain-text math, not code. Sentences short; headings plain; no tier tags in prose.
-
-## System overview
-
-`system-overview.md` — the entry point for a reader who knows nothing:
-
-```markdown
-# <System> — What it does
-**Created:** YYYY-MM-DD
-**Owned by:** `dev:doc-business-model`
-**Derived from:** code by `be-documenter` @ `<sha>` on YYYY-MM-DD
-
-## Overview
-<One paragraph: what the system is for, who uses it, and what it produces. Business terms only.>
-
-## The areas
-| ID | Area | What it does for users | Document | Depth |
-|---|---|---|---|---|
-| AREA-001 | Identity & access | … | [areas/identity.md](areas/identity.md) | full |
-
-## End-to-end flows
-<!-- The user journeys that cross several areas, as numbered steps naming the area at each step.
-     This is what a reader needs and no single area document can give them. -->
-
-### New customer's first order
-1. **Identity & access** — the customer registers and verifies their email
-2. **Catalog** — they browse and add items to a basket
-3. **Ordering** — they place the order
-4. **Billing** — payment is taken
-5. **Notifications** — they receive confirmation
-6. **Fulfilment** — the warehouse ships it
-
-## Foundations
-<!-- Cross-cutting concerns from the survey: how sign-in and permissions work, how failures reach
-     users, how organisations' data is kept apart. One or two lines each, business-level. -->
-
-## What is not documented
-| Area / surface | Why | Revisit when |
+| Level 3 (technical) | Level 2 (behind the scenes) | Level 1 (guide) |
 |---|---|---|
+| `POST /bookings/{id}/cancel` → 409 when `status != Pending` | The booking service refuses the cancellation and the page shows a message | You can only cancel an order that has not yet shipped |
+| unique index `(tenant_id, order_number)` | The order number is checked for clashes when the order is saved | Order numbers are unique within an organisation |
+| `BookingConfirmed` via outbox after commit; consumer retried 3× then dead-lettered | Once the booking is saved, the pricing step is told in the background; if it fails it is tried three times and then set aside | Your credits are worked out as soon as the booking is confirmed |
+| F1: no idempotency key — redelivery double-prices | The same message can arrive twice, and the booking is then priced twice | — (not a client-facing rule) |
+| `Math.Ceiling(qty * price * rate * 100) / 100` | — (Level 2 links to Level 1) | SEC fee = ROUNDUP(Qty × Fill price × SEC rate, 2) |
 
-## Coverage
-<!-- The survey's full coverage ledger — every surface assigned to an area or parked with a
-     reason — so this file can back its own coverage claim. -->
-| Surface | Kind | Area | Note |
-|---|---|---|---|
-```
-
-**"What is not documented" is mandatory.** A documentation set that does not state its own limits gets read as complete, and the parts nobody traced become the parts everyone assumes are fine.
+Banned in **Level 1** (and in Level 2, beyond its allowed everyday words): class, method, table and column names, file names, status codes, exception types, framework nouns, inline code, jargon such as *endpoint, payload, handler, middleware, idempotent, eventual consistency*, tier tags, `file:line`, and the defect words of discipline 6. A word that needs a definition is replaced, not defined; a word the client uses themselves stays.
 
 ## Glossary
 
-Every domain term found in the code, with its business meaning and — the valuable part — the **mapping between the two vocabularies**:
+Every domain term found, with its business meaning and the **mapping between the vocabularies** — the client's own term (from the trace's `Client vocabulary` table), what it means, and what the code calls it:
 
-| Term (business) | Means | Called in code | Notes |
-|---|---|---|---|
-| Order | A confirmed purchase, from placement to delivery | `Order`, `PurchaseOrder` (legacy) | Two names for one concept `#observed` |
-| Account | The billing relationship, not the login | `Customer` | **Drift:** "customer" means the *person* in Identity, the *billing entity* in Billing `#observed` |
+| Term (client) | Means | Called in code | Where the client sees it | Notes |
+|---|---|---|---|---|
+| Order | A confirmed purchase, from placement to delivery | `Order`, `PurchaseOrder` (legacy) | order confirmation email | Two names for one concept `#observed` |
+| Account | The billing relationship, not the login | `Customer` | invoice header | **Drift:** "customer" means the *person* in Identity, the *billing entity* in Billing `#observed` |
 
-**Terminology drift is a finding, not a merge.** Two meanings for one word is exactly the kind of thing that causes an expensive misunderstanding later — record both, flag it, and let `business-analyst` resolve it.
+**Terminology drift is a finding, not a merge** — record both, flag it, and let `business-analyst` resolve it. Level 2's plain part names are in the glossary too.
 
-## Reconcile procedure (REFRESH mode)
+## Reconcile procedure (every run that finds an existing set)
 
-When the KB already holds documentation for an area and the code has moved:
-
-1. **Re-trace first.** The existing document is a lead; the code is the evidence.
-2. **Verdict every statement**: **Agrees** · **New** · **Gone** · **Contradicts**.
-3. **Update, don't rewrite** — per the KB's grammar, `~~old~~ → new` keeps one generation of history inline, so a reader can see what changed. Re-run the example's arithmetic whenever a number it uses changed.
-4. **`Gone` needs care.** A statement with no code behind it means the feature was removed *or* your trace did not find it. Say which, and never delete a `#confirmed` statement on the strength of a failed search.
-5. **`Contradicts` escalates.** Present the documented statement, the code evidence, and both readings — *the documentation is stale* vs *the code has a defect*. Never silently pick one.
-6. **Re-stamp provenance** and log the session in `active-context.md`.
+1. **Check staleness per file.** Read each existing file's `Derived from` sha, compare it with `HEAD` and the git delta for the area's paths, and report which of the three levels are stale. If any one is stale, all three are reconciled together.
+2. **Re-trace first.** The existing documents are a lead; the code is the evidence.
+3. **Verdict every statement**: **Agrees** · **New** · **Gone** · **Contradicts**.
+4. **Update, don't rewrite** — `~~old~~ → new` keeps one generation of history inline. Re-run the example's arithmetic whenever a number it uses changed; re-check Level 2's timing and failure statements; re-verify every `file:line` at the current commit and every evidence-index `Flow · step N` citation against the renumbered steps.
+5. **`Gone` needs care.** Say whether the feature was removed or your trace did not find it; never delete a `#confirmed` statement on the strength of a failed search.
+6. **`Contradicts` escalates.** Present the documented statement, the code evidence, and both readings — *stale documentation* vs *code defect*. Never silently pick one.
+7. **Re-stamp all three files** with the same sha and a `Last updated` line, and log the session in `active-context.md`. A REFRESH that deliberately re-traced only part of a set says so in the report.
 
 ## Self-check before handing off
 
-1. Every area from the confirmed map has a document, or is listed in "What is not documented" with a reason.
-2. Every document has Overview, How it works, Example, Open questions and the evidence table; optional sections are present only where they apply, and their absence is backed by a negative-search row.
-3. Every flow has a trigger and a result; every computing step shows its formula with rounding and conventions stated.
-4. **The example's arithmetic is recomputed and correct**, every number used as a rule matches the evidence table, and the same cast and data run through the whole document.
-5. No `#confirmed` anywhere in what you wrote; every inferred purpose reads as uncertainty in the body and appears in Open questions.
-6. **Every parameter, formula, threshold, step and branch in the body has an evidence row**, and every `#observed` row carries `file:line` read this session.
-7. Nothing above the evidence table contains class names, table names, status codes, exception types, framework nouns or tier tags — grep your own output.
-8. Flows, state grids, and decision tables are **linked by ID**, not duplicated.
-9. Every file carries its `Created`/`Owned by` header and provenance stamp; `INDEX.md` has a line for everything added; `active-context.md` has this session at the top.
-10. The glossary records both vocabularies and flags every drift.
-11. Nothing unreachable is documented as a capability.
-12. How it connects is present, or its negative search is an evidence row.
+1. **Lint passes:** `python3 ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/doc-lint.py --dir <folder>` exits 0. Fix every `ERROR`; read every `WARN` and either fix it or say in the report why it stands.
+2. Every area from the confirmed map has all three documents, or is in "What is not documented" with a reason.
+3. **Level 1** has Overview, How it works, Example, Open questions and Going deeper; optional sections only where they apply, absence backed by a Level 3 negative-search row. No evidence table, tier tag, code noun, jargon or defect word. It uses the client's terms, and every *What stops it* row quotes the exact message.
+4. **Level 2** matches its reference: diagram, parts, a flow per Level 1 flow with only the lanes it uses, *What the person notices* only where there is a later step, remembered / timing / failure sections. No banned word, no defect word — behaviour stated neutrally, and every statement that is also a finding has an index row citing it. In a KB run, no FLOW is redrawn.
+5. **Level 3** matches its reference: every heading (empty ones state their search), local ids on every row, Mermaid for each state machine and multi-participant flow, Findings routed with a boundary condition.
+6. Every flow has a trigger and a result; every computing step shows its formula with rounding and conventions; **the example's arithmetic is recomputed and correct**, and every number matches Level 3.
+7. No `#confirmed` anywhere you wrote; every inferred purpose reads as uncertainty in Levels 1 and 2 and is an open question.
+8. **Evidence index complete:** every qualifying statement in Levels 1 and 2 has a row; Section cells read `<Flow heading> · step N` (or the section name); every `###` flow of both plain levels is cited; every `see **X**` resolves to a row id in Level 3; every `#observed` row carries `file:line` read this session.
+9. **The three levels agree** — spot-check five facts that appear at more than one level (a threshold, a retry count, a trigger, a name mapping, an actor).
+10. Every file carries the full header block with its `Audience` line, and all three carry the same `Derived from` sha; `INDEX.md` has one line per area naming all three files; `active-context.md` has this session at the top.
+11. The glossary records the client's terms, the code names and every drift; Level 2's part names are in it.
+12. Flows, state grids and decision tables are linked by ID, not duplicated; nothing unreachable is documented as a capability.
 
 ## Handoffs
 
-- **→ `business-analyst`** — owns the KB. Hand off the open questions, the terminology drift, and any contradiction between two areas' rules. It resolves conflicts and records precedence; you never invent it.
-- **→ `requirements-author`** — turns confirmed area documentation into epics and INVEST stories, once the business has answered the open questions.
-- **→ `qa-test-case-designer`** — the flows, formulas and the worked example are a test basis; the thresholds are BVA seeds and the example is the first expected-value test.
-- **→ `solution-planner`** — the area map and documented behavior are the inputs to an EXTEND run against this system.
-- **→ `code-auditor`** — the findings the trace produced but this documentation deliberately excludes.
+- **→ `business-analyst`** — the open questions, the terminology drift, and any contradiction between two areas' rules. It resolves conflicts and records precedence; you never invent it.
+- **→ `requirements-author`** — turns confirmed Level 1 documentation into epics and stories once the open questions are answered.
+- **→ `qa-test-case-designer`** — Level 1's flows, formulas and worked example are a test basis; Level 3's rules, errors and refused transitions are the negative-test matrix.
+- **→ `solution-planner`** — the area map and Level 3 are the inputs to an EXTEND run.
+- **→ `code-auditor`** — Level 3's Findings.
+- **→ any `be-<stack>` agent or AI assistant about to change the code** — start from Level 3's *Quick facts* and *Code map*; read *Changing this safely* before editing.
 
 ## Version policy
 
-Version-agnostic — this skill writes prose, not code. The one version-sensitive input is the **evidence** it cites: `file:line` references are valid only against the commit recorded in the provenance stamp, which is why that stamp is mandatory. On a `REFRESH`, re-verify every citation against the current commit rather than carrying it forward; a citation that has silently drifted to a different line is worse than no citation, because it looks checkable.
+Version-agnostic — this skill writes prose, not code. The one version-sensitive input is the **evidence**: `file:line` references are valid only against the commit in each file's `Derived from` stamp. On a refresh, re-verify every citation against the current commit rather than carrying it forward; a citation that has silently drifted to a different line is worse than no citation.

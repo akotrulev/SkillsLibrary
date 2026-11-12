@@ -1,0 +1,12 @@
+{
+  "nav.credits": "Session credits",
+  "money.currency": "GBP",
+  "money.symbol": "£",
+  "plans.monthlyCredits": "Monthly allowance",
+  "plans.overageRate": "Overage rate (per credit)",
+  "members.overage": "Overage",
+  "members.overageOverride": "Personal overage rate",
+  "members.creditsUsed": "Credits used this month",
+  "sessions.tier": "Session tier",
+  "sessions.cancel": "Cancel session"
+}
