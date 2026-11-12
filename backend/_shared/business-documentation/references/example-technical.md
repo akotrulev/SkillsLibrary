@@ -2,7 +2,7 @@
 
 The Level 3 example for `dev:doc-business-model`: the same **Session credits & charges** area as [example-area.md](example-area.md) (Level 1) and [example-behind-the-scenes.md](example-behind-the-scenes.md) (Level 2), written for developers and AI agents. Every code name, path, status code and tier tag the other two levels keep out is here. **Shape, heading names, local ids and the evidence index are normative; domain content, paths and line numbers are illustrative.**
 
-Note what the example demonstrates: tables over prose; one fact per row with its evidence on the same row; local ids (`EP1`, `R4`, `DB2`…) the evidence index and other agents can cite; Mermaid for the state machine and the multi-participant flow; the same plain part names as Level 2 mapped to class names; a section with nothing to report (*Configuration*, *Telemetry*) stating the search that found nothing; a Finding carrying its boundary condition — the only place in the set where behaviour is called a defect; and an evidence index whose Section cells cite `Flow · step N` for every flow of Levels 1 and 2.
+Note what the example demonstrates: tables over prose; one fact per row with its evidence on the same row; local ids (`EP1`, `R4`, `DB2`…) the evidence index and other agents can cite; Mermaid for the state machine and the multi-participant flow; the same plain part names as Level 2 mapped to class names; a section with nothing to report (*Integrations*, *Configuration*) stating the search that found nothing; a Finding carrying its boundary condition — the only place in the set where behaviour is called a defect; and an evidence index whose Section cells cite `Flow · step N` for every flow of Levels 1 and 2, with its one `#inferred` row naming the open question that carries it.
 
 ---
 
@@ -13,20 +13,20 @@ Note what the example demonstrates: tables over prose; one fact per row with its
 **Derived from:** code by `be-documenter` @ `a3f9c21` on 2026-08-02
 **Audience:** internal
 **Levels:** [Guide](credits-and-charges.md) · [Behind the scenes](credits-and-charges.behind-the-scenes.md) · [Technical reference](credits-and-charges.technical.md)
-**Commit:** `a3f9c21` · **Stack:** .NET 8, ASP.NET Core minimal APIs, EF Core 8, PostgreSQL, in-process outbox · **Depth:** full · **Traced:** 2026-08-02
+**Stack:** .NET 8, ASP.NET Core minimal APIs, EF Core 8, PostgreSQL, in-process outbox · **Depth:** full · **Traced:** 2026-08-02
 
 ## How to read this
 
 - Tiers: `#observed` = code read this session at the cited `path:line`; `#inferred` = intent, always tied to an open question (`Q` in Levels 1–2, `T` here). Never `#confirmed`.
 - Paths are repo-relative; `a-b` after a colon is a line range. Citations are valid only at the commit above.
-- Local ids: `EP` entry point · `R` rule · `DB` data · `EV` event/reaction · `INT` integration · `CFG` configuration · `F` finding.
+- Local ids: `EP` entry point · `R` rule · `DB` data · `EV` event/reaction · `INT` integration · `CFG` configuration · `ERR` error · `F` finding · `T` technical open question. Code map, Tests, vocabulary and Changing-this-safely rows carry no id.
 - Models: [FLOW-004] · [ENT-003] · [DEC-002]. Dependency map: EVT-004–006, RX-004–007, INV-004.
 
 ## Quick facts
 
 | Area id | Modules | Entry points | Entities | Events in / out | Integrations | Flags |
 |---|---|---|---|---|---|---|
-| AREA-004 | `src/Credits/` | 2 HTTP · 1 job · 2 consumers | `MembershipPlan`, `SessionTier`, `Member.CreditsUsed`, `AccruedOverage` | in: `BookingConfirmed`, `BookingCancelled` · out: none | none | none |
+| AREA-004 | `src/Credits/` | 4 HTTP · 1 job · 2 consumers | `MembershipPlan`, `SessionTier`, `Member.CreditsUsed`, `AccruedOverage` | in: `BookingConfirmed`, `BookingCancelled` · out: none | none | none |
 
 ## Code map
 
@@ -46,6 +46,8 @@ Note what the example demonstrates: tables over prose; one fact per row with its
 |---|---|---|---|---|---|
 | EP1 | `GET /members/me/credits` | `CreditEndpoints.cs:21` | policy `credits:own` | → `{creditsUsed, creditsRemaining, accruedOverage}` | `CreditEndpoints.cs:21` |
 | EP2 | `PUT /plans/{id}` | `PlanAdminEndpoints.cs:17` | policy `workshops:manage` | `{name, monthlyCredits, overageRate}` → `204` | `PlanAdminEndpoints.cs:17` |
+| EP6 | `PUT /tiers/{id}` | `PlanAdminEndpoints.cs:36` | policy `workshops:manage` | `{creditsPerSeat}` → `204` | `PlanAdminEndpoints.cs:36` |
+| EP7 | `PUT /members/{id}/overage-rate` | `PlanAdminEndpoints.cs:48` | policy `workshops:manage` | `{overageRate: decimal \| null}` → `204`; `null` clears | `PlanAdminEndpoints.cs:48-55` |
 | EP3 | consumer: `BookingConfirmed` | `CreditPricingService.cs:31` | internal | event `BookingConfirmed.cs:6` | `CreditPricingService.cs:31` |
 | EP4 | consumer: `BookingCancelled` | `BookingCancelledHandler.cs:19` | internal | event `BookingCancelled.cs:8` | `BookingCancelledHandler.cs:19-33` |
 | EP5 | job: cron `0 0 1 * *` | `OverageChargeJob.cs:12` | internal | — | `OverageChargeJob.cs:12` |
@@ -62,7 +64,7 @@ Note what the example demonstrates: tables over prose; one fact per row with its
 | R6 | Late forfeit | member cancels `< 24 h` before start | nothing returned, accrual kept; no fee path | `BookingCancelledHandler.cs:27` | `#observed` |
 | R7 | Monthly post | unposted accruals sum `> 0` | one ledger charge, accruals marked posted | `OverageChargeJob.cs:40-58`, `:44` | `#observed` |
 | R8 | Monthly reset | every member, every run | `CreditsUsed = 0`; no roll-over | `OverageChargeJob.cs:58` | `#observed` |
-| R9 | Plan validation | save plan | `MonthlyCredits >= 0` integer; rates `>= 0` | `MembershipPlanValidator.cs:15-19` | `#observed` |
+| R9 | Plan and override validation | EP2, EP7 | `MonthlyCredits >= 0` integer; plan rate and override `>= 0` | `MembershipPlanValidator.cs:15-19`, `PlanAdminEndpoints.cs:52` | `#observed` |
 | R10 | Constants | — | cut-off 24 h at `BookingCancelledHandler.cs:19`; posting time at `OverageChargeJob.cs:12`; fixed in code, Q1, Q3 | as cited | `#observed` |
 
 ## Data
@@ -99,7 +101,7 @@ sequenceDiagram
 ```
 
 - **Transaction boundary:** booking save and outbox row commit together; pricing runs after commit (`Outbox.cs:22`).
-- **Retries:** pricing consumer retried 3×, then parked; the cancellation handler has no failure path (`Outbox.cs:22`, `BookingCancelledHandler.cs:19-33`).
+- **Retries:** pricing consumer gets 3 attempts in all, then is parked; the cancellation handler has no failure path (`Outbox.cs:22`, `BookingCancelledHandler.cs:19-33`).
 - **Idempotency:** none found (search: `IdempotencyKey`, `Processed` under `src/`); see **F1**.
 - **Concurrency:** no lock or version column on `Member.CreditsUsed`; ordering between `BookingConfirmed` and `BookingCancelled` for one booking is `?` — **T1**.
 
@@ -107,7 +109,7 @@ sequenceDiagram
 
 | Id | Entry point | Kind | Reads | Writes | Also written by | Emits | Reacted to by | Mode | On failure | Evidence |
 |---|---|---|---|---|---|---|---|---|---|---|
-| EV1 | `BookingService.Confirm` | command | `Booking`, `SessionTier` | `Booking.CreditCost` | — | `BookingConfirmed` (EVT-005) | `CreditPricingService.cs:31` (RX-004) | after commit, at-least-once | retried 3×, parked | `Outbox.cs:22` |
+| EV1 | `BookingService.Confirm` | command | `Session` | `Booking` (insert; `CreditCost` left null for R1) | — | `BookingConfirmed` (EVT-005) | `CreditPricingService.cs:31` (RX-004) | after commit, at-least-once | 3 attempts in all, then parked | `Outbox.cs:22` |
 | EV2 | `BookingService.Cancel` | command | `Booking` | `Booking.Status` | — | `BookingCancelled` (EVT-006) | `BookingCancelledHandler.cs:19` (RX-006) | after commit, `?` | unhandled | `BookingCancelledHandler.cs:19-33` |
 | EV3 | `SessionService.CancelSession` | command | `Booking` | `Booking.Status` | — | one `BookingCancelled` per booking (EVT-004 → RX-005 → EVT-006) | RX-006 | after commit, `?` | `?` | `SessionService.cs:70-96` |
 | EV4 | `OverageChargeJob` | schedule | `AccruedOverage` | `AccruedOverage.Posted`, `Member.CreditsUsed`, ledger | — | none (search: `Publish`, `Emit`, `Outbox.Add` under `src/Credits/`) | — | scheduled | unhandled | `OverageChargeJob.cs:40-58` (RX-007) |
@@ -122,11 +124,11 @@ None. Search: `IOptions<`, `Configuration[`, `appsettings` keys `Credits:*` — 
 
 ## Errors
 
-| Condition | Status / problem type | Body | User-visible text | Evidence |
-|---|---|---|---|---|
-| Plan name not unique | `409` `plan-name-taken` | problem details | “That plan name is already taken.” | `migrations/007:22` → `PlanAdminEndpoints.cs:31` |
-| Invalid plan values (R9) | `400` `validation-failed` | field errors | “Monthly credits must be 0 or more.” · “Overage rate must be 0 or more.” | `MembershipPlanValidator.cs:15-19` |
-| `credits:own` missing | `403` | empty | — | `CreditEndpoints.cs:21` |
+| Id | Condition | Status / problem type | Body | User-visible text | Evidence |
+|---|---|---|---|---|---|
+| ERR1 | Plan name not unique | `409` `plan-name-taken` | problem details | “That plan name is already taken.” | `migrations/007:22` → `PlanAdminEndpoints.cs:31` |
+| ERR2 | Invalid plan or override values (R9) | `400` `validation-failed` | field errors | “Monthly credits must be 0 or more.” · “Overage rate must be 0 or more.” | `MembershipPlanValidator.cs:15-19` |
+| ERR3 | `credits:own` or `workshops:manage` missing | `403` | empty | — | `CreditEndpoints.cs:21`, `PlanAdminEndpoints.cs:17` |
 
 ## Telemetry
 
@@ -150,6 +152,7 @@ None found. Search: `ActivitySource`, `Meter`, `ILogger` calls in `src/Credits/`
 | Scheduling service | `SessionService` (`src/Scheduling/`) |
 | Overage note | `AccruedOverage` |
 | Plan (client term on the staff screen) | `MembershipPlan` |
+| Overage rate override (staff screen) | `Member.OverageRateOverride` |
 | Session tier: Standard · Workshop · Masterclass | `SessionTier` enum display names |
 | Credits used | `Member.CreditsUsed` |
 
@@ -180,32 +183,39 @@ None found. Search: `ActivitySource`, `Meter`, `ILogger` calls in `src/Credits/`
 | Level | Section | Statement | Evidence | Tier |
 |---|---|---|---|---|
 | Guide | Overview | Overage accrues during the month, posted once at month start | see **R7**, **EV4** | `#observed` |
-| Guide | Overview | Bookings are priced when made and never re-priced | `CreditPricingService.cs:31`; no re-pricing path (search: `Reprice`, `Recalculate` under `src/Credits/`) | `#observed` |
-| Guide | Overview | Exists so members can book beyond their plan without being refused | comment at `CreditPricingService.cs:9`; Q1 | `#inferred` |
-| Guide | Setup | Plan, tier, member override and precedence | see **DB1**, **R3**, `SessionTier.cs:11` | `#observed` |
-| Guide | Setup | Validations and the messages staff see | see **R9**, **DB1**; text at `PlanAdminEndpoints.cs:31`, `MembershipPlanValidator.cs:15-19` | `#observed` |
+| Guide | Overview | A booking is priced once, after it is confirmed, and never re-priced | see **EV1**, **R1**; no re-pricing path (search: `Reprice`, `Recalculate` under `src/Credits/`) | `#observed` |
+| Guide | Overview | Returned credits never reduce an accrued overage | no reader of returned credits outside future pricing (search: `ReturnedCredits` under `src/`); Q2 | `#observed` |
+| Guide | Overview | Appears to exist so members can book beyond their plan without being refused | comment at `CreditPricingService.cs:9`; Q5 | `#inferred` |
+| Guide | Setup | Plan, tier, member override and precedence; staff set them | see **DB1**, **R3**, **EP2**, **EP6**, **EP7**, `SessionTier.cs:11` | `#observed` |
+| Guide | Setup | Validations and the messages staff see | see **R9**, **DB1**, **ERR1**, **ERR2** | `#observed` |
 | Guide | Setup | Cut-off, posting time, no roll-over fixed in code | see **R10**; Q1, Q3 | `#observed` |
-| Guide | Setup | No *Scope* section — applies to every member | search: `Eligib`, `AppliesTo` under `src/Credits/` — none | `#observed` |
+| Guide | Scope | No *Scope* section — applies to every member | search: `Eligib`, `AppliesTo` under `src/Credits/` — none | `#observed` |
 | Guide | Booking a seat · steps 1–2 | Credit cost from tier; credits remaining | see **R1**, **R2** | `#observed` |
 | Guide | Booking a seat · steps 3–4 | Spend or overage; rate precedence | see **R2**, **R3** | `#observed` |
 | Guide | Booking a seat · step 5 | Overage accrued, never refused | see **R2**, **R4** | `#observed` |
 | Guide | Cancelling a booking · step 1 | Early or staff cancellation returns credits and removes the accrual | see **R5** | `#observed` |
 | Guide | Cancelling a booking · step 2 | Late member cancellation returns nothing | see **R6**; Q4 | `#observed` |
-| Guide | Cancelling a booking · step 1 | Returned credits never re-price an accrual | no reader of returned credits outside future pricing (search: `ReturnedCredits` under `src/`); Q2 | `#observed` |
-| Guide | Monthly posting · steps 1–2 | One charge per member; zero sum posts nothing | see **R7** | `#observed` |
+| Guide | Monthly posting · steps 1–2 | One charge per member per run; zero sum posts nothing | see **R7** | `#observed` |
 | Guide | Monthly posting · step 3 | Credits reset, no roll-over | see **R8** | `#observed` |
 | Guide | How it connects | Starts from Bookings and Scheduling; sets off nothing; shares bookings read-only | see **EV1**, **EV2**, **EV3**, **EV4**, **DB2** | `#observed` |
-| Guide | Who can do what | Member sees own balances; staff manage plans and always return credits | see **EP1**, **EP2**, **R5** | `#observed` |
+| Guide | Who can do what | Member sees own balances; staff manage plans, tiers and overrides and always return credits | see **EP1**, **EP2**, **EP6**, **EP7**, **R5** | `#observed` |
 | Behind the scenes | At a glance | Nothing here talks to an outside service | search under Integrations | `#observed` |
+| Behind the scenes | The parts involved | Part names and what each does | see Business ↔ code vocabulary; **EV1**–**EV4** | `#observed` |
+| Behind the scenes | The parts involved | Credits service runs after the booking is saved; billing job at 00:00 on the 1st | see **EV1**, **EP5** | `#observed` |
 | Behind the scenes | Booking a seat · step 1 | Booking saved and confirmed before pricing | see **EV1** | `#observed` |
-| Behind the scenes | Booking a seat · step 2 | How soon the credits service is told is not shown | no delay, poll interval or schedule visible at `Outbox.cs:22`; Q8 | `#observed` |
+| Behind the scenes | Booking a seat · step 2 | How soon the credits service is told is not shown | no delay, poll interval or schedule visible at `Outbox.cs:22`; Q9 | `#observed` |
 | Behind the scenes | Booking a seat · steps 3–4 | Cost copied onto the booking; overage note added | see **R1**, **R2**, **DB4** | `#observed` |
 | Behind the scenes | Cancelling a booking · steps 1–2 | Cancellation saved, then the credits service is told who cancelled | see **EV2** | `#observed` |
 | Behind the scenes | Cancelling a booking · step 3 | A repeated cancellation message returns the credits twice | see **F1** | `#observed` |
-| Behind the scenes | Cancelling a booking · step 3 | Staff cancelling a session cancels each booking one by one | see **EV3** | `#observed` |
-| Behind the scenes | Monthly posting · steps 1–3 | Runs at 00:00 on the 1st; one charge; reset for everyone | see **EP5**, **R7**, **R8** | `#observed` |
+| Behind the scenes | Cancelling a booking | Staff cancelling a session cancels each booking one by one | see **EV3** | `#observed` |
+| Behind the scenes | Monthly posting · steps 1–3 | Runs at 00:00 on the 1st; one charge per member per run; reset for everyone | see **EP5**, **R7**, **R8** | `#observed` |
+| Behind the scenes | What is remembered, and where | Plan values, tier costs and personal rate changed only by staff | see **EP2**, **EP6**, **EP7**, **DB1** | `#observed` |
+| Behind the scenes | What is remembered, and where | Booking cost written once at pricing; credits used has three writers; notes and ledger writers | see **DB2**, **DB3**, **DB4**, **EV4** | `#observed` |
+| Behind the scenes | Timing and ordering | Pricing after save; unpriced until then, duration not shown | see **EV1**; Q9 | `#observed` |
 | Behind the scenes | Timing and ordering | A redelivered confirmation is priced again | see **F1** | `#observed` |
-| Behind the scenes | Timing and ordering | Order of booking and cancellation not guaranteed | no ordering key or sequence number (search: `Sequence`, `OrderingKey`, `Version` in `src/Credits/` and `src/Shared/Outbox.cs`); **T1**, Q5 | `#observed` |
+| Behind the scenes | Timing and ordering | Order of booking and cancellation not guaranteed | no ordering key or sequence number (search: `Sequence`, `OrderingKey`, `Version` in `src/Credits/` and `src/Shared/Outbox.cs`); **T1**, Q6 | `#observed` |
 | Behind the scenes | Timing and ordering | Monthly reset and a booking at the same moment are not coordinated | no lock or version column (search: `RowVersion`, `Lock`, `ConcurrencyToken` under `src/Credits/`) | `#observed` |
-| Behind the scenes | When parts fail or are slow | Pricing retried 3×; returns and monthly job have no failure path | see **EV1**, **EV2**, **EV4**, **F3** | `#observed` |
-| Behind the scenes | Settings and switches | No configuration | search under Configuration | `#observed` |
+| Behind the scenes | When parts fail or are slow | Pricing gets 3 attempts in all; returns and monthly job have no failure path | see **EV1**, **EV2**, **EV4**, **F3** | `#observed` |
+| Behind the scenes | Settings and switches | No *Settings and switches* section — nothing differs by environment or switch | search under Configuration | `#observed` |
+| Behind the scenes | If you change this | Cost copied at pricing; single writer of credits used; only the cancelled message returns credits | see Changing this safely; **DB2**, **EV2** | `#observed` |
+| Behind the scenes | If you change this | Ledger gets one line per member with unposted overage per run | see **R7**, **EV4** | `#observed` |

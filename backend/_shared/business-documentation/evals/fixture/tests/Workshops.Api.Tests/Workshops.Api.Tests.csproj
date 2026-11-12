@@ -11,6 +11,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.10" />
   </ItemGroup>
   <ItemGroup>
+    <Using Include="NUnit.Framework" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../../src/Workshops.Api/Workshops.Api.csproj" />
   </ItemGroup>
 </Project>

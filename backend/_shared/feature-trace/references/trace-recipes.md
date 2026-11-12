@@ -80,24 +80,24 @@ Rules nobody thinks to write down, that surface constantly in real systems and m
 
 ```bash
 # entry points — attribute routing and minimal APIs both, the project may use either or both
-grep -rn '\[Http\(Get\|Post\|Put\|Patch\|Delete\)\|\[Route\|MapGet\|MapPost\|MapPut\|MapDelete\|MapGroup' --include=*.cs src/
+grep -rn '\[Http\(Get\|Post\|Put\|Patch\|Delete\)\|\[Route\|MapGet\|MapPost\|MapPut\|MapDelete\|MapGroup' --include='*.cs' src/
 # authorization
-grep -rn '\[Authorize\|RequireClaim\|RequireRole\|AddPolicy\|IAuthorizationHandler\|\[AllowAnonymous\]' --include=*.cs src/
+grep -rn '\[Authorize\|RequireClaim\|RequireRole\|AddPolicy\|IAuthorizationHandler\|\[AllowAnonymous\]' --include='*.cs' src/
 # validation
-grep -rn 'AbstractValidator\|RuleFor\|\[Required\]\|\[Range\|\[MaxLength\|\[RegularExpression\|ValidationAttribute' --include=*.cs src/
+grep -rn 'AbstractValidator\|RuleFor\|\[Required\]\|\[Range\|\[MaxLength\|\[RegularExpression\|ValidationAttribute' --include='*.cs' src/
 # business rules — guard clauses and domain failures
-grep -rn 'throw new \(Domain\|Business\|Invalid\|Validation\)\|Result\.Fail\|return BadRequest\|return Conflict' --include=*.cs src/
+grep -rn 'throw new \(Domain\|Business\|Invalid\|Validation\)\|Result\.Fail\|return BadRequest\|return Conflict' --include='*.cs' src/
 # scheduled work + consumers
-grep -rn 'BackgroundService\|IHostedService\|RecurringJob\|CronSchedule\|IConsumer<\|IHandleMessages' --include=*.cs src/
+grep -rn 'BackgroundService\|IHostedService\|RecurringJob\|CronSchedule\|IConsumer<\|IHandleMessages' --include='*.cs' src/
 # persistence rules
-grep -rn 'HasCheckConstraint\|HasIndex\|IsUnique\|HasDefaultValue\|OnDelete\|HasQueryFilter\|IsConcurrencyToken\|IsRowVersion' --include=*.cs src/
+grep -rn 'HasCheckConstraint\|HasIndex\|IsUnique\|HasDefaultValue\|OnDelete\|HasQueryFilter\|IsConcurrencyToken\|IsRowVersion' --include='*.cs' src/
 # silent rules
-grep -rn 'Math.Round\|MidpointRounding\|DateTime.Now\|DateTime.Today\|TimeZoneInfo\|\.First()\|\.OrderBy' --include=*.cs src/
+grep -rn 'Math.Round\|MidpointRounding\|DateTime.Now\|DateTime.Today\|TimeZoneInfo\|\.First()\|\.OrderBy' --include='*.cs' src/
 # GraphQL + gRPC entry points — only if the survey found these surfaces
-grep -rn '\[Query\]\|\[Mutation\]\|\[Subscription\]\|QueryType\|MutationType\|MapGraphQL\|MapGrpcService\|ServerCallContext' --include=*.cs src/
+grep -rn '\[Query\]\|\[Mutation\]\|\[Subscription\]\|QueryType\|MutationType\|MapGraphQL\|MapGrpcService\|ServerCallContext' --include='*.cs' src/
 # client vocabulary — resources, localizers, validation and problem-detail text, enum display names, templates
 find src/ -name '*.resx' -o -name '*.cshtml' -o -name '*.liquid' -o -name '*.hbs'
-grep -rn 'IStringLocalizer\|IHtmlLocalizer\|WithMessage(\|ErrorMessage =\|ProblemDetails\|Title =\|Detail =\|\[Display(Name\|\[Description(' --include=*.cs src/
+grep -rn 'IStringLocalizer\|IHtmlLocalizer\|WithMessage(\|ErrorMessage =\|ProblemDetails\|Title =\|Detail =\|\[Display(Name\|\[Description(' --include='*.cs' src/
 ```
 
 `HasQueryFilter` is worth its own pass — it is where soft-delete and tenancy filters live, and it silently changes the meaning of *every* query in the area.
@@ -106,24 +106,24 @@ grep -rn 'IStringLocalizer\|IHtmlLocalizer\|WithMessage(\|ErrorMessage =\|Proble
 
 ```bash
 # entry points
-grep -rn '@RestController\|@RequestMapping\|@GetMapping\|@PostMapping\|@PutMapping\|@PatchMapping\|@DeleteMapping' --include=*.java src/
+grep -rn '@RestController\|@RequestMapping\|@GetMapping\|@PostMapping\|@PutMapping\|@PatchMapping\|@DeleteMapping' --include='*.java' src/
 # authorization
-grep -rn '@PreAuthorize\|@PostAuthorize\|@Secured\|@RolesAllowed\|hasAuthority\|hasRole\|SecurityFilterChain' --include=*.java src/
+grep -rn '@PreAuthorize\|@PostAuthorize\|@Secured\|@RolesAllowed\|hasAuthority\|hasRole\|SecurityFilterChain' --include='*.java' src/
 # validation
-grep -rn '@Valid\|@NotNull\|@NotBlank\|@Size\|@Min\|@Max\|@Pattern\|ConstraintValidator' --include=*.java src/
+grep -rn '@Valid\|@NotNull\|@NotBlank\|@Size\|@Min\|@Max\|@Pattern\|ConstraintValidator' --include='*.java' src/
 # business rules
-grep -rn 'throw new \(Business\|Domain\|Invalid\|IllegalState\)\|ResponseStatusException' --include=*.java src/
+grep -rn 'throw new \(Business\|Domain\|Invalid\|IllegalState\)\|ResponseStatusException' --include='*.java' src/
 # scheduled work + consumers
-grep -rn '@Scheduled\|@KafkaListener\|@RabbitListener\|@SqsListener\|@JmsListener\|@EventListener' --include=*.java src/
+grep -rn '@Scheduled\|@KafkaListener\|@RabbitListener\|@SqsListener\|@JmsListener\|@EventListener' --include='*.java' src/
 # persistence rules
-grep -rn '@Column(\|@Table(\|uniqueConstraints\|@Version\|@Where\|@SQLRestriction\|@Filter\|cascade =\|orphanRemoval' --include=*.java src/
+grep -rn '@Column(\|@Table(\|uniqueConstraints\|@Version\|@Where\|@SQLRestriction\|@Filter\|cascade =\|orphanRemoval' --include='*.java' src/
 # transaction boundaries — what is atomic is a business statement
-grep -rn '@Transactional' --include=*.java src/
+grep -rn '@Transactional' --include='*.java' src/
 # GraphQL + gRPC entry points — only if the survey found these surfaces
-grep -rn '@QueryMapping\|@MutationMapping\|@SchemaMapping\|@SubscriptionMapping\|DataFetcher\|@GrpcService\|extends .*ImplBase' --include=*.java src/
+grep -rn '@QueryMapping\|@MutationMapping\|@SchemaMapping\|@SubscriptionMapping\|DataFetcher\|@GrpcService\|extends .*ImplBase' --include='*.java' src/
 # client vocabulary — message bundles, constraint messages, problem details, templates
 find src/ -name 'messages*.properties' -o -name 'ValidationMessages*.properties' -o -path '*templates*' -name '*.html'
-grep -rn 'message = "\|MessageSource\|getMessage(\|ProblemDetail\|setTitle(\|setDetail(\|forStatusAndDetail' --include=*.java src/
+grep -rn 'message = "\|MessageSource\|getMessage(\|ProblemDetail\|setTitle(\|setDetail(\|forStatusAndDetail' --include='*.java' src/
 ```
 
 `@Where` / `@SQLRestriction` are the Hibernate equivalent of a global query filter — same warning as .NET's.
@@ -132,24 +132,24 @@ grep -rn 'message = "\|MessageSource\|getMessage(\|ProblemDetail\|setTitle(\|set
 
 ```bash
 # entry points — Express/Fastify and Nest both
-grep -rn "router\.\(get\|post\|put\|patch\|delete\)\|app\.\(get\|post\|put\|patch\|delete\)\|@Controller\|@Get(\|@Post(\|@Put(\|@Patch(\|@Delete(" --include=*.ts src/
+grep -rn "router\.\(get\|post\|put\|patch\|delete\)\|app\.\(get\|post\|put\|patch\|delete\)\|@Controller\|@Get(\|@Post(\|@Put(\|@Patch(\|@Delete(" --include='*.ts' src/
 # authorization
-grep -rn '@UseGuards\|@Roles\|CanActivate\|requireAuth\|authorize(\|passport\.' --include=*.ts src/
+grep -rn '@UseGuards\|@Roles\|CanActivate\|requireAuth\|authorize(\|passport\.' --include='*.ts' src/
 # validation — Zod/class-validator/Joi
-grep -rn 'z\.object\|z\.string()\.\|@IsNotEmpty\|@IsEmail\|@Min(\|@Max(\|Joi\.\|\.refine(' --include=*.ts src/
+grep -rn 'z\.object\|z\.string()\.\|@IsNotEmpty\|@IsEmail\|@Min(\|@Max(\|Joi\.\|\.refine(' --include='*.ts' src/
 # business rules
-grep -rn 'throw new \(Bad\|Conflict\|Forbidden\|Unprocessable\|Domain\|Business\)\|res\.status(4' --include=*.ts src/
+grep -rn 'throw new \(Bad\|Conflict\|Forbidden\|Unprocessable\|Domain\|Business\)\|res\.status(4' --include='*.ts' src/
 # scheduled work + consumers
-grep -rn '@Cron\|node-cron\|schedule(\|@EventPattern\|@MessagePattern\|\.subscribe(\|consumer\.run' --include=*.ts src/
+grep -rn '@Cron\|node-cron\|schedule(\|@EventPattern\|@MessagePattern\|\.subscribe(\|consumer\.run' --include='*.ts' src/
 # persistence rules — Prisma/Drizzle/TypeORM
-grep -rn '@@unique\|@unique\|@default\|onDelete\|@relation\|uniqueIndex(\|\.default(\|@Column(' --include=*.ts prisma/ src/
+grep -rn '@@unique\|@unique\|@default\|onDelete\|@relation\|uniqueIndex(\|\.default(\|@Column(' --include='*.ts' prisma/ src/
 # silent rules
-grep -rn 'toFixed\|Math.round\|new Date()\|Date.now()\|\.sort(\|\[0\]' --include=*.ts src/
+grep -rn 'toFixed\|Math.round\|new Date()\|Date.now()\|\.sort(\|\[0\]' --include='*.ts' src/
 # GraphQL + gRPC entry points — only if the survey found these surfaces
-grep -rn '@Resolver\|@Query(\|@Mutation(\|@ResolveField\|@Subscription(\|@GrpcMethod\|@GrpcStreamMethod\|loadPackageDefinition' --include=*.ts src/
+grep -rn '@Resolver\|@Query(\|@Mutation(\|@ResolveField\|@Subscription(\|@GrpcMethod\|@GrpcStreamMethod\|loadPackageDefinition' --include='*.ts' src/
 # client vocabulary — i18n/locales JSON, class-validator and Zod messages, exception text, templates
 find . -path ./node_modules -prune -o \( -path '*locales*' -o -path '*i18n*' \) -name '*.json' -print
-grep -rn "message: ['\"]\|{ message\|i18n\.t(\|\bt(['\"]\|new \w*Exception(['\"]\|\.hbs\|\.mjml" --include=*.ts src/
+grep -rn "message: ['\"]\|{ message\|i18n\.t(\|\bt(['\"]\|new \w*Exception(['\"]\|\.hbs\|\.mjml" --include='*.ts' src/
 ```
 
 Prisma's `schema.prisma` is a single high-value read: constraints, defaults, cascades and the full relational model in one file.
@@ -177,39 +177,39 @@ Stop 9 and the Edges inventory need three answers per emitted event or written f
 
 ```bash
 # consumers of an event type — in-process notifications and broker consumers
-grep -rn 'INotificationHandler<Event>\|IDomainEventHandler<Event>\|IConsumer<Event>\|IHandleMessages<Event>' --include=*.cs src/
+grep -rn 'INotificationHandler<Event>\|IDomainEventHandler<Event>\|IConsumer<Event>\|IHandleMessages<Event>' --include='*.cs' src/
 # publishers and dispatch moment — in request, or after SaveChanges
-grep -rn 'Publish(\|PublishAsync(\|DomainEvents\|SaveChangesInterceptor\|AddEntityFrameworkOutbox\|UseBusOutbox\|OutboxMessage' --include=*.cs src/
+grep -rn 'Publish(\|PublishAsync(\|DomainEvents\|SaveChangesInterceptor\|AddEntityFrameworkOutbox\|UseBusOutbox\|OutboxMessage' --include='*.cs' src/
 # retry and idempotency evidence
-grep -rn 'UseMessageRetry\|UseDelayedRedelivery\|Polly\|ProcessedMessage\|IdempotencyKey' --include=*.cs src/
+grep -rn 'UseMessageRetry\|UseDelayedRedelivery\|Polly\|ProcessedMessage\|IdempotencyKey' --include='*.cs' src/
 # readers of a field, including jobs
-grep -rn '\.<Field>\b' --include=*.cs src/ | grep -i 'Where\|Select\|OrderBy\|Job\|Worker'
+grep -rn '\.<Field>\b' --include='*.cs' src/ | grep -i 'Where\|Select\|OrderBy\|Job\|Worker'
 ```
 
 ### Java 21 + Spring Boot 3.x
 
 ```bash
 # consumers
-grep -rn '@EventListener\|@TransactionalEventListener\|@KafkaListener\|@RabbitListener\|@SqsListener\|@JmsListener' --include=*.java src/
+grep -rn '@EventListener\|@TransactionalEventListener\|@KafkaListener\|@RabbitListener\|@SqsListener\|@JmsListener' --include='*.java' src/
 # dispatch moment — AFTER_COMMIT is the default phase of @TransactionalEventListener
-grep -rn 'publishEvent(\|@TransactionalEventListener\|phase =\|outbox\|Outbox' --include=*.java src/
+grep -rn 'publishEvent(\|@TransactionalEventListener\|phase =\|outbox\|Outbox' --include='*.java' src/
 # retry and idempotency evidence
-grep -rn '@Retryable\|RetryTemplate\|DefaultErrorHandler\|@DltHandler\|DeadLetter\|processed_message\|idempotenc' --include=*.java src/
+grep -rn '@Retryable\|RetryTemplate\|DefaultErrorHandler\|@DltHandler\|DeadLetter\|processed_message\|idempotenc' --include='*.java' src/
 # readers of a field, including jobs and repository queries
-grep -rn '<field>\|findBy<Field>\|@Query' --include=*.java src/
+grep -rn '<field>\|findBy<Field>\|@Query' --include='*.java' src/
 ```
 
 ### Node 24 / 22 + TypeScript
 
 ```bash
 # consumers
-grep -rn "@OnEvent(\|@EventPattern(\|@MessagePattern(\|\.on(['\"]<event>\|consumer\.run\|new Worker(" --include=*.ts src/
+grep -rn "@OnEvent(\|@EventPattern(\|@MessagePattern(\|\.on(['\"]<event>\|consumer\.run\|new Worker(" --include='*.ts' src/
 # dispatch moment — emitted inside the request, or from an outbox relay
-grep -rn 'emit(\|emitAsync(\|eventEmitter\|outbox\|queue\.add(' --include=*.ts src/
+grep -rn 'emit(\|emitAsync(\|eventEmitter\|outbox\|queue\.add(' --include='*.ts' src/
 # retry and idempotency evidence
-grep -rn 'attempts:\|backoff\|removeOnFail\|deadLetter\|processedMessage\|idempotencyKey' --include=*.ts src/
+grep -rn 'attempts:\|backoff\|removeOnFail\|deadLetter\|processedMessage\|idempotencyKey' --include='*.ts' src/
 # readers of a field, including jobs
-grep -rn '<field>' --include=*.ts src/
+grep -rn '<field>' --include='*.ts' src/
 ```
 
 A Node `EventEmitter` is synchronous and in-process: its handlers run `in request` unless the emit sits after the commit. A queue's own retry settings (BullMQ `attempts`, `backoff`) are the visible retry; without them the guarantee is `?`.

@@ -23,7 +23,7 @@ It also produces the thing that keeps the whole exercise honest: a **coverage le
 
 ## Output
 
-The area map and reading plan. On a `be-documenter` run they are presented for confirmation and then recorded in the KB's `system-overview.md` (per `business-analysis:knowledge-base`) — the full per-surface coverage ledger included, as that file's Coverage appendix, so the KB can back its own coverage claim. The orientation cache holds only the surface **counts** and the parked list; a 120-controller ledger belongs in the KB, not in a file meant to orient a run in one read.
+The area map and reading plan. On a `be-documenter` run they are presented for confirmation and then recorded in the KB's `system-overview.md` (per `business-analysis:knowledge-base`) — the full per-surface coverage ledger included, as that file's Coverage appendix, so the KB can back its own coverage claim. In a run of more than one session they live in the plan's §2 until its last task writes the system overview. The orientation cache holds only the surface **counts** and the parked list; a 120-controller ledger belongs in the KB, not in a file meant to orient a run in one read.
 
 ---
 
@@ -89,7 +89,7 @@ Every surface from Step 1 gets assigned. This is what makes a later coverage cla
 | `PaymentWebhookController` | HTTP (inbound webhook) | Billing | anonymous, signature-verified |
 | `LegacyImportController` | HTTP | **parked** | no route registration found — likely dead `#observed` |
 
-Parking is legitimate; parking silently is not. Every parked row states **why** (dead, out of scope for this run, owned by another team, deferred to a later batch).
+Parking is legitimate; parking silently is not. Every parked row states **why** (dead, out of scope for this run, owned by another team, deferred to a later session).
 
 ### Step 4 — Write the reading plan
 
@@ -103,19 +103,23 @@ The order matters, and not for tidiness:
 
 Then, per area, state the plan:
 
-| Area | Entry points | Depth | Primary evidence | Estimate (tokens) | Batch |
+| Area | Entry points | Depth | Primary evidence | Estimate (tokens) | Session |
 |---|---|---|---|---|---|
-| Identity & access | 6 HTTP, 1 job | full | auth policies, user entity, registration flow | ≈ 1,800 lines → 55k | 1 |
-| Ordering | 12 HTTP, 2 jobs, 1 consumer | full | order aggregate, state transitions, `OrderService` | ≈ 4,500 lines → 87k | 2 |
-| Reporting | 9 HTTP | shallow | read-only projections; rules live upstream | ≈ 900 lines → 44k | 1 |
+| Identity & access | 6 HTTP, 1 job | full | auth policies, user entity, registration flow | ≈ 1,800 lines → 132k | 1 |
+| Ordering — placement | 5 HTTP | full | order aggregate, `OrderService` | ≈ 1,500 lines → 128k | 2 |
+| Ordering — fulfilment | 4 HTTP, 1 consumer | full | state transitions, shipment handler | ≈ 1,500 lines → 128k | 3 |
+| Ordering — returns | 3 HTTP, 2 jobs | full | refund rules, expiry jobs | ≈ 1,500 lines → 128k | 4 |
+| Reporting | 9 HTTP | shallow | read-only projections; rules live upstream | ≈ 900 lines → 121k | 5 |
 
-**Estimate each area's run cost** with the rule of thumb `estimate ≈ traced source lines × 12 + 3 documents × 6,000 + 45,000 overhead (loading the skills, references and golden examples)` (traced lines: the files the area's entry points reach, counted with `wc -l`), then **batch areas so each batch stays ≤ 100k tokens** — the session budget is 150k, and the margin is for reading output back. An area that alone exceeds 100k is split before it is batched.
+Ordering (≈ 4,500 lines) alone estimates 164k, over the cap, so it is split by sub-flow before it is scheduled.
+
+**Estimate each session's cost** with the rule of thumb `85,000 fixed (harness, skills, references, rule file, working overhead — once per session) + per area in it: traced source lines × 12 + 25,000 (its three documents, written and re-read)` (traced lines: the files the area's entry points reach, counted with `wc -l`), and **schedule areas so each session stays ≤ 135k tokens** — the session budget is 150k, and the margin is for reading output back. An area whose own estimate exceeds 135k (more than about 2,000 traced lines) is split before it is scheduled; in practice most areas are one session each. When the orientation cache records a real run's actual figure, estimate from it instead.
 
 **Depth is a real choice.** `full` (every rule, every branch, every failure path) for areas where the business logic lives; `shallow` (capabilities and actors only) for pass-through, read-only, or CRUD-only areas. Documenting a read-only reporting area to the same depth as a pricing engine wastes the run's budget on the part with the fewest rules.
 
 ### Step 5 — Confirm with the human (blocking)
 
-Present in **one message**: the area table, the coverage ledger summary, the reading order with its reason, the depth and token estimate per area, the batches (each ≤ 100k), and what is parked. Then ask.
+Present in **one message**: the area table, the coverage ledger summary, the reading order with its reason, the depth and token estimate per area, the sessions (each ≤ 135k), and what is parked. Then ask.
 
 Confirm these three things specifically, because they are the ones that are expensive to change later:
 
@@ -126,6 +130,8 @@ Confirm these three things specifically, because they are the ones that are expe
 Use the harness's structured-question tool if one is available. Do not begin tracing before the answer: a rename after Step 4 means re-filing every artifact and re-writing every cross-reference.
 
 If the human has no opinion (common — they may know the business but not the codebase), say which names you are least confident in and proceed on your own proposal, marking those `#inferred` in `system-overview.md`.
+
+**After the confirmation, count the sessions.** One session: go straight on to tracing. More than one: load [`references/documentation-plan.md`](references/documentation-plan.md), write the reading plan as a runnable plan — `docs/plans/NNN-document-<system>.md`, one task per session in the reading order and a last task for the system overview and the whole-KB lint — and stop. Each task then runs in a session of its own.
 
 ---
 
@@ -148,7 +154,7 @@ If the human has no opinion (common — they may know the business but not the c
 |---|---|---|---|
 
 ## Reading plan
-| Order | Area | Depth | Primary evidence | Estimate (tokens) | Batch | Why this position |
+| Order | Area | Depth | Primary evidence | Estimate (tokens) | Session | Why this position |
 |---|---|---|---|---|---|---|
 
 ## Parked
@@ -168,8 +174,9 @@ If the human has no opinion (common — they may know the business but not the c
 3. Every area has at least one entry point and at least one plausible human or system actor.
 4. Cross-cutting concerns are in Foundations, not in `areas/`.
 5. The reading order puts identity/actors first and consumers last, and says why.
-6. Depth is assigned per area and justified, not uniform by default; every area carries a token estimate and no batch exceeds 100k.
+6. Depth is assigned per area and justified, not uniform by default; every area carries a token estimate and no session exceeds 135k.
 7. The split was **confirmed** — or the human declined to weigh in, and the low-confidence names are marked `#inferred`.
+8. A reading plan of more than one session is written as a plan, and nothing was traced in the survey session.
 
 ## Handoffs
 

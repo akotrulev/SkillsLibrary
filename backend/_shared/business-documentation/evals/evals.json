@@ -4,47 +4,86 @@
     {
       "id": 1,
       "prompt": "Document the credit pricing and overage charges feature of the fixture",
-      "expected_output": "be-feature-documenter (via /dev:document-feature) writes a three-level set under docs/features/ of a git-committed copy of evals/fixture/: <feature>.md, <feature>.behind-the-scenes.md, <feature>.technical.md, matching the golden examples in shape.",
+      "expected_output": "be-feature-documenter (via /dev:document-feature) writes a three-level set under docs/features/ of a git-committed copy of evals/fixture/: <feature>.md, <feature>.behind-the-scenes.md, <feature>.technical.md, matching the golden examples in shape, with every fact traced from the fixture rather than taken from the goldens.",
       "files": [
         "evals/fixture/"
       ],
       "expectations": [
-        "Exactly three files for the feature exist under docs/features/: the guide, *.behind-the-scenes.md and *.technical.md",
+        "The three level files for the feature exist under docs/features/: the guide <name>.md, <name>.behind-the-scenes.md and <name>.technical.md; the only other files for it there are Level 3 topic splits named <name>.technical.<topic>.md",
         "`python3 scripts/doc-lint.py --dir <output dir>` exits 0",
         "The exact values £6.00, 8 credits, 24 hours and 3 credits appear in the Level 1 guide",
-        "The Level 1 worked example contains the arithmetic line for the Masterclass booking with 6 of 8 credits used: shortfall 1 credit × £6.00 = £6.00, and the result is correct",
-        "No `#confirmed` tier tag appears in any file except the one sentence in Level 3's `How to read this` legend that says it is never written",
+        "The Level 1 worked example contains at least one overage arithmetic line of the form shortfall credits × rate = amount, built only from values that exist in the fixture (tier costs 1/2/3, plan allowances 8 or 16 credits, rates £6.00 or £5.00, or a personal rate the example states as an assumption), and every arithmetic line in the example is correct",
+        "No `#confirmed` tier tag appears in any of the three level files except the one sentence in Level 3's `How to read this` legend that says it is never written",
         "Level 1 contains no HTTP status code, no file name (*.cs, *.json), no class name (e.g. CreditPricingService, BookingCancelledHandler, OverageChargeJob, Outbox) and neither the word 'handler' nor 'outbox'",
         "Level 3 has a Finding that a redelivered booking confirmation is priced twice (no idempotency key), with a boundary condition (e.g. delivery fails after the save, the retry spends credits / accrues overage a second time)",
-        "Neither Level 1 nor Level 2 calls the missing idempotency a defect, risk or finding (Level 2 may state at-least-once delivery neutrally)",
+        "Levels 1 and 2 contain none of the words bug, defect, flaw, broken, wrong, mistake, vulnerability or 'should have'; where they mention double pricing on redelivery they state it as behaviour without judging it (Level 2 may state at-least-once delivery neutrally)",
         "Level 3 reports that no telemetry exists beyond a single start-up log line (Telemetry section states the search that found nothing)",
         "Level 1 uses the client terms 'Session credits', 'Overage' and 'Monthly allowance'",
         "Level 1 quotes the exact refusal text \"That plan name is already taken\"",
         "Level 2 names the parts by plain role names (no class names) and Level 3 maps each of those role names to its class/file",
-        "All three files carry the same commit sha in their Derived from line, and each carries an Audience line (Level 1 shareable, Levels 2 and 3 internal)"
+        "All three level files carry the same commit sha in their stamp line, and each carries an Audience line (Level 1 shareable, Levels 2 and 3 internal)",
+        "Golden-copy check: Level 2 or Level 3 states that a failed cancellation return is retried like booking pricing (3 attempts in total, then set aside/parked); no level says returns are never retried or have no failure path",
+        "Golden-copy check: Level 2 or Level 3 states that waiting confirmations and cancellations are picked up every 5 seconds; no level says the delay is unknown or not visible from the code",
+        "Golden-copy check: no level says staff (or anyone) can configure or change session tiers or their credit costs",
+        "Golden-copy check: no level says staff (or anyone) can set or clear a member's personal overage rate through the system",
+        "Golden-copy check: no level says a crash part-way through monthly posting leaves some members charged and others not; if Level 3 discusses a partial failure of monthly posting, it is that allowances can be reset while no charges are saved",
+        "Golden-copy check: every file path cited in Level 3 exists in the fixture (e.g. src/Workshops.Api/Credits/CreditPricingService.cs); none of src/Credits/…, src/Shared/Outbox.cs or migrations/007 appears",
+        "Golden-copy check: at least one level names a second plan, Plus, with 16 credits a month at £5.00 per overage credit"
       ]
     },
     {
       "id": 2,
-      "prompt": "Document the system in AREA mode. Scope: the credits area (plans, session tiers, booking pricing, cancellation returns, monthly overage posting) - the credits area is confirmed as one area, proceed.",
-      "expected_output": "be-documenter (via /dev:document-system) writes a three-level set for the credits area under docs/business-model/areas/ of a git-committed copy of evals/fixture/.",
+      "prompt": "Document the system. There is no knowledge base yet, so this is a FULL run. Scope and split are confirmed: one area, credits (plans, session tiers, booking pricing, cancellation returns, monthly overage posting), documented in one session. Proceed past the survey gate without stopping.",
+      "expected_output": "be-documenter (via /dev:document-system) runs in FULL mode on a git-committed copy of evals/fixture/ and writes the knowledge base under docs/business-model/: the three-level set for the credits area under areas/, the system overview set (system-overview.md, .behind-the-scenes.md, .technical.md), and the KB files (flows, entities, decisions, events, glossary, INDEX.md, active-context.md), with every fact traced from the fixture rather than taken from the goldens.",
       "files": [
         "evals/fixture/"
       ],
       "expectations": [
-        "Exactly three files for the credits area exist under docs/business-model/areas/: the guide, *.behind-the-scenes.md and *.technical.md",
+        "The three level files for the credits area exist under docs/business-model/areas/: the guide <name>.md, <name>.behind-the-scenes.md and <name>.technical.md; the only other files for it there are Level 3 topic splits named <name>.technical.<topic>.md",
         "`python3 scripts/doc-lint.py --dir <output dir>` exits 0",
         "The exact values £6.00, 8 credits, 24 hours and 3 credits appear in the Level 1 guide",
-        "The Level 1 worked example contains the arithmetic line for the Masterclass booking with 6 of 8 credits used: shortfall 1 credit × £6.00 = £6.00, and the result is correct",
-        "No `#confirmed` tier tag appears in any file except the one sentence in Level 3's `How to read this` legend that says it is never written",
+        "The Level 1 worked example contains at least one overage arithmetic line of the form shortfall credits × rate = amount, built only from values that exist in the fixture (tier costs 1/2/3, plan allowances 8 or 16 credits, rates £6.00 or £5.00, or a personal rate the example states as an assumption), and every arithmetic line in the example is correct",
+        "No `#confirmed` tier tag appears in any of the three level files except the one sentence in Level 3's `How to read this` legend that says it is never written",
         "Level 1 contains no HTTP status code, no file name (*.cs, *.json), no class name (e.g. CreditPricingService, BookingCancelledHandler, OverageChargeJob, Outbox) and neither the word 'handler' nor 'outbox'",
         "Level 3 has a Finding that a redelivered booking confirmation is priced twice (no idempotency key), with a boundary condition (e.g. delivery fails after the save, the retry spends credits / accrues overage a second time)",
-        "Neither Level 1 nor Level 2 calls the missing idempotency a defect, risk or finding (Level 2 may state at-least-once delivery neutrally)",
+        "Levels 1 and 2 contain none of the words bug, defect, flaw, broken, wrong, mistake, vulnerability or 'should have'; where they mention double pricing on redelivery they state it as behaviour without judging it (Level 2 may state at-least-once delivery neutrally)",
         "Level 3 reports that no telemetry exists beyond a single start-up log line (Telemetry section states the search that found nothing)",
         "Level 1 uses the client terms 'Session credits', 'Overage' and 'Monthly allowance'",
         "Level 1 quotes the exact refusal text \"That plan name is already taken\"",
         "Level 2 names the parts by plain role names (no class names) and Level 3 maps each of those role names to its class/file",
-        "All three files carry the same commit sha in their Derived from line, and each carries an Audience line (Level 1 shareable, Levels 2 and 3 internal)"
+        "All three level files carry the same commit sha in their stamp line, and each carries an Audience line (Level 1 shareable, Levels 2 and 3 internal)",
+        "Golden-copy check: Level 2 or Level 3 states that a failed cancellation return is retried like booking pricing (3 attempts in total, then set aside/parked); no level says returns are never retried or have no failure path",
+        "Golden-copy check: Level 2 or Level 3 states that waiting confirmations and cancellations are picked up every 5 seconds; no level says the delay is unknown or not visible from the code",
+        "Golden-copy check: no level says staff (or anyone) can configure or change session tiers or their credit costs",
+        "Golden-copy check: no level says staff (or anyone) can set or clear a member's personal overage rate through the system",
+        "Golden-copy check: no level says a crash part-way through monthly posting leaves some members charged and others not; if Level 3 discusses a partial failure of monthly posting, it is that allowances can be reset while no charges are saved",
+        "Golden-copy check: every file path cited in Level 3 exists in the fixture (e.g. src/Workshops.Api/Credits/CreditPricingService.cs); none of src/Credits/…, src/Shared/Outbox.cs or migrations/007 appears",
+        "Golden-copy check: at least one level names a second plan, Plus, with 16 credits a month at £5.00 per overage credit",
+        "The system overview set exists under docs/business-model/: system-overview.md, system-overview.behind-the-scenes.md and system-overview.technical.md",
+        "docs/business-model/INDEX.md has one line for the credits area that names all three of its level files"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Document the system. There is no knowledge base yet, so this is a FULL run. Scope, split and sessions are confirmed: two areas, one session each, in this order - plans and credits (plan settings, the member's credits page, booking pricing, cancellation returns, monthly overage posting), then bookings and sessions (booking a seat, cancelling a booking, cancelling a session). Proceed past the survey gate without stopping.",
+      "expected_output": "be-documenter (via /dev:document-system) surveys a git-committed copy of evals/fixture/, and because the confirmed reading plan holds two sessions it writes one runnable plan under docs/plans/ in the library's plan format and stops without tracing or documenting any area.",
+      "files": [
+        "evals/fixture/"
+      ],
+      "expectations": [
+        "Exactly one plan exists, at docs/plans/NNN-document-<system>.md with a zero-padded NNN; its title line is `# NNN — <title> — plan (YYYY-MM-DD)` followed by a **Goal:** line and a **Status:** line that says the split is confirmed, nothing is documented yet and which task is next",
+        "Nothing was documented in the survey session: docs/business-model/areas/ holds no area file and no system-overview file exists",
+        "`## 1. What already exists, and what is missing` is a `| Need | Today | Gap |` table with one row per area whose Today cell cites fixture paths with line numbers, plus rows for the system overview and the shared KB files",
+        "A numbered section holds the confirmed area map with AREA ids, and every surface of the fixture is in exactly one area or the parked list: the five HTTP routes mapped in Program.cs, the monthly overage job, and the two message handlers with the outbox that delivers to them",
+        "The tasks are A1, A2 and K1 in that order, each with `**Stack:** `docs` · **Agent:** `be-documenter``, exactly one **Deliverable:** stated as a result, a **Depends on:** line, a **Budget:** with itemized drivers that follow 85,000 + traced source lines × 12 + 25,000, and a **Gate** line",
+        "A2 depends on A1 and K1 depends on A1 and A2; no task is said to run beside another, and a decision records why (the shared KB files and the reading order)",
+        "Every task's gate runs doc-lint.py over docs/business-model; A1 and A2 use the `Gate: own tests` form and K1 the last-runnable-task form",
+        "The plan says it writes no code and therefore has no acceptance tests, coverage floor or telemetry smoke",
+        "`## Close-out — every task` is present directly above the prompts with all eight steps of the plan format's close-out",
+        "`## Prompts — one per task` is the last section; its only `###` headings are `### A1 — <title> (be-documenter, docs)`, `### A2 — …` and `### K1 — …`; each heading is followed by one blank line and a fenced block whose first line is `Depends on: none` or ids of this plan and whose second line is `Agent: be-documenter · Stack: docs`",
+        "Each prompt block has a reading order that names the area's primary evidence by fixture path, a line saying the survey is done and must not be redone, two to four traps, its gate command, a commit message, and ends with the close-out line",
+        "The plan contains no TBD or TODO and no grouping layer over the tasks (no phases, slices, stages or milestones)",
+        "docs/agent-context/be-documenter.md exists and records the area map, the surface counts and the parked list"
       ]
     }
   ]

@@ -2,7 +2,7 @@
 
 The Level 1 example for `dev:doc-business-model`: one area guide as a `be-documenter` run would write it into `docs/business-model/areas/credits-and-charges.md`. The system is the same **workshop-booking** toy the planner examples build — imagined here as an *inherited* codebase being documented after the fact. **Shape, tone and the example discipline are normative; domain content and citations are illustrative.**
 
-Note what the example demonstrates: a document a client can read top to bottom — plain headings, numbered steps, formulas written as plain-text math with `Where:`, one running cast, and a worked example whose arithmetic carries through to the final result — with **no** `file:line`, tier tag, code noun, defect word or evidence table, and with the client's own words throughout (credits, sessions, the exact messages staff see) (those are Level 3: [example-technical.md](example-technical.md); the connections and failure handling are Level 2: [example-behind-the-scenes.md](example-behind-the-scenes.md)). Optional sections that do not apply (there is no *Scope* section here because the area applies to every member) are dropped, and the search that proved it is a row in Level 3's evidence index.
+Note what the example demonstrates: a document a client can read top to bottom — plain headings, numbered steps, formulas written as plain-text math with `Where:`, one running cast, and a worked example whose arithmetic carries through to the final result, and an inferred purpose written as uncertainty with its own open question — with **no** `file:line`, tier tag, code noun, defect word or evidence table, and with the client's own words throughout (credits, sessions, the exact messages staff see) (those are Level 3: [example-technical.md](example-technical.md); the connections and failure handling are Level 2: [example-behind-the-scenes.md](example-behind-the-scenes.md)). Optional sections that do not apply (there is no *Scope* section here because the area applies to every member) are dropped, and the search that proved it is a row in Level 3's evidence index.
 
 ---
 
@@ -17,9 +17,9 @@ Note what the example demonstrates: a document a client can read top to bottom �
 
 ## Overview
 
-Every membership plan comes with a number of session credits per month. Booking a session spends credits according to the session's tier; when a member runs out, the booking still goes ahead and the shortfall is charged as an **overage** at a per-credit rate. Overage charges build up during the month and are charged once, at the start of the next month, when credits reset.
+Every membership plan comes with a number of session credits per month. Booking a session spends credits according to the session's tier; when a member runs out, the booking still goes ahead and the shortfall is charged as an **overage** at a per-credit rate. Overage charges build up during the month and are charged once, at the start of the next month, when credits reset. It appears to exist so that members can keep booking beyond their plan without being refused.
 
-**Important:** credits and charges are worked out at the moment a booking is made or cancelled — never re-priced afterwards. A credit returned by a later cancellation is available for future bookings; it does not reduce an overage already accrued.
+**Important:** a booking is priced once, after it is confirmed, from the tier cost and rate in force at that point — it is never re-priced afterwards. A credit returned by a later cancellation is available for future bookings; it does not reduce an overage already accrued.
 
 ## Setup
 
@@ -83,7 +83,7 @@ Fixed in the system today, not configurable: the late-cancellation cut-off (24 h
 2. If the sum is greater than 0, post it as **one charge** to the member's account and mark those accruals as posted.
 3. Set Credits used to 0 — the new month starts with the plan's full allowance. Unused credits from the previous month are lost.
 
-**Result:** at most one overage charge per member per month on their account, and a fresh credit balance.
+**Result:** each time the posting runs, one overage charge on the account of every member with unposted overage, and a fresh credit balance for every member.
 
 ## How it connects
 
@@ -125,7 +125,7 @@ Ana is on the Basic plan with no personal override. Ben is also on Basic but car
 | 25 Mar | Books *Wheel basics II* (Standard, starts 30 Mar 18:00) | 1 | 2 | 1 | — | 7 |
 | 1 Apr 00:00 | Monthly posting | — | — | — | **£6.00 charged** to Ana's account | 0 |
 
-Walking through the two lines that matter:
+Walking through the lines that matter:
 
 - **11 Mar.** Credit cost 3, credits remaining 8 − 6 = 2. 2 is less than 3, so 2 credits are spent and the shortfall is 3 − 2 = 1 overage credit. Overage charge = 1 × £6.00 = £6.00, accrued.
 - **15 Mar.** The workshop's 2 credits come back, so Ana has 2 credits again — but the £6.00 accrued on 11 Mar stays, because a returned credit never re-prices an earlier booking.
@@ -148,6 +148,7 @@ Walking through the two lines that matter:
 | Q2 | A credit returned by a cancellation does not reduce an overage already accrued that month. Intended? | It is the rule most likely to generate a support query ("I cancelled, why was I still charged?") |
 | Q3 | Is the 24-hour late-cancellation cut-off a policy you chose, and is it yours to change? | It is fixed in the system, not configurable |
 | Q4 | A late cancellation forfeits the credits but carries no fee. Was a fee intended? | The forfeiture is the only consequence today |
+| Q5 | Is the overage there so that members can keep booking beyond their plan without being refused? | The system never refuses a booking for lack of credits; if that is not the intent, a limit is missing |
 
 ## Going deeper
 

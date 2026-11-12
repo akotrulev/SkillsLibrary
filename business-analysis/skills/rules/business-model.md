@@ -3,7 +3,7 @@ paths:
   - "docs/business-model/**/*.md"
 ---
 
-<!-- business-analysis rules v1 (2026-11-03): core. Installed by /business-analysis:rules; edit to fit this project, re-run to compare with the plugin's copy. -->
+<!-- business-analysis rules v2 (2026-11-12): core. Installed by /business-analysis:rules; edit to fit this project, re-run to compare with the plugin's copy. -->
 
 # Business-model knowledge base standards
 
@@ -13,7 +13,7 @@ Apply these to every file you write, edit or review under `docs/business-model/`
 
 ## What the KB holds
 
-- What the software must do and how features interact. Never code architecture, API shapes the repo already records, test bases, test cases, techniques or coverage. *major*
+- What the software must do and how features interact. Never code architecture, API shapes the repo already records, test bases, test cases, techniques or coverage — except in `<name>.technical.md`, the developer reference of an area or of the system overview, which holds exactly that, each fact with its evidence. *major*
 - A distilled model that links to its sources, never a copy of a BRD or a story. *minor*
 - One artifact per thing: extend the existing flow, entity grid, decision table or connection file; never a second file for the same flow, entity or decision point. *blocker*
 - No speculative backfill: write only what this task's analysis produced, or what code read this session evidences (`#observed` with its `file:line`). *major*
@@ -43,7 +43,7 @@ Apply these to every file you write, edit or review under `docs/business-model/`
 ## Writing and deciding
 
 - Short declarative statements with their source ("Refunds allowed within 30 days (BRD §6)"), critical facts near the top of each file. *minor*
-- A file nearing about 2,000 words splits by topic; a `.technical.md` file may run to about 4,000. *minor*
+- A file nearing about 2,000 words splits by topic. A `.technical.md` file runs to about 4,000 words, not counting its evidence index; past that it splits into `<name>.technical.<topic>.md` files, which the lint reads together with the main file. *minor*
 - Glossary terms only. A term used with two meanings is a terminology-drift finding, never a silent merge; a new term goes to `glossary.md` with its source. *major*
 - Precedence, stacking operators and exclusions are business decisions: present the options, record who decided, when and why in `interaction-map.md`. Never pick one yourself. *blocker*
 - Every finding names its boundary condition: the concrete scenario where it bites. Without one it is a suspicion, not a finding. *major*

@@ -39,8 +39,39 @@ Load this when writing or refreshing `system-overview.md` and its two siblings �
 |---|---|---|
 ```
 
-**`system-overview.behind-the-scenes.md` (Level 2)** — one **Mermaid** map of the areas and what starts what; **what runs when** (scheduled and background work in plain words); the **outside services** the system talks to and what happens if each is down; **where information lives** (which area owns which records, which read them); **how a failure travels** (where a problem in one area is noticed in another); the end-to-end flows again, each with only the lanes it uses (*straight away / a moment later / on a schedule*). Written from the dependency map; cites `EVT-`/`RX-`/`INV-` ids only in Level 3. Neutral wording rules of Level 2 apply.
+**`system-overview.behind-the-scenes.md` (Level 2)** — written from the dependency map; `EVT-`/`RX-`/`INV-` ids appear only in Level 3, and Level 2's neutral wording, banned words and guarantee words apply:
 
-**`system-overview.technical.md` (Level 3)** — the architecture an agent needs on arrival: stack and versions, module structure and where each area's code lives, the cross-cutting foundations (authentication and authorisation, tenancy, error handling and problem types, logging and telemetry, configuration and secrets handling, background-work framework), the **coverage ledger** (every entry point, job and consumer assigned to exactly one area or parked, with a reason), links to `events.md`, `shared-data.md`, `invariants.md` and `glossary.md`, the system-wide Findings, and the evidence index for the two plain files (Section cells `<Flow> · step N` as in the Level 3 reference).
+```markdown
+# <System> — Behind the scenes
+<header block — Audience: internal>
+
+## At a glance                ← a few sentences and one Mermaid map of the areas and what starts what
+## What runs when              ← scheduled and background work, in plain words
+## Outside services            ← optional: each service the system talks to, and what happens if it is down
+## Where information lives     ← which area owns which records, and which areas read them
+## How a failure travels       ← where a problem in one area is noticed in another
+## End-to-end flows
+### <Flow — same heading as in system-overview.md>
+                               ← lanes used only where needed: Straight away (while the person waits) ·
+                                 Afterwards (in the background) · On a schedule
+```
+
+**`system-overview.technical.md` (Level 3)** — the architecture an agent needs on arrival:
+
+```markdown
+# <System> — Technical reference
+<header block — Audience: internal>
+
+## How to read this            ← tier legend, path convention, id scheme
+## Stack and versions
+## Module structure            ← where each area's code lives
+## Foundations                 ← authentication and authorisation, tenancy, error handling and problem types,
+                                 logging and telemetry, configuration and secrets handling, background-work framework
+## Coverage ledger             ← every entry point, job and consumer assigned to exactly one area or parked, with a reason
+## Findings                    ← system-wide; links to events.md, shared-data.md, invariants.md, glossary.md
+## Evidence index              ← backs both plain files
+```
+
+Flows sit under `## End-to-end flows` as `###` headings in both plain files, and the evidence index cites them exactly as an area's: `<Flow heading> · step N`.
 
 **"What is not documented" is mandatory.** A documentation set that does not state its own limits gets read as complete, and the parts nobody traced become the parts everyone assumes are fine.

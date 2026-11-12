@@ -14,6 +14,7 @@ builder.Services.AddAuthentication().AddJwtBearer();
 builder.Services.AddAuthorization(o =>
 {
     o.AddPolicy("credits:own", p => p.RequireClaim("scope", "credits:own"));
+    o.AddPolicy("bookings:own", p => p.RequireClaim("scope", "bookings:own"));
     o.AddPolicy("workshops:manage", p => p.RequireClaim("scope", "workshops:manage"));
 });
 
@@ -34,6 +35,8 @@ app.UseAuthorization();
 
 app.MapCreditEndpoints();
 app.MapPlanAdminEndpoints();
+app.MapBookingEndpoints();
+app.MapSessionAdminEndpoints();
 
 app.Logger.LogInformation("Workshops.Api started");
 

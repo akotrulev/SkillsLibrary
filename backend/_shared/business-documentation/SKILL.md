@@ -1,6 +1,6 @@
 ---
 name: doc-business-model
-description: Use when traced backend behavior must be written up at three levels — a plain-language client guide, a plain-language "behind the scenes" account of how the parts connect, and a technical reference for developers and AI — one set per area in docs/business-model/. Triggers "turn this trace into docs", "write the client guide and the technical reference". Not for tracing code (doc-feature-trace).
+description: Use when traced behavior must be written up as a client guide, a behind-the-scenes account and a technical reference. Triggers "turn this trace into docs". Not for tracing code (doc-feature-trace).
 ---
 
 # Business Documentation — one trace, three documents, three readers
@@ -31,8 +31,8 @@ Six disciplines carry the whole skill:
 2. **Never let inference pass as fact — and keep the grammar in Level 3.** `#observed` is what the code does; `#inferred` is what you think it is for. Tiers and every `file:line` live in Level 3's **evidence index**; in Levels 1 and 2 an inferred purpose reads as uncertainty ("appears to exist so that…") and is a row in Open questions.
 3. **Simple, flows, examples.** Level 1 reads the same way every time: what it is → how it is set up → what happens, step by step → **a full worked example with real numbers**.
 4. **One fact, one home.** A statement is explained at the level where its reader needs it and cited at the others. The three levels never contradict each other; when evidence changes one, all three are re-checked and re-stamped.
-5. **Level 3 carries the proof for all three.** Every parameter, formula, threshold, step, branch, connection, timing and failure claim in Levels 1 and 2 has a row in Level 3's evidence index. Level 3 is never skipped.
-6. **Levels 1 and 2 describe; only Level 3 judges.** Behaviour is stated factually and neutrally ("the credits are returned twice"). The words *bug, defect, flaw, broken, wrong, mistake, vulnerability* and *should have* never appear in Levels 1 or 2; classifying something as a defect happens only in Level 3's Findings, and a Level 2 statement that is also a finding has an evidence-index row citing it (`see **F1**`). Level 2 is `internal` because it is frank about failure, not because it is allowed to editorialise.
+5. **Level 3 carries the proof for all three.** Every parameter, formula, threshold, step, branch, connection, timing and failure claim in Levels 1 and 2 has a row in Level 3's evidence index. Level 3 is never skipped. **Write order:** Level 3's body, then Level 1, then Level 2, then Level 3's evidence index last — it cites the step numbers of the other two. Level 3 runs up to about 4,000 words, not counting the index, then splits by topic (see its reference).
+6. **Levels 1 and 2 describe; only Level 3 judges.** Behaviour is stated factually and neutrally ("the credits are returned twice"). The words *bug, defect, flaw, broken, wrong, mistake, vulnerability* and *should have* never appear in Levels 1 or 2 — the lint warns on each, and each is fixed or explained in the report; text quoted verbatim from the product is exempt; classifying something as a defect happens only in Level 3's Findings, and a Level 2 statement that is also a finding has an evidence-index row citing it (`see **F1**`). Level 2 is `internal` because it is frank about failure, not because it is allowed to editorialise.
 
 **Prerequisites:** a confirmed area map (`dev:doc-codebase-survey`) and per-area evidence (`dev:doc-feature-trace`), including its `Client vocabulary` table and the verbatim refusal texts in inventory 3. **When `docs/business-model/` exists or is being written, load `business-analysis:knowledge-base` first** — it owns the KB layout, IDs, annotation grammar, and the read-first/update-after contract; a standalone feature run without a KB skips it.
 
@@ -111,7 +111,7 @@ Optional sections are **dropped** when they do not apply — never padded. The n
 
 - **Overview** — two to four sentences: what it is and why it exists, in the client's words. One rule that governs everything below is stated as **Important:**. An inferred purpose reads as uncertainty and is an open question.
 - **Scope** — what it applies to and what it does not, as short bullets, closed by **Boundaries** ("Does not decide prices — that is **Catalog** (AREA-002)").
-- **Setup** — a `| Parameter | Description | Example |` table. Layered configuration names its levels and precedence in one line ("the most specific wins — member, then plan"); validations as a short list under the table; a **hard-coded** value is still stated with its number (Level 3 records that it is fixed, usually also an open question).
+- **Setup** — a `| Parameter | Description | Example |` table; layered configuration adds a `Level` column and names its levels and precedence in one line ("the most specific wins — member, then plan"); validations as a short list under the table; a **hard-coded** value is still stated with its number (Level 3 records that it is fixed, usually also an open question).
 - **How it connects** — three short lists in business words, from the Edges inventory: **Starts from**, **Sets off**, **Shares**. Areas by `AREA-nnn` and label. The *how* is Level 2; ids and delivery mode are Level 3.
 
 ### How it works
@@ -165,11 +165,13 @@ The same fact, three ways:
 |---|---|---|
 | `POST /bookings/{id}/cancel` → 409 when `status != Pending` | The booking service refuses the cancellation and the page shows a message | You can only cancel an order that has not yet shipped |
 | unique index `(tenant_id, order_number)` | The order number is checked for clashes when the order is saved | Order numbers are unique within an organisation |
-| `BookingConfirmed` via outbox after commit; consumer retried 3× then dead-lettered | Once the booking is saved, the pricing step is told in the background; if it fails it is tried three times and then set aside | Your credits are worked out as soon as the booking is confirmed |
+| `BookingConfirmed` via outbox after commit; consumer gets 3 attempts in all, then dead-lettered | Once the booking is saved, the pricing step is told in the background; if it fails it is tried three times in all and then set aside | Your credits are worked out after the booking is confirmed |
 | F1: no idempotency key — redelivery double-prices | The same message can arrive twice, and the booking is then priced twice | — (not a client-facing rule) |
 | `Math.Ceiling(qty * price * rate * 100) / 100` | — (Level 2 links to Level 1) | SEC fee = ROUNDUP(Qty × Fill price × SEC rate, 2) |
 
-Banned in **Level 1** (and in Level 2, beyond its allowed everyday words): class, method, table and column names, file names, status codes, exception types, framework nouns, inline code, jargon such as *endpoint, payload, handler, middleware, idempotent, eventual consistency*, tier tags, `file:line`, and the defect words of discipline 6. A word that needs a definition is replaced, not defined; a word the client uses themselves stays.
+Banned in **Level 1** (and in Level 2, beyond its allowed everyday words): class, method, table and column names, file names, status codes, exception types, framework nouns, inline code, jargon such as *endpoint, payload, handler, middleware, idempotent, eventual consistency*, tier tags, `file:line`, and the defect words of discipline 6. A word that needs a definition is replaced, not defined. A client's own technical-sounding word ("API keys", "claims handler") stays only when it is listed in the first column of Level 3's *Business ↔ code vocabulary*.
+
+**Guarantee words** — *exactly once, at most one / once, immediately, instantly, as soon as, in real time, right away* — are lint warnings in Levels 1–2: a timing or delivery guarantee is written only when the code shows it and it has an evidence-index row; otherwise reword or ask.
 
 ## Glossary
 
@@ -194,18 +196,17 @@ Every domain term found, with its business meaning and the **mapping between the
 
 ## Self-check before handing off
 
-1. **Lint passes:** `python3 ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/doc-lint.py --dir <folder>` exits 0. Fix every `ERROR`; read every `WARN` and either fix it or say in the report why it stands.
-2. Every area from the confirmed map has all three documents, or is in "What is not documented" with a reason.
-3. **Level 1** has Overview, How it works, Example, Open questions and Going deeper; optional sections only where they apply, absence backed by a Level 3 negative-search row. No evidence table, tier tag, code noun, jargon or defect word. It uses the client's terms, and every *What stops it* row quotes the exact message.
-4. **Level 2** matches its reference: diagram, parts, a flow per Level 1 flow with only the lanes it uses, *What the person notices* only where there is a later step, remembered / timing / failure sections. No banned word, no defect word — behaviour stated neutrally, and every statement that is also a finding has an index row citing it. In a KB run, no FLOW is redrawn.
-5. **Level 3** matches its reference: every heading (empty ones state their search), local ids on every row, Mermaid for each state machine and multi-participant flow, Findings routed with a boundary condition.
-6. Every flow has a trigger and a result; every computing step shows its formula with rounding and conventions; **the example's arithmetic is recomputed and correct**, and every number matches Level 3.
-7. No `#confirmed` anywhere you wrote; every inferred purpose reads as uncertainty in Levels 1 and 2 and is an open question.
-8. **Evidence index complete:** every qualifying statement in Levels 1 and 2 has a row; Section cells read `<Flow heading> · step N` (or the section name); every `###` flow of both plain levels is cited; every `see **X**` resolves to a row id in Level 3; every `#observed` row carries `file:line` read this session.
-9. **The three levels agree** — spot-check five facts that appear at more than one level (a threshold, a retry count, a trigger, a name mapping, an actor).
-10. Every file carries the full header block with its `Audience` line, and all three carry the same `Derived from` sha; `INDEX.md` has one line per area naming all three files; `active-context.md` has this session at the top.
-11. The glossary records the client's terms, the code names and every drift; Level 2's part names are in it.
-12. Flows, state grids and decision tables are linked by ID, not duplicated; nothing unreachable is documented as a capability.
+1. **Lint passes:** `python3 ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/doc-lint.py --dir <folder>` exits 0. Fix every `ERROR`; fix every `WARN` or say in the report why it stands.
+
+Then only what the lint cannot check:
+
+2. Every area from the confirmed map has its set, or is in "What is not documented" with a reason.
+3. **The worked example's arithmetic is recomputed** and every number in it equals Level 3's.
+4. Every qualifying statement of Levels 1–2 has an evidence-index row — spot-check five.
+5. **The three levels agree** — cross-check five facts that appear at more than one level (a threshold, a retry count, a trigger, a name mapping, an actor).
+6. The client's terms and the exact refusal messages are used.
+7. `INDEX.md`, `active-context.md` and the glossary are updated.
+8. Nothing unreachable is documented as a capability.
 
 ## Handoffs
 

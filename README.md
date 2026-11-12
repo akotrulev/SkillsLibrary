@@ -232,7 +232,7 @@ The ten skills (`/business-analysis:scoping`, `/business-analysis:epics`, `/busi
 |---|---|---|
 | `/dev:refine` | a loose description of what you want built | the front door: batched questions, then `requirements.md` + `epics.md` (`E1..En`) + `stories.md` (`US1..USn`) in a new initiative folder, ready for `/dev:plan-system`. Also extends or audits an existing backlog |
 | `/dev:plan-system` | the initiative folder from `/dev:refine`, the requirements, or `resume` | plan a whole application: an approved high-level blueprint, then the detail pack — DB structure, experience plan, service→resource→endpoint surface with request/response bodies, shared validation catalog, external dependencies — then the epic map (which lanes can run at once) and a task list where **every task is one epic, one story, one stack, one agent and one session**, closing with the plan's own `## Prompts — one per task` section: one ready-to-paste prompt per task, in one self-contained, queueable document. Writes plans, never code |
-| `/dev:document-system` | the system or area, or `refresh` | the reverse: read an existing backend, split it into functional areas (you confirm the split), trace each one, and write what it does from the **end user's** perspective into `docs/business-model/` — three documents per area: a plain-language client guide (overview, setup, how it works, a full worked example with real numbers, open questions), a plain-language behind-the-scenes account of how the parts connect, and a technical reference for developers and AI, with flowcharts, decision tables and state grids linked by ID. Every claim `file:line`-evidenced and tiered `#observed` / `#inferred` in the technical reference's evidence index; never invents intent. Read-only on code |
+| `/dev:document-system` | the system or area, or `refresh` | the reverse: read an existing backend, split it into functional areas (you confirm the split), trace each one, and write what it does from the **end user's** perspective into `docs/business-model/` — three documents per area: a plain-language client guide (overview, setup, how it works, a full worked example with real numbers, open questions), a plain-language behind-the-scenes account of how the parts connect, and a technical reference for developers and AI, with flowcharts, decision tables and state grids linked by ID. Every claim `file:line`-evidenced and tiered `#observed` / `#inferred` in the technical reference's evidence index; never invents intent. A system that needs more than one session gets a runnable plan (`docs/plans/NNN-document-<system>.md`, one task per session) instead of being documented in the survey session. Read-only on code |
 | `/dev:document-feature` | the feature, in your own words (e.g. "the refund flow") | document **one** feature of an existing codebase: locate the implementation, trace it end to end, and write three standalone documents from one trace — `docs/features/<NNN>-<slug>.md` (a plain-language client guide: overview, setup, how it works, a full worked example, open questions), `.behind-the-scenes.md` (plain language: how the parts connect, what runs when, what happens on failure) and `.technical.md` (for developers and AI: code map, contracts, data, findings, `file:line` evidence index). No KB writes; read-only on code |
 | `/dev:audit` | spec, stories, feature, or area | read-only audit engagement (the `code-auditor` agent), saved to `docs/audits/` — owns both the spec-vs-code and spec-less feature lanes; `dev:audit-spec` / `dev:audit-feature` remain invocable for a one-off |
 
@@ -387,6 +387,30 @@ One repo per product: `contracts/` (OpenAPI/AsyncAPI) · `services/<name>/{src/M
 - **Built to be split later:** a module owns its schema, exposes one public surface, and an architecture test fails the build on a reach-in.
 - **Observable from the first task:** OpenTelemetry and the local Grafana stack land in the foundation; every task instruments what it builds.
 - **Parallel tasks:** every prompt block opens with `Depends on:`, so tasks that wait for nothing in common run together.
+
+## How an existing system is documented
+
+For a backend nobody wrote requirements for: `/dev:document-system` for a whole system, `/dev:document-feature` for one feature. Both are read-only on the code.
+
+| # | Step | Who | Produces |
+|---|---|---|---|
+| 1 | Survey | `be-documenter` | the functional-area split with a token estimate per area — **you confirm it** |
+| 2 | Plan, when the split needs more than one session | `be-documenter` | `docs/plans/NNN-document-<system>.md` in the library's plan format; the survey session stops here |
+| 3 | Area tasks `A1…An`, one session each, in the reading order | `be-documenter` | per area: the three documents below, with its flows, state grids and decision tables |
+| 4 | Consolidation `K1` | `be-documenter` | the system overview at the same three levels, the consolidated KB, the lint over all of `docs/business-model/` |
+
+Every area, and every single feature, is written three times from one trace:
+
+| File | Reader | Holds |
+|---|---|---|
+| `<name>.md` | client, product owner, support | the guide: plain language, numbered steps, formulas, a worked example with real numbers — shareable |
+| `<name>.behind-the-scenes.md` | project manager, analyst, ops | still plain language: the parts, who tells whom, what happens straight away and afterwards, what happens when a part fails — internal |
+| `<name>.technical.md` | developers and AI agents | code names, contracts, data, Findings, and the evidence index that backs the other two — internal |
+
+- **A plan you run, not one long session.** Commit the plan, then run its prompts through Plan Queue. A system that fits one session (about 2,000 traced lines) skips the plan and is documented straight away.
+- **Area tasks run in sequence, never beside each other:** they write the same KB files, and later areas reuse the actors and terms earlier ones set.
+- **Nothing is invented.** Every statement in the two plain documents has a `file:line` row in the technical reference; a purpose the code does not show is an open question. `doc-lint.py` checks each set before it is handed over.
+- **The estimate is stated up front:** 85k fixed per session, plus traced source lines × 12 and 25k per area, capped at 135k.
 
 ## Adding a new skill
 

@@ -1,7 +1,8 @@
 # The plan document format
 
 The shape every plan in this library is written in — the one the Plan Queue VS Code plugin queues, and
-the one `dev:plan-feature`, `dev:plan-delivery` and `dev:plan-session-budget` all produce.
+the one `dev:plan-feature`, `dev:plan-delivery` and `dev:plan-session-budget` all produce, and the one
+`be-documenter` writes when documenting a system takes more than one session.
 
 **One file, self-contained.** The plugin queues whole plan documents, so everything a cold reader or a
 fresh session needs is *in the file*: the context, the decisions, the tasks, and the paste-ready prompt
