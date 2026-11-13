@@ -5,6 +5,7 @@ import re
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 HERE = Path(__file__).resolve().parent
 REFERENCES = HERE.parent / "references"
@@ -97,11 +98,13 @@ def overview_set():
     flow = "### First order\n\n1. Signs up.\n2. Orders."
     return {
         f"{name}.md": document("System", "shareable", {
-            "Overview": "A shop.", "The areas": "Orders.", "End-to-end flows": flow, "What is not documented": "Nothing.",
+            "Who uses it": "| Who | What they do | Start here |\n|---|---|---|\n| Shoppers | Order | [Orders](areas/orders.md) |",
+            "The journey": "A shop.", "Areas, by who uses them": "### For shoppers\n\nOrders.",
+            "End-to-end flows": flow, "What is not documented": "Nothing.", "About this document": "Shop.",
         }, name),
         f"{name}.behind-the-scenes.md": document("System — Behind the scenes", "internal", {
             "At a glance": "Parts.", "What runs when": "Nightly.", "Where information lives": "One store.",
-            "How a failure travels": "Retried.", "End-to-end flows": flow,
+            "How a failure travels": "Retried.", "End-to-end flows": flow, "About this document": "Shop.",
         }, name),
         f"{name}.technical.md": document("System — Technical reference", "internal", {
             "How to read this": "Tiers.", "Stack and versions": ".NET 8.", "Module structure": "One.",
@@ -144,6 +147,17 @@ def limited_task(steps, outcomes, alerts):
 
 def without_section(text, title):
     return re.sub(rf"## {re.escape(title)}\n\n.*?(?=\n## |\Z)", "", text, flags=re.DOTALL)
+
+
+INDEX_ENTRY = ("- [Area](areas/a.md) — AREA-001 · members, staff · Book and cancel sessions with credits · "
+               "[behind the scenes](areas/a.behind-the-scenes.md) · [technical](areas/a.technical.md) · @ `abc1234`")
+OLD_GUIDE = guide().replace("## Who uses it", "## How it works").replace("## For members", "## Flows")
+
+
+def completed(entry, **replacements):
+    for old, new in replacements.items():
+        entry = entry.replace(old, new)
+    return entry
 
 
 class DocLintTests(unittest.TestCase):
@@ -192,7 +206,7 @@ class DocLintTests(unittest.TestCase):
     def test_should_report_index_coverage_when_system_overview_flow_uncited(self):
         texts = overview_set()
         texts["system-overview.technical.md"] = texts["system-overview.technical.md"].replace(
-            "| Guide | First order · step 1", "| Guide | The areas")
+            "| Guide | First order · step 1", "| Guide | The journey")
         self.write(texts)
         self.assert_fires("index-coverage")
 
@@ -882,6 +896,181 @@ class DocLintTests(unittest.TestCase):
     def test_should_pass_guarantee_words_when_not_yet_describes_a_state(self):
         self.write_set(guide_text=guide(body="An order that has not yet shipped can be cancelled."))
         self.assert_clean()
+
+    def write_kb(self, index_lines, guide_text=None, folder="areas"):
+        target = self.folder / folder
+        target.mkdir(exist_ok=True)
+        self.write({f"{folder}/a.md": guide_text or guide(), f"{folder}/a.behind-the-scenes.md": behind(),
+                    f"{folder}/a.technical.md": technical()})
+        if index_lines is not None:
+            (self.folder / "INDEX.md").write_text("# Business Model\n\n## Areas\n" + "\n".join(index_lines) + "\n", encoding="utf-8")
+
+    def test_should_report_sections_when_overview_has_no_journey(self):
+        texts = overview_set()
+        texts["system-overview.md"] = without_section(texts["system-overview.md"], "The journey")
+        self.write(texts)
+        self.assert_fires("sections")
+
+    def test_should_report_sections_when_overview_behind_has_no_about(self):
+        texts = overview_set()
+        texts["system-overview.behind-the-scenes.md"] = without_section(texts["system-overview.behind-the-scenes.md"], "About this document")
+        self.write(texts)
+        self.assert_fires("sections")
+
+    def test_should_warn_old_shape_once_and_run_no_other_check_when_guide_has_how_it_works(self):
+        broken = OLD_GUIDE + "\n#confirmed\n"
+        self.write_set(guide_text=broken, technical_text="# Not a technical file\n")
+        code, out = self.run_dir()
+        self.assertEqual((0, 1), (code, len(out.splitlines())), out)
+        self.assertRegex(out, r"^WARN \S+a\.md:\d+ old-shape ")
+
+    def test_should_warn_old_shape_when_the_overview_has_the_areas_table_and_no_who_uses_it(self):
+        texts = overview_set()
+        texts["system-overview.md"] = texts["system-overview.md"].replace("## Who uses it", "## The areas")
+        self.write(texts)
+        self.assert_fires("old-shape", "WARN")
+
+    def test_should_not_warn_old_shape_when_the_guide_has_who_uses_it(self):
+        self.write_set(guide_text=guide().replace("## For members", "## How it works"))
+        code, out = self.run_dir()
+        self.assertNotIn("old-shape", out)
+
+    def test_should_pass_index_line_when_the_line_has_the_shape(self):
+        self.write_kb([INDEX_ENTRY])
+        self.assert_clean()
+
+    def test_should_report_index_line_when_the_set_has_no_line(self):
+        self.write_kb(["- [Other](areas/other.md) — AREA-009 · x"])
+        self.assert_fires("index-line")
+
+    def test_should_report_index_line_when_the_set_has_two_lines(self):
+        self.write_kb([INDEX_ENTRY, INDEX_ENTRY])
+        self.assert_fires("index-line")
+
+    def test_should_report_index_line_when_the_line_is_the_old_style(self):
+        self.write_kb(["- [Area](areas/a.md) — AREA-001; book sessions; actors: members · derived from code"])
+        self.assert_fires("index-line")
+
+    def test_should_pass_index_line_when_the_description_has_twenty_words(self):
+        self.write_kb([completed(INDEX_ENTRY, **{"Book and cancel sessions with credits": words(20)})])
+        self.assert_clean()
+
+    def test_should_report_index_line_when_the_description_has_twenty_one_words(self):
+        self.write_kb([completed(INDEX_ENTRY, **{"Book and cancel sessions with credits": words(21)})])
+        self.assert_fires("index-line")
+
+    def test_should_report_index_line_when_a_link_does_not_resolve(self):
+        self.write_kb([completed(INDEX_ENTRY, **{"areas/a.technical.md)": "areas/gone.technical.md)"})])
+        self.assert_fires("index-line")
+
+    def test_should_not_check_index_line_when_the_set_is_old_shape(self):
+        self.write_kb(["- [Area](areas/a.md) — AREA-001; old style line"], guide_text=OLD_GUIDE)
+        code, out = self.run_dir()
+        self.assertEqual((0, 1), (code, out.count("old-shape")), out)
+        self.assertNotIn("index-line", out)
+
+    def test_should_not_check_index_line_when_there_is_no_index(self):
+        self.write_kb(None)
+        self.assert_clean()
+
+    def test_should_not_check_index_line_when_the_set_is_not_under_areas(self):
+        self.write_kb(["- [Other](areas/other.md) — x"], folder="features")
+        self.assert_clean()
+
+    def test_should_report_only_set_complete_when_a_set_is_incomplete_and_an_index_exists(self):
+        self.write_kb([INDEX_ENTRY])
+        (self.folder / "areas" / "a.technical.md").unlink()
+        code, out = self.run_dir()
+        self.assertNotIn("index-line", out)
+        self.assertIn("set-complete", out)
+
+    def test_should_read_a_number_and_a_quoted_message_as_facts(self):
+        text = "You pay £6.00 for 24 hours.\nThe screen says “Seat taken” or \"Try later\".\n"
+        self.assertEqual(
+            [(1, "number", "6.00"), (1, "number", "24"), (2, "message", "Seat taken"), (2, "message", "Try later")],
+            doc_lint.fact_lines(text))
+
+    def test_should_not_read_ids_list_numbers_link_targets_or_header_lines_as_facts(self):
+        text = ("**Created:** 2026-08-02\n**Id:** AREA-004\n1. See [FLOW-110](flows/f-2.md) and Q12.\n"
+                "2. Open the page.\n")
+        self.assertEqual([], doc_lint.fact_lines(text))
+
+    def test_should_report_a_lost_number_when_the_new_text_does_not_hold_it(self):
+        self.assertEqual([("Guide", 1, "number", "24")], doc_lint.lost_facts([("Guide", "Cut-off is 24 hours.")], "Cut-off is 12 hours."))
+
+    def test_should_keep_a_number_when_a_reconcile_mark_holds_the_old_value(self):
+        self.assertEqual([], doc_lint.lost_facts([("Guide", "Cut-off is 24 hours.")], "Cut-off is ~~24~~ → 12 hours."))
+
+    def test_should_keep_a_number_when_it_moved_to_another_level(self):
+        self.assertEqual([], doc_lint.lost_facts([("Guide", "Cut-off is 24 hours.")], "Guide.\nThe rule: 24 h."))
+
+    def test_should_not_count_an_id_as_a_fact_when_the_new_text_drops_it(self):
+        self.assertEqual([], doc_lint.lost_facts([("Guide", "See AREA-004 and Q7.")], "See the area."))
+
+    def test_should_report_a_lost_message_when_the_new_text_words_it_differently(self):
+        old = [("Behind the scenes", "It says “This order was accepted.”")]
+        self.assertEqual([("Behind the scenes", 1, "message", "This order was accepted.")], doc_lint.lost_facts(old, "It says “Order accepted.”"))
+
+    def test_should_keep_a_message_when_the_quotes_or_line_breaks_differ(self):
+        old = [("Guide", "It says “Seat\ntaken”.")]
+        self.assertEqual([], doc_lint.lost_facts(old, "It says \"Seat taken\"."))
+
+    def test_should_report_a_lost_fact_once_when_two_levels_held_it(self):
+        old = [("Guide", "Limit 5."), ("Behind the scenes", "Limit 5.")]
+        self.assertEqual([("Guide", 1, "number", "5")], doc_lint.lost_facts(old, "Limit is high."))
+
+    def test_should_read_the_old_file_through_git_show_beside_its_path(self):
+        done = mock.Mock(returncode=0, stdout="old text")
+        with mock.patch.object(doc_lint.subprocess, "run", return_value=done) as run:
+            self.assertEqual("old text", doc_lint.git_show("abc123", Path("docs/areas/a.md")))
+        self.assertEqual(["git", "-C", "docs/areas", "show", "abc123:./a.md"], run.call_args.args[0])
+
+    def test_should_read_nothing_when_the_revision_has_no_such_file(self):
+        with mock.patch.object(doc_lint.subprocess, "run", return_value=mock.Mock(returncode=128, stdout="")):
+            self.assertIsNone(doc_lint.git_show("abc123", Path("a.md")))
+
+    def test_should_say_whether_a_revision_exists(self):
+        with mock.patch.object(doc_lint.subprocess, "run", return_value=mock.Mock(returncode=0)):
+            self.assertTrue(doc_lint.revision_exists("abc123", Path(".")))
+        with mock.patch.object(doc_lint.subprocess, "run", return_value=mock.Mock(returncode=1)):
+            self.assertFalse(doc_lint.revision_exists("nope", Path(".")))
+
+    def test_should_warn_fact_kept_when_the_old_guide_held_a_number_the_set_lost(self):
+        self.write_set()
+        old = {"a.md": "Credits expire after 99 days.", "a.behind-the-scenes.md": None}
+        with mock.patch.object(doc_lint, "revision_exists", return_value=True), \
+                mock.patch.object(doc_lint, "git_show", side_effect=lambda rev, path: old[path.name]):
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
+                code = doc_lint.main(["--dir", str(self.folder), "--kept-from", "abc123"])
+        self.assertEqual(0, code)
+        self.assertRegex(out.getvalue(), r"(?m)^WARN \S+a\.md:1 fact-kept number '99' from abc123 ")
+
+    def test_should_print_no_fact_kept_when_the_set_kept_every_fact(self):
+        self.write_set()
+        with mock.patch.object(doc_lint, "revision_exists", return_value=True), \
+                mock.patch.object(doc_lint, "git_show", side_effect=lambda rev, path: path.read_text(encoding="utf-8")):
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
+                code = doc_lint.main(["--dir", str(self.folder), "--kept-from", "abc123"])
+        self.assertEqual((0, ""), (code, out.getvalue()))
+
+    def test_should_check_fact_kept_on_an_explicit_set_when_kept_from_is_given(self):
+        self.write_set()
+        paths = [str(self.folder / n) for n in ("a.md", "a.behind-the-scenes.md", "a.technical.md")]
+        with mock.patch.object(doc_lint, "revision_exists", return_value=True), \
+                mock.patch.object(doc_lint, "git_show", return_value="Roll-over after 77 days."):
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
+                doc_lint.main(paths + ["--kept-from", "abc123"])
+        self.assertEqual(1, out.getvalue().count("fact-kept number '77'"), out.getvalue())
+
+    def test_should_exit_with_usage_when_the_kept_from_revision_does_not_exist(self):
+        self.write_set()
+        with mock.patch.object(doc_lint, "revision_exists", return_value=False), \
+                contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:
+            doc_lint.main(["--dir", str(self.folder), "--kept-from", "nope"])
+        self.assertEqual(2, raised.exception.code)
 
     def test_should_exit_with_usage_when_two_files_given(self):
         with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as raised:

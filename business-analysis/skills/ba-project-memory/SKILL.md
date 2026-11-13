@@ -83,7 +83,7 @@ The standards every KB file must meet (what the KB holds, ids and traceability, 
 Read this file first, every session. One line per artifact; read the ones your task touches.
 
 ## Areas
-- [Ordering](areas/ordering.md) — AREA-003; place/cancel/track orders; actors: customer, support agent · derived from code
+- [Ordering](areas/ordering.md) — AREA-003 · customers, support agents · Place, change, cancel and track an order · [behind the scenes](areas/ordering.behind-the-scenes.md) · [technical](areas/ordering.technical.md) · @ `4f2a91c`
 ## Entities
 - [Order](entities/order.md) — ENT-001; lifecycle Draft→…→Refunded; owners: checkout, fulfillment, refunds
 ## Flows
@@ -100,6 +100,8 @@ Read this file first, every session. One line per artifact; read the ones your t
 - [System overview](system-overview.md) — 6 areas, 3 cross-area journeys; 2 areas not yet documented
 - [Active context](active-context.md) — last touched 2026-07-12; 3 open questions
 ```
+
+An area line has this shape and no other: `- [<Area name>](areas/<name>.md) — AREA-nnn · <who, comma-separated> · <what a person does there, at most 20 words> · [behind the scenes](…) · [technical](…) · @ \`<sha>\``; `dev:doc-business-model`'s lint (`index-line`) checks it. The description is the area's row in the system overview's *Areas, by who uses them*. A line in the older style is edited into the shape in place, together with its set when that set is updated, never regenerated; entity, flow and decision lines keep their shape.
 
 ## Feature slice
 

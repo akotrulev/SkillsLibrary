@@ -2,7 +2,7 @@
 
 **Goal:** `dev:doc-business-model` writes guides (Level 1) and behind-the-scenes accounts (Level 2) that read in the order a person meets the product — who uses it, the few ideas and one picture of how it fits together, then each person's tasks in the order life happens — with Mermaid diagrams, GitHub-style callouts and examples beside the rule they show, screen labels the trace found and never invented ones, no internal ids in the body, and lengths the lint enforces. It works on greenfield and brownfield alike: a new KB is written in this shape, and existing documentation is only ever updated in place into it, never recreated (D8), with a check that no number or quoted message was lost. A script turns any guide into one standalone, consistently styled `.html` file to send to a client.
 
-**Status:** T1 and T2 are built (2026-11-13): the Level 1 and Level 2 shapes are in `BD/SKILL.md` and `level-2-behind-the-scenes.md`, the three golden examples follow them, and the lint reads both and measures size, sentences, labels and the diagram; the three examples pass with 0 errors and 0 warnings and 154 tests pass. Still the old rules: the overview and INDEX (T3), the renderer (T4). T3 is next. The agentic-shop pilot (that repo's plan 168, task D1) waits for this plan's W1 and for the user to update the `dev` plugin there; that plan's F1 draws three callout kinds and must add `[!WARNING]`, the fourth kind this plan allows (D6). The rule-based evals (`evals/`) are agent runs and are not part of any gate here: until the user runs the fixture eval (the row under W1 in the prompts table), the new shape is proven only by the golden examples passing the lint.
+**Status:** T1, T2 and T3 are built (2026-11-13): the Level 1 and Level 2 shapes, the three golden examples, the reader-first overview, the INDEX line, the in-place update of an old-shape set (reconcile step 2, both documenter agents, the survey's REFRESH plan) and the lint (`old-shape`, `index-line`, `--kept-from`/`fact-kept` beside the T1–T2 rules); the three examples pass with 0 errors and 0 warnings, `--kept-from 92f14828` over them finds no lost fact, and 186 tests pass. Built but unverified: the lint and `fact-kept` on a real KB. Still to build: the renderer (T4, next); the agents already print its command. W1 closes. The agentic-shop pilot (that repo's plan 168, task D1) waits for this plan's W1 and for the user to update the `dev` plugin there; that plan's F1 draws three callout kinds and must add `[!WARNING]`, the fourth kind this plan allows (D6). The rule-based evals (`evals/`) are agent runs and are not part of any gate here: until the user runs the fixture eval (the row under W1 in the prompts table), the new shape is proven only by the golden examples passing the lint.
 
 ## 1. What already exists, and what is missing
 
@@ -279,6 +279,8 @@ Costs: offline, the reader gets a one-line notice in place of the picture.
 
 **D14 (2026-11-13, T2) — three small readings the plan left open.** (a) `length` and `task-unique` run on every set, the overview included (the plan says "Level 1"); `diagram` runs on every Level 1 file; `internal-ids`, `flow-mirror`, `limits`, `long-sentence` and `labels` run on area sets only, so the overview stays untouched until T3. (b) Level 2's `**Audience:**` is read from the top only — the same line in `## About this document` is reported missing — while its other metadata is read from About, and `header_line` falls back to the top for both Levels 1–2. (c) `length` counts a header line (`**Created:**`…, `**Levels:**`) as nothing, and a word is any whitespace- or pipe-separated token holding a letter or digit, so `£6.00` is one word and a table's `|---|` none. Costs: a Level 2 file that moves its Audience under About fails `audience` instead of passing quietly.
 
+**D15 (2026-11-13, T3) — `old-shape` also covers the overview, and the INDEX check keys on the guide's link.** (a) §6 defines `old-shape` as `## How it works` and no `## Who uses it`; an old overview has `## Overview` and `## The areas` and never `## How it works`, so under the plan's text it would have drawn a wall of `sections` ERRORs the day the plugin updates, which is what D8 exists to prevent. The lint treats an overview guide with `## The areas` and no `## Who uses it` as old-shape. (b) `index-line` finds a set's line as the one whose link is the guide's path relative to `--dir`, so a set not under `areas/` (a feature folder) is never checked and a set the lint reports as `old-shape` or `set-complete` is skipped. (c) `fact-kept` reads a number as a digit run not preceded by a word character, `.` or `-` (so `AREA-004`, `Q7` and a sha are not facts), skips header lines, list numbers and link targets, and reads a quoted message as the text between `“…”` or `"…"` compared with whitespace collapsed. A fact found at no level of the set is reported once, at its first line in the old file. A `--kept-from` revision git cannot resolve exits 2 rather than printing nothing. Costs: a number written as a word, or a fact stated without a number or quotation, is invisible to `fact-kept`.
+
 ## Answered questions (2026-11-13)
 
 **O1 — Title as a question (Trading212 style)?** No: the title is the area's plain name.
@@ -348,6 +350,7 @@ a scratch KB under `$TMPDIR` holding one old-shape set (copy of `example-area.md
 - `be-documenter.md`: Step 0 (Orient) reports which existing sets are old-shape; Step 4's row and the REFRESH paragraph name the new sections, `Where:` and the no-screen form, the in-place update (D8: move, add what is missing, re-trace only the delta, run `--kept-from`, never recreate), and the length ERRORs with §2's order for what leaves a guide; the final report gives the render command (`uv run …/render-html.py --out <dir> --dir docs/business-model`) — T4 writes the script, so the line names it as it will exist. `be-feature-documenter.md`: the same, for `docs/features/` (an existing feature document is updated in place).
 - `codebase-survey/references/documentation-plan.md`: a REFRESH plan over an old-shape KB sizes each area as an in-place update — reading the three existing files, the targeted lookup for `Who uses it`/`Where:`/diagram, and a re-trace only of the delta's paths — and its last task's whole-KB lint has no `old-shape` WARN left and its `--kept-from` run no unexplained `fact-kept`.
 - `doc-lint.py` + tests: overview `sections` (both plain levels), `old-shape`, `index-line` (new-shape sets only), `--kept-from` and `fact-kept`. Keep the comparison a pure function over the old and new text, with the `git show <rev>:./<file>` read beside it, so the unit tests need no repository. Update the docstring.
+- **As built (2026-11-13):** `system-overview.md` reference rewritten to §4 (Who uses it, The journey, Areas by who uses them, About this document; Level 2 gains About, Audience on top). `BD/SKILL.md`: the INDEX line shape in the Output table, the greenfield/brownfield sentence opening Level 1, a new reconcile step 2 "An old-shape set is updated in place" (D8's six actions; D8 point 7 is its sub-step 6), step 5 "Update, don't rewrite" says layout moves are not struck through and re-checks the diagram, self-check item 2. `ba-project-memory`: the `## Areas` example line is §5's. `feature-trace`: `Client vocabulary` has `Where in the product (screen › control)`; `trace-recipes.md` has a new "Part 3a — Where in the product" (Next.js, React Router, Blazor). `be-documenter.md` and `be-feature-documenter.md`: the in-place-update invariant, old-shape sets reported on arrival, Step 4/REFRESH wording, `--kept-from` allowed in the lint line, report lines for old-shape sets, kept facts, over-length guides and the printed render command. `documentation-plan.md`: K1's gate and a closing paragraph sizing a REFRESH over an old-shape KB as an in-place update. `doc-lint.py`: `is_old_shape` (short-circuits `lint_set`), `check_index_line`, `fact_lines`/`lost_facts` (pure), `git_show`/`revision_exists` (the git reads), `check_kept`, `--kept-from`; docstring updated. Proof: `python3 -m unittest discover -s BD/scripts` → 186 tests OK; `doc-lint.py` coverage 99% (546 stmts, 234 branches, one miss at the `__main__` guard); the three examples → `0 error(s), 0 warning(s)`; `--kept-from 92f14828` over them → `0 error(s), 0 warning(s)` (no `fact-kept`); scratch KB under `$TMPDIR/kb011` (old set from 92f14828 + new set + INDEX): exit 0 with exactly one `old-shape` WARN and no `index-line`; the new set's INDEX line removed → exit 1 on `index-line`. Built but unverified: the lint on a real KB, and `fact-kept` against a real in-place update (the golden examples are the only old/new pair tested).
 - **Not in T3:** the renderer (T4); `evals/`, `qa/manual/requirements-breakdown/SKILL.md`, `docs/skills-catalog.md`, `README.md`, `engineering-practices/rules/feature-docs.md`, `business-analysis/skills/rules/business-model.md` (W1). `docs/plans/005-cross-feature-test-design.md` cites old section names but is another plan in flight: do not edit it; W1 records it.
 
 ### T4 — `render-html.py`: a guide as one standalone page
@@ -425,74 +428,13 @@ Run them in order, one session each; each block is complete on its own. Every ta
 
 | # | Stack | Agent | Depends on | Runs beside | Budget |
 |---|---|---|---|---|---|
-| T3 | `docs` | `general-purpose` | T2 | — | ~135k |
 | T4 | `docs` | `general-purpose` | T3 | — | ~80k |
 | W1 | `docs` | `general-purpose` | T1, T2, T3, T4 | — | ~100k |
 | — | run the fixture eval (`evals/README.md`, eval 1); update the `dev` plugin in agentic-shop; add `[!WARNING]` to its plan 168 F1; run plan 168 | **the user** | W1 | — | — |
 
-T1 and T2 have landed; T3, T4 and W1 are live.
+T1, T2 and T3 have landed; T4 and W1 are live.
 
 ---
-
-### T3 — the overview, INDEX lines, and updating an old set in place without losing a fact (general-purpose, docs)
-
-````
-Depends on: T2
-Agent: general-purpose · Stack: docs
-
-You are working in the SkillsLibrary repo. Task T3 of docs/plans/011-documenter-reader-first-shape.md:
-reshape the system overview, fix the INDEX line, give the trace its screen-path column, teach the
-reconcile procedure and both documenter agents to update an old-shape set in place (brownfield: never
-recreate; greenfield writes the new shape directly), and add the lint rules that make a half-updated
-KB lint green and an update that lost a fact visible.
-
-Read, in this order:
-1. CLAUDE.md (Comments, KISS, Test code rules).
-2. The plan: §4, §5, §6 (rows marked T3), D8, D10, D12, task T3, the As-built notes of T1–T2, and
-   "Close-out — every task".
-3. backend/_shared/business-documentation/references/system-overview.md (whole).
-4. backend/_shared/business-documentation/SKILL.md — "Output", "Reconcile procedure", "Self-check".
-5. business-analysis/skills/ba-project-memory/SKILL.md — "## INDEX.md format" only.
-6. backend/_shared/agents/be-documenter.md (whole); be-feature-documenter.md (whole).
-7. backend/_shared/codebase-survey/references/documentation-plan.md (whole).
-8. backend/_shared/feature-trace/SKILL.md — the `Client vocabulary` paragraph and table;
-   references/trace-recipes.md — the client-vocabulary searches.
-9. scripts/doc-lint.py and test_doc_lint.py as T2 left them.
-
-Build what task T3 lists. The render command in the agents' report line is
-`uv run ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/render-html.py --out <dir> --dir docs/business-model`
-— T4 writes that script; name it as it will exist.
-
-Traps:
-- `old-shape` must short-circuit: a set it flags gets that one WARN and no other check, or an
-  agentic-shop KB with 27 old sets drowns in ERRORs (D8).
-- `index-line` runs only in `--dir` mode, only when `<dir>/INDEX.md` exists, and only for sets that are
-  not old-shape; feature folders (docs/features/) have no INDEX and must not fail.
-- `fact-kept` compares text, so keep the comparison a pure function (old guide and Level 2 text in,
-  the new three levels' text in, findings out) and the `git show <rev>:./<file>` read beside it; the
-  unit tests then need no repository. A number inside an id (`AREA-004`) is not a fact; a
-  `~~old~~ → new` mark keeps the old value present, which is right.
-- If `--kept-from 92f14828` reports a `fact-kept` on the golden examples, T1 or T2 dropped a fact:
-  restore it in the example. Do not narrow the rule to make the line go away.
-- docs/plans/005-cross-feature-test-design.md cites old section names: do not edit it (another plan in
-  flight); W1 records it. The evals and qa/manual/requirements-breakdown are W1's.
-- D8 is the user's rule: existing documentation is only updated, never recreated. The agents must not
-  delete and regenerate a file, must keep `Created`, `#confirmed` statements and evidence rows, must
-  re-trace only the code delta, and close the update with a `--kept-from` run. Write it so an agent
-  cannot read "update" as "regenerate and diff".
-
-Gate: own tests — the three commands in T1's gate line (coverage over the branches T3 wrote), plus:
-  S="$TMPDIR/kb011" && rm -rf "$S" && mkdir -p "$S/areas"
-  git show 92f14828:backend/_shared/business-documentation/references/example-area.md > "$S/areas/old.md"   (and its two siblings as old.behind-the-scenes.md / old.technical.md, the same way)
-  copy the current three examples in as new.*.md; write an INDEX.md with a §5 line for the new set and an old-style line for the old one
-  python3 backend/_shared/business-documentation/scripts/doc-lint.py --dir "$S"   → exit 0, exactly one old-shape WARN, no index-line
-  remove the new set's INDEX line → exit 1 on index-line
-  python3 backend/_shared/business-documentation/scripts/doc-lint.py --kept-from 92f14828 backend/_shared/business-documentation/references/example-area.md backend/_shared/business-documentation/references/example-behind-the-scenes.md backend/_shared/business-documentation/references/example-technical.md   → no fact-kept line
-Do not run the evals.
-
-Commit: `feat(documenters): reader-first overview, INDEX line, in-place update of old sets with a kept-facts check (011 T3)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### T4 — `render-html.py`: a guide as one standalone page (general-purpose, docs)
 
@@ -526,6 +468,7 @@ Traps:
 - Nothing internal reaches the page: no id, sha or model link from `## About this document`, no struck
   old value. A lone `~~text~~` with no arrow is ordinary strikethrough and stays.
 - When Mermaid does not load, the reader sees the one-line notice, never the diagram's source.
+- The documenter agents (T3) already print two forms of your command: `--out <dir> --dir docs/business-model` (be-documenter) and `--out <dir> docs/features/<NNN>-<slug>.md` (be-feature-documenter). Both must work as written; the second is a named Level 1 file.
 
 Gate: own tests —
   uv run --with markdown-it-py==<pin> --with mdit-py-plugins==<pin> --with coverage coverage run --branch -m unittest discover -s backend/_shared/business-documentation/scripts -p 'test_render*.py' && uv run --with coverage coverage report -m --include='*render-html.py'   (≥ 80%)
@@ -568,6 +511,9 @@ Traps:
   The new expectations are in task W1; the fixture's only screen labels are in `staff-ui.en.json`.
 - The fix loop: run the whole set once, fix each failure with the narrowest rerun, rerun only what
   failed, then the whole set once more.
+- T3 left `evals/`, `requirements-breakdown`, the catalog, README and the two rule files as they were; D15
+  (the overview counts as old-shape too) and the `--kept-from`/`old-shape`/`index-line` rules belong in the
+  catalog's lint paragraph. Record the 005 plan's old section names as a dated D16 (the next free number).
 
 Gate (this is the last task, so it runs the whole set once more across the plan, in run order):
   python3 -m unittest discover -s backend/_shared/business-documentation/scripts -p 'test_doc_lint.py'

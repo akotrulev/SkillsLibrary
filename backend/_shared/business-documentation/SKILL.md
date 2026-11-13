@@ -60,7 +60,7 @@ Everything lands in **`docs/business-model/`**, per `business-analysis:knowledge
 | `areas/<area>.technical.md` | **this skill** | Level 3 |
 | `system-overview.md`, `.behind-the-scenes.md`, `.technical.md` | **this skill** | The same three levels for the whole system |
 | `glossary.md` | shared | Terms, the client's own words, and the business ↔ code mapping |
-| `INDEX.md`, `active-context.md` | shared | Updated per the KB contract. **One `INDEX.md` line per area**, naming all three files |
+| `INDEX.md`, `active-context.md` | shared | Updated per the KB contract. **One `INDEX.md` line per area**, in this shape and no other (lint `index-line`): `- [<Area name>](areas/<name>.md) — AREA-nnn · <who, comma-separated> · <what a person does there, at most 20 words> · [behind the scenes](areas/<name>.behind-the-scenes.md) · [technical](areas/<name>.technical.md) · @ \`<sha>\``. The description is the area's row in the overview's `## Areas, by who uses them`. An existing line is edited into the shape together with its set, never regenerated |
 | `events.md`, `shared-data.md`, `invariants.md` | `business-analysis:dependency-map` | **Not yours.** Levels 2 and 3 cite them by id |
 | `flows/`, `entities/`, `decisions/` | `process-flow` · `state-grid` · `decision-table` | **Not yours.** You link to them by ID |
 
@@ -86,6 +86,8 @@ The lines below are mandatory on **every file** of a set, in this order:
 ---
 
 ## Level 1 — the guide
+
+**Greenfield or brownfield.** A FULL run on a project with no documentation writes this shape directly. A run on existing documentation **updates it in place** into this shape and never recreates it — the *Reconcile procedure*'s in-place step says how.
 
 The client-facing document. If a sentence would make a non-technical client ask "what does that mean?", it does not belong here. It reads in the order a person meets the product: who uses it, the few ideas and one picture of how it fits together, then each person's tasks in the order life happens.
 
@@ -204,12 +206,19 @@ Every domain term found, with its business meaning and the **mapping between the
 ## Reconcile procedure (every run that finds an existing set)
 
 1. **Check staleness per file.** Read each existing file's `Derived from` sha, compare it with `HEAD` and the git delta for the area's paths, and report which of the three levels are stale. If any one is stale, all three are reconciled together.
-2. **Re-trace first.** The existing documents are a lead; the code is the evidence.
-3. **Verdict every statement**: **Agrees** · **New** · **Gone** · **Contradicts**.
-4. **Update, don't rewrite** — `~~old~~ → new` keeps one generation of history inline. Re-run the example's arithmetic whenever a number it uses changed; re-check Level 2's timing and failure statements; re-verify every `file:line` at the current commit and every evidence-index `Flow · step N` citation against the renumbered steps.
-5. **`Gone` needs care.** Say whether the feature was removed or your trace did not find it; never delete a `#confirmed` statement on the strength of a failed search.
-6. **`Contradicts` escalates.** Present the documented statement, the code evidence, and both readings — *stale documentation* vs *code defect*. Never silently pick one.
-7. **Re-stamp all three files** with the same sha and a `Last updated` line, and log the session in `active-context.md`. A REFRESH that deliberately re-traced only part of a set says so in the report.
+2. **An old-shape set is updated in place.** A set whose guide has `## How it works` and no `## Who uses it` (an overview: `## The areas` and no `## Who uses it`) is **updated, file by file, into the current shape — never deleted and regenerated, never rewritten from a fresh trace and compared**. Existing documentation is only ever updated:
+   1. **Same files, same history.** The three files are edited. `Created` is kept, a `Last updated` line is added, every `#confirmed` statement and every evidence-index row stays, and `~~old~~ → new` marks every changed fact.
+   2. **Move, don't rewrite.** Each existing statement goes under its new section: a flow to the `### <task>` under the `## For <person>` it belongs to; a system check the person does not notice to Level 2; Setup to `## Rules and limits`; How it connects to `## Related areas`; Who can do what to `## Who uses it`; the end example to the task it illustrates, or `## A <period> in numbers`; inline ids to `## About this document`; inferred purposes to `## Open questions`. Wording changes only where the shape demands it (second person; a step becomes the person's action). Over the length cap, detail moves down a level in the order the Level 1 section gives; nothing is dropped.
+   3. **Add only what the shape needs and the old trace lacks** — the `Who uses it` table, key ideas, `**Where:**` paths and labels, the diagram, callouts — from a **targeted** lookup (the UI routes and labels per `feature-trace`'s recipes, the trace's states), not a full re-trace. Where it finds no screen, the task takes the no-screen form.
+   4. **Re-trace only the code delta** — `git diff <Derived from sha>..HEAD` over the area's paths, as step 1 reads it. No delta, no re-trace.
+   5. **Re-cite the evidence index, do not rebuild it:** each row keeps its evidence and takes the new `<Task> · step N` or `· outcome N`.
+   6. **Check it, do not trust it.** Close the update with `doc-lint.py --kept-from <the set's old sha, or the commit before the update> --dir <folder>`: every `fact-kept` WARN is a number or quoted message the old guide or Level 2 had and no level has now — restore it, or name in the report the code change that removed it. The `INDEX.md` line of the set is edited into its shape in the same update.
+3. **Re-trace first.** The existing documents are a lead; the code is the evidence. (For an old-shape set, only the delta — step 2.4.)
+4. **Verdict every statement**: **Agrees** · **New** · **Gone** · **Contradicts**.
+5. **Update, don't rewrite** — `~~old~~ → new` keeps one generation of history inline and marks a changed **fact**; moving a statement to its new section is a layout move and is never struck through. Re-check the guide's diagram whenever a state or a transition changed (it is the one derived picture: its arrows are the guide's tasks, and it agrees with the `ENT-nnn` grid). Re-run the example's arithmetic whenever a number it uses changed; re-check Level 2's timing and failure statements; re-verify every `file:line` at the current commit and every evidence-index `Flow · step N` citation against the renumbered steps.
+6. **`Gone` needs care.** Say whether the feature was removed or your trace did not find it; never delete a `#confirmed` statement on the strength of a failed search.
+7. **`Contradicts` escalates.** Present the documented statement, the code evidence, and both readings — *stale documentation* vs *code defect*. Never silently pick one.
+8. **Re-stamp all three files** with the same sha and a `Last updated` line, and log the session in `active-context.md`. A REFRESH that deliberately re-traced only part of a set says so in the report.
 
 ## Self-check before handing off
 
@@ -217,7 +226,7 @@ Every domain term found, with its business meaning and the **mapping between the
 
 Then only what the lint cannot check:
 
-2. Every area from the confirmed map has its set, or is in "What is not documented" with a reason.
+2. Every area from the confirmed map has its set, or is in "What is not documented" with a reason. **An `old-shape` WARN means that set is not done**: it is updated in place (reconcile step 2), never left as a passing lint. An in-place update closes with a `--kept-from` run, every `fact-kept` WARN restored or explained in the report.
 3. **The worked example's arithmetic is recomputed** and every number in it equals Level 3's.
 4. Every qualifying statement of Levels 1–2 has an evidence-index row — spot-check five.
 5. **The three levels agree** — cross-check five facts that appear at more than one level (a threshold, a retry count, a trigger, a name mapping, an actor).

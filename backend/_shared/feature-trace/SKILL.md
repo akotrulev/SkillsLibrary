@@ -105,7 +105,7 @@ The tests covering the area (path and line, what each covers, what none covers �
 
 ## Harvest the client's words
 
-Record the client's own words, so the guide speaks them instead of code names: UI copy, translation and resource files, email and notification templates, validation and problem-detail text, enum display names, domain terms in docs and test names. Each goes in `Client vocabulary` with where seen and its code name; a code name with no client term is recorded with the search. `references/trace-recipes.md` has the per-stack searches.
+Record the client's own words, so the guide speaks them instead of code names: UI copy, translation and resource files, email and notification templates, validation and problem-detail text, enum display names, domain terms in docs and test names. Each goes in `Client vocabulary` with where seen, **where in the product** it is met, and its code name; a code name with no client term is recorded with the search. Where the UI is in the repository, record the screen and control path as `screen › control` (`Your orders › Cancel order`) from the routes, navigation and the label's own file; where it is not, or the search finds nothing, record the search instead — that negative row is what lets the guide take its no-screen form (no `**Where:**` line, no bold label) honestly instead of inventing a button. `references/trace-recipes.md` has the per-stack searches.
 
 ## Evidence rules
 
@@ -164,7 +164,7 @@ You are tracing, not auditing; handle what you find like this and keep moving:
 | # | Kind (test / log / span / metric) | Name / path | Covers | Gap | Evidence |
 
 ### Client vocabulary
-| Client term | Where seen | Code name |
+| Client term | Where seen | Where in the product (screen › control) | Code name |
 
 ### Intent notes (`#inferred`)
 | Observation | Probable purpose | Basis (comment / test / commit / naming) | Question for the business |
@@ -195,7 +195,7 @@ You are tracing, not auditing; handle what you find like this and keep moving:
 - **→ `business-analysis:state-grid`** — inventory 4 becomes `ENT-nnn` state × event grids; refused transitions are its meaningful `—` cells.
 - **→ `business-analysis:decision-table`** — inventory 5 becomes `DEC-nnn` tables with a declared hit policy; completeness exposes the combinations the code never handles.
 - **→ `business-analysis:dependency-map`** — Edges become `events.md`, `shared-data.md`, `invariants.md`; `be-documenter` writes them, `be-feature-documenter` does not.
-- **→ `dev:doc-business-model`** — the three documents: capabilities, rules and decisions the guide (client vocabulary, exact refusal text); Edges the guide's *How it connects* and all of *Behind the scenes*; every inventory, with exact names, the technical reference.
+- **→ `dev:doc-business-model`** — the three documents: capabilities, rules and decisions the guide (client vocabulary, exact refusal text); Edges the guide's *Related areas* and all of *Behind the scenes*; every inventory, with exact names, the technical reference.
 - **→ `code-auditor`** — the findings list; it lands in the technical reference's Findings, never in the plain-language levels.
 - **→ `qa-test-case-designer`** — rules and validations are a test basis; thresholds are BVA seeds.
 

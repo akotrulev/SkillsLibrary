@@ -5,6 +5,8 @@ Usage:
   doc-lint.py --dir <folder>                          lint every set found (any *.behind-the-scenes.md or
                                                       *.technical.md marks one)
   doc-lint.py <guide.md> <behind.md> <technical.md>   lint one explicit set
+  --kept-from <git-rev>                               with either form: also report every number and quoted message
+                                                      of the guide and Level 2 at that revision that no level holds now
 
 Output: ERROR|WARN <path>:<line> <rule-id> <message>. Exit 0 when no ERROR, 1 otherwise.
 Level 3 may be split into <name>.technical.md plus <name>.technical.<topic>.md siblings; Level 3 sections,
@@ -60,11 +62,19 @@ Rules:
                           "flowchart LR"; a flowchart node label not in double quotes
   guarantee-words  also WARN on roadmap promises: a line starting "Not yet", "coming soon", "not yet available /
                           supported / possible", "in a future version / release"
+  old-shape        WARN   a set whose guide has "## How it works" (overview: "## The areas") and no "## Who uses it": one
+                          WARN for the set and no other check runs on it, so a half-updated KB lints green
+  index-line       ERROR  --dir mode with <dir>/INDEX.md: every set under areas/ that is not old-shape has exactly one
+                          line "- [Name](areas/x.md) — AREA-nnn · who · what (at most 20 words) · [behind the scenes](..) ·
+                          [technical](..) · @ `sha`", and its three links resolve
+  fact-kept        WARN   only with --kept-from: a number (not part of an id) or a quoted message that the guide or Level 2
+                          held at that revision and that appears nowhere in the set's three levels now
 Flows are the ### headings under "## For ..." and "## What happens automatically" (Levels 1-2) or "## End-to-end
 flows" (overview). A flow's numbered items are its steps; the bullets under **What happens next** are its outcomes.
 """
 import argparse
 import re
+import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -88,8 +98,14 @@ REQUIRED_SECTIONS = {
     ],
 }
 OVERVIEW_SECTIONS = {
-    GUIDE: ["Overview", "The areas", "End-to-end flows", "What is not documented"],
-    BEHIND: ["At a glance", "What runs when", "Where information lives", "How a failure travels", "End-to-end flows"],
+    GUIDE: [
+        "Who uses it", "The journey", "Areas, by who uses them", "End-to-end flows", "What is not documented",
+        "About this document",
+    ],
+    BEHIND: [
+        "At a glance", "What runs when", "Where information lives", "How a failure travels", "End-to-end flows",
+        "About this document",
+    ],
     TECH: [
         "How to read this", "Stack and versions", "Module structure", "Foundations", "Coverage ledger",
         "Findings", "Evidence index",
@@ -103,6 +119,7 @@ INDEX_LEVELS = (GUIDE, BEHIND)
 WORD_LIMITS = {GUIDE: 2500, BEHIND: 3000, TECH: 4000}
 MAX_STEPS, MAX_OUTCOMES, MAX_ALERTS, MAX_KEY_IDEAS, MAX_GOOD_TO_KNOW, MAX_SENTENCE_WORDS = 7, 5, 1, 6, 6, 30
 MERMAID_FIRST_LINES = ("stateDiagram-v2", "flowchart LR")
+MAX_INDEX_WORDS = 20
 
 JARGON = [
     "endpoint", "payload", "handler", "middleware", "idempotent", "idempotency", "eventual consistency",
@@ -163,6 +180,12 @@ STEP_CITE = re.compile(r"·\s*steps?\s+(\d+)(?:\s*[–-]\s*(\d+))?")
 OUTCOME_CITE = re.compile(r"·\s*outcomes?\s+(\d+)(?:\s*[–-]\s*(\d+))?")
 CITED_ID = re.compile(r"\*\*([A-Z]+\d+)\*\*|\bsee\s+(?!Q\d)([A-Z]+\d+)\b")
 EMPTY_EVIDENCE = ("", "—", "-")
+INDEX_LINE = re.compile(
+    r"^- \[[^\]]+\]\([^)]+\) — AREA-\d+ · (?P<who>[^·]+?) · (?P<what>[^·]+?) · "
+    r"\[behind the scenes\]\((?P<behind>[^)]+)\) · \[technical\]\((?P<tech>[^)]+)\) · @ `[0-9a-f]{7,40}`$"
+)
+NUMBER = re.compile(r"(?<![\w.-])\d+(?:[.,]\d+)*")
+LIST_NUMBER = re.compile(r"^\s*\d+\.\s+")
 
 
 @dataclass(frozen=True)
@@ -723,17 +746,91 @@ def check_sections(doc):
     return findings
 
 
+def is_old_shape(guide):
+    titles = {title for _, title in guide.headings()}
+    old_marker = "The areas" if guide.overview else "How it works"
+    return old_marker in titles and "Who uses it" not in titles
+
+
+def check_index_line(index, lines, folder, guide_path):
+    target = guide_path.relative_to(folder).as_posix()
+    mine = [(n, text) for n, text in enumerate(lines, 1) if f"]({target})" in text]
+    if len(mine) != 1:
+        return [Finding("ERROR", index, mine[0][0] if mine else 1, "index-line", f"{len(mine)} lines link {target}; exactly one")]
+    number, text = mine[0]
+    match = INDEX_LINE.match(text)
+    if not match:
+        return [Finding("ERROR", index, number, "index-line", f"the line for {target} is not of the INDEX line shape")]
+    findings = []
+    if len(match["what"].split()) > MAX_INDEX_WORDS:
+        findings.append(Finding("ERROR", index, number, "index-line", f"description over {MAX_INDEX_WORDS} words"))
+    findings += [
+        Finding("ERROR", index, number, "index-line", f"link target does not exist: {link}")
+        for link in (target, match["behind"], match["tech"]) if not (index.parent / link).exists()
+    ]
+    return findings
+
+
+def fact_lines(text):
+    """(line number, kind, fact) of each number and quoted message a reader meets: header lines, link targets and list numbers are not facts."""
+    result = []
+    for number, line in enumerate(text.splitlines(), 1):
+        if line.startswith(HEADER_PREFIXES):
+            continue
+        line = LIST_NUMBER.sub("", LINK_TARGET.sub("]", line))
+        result += [(number, "number", found) for found in NUMBER.findall(line)]
+        result += [(number, "message", " ".join(quote[1:-1].split())) for quote in QUOTED.findall(line)]
+    return result
+
+
+def lost_facts(old_docs, new_text):
+    """(level, line, kind, fact) of each fact in the old (level, text) pairs that `new_text` no longer holds, first sighting only."""
+    squashed = " ".join(new_text.split())
+    numbers = set(NUMBER.findall(new_text))
+    lost, seen = [], set()
+    for level, text in old_docs:
+        for number, kind, fact in fact_lines(text):
+            kept = fact in numbers if kind == "number" else fact in squashed
+            if not kept and (kind, fact) not in seen:
+                seen.add((kind, fact))
+                lost.append((level, number, kind, fact))
+    return lost
+
+
+def git_show(rev, path):
+    """The file's text at `rev`, or None when that revision has no such file."""
+    shown = subprocess.run(["git", "-C", str(path.parent), "show", f"{rev}:./{path.name}"], capture_output=True, text=True)
+    return shown.stdout if shown.returncode == 0 else None
+
+
+def revision_exists(rev, folder):
+    checked = subprocess.run(["git", "-C", str(folder), "rev-parse", "--verify", "--quiet", rev + "^{commit}"], capture_output=True)
+    return checked.returncode == 0
+
+
+def check_kept(paths, new_text, rev):
+    old_docs = [(level, git_show(rev, paths[level])) for level in (GUIDE, BEHIND)]
+    return [
+        Finding("WARN", paths[level], line, "fact-kept",
+                f"{kind} '{fact}' from {rev} appears at no level now; restore it, or name the code change that removed it")
+        for level, line, kind, fact in lost_facts([(lv, text) for lv, text in old_docs if text is not None], new_text)
+    ]
+
+
 def topic_paths(technical):
     stem = technical.name[: -len(".md")]
     return sorted(technical.parent.glob(stem + ".*.md"))
 
 
-def lint_set(paths, check_targets):
+def lint_set(paths, check_targets, kept_from=None):
     missing = [Finding("ERROR", p, 0, "set-complete", f"missing {level} file") for level, p in paths.items() if not p.is_file()]
     if missing:
         return missing
     overview = paths[GUIDE].name == OVERVIEW_NAME + LEVEL_SUFFIX[GUIDE]
     guide, behind, tech = (load(level, paths[level], overview) for level in (GUIDE, BEHIND, TECH))
+    if is_old_shape(guide):
+        return [Finding("WARN", guide.path, guide.start + 1, "old-shape",
+                        "written in the old layout; update it in place into the current shape — no other check runs on it")]
     tech.topics = [load(TECH, p, overview) for p in topic_paths(paths[TECH])]
     docs = [guide, behind, tech]
     allowed = client_words(tech)
@@ -755,6 +852,8 @@ def lint_set(paths, check_targets):
         findings += check_limits(guide) + check_long_sentence(guide) + check_labels(guide, tech)
     findings += check_stamp_agree(docs) + check_index_rows(tech)
     findings += check_qid_unique(guide, behind, tech) + check_ref_resolves(guide, behind, tech)
+    if kept_from:
+        findings += check_kept(paths, "\n".join("\n".join(d.lines) for d in docs + tech.topics), kept_from)
     return findings
 
 
@@ -767,24 +866,36 @@ def sets_in(folder):
         yield {level: parent / (name + suffix) for level, suffix in LEVEL_SUFFIX.items()}
 
 
-def lint_dir(folder):
+def lint_dir(folder, kept_from=None):
     sets = list(sets_in(folder)) if folder.is_dir() else []
     if not sets:
         return [Finding("ERROR", folder, 0, "no-sets", "no documentation set found")]
-    return [f for paths in sets for f in lint_set(paths, True)]
+    index = folder / "INDEX.md"
+    index_lines = index.read_text(encoding="utf-8").splitlines() if index.is_file() else None
+    findings = []
+    for paths in sets:
+        found = lint_set(paths, True, kept_from)
+        findings += found
+        unfinished = any(f.rule in ("old-shape", "set-complete") for f in found)
+        if index_lines is not None and not unfinished and paths[GUIDE].relative_to(folder).parts[0] == "areas":
+            findings += check_index_line(index, index_lines, folder, paths[GUIDE])
+    return findings
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--dir", type=Path, help="folder to search for sets")
     parser.add_argument("files", nargs="*", type=Path, help="guide, behind-the-scenes and technical files")
+    parser.add_argument("--kept-from", metavar="GIT_REV", help="report facts of the old guide and Level 2 that no level holds now")
     args = parser.parse_args(argv)
-    if args.dir is not None:
-        findings = lint_dir(args.dir)
-    elif len(args.files) == 3:
-        findings = lint_set(dict(zip((GUIDE, BEHIND, TECH), args.files)), False)
-    else:
+    if args.dir is None and len(args.files) != 3:
         parser.error("give --dir <folder> or exactly three files")
+    if args.kept_from and not revision_exists(args.kept_from, args.dir or args.files[0].parent):
+        parser.error(f"revision {args.kept_from} not found")
+    if args.dir is not None:
+        findings = lint_dir(args.dir, args.kept_from)
+    else:
+        findings = lint_set(dict(zip((GUIDE, BEHIND, TECH), args.files)), False, args.kept_from)
     for finding in findings:
         print(finding)
     errors = sum(f.severity == "ERROR" for f in findings)
