@@ -234,6 +234,20 @@ Then only what the lint cannot check:
 7. `INDEX.md`, `active-context.md` and the glossary are updated.
 8. Nothing unreachable is documented as a capability.
 
+## Sharing a guide
+
+A client reads a page, not a markdown file. `render-html.py` turns guides into standalone pages — a table of contents, styled alerts, tables, the diagram drawn — and never writes into the KB:
+
+```bash
+uv run ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/render-html.py --out <dir> --dir docs/business-model
+uv run ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/render-html.py --out <dir> docs/features/<NNN>-<slug>.md
+```
+
+- **Rendered on demand, never committed.** Markdown stays the only source; a committed page drifts the first time the markdown is edited. Render again after every update and send the new files.
+- `--dir` renders every file under it marked `**Audience:** shareable` (the guides and `system-overview.md`); a named file is rendered as given, a Level 2 file only that way, with "Internal — not for sharing" under its title.
+- **The page carries nothing internal:** the About section becomes "Last updated <date>"; a `~~old~~ → new` mark shows only `new`; links to Level 2 and Level 3 files show their text; links to other guides point to the matching `.html` file, so send a set's pages together.
+- **Offline, the reader loses the picture.** The only request a page makes is the pinned Mermaid script; without it the diagram shows as "This diagram needs an internet connection" and every arrow is still a task in the text.
+
 ## Handoffs
 
 - **→ `business-analyst`** — the open questions, the terminology drift, and any contradiction between two areas' rules. It resolves conflicts and records precedence; you never invent it.

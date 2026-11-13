@@ -2,7 +2,7 @@
 
 **Goal:** `dev:doc-business-model` writes guides (Level 1) and behind-the-scenes accounts (Level 2) that read in the order a person meets the product — who uses it, the few ideas and one picture of how it fits together, then each person's tasks in the order life happens — with Mermaid diagrams, GitHub-style callouts and examples beside the rule they show, screen labels the trace found and never invented ones, no internal ids in the body, and lengths the lint enforces. It works on greenfield and brownfield alike: a new KB is written in this shape, and existing documentation is only ever updated in place into it, never recreated (D8), with a check that no number or quoted message was lost. A script turns any guide into one standalone, consistently styled `.html` file to send to a client.
 
-**Status:** T1, T2 and T3 are built (2026-11-13): the Level 1 and Level 2 shapes, the three golden examples, the reader-first overview, the INDEX line, the in-place update of an old-shape set (reconcile step 2, both documenter agents, the survey's REFRESH plan) and the lint (`old-shape`, `index-line`, `--kept-from`/`fact-kept` beside the T1–T2 rules); the three examples pass with 0 errors and 0 warnings, `--kept-from 92f14828` over them finds no lost fact, and 186 tests pass. Built but unverified: the lint and `fact-kept` on a real KB. Still to build: the renderer (T4, next); the agents already print its command. W1 closes. The agentic-shop pilot (that repo's plan 168, task D1) waits for this plan's W1 and for the user to update the `dev` plugin there; that plan's F1 draws three callout kinds and must add `[!WARNING]`, the fourth kind this plan allows (D6). The rule-based evals (`evals/`) are agent runs and are not part of any gate here: until the user runs the fixture eval (the row under W1 in the prompts table), the new shape is proven only by the golden examples passing the lint.
+**Status:** T1, T2, T3 and T4 are built (2026-11-13): the Level 1 and Level 2 shapes, the three golden examples, the reader-first overview, the INDEX line, the in-place update of an old-shape set (reconcile step 2, both documenter agents, the survey's REFRESH plan) and the lint (`old-shape`, `index-line`, `--kept-from`/`fact-kept` beside the T1–T2 rules); the three examples pass with 0 errors and 0 warnings, `--kept-from 92f14828` over them finds no lost fact, and 186 tests pass. Built but unverified: the lint and `fact-kept` on a real KB, and the pages in anything but headless Chrome. The renderer (`render-html.py`, pins `markdown-it-py==4.3.0`, `mdit-py-plugins==0.7.0`, Mermaid 11.17.2 with integrity) draws the golden example's diagram in headless Chrome (checked 2026-11-13). Still to build: W1, which closes. The agentic-shop pilot (that repo's plan 168, task D1) waits for this plan's W1 and for the user to update the `dev` plugin there; that plan's F1 draws three callout kinds and must add `[!WARNING]`, the fourth kind this plan allows (D6). The rule-based evals (`evals/`) are agent runs and are not part of any gate here: until the user runs the fixture eval (the row under W1 in the prompts table), the new shape is proven only by the golden examples passing the lint.
 
 ## 1. What already exists, and what is missing
 
@@ -281,6 +281,8 @@ Costs: offline, the reader gets a one-line notice in place of the picture.
 
 **D15 (2026-11-13, T3) — `old-shape` also covers the overview, and the INDEX check keys on the guide's link.** (a) §6 defines `old-shape` as `## How it works` and no `## Who uses it`; an old overview has `## Overview` and `## The areas` and never `## How it works`, so under the plan's text it would have drawn a wall of `sections` ERRORs the day the plugin updates, which is what D8 exists to prevent. The lint treats an overview guide with `## The areas` and no `## Who uses it` as old-shape. (b) `index-line` finds a set's line as the one whose link is the guide's path relative to `--dir`, so a set not under `areas/` (a feature folder) is never checked and a set the lint reports as `old-shape` or `set-complete` is skipped. (c) `fact-kept` reads a number as a digit run not preceded by a word character, `.` or `-` (so `AREA-004`, `Q7` and a sha are not facts), skips header lines, list numbers and link targets, and reads a quoted message as the text between `“…”` or `"…"` compared with whitespace collapsed. A fact found at no level of the set is reported once, at its first line in the old file. A `--kept-from` revision git cannot resolve exits 2 rather than printing nothing. Costs: a number written as a word, or a fact stated without a number or quotation, is invisible to `fact-kept`.
 
+**D16 (2026-11-13, T4) — four readings the renderer made.** (a) `--dir` renders the files holding a `**Audience:** shareable` line (anywhere), not "every Level 1 guide by name": a KB's `INDEX.md`, glossary and notes carry no such line and stay out, while an overview qualifies. (b) The `**Levels:**` and `**Audience:**` header lines are dropped from the page (the Levels links would all render as text or point at the page itself), and Audience is still read first to decide the "Internal — not for sharing" line. (c) A link is a guide link when it ends `.md` and is not a Level 2/3 file by name (`.behind-the-scenes.md`, `.technical[.topic].md`); a link to another `.md` that is no guide (an `INDEX.md`) cannot be told apart by name and becomes a dead `.html` link, which beats guessing from the disk because the pages are sent as a set. `https:`, `http:`, `mailto:` and `#` links stay. (d) A page with no diagram loads no script at all, so it makes no request. Alert icons are CSS glyphs, not inline `<svg>`, so the gate's `grep -c "<svg"` counts only drawn diagrams. Costs: (c)'s dead link for a non-guide `.md`; a page whose diagram fails to parse shows Mermaid's own error graphic, not the notice.
+
 ## Answered questions (2026-11-13)
 
 **O1 — Title as a question (Trading212 style)?** No: the title is the area's plain name.
@@ -365,6 +367,7 @@ a scratch KB under `$TMPDIR` holding one old-shape set (copy of `example-area.md
 - Alerts: markdown-it has no GFM-alert rule — transform the blockquote tokens whose first inline starts `[!NOTE]`/`[!TIP]`/`[!IMPORTANT]`/`[!WARNING]`, in a small function with its own tests. An unknown kind renders as a plain blockquote (the lint already refuses it at source).
 - The client's page (§7): the About section reduced to "Last updated <date>", `~~old~~ → new` rendered as `new`, the internal line on a file whose Audience is `internal`, and the one-line notice shown in place of a diagram when the Mermaid script did not load — each with its own test.
 - `BD/SKILL.md`: a short "## Sharing a guide" section — the command, D9, what the reader loses offline.
+- **As built (2026-11-13):** `BD/scripts/render-html.py` (PEP 723, `markdown-it-py==4.3.0`, `mdit-py-plugins==0.7.0` — the newest `uv` resolved today; `anchors_plugin` gives the heading ids) and `BD/scripts/test_render_html.py` (44 tests); Mermaid `11.17.2` (jsdelivr 200) with `integrity="sha384-EOXBFmc3gx5mb+vn0vPvvGqACToJD24hhacX5Yx+8NUUQrHIle/Qi5Bg9o3zKwW2"` computed from that file. Alerts are done on the blockquote's tokens (`apply_alerts`, re-parsing the inline after the marker); a mermaid fence becomes an `html_block` holding `<pre class="mermaid">` and the one-line notice (CSS hides the source until Mermaid sets `data-processed`); nothing is fetched but the Mermaid script, and only on a page with a diagram. Both agent forms work as written (`--out <dir> --dir …`, `--out <dir> <file.md>`; tested). `SKILL.md` gained `## Sharing a guide`. The two pins are written into W1's gate line and its prompt. Divergences: D16. Proof: 44 tests OK; `coverage report` 99% (the one miss is the `__main__` line); `render-html.py --out "$TMPDIR/render" --dir BD/references` wrote `example-area.html` and `system-overview.html`; headless Chrome on `example-area.html` with `--dump-dom` prints `1` for `grep -c "<svg"` while the file on disk holds 0, so the diagram drew (Chrome here, Mermaid 11.17.2). Built but unverified: other mail clients and browsers; a KB-wide `--dir` on a real KB.
 - **Not in T4:** wiring into agentic-shop (plan 168 there renders through `/admin/docs`; its D1 runs this script once for the pilot).
 
 ### W1 — the close-out: catalog, README, rules, evals, and the whole set
@@ -375,7 +378,7 @@ a scratch KB under `$TMPDIR` holding one old-shape set (copy of `example-area.md
 **Budget:** ~100k — CLAUDE.md files 20k, this plan's Status, As-built notes and Decisions 10k, `docs/skills-catalog.md` documenter paragraphs only (grep `be-documenter\|doc-business-model\|business-documentation`) 8k + 3k, `README.md` two command rows 1k, `engineering-practices/rules/feature-docs.md` 3k + 2k, `business-analysis/skills/rules/business-model.md` 3k + 2k, `qa/manual/requirements-breakdown/SKILL.md` (its section references) 3k, `evals/evals.json` + `README.md` 4k + 3k, gate output 15k, fixes 10k, reasoning 13k.
 **Gate (this is the last task, so it runs the whole set once more across the plan, in run order):**
 `python3 -m unittest discover -s BD/scripts -p 'test_doc_lint.py'` ·
-`uv run --with markdown-it-py==<pin> --with mdit-py-plugins==<pin> --with coverage coverage run --branch -m unittest discover -s BD/scripts && uv run --with coverage coverage report -m --include='*doc-lint.py,*render-html.py'` (≥ 80% of the branches the plan wrote) ·
+`uv run --with markdown-it-py==4.3.0 --with mdit-py-plugins==0.7.0 --with coverage coverage run --branch -m unittest discover -s BD/scripts && uv run --with coverage coverage report -m --include='*doc-lint.py,*render-html.py'` (≥ 80% of the branches the plan wrote) ·
 `python3 BD/scripts/doc-lint.py BD/references/example-area.md BD/references/example-behind-the-scenes.md BD/references/example-technical.md` (0 errors, 0 warnings) ·
 `python3 BD/scripts/doc-lint.py --kept-from 92f14828 BD/references/example-area.md BD/references/example-behind-the-scenes.md BD/references/example-technical.md` (no `fact-kept` line) ·
 `uv run BD/scripts/render-html.py --out "$TMPDIR/render" --dir BD/references` and T4's headless-Chrome line ·
@@ -428,57 +431,12 @@ Run them in order, one session each; each block is complete on its own. Every ta
 
 | # | Stack | Agent | Depends on | Runs beside | Budget |
 |---|---|---|---|---|---|
-| T4 | `docs` | `general-purpose` | T3 | — | ~80k |
 | W1 | `docs` | `general-purpose` | T1, T2, T3, T4 | — | ~100k |
 | — | run the fixture eval (`evals/README.md`, eval 1); update the `dev` plugin in agentic-shop; add `[!WARNING]` to its plan 168 F1; run plan 168 | **the user** | W1 | — | — |
 
-T1, T2 and T3 have landed; T4 and W1 are live.
+T1, T2, T3 and T4 have landed; W1 is live.
 
 ---
-
-### T4 — `render-html.py`: a guide as one standalone page (general-purpose, docs)
-
-````
-Depends on: T3
-Agent: general-purpose · Stack: docs
-
-You are working in the SkillsLibrary repo. Task T4 of docs/plans/011-documenter-reader-first-shape.md:
-write the script that turns a guide into one standalone, consistently styled HTML page a client can
-be sent.
-
-Read, in this order:
-1. CLAUDE.md (Comments, KISS, Test code rules).
-2. The plan: §7, D1, D9, D11, task T4, and "Close-out — every task".
-3. backend/_shared/business-documentation/references/example-area.md (whole) — your test input.
-4. backend/_shared/business-documentation/scripts/test_doc_lint.py — the first 30 lines, for how a
-   test imports a hyphenated script.
-
-Build what task T4 lists: `scripts/render-html.py` (PEP 723, `uv run`), `scripts/test_render_html.py`
-(every branch: alerts of each of the four kinds and an unknown kind, a mermaid fence, a guide link, a
-Level 2/3 link, a relative non-guide link, an https link, the About section reduced to its date with
-and without a `Last updated` line, a `~~old~~ → new` mark, an internal file, `--dir` vs named files,
-`--out` missing), and SKILL.md's "## Sharing a guide".
-
-Traps:
-- markdown-it has no GitHub-alert rule; transform the blockquote's tokens, do not regex the HTML.
-- Pin exact versions (markdown-it-py, mdit-py-plugins, Mermaid 11.x on jsdelivr) after checking they
-  resolve, and compute the script tag's `integrity` from the exact file you pinned; then write the two
-  Python pins into W1's gate line in this plan (Close-out step 3).
-- The page must work opened from disk (`file://`): no fetches besides the Mermaid script.
-- Nothing internal reaches the page: no id, sha or model link from `## About this document`, no struck
-  old value. A lone `~~text~~` with no arrow is ordinary strikethrough and stays.
-- When Mermaid does not load, the reader sees the one-line notice, never the diagram's source.
-- The documenter agents (T3) already print two forms of your command: `--out <dir> --dir docs/business-model` (be-documenter) and `--out <dir> docs/features/<NNN>-<slug>.md` (be-feature-documenter). Both must work as written; the second is a named Level 1 file.
-
-Gate: own tests —
-  uv run --with markdown-it-py==<pin> --with mdit-py-plugins==<pin> --with coverage coverage run --branch -m unittest discover -s backend/_shared/business-documentation/scripts -p 'test_render*.py' && uv run --with coverage coverage report -m --include='*render-html.py'   (≥ 80%)
-  uv run backend/_shared/business-documentation/scripts/render-html.py --out "$TMPDIR/render" --dir backend/_shared/business-documentation/references
-  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --virtual-time-budget=15000 --dump-dom "file://$TMPDIR/render/example-area.html" | grep -c "<svg"   → 1 or more: the diagram drew
-  Without Chrome on the machine, write the drawn diagram into `Status:` as unverified; do not claim it.
-
-Commit: `feat(documenters): render-html.py — a guide as one standalone page (011 T4)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### W1 — the close-out: catalog, README, rules, evals, and the whole set (general-purpose, docs)
 
@@ -517,7 +475,7 @@ Traps:
 
 Gate (this is the last task, so it runs the whole set once more across the plan, in run order):
   python3 -m unittest discover -s backend/_shared/business-documentation/scripts -p 'test_doc_lint.py'
-  uv run --with markdown-it-py==<pin> --with mdit-py-plugins==<pin> --with coverage coverage run --branch -m unittest discover -s backend/_shared/business-documentation/scripts && uv run --with coverage coverage report -m --include='*doc-lint.py,*render-html.py'
+  uv run --with markdown-it-py==4.3.0 --with mdit-py-plugins==0.7.0 --with coverage coverage run --branch -m unittest discover -s backend/_shared/business-documentation/scripts && uv run --with coverage coverage report -m --include='*doc-lint.py,*render-html.py'
     (≥ 80% of the branches the plan wrote: files from `git diff --name-only "$(git log --diff-filter=A --format=%h -1 -- docs/plans/011-documenter-reader-first-shape.md)" HEAD`; the `Missing` column lists each unexecuted branch as `from->to`)
   python3 backend/_shared/business-documentation/scripts/doc-lint.py backend/_shared/business-documentation/references/example-area.md backend/_shared/business-documentation/references/example-behind-the-scenes.md backend/_shared/business-documentation/references/example-technical.md   → 0 errors, 0 warnings
   python3 backend/_shared/business-documentation/scripts/doc-lint.py --kept-from 92f14828 backend/_shared/business-documentation/references/example-area.md backend/_shared/business-documentation/references/example-behind-the-scenes.md backend/_shared/business-documentation/references/example-technical.md   → no fact-kept line
