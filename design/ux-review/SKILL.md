@@ -112,5 +112,5 @@ Perceived speed is part of the experience; the budget is [`design/ux-patterns`](
 - [`design/visual-identity`](../visual-identity/SKILL.md) — owns **visual taste**; heuristic #8 (minimalism) is the usability face of its restraint discipline.
 - A stack's `ui-rules` ([Blazor](../../frontend/blazor/skills/ui-rules/SKILL.md) · [React](../../frontend/react/skills/ui-rules/SKILL.md)) — owns the confirmation-by-object-name and empty-state *mechanics* this review defers to.
 - A stack's / qa `accessibility-testing` — runs the **automated** a11y scans; this only flags usability heuristics a scanner can't see.
-- qa `exploratory-charter-writer` — charters an exploratory session to find **defects**; this judges the **experience** of a build that already works.
+- qa `app-exploration` (the `qa-explorer` agent) explores a running build to find **defects**, and `exploratory-charter-writer` charters a human's session; this judges the **experience** of a build that already works.
 - [`design:corpus`](../ui-ux-pro-max/SKILL.md) — the guideline corpus findings are cited against, plus `references/quick-reference.md` and `references/pro-rules.md`.

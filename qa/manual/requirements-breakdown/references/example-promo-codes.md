@@ -1,10 +1,8 @@
 # Golden example — promo codes
 
-The filled input and output for `qa/manual/requirements-breakdown`, moved out of its SKILL.md unchanged. It predates the §4/§6 rebalancing: a new basis puts V-1's schema constraint in the §6 data dictionary and keeps §4 for business validations, and it ends with a §8 Connections section.
+The filled input and output for `qa/manual/requirements-breakdown`. A filled §8 Connections is in `qa/manual/cross-feature-test-design/references/example-cancel-booking.md`; this basis is single-feature, so its §8 says so.
 
-## Example
-
-### Input
+## Input
 
 > **Story**: As a shopper, I want a promo code at checkout so I get a discount.
 > **AC1**: A valid, active promo code reduces the order total by its percentage.
@@ -12,7 +10,7 @@ The filled input and output for `qa/manual/requirements-breakdown`, moved out of
 > **AC3**: Only one promo code per order.
 > Promo codes are 6–10 uppercase alphanumeric characters. (from the API schema)
 
-### Output
+## Output
 
 ```markdown
 # Test Basis — Checkout Promo Codes
@@ -37,30 +35,47 @@ Shoppers enter a promo code at checkout to reduce the order total by a percentag
 | BR-2 | An expired or unknown code leaves the total unchanged | AC2 |
 | BR-3 | At most one promo code per order | AC3 |
 
+### Calculations
+| # | Figure | Formula | Rounding / order | Worked example | Where it shows | Source |
+|---|---|---|---|---|---|---|
+| C-1 | Discount | order total × code percentage ÷ 100 | ❓ rounding not stated; ❓ whether "order total" is before or after tax and delivery | 15 % of $80.00 = $12.00 | basket | AC1 |
+| C-2 | Total to pay | order total − discount | — | $80.00 − $12.00 = $68.00 | basket; the confirmation and the invoice `#assumption` | AC1 |
+
 ## 4. Validations & restrictions
 | # | Field / action | Rule | On violation | Source |
 |---|---|---|---|---|
-| V-1 | code | 6–10 chars, uppercase alphanumeric | (format rejection behavior not specified) | API schema |
-| V-2 | code | must exist and be active | "This code isn't valid", total unchanged | AC2 |
-| V-3 | apply code | only one per order | (behavior on 2nd code not specified) | AC3 |
+| V-1 | code | must exist and be active | "This code isn't valid", total unchanged | AC2 |
+| V-2 | apply code | only one per order | ❓ behavior on a second code not specified | AC3 |
 
-## 5. Workflow & states
-No stateful behavior — applying a code is a single-shot action on the cart.
+## 5. Journeys, workflow & states
+### Journeys
+| # | Actor · goal | Path | Business outcome, and where it shows | Source |
+|---|---|---|---|---|
+| J-1 | Shopper · pay less with a code | basket → apply code → checkout → pay → confirmation | the order is placed at the discounted total, and the confirmation shows the same total `#assumption` | STORY-2210 |
+| J-2 | Shopper · recover from a code that does not work | basket → apply an expired code → message → apply a valid code → checkout | the first attempt changes nothing; the order is placed with the second code's discount | AC2, AC1 |
+
+### States
+No stateful behavior of its own — applying a code is a single-shot action on the cart. ❓ Whether a code stays applied when the cart changes afterwards is not stated.
 
 ## 6. Data dictionary
-| Field | Type | Required | Range / format | Notes |
-|---|---|---|---|---|
-| code | string | yes | 6–10 chars, A–Z 0–9 | case sensitivity vs. lowercase input unspecified |
+| Field | Type | Required | Range / format | On violation | Notes |
+|---|---|---|---|---|---|
+| code | string | yes | 6–10 chars, A–Z 0–9 | ❓ not specified | case sensitivity for lowercase input unspecified |
 
 ## 7. High-level implementation notes
-- Discount is a **percentage** of order total (AC1) — rounding rule not specified.
-- Validation presumably server-side (it checks code existence/active state) — confirm client also blocks malformed input.
+- The existence and active check must be server-side (AC2); confirm whether the client also blocks malformed input.
+
+## 8. Connections
+Not built — single-feature basis.
 
 ## Open questions & flags
-- ❓ V-1: what happens to a code outside 6–10 chars or with lowercase/symbols — inline format error, or treated as "not valid" (V-2)?
-- ❓ BR-3/V-3: applying a *second* code — does it replace the first, or is it rejected with a message?
-- ❓ Rounding: 15% off $9.99 — round how?
-- 🏷️ `#assumption`: codes are case-sensitive (schema says uppercase) until confirmed.
+- ❓ C-1: how is the discount rounded — 15 % of $9.99 is $1.4985?
+- ❓ C-1: is the percentage taken from the total before or after tax and delivery?
+- ❓ V-2: a second code — does it replace the first, or is it refused with a message?
+- ❓ §6: a code outside 6–10 chars, or with lowercase or symbols — a format error, or "This code isn't valid" (V-1)?
+- ❓ §5: does an applied code survive a change to the cart (an item removed, the total dropping)?
+- 🏷️ `#assumption`: codes are case-sensitive (the schema says uppercase) until confirmed.
+- 🏷️ `#assumption`: the discounted total is what the confirmation and the invoice show (J-1, C-2).
 ```
 
-Notice the output is shorter than a full case suite, every row cites a source, and the four things the story never actually answered are flagged instead of guessed.
+Notice three things. The output is shorter than a case suite and every row cites a source. The story's one sentence about "a discount" became two calculations and two journeys, and that is where four of the five open questions came from: none of them is about the format of the field. And nothing the story left undecided was filled in from intuition.

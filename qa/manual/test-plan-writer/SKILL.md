@@ -20,7 +20,7 @@ This skill **owns the document**: its sections, tables, grammar, and quality bar
 
 - Risk register / pyramid sizing / release quality gates **alone** → `qa/manual/test-strategy` (this plan *embeds* its outputs)
 - Step-by-step test cases → `qa/manual/test-case-writer` / the `qa-test-case-designer` agent (the plan's case inventory is scenario-level, deliberately without steps)
-- An exploratory session brief → `qa/manual/exploratory-charter-writer`
+- An exploratory session brief → `qa/manual/exploratory-charter-writer`; exploring the running app → the `qa-explorer` agent
 - Automation code → the stack agents (`qa-api-<stack>`, `qa-ui-<stack>`, …)
 - Measuring an existing process → `qa/manual/quality-metrics`
 
@@ -76,7 +76,8 @@ Test data strategy: <builders/ObjectMother · seeding · anonymized copy — and
 <test-basis doc · case suites · feature files · POMs/clients built · bug reports · Allure/report output · coverage matrix — each with an owner and a path>
 
 ## 9. Case inventory
-| ID | Case (behavior, not steps) | Level | Technique | Priority | Coverage | Executor | Traces to |
+| ID | Case (behavior, not steps) | Layer | Level | Technique | Priority | Coverage | Executor | Traces to |
+<Layer is one of journey · rule · state · data · interaction · temporal · concurrency · field. Journey rows come first.>
 <ID = TP-###. Coverage is exactly one of **existing** (already automated — cite file:line in §6) · **extend** (seam exists, scenario missing) · **new** (seam must be built first). Executor is an exact library agent/skill name.>
 
 ## 10. Entry & exit criteria
@@ -92,6 +93,7 @@ Exit: <numbers, not adjectives — every P1 case executed/passing, no open block
 - **Scope is closed.** Every testable item from the basis appears in exactly one of in / out / deferred. Out-of-scope without a reason is not out of scope — it's forgotten.
 - **The harness is looked up before it is invented.** `detected` rows cite the repo path; `proposed` rows exist only where nothing was detected and name what the stack defaults would choose. Never propose a second harness beside a working detected one.
 - **Reuse before build.** A case is `new` only after §6 shows no seam for it; a plan whose inventory is all-`new` against a repo with existing suites is wrong, not thorough.
+- **The inventory is business first.** Every actor goal in the basis has a journey row, end to end, to the business outcome; every rule and every calculated figure has a row; rows are listed journeys, then rules and calculations, then states and connections, then fields, which are at most a third of the inventory. An inventory of field checks around one happy path plans the wrong work.
 - **Cases are scenario-level.** One row per behavior — title, level, technique, priority, coverage status, executor, trace. **No steps, no test data values**; that is `test-case-writer` / the stack agents' work, and duplicating it here guarantees drift.
 - **Executors are picked, not invented.** Every case row and artifact row names an exact agent/skill (`qa-api-<stack>`, `qa-ui-<stack>`, `qa-test-case-designer`, `qa-security`, …). A name that doesn't resolve to the library is a defect.
 - **Every case traces** — to a basis line, a risk ID, or an `#observed`/`#assumption` tag. An untraceable case is a guess wearing an ID.
@@ -125,4 +127,4 @@ Exit: <numbers, not adjectives — every P1 case executed/passing, no open block
 - Automation of `extend`/`new` rows → `qa-api-<stack>` · `qa-ui-<stack>` · `qa-mobile-<stack>` · `qa-performance-<stack>` · `qa-llm-<stack>` · `qa-bdd-<stack>`
 - Security rows → the `qa-security` agent
 - CI & reporting artifacts → `qa-cicd-<stack>` · `qa-reporting-<stack>`
-- Exploratory rows → `qa/manual/exploratory-charter-writer`
+- Exploratory rows → the `qa-explorer` agent (an agent explores the running build) or `qa/manual/exploratory-charter-writer` (a charter for a human's session)

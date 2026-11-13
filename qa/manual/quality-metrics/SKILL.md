@@ -17,7 +17,7 @@ Names the metrics worth tracking, defines each precisely, and prescribes a dashb
 
 ## When NOT to use
 
-- Writing tests → `qa/<topic>` generators
+- Writing tests → `qa/manual/test-case-writer`, `qa/<stack>/skills/api-test-author/...` / `ui-test-author/...`
 - Strategy / what-to-test → `qa/manual/test-strategy`
 - Building the panels themselves → `observability/dashboards`
 - LogQL / PromQL syntax for the queries → `observability/queries`
@@ -100,6 +100,19 @@ These are useful as **signals**, never as goals:
 **Coverage rule of thumb:** track it, gate it on *changed code*, never set a global percentage target. The library's one number is ≥ 80% branch coverage of the code a change wrote — the dev agents' coverage floor — measured with trivial code left out by name and paired with mutation score, because 80% coverage of trivial getters is worse than 60% coverage of real behavior.
 
 **Flake rule of thumb:** every flaky test gets a root-cause fix or a deletion with explicit retire-reason. "Quarantine indefinitely" is a graveyard, not a strategy.
+
+## Test-design coverage (a suite or a plan)
+
+What a test-case suite or a test plan reports about itself. These measure whether the design reached the business, and they are counted from the basis, never from the code:
+
+| Measure | Definition | Reads as |
+|---|---|---|
+| **Journey coverage** | Actor goals with an end-to-end journey case ÷ actor goals in the basis | Under 100 % = a reason people use the product is untested end to end |
+| **Rule and calculation coverage** | Rules and formula branches with a case asserting the business effect ÷ those in the basis | The share of the business logic a regression would be caught in |
+| **Requirement coverage** | Basis lines (AC, BR, C, V, J) with ≥ 1 case ÷ basis lines | Gaps are listed with a reason, never left blank |
+| **Technique coverage** | Coverage items exercised ÷ items the technique defines ("decision table 5/5", "BVA 3-value") | The stopping criterion per technique |
+| **Suite balance** | Cases per layer; field validation as a share of all cases | Field share over a third = the suite tests the form, not the business |
+| **P1 automated** | P1 cases with an automated test ÷ P1 cases | The regression floor that runs without a person |
 
 ## Vanity / harmful metrics (avoid)
 

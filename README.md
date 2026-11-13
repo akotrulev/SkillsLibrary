@@ -82,7 +82,7 @@ Skills and commands are `/<plugin>:<name>`. A bare `/<name>` works while only on
 
 **One self-contained plugin per language** — `qa-java`, `qa-dotnet`, `qa-typescript`. Each is a complete QA toolkit for its stack: it bundles every discipline (API / UI / mobile / performance / LLM authoring and review, BDD living documentation, deep verification, contracts, chaos, feature flags) **plus** the shared, cross-cutting capabilities that used to be separate peer plugins:
 
-- **Manual QA** — the language-agnostic `qa/manual` process skills and the `qa-test-case-designer`, `qa-test-planner` and `qa-feature-spec-writer` agents (test-basis analysis, ISTQB design techniques, cross-feature test design, test-case / test-plan / bug-report / charter writing).
+- **Manual QA** — the language-agnostic `qa/manual` process skills and the `qa-test-case-designer`, `qa-test-planner`, `qa-feature-spec-writer` and `qa-explorer` agents (test-basis analysis, business-first test design — end-to-end journeys, rules and calculations before field validation — cross-feature test design, hands-on exploration of a running web or mobile app, test-case / test-plan / bug-report / charter writing).
 - **Test audit** — `test-audit`, a read-only sweep that ranks tests by upkeep against protection and saves findings to `docs/audits/`.
 - **Security** — the cross-stack, OWASP-mapped `qa/_shared` scanner gates (ZAP, SAST, secrets, container/IaC, API fuzzing, Nuclei, TLS), the agent-driven `source-audit` (Cloudflare's vendored `security-audit` workflow), the stack-native security skills (BOLA/IDOR/BFLA access-control matrix, ZAP baseline, SCA), and the `qa-security` orchestrator agent.
 - **CI/CD** — the stack's `ci-pipelines` skill (GitHub Actions / Azure Pipelines / GitLab CI), the language-agnostic `ci-conventions`, and the `qa-cicd-<stack>` agent.
@@ -125,7 +125,7 @@ Three skills are **unregistered and loaded by path only** — they never appear 
 
 **Every skill is already slash-invocable as `/<plugin>:<name>`** — `/design:tokens`, `/business-analysis:stories`, `/qa-<stack>:bug-report-writer`, `/dev:audit-feature` — and the commands below are the agent entry points. Prefer the agent for anything that touches code: an agent's first act is version detection (TFM / React major / engine version / Node major) plus reading existing files for conventions, and a skill invoked directly skips all of it — the exact way a .NET 8 repo ends up with a .NET 10 recipe.
 
-**Naming scheme.** A plugin's front-door command is the plugin's name; every read-only conformance audit is `:audit`; every other command is a short role or topic. 65 command files, 73 registrations.
+**Naming scheme.** A plugin's front-door command is the plugin's name; every read-only conformance audit is `:audit`; every other command is a short role or topic. 68 command files, 78 registrations.
 
 **`qa-java` · `qa-dotnet` · `qa-typescript`** — 12 commands each (`qa-dotnet` has 13 — see `:audit`); substitute your stack for `<stack>`:
 
@@ -140,12 +140,13 @@ Three skills are **unregistered and loaded by path only** — they never appear 
 | `/qa-<stack>:cicd` | pipeline to build or harden | shard matrix, gates, OIDC secrets, result publishing |
 | `/qa-<stack>:reporting` | what to wire, tag, or quarantine | wire Allure, tag tests by finding, detect and quarantine flakes |
 | `/qa-<stack>:test-cases` | doc, story, contract, or URL | documentation (or a live page) → a systematically-derived test-case suite |
+| `/qa-<stack>:explore` | URL or app, the environment and account, any docs that say how it should behave | a running web or mobile app → an exploration report: broken links, layout, misleading copy, wrong calculations, state bugs, each reproduced with evidence (look-only on production) |
 | `/qa-<stack>:test-plan` | feature, doc, URL, or repo area | feature (documented or not) → a saved test plan: scope, harness looked up from the repo, artifacts, gap-analyzed case inventory |
 | `/qa-<stack>:feature-spec` | feature sentence + entry points, or an inventory row | one trace of the code → a feature document and an e2e test-case suite (surface, seam and automating agent per case) |
 | `/qa-<stack>:security` | app, API, or layer | OWASP-mapped SAST, secrets, SCA, access-control, DAST, fuzzing, container/IaC, TLS gates |
 | `/qa-dotnet:audit` *(qa-dotnet only so far)* | *(none — or a path/section limiter)* | read-only sweep of the **test suite** against the `qa-dotnet` conventions → findings report in `docs/audits/` |
 
-The manual-QA writers (`qa-<stack>:test-case-writer`, `qa-<stack>:test-plan-writer`, `qa-<stack>:requirements-breakdown`, `qa-<stack>:bug-report-writer`, `qa-<stack>:exploratory-charter-writer`, `qa-<stack>:test-strategy`) are skills, invoked by name.
+The manual-QA writers (`qa-<stack>:test-case-writer`, `qa-<stack>:test-plan-writer`, `qa-<stack>:requirements-breakdown`, `qa-<stack>:bug-report-writer`, `qa-<stack>:exploratory-charter-writer`, `qa-<stack>:app-exploration`, `qa-<stack>:test-strategy`) are skills, invoked by name.
 
 **`fe-blazor`** — 1 command · **`fe-react`** — 2:
 
@@ -358,7 +359,8 @@ The `qa/` section is the most fully built-out part of the library. Most code-pro
 
 | Skill | What it does |
 |-------|--------------|
-| `test-case-writer` | Write structured test cases |
+| `test-case-writer` | Write business-first test-case suites: end-to-end journeys, rules and calculations with worked numbers, field validation last |
+| `app-exploration` | Explore a live web or mobile app for defects: links, layout, copy, calculations, state |
 | `test-plan-writer` | Assemble a feature/release test plan (scope, harness, artifacts, case inventory) |
 | `bug-report-writer` | Write actionable bug reports |
 | `exploratory-charter-writer` | Write exploratory testing charters |

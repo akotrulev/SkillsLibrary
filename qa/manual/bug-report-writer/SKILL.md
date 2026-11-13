@@ -12,6 +12,7 @@ Turns a rough defect observation into a high-signal bug report that a developer 
 - The user describes a bug they observed and wants it written up formally
 - The user has a draft bug report and wants it sharpened
 - The user wants the same bug written for different audiences (engineering vs product)
+- An exploration finding of Major or worse needs its full report (`qa/manual/app-exploration`)
 
 ## When NOT to use
 
@@ -46,6 +47,9 @@ If the user has logs or HAR files, ask to see the relevant slice — don't fabri
    - A typo in the footer can be high priority (CEO sees it) but low severity. Don't conflate.
 4. Add log excerpts as code blocks with the relevant lines only — not the whole file.
 5. Note any reproduction steps you couldn't verify yourself and label them as such.
+6. **A wrong figure is reported with its arithmetic**: the inputs as shown, the working, the expected value and the value shown. "The total is wrong" cannot be acted on; "3 × €19.99 + €5.00 = €64.97, the basket shows €64.57" can.
+7. **The expected result names its oracle**: the AC or spec line, the product's own claim, the same fact shown elsewhere, or a convention. With no oracle it is a question for the owner, not a bug.
+8. **Where it goes**: the team's tracker when one is connected and the user asks for it; otherwise Markdown, inside the exploration report that found it (`## Bug reports`) or as `docs/bugs/BUG-<NNN>-<slug>.md`.
 
 ## Output format
 
@@ -112,7 +116,8 @@ A bug report passes if:
 
 - [ ] Title reads as `<action> <object> <unexpected outcome>` — e.g. "Submitting order with empty cart returns 500 instead of 400"
 - [ ] A developer with zero context can reproduce it from the steps
-- [ ] Expected result cites a source (AC, spec, prior behavior, convention)
+- [ ] Expected result cites a source (AC, spec, the product's own claim, prior behavior, convention)
+- [ ] A wrong figure shows the inputs, the working, the expected and the actual value
 - [ ] Severity and priority are set separately and justified
 - [ ] At least one piece of evidence is attached (or marked "evidence unavailable, reason: X")
 - [ ] No "I think" / "it seems" in the Actual Result section — those go in Notes

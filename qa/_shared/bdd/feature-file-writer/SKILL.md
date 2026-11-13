@@ -42,12 +42,14 @@ Confirm at most 2–3; infer the rest from the suite.
 | **Setup** block (shared preconditions, e.g. login) | **`Background:`** — only the steps *every* scenario in the feature needs |
 | Per-case **Preconditions (delta from Setup)** | Leading `Given` steps in that scenario |
 | Steps (numbered, atomic) | `When` (the action under test) + supporting `Given`s |
+| A **journey** case (steps written `action → checkpoint`) | One `Scenario` tagged `@journey`: each step is a `When`, its checkpoint the `Then` that follows, and the Expected Result is the closing `Then` / `And` set. This is the one place repeated `When` / `Then` pairs are right; never split a journey into scenarios that depend on each other |
+| `### Worked numbers` | Not Gherkin: its figures are already the `Then` values. A parameterized calculation case becomes a `Scenario Outline` whose `Examples` columns are the inputs and the expected figure |
 | Expected Result | `Then` (+ `And` for additional observable outcomes) |
 | Test Data | Inline step parameters, or an `Examples:` table when ≥2 rows share one behavior |
 | Priority (P1/P2/P3) | Tag `@p1` / `@p2` / `@p3`; every `@p1` also gets `@regression` — P1 is the suite's regression floor |
 | Type (positive/negative) | Tag `@negative` (positive needs none); add `@boundary` when the Technique column says BVA, `@edge` when it says error guessing |
 | Technique (EP/BVA/…) | Drives Outline-vs-scenarios choice (see #4) and the `@boundary`/`@edge` tags above; not a tag itself |
-| Source (`AC2` / `BR-1` / `TP-012` / `#observed` / `#assumption`) | Tag `@AC-<n>` / `@BR-<n>` / `@TP-<n>` on each scenario so traceability survives into living docs; `#assumption` cases get `@assumption` and stay out of `@regression` until confirmed |
+| Source (`AC2` / `BR-1` / `J-1` / `C-2` / `TP-012` / `#observed` / `#assumption`) | Tag `@AC-<n>` / `@BR-<n>` / `@J-<n>` / `@C-<n>` / `@TP-<n>` on each scenario so traceability survives into living docs; `#assumption` cases get `@assumption` and stay out of `@regression` until confirmed |
 | Cleanup block | **Not** Gherkin — handed to `gherkin-step-code` as `@AfterScenario`/`After` hook notes (record it in the handoff, not the `.feature`) |
 
 ### 2. Declarative over imperative (the central rule)
@@ -80,7 +82,7 @@ Maintain one **step catalog** across the whole suite. Before writing a new step,
 
 ### 6. Tags
 
-`@p1/@p2/@p3` (priority) · `@smoke`/`@regression` (tier — `@regression` = every P1) · `@negative`/`@boundary`/`@edge` (type) · `@AC-<n>`/`@BR-<n>`/`@TP-<n>`/`@assumption` (traceability, from the Source column) · `@web`/`@mobile` (platform, only if the suite spans both). Feature-level tags are inherited — put `@regression` at the top and only override per scenario.
+`@p1/@p2/@p3` (priority) · `@smoke`/`@regression` (tier — `@regression` = every P1) · `@negative`/`@boundary`/`@edge` (type) · `@journey` (an end-to-end journey case) · `@AC-<n>`/`@BR-<n>`/`@J-<n>`/`@C-<n>`/`@TP-<n>`/`@assumption` (traceability, from the Source column) · `@web`/`@mobile` (platform, only if the suite spans both). Feature-level tags are inherited — put `@regression` at the top and only override per scenario.
 
 ## Output format
 

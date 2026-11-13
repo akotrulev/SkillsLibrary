@@ -18,6 +18,7 @@ Produces a Session-Based Test Management (SBTM) charter: a short, mission-shaped
 
 ## When NOT to use
 
+- An agent should explore the running app itself → `qa/manual/app-exploration` (the `qa-explorer` agent): it owns the run mode, the safe-action floor, the checks and the report; this skill gives it the mission form
 - Step-by-step formal test cases → `qa/manual/test-case-writer`
 - Filing a defect → `qa/manual/bug-report-writer`
 - The whole release plan → `qa/manual/test-strategy`
@@ -71,6 +72,8 @@ Tours are *guided walks* of the product through a theme:
 | **History tour** | Audit trails, event logs, "what changed when" |
 | **Variability tour** | Same flow with different roles, tenants, data shapes |
 | **Performance tour** | Same flow at scale (10x data, slow network) |
+| **Claims tour** | Every promise the product makes about itself (a banner, a tooltip, help text), tested |
+| **Interruption tour** | One flow broken at every step: back, reload, a second tab, the app in the background |
 
 Pick one or two tours per session — more is unfocused.
 
@@ -162,9 +165,10 @@ Every Bug row links to a report filed via `qa/manual/bug-report-writer` — deta
 
 The session report is the **deliverable**. A charter without a report is half a charter.
 
-## Execution tooling & evidence (web sessions)
+## Who runs the session
 
-When the session target is a web page, drive and evidence it with the **Playwright CLI** via `npx` — `npx playwright open <url>` (headed exploration), `npx playwright codegen <url>` (record an interaction that reproduces a finding), `npx playwright screenshot <url> <file.png>` (evidence). Throwaway probe scripts go in `specs/`. Prefer the CLI over the Playwright MCP server for exploration — same observations, far cheaper; the MCP server is for `page-objects-from-url`-style extraction workflows. During the session, keep the **console and network tabs in scope**: JS errors, failed/slow requests, and unexpected redirects are findings even when the UI looks fine.
+- **A human tester** runs it in their own browser or device, with the **console and network tabs in scope**: script errors, failed or slow requests and unexpected redirects are findings even when the screen looks fine. Evidence (screenshots, a recording, the failed request) is captured per `qa/<stack>/skills/evidence-capture` and attached to the filed bugs.
+- **An agent** runs it per `qa/manual/app-exploration`: the charter above becomes the first section of its exploration report, and that skill's run mode (look-only on production), safe-action floor, seven check classes and report shape take the place of the session report.
 
 ## Time-boxes
 
@@ -250,6 +254,7 @@ Pick the two or three that fit the area. A charter that says "look for bugs" pro
 
 ## Handoffs
 
+- An agent runs the session on a live app → `qa/manual/app-exploration` (the `qa-explorer` agent)
 - Bugs found during the session → `qa/manual/bug-report-writer`
 - Distill docs into a test-basis document when they exist → `qa/manual/requirements-breakdown`
 - Strategy that includes exploratory effort → `qa/manual/test-strategy`

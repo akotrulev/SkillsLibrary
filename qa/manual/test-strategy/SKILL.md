@@ -89,7 +89,7 @@ Concrete, automated, fail-the-pipeline criteria. **Numbers, not adjectives.**
 | Gate | Threshold | Stage |
 |---|---|---|
 | Unit + integration tests pass | 100% | PR / CI |
-| Coverage on changed lines | ≥ 80% line, ≥ 60% branch | PR |
+| Branch coverage of the changed code | ≥ 80% | PR |
 | API contract tests pass | 100% | PR |
 | E2E happy path | green | Pre-merge to `main` |
 | Performance smoke (k6 / NBomber) | p95 latency ≤ baseline + 10%, error rate ≤ 0.5% | Pre-deploy to prod |
@@ -97,7 +97,7 @@ Concrete, automated, fail-the-pipeline criteria. **Numbers, not adjectives.**
 | Security: SAST | 0 new high findings | PR |
 | Accessibility | 0 new axe critical findings on touched pages | PR |
 
-**Coverage on changed lines** beats global coverage as a gate — legacy code doesn't suddenly become safer because you added tests elsewhere.
+**Coverage of the changed code** beats global coverage as a gate — legacy code doesn't suddenly become safer because you added tests elsewhere.
 
 ### Step 5 — Exit criteria for the release
 
@@ -105,7 +105,7 @@ A release is "done" when **all** of:
 
 - Every Gate above is green
 - All top-5 risks have at least one ✅ in the coverage matrix
-- Exploratory test charters for the new feature have been executed (`qa/manual/exploratory-charter-writer`)
+- The exploration of the new feature has been run and its findings triaged (the `qa-explorer` agent on the running build, or a human's chartered session per `qa/manual/exploratory-charter-writer`)
 - The bug backlog has no open `blocker` or `major` linked to the release scope
 - The deployment runbook is reviewed; rollback path tested at least in staging
 
@@ -139,7 +139,7 @@ Avoid testing the *same* thing at three layers — that's not safety, that's tax
 - Unit: <areas, why, ~test count>
 - Integration: <areas>
 - Contract: <consumers, tooling>
-- E2E: <happy paths only>
+- E2E: <the journeys that carry money or an irreversible outcome: main path, plus the exceptions the business must survive>
 - Exploratory: <charters, time-boxed>
 - Performance: <scope or "N/A this release">
 - Security: <scope>
@@ -170,6 +170,7 @@ Avoid testing the *same* thing at three layers — that's not safety, that's tax
 - **Risk-first**. Coverage targets follow from risk, not the other way around.
 - Quality gates are quantitative — "good test coverage" is not a gate
 - Push tests down the pyramid when behavior is exercisable lower — every E2E test on a CI run is a tax someone pays for years
+- **Designing a journey is not the same as automating it end to end.** The test-case suite writes every journey and every business rule in full (`qa/manual/test-case-writer`); the strategy then decides, per case, the lowest level that can prove it, and which journeys run end to end in CI
 - Out-of-scope is part of the strategy. Document what's not being tested and why.
 - Strategy is short. Aim for a 2-page document, not a 12-page one no one reads.
 - Re-run the strategy after each release retro — what missed, what was over-tested, what shifted in risk profile
@@ -202,7 +203,7 @@ Avoid testing the *same* thing at three layers — that's not safety, that's tax
 - UI test generation → `qa/<stack>/skills/ui-test-author/<tool>`
 - Test data → `qa/<stack>/skills/test-data-builder`
 - Contract testing → `qa/<stack>/skills/api-contract-testing`
-- Exploratory charters → `qa/manual/exploratory-charter-writer`
+- Exploration of a running build → the `qa-explorer` agent; a charter for a human's session → `qa/manual/exploratory-charter-writer`
 - Bug intake → `qa/manual/bug-report-writer`
 - Allure reporting → `qa/reporting/<stack>/skills/test-reports`
 - Metrics & dashboards → `qa/manual/quality-metrics`

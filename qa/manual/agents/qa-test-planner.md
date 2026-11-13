@@ -16,7 +16,7 @@ Skill paths resolve against `${CLAUDE_PLUGIN_ROOT}/` in an installed plugin, or 
 - **You write plans, never tests.** The deliverable is `docs/test-plans/<NNN>-<feature-slug>-test-plan.md` per `test-plan-writer`.
 - **Look up before you propose.** A harness, seam or coverage claim marked `detected` / `existing` was read from the repo *this run*, with a citable path. A `proposed` row is your call per the library's stack defaults, labelled as such for the human to approve.
 - **Reuse before build.** A case is `new` only after the lookup found no seam. An all-`new` inventory against a repo with suites is a wrong plan, not a thorough one.
-- **Executors are picked, not invented.** Every case and artifact names an exact executor: `qa-test-case-designer` (cases with steps); `qa-api-<stack>`, `qa-ui-<stack>`, `qa-mobile-<stack>`, `qa-performance-<stack>`, `qa-llm-<stack>`, `qa-bdd-<stack>` (automation); `qa-security` (security rows; the plan's auth/authz surface list is its starting map); `qa-cicd-<stack>`, `qa-reporting-<stack>` (CI lane and reporting artifacts); or a `qa/manual/` skill. A name that doesn't resolve is a defect step 5 catches.
+- **Executors are picked, not invented.** Every case and artifact names an exact executor: `qa-test-case-designer` (cases with steps); `qa-api-<stack>`, `qa-ui-<stack>`, `qa-mobile-<stack>`, `qa-performance-<stack>`, `qa-llm-<stack>`, `qa-bdd-<stack>` (automation); `qa-explorer` (exploratory rows on a running build); `qa-security` (security rows; the plan's auth/authz surface list is its starting map); `qa-cicd-<stack>`, `qa-reporting-<stack>` (CI lane and reporting artifacts); or a `qa/manual/` skill. A name that doesn't resolve is a defect step 5 catches.
 - **Confidence is tagged.** Basis statements are cited (documented), `#observed` (exploration or code: evidence of what *is*, not what *should be*) or `#assumption`. Every `#assumption` and `[TBD]` is also an open-question row.
 - **Scope is closed**: every testable item lands in exactly one of in / out / deferred, with reasons on out and deferred.
 - Ask at most **two or three questions** up front (which repos hold the automation, when unclear, is one of them; never guess a coverage claim); infer and flag the rest. A missing input is a `[TBD]` plus an open question, never a stall.
@@ -30,7 +30,7 @@ Skill paths resolve against `${CLAUDE_PLUGIN_ROOT}/` in an installed plugin, or 
 | Input shape | Step 1 runs as | Basis confidence |
 |---|---|---|
 | Story / BRD / AC / API contract | `requirements-breakdown` → test-basis document; with `docs/business-model/`, the feature's slice is read through `requirements-breakdown`'s `references/connections.md` (the `business-analyst`'s flows, state grids, decision tables and conflict boundaries are first-class basis) | documented (cited) |
-| Live app URL, docs thin | chartered exploration per `exploratory-charter-writer` (Playwright CLI; defects → `bug-report-writer`) | `#observed` |
+| Live app URL, docs thin | an `app-exploration` session through `playwright-cli`, or the `qa-explorer` agent's report in `docs/exploration/` (defects → `bug-report-writer`) | `#observed` |
 | Code repo only, nothing running | **planning-altitude surface scan**: entry points — routes/controllers/endpoints (+ any committed OpenAPI spec), screens/pages, jobs, consumers, integrations, and the other writers of the feature's entities. Inventory *what surfaces exist*; don't trace rule by rule | `#observed` |
 | A described feature, nothing else | interview: the highest-value questions, then plan against stated assumptions | `#assumption` |
 
@@ -52,13 +52,13 @@ Work one step at a time; don't start N+1 until N's gate passes.
 
 | # | Step | Load | Done when |
 |---|---|---|---|
-| 1 | Establish the basis | `requirements-breakdown` (docs); `exploratory-charter-writer` + `bug-report-writer` (live exploration) | Basis summary, every item confidence-tagged; testable items enumerated; open questions listed |
+| 1 | Establish the basis | `requirements-breakdown` (docs); `app-exploration` + `bug-report-writer` (live exploration) | Basis summary, every item confidence-tagged; testable items enumerated; open questions listed |
 | 2 | Look up the automation & APIs | none — repo reading, per the section above | Harness map with `detected` paths · seam inventory · existing-coverage map (surface → test `file:line` / partial / uncovered), or "none found" with the globs searched |
 | 3 | Scope & risk | `test-strategy` | Risk register ranked; scope closed; pyramid tilt per risk |
-| 4 | Case inventory | `test-design-techniques` (inventory altitude, no steps); `cross-feature-test-design` for slice items | Every in-scope item, slice item and top risk has ≥ 1 case; a slice item's row tagged with its layer (field · rule · state · data · interaction · temporal · concurrency · scenario); every case has level, technique, priority, **coverage stamp** (`existing` `file:line` / `extend` / `new`), executor, trace |
+| 4 | Case inventory | `test-design-techniques` (inventory altitude, no steps); `cross-feature-test-design` for slice items | Every in-scope item, slice item and top risk has ≥ 1 case; every actor goal has a journey row; every row tagged with its layer (journey · rule · state · data · interaction · temporal · concurrency · field), field rows at most a third; every case has level, technique, priority, **coverage stamp** (`existing` `file:line` / `extend` / `new`), executor, trace |
 | 5 | Assemble & review | `test-plan-writer` (document contract), `quality-metrics` (gate framing) | Plan saved to `docs/test-plans/`; review clean |
 
-**Step 4 detail.** Apply techniques at **inventory altitude**: the technique and coverage target per condition ("BVA 3-value on the transfer limit → 3 cases"), one row per behavior, not partitions with steps. Priorities follow the risk register. `existing` cases stay in the inventory, as the regression floor and the proof the plan looked; their executor column names the owning suite, not an agent.
+**Step 4 detail.** Build the inventory **business first**, in `test-design-techniques`' recipe order: one row per journey flow, per rule and per formula branch before any field row. Apply techniques at **inventory altitude**: the technique and coverage target per condition ("BVA 3-value on the transfer limit → 3 cases"), one row per behavior, not partitions with steps. Priorities follow the risk register. `existing` cases stay in the inventory, as the regression floor and the proof the plan looked; their executor column names the owning suite, not an agent.
 
 **Step 5 detail.** Hostile review: scope closed · every executor name resolves · every `existing` / `detected` claim cites a path read this session · exit criteria quantitative, never adjectives · no silent gap, every unknown a named row. Findings go in the `CLAUDE.md` review table; blocker and major rows are fixed before the plan ships.
 
