@@ -1,7 +1,7 @@
 ---
 name: rules
-description: Use when installing or updating the be-rust coding standards as path-scoped rules in .claude/rules/be-rust/. Triggers "install the Rust rules". Not for reviewing code (conventions-review).
-disable-model-invocation: true
+description: Use when installing or updating the be-rust coding standards as path-scoped rules in .claude/rules/be-rust/. Triggers "install the Rust rules", "set up this project". Not for reviewing code (conventions-review).
+argument-hint: "[replace | keep | beside]"
 ---
 
 # Install the be-rust rules
@@ -19,6 +19,12 @@ Plugins cannot ship Claude Code rules, so this skill copies them into the projec
 
 The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/be-rust/`.
 
+## Run by a person or by a model
+
+A person types `/be-rust:rules`. A model runs this skill itself, as `be-rust:rules`, when it is asked to set up a project or to install or update the rules, and when it finds this plugin enabled in a project that has no `.claude/rules/be-rust/`. One argument answers the differing-file question below for every file in advance: `replace`, `keep` or `beside`.
+
+Where a step needs the user's answer or agreement and nobody is there to give it (a queued plan task, a subagent, a headless run) and no argument settles it, take the choice that changes nothing of theirs: a differing file gets the plugin's copy beside it as `<name>.plugin`, and a path or any other change to an installed copy is not made. List each one under `Waiting for the user:` in the report. Never guess the answer.
+
 ## Procedure
 
 1. **Find the project root**: `git rev-parse --show-toplevel`, or the working directory when it is not a git repo.
@@ -26,7 +32,7 @@ The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/
 3. **Copy each file** that is missing from the target: `mkdir -p <root>/.claude/rules/be-rust` and `cp` it byte for byte.
 4. **For each file already present**, `cmp` it with the source.
    - Identical: up to date.
-   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer.
+   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer or a `replace` argument.
 5. **Fit the paths to this project.**
    - **Persistence.** Find where the queries live: `git grep -l -e 'sqlx::query' -e 'query!(' -e 'query_as!(' -e 'QueryBuilder' -e 'diesel::' -e 'sea_orm::' -- '*.rs'`, and the migration folders: `git ls-files '*.sql' | xargs -n1 dirname | sort -u`. If a path either command lists matches none of the `rust-persistence.md` globs, propose the globs that would cover it (for example `"crates/orders/src/infra/**/*.rs"` or `"**/adapters/postgres/**"`) and add them to the installed copy with the user's agreement.
    - **Tests.** List the sibling test files: `git grep -l '#\[cfg(test)\]' -- '*.rs'` and look for `mod tests;` declarations that point at a separate file. Propose globs for any such file the `rust-tests.md` globs miss. Inline test modules stay with the pointer in `rust.md`; say so.
@@ -43,6 +49,7 @@ Persistence paths: default | widened with <globs>
 Test paths: default | widened with <globs>; inline #[cfg(test)] modules: <count> (covered by the pointer in rust.md)
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md / [lints]: none | <one line each>
+Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 
 Then tell the user to commit the folder, and that a rule shows in `/memory` once the session has read a matching file.

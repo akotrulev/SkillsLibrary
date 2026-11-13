@@ -1,7 +1,7 @@
 ---
 name: rules
-description: Use when installing or updating the data standards for SQL and migration files as path-scoped rules in .claude/rules/data/. Triggers "install the data rules". Not for schema design (schema-design).
-disable-model-invocation: true
+description: Use when installing or updating the data standards for SQL and migration files as path-scoped rules in .claude/rules/data/. Triggers "install the data rules", "set up this project". Not for schema design (schema-design).
+argument-hint: "[replace | keep | beside]"
 ---
 
 # Install the data rules
@@ -20,6 +20,12 @@ MongoDB, Redis, DynamoDB, Cosmos DB and Elasticsearch have no rule file: their s
 
 The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/data/`.
 
+## Run by a person or by a model
+
+A person types `/data:rules`. A model runs this skill itself, as `data:rules`, when it is asked to set up a project or to install or update the rules, and when it finds this plugin enabled in a project that has no `.claude/rules/data/`. One argument answers the differing-file question below for every file in advance: `replace`, `keep` or `beside`.
+
+Where a step needs the user's answer or agreement and nobody is there to give it (a queued plan task, a subagent, a headless run) and no argument settles it, take the choice that changes nothing of theirs: a differing file gets the plugin's copy beside it as `<name>.plugin`, and a path or any other change to an installed copy is not made. List each one under `Waiting for the user:` in the report. Never guess the answer.
+
 ## Procedure
 
 1. **Find the project root**: `git rev-parse --show-toplevel`, or the working directory when it is not a git repo.
@@ -34,7 +40,7 @@ The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/
 5. **Copy each file** that is missing from the target: `data.md`, `data-migrations.md`, and the engine files step 3 found. `mkdir -p <root>/.claude/rules/data` and `cp` byte for byte.
 6. **For each file already present**, `cmp` it with the source.
    - Identical: up to date.
-   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer.
+   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer or a `replace` argument.
    - An engine file installed earlier for an engine step 3 no longer finds: report it, do not delete it.
 7. **Fit the paths to this project**, with the user's agreement, in the installed copies:
    - A migration location from step 4 that no default glob matches (a Mongock package, DbUp `Scripts/`, a custom Flyway location): add its glob to `data.md`, `data-migrations.md` and the engine file.
@@ -53,6 +59,7 @@ Engines: <SQL engines found> · no rule file: <NoSQL engines found, or none>
 Migration tool: <tool at path>   Paths: default | widened with <globs> | narrowed to <globs>
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md or backend rules: none | <one line each>
+Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 
 Then tell the user to commit the folder, and that a rule shows in `/memory` once the session has read a matching file.

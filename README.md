@@ -59,6 +59,8 @@ Install at user scope, keep every `skills-library` plugin `false` in `~/.claude/
 
 A plugin's coding and document standards are **Claude Code rules**: files with `paths:` frontmatter that load on their own once a session (or a subagent) reads or edits a matching file, so a session pays only for the standards its files need. Plugins cannot ship rules, so each plugin that has them carries an install command that copies them into `.claude/rules/<plugin>/`. Run it once per enabled plugin and commit the folder; re-run it after a plugin update to compare (it never overwrites a copy the team edited without asking).
 
+A model can run them too: asked to "set up this project", it reads `enabledPlugins` in `.claude/settings.json` and runs `<plugin>:rules` for each enabled plugin in the table. One argument answers the edited-copy question in advance (`replace`, `keep`, or `beside` to write the plugin's copy as `<name>.plugin`); with no argument and nobody to ask, it takes `beside`, changes no paths and reports what is waiting for you.
+
 | Command | Loads when a session touches |
 |---|---|
 | `/be-dotnet:rules` · `/be-java:rules` · `/be-node:rules` · `/be-python:rules` · `/be-rust:rules` | the stack's source, persistence, test and config files |
@@ -139,9 +141,9 @@ Three skills are **unregistered and loaded by path only** — they never appear 
 | `/qa-<stack>:bdd` | test-case suite or features | test cases → feature files → step definitions bound to page objects |
 | `/qa-<stack>:cicd` | pipeline to build or harden | shard matrix, gates, OIDC secrets, result publishing |
 | `/qa-<stack>:reporting` | what to wire, tag, or quarantine | wire Allure, tag tests by finding, detect and quarantine flakes |
-| `/qa-<stack>:test-cases` | doc, story, contract, or URL | documentation (or a live page) → a systematically-derived test-case suite |
+| `/qa-<stack>:test-cases` | story (`US<n>`) or test plan, doc, contract, or URL | a story (or other documentation, or a live page) → a systematically-derived test-case suite, one per story |
 | `/qa-<stack>:explore` | URL or app, the environment and account, any docs that say how it should behave | a running web or mobile app → an exploration report: broken links, layout, misleading copy, wrong calculations, state bugs, each reproduced with evidence (look-only on production) |
-| `/qa-<stack>:test-plan` | feature, doc, URL, or repo area | feature (documented or not) → a saved test plan: scope, harness looked up from the repo, artifacts, gap-analyzed case inventory |
+| `/qa-<stack>:test-plan` | initiative folder or epic, feature, doc, URL, or repo area | an epic and its stories (or a feature, documented or not) → a saved test plan: versions under test, scope, harness looked up from the repo, artifacts, gap-analyzed scenarios, Definition of Ready and Done |
 | `/qa-<stack>:feature-spec` | feature sentence + entry points, or an inventory row | one trace of the code → a feature document and an e2e test-case suite (surface, seam and automating agent per case) |
 | `/qa-<stack>:security` | app, API, or layer | OWASP-mapped SAST, secrets, SCA, access-control, DAST, fuzzing, container/IaC, TLS gates |
 | `/qa-dotnet:audit` *(qa-dotnet only so far)* | *(none — or a path/section limiter)* | read-only sweep of the **test suite** against the `qa-dotnet` conventions → findings report in `docs/audits/` |
@@ -361,12 +363,36 @@ The `qa/` section is the most fully built-out part of the library. Most code-pro
 |-------|--------------|
 | `test-case-writer` | Write business-first test-case suites: end-to-end journeys, rules and calculations with worked numbers, field validation last |
 | `app-exploration` | Explore a live web or mobile app for defects: links, layout, copy, calculations, state |
-| `test-plan-writer` | Assemble a feature/release test plan (scope, harness, artifacts, case inventory) |
+| `test-plan-writer` | Assemble an epic/feature/release test plan (versions, scope, harness, artifacts, scenarios, Definition of Ready and Done) |
 | `bug-report-writer` | Write actionable bug reports |
 | `exploratory-charter-writer` | Write exploratory testing charters |
 | `_shared/test-strategy` | Test strategy guidance |
 | `_shared/quality-metrics` | Quality metrics guidance |
 | `qa-<stack>:python-web-testing` | UI automation with Python — Playwright web-app testing toolkit (Anthropic-provided import) |
+
+## From an ask to a tested, documented feature
+
+One chain. Every step reads what the step above wrote and names the step below in its report. The same block opens each agent in it, with "you are step N", so a session that loads one agent knows where it is and what comes next.
+
+```
+1  /dev:refine       requirements-author    → docs/plans/<NNN>-<initiative>/requirements.md · epics.md (E<n>) · stories.md (US<n>, AC<k>)
+2  /dev:plan-system  solution-planner       → blueprint ██ approval · detail pack · delivery-plan.md: one prompt per task
+   Plan Queue (or a person) then runs the prompts in order, one session each:
+3    TD   qa-test-planner                   → docs/test-plans/<NNN>-<epic>-test-plan.md, one per epic:
+                                              versions · what is tested · harness · scenarios TP-### · Ready · Done
+4    TD   qa-test-case-designer             → docs/test-cases/<NNN>-<story>.md, one suite per story: TC-… citing US<n> AC<k>, TP-###
+5    Q    qa-api / qa-ui / qa-mobile        → acceptance tests, red on the stubs, automating the TP rows bound to them
+6    B F  be-* / fe-* / mobile-*            → the code; each task turns its Q tests green
+7    gate (the last code task)              → the whole set green; each test plan's Definition of Done checked
+8    DOC  be-documenter | be-feature-documenter → the documentation updated from the code that landed; the plan filed
+Without a delivery plan, 3 and 4 run on their own: /qa-<stack>:test-plan <initiative folder>, then /qa-<stack>:test-cases <plan or story>.
+```
+
+- **Two commands start everything.** `/dev:refine` writes the epics and the stories on them; `/dev:plan-system` writes one delivery plan whose prompts Plan Queue runs. Steps 3 to 8 are tasks in that plan.
+- **Nothing is retyped downstream.** A story's included parts are the test plan's scope items and the suite's journeys; its criteria (`US<n> AC<k>`) are what scenarios, cases and acceptance tests trace to.
+- **A story is checked before it is tested from.** The test plan's Definition of Ready lists any story with a `[TBD]` criterion or an open `business-analysis:story-review` blocker.
+- **Two tasks close a plan.** The gate task runs the whole set and checks each test plan's Definition of Done; the documentation task, run by the documenter agent, is last.
+- Test design and the documentation task are left out only on the user's answer, recorded in the plan header.
 
 ## How a feature is built
 
@@ -374,12 +400,14 @@ Test-first is the default for any plan that delivers an API surface or a journey
 
 | # | Step | Who | Produces | Tests |
 |---|---|---|---|---|
-| 1 | Define the feature | `requirements-author` | `stories.md`, Gherkin ACs | — |
+| 1 | Define the feature | `requirements-author` | `stories.md`: one story per feature, AC as met-or-not bullets | — |
 | 2 | Agree the contracts | `solution-planner` | blueprint, data model, `api-surface.md`, `experience-plan.md`, `delivery-plan.md` | — |
 | 3 | Contract tasks `C` | `be-*`, `fe-*`, `observability-engineer-*` | schema, module folders, every endpoint answering `501 not-implemented`, telemetry base | nothing to run |
-| 4 | Acceptance tasks `Q` | `qa-api-*`, then `qa-ui-*` / `qa-mobile-*` | API and journey tests from the contract | **red** on `not-implemented` |
-| 5 | Implementation `B`, `F` | `be-*`, then `fe-*` / `mobile-*` | the logic, unit-tested to the 80% branch floor, instrumented | acceptance tests turn **green**, read-only |
-| 6 | The gate | last task | build, whole suite, lint, coverage, telemetry smoke | all green |
+| 4 | Test-design tasks `TD` | `qa-test-planner`, then `qa-test-case-designer` | a test plan per epic (versions, scope, harness, scenarios, Definition of Ready and Done), then a test-case suite per story | documents; nothing to run |
+| 5 | Acceptance tasks `Q` | `qa-api-*`, then `qa-ui-*` / `qa-mobile-*` | API and journey tests from the contract | **red** on `not-implemented` |
+| 6 | Implementation `B`, `F` | `be-*`, then `fe-*` / `mobile-*` | the logic, unit-tested to the 80% branch floor, instrumented | acceptance tests turn **green**, read-only |
+| 7 | The gate | the last code task | build, whole suite, lint, coverage, telemetry smoke, each test plan's Definition of Done | all green |
+| 8 | Documentation `DOC1` | `be-documenter` / `be-feature-documenter` | the documentation updated from the code that landed; the plan filed | doc lint |
 
 - **The tests come from a different agent, from the contract, before the code exists.**
 - **The implementer cannot change them** — passing a test by editing it is how test-first fails with LLMs.

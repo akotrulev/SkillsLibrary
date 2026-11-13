@@ -153,6 +153,30 @@ verbatim:
 
 > The acceptance tests a `Q` task wrote are the spec, and they are **read-only** to every later task except the gate. Never edit, skip, delete or weaken one: not its assertion, its data or its timeout. A test you believe is wrong is a dated `D<n>` with both readings, and it stays red; the gate task resolves it with the user.
 
+**Plans built on stories add the test-design family, `TD`.** Where the plan serves stories (`US<n>` in
+`stories.md`), testing is planned and designed inside the plan, by the same queue that builds it:
+
+- **`TD` tasks are stack `qa` and come in two kinds, in this order.** First **the test plan**
+  (agent `qa-test-planner`): one document per epic in `docs/test-plans/`, with the versions under test,
+  what is to be tested (every included part of the epic's stories), the harness looked up from the repo,
+  a scenario (`TP-###`) for every acceptance criterion with the agent that will carry it out, and the
+  Definition of Ready and the Definition of Done. Then **the test cases** (agent `qa-test-case-designer`):
+  one suite per story in `docs/test-cases/`, every included part with a journey case and every criterion
+  with a case, each citing its `US<n> AC<k>` and its `TP-` row.
+- **Fill the session.** One test-plan task covers as many epics as fit its budget, one plan document
+  each; test-case tasks likewise cover as many stories as fit. A task spanning epics names the first as
+  its `Epic` and every story it covers in `Story`.
+- **Order:** after everything both sides bind to (the contract and the stubs, so the harness and the API
+  surface are looked up, not proposed), and **before the `Q` tasks**. A `Q` task depends on the test-plan
+  task for its epic and automates the scenarios that plan binds to its agent, each test carrying its
+  `TP-` id beside its AC id. The test-case tasks depend on the test-plan task and block nothing.
+- **Gate:** `**Gate: none** — a test plan and a test-case suite are documents; the agent's own review
+  (scope closed, every criterion traced, every executor resolves) is the check.`
+- **The last task checks each test plan's Definition of Done** line by line and records every unmet line
+  in `Status:`. It never edits a plan's scenarios or a suite's cases to make a line true.
+- **Left out only on an answer.** A plan with stories and no `TD` tasks records, in its header, who
+  opted out and why. A plan with no stories (an internal refactor, a tool) has none.
+
 **Red for the right reason.** A `Q` test is red **on the `not-implemented` stub** — in Arrange or in
 Act, since a setup call that reaches a stub is also the right reason — or, for a journey, **on the
 screen's placeholder**. A test that passes against a stub asserts nothing. A test that is red on a
@@ -166,11 +190,33 @@ where they need one), and the coverage measure over the files it wrote. It leave
 stands in the way whichever task caused it. Its `**Gate:**` line names those exact commands. It does not
 run the project's whole suite, lint or typecheck beyond what those commands include.
 
-**The last runnable task runs the whole set once more across the plan**, ending with the coverage floor
-when the plan writes code, **fixes what it finds rather than handing it back** by the fix loop below, and
-carries the docs and close-out: it is the only session that knows what actually landed and what is built
-but unverified, and a session that only writes markdown is the wasted agent switch this rule exists to
-remove. It holds no feature work when the plan has any.
+**Two tasks close a plan: the gate task, then the documentation task.**
+
+**The gate task is the last task that builds and runs code** — "the last runnable task" everywhere in this
+document. It **runs the whole set once more across the plan**, ending with the coverage floor when the plan
+writes code, **fixes what it finds rather than handing it back** by the fix loop below, checks each test
+plan's Definition of Done (§4), and records in `Status:` what is built but unverified. It holds no feature
+work when the plan has any, and it writes no product documentation.
+
+**The documentation task is the plan's last task**, after the gate task and depending on it:
+
+- **Id `DOC1`, stack `docs`, agent the documenter**: `be-documenter` where the project keeps
+  `docs/business-model/` (or keeps no documentation yet), `be-feature-documenter` where it documents
+  feature by feature in `docs/features/`. Never the agent that wrote the code.
+- **It updates the documentation from the code that landed, never from the plan.** It re-traces the areas
+  or features the plan's tasks touched (their `As built` notes are leads, the code is the evidence),
+  updates the existing documents in place and writes the ones a new area or feature needs. What the
+  plan intended and did not build is not documented as built.
+- **Deliverable:** names the documents — "the Booking and Membership areas in `docs/business-model/`
+  describe what this plan landed: every guide's tasks, rules and worked example match the code at HEAD."
+- **Gate:** `**Gate: own tests** — the documenter's doc lint over the documents it touched.`
+- **Over budget, it is split by area** — `DOC1`, `DOC2` — never handed to another agent.
+- **It closes the plan.** Being last, it deletes the last prompt block, so the filing in §8 is its.
+  A blocked task still sits below it (§8); when that task lands later, its `As built` note says which
+  documents it left behind, and `Status:` carries them.
+- **Left out only with a reason in the header**: `Documentation task: none — <why>`, for a plan that
+  changes no behaviour a reader of the documentation would notice (a refactor, a tooling change), or a
+  documentation plan, whose tasks are already the documenter's.
 
 **The last task's fix loop.** Run the whole set once. Reproduce each failure with the narrowest command
 that shows it — one spec file, one test filter — fix it, and see it green there. Then rerun only what
@@ -440,9 +486,10 @@ block and the line that says which have landed.
 5. **Commit the work** — the code, its tests and these plan edits together, on the current branch (under
    Plan Queue, the plan's branch in its worktree; never check out the default branch), adding only your
    own files, by path — never `git add -A`. Your prompt block is still in the plan.
-6. **Merge, last task only** — if this plan runs on its own branch, merge the default branch into it
-   now, resolve every conflict by keeping both sides' rows, re-run the failing suites if code conflicted,
-   and commit the merge, so the plan merges back cleanly.
+6. **Merge, gate task only** — if you are the task that ran the whole set and this plan runs on its own
+   branch, merge the default branch into it now, resolve every conflict by keeping both sides' rows,
+   re-run the failing suites if code conflicted, and commit the merge, so the plan merges back cleanly
+   and the documentation task after you documents the merged code.
 7. **Your own block** — only now delete it, and update the line above the blocks that says which have
    landed, in a follow-up commit of its own: `docs: delete <id>'s prompt (<plan>)`. Do not stop between
    the two commits. Stopping mid-task: keep it, with a `Picking up from:` line. Blocked: keep it, naming
@@ -463,7 +510,7 @@ steps 4, 5 and 7 always apply.
 ## 8. A finished plan is moved to `docs/plans/implemented/`
 
 **Deleting the last prompt block is what finishes a plan**, so the task that deletes it is the task
-that files the plan. Before it stops, it:
+that files the plan: normally the documentation task (§5). Before it stops, it:
 
 1. Rewrites the `**Status:**` line one last time — what the plan delivered, and what is still
    **unverified** (a journey nobody walked, a path only the gate's unit tests exercised, a capability
@@ -486,7 +533,7 @@ block, no `Blocked on <id>` placeholder, and no blocked task holding one. So:
 
 - **A blocked task keeps the plan in `docs/plans/`.** Its block stays, naming its blocker and its
   owner; a plan whose only remaining work is waiting on a person is still in flight, and moving it
-  would hide the wait. The filing duty then belongs to *that* block, not to the last runnable task's — say so
+  would hide the wait. The filing duty then belongs to *that* block, not to the documentation task's — say so
   in both.
 - **A task marked unnecessary does not.** It keeps its id and its "why", per §3, but it has no prompt
   block, so it holds nothing up.
@@ -508,6 +555,8 @@ These are plan failures, not style:
 - A task with no `**Gate:**` line, a code task whose gate runs nothing, or an intermediate task that runs
   the unfiltered whole suite
 - A plan with no last task running the whole set
+- A plan that changes behaviour and does not end with a documentation task run by the documenter agent,
+  or a gate task that writes the product documentation itself
 - An implementation task that edits, skips or deletes an acceptance test
 - A `Gate: own tests` line with no commands, or with an unfiltered one
 - A `Q` task that ran its tests and did not see them red on the stub, or whose gate proves nothing loads

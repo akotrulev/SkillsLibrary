@@ -51,7 +51,7 @@ Confirm before analyzing. Ask only what's missing, at most 2–3 questions:
 
    | Input shape | Source of truth | What you mine for |
    |---|---|---|
-   | User story + acceptance criteria | the ACs | the goal behind the story (a journey), business logic and figures, validations per AC |
+   | Story + acceptance criteria | the ACs | the story's goal and each included part (a journey each), business logic and figures, validations per AC |
    | Requirements / BRD | numbered requirements | rules, restrictions, dependencies between requirements |
    | API contract (OpenAPI/Swagger) | endpoints + schemas | per-field validations, required/optional, formats, auth/restrictions, status codes |
    | State diagram / workflow | states + events | the state model, legal/illegal transitions, guards |

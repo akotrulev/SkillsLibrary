@@ -1,7 +1,7 @@
 ---
 name: rules
-description: Use when installing or updating the KB and backlog standards as path-scoped rules in .claude/rules/business-analysis/. Triggers "install the BA rules". Not for the KB protocol (knowledge-base).
-disable-model-invocation: true
+description: Use when installing or updating the KB and backlog standards as path-scoped rules in .claude/rules/business-analysis/. Triggers "install the BA rules", "set up this project". Not for the KB protocol (knowledge-base).
+argument-hint: "[replace | keep | beside]"
 ---
 
 # Install the business-analysis rules
@@ -24,6 +24,12 @@ The rules hold each document's **standards**: what must be in it, what must neve
 
 The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/business-analysis/`.
 
+## Run by a person or by a model
+
+A person types `/business-analysis:rules`. A model runs this skill itself, as `business-analysis:rules`, when it is asked to set up a project or to install or update the rules, and when it finds this plugin enabled in a project that has no `.claude/rules/business-analysis/`. One argument answers the differing-file question below for every file in advance: `replace`, `keep` or `beside`.
+
+Where a step needs the user's answer or agreement and nobody is there to give it (a queued plan task, a subagent, a headless run) and no argument settles it, take the choice that changes nothing of theirs: a differing file gets the plugin's copy beside it as `<name>.plugin`, and a path or any other change to an installed copy is not made. List each one under `Waiting for the user:` in the report. Never guess the answer.
+
 ## Procedure
 
 1. **Find the project root**: `git rev-parse --show-toplevel`, or the working directory when it is not a git repo.
@@ -31,7 +37,7 @@ The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/
 3. **Copy each file** that is missing from the target: `mkdir -p <root>/.claude/rules/business-analysis` and `cp` it byte for byte.
 4. **For each file already present**, `cmp` it with the source.
    - Identical: up to date.
-   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer.
+   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer or a `replace` argument.
 5. **Fit the paths to this project.** The defaults assume the KB at `docs/business-model/` and initiative folders under `docs/plans/`, both at the root.
    - Find the KB: `git ls-files '*INDEX.md' | xargs grep -l '^# Business Model'`, plus any directory named `business-model`. A KB somewhere else (a monorepo package's `docs/`, a `documentation/` folder) gets its own globs, the same suffixes under its real prefix (for example `"services/billing/docs/business-model/**/*.md"`), added to each `business-model*.md` copy with the user's agreement.
    - Find the backlogs: `git ls-files '*requirements.md' '*epics.md' '*stories.md'`. Any outside `docs/plans/` that follow the same shape (`US<n>` stories, `E<n>` epics) get the matching glob added to the `backlog-*.md` copies, with agreement. Never widen to a bare `**/requirements.md`: it would load on unrelated files.
@@ -48,6 +54,7 @@ KB paths: default | widened with <globs>
 Backlog paths: default | widened with <globs>
 Committed: yes | ignored by git
 Conflicts: none | <one line each, with the file that states it>
+Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 
 Then tell the user to commit the folder, and that a rule shows in `/memory` once the session has read a matching file.

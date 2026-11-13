@@ -1,7 +1,7 @@
 ---
 name: rules
-description: Use when installing or updating the be-node coding standards as path-scoped rules in .claude/rules/be-node/. Triggers "install the Node backend rules". Not for reviewing code (conventions-review).
-disable-model-invocation: true
+description: Use when installing or updating the be-node coding standards as path-scoped rules in .claude/rules/be-node/. Triggers "install the Node backend rules", "set up this project". Not for reviewing code (conventions-review).
+argument-hint: "[replace | keep | beside]"
 ---
 
 # Install the be-node rules
@@ -19,6 +19,12 @@ Plugins cannot ship Claude Code rules, so this skill copies them into the projec
 
 The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/be-node/`.
 
+## Run by a person or by a model
+
+A person types `/be-node:rules`. A model runs this skill itself, as `be-node:rules`, when it is asked to set up a project or to install or update the rules, and when it finds this plugin enabled in a project that has no `.claude/rules/be-node/`. One argument answers the differing-file question below for every file in advance: `replace`, `keep` or `beside`.
+
+Where a step needs the user's answer or agreement and nobody is there to give it (a queued plan task, a subagent, a headless run) and no argument settles it, take the choice that changes nothing of theirs: a differing file gets the plugin's copy beside it as `<name>.plugin`, and a path or any other change to an installed copy is not made. List each one under `Waiting for the user:` in the report. Never guess the answer.
+
 ## Procedure
 
 1. **Find the project root**: `git rev-parse --show-toplevel`, or the working directory when it is not a git repo.
@@ -26,7 +32,7 @@ The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/
 3. **Copy each file** that is missing from the target: `mkdir -p <root>/.claude/rules/be-node` and `cp` it byte for byte.
 4. **For each file already present**, `cmp` it with the source.
    - Identical: up to date.
-   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer.
+   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer or a `replace` argument.
 5. **Fit the paths to where this project's backend lives.**
    - **Backend packages**: `git grep -l -E '"(express|@nestjs/core|fastify|hono|koa)"' -- '*package.json'`. Each hit's folder is a backend package root. When it is the root `package.json` of a single-package service, `<pkg>` below is `src` for code, `{src,test}` for tests and nothing for config, never `**`, which would also cover scripts and tooling.
    - **Schema and data access**: `git ls-files '*.prisma'`, `git grep -l -E 'pgTable\(|mysqlTable\(|@Entity\(|new PrismaClient' -- '*.ts'`.
@@ -43,6 +49,7 @@ Path: <root>/.claude/rules/be-node/
 Backend paths: default | widened with <globs>   (left out: <frontend/mobile/QA packages found>)
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md: none | <one line each>
+Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 
 Then tell the user to commit the folder, and that a rule shows in `/memory` once the session has read a matching file.

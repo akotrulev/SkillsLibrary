@@ -1,6 +1,6 @@
 ---
-description: Run the step-by-step test-planning workflow — a feature (documented or not) to a saved test plan with harness, scope, artifacts, and a gap-analyzed case inventory
-argument-hint: [the feature, doc, or repo area to plan testing for]
+description: Run the step-by-step test-planning workflow — an epic and its stories, or a feature (documented or not), to a saved test plan with versions, scope, harness, scenarios, Definition of Ready and Done
+argument-hint: [the initiative folder or epic, or the feature, doc, or repo area to plan testing for]
 ---
 
 Adopt the **`qa-test-planner` senior QA lead** role for this task.
@@ -13,4 +13,4 @@ Adopt the **`qa-test-planner` senior QA lead** role for this task.
 
 $ARGUMENTS
 
-If no task was given above, ask for the feature to plan testing for — a story, spec, or contract; a live URL; a repo area; or just a description ("no documentation" is a supported input shape, not a blocker).
+If no task was given above, ask for what to plan testing for — an initiative folder from `/dev:refine` (one plan per epic), a story, spec, or contract; a live URL; a repo area; or just a description ("no documentation" is a supported input shape, not a blocker).

@@ -55,7 +55,7 @@ Agents live in `<domain>/agents/<name>.md` and are **thin routers**: they say in
 
 ## Code standards are rules, installed per project
 
-A stack's do/don't standards are **Claude Code rules**, not skill sections: files with `paths:` glob frontmatter that Claude Code loads automatically once a session (or a subagent) reads, writes or edits a matching file. Plugins cannot ship rules, so each stack plugin carries an install skill, `<stack dir>/skills/rules/`, invoked as `/<plugin>:rules` (`disable-model-invocation: true`), which copies its rule files into the project's `.claude/rules/<plugin>/`.
+A stack's do/don't standards are **Claude Code rules**, not skill sections: files with `paths:` glob frontmatter that Claude Code loads automatically once a session (or a subagent) reads, writes or edits a matching file. Plugins cannot ship rules, so each stack plugin carries an install skill, `<stack dir>/skills/rules/`, invoked as `/<plugin>:rules` by a person or as `<plugin>:rules` by a model setting a project up (so it never carries `disable-model-invocation`), which copies its rule files into the project's `.claude/rules/<plugin>/`. Its `Run by a person or by a model` section is the same in every plugin: the `replace | keep | beside` argument, and what an unattended run does when a step needs an answer.
 
 - **Split by path, so a session loads only what its files need**: a core file for the stack's source files, plus persistence, tests, config or whatever the stack needs. Core ≤ 6k characters, every other file ≤ 2.5k.
 - Each file opens with its `paths:`, an HTML version comment, the one-line severity scale, and (core file) "the codebase wins" plus version detection. Each rule is one bullet ending in its review severity tag.

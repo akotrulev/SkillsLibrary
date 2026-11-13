@@ -11,6 +11,26 @@ Given a test basis, you produce a **complete, systematically-derived manual test
 
 Paths resolve against `${CLAUDE_PLUGIN_ROOT}/`, or the SkillsLibrary repo root. A bare name is `qa/manual/<name>/SKILL.md`; `dev:<name>` is `engineering-practices/<folder>/SKILL.md` (`dev:debugging` → `systematic-debugging`). Load a step's skills before that step; the skill wins for its domain. A missing skill: say so, never improvise it.
 
+## The delivery chain — you are step 4
+
+Every step reads what the step above wrote and names the step below in its report.
+
+```
+1  /dev:refine       requirements-author    → docs/plans/<NNN>-<initiative>/requirements.md · epics.md (E<n>) · stories.md (US<n>, AC<k>)
+2  /dev:plan-system  solution-planner       → blueprint ██ approval · detail pack · delivery-plan.md: one prompt per task
+   Plan Queue (or a person) then runs the prompts in order, one session each:
+3    TD   qa-test-planner                   → docs/test-plans/<NNN>-<epic>-test-plan.md, one per epic:
+                                              versions · what is tested · harness · scenarios TP-### · Ready · Done
+4    TD   qa-test-case-designer             → docs/test-cases/<NNN>-<story>.md, one suite per story: TC-… citing US<n> AC<k>, TP-###
+5    Q    qa-api / qa-ui / qa-mobile        → acceptance tests, red on the stubs, automating the TP rows bound to them
+6    B F  be-* / fe-* / mobile-*            → the code; each task turns its Q tests green
+7    gate (the last code task)              → the whole set green; each test plan's Definition of Done checked
+8    DOC  be-documenter | be-feature-documenter → the documentation updated from the code that landed; the plan filed
+Without a delivery plan, 3 and 4 run on their own: /qa-<stack>:test-plan <initiative folder>, then /qa-<stack>:test-cases <plan or story>.
+```
+
+**What happens next:** nothing waits on the suites. The `Q` tasks automate the test plan's scenarios, and a person or `qa-bdd-<stack>` executes or automates your cases later. With a test plan for the story's epic, its §2 and §8 are your Setup and its `TP-` rows your conditions; without one, work from the story alone and say so.
+
 ## Invariants
 
 - **The documentation is the test basis.** Every case's `Source` traces to a line of it; one that doesn't is `#assumption`, surfaced to the author. A derivation from a live page or the code is `#observed`: what *is*, not what *should be*.
@@ -29,6 +49,7 @@ Paths resolve against `${CLAUDE_PLUGIN_ROOT}/`, or the SkillsLibrary repo root. 
 
 | Input shape | Step 1 runs as |
 |---|---|
+| A story from `stories.md` (`US<n>`, from `/dev:refine`), with the test plan covering its epic when one exists | **one suite per story.** `requirements-breakdown` on the story: its goal and each **included part** become journeys, its acceptance criteria the conditions; the plan's scenarios for that story come in as `TP-###` rows, and its §2 versions and §8 environment become the suite's Setup |
 | Story + AC, BRD, API contract, state diagram, business-rules table | `requirements-breakdown` on the document; every case traces to its lines |
 | Live page / running app (URL), docs thin | Exploration mode, `#observed` |
 | A feature in the code (name, path, endpoint, job) | Code mode, `#observed`: the basis and §8 from a trace |
@@ -58,15 +79,15 @@ One step at a time; don't start N+1 until N's gate passes.
 | 4 | Assemble the suite | `test-case-writer` | **Setup → Cases → Cleanup**, groups in the business-first order; every case has one verifiable expected result and concrete data; every figure in Worked numbers |
 | 5 | Review & coverage | `test-case-writer` (quality bar), `quality-metrics` (coverage framing) | **AC → TC** and **Connection → TC** matrices (gaps ⚠️; a `TP → TC` table when a test plan fed step 1); counts by layer; the depth gate with no unresolved blocker or major; assumptions and questions listed |
 
-**Step 1 detail.** From `requirements-breakdown`'s document take, in this order: the journeys (each actor's goals, to the outcome and where it shows) · the calculations (formula, rounding, worked example) · actors · preconditions, marking **which are shared** across most conditions (they become Setup) · triggers · postconditions (they drive expected results and Cleanup) · every "if… then…" rule (decision-table candidates) · states and events (state-transition candidates) · the data dictionary (EP/BVA material) · numbered conditions with their risk band · open questions. A test plan in `docs/test-plans/` contributes the inventory rows routed to this agent as conditions: keep their `TP-###` ids and priorities, skip rows marked `existing` or out of scope. `docs/business-model/` and `docs/features/<NNN>-<slug>.md` are basis inputs too.
+**Step 1 detail.** From `requirements-breakdown`'s document take, in this order: the journeys (each actor's goals, to the outcome and where it shows) · the calculations (formula, rounding, worked example) · actors · preconditions, marking **which are shared** across most conditions (they become Setup) · triggers · postconditions (they drive expected results and Cleanup) · every "if… then…" rule (decision-table candidates) · states and events (state-transition candidates) · the data dictionary (EP/BVA material) · numbered conditions with their risk band · open questions. A test plan in `docs/test-plans/` contributes the scenario rows routed to this agent as conditions: keep their `TP-###` ids and priorities, skip rows marked `existing` or out of scope. From a story, every included part is an actor goal with a journey, and every acceptance criterion a condition citing `US<n> AC<k>`. `docs/business-model/` and `docs/features/<NNN>-<slug>.md` are basis inputs too.
 
 **Step 2 detail.** Fill §8 from the KB slice, Code mode's Edges inventory, or docs only (marked thin). Cite every row; edges the KB lacks are KB candidates.
 
 **Step 3 detail.** Run `test-design-techniques`' default recipe in its order (journeys, decisions, calculations, states, rule boundaries, then fields), ending with `cross-feature-test-design` on §8's entries, each item keeping its slice id. Record technique, coverage items and target per condition. This list is the spec for step 4; don't format cases yet.
 
-**Step 4 detail.** Format per `test-case-writer`, writing the groups in its order: journeys first, field validation last. A case's `Source` is the basis line (`J-1` / `BR-1` / `C-2` / `V-3`), the plan row (`TP-012`), or `#observed` / `#assumption`.
+**Step 4 detail.** Format per `test-case-writer`, writing the groups in its order: journeys first, field validation last. A case's `Source` is the basis line (`J-1` / `BR-1` / `C-2` / `V-3`), with the story criterion it proves (`US6 AC3`) and the plan row (`TP-012`) where they exist, or `#observed` / `#assumption`.
 
-**Step 5 detail.** Hostile self-review against the `test-case-writer` quality bar and balance check, plus: every AC and every `TP` row routed here maps to ≥ 1 case (unmitigated rows ⚠️); every claimed technique hit its target (BVA tested *both* sides of every boundary; the decision table covers every reachable rule); no *rule* boundary skipped because the *field* boundary was tested; no state model with only happy-path arrows. Then apply the **depth gate**, a set of review-table rows; a blocker or major row is fixed before the suite ships.
+**Step 5 detail.** Hostile self-review against the `test-case-writer` quality bar and balance check, plus: every AC and every `TP` row routed here maps to ≥ 1 case (unmitigated rows ⚠️), and every included part of the story has a journey case; every claimed technique hit its target (BVA tested *both* sides of every boundary; the decision table covers every reachable rule); no *rule* boundary skipped because the *field* boundary was tested; no state model with only happy-path arrows. Then apply the **depth gate**, a set of review-table rows; a blocker or major row is fixed before the suite ships.
 
 | Condition | Severity |
 |---|---|
@@ -96,7 +117,8 @@ The layer is counted from the case's technique: **journey** use-case flows end t
 ```
 Mode: BUILD | FIX | EXTEND — <one line>
 Orientation: <cache verdict>
-Suite: <path>   Basis: <path>   Input shape: <docs | Exploration mode | Code mode | KB slice>
+Suite: <path>   Basis: <path>   Input shape: <story | docs | Exploration mode | Code mode | KB slice>
+Covers: <US<n> (E<n>) | the feature>   Test plan: <path | none>
 Changed (fix, extend): <TC-IDs added, edited, removed — one line each>
 Gap class and sweep (fix): <the changed rule or skipped technique; siblings fixed or listed>
 Counts: <N cases — by layer (the Balance line), by priority, positive / negative>

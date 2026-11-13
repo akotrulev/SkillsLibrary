@@ -1,7 +1,7 @@
 ---
 name: rules
-description: Use when installing or updating the qa-java test-automation standards as path-scoped rules in .claude/rules/qa-java/. Triggers "install the QA Java rules". Not for reviewing tests (api-tests-review).
-disable-model-invocation: true
+description: Use when installing or updating the qa-java test-automation standards as path-scoped rules in .claude/rules/qa-java/. Triggers "install the QA Java rules", "set up this project". Not for reviewing tests (api-tests-review).
+argument-hint: "[replace | keep | beside]"
 ---
 
 # Install the qa-java rules
@@ -23,6 +23,12 @@ The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/
 
 The be-java plugin installs `java-tests.md` for unit tests (`src/test`, `*Test` / `*IT`). The two sets do not conflict; a file both match loads both.
 
+## Run by a person or by a model
+
+A person types `/qa-java:rules`. A model runs this skill itself, as `qa-java:rules`, when it is asked to set up a project or to install or update the rules, and when it finds this plugin enabled in a project that has no `.claude/rules/qa-java/`. One argument answers the differing-file question below for every file in advance: `replace`, `keep` or `beside`.
+
+Where a step needs the user's answer or agreement and nobody is there to give it (a queued plan task, a subagent, a headless run) and no argument settles it, take the choice that changes nothing of theirs: a differing file gets the plugin's copy beside it as `<name>.plugin`, and a path or any other change to an installed copy is not made. List each one under `Waiting for the user:` in the report. Never guess the answer.
+
 ## Procedure
 
 1. **Find the project root**: `git rev-parse --show-toplevel`, or the working directory when it is not a git repo.
@@ -30,7 +36,7 @@ The be-java plugin installs `java-tests.md` for unit tests (`src/test`, `*Test` 
 3. **Copy each file** that is missing from the target: `mkdir -p <root>/.claude/rules/qa-java` and `cp` it byte for byte.
 4. **For each file already present**, `cmp` it with the source.
    - Identical: up to date.
-   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer.
+   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer or a `replace` argument.
 5. **Fit the paths to where this project's suites live.** The defaults follow the library's layouts; Java test code shares its extension with production code, so they stay narrow on purpose. Find the real locations:
    - Test modules: `git grep -l -e org.testng -e io.rest-assured -e com.microsoft.playwright -e io.appium -e io.cucumber -e io.gatling -- '*build.gradle*' '*pom.xml'`. A module directory none of the `qa-java.md` globs covers gets `"<module>/**/*.java"` there and its build file in `qa-java-suite.md`. When the whole repository is a test-automation project (no production code), propose `"**/*.java"` for `qa-java.md`.
    - API: `git grep -l -e 'extends BaseApiClient' -e 'io.restassured' -e APIRequestContext -- '*.java'`, for `qa-java-api.md`.
@@ -52,6 +58,7 @@ Path: <root>/.claude/rules/qa-java/
 Suite paths: default | widened with <file>: <globs>   (one line per widened file)
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md or be-java rules: none | <one line each>
+Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 
 Then tell the user to commit the folder, and that a rule shows in `/memory` once the session has read a matching file.

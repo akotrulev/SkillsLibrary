@@ -1,7 +1,7 @@
 ---
 name: rules
-description: Use when installing or updating the fe-blazor coding standards as path-scoped rules in .claude/rules/fe-blazor/. Triggers "install the Blazor rules". Not for reviewing code (conventions-review).
-disable-model-invocation: true
+description: Use when installing or updating the fe-blazor coding standards as path-scoped rules in .claude/rules/fe-blazor/. Triggers "install the Blazor rules", "set up this project". Not for reviewing code (conventions-review).
+argument-hint: "[replace | keep | beside]"
 ---
 
 # Install the fe-blazor rules
@@ -23,6 +23,12 @@ C# files (`*.cs`, `*.csproj`, `appsettings*.json`) are shared with the be-dotnet
 
 The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/fe-blazor/`.
 
+## Run by a person or by a model
+
+A person types `/fe-blazor:rules`. A model runs this skill itself, as `fe-blazor:rules`, when it is asked to set up a project or to install or update the rules, and when it finds this plugin enabled in a project that has no `.claude/rules/fe-blazor/`. One argument answers the differing-file question below for every file in advance: `replace`, `keep` or `beside`.
+
+Where a step needs the user's answer or agreement and nobody is there to give it (a queued plan task, a subagent, a headless run) and no argument settles it, take the choice that changes nothing of theirs: a differing file gets the plugin's copy beside it as `<name>.plugin`, and a path or any other change to an installed copy is not made. List each one under `Waiting for the user:` in the report. Never guess the answer.
+
 ## Procedure
 
 1. **Find the project root**: `git rev-parse --show-toplevel`, or the working directory when it is not a git repo.
@@ -30,7 +36,7 @@ The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/
 3. **Copy each file** that is missing from the target: `mkdir -p <root>/.claude/rules/fe-blazor` and `cp` it byte for byte.
 4. **For each file already present**, `cmp` it with the source.
    - Identical: up to date.
-   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer.
+   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer or a `replace` argument.
 5. **Fit the paths to this project.** Find the Blazor projects:
    - `git grep -l -e 'Microsoft.NET.Sdk.BlazorWebAssembly' -e 'Microsoft.NET.Sdk.Razor' -- '*.csproj'`, plus the folder of every project that holds `.razor` files: `git ls-files '*.razor'`, then the nearest `.csproj` above each.
    - For each, propose `"<dir>/**/*.cs"` for `blazor.md` (state containers, typed clients, validators and services are Blazor code there), and `"<dir>/*.csproj"`, `"<dir>/appsettings*.json"`, `"<dir>/Program.cs"` for `blazor-config.md`. When a host project also carries backend API code, propose its component folders only (`"<dir>/Components/**/*.cs"`), and leave the rest to the backend rules.
@@ -47,6 +53,7 @@ Path: <root>/.claude/rules/fe-blazor/
 Blazor projects: <dirs found>   Paths: default | widened with <globs per file>
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md: none | <one line each>
+Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 
 Then tell the user to commit the folder, and that a rule shows in `/memory` once the session has read a matching file.

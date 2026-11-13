@@ -4,7 +4,7 @@ The filled example for `dev:plan-delivery`, from the **workshop-booking** toy in
 by all the planner examples. **Shapes and disciplines are normative; domain content is illustrative.**
 A real artifact writes a full block for *every* task — this example writes five representative ones (a
 foundation task, an acceptance-test task, a backend capability task, the frontend task that actually
-delivers that capability, and the whole-set-and-close-out task) and abbreviates the rest, saying so.
+delivers that capability, and the whole-set gate task) and abbreviates the rest, saying so.
 
 The document format is `engineering-practices/writing-plans/references/plan-format.md`; the prompts
 section's shape is `backend/_shared/session-budget/references/prompts-section-template.md`; the epic
@@ -20,9 +20,11 @@ and story**; every task carries a **`Budget`** with the drivers behind it; **eve
 it built** (`Gate: own tests`, with named commands) and **`B7`, the last runnable one, runs the whole set
 once more**; **the acceptance tests exist, red on the stubs,
 before the code they specify** (`C8` → `Q1`–`Q4` → `B1`–`B3`); and the plan's **progress
-is the `As built` notes plus the prompt blocks that are left**, not a status column. Note also where the
-filing duty sits: `B4` is blocked on a person and outlives `B7`, so **`B4`'s block carries the
-move to `docs/plans/implemented/`**, not `B7`'s.
+is the `As built` notes plus the prompt blocks that are left**, not a status column. Note also how the plan
+closes: **testing is planned inside it** (`TD1`–`TD3`, the test plan per epic and the test cases per
+story, before the `Q` tasks), and **its last task is `DOC1`**, the `be-documenter` task that updates the
+documentation from the code `B7` verified. And where the filing duty sits: `B4` is blocked on a person and
+outlives `DOC1`, so **`B4`'s block carries the move to `docs/plans/implemented/`**, not `DOC1`'s.
 
 ---
 
@@ -32,17 +34,17 @@ move to `docs/plans/implemented/`**, not `B7`'s.
 session, manage their bookings and edit their profile — with a confirmation email once the sending
 domain is verified.
 
-**Status:** *(2026-08-09)* `H1`, `C1`–`C9`, `Q1`–`Q3`, `B1` and `F1` have landed — **E1 is usable**: a
+**Status:** *(2026-08-09)* `H1`, `C1`–`C9`, `TD1`–`TD2`, `Q1`–`Q3`, `B1` and `F1` have landed — **E1 is usable**: a
 member browses the timetable and an admin publishes a workshop (J1 walked by hand 2026-08-08). `B2`
 (bookings) is **partial**: book and my-bookings are written, cancel and attend are not, and `Q1`'s
 bookings tests for them are still red. Each landed task's own tests are green, but the whole suite has
-not run: **that is `B7`**, the last runnable task. `H2` (SendGrid domain authentication) is blocked on the
-studio owner, and `B4` sits below `B7` because of it.
+not run: **that is `B7`**, the last runnable task, and `DOC1` documents what it verified. `H2` (SendGrid
+domain authentication) is blocked on the studio owner, and `B4` sits below `DOC1` because of it.
 
 **Pack:** `./epics.md` · `./stories.md` · `./blueprint.md` · `./data-model.md` · `./experience-plan.md` · `./api-surface.md` · `./integrations.md` · `./epic-map.md`
 **Target repo:** `~/src/workshop-booking` · **Stack:** .NET 10 + PostgreSQL 18 (`src/`) · React 19 + Next 15 (`web/`)
 **Build/test:** `dotnet build` / `dotnet test` / `dotnet format` for `be` tasks · `pnpm build` / `pnpm test` for `fe` tasks — **run in full once, by `B7`**; every earlier code task runs only the scoped commands its `Gate: own tests` line names
-**Sequencing shape:** feature-complete — the studio owner wants the timetable demonstrable before booking exists · **Test-first:** yes — the API surface and journeys are the contract (the user did not opt out)
+**Sequencing shape:** feature-complete — the studio owner wants the timetable demonstrable before booking exists · **Test-first:** yes — the API surface and journeys are the contract (the user did not opt out) · **Test design:** yes — a test plan per epic and a test-case suite per story (`TD1`–`TD3`) · **Documentation task:** `DOC1` → `be-documenter` (Scheduling, Booking, Membership)
 
 > **For agentic workers:** the tasks in §3 are one flat sequence — work them in order. Each names the
 > agent that should execute it, the skills to load, and the one deliverable that means it is done.
@@ -70,6 +72,7 @@ grounding — every task below traces to a row, and a row with no task is someth
 | Workshops, sessions and bookings in the database, with capacity enforced | — | Migrations 001–002 (`C5`), migration 003 + the capacity guard (`C7`), guard review (`DA1`) |
 | A web shell a member can navigate, and a typed client | — | `C6` — the shell with a placeholder per screen route, the nav map, the route tree, `web/lib/api-client.ts` |
 | Every endpoint routed before it is implemented, and a spec the tests bind to | — | `C8` — every `api-surface.md` §5 endpoint answers `501 not-implemented`; the OpenAPI asset is generated from the stubs |
+| Testing planned and designed from the stories: what is tested, on which versions, with which harness, and when it is ready and done | — | `TD1` (a test plan per epic, `qa-test-planner`), then `TD2` and `TD3` (a test-case suite per story, `qa-test-case-designer`). The `Q` tasks automate the scenarios the plans bind to them; `B7` checks each plan's Definition of Done |
 | Acceptance tests that exist before the code | — | `Q3`, `Q1`, `Q4` (API tests per resource group, `qa-api-dotnet`), each red on the stubs, and `Q2` (journeys J1–J2, `qa-ui-typescript`), proved to load and list until `F1` and `F2` serve them |
 | Publishing workshops and sessions | — | `B1` (API, turns `Q3` green) + `F1` (screens, turns J1 green). **`B1` alone does not deliver it** |
 | Booking, cancelling, seeing your bookings | — | `B2` (API, turns `Q1` green) + `F2` (screens, turns J2 green) |
@@ -78,7 +81,8 @@ grounding — every task below traces to a row, and a row with no task is someth
 | The committed OpenAPI asset matches the implemented surface | — | `C8` commits it from the stubs; `B5` regenerates it after the last endpoint task and diffs it against `C8`'s |
 | Traces, logs and RED metrics reaching a local Grafana stack from the first request | — | `C9` — the OpenTelemetry SDK, structured logging, the resource attributes, `deploy/local/` and a RED dashboard; each implementation task then instruments what it builds (`B2` names its signals) |
 | Business dashboards and alert rules | — | `B6`, once the named signals exist |
-| One verified build, suite and format pass across the plan, plus the docs | — | `B7`, the last runnable task |
+| One verified build, suite and format pass across the plan | — | `B7`, the last runnable task |
+| Documentation that describes what was built, for the studio owner and for whoever maintains it | — | `DOC1`, the plan's last task: `be-documenter` writes the Scheduling, Booking and Membership areas in `docs/business-model/` from the code `B7` verified |
 
 ## 2. Streams
 
@@ -91,12 +95,14 @@ Derived from `epic-map.md` §2, split by stack where a lane spans two — the on
 | `foundations-api` | `E0` | `be` | Solution root and everything shared: scaffold, config, CI, auth wiring, error middleware, the endpoint-module seam, the endpoint stubs, the OpenAPI asset, the telemetry base, the whole-set run | Every task edits the solution root or `src/Api/Program.cs`. `H1` sits here too — the Auth0 tenant is what `C3` wires |
 | `schema` | `E0` | `be` / `data` | Migrations and the data-integrity work that follows — `src/Api/Migrations/*` | Migrations are ordered by definition, and `DA1`'s review reads the constraint `C7` creates. Disjoint from `foundations-api`'s file set, so its own lane |
 | `foundations-ui` | `E0` | `fe` | App shell, nav map, route tree, typed API client — `web/app/layout.tsx`, `web/app/(nav)/*`, `web/lib/api-client.ts` | One root file set on the web side, exactly as `foundations-api` is on the API side |
+| `test-design` | `E1`–`E4` | `qa` | The test plans and the test-case suites — `docs/test-plans/*`, `docs/test-cases/*` | The suites are written from the plans; no other stream touches these folders, so it runs beside everything after `C8` |
 | `timetable-api` | `E1` | `be` / `qa` | Workshops + Sessions — `src/Scheduling/*`, `tests/Scheduling.AcceptanceTests/*` | One module, one file set; `Q3` precedes `B1` |
 | `timetable-ui` | `E1` | `fe` | The public timetable and the admin workshop editor — `web/app/timetable/*`, `web/app/admin/workshops/*` | Both screens share the session-card component |
 | `journeys` | `E1` | `qa` | The journey acceptance tests — `e2e/*` | One Playwright project; `Q2` is its only task, and `F1`/`F2` wait on it |
 | `booking-api` | `E2` | `be` / `qa` | The Bookings resource — `src/Booking/*`, `tests/Booking.AcceptanceTests/*` | One module, one file set; `Q1` precedes `B2` |
 | `booking-ui` | `E2` | `fe` | Book and my-bookings — `web/app/bookings/*` | One screen set over one aggregate |
 | `profile-api` / `profile-ui` | `E3` | `be` + `qa` / `fe` | Member profile — `src/Membership/*`, `tests/Membership.AcceptanceTests/*` · `web/app/profile/*` | *(abbreviated in this example)* |
+| `docs` | `E0` | `docs` | The product documentation — `docs/business-model/*` | One task, `DOC1`, after `B7` |
 | `email` | `E4` | `be` | The confirmation email — `src/Notifications/*` | One story, one tree — a lane of one task |
 
 `email` finishes `H2` in minutes and then waits — not on a barrier, but on `B4`'s own `Depends on`
@@ -150,11 +156,11 @@ written by C2 ~4k, 4 files created and 1 modified 9.5k, commit, diff and gate re
 
 ### Q1 — Bookings API acceptance tests
 
-**Epic:** `E2` Booking · **Story:** `US6`–`US9` · **Stack:** `qa` · **Stream:** `booking-api` · **Order:** 16
+**Epic:** `E2` Booking · **Story:** `US6`–`US9` · **Stack:** `qa` · **Stream:** `booking-api` · **Order:** 19
 **Agent:** `qa-api-dotnet` · **Skills:** `qa-dotnet:test-first`, `qa-dotnet:api-spec-assets`
 **Deliverable:** every Bookings endpoint in `api-surface.md` §5.3 and every AC of US6–US9 has an
 acceptance test in `tests/Booking.AcceptanceTests/`, and each fails on `501 not-implemented`.
-**Depends on:** C8 (the stubs and the OpenAPI asset generated from them), C3 (auth, for the member and admin tokens)
+**Depends on:** C8 (the stubs and the OpenAPI asset generated from them), C3 (auth, for the member and admin tokens), TD1 (the Booking test plan's scenarios bound to `qa-api-dotnet`)
 **Budget:** ~90k — CLAUDE.md 25k, `api-surface.md` §4 and §5.3 and `stories.md` US6–US9 8k, 2 skills 16k,
 the OpenAPI asset's typed client 4k, 4 test files and 1 fixture created 10k, commit, diff and gate
 read-back 10k, churn ×1.2
@@ -165,7 +171,7 @@ red on `not-implemented`, and record the reason. Do not run the unfiltered suite
 - Create: `tests/Booking.AcceptanceTests/BookSessionTests.cs`, `MyBookingsTests.cs`, `CancelBookingTests.cs`, `AttendBookingTests.cs`, `BookingApiFixture.cs`
 
 - One test per endpoint outcome in `api-surface.md` §5.3 and per AC of US6–US9, each carrying its AC id
-  (`[Category("US7-AC2")]`); the three deltas assert their documented slugs `session-full`,
+  (`[Category("US7-AC2")]`) and the id of the test-plan scenario it automates (`[Category("TP-014")]`); the three deltas assert their documented slugs `session-full`,
   `already-booked` and `invalid-state`.
 - The tests bind to the generated client and the documented slugs, never to `src/Booking`, which does not
   exist yet; expected values come from the contract and the ACs, never from the stub.
@@ -181,7 +187,7 @@ red on `not-implemented`, and record the reason. Do not run the unfiltered suite
 
 ### B2 — Bookings resource
 
-**Epic:** `E2` Booking · **Story:** `US6`–`US9` · **Stack:** `be` · **Stream:** `booking-api` · **Order:** 17
+**Epic:** `E2` Booking · **Story:** `US6`–`US9` · **Stack:** `be` · **Stream:** `booking-api` · **Order:** 20
 **Agent:** `be-dotnet` · **Skills:** `be-dotnet:patterns-apply`, `be-dotnet:persistence`, `be-dotnet:unit-testing`,
 `be-dotnet:opentelemetry`, `be-dotnet:structured-logging`
 **Deliverable:** the four booking endpoints implement their documented behaviour, validation and
@@ -225,7 +231,7 @@ unfiltered suite, `pnpm` or `dotnet format`.
 
 ### F2 — Book + my-bookings screens (S3, S4)
 
-**Epic:** `E2` Booking · **Story:** `US10` · **Stack:** `fe` · **Stream:** `booking-ui` · **Order:** 18
+**Epic:** `E2` Booking · **Story:** `US10` · **Stack:** `fe` · **Stream:** `booking-ui` · **Order:** 21
 **Agent:** `fe-react` · **Skills:** `fe-react:component-writer`, `fe-react:data-fetching`, `design:app-structure`
 **Deliverable:** a member can book a session, see it under their bookings, cancel it, and be told when
 a session is full — journey J2, end to end, and `Q2`'s J2 tests go green. **This is the task that delivers `E2`.**
@@ -259,18 +265,18 @@ suite, or `dotnet` beyond starting the API.
   the J2 tests (`Q2`, `qa-ui-typescript`) and the J2 walk-through (`B7`'s close-out records whether the
   journey has been walked).
 
-### B7 — the whole set and the close-out
+### B7 — the whole set
 
-**Epic:** `E0` Contract + foundations · **Story:** — · **Stack:** `be` · **Stream:** `foundations-api` · **Order:** 25
+**Epic:** `E0` Contract + foundations · **Story:** — · **Stack:** `be` · **Stream:** `foundations-api` · **Order:** 28
 **Agent:** `be-dotnet` · **Skills:** `be-dotnet:conventions-review`
 **Deliverable:** the whole solution builds, the whole suite passes — every acceptance test from `Q1`–`Q4`
 and journeys J1–J2 included — the format check is clean, unit
 tests cover ≥ 80% of the branches this plan wrote in each stack, and `docs/repository-state.md` says
 what is built and what is unverified.
 **Depends on:** every task above it — this task runs the whole set
-**Budget:** ~135k — CLAUDE.md 25k, this plan 12k, the `As built` notes of 18 tasks 10k, the whole set's
+**Budget:** ~130k — CLAUDE.md 25k, this plan 12k, the `As built` notes of 18 tasks 10k, the whole set's
 output and the fix loop 12k plus 2k per earlier task (48k for 18), the coverage reports and the tests a
-shortfall needs ~10k, the docs written 8k, churn ×1.2
+shortfall needs ~10k, the repository-state note 3k, churn ×1.2
 **Gate (this is the last runnable task, so it runs the whole set once more across the plan, in run order):**
 ```
 dotnet build   →  dotnet test   →  dotnet format --verify-no-changes
@@ -287,13 +293,16 @@ attributing it is part of this task, and the `As built` note says which task eac
 
 **Files:**
 - Modify: whatever the gate proves wrong, in whichever task's tree it lives
-- Create: `docs/repository-state.md`, `docs/api/README.md`
+- Create: `docs/repository-state.md`
 
 - Run the set in the order above. Do not reorder it: a format failure after a red build wastes the run.
   On a re-run, retry only what failed where the project has a way to (`pnpm playwright test --last-failed`).
 - The acceptance tests are read-only to every task but this one. A test an implementation task recorded
   as wrong in a `D<n>` is resolved here, with the user, before it is changed.
 - Every failure is fixed here, and attributed in the `As built` note to the task that introduced it.
+- Each test plan's Definition of Done (`docs/test-plans/`, from `TD1`) is checked line by line once the set
+  is green; every unmet line goes in `Status:` with what is missing. The plans' scenarios and the suites'
+  cases are never edited to make a line true.
 - The coverage floor runs last: ≥ 80% of the branches the plan wrote, per stack. A shortfall is closed
   by writing the missing tests in the owning task's test project and attributed like any failure; the
   `As built` note records each stack's figure and names every file left out (DTOs, EF configurations,
@@ -304,14 +313,14 @@ attributing it is part of this task, and the `As built` note says which task eac
 - The telemetry smoke runs after the coverage floor; the `As built` note records the trace id and the three
   queries. With no container runtime on the machine it is recorded as unverified in `Status:`, never skipped.
 - The plan's `**Status:**` line is rewritten from what the gate actually showed.
-- **The plan is not filed here.** `B4` is blocked on `H2` and still holds a prompt block, so
-  `docs/plans/003-workshop-booking/` stays in `docs/plans/`. Say so in `Status:`. `B4` is the task
-  that will delete the last block, and its prompt carries the move to `docs/plans/implemented/`.
-- **Not in B7:** writing acceptance tests (`Q1`–`Q4`; this task only runs them and resolves a disputed one),
+- **The plan is not filed here, and the product documentation is not written here.** `DOC1` follows and
+  documents what this task verified; `B4` is blocked on `H2` and still holds a prompt block, so
+  `docs/plans/003-workshop-booking/` stays in `docs/plans/`. Say so in `Status:`.
+- **Not in B7:** the documentation in `docs/business-model/` (`DOC1`, `be-documenter`), writing acceptance tests (`Q1`–`Q4`; this task only runs them and resolves a disputed one),
   the environment-level integration suites (`qa-api-dotnet`), the access-control proof (`qa-security`) — and `B4`, which is blocked on `H2`
   and carries its own gate whenever it runs.
 
-### H1, H2, C1–C3, C5–C9, Q2–Q4, B1, B3–B6, F1, F3, DA1 — abbreviated in this example
+### H1, H2, C1–C3, C5–C9, TD1–TD3, Q2–Q4, B1, B3–B6, F1, F3, DA1, DOC1 — abbreviated in this example
 
 Each gets the same block shape, deliverable first. Every code task says `Gate: own tests` with named
 commands like `C4`'s, `Q1`'s, `B2`'s and `F2`'s; the `human` tasks have no gate. Notable:
@@ -331,6 +340,15 @@ commands like `C4`'s, `Q1`'s, `B2`'s and `F2`'s; the `human` tasks have no gate.
   `detail` naming the task that implements it (validation catalog V8.6), declaring its real response types.
   It then generates the OpenAPI asset from the stubs and commits it canonicalized, so `Q1`, `Q3` and `Q4`
   have their typed client. `B5` regenerates it once the bodies exist and diffs it against this one.
+- **`TD1`–`TD3` are the test-design tasks**, `Stack: qa`, in their own `test-design` stream right after
+  the stubs. `TD1` (`qa-test-planner`) writes one test plan per epic in `docs/test-plans/`: the versions
+  under test (the build is `[TBD]` until `B7`, and says so in its Definition of Ready), every included part
+  of the epic's stories in scope, out or deferred, the harness as `proposed` rows where the greenfield repo
+  has none yet, a scenario for every AC with its executor, and the Definition of Ready and Done. `TD2` and
+  `TD3` (`qa-test-case-designer`) write one test-case suite per story from those plans, split in two because
+  fourteen suites do not fit one session. All three say `Gate: none`: they write documents. A task spanning
+  epics names the first as its `Epic`. Every `Q` task depends on `TD1` and automates the `TP-` rows bound to
+  its agent.
 - **`Q2` is `Stack: qa`**, `qa-ui-typescript`, and `Gate: own tests` with `pnpm playwright test --list
   e2e/`: the J1 and J2 tests need the API, the database and the web app running together, which no single
   command starts yet, so its gate proves they load and list, and `F1` and `F2`, which serve each journey,
@@ -345,8 +363,15 @@ commands like `C4`'s, `Q1`'s, `B2`'s and `F2`'s; the `human` tasks have no gate.
 - **There is no pin task here.** The repo is greenfield, so no behaviour exists that no test pins. On a
   brownfield plan, a `qa-api-dotnet` or `be-dotnet` pin task would sit above the first task that touches
   the untested area: "the current behaviour of <area> is pinned by N tests, green on today's code."
-- **`B4` sits below `B7`**, because it is blocked on `H2`. `B7` is the last *runnable* task and
-  therefore runs the whole set; `B4` carries its own gate for whenever the sending domain clears.
+- **`DOC1` is the plan's last task**, `Stack: docs`, agent `be-documenter`, depending on `B7`. It traces
+  the three modules at HEAD and writes the Scheduling, Booking and Membership areas in
+  `docs/business-model/` (a client guide with a worked example, the behind-the-scenes account and the
+  technical reference each), from the code and never from this plan: what `B7` recorded as built but
+  unverified is documented as built, with the unverified part said. Its gate is the doc lint over those
+  files. It would file the plan, but `B4` still holds a block.
+- **`B4` sits below `B7` and `DOC1`**, because it is blocked on `H2`. `B7` is the last *runnable* code task
+  and therefore runs the whole set; `B4` carries its own gate for whenever the sending domain clears, and
+  its `As built` note says the Booking guide needs the confirmation email added.
 
 ## 4. Open questions
 
@@ -408,9 +433,10 @@ block and the line that says which have landed.
 5. **Commit the work** — the code, its tests and these plan edits together, on the current branch (under
    Plan Queue, the plan's branch in its worktree; never check out the default branch), adding only your
    own files, by path — never `git add -A`. Your prompt block is still in the plan.
-6. **Merge, last task only** — if this plan runs on its own branch, merge the default branch into it
-   now, resolve every conflict by keeping both sides' rows, re-run the failing suites if code conflicted,
-   and commit the merge, so the plan merges back cleanly.
+6. **Merge, gate task only** — if you are the task that ran the whole set and this plan runs on its own
+   branch, merge the default branch into it now, resolve every conflict by keeping both sides' rows,
+   re-run the failing suites if code conflicted, and commit the merge, so the plan merges back cleanly
+   and the documentation task after you documents the merged code.
 7. **Your own block** — only now delete it, and update the line above the blocks that says which have
    landed, in a follow-up commit of its own: `docs: delete <id>'s prompt (<plan>)`. Do not stop between
    the two commits. Stopping mid-task: keep it, with a `Picking up from:` line. Blocked: keep it, naming
@@ -444,26 +470,30 @@ green, but the whole suite has not run.
 | 8 | C6 | `E0` | — | `fe` | `foundations-ui` | The shell renders with every nav entry and a placeholder per screen route, and the typed client covers `api-surface.md` §5 | `fe-react` | ~130k | C4 |
 | 9 | C8 | `E0` | — | `be` | `foundations-api` | Every `api-surface.md` §5 endpoint answers `501 not-implemented`, and the OpenAPI asset generated from the stubs is committed | `be-dotnet` | ~85k | C4, C5 |
 | 10 | C9 | `E0` | — | `be` | `foundations-api` | A request to any endpoint emits a trace, a log line carrying its trace id and the standard RED metrics, all visible in the local Grafana stack (`deploy/local/`) | `observability-engineer-dotnet` | ~95k | C2, C8 |
-| 11 | Q3 | `E1` | `US1`–`US3` | `qa` | `timetable-api` | Every Workshops and Sessions endpoint and AC has an acceptance test, each red on `501 not-implemented` | `qa-api-dotnet` | ~90k | C8, C3 |
-| 12 | B1 | `E1` | `US1`–`US3` | `be` | `timetable-api` | An admin can publish a workshop, add sessions and list them via the API; nobody else can; the `Q3` tests pass | `be-dotnet` | ~115k | Q3, C5, C3, C4 |
-| 13 | Q2 | `E1` | `US4`–`US5`, `US10` | `qa` | `journeys` | Journeys J1 and J2 have Playwright tests on the agreed test ids, each loaded and listed; `F1` and `F2` turn them green | `qa-ui-typescript` | ~95k | C6, C8 |
-| 14 | F1 | `E1` | `US4`–`US5` | `fe` | `timetable-ui` | **A member browses the timetable and an admin publishes a workshop** — J1 complete, its `Q2` tests green | `fe-react` | ~140k | Q2, C6, B1 |
-| 15 | C7 | `E0` | — | `be` | `schema` | Migration head `003` applies; a booking past capacity is rejected by the database itself | `be-dotnet` | ~65k | C5 |
-| 16 | Q1 | `E2` | `US6`–`US9` | `qa` | `booking-api` | Every Bookings endpoint and AC has an acceptance test, each red on `501 not-implemented` | `qa-api-dotnet` | ~90k | C8, C3 |
-| 17 | B2 | `E2` | `US6`–`US9` | `be` | `booking-api` | The four booking endpoints implement their documented behaviour, validation and capacity guard; the `Q1` tests pass | `be-dotnet` | ~110k | Q1, C7, C3, C4 |
-| 18 | F2 | `E2` | `US10` | `fe` | `booking-ui` | **A member books, sees, cancels, and is told when a session is full** — J2 complete | `fe-react` | ~125k | Q2, C6, F1, B2 |
-| 19 | Q4 | `E3` | `US11`–`US12` | `qa` | `profile-api` | Every Profile endpoint and AC has an acceptance test, each red on `501 not-implemented` | `qa-api-dotnet` | ~80k | C8, C3 |
-| 20 | B3 | `E3` | `US11`–`US12` | `be` | `profile-api` | A member can read and update their own profile, and cannot read anyone else's; the `Q4` tests pass | `be-dotnet` | ~100k | Q4, C5, C3, C4 |
-| 21 | F3 | `E3` | `US13` | `fe` | `profile-ui` | **A member views and edits their own profile** — J3 complete | `fe-react` | ~100k | C6, B3 |
-| 22 | B5 | `E0` | — | `be` | `foundations-api` | The OpenAPI asset regenerated from the implemented surface differs from `C8`'s only in response bodies | `be-dotnet` | ~70k | B1, B2, B3 |
-| 23 | B6 | `E0` | — | `be` | `foundations-api` | A Grafana dashboard shows bookings placed by outcome and an alert fires on a sustained 5xx rate | `observability-engineer-dotnet` | ~95k | C9, B1, B2 |
-| 24 | DA1 | `E0` | — | `data` | `schema` | A written verdict on the capacity guard under concurrent booking, with any constraint change applied | `data-architect` | ~80k | C7 |
-| 25 | B7 | `E0` | — | `be` | `foundations-api` | The solution builds, the whole suite and the journeys pass, the format check is clean, and the repository-state note is written | `be-dotnet` | ~135k | all of the above |
-| 26 | B4 | `E4` | `US14` | `be` | `email` | A confirmed booking produces a confirmation email, deliverable in dev against Mailpit | `be-dotnet` | ~90k | C4, B2, H2 |
+| 11 | TD1 | `E1` | `US1`–`US14` | `qa` | `test-design` | A test plan per epic `E1`–`E4` in `docs/test-plans/`: the versions under test, every included part in scope, out or deferred, a scenario for every AC with its executor, and the Definition of Ready and Done | `qa-test-planner` | ~120k | C8 |
+| 12 | TD2 | `E1` | `US1`–`US10` | `qa` | `test-design` | One test-case suite per story `US1`–`US10` in `docs/test-cases/`, every included part with a journey case and every AC with a case | `qa-test-case-designer` | ~140k | TD1 |
+| 13 | TD3 | `E3` | `US11`–`US14` | `qa` | `test-design` | One test-case suite per story `US11`–`US14` in `docs/test-cases/`, every included part with a journey case and every AC with a case | `qa-test-case-designer` | ~90k | TD1 |
+| 14 | Q3 | `E1` | `US1`–`US3` | `qa` | `timetable-api` | Every Workshops and Sessions endpoint and AC has an acceptance test, each red on `501 not-implemented` | `qa-api-dotnet` | ~90k | C8, C3, TD1 |
+| 15 | B1 | `E1` | `US1`–`US3` | `be` | `timetable-api` | An admin can publish a workshop, add sessions and list them via the API; nobody else can; the `Q3` tests pass | `be-dotnet` | ~115k | Q3, C5, C3, C4 |
+| 16 | Q2 | `E1` | `US4`–`US5`, `US10` | `qa` | `journeys` | Journeys J1 and J2 have Playwright tests on the agreed test ids, each loaded and listed; `F1` and `F2` turn them green | `qa-ui-typescript` | ~95k | C6, C8, TD1 |
+| 17 | F1 | `E1` | `US4`–`US5` | `fe` | `timetable-ui` | **A member browses the timetable and an admin publishes a workshop** — J1 complete, its `Q2` tests green | `fe-react` | ~140k | Q2, C6, B1 |
+| 18 | C7 | `E0` | — | `be` | `schema` | Migration head `003` applies; a booking past capacity is rejected by the database itself | `be-dotnet` | ~65k | C5 |
+| 19 | Q1 | `E2` | `US6`–`US9` | `qa` | `booking-api` | Every Bookings endpoint and AC has an acceptance test, each red on `501 not-implemented` | `qa-api-dotnet` | ~90k | C8, C3, TD1 |
+| 20 | B2 | `E2` | `US6`–`US9` | `be` | `booking-api` | The four booking endpoints implement their documented behaviour, validation and capacity guard; the `Q1` tests pass | `be-dotnet` | ~110k | Q1, C7, C3, C4 |
+| 21 | F2 | `E2` | `US10` | `fe` | `booking-ui` | **A member books, sees, cancels, and is told when a session is full** — J2 complete | `fe-react` | ~125k | Q2, C6, F1, B2 |
+| 22 | Q4 | `E3` | `US11`–`US12` | `qa` | `profile-api` | Every Profile endpoint and AC has an acceptance test, each red on `501 not-implemented` | `qa-api-dotnet` | ~80k | C8, C3, TD1 |
+| 23 | B3 | `E3` | `US11`–`US12` | `be` | `profile-api` | A member can read and update their own profile, and cannot read anyone else's; the `Q4` tests pass | `be-dotnet` | ~100k | Q4, C5, C3, C4 |
+| 24 | F3 | `E3` | `US13` | `fe` | `profile-ui` | **A member views and edits their own profile** — J3 complete | `fe-react` | ~100k | C6, B3 |
+| 25 | B5 | `E0` | — | `be` | `foundations-api` | The OpenAPI asset regenerated from the implemented surface differs from `C8`'s only in response bodies | `be-dotnet` | ~70k | B1, B2, B3 |
+| 26 | B6 | `E0` | — | `be` | `foundations-api` | A Grafana dashboard shows bookings placed by outcome and an alert fires on a sustained 5xx rate | `observability-engineer-dotnet` | ~95k | C9, B1, B2 |
+| 27 | DA1 | `E0` | — | `data` | `schema` | A written verdict on the capacity guard under concurrent booking, with any constraint change applied | `data-architect` | ~80k | C7 |
+| 28 | B7 | `E0` | — | `be` | `foundations-api` | The solution builds, the whole suite and the journeys pass, the format check is clean, and the repository-state note is written | `be-dotnet` | ~130k | all of the above |
+| 29 | DOC1 | `E0` | — | `docs` | `docs` | The Scheduling, Booking and Membership areas in `docs/business-model/` describe what this plan landed, each guide's tasks, rules and worked example matching the code at HEAD | `be-documenter` | ~120k | B7 |
+| 30 | B4 | `E4` | `US14` | `be` | `email` | A confirmed booking produces a confirmation email, deliverable in dev against Mailpit | `be-dotnet` | ~90k | C4, B2, H2 |
 
-**`H1`, `C1`–`C9`, `Q1`–`Q3`, `B1` and `F1` have landed, and their prompts are deleted** — a prompt for a
-finished task is a thing someone runs by mistake. `B2` (held, partial), `F2`, `Q4`, `B3`, `F3`, `B5`, `B6`,
-`DA1`, `B7` and `B4` (blocked) are live.
+**`H1`, `C1`–`C9`, `TD1`–`TD2`, `Q1`–`Q3`, `B1` and `F1` have landed, and their prompts are deleted** — a prompt for a
+finished task is a thing someone runs by mistake. `TD3`, `B2` (held, partial), `F2`, `Q4`, `B3`, `F3`, `B5`, `B6`,
+`DA1`, `B7`, `DOC1` and `B4` (blocked) are live.
 
 ---
 
@@ -548,7 +578,7 @@ Close out per the plan's "Close-out — every task" before you stop.
 **Blocked on B2** for the prompt — B2 writes this block when it lands, from the exact name and payload
 of the `BookingConfirmed` domain event it raises. **And blocked on H2** to run at all: the SendGrid
 sending domain is not verified (`integrations.md` §5), owned by the studio owner, since 2026-08-04.
-`B4` sits below `B7`, so it carries its own gate whenever it runs — **and, as the task that will delete
+`B4` sits below `B7` and `DOC1`, so it carries its own gate whenever it runs — **and, as the task that will delete
 the last prompt block, it carries the filing duty:** rewrite `Status:` with what the pack finally
 delivered and what is still unverified, then
 `git mv docs/plans/003-workshop-booking docs/plans/implemented/`, the whole folder, in its own commit.
@@ -562,7 +592,7 @@ it finds and attribute each failure to the task that introduced it.)*
 ## For Mission Control
 
 Paste this document into the plan box and point the run at `~/src/workshop-booking`.
-The task graph maps 1:1 — the nine streams in §2 become MC's lanes, each task keeps
+The task graph maps 1:1 — the streams in §2 become MC's lanes, each task keeps
 its `stream` and `order` alongside its `deliverable`, `agent`, `skills`, `files` and
 `dependsOn`, and the open questions in §4 carry their options. `epic`, `story`, `stack`
 and `budget` travel with each task as additive fields — MC ignores what it does not

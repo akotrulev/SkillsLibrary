@@ -29,8 +29,9 @@ Three things make it different from a generic plan:
   lands — not in someone's memory of the session. See *Tracking execution in the plan document*.
 
 **The unit of work is a task, and the plan is one flat list of them.** Ids carry a letter prefix naming
-the family of work and a number within it — `C1` for the contract wave, `B1…Bn` for the backend
-batches, `F1…Fn` for the frontend areas, `H1` for a human prerequisite — in the order they are done,
+the family of work and a number within it — `C1` for the contract wave, `TD1…TDn` for test design
+(the test plan, then the test cases), `Q1…Qn` for the acceptance tests, `DOC1` for the documentation task that closes the plan, `B1…Bn` for
+the backend batches, `F1…Fn` for the frontend areas, `H1` for a human prerequisite — in the order they are done,
 with no grouping layer above them: no phases, no slices, no stages, no milestones. What a grouping
 would have carried is carried by four things on the task itself: its position in the order, its
 `Depends on` edges, its stream, and the epic and story it serves. Use the word **task** everywhere —
@@ -52,8 +53,9 @@ they need one), and the coverage measure over the files it wrote. It leaves them
 in the way whichever task caused it. Its `**Gate:**` line names those exact commands. It does not run the
 project's whole suite, lint or typecheck beyond what those commands include. The last runnable task runs
 the whole set once more across the plan, ending with the coverage floor when the plan writes code, and
-**fixes what it finds rather than handing it back** by the fix loop (plan format §5), and carries the docs
-and close-out. An implementation task's gate also reruns the acceptance tests earlier tasks turned green
+**fixes what it finds rather than handing it back** by the fix loop (plan format §5). **The plan's last
+task is the documentation task** (`DOC1`, the documenter agent), which updates the documentation from
+the code that landed and files the plan. An implementation task's gate also reruns the acceptance tests earlier tasks turned green
 in the same app, through the runner the last task's gate uses, so that loop stays short. It holds no feature work when the plan has any. A plan stopped halfway has
 each landed task's own tests green, but the whole suite has not run. See Step 4.
 
@@ -108,11 +110,13 @@ Do not brainstorm tasks. Read them out of the detail pack, in this order — the
 | `blueprint.md` cross-cutting concerns | Auth wiring, error envelope, config validation — and **the telemetry base**, one task right after the scaffold (`observability-engineer-<stack>`, stack `be`): the OpenTelemetry SDK, structured logging with the trace id on every line, the resource attributes, a RED dashboard per service, and the local Grafana stack in `deploy/local/` (Collector, Loki, Tempo, Prometheus, Grafana). Skipped only where a service already ships its signals |
 | `api-surface.md` shared schemas + section 4 | Shared DTOs and the validation/error middleware — **once**, before any endpoint |
 | `api-surface.md` endpoint blocks | One task per resource (not per endpoint — a resource's CRUD set is one coherent task). In a test-first plan, first **one stub task** routing every endpoint to the `501 not-implemented` response (validation catalog V8.6) with its real response types |
-| `api-surface.md` endpoint blocks + the validation catalog + the `Acceptance:` lines | **API acceptance tasks** (`Q`, `qa-api-<stack>`) — one per resource group that fits a session, after the stub task and before the resource tasks that turn them green |
+| `epics.md` + `stories.md` (every epic with stories) | **Test-design tasks** (`TD`, stack `qa`), after the stub task and before the first `Q` task. **The test plan** (`qa-test-planner`): one document per epic in `docs/test-plans/` — versions under test, what is to be tested (every included part of the epic's stories), the harness looked up from the repo, a scenario `TP-###` for every acceptance criterion with its executor, the Definition of Ready and the Definition of Done. **The test cases** (`qa-test-case-designer`): one suite per story in `docs/test-cases/`, every included part with a journey case and every criterion with a case. One test-plan task covers as many epics as fit a session; test-case tasks as many stories as fit (`plan-format.md` §4). Left out only when the user opted out, recorded in the header |
+| `api-surface.md` endpoint blocks + the validation catalog + the `Acceptance:` lines + the test plan's scenarios bound to `qa-api-<stack>` | **API acceptance tasks** (`Q`, `qa-api-<stack>`) — one per resource group that fits a session, after the stub task and the test-plan task and before the resource tasks that turn them green |
 | `integrations.md` dependency blocks | One client task per external system |
 | `experience-plan.md` §2 + §4 screen catalog | The **app-shell task** (shell, nav, home — once, bound to `fe-react` / `fe-blazor` with `design:app-structure`; in a test-first plan every screen route renders a placeholder), then one frontend task per screen or per journey's screen set (a list and its detail are one coherent task), each after the endpoints it calls and citing its screen ids |
 | `experience-plan.md` journeys + the `Test ids:` lines | **Journey tasks** (`Q`, `qa-ui-<stack>` / `qa-mobile-<stack>`) — after the app shell and the stubs, before the screens they specify; red on the screens' placeholders |
 | `api-surface.md` outbound webhooks + background work | Job/consumer tasks |
+| The plan itself | **The documentation task**, last in the order and depending on the gate task: `DOC1`, stack `docs`, agent `be-documenter` where the project keeps `docs/business-model/` (or has no documentation yet), `be-feature-documenter` where it documents per feature in `docs/features/`. It re-traces the areas or features this plan's tasks touched and updates their documents from the code at HEAD, never from the plan. `Gate: own tests` is the doc lint over what it touched. Split by area (`DOC1`, `DOC2`) when over budget (`plan-format.md` §5) |
 | `api-surface.md` endpoint map | **The OpenAPI-asset task** — one standard task. **Test-first:** the stub task generates the spec from the stubs, so the `Q` tasks have their typed client first; the asset is regenerated through `qa/_shared/api-spec-assets`' diff lane after the last endpoint task. **Test-after:** after the last endpoint task, the `be-<stack>` agent generates the spec from the implemented surface. Either way it is committed canonicalized as `{service}-openapi-YYYY-MM-DD.json`, so `qa/_shared/api-spec-assets` has its canonical input and every later contract change flows through that skill's diff-driven lane instead of being reverse-engineered. Greenfield plans include it by default; skip only when the repo already keeps the asset |
 
 Anything not traceable to a row above is either missing from the design pack (go add it there) or is not needed.
@@ -145,7 +149,7 @@ The order must satisfy five things:
 - **Dependencies point backwards, always.** A `Depends on` naming a task with a higher order is a contradiction, and it is reported as a plan defect rather than resolved by reordering the ids.
 - **Prerequisites first.** Human-blocked provisioning from `integrations.md` leads the sequence as its own tasks, so nothing downstream stalls on a credential nobody requested.
 
-**Test-first is an ordering rule inside every shape, not a shape of its own.** Wherever the plan delivers an API surface or a journey, the order is: **pin tasks first** (behaviour the plan must keep, untested), then everything both sides bind to — schema, shared types, **the stubs** answering `501 not-implemented` and the OpenAPI asset generated from them — then **the `Q` tasks** written against those stubs, then the implementation tasks that turn them green. A `Q` task never sits after the implementation it specifies. A plan with no external contract (an internal refactor, a tool) stays test-after; ask once, with the shape question, whether the user opts out, and record the answer beside it. Each shape below states what test-first costs it.
+**Test-first is an ordering rule inside every shape, not a shape of its own.** Wherever the plan delivers an API surface or a journey, the order is: **pin tasks first** (behaviour the plan must keep, untested), then everything both sides bind to — schema, shared types, **the stubs** answering `501 not-implemented` and the OpenAPI asset generated from them — then **the `TD` tasks** (the test plan for each epic, then the test-case suites for its stories; they are documents, so in every shape they sit once, right after the contract tasks, for every epic the plan serves) — then **the `Q` tasks** written against those stubs, automating the scenarios the test plan binds to them, then the implementation tasks that turn them green. A `Q` task never sits after the implementation it specifies. A plan with no external contract (an internal refactor, a tool) stays test-after; ask once, with the shape question, whether the user opts out, and record the answer beside it. Each shape below states what test-first costs it.
 
 **Then decide the sequencing shape**, because it changes what runs consecutively:
 
@@ -164,10 +168,11 @@ The order must satisfy five things:
 | First | Human-blocked provisioning the first capability needs — one task per provisioning track |
 | Then | Scaffold, layout, config + validation, CI skeleton, and the cross-cutting surfaces (auth, error envelope, shared DTOs) the first capability actually depends on — nothing speculative |
 | Then | **The telemetry base** — one `observability-engineer-<stack>` task, so every request any later task serves shows up in Grafana while it is being built |
+| Then | **Test design** (`TD`) for every epic the plan serves: the test-plan task (`qa-test-planner`), then the test-case tasks (`qa-test-case-designer`). They need the stubs and the stories, nothing else, so they sit here once rather than once per capability |
 | Then | Capability A's whole set from Step 1, in its natural order: migration → its stubs and OpenAPI asset → its `Q` tasks → entities + rules → service → endpoint bodies → wiring → unit tests → its screens (the app-shell task precedes the first capability's `Q` journeys and screens) |
 | Then | Capability B's own set, plus only the foundations B is the first to need |
 | Then | One run of tasks per remaining capability, most valuable first |
-| Last | The OpenAPI asset's regeneration (test-first) or generation (test-after), business dashboards and alert rules, rate limiting, performance, docs |
+| Last | The OpenAPI asset's regeneration (test-first) or generation (test-after), business dashboards and alert rules, rate limiting, performance; then the gate task (the whole set); then **the documentation task** (`DOC1`, the documenter agent) |
 
 Test-first costs this shape two agent switches per capability (its `Q` tasks, then back to its implementation); a capability's last task still delivers it.
 
@@ -184,11 +189,12 @@ Three rules keep it honest:
 | First | Human-blocked provisioning from `integrations.md` — unchanged, and still one task per provisioning track |
 | Then | **The contract wave** — one batch carrying everything both sides bind to, for the **whole initiative** rather than the first capability: the full migration sequence, the entity/model types, the shared DTOs and the error envelope, auth wiring, config keys, the typed endpoint signatures with their request/response contracts (stubbed where the behaviour lands later — a test-first plan routes every endpoint to the `501 not-implemented` stub and generates the OpenAPI asset from it), the generated or hand-written API client the frontend imports, and the app shell + nav map + route tree (a placeholder per screen route). Once this lands, no later batch waits on a different agent |
 | Then | **The telemetry base** — its own batch, because its agent is `observability-engineer-<stack>`: the SDK wiring, the local Grafana stack and the RED dashboard, on the contract wave's scaffold |
-| Then | **API acceptance batches** (`Q`, `qa-api-<stack>`) — one per resource group that fits a session, written against the stubs and red on them |
+| Then | **Test-design batches** (`TD`) — the test plans for every epic in one `qa-test-planner` batch, then the test-case suites in as few `qa-test-case-designer` batches as fit |
+| Then | **API acceptance batches** (`Q`, `qa-api-<stack>`) — one per resource group that fits a session, written against the stubs and red on them, automating the test plan's scenarios bound to them |
 | Then | **Journey batches** (`Q`, `qa-ui-<stack>` / `qa-mobile-<stack>`) — written against the agreed test ids and red on the placeholders |
 | Then | **Backend, one batch per module** — a module is a file tree one agent owns (`src/Booking/*`): its entities, domain rules, service, endpoint bodies, registration and unit tests, in a single task. Most-depended-on module first |
 | Then | **Frontend, one batch per screen area** — an area is one nav section of `experience-plan.md` §2 and the screens under it: their components, routes, states and wiring, in a single task, ordered by the nav map |
-| Last | The OpenAPI asset's regeneration, business dashboards and alert rules, rate limiting, docs — and the **verification batch**: the full build, the whole test run (old and new), the journeys and the coverage floor, once more across the plan. The acceptance tests are not deferred to it: they ran red before the implementation, and each batch turned its own green |
+| Last | The OpenAPI asset's regeneration, business dashboards and alert rules, rate limiting — then the **verification batch**: the full build, the whole test run (old and new), the journeys and the coverage floor, once more across the plan. The acceptance tests are not deferred to it: they ran red before the implementation, and each batch turned its own green. After it, **the documentation batch** (`DOC1`, the documenter agent) closes the plan |
 
 **What may be merged into one batch — all four, or it stays separate:**
 
@@ -218,10 +224,11 @@ Three rules keep it honest:
 | Then | The telemetry base — SDK wiring, the local Grafana stack, a RED dashboard (`observability-engineer-<stack>`) |
 | Then | Auth wiring, error middleware, shared DTOs — every later task depends on these |
 | Then | Every endpoint routed as a `501 not-implemented` stub and the OpenAPI asset generated from it; the app shell with a placeholder per screen route, where there are screens |
+| Then | The `TD` tasks: the test plan per epic, then the test-case suites per story |
 | Then | The `Q` tasks: API acceptance tests per resource group, journey tests per journey — red on the stubs |
 | Then | One task per resource: entity → persistence → service → endpoint bodies → unit tests, turning that resource's `Q` tests green |
 | Then | External clients, webhook handlers, background jobs — one per dependency |
-| Last | Rate limiting, business dashboards and alert rules, performance, docs |
+| Last | Rate limiting, business dashboards and alert rules, performance; then the gate task; then **the documentation task** (`DOC1`, the documenter agent) |
 
 Test-first costs this shape one more layer before the first resource task: the stubs and the `Q` tasks.
 
@@ -429,6 +436,13 @@ Rules:
   with low-cardinality labels. The telemetry base is the foundation's, so the
   task never rebuilds the SDK, the exporters or the local stack, and the gate's telemetry smoke
   (`plan-format.md` §5) queries the names the bullets carry.
+- **`TD` tasks write documents, and say so.** A test-plan task's deliverable names the plan files and what
+  each holds ("`docs/test-plans/004-booking-test-plan.md` covers E2: its versions, every included part of
+  US6–US10 in scope, out or deferred, a scenario for every AC, and the Definition of Ready and Done"); a
+  test-case task's names the suites ("one suite per story US6–US10 in `docs/test-cases/`, every included
+  part with a journey case and every AC with a case"). Both say `Gate: none` with the reason from
+  `plan-format.md` §4. The `Q` task for an epic lists the test-plan task in `Depends on` and automates the
+  `TP-` rows bound to its agent; the last runnable task checks each plan's Definition of Done.
 - **Test-first deliverables name the tests.** A `Q` task's deliverable names its tests and their red
   reason; an implementation task's deliverable names the `Q` tests it turns green. Every own-tests
   command is filtered by file or class — never the unfiltered suite — and the `Q` task's `As built`
@@ -594,7 +608,7 @@ that lands anything.>
 
 **Pack:** `./epics.md` · `./stories.md` · `./blueprint.md` · `./data-model.md` · `./experience-plan.md` (when user-facing) · `./api-surface.md` · `./integrations.md` · `./epic-map.md`
 **Target repo:** `<path>` · **Stack:** <stack + version> · **Build/test:** `<the project's own commands>`
-**Sequencing shape:** feature-complete | agent-batched | platform-first — <the execution model that selected it>
+**Sequencing shape:** feature-complete | agent-batched | platform-first — <the execution model that selected it> · **Test design:** yes — `TD<n>`: a test plan per epic, a test-case suite per story | no — <who opted out, why> · **Documentation task:** `DOC1` → <be-documenter | be-feature-documenter> | none — <why>
 
 > **For agentic workers:** the tasks below are one flat sequence — work them in order. Each names the
 > agent that should execute it, the skills to load, and the one deliverable that means it is done.
@@ -697,7 +711,15 @@ that lands anything.>
     precedes the tasks that turn its tests green; every implementation deliverable names the acceptance
     tests it turns green; every own-tests command is filtered; every behaviour the plan must keep, with no
     test, has a pin task before the first task that touches it.
-16. The prompt block that will delete the last block carries the filing duty — rewrite `Status:`, then move the whole initiative folder into `docs/plans/implemented/` — and this pack's `NNN` was taken from the high-water mark across `docs/plans/` **and** `docs/plans/implemented/`.
+16. **Plans that serve stories:** every epic with stories has a test plan written by a `TD` task and
+    every story a test-case suite; the `TD` tasks follow the stub task and precede every `Q` task; each
+    `Q` task depends on the test-plan task covering its epic; the last runnable task checks each test
+    plan's Definition of Done. A plan without `TD` tasks records the opt-out in its header.
+17. **The plan's last task is the documentation task**: `DOC1`, stack `docs`, agent `be-documenter` or
+    `be-feature-documenter`, depending on the gate task, its deliverable naming the documents it updates
+    and its gate the doc lint; or the header says `Documentation task: none — <why>`. The gate task's
+    `Files` name no product documentation.
+18. The prompt block that will delete the last block carries the filing duty — rewrite `Status:`, then move the whole initiative folder into `docs/plans/implemented/` — and this pack's `NNN` was taken from the high-water mark across `docs/plans/` **and** `docs/plans/implemented/`.
 
 ## Handoffs
 
@@ -712,6 +734,10 @@ that lands anything.>
   tasks bound to them, write the `As built` note and the `Status:` line, rewrite the prompt blocks below theirs,
   and delete their own block in a follow-up commit once the work is committed.
 - **→ Mission Control** — paste the document, point at the repo.
+- **→ `be-documenter` / `be-feature-documenter`** — the plan's last task: the documentation updated from
+  the code that landed, and the plan filed.
+- **→ `qa-test-planner` / `qa-test-case-designer`** — the `TD` tasks: the test plan per epic, then the
+  test-case suites per story, read by the `Q` tasks and checked by the last task.
 - **→ `data-architect` / `tooling-engineer` / `devops-engineer` / `observability-engineer-<stack>` /
   `qa-*`** — the tasks bound to them, run as peers.
 - **→ `code-auditor`** — when a reconcile finds systemic drift rather than a handful of divergences,

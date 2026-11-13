@@ -123,8 +123,15 @@ them — the sequence itself carries the ordering, and the third task is "the th
   exceed the budget target, then start the next. **The goal is the fewest sessions, not the smallest
   tasks** — an agent switch costs a whole context reload, so a plan of twenty tiny tasks is more
   expensive than one of eight full ones, and it re-reads the same files eight times instead of once.
-- **Documentation and close-out ride with the last task**, never a session of their own. That session
-  is the only one that knows what actually landed, and it holds no feature work when the plan has any.
+- **Two tasks close a plan.** The **gate task** (the last task that builds and runs code) runs the whole
+  set and holds no feature work when the plan has any. The **documentation task** is the plan's last
+  task: `DOC1`, stack `docs`, agent `be-documenter` (or `be-feature-documenter` where the project
+  documents per feature), depending on the gate task. It updates the documentation from the code that
+  landed, never from the plan, and files the plan. Left out only with `Documentation task: none — <why>`
+  in the header (format reference §5).
+- **A plan that serves stories plans its testing too:** `TD` tasks after the contract and before the `Q`
+  tasks, the test plan per epic (`qa-test-planner`), then the test-case suites per story
+  (`qa-test-case-designer`) (format reference §4).
 
 **A plan stopped halfway has each landed task's own tests green, but the whole suite has not run.** Say so
 in the plan, in those words. Where a stack-cut task cannot be
@@ -255,8 +262,9 @@ Four rules are easy to get wrong and expensive when you do:
   its `As built` note, repair the blocks below it, delete its own block and file the plan.
 - **The block that will delete the last prompt carries the filing duty.** Deleting the last block is
   what finishes the plan (§8). The close-out's step 6 already tells every task to file the plan when its
-  deletion leaves no blocks; where a blocked task will still be holding a block, say so in the last
-  runnable block: that plan stays in `docs/plans/` until it clears.
+  deletion leaves no blocks, which is normally the documentation task; where a blocked task will still
+  be holding a block, say so in the documentation task's block: that plan stays in `docs/plans/` until
+  it clears.
 
 ## Rules
 
@@ -297,8 +305,11 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
     order, its block spells out the fix loop, it ends with the coverage floor (format reference §5) when the
     plan writes code, and it holds no feature work when the plan has any. What a halfway stop leaves is
     stated in the plan.
-12. **Filing check:** where a blocked task will outlive the last runnable one, the last runnable block
-    says the plan stays in `docs/plans/` until it clears; the plan's own number was taken from the high-water mark across both
+12. **Documentation check:** the plan's last task is `DOC1` (stack `docs`, the documenter agent),
+    depends on the gate task, names the documents it updates, and its gate is the doc lint; or the header
+    says `Documentation task: none — <why>`. The gate task writes no product documentation.
+13. **Filing check:** the documentation task's block carries the filing duty; where a blocked task will
+    outlive it, that block says the plan stays in `docs/plans/` until it clears; the plan's own number was taken from the high-water mark across both
     folders.
 13. **Prompt check:** one block per task, in task order, each carrying the deliverable verbatim, an
     exact reading list with **sections** rather than artifacts, its traps, its gate line and its

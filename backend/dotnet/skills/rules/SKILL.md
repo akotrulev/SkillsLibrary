@@ -1,7 +1,7 @@
 ---
 name: rules
-description: Use when installing or updating the be-dotnet coding standards as path-scoped rules in .claude/rules/be-dotnet/. Triggers "install the .NET rules". Not for reviewing code (conventions-review).
-disable-model-invocation: true
+description: Use when installing or updating the be-dotnet coding standards as path-scoped rules in .claude/rules/be-dotnet/. Triggers "install the .NET rules", "set up this project". Not for reviewing code (conventions-review).
+argument-hint: "[replace | keep | beside]"
 ---
 
 # Install the be-dotnet rules
@@ -20,6 +20,12 @@ Plugins cannot ship Claude Code rules, so this skill copies them into the projec
 
 The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/be-dotnet/`.
 
+## Run by a person or by a model
+
+A person types `/be-dotnet:rules`. A model runs this skill itself, as `be-dotnet:rules`, when it is asked to set up a project or to install or update the rules, and when it finds this plugin enabled in a project that has no `.claude/rules/be-dotnet/`. One argument answers the differing-file question below for every file in advance: `replace`, `keep` or `beside`.
+
+Where a step needs the user's answer or agreement and nobody is there to give it (a queued plan task, a subagent, a headless run) and no argument settles it, take the choice that changes nothing of theirs: a differing file gets the plugin's copy beside it as `<name>.plugin`, and a path or any other change to an installed copy is not made. List each one under `Waiting for the user:` in the report. Never guess the answer.
+
 ## Procedure
 
 1. **Find the project root**: `git rev-parse --show-toplevel`, or the working directory when it is not a git repo.
@@ -27,7 +33,7 @@ The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/
 3. **Copy each file** that is missing from the target: `mkdir -p <root>/.claude/rules/be-dotnet` and `cp` it byte for byte.
 4. **For each file already present**, `cmp` it with the source.
    - Identical: up to date.
-   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer.
+   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer or a `replace` argument.
 5. **Fit the paths to this project.** Find where the backend code really lives, then check each location against the installed globs:
    - **Backend projects**: `git grep -l -e 'Sdk="Microsoft.NET.Sdk.Web"' -e 'Sdk="Microsoft.NET.Sdk.Worker"' -- '*.csproj'`, plus the class libraries they reference (`<ProjectReference>`) that are not test projects. Leave out a web project that holds `*.razor` files or references `Microsoft.AspNetCore.Components.WebAssembly`: that is fe-blazor's, unless the user says it also hosts the API.
    - **Persistence**: `git grep -l -e ': DbContext' -e 'IEntityTypeConfiguration<' -- '*.cs'`, and every `Migrations/` folder.
@@ -46,6 +52,7 @@ Paths: default | widened with <globs, per file>
 Left to other stacks: <Blazor or qa-dotnet projects not covered, or none>
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md: none | <one line each>
+Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 
 Then tell the user to commit the folder, and that a rule shows in `/memory` once the session has read a matching file.

@@ -91,7 +91,8 @@ Every clause is **observable** (text, a figure, a status, a record on a screen o
 ```markdown
 ## Test Cases: <Feature name>
 
-**Source**: <story / requirement id> — basis `docs/test-cases/<NNN>-<slug>-basis.md`
+**Source**: <story / requirement id, e.g. `US6 Booking a place (E2)`> — basis `docs/test-cases/<NNN>-<slug>-basis.md`
+**Test plan**: <`docs/test-plans/<NNN>-<slug>-test-plan.md` and the `TP-` rows this suite carries out, or "none">
 **Coverage**: <full / happy path / regression>
 **Techniques applied**: <use-case (main + 2 alternate + 1 exception), decision table 3/3, BVA 3-value on the credit threshold, …>
 **Balance**: journeys 3 · rules and calculations 5 · states and permissions 3 · connections 1 · field 1 (8 %)

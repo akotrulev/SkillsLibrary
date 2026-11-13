@@ -10,7 +10,7 @@
 |---|---|---|
 | Acceptance tests are written before the implementation | QA authoring is a separate pass at the end: "Live/E2E/integration test runs … belong to a separate QA pass owned by a `qa-*` peer" (`backend/_shared/delivery-plan/SKILL.md:361`), and the agent-batched order puts "the QA pass" in the verification batch (`:177`) | A `Q` task family between the contract tasks and the implementation (§2, §3.2) |
 | `Q` tasks have something to test against | Contract-wave stubs return "an explicit not-implemented response" (`delivery-plan/SKILL.md:191`), shape unspecified; the OpenAPI asset is generated "after the last endpoint task" (`:110`) | One stub response, defined once; the asset generated from the stubs by the contract task (§4.1, D3, D6) |
-| Tests trace to requirements | Stories carry Gherkin ACs (`business-analysis/skills/ba-story-writer/SKILL.md:46`), cited as `US13 AC2` in `ba-story-quality-review`; `api-surface.md` endpoint blocks and `experience-plan.md` journeys do not cite them | An `Acceptance:` line on each endpoint block and each journey (§4.2, §4.3) |
+| Tests trace to requirements | Stories carry acceptance criteria as met-or-not bullets with stable ids `AC1..ACn` (`business-analysis/skills/ba-story-writer/SKILL.md:50`), cited as `US13 AC2` in `ba-story-quality-review`; `api-surface.md` endpoint blocks and `experience-plan.md` journeys do not cite them | An `Acceptance:` line on each endpoint block and each journey (§4.2, §4.3) |
 | Journey tests can be written before the screens | Test ids are authored with the components (`frontend/*/skills/test-ids`); `experience-plan.md` screen blocks carry none (`backend/_shared/experience-plan/SKILL.md:68-90`) | A `Test ids:` line per screen: the names the page objects and the screen both bind to (§4.3) |
 | Implementers see red turn green | The plan gates once and every earlier task runs nothing (`engineering-practices/writing-plans/references/plan-format.md` §5); 58 agents carry the identical "`Gate: none` … runs no build, test suite" bullet | A `Gate: own tests` form: a filtered run of the task's own tests (§3.1, D1) |
 | Implementers cannot pass a test by changing it | No rule; the gate task "fixes what it finds" (`plan-format.md` §5), tests included | Acceptance tests are read-only to implementation tasks (§3.3, D2) |
@@ -26,7 +26,7 @@
 
 | # | Step | Who | Produces | Tests |
 |---|---|---|---|---|
-| 1 | Define the feature | `requirements-author` (`/dev:refine`) | `stories.md`: Gherkin ACs, cited `US7 AC2` | — |
+| 1 | Define the feature | `requirements-author` (`/dev:refine`) | `stories.md`: one story per feature, AC as met-or-not bullets, cited `US7 AC2` | — |
 | 2 | Agree the contracts | `solution-planner` (`/dev:plan-system`) | approved `blueprint.md`; `data-model.md`; `api-surface.md` with `Acceptance:` per endpoint; `experience-plan.md` with `Test ids:` per screen and `Acceptance:` per journey; `delivery-plan.md` in the test-first order | — |
 | 3 | Contract tasks `C` | `be-<stack>`, plus `data-architect` for schema depth, `fe-<stack>` for the shell, and `observability-engineer-<stack>` for the telemetry base | schema and migrations, the module folders with a schema each and the architecture test, entities, DTOs, error envelope, auth wiring, **every endpoint routed and answering `501 not-implemented`**, the OpenAPI asset generated from the stubs, the app shell with a placeholder per screen route, and **the telemetry base**: OpenTelemetry, structured logs carrying the trace id, the local Grafana stack | compile; nothing to run |
 | 4 | Acceptance tasks `Q` | `qa-api-<stack>`, then `qa-ui-<stack>` / `qa-mobile-<stack>` | API tests from the endpoint blocks, the validation catalog and the ACs; journey tests on the agreed test ids | **red**, each on `not-implemented` |
@@ -415,12 +415,17 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
    green and instrumenting what it builds. Behaviour a plan must keep, and that no test pins,
    gets a pin task first. Every prompt carries a `Depends on:` line naming its prerequisites
    and every earlier task it shares files or a build with (`Depends on: none` when it can start
-   at once), so independent tasks run in parallel. **The
-   documentation and close-out work rides with the last task** rather than taking a session of its
-   own — that session is the only one that knows what actually landed and what is built but
-   unverified, and a session that only writes markdown is the wasted agent switch this rule exists
-   to remove.
+   at once), so independent tasks run in parallel. **Two tasks close a plan: the gate task, then
+   the documentation task** (2026-11-13). The gate task writes no product documentation and
+   merges the default branch into the plan's branch. The plan's last task is `DOC1`: stack
+   `docs`, agent `be-documenter` (`be-feature-documenter` where the project documents per
+   feature), depending on the gate task. It updates the documentation from the code that
+   landed, never from the plan; its gate is the doc lint; it files the plan. It is left out only
+   with `Documentation task: none — <why>` in the plan header. Every task still runs the plan's
+   close-out (`Status:`, `As built`, its prompt deleted) in its own session.
 ```
+
+Rule 6's closing sentence was rewritten on 2026-11-13, here and in `~/.claude/CLAUDE.md`: H1 landed it with the documentation written by the plan's last code task, and `plan-format.md` §5 now ends every plan with the documentation task. Rule 5 above is H1's 2026-10-21 text; the live rule has since moved to a gate on every task.
 
 ## 10. Tasks
 

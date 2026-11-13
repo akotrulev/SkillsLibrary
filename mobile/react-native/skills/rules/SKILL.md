@@ -1,7 +1,7 @@
 ---
 name: rules
-description: Use when installing or updating the React Native standards as path-scoped rules in .claude/rules/mobile-react-native/. Triggers "install the RN rules". Not for reviewing code (conventions-review).
-disable-model-invocation: true
+description: Use when installing or updating the React Native standards as path-scoped rules in .claude/rules/mobile-react-native/. Triggers "install the RN rules", "set up this project". Not for reviewing code (conventions-review).
+argument-hint: "[replace | keep | beside]"
 ---
 
 # Install the mobile-react-native rules
@@ -23,6 +23,12 @@ Plugins cannot ship Claude Code rules, so this skill copies them into the projec
 
 The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/mobile-react-native/`.
 
+## Run by a person or by a model
+
+A person types `/mobile-react-native:rules`. A model runs this skill itself, as `mobile-react-native:rules`, when it is asked to set up a project or to install or update the rules, and when it finds this plugin enabled in a project that has no `.claude/rules/mobile-react-native/`. One argument answers the differing-file question below for every file in advance: `replace`, `keep` or `beside`.
+
+Where a step needs the user's answer or agreement and nobody is there to give it (a queued plan task, a subagent, a headless run) and no argument settles it, take the choice that changes nothing of theirs: a differing file gets the plugin's copy beside it as `<name>.plugin`, and a path or any other change to an installed copy is not made. List each one under `Waiting for the user:` in the report. Never guess the answer.
+
 ## Procedure
 
 1. **Find the project root**: `git rev-parse --show-toplevel`, or the working directory when it is not a git repo.
@@ -30,7 +36,7 @@ The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/
 3. **Copy each file** that is missing from the target: `mkdir -p <root>/.claude/rules/mobile-react-native` and `cp` it byte for byte.
 4. **For each file already present**, `cmp` it with the source.
    - Identical: up to date.
-   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer.
+   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer or a `replace` argument.
 5. **Fit the paths to where the app lives.** Find each React Native app: `git ls-files -- '*package.json' ':!:**/node_modules/**' | xargs grep -lE '"(expo|react-native)"[[:space:]]*:'`. Each match's folder is an app root (`<app>`, `.` at the repo root). If none matches, say so and stop at this step. For each app root, propose to the user and, with their agreement, add to the installed copies:
    - core: `<app>/**/*.{ts,tsx}`; ui, a11y and forms: `<app>/**/*.tsx`; data: `<app>/**/*.ts`.
    - routes: the folder that holds the root `_layout.tsx` (`git ls-files -- '*_layout.tsx'`), as `<that folder>/**/*.tsx`.
@@ -48,6 +54,7 @@ Path: <root>/.claude/rules/mobile-react-native/
 App roots: <folders found>   Paths: default | widened with <globs> | defaults removed (<why>)
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md: none | <one line each>
+Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 
 Then tell the user to commit the folder, and that a rule shows in `/memory` once the session has read a matching file.

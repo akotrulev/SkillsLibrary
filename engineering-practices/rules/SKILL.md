@@ -1,7 +1,7 @@
 ---
 name: rules
-description: Use when installing or updating the dev standards for plans and other documents as path-scoped rules in .claude/rules/dev/. Triggers "install the dev rules". Not for writing a plan (plan-feature).
-disable-model-invocation: true
+description: Use when installing or updating the dev standards for plans and other documents as path-scoped rules in .claude/rules/dev/. Triggers "install the dev rules", "set up this project". Not for writing a plan (plan-feature).
+argument-hint: "[replace | keep | beside]"
 ---
 
 # Install the dev rules
@@ -20,6 +20,12 @@ Finished plans in `docs/plans/implemented/` match no glob on purpose: later work
 
 The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/dev/`.
 
+## Run by a person or by a model
+
+A person types `/dev:rules`. A model runs this skill itself, as `dev:rules`, when it is asked to set up a project or to install or update the rules, and when it finds this plugin enabled in a project that has no `.claude/rules/dev/`. One argument answers the differing-file question below for every file in advance: `replace`, `keep` or `beside`.
+
+Where a step needs the user's answer or agreement and nobody is there to give it (a queued plan task, a subagent, a headless run) and no argument settles it, take the choice that changes nothing of theirs: a differing file gets the plugin's copy beside it as `<name>.plugin`, and a path or any other change to an installed copy is not made. List each one under `Waiting for the user:` in the report. Never guess the answer.
+
 ## Procedure
 
 1. **Find the project root**: `git rev-parse --show-toplevel`, or the working directory when it is not a git repo.
@@ -27,7 +33,7 @@ The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/
 3. **Copy each file** that is missing from the target: `mkdir -p <root>/.claude/rules/dev` and `cp` it byte for byte.
 4. **For each file already present**, `cmp` it with the source.
    - Identical: up to date.
-   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer.
+   - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer or a `replace` argument.
 5. **Fit the paths to where this project keeps its documents.** The defaults assume `docs/plans/`. Find the real places:
    - Plans: `git grep -l -e '^## Prompts' -e '^## Close-out — every task' -- '*.md'`.
    - Audits and feature docs: the folders holding `*-audit-r*.md` / `*-requirements.md` rounds and `docs/features`-style documents, when the project keeps them somewhere else.
@@ -45,6 +51,7 @@ Path: <root>/.claude/rules/dev/
 Document paths: default | widened with <globs>
 Committed: yes | ignored by git
 Differs from the project's own rules: none | <one line each>
+Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 
 Then tell the user to commit the folder, and that a rule shows in `/memory` once the session has read a matching file.

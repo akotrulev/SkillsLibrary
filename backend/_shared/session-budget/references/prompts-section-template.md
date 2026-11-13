@@ -17,6 +17,7 @@ they disagree, the `As built` notes are right.
 
 | Rule | Why |
 |---|---|
+| **A block's second line is `Agent: <agent> · Stack: <stack>`** | The same pair as the heading's parenthetical. Plan Queue reads it to pick the agent, and a block pasted without its heading still says who runs it |
 | **A block opens with `Depends on: <ids>`** | Ids only, comma-separated, or `none` — a program starts the task when those are done. It holds the task's prerequisites and every earlier task it shares files or a build tree with (a stream task adds its stream predecessor and cross-stream edges); a missing line is never relied on |
 | **A block is a prompt, not a summary** | It is pasted verbatim into an empty session. Anything the session needs that is not in the block is something it will invent or go looking for |
 | **One block names one task** | A block handing over two tasks gets half-done, and the second half is re-derived from scratch by whoever picks it up |
@@ -64,6 +65,7 @@ someone runs by mistake. `<ids>` are live.
 
 ````
 Depends on: <ids only, or none>
+Agent: <exact agent name> · Stack: <stack>
 
 You are `<exact agent name>`. Task B1 of docs/plans/<NNN>-<initiative>/delivery-plan.md:
 <the mission in one sentence>.
@@ -116,10 +118,111 @@ Close out per the plan's "Close-out — every task" before you stop.
 
 ---
 
+### TD1 — <title: the test plan for <epics>> (qa-test-planner, qa)
+
+````
+Depends on: <the stub task's id; ids only>
+Agent: qa-test-planner · Stack: qa
+
+You are `qa-test-planner`. Task TD1 of docs/plans/<NNN>-<initiative>/delivery-plan.md: write the test
+plan for <E2 Booking | each of E1–E3>, one document per epic, before the acceptance tests exist.
+
+Read your agent definition, then load exactly these skills: `<qa-stack>:requirements-breakdown`,
+`<qa-stack>:test-strategy`, `<qa-stack>:test-design-techniques`, `<qa-stack>:test-plan-writer`.
+
+Read, in this order — these sections only, not the whole artifacts:
+1. CLAUDE.md.
+2. The plan: §3 task TD1; `epics.md` <E ids> — §1 goal, §5 how we get there, §6 the stories;
+   `stories.md` <US ids> — whole: the included parts are the scope items, the ACs the trace targets.
+3. `api-surface.md` §<n.n> and `experience-plan.md` <J ids> for those stories — what surfaces exist.
+4. The repo, for the harness: the test projects and their manifests, the CI lane, the OpenAPI asset
+   (its path is in <the stub task>'s `As built` note), any page objects and fixtures.
+5. The plan's "Close-out — every task".
+
+Deliverable: <copied verbatim from the task block — it names each plan file and what it holds>.
+
+Build:
+- One `docs/test-plans/<NNN>-<epic-slug>-test-plan.md` per epic, in `test-plan-writer`'s shape: `Covers`
+  and plan version; §2 Versions; §3 scope closed over every included part of every story; §6–§7 harness
+  and existing automation as `detected` rows with paths; §10 a scenario for every AC, each with its
+  executor; §11 the Definition of Ready and the Definition of Done.
+- <the task's own bullets, copied>
+
+Out of scope: the test cases with steps (<TD2>, `qa-test-case-designer`); the automated acceptance tests
+(<the Q tasks>); editing `epics.md` or `stories.md` — a gap in a story is an open question in the plan's
+§12 and a Definition-of-Ready line.
+
+Traps:
+- Versions are detected or stated, never guessed: the build under test is `[TBD — <who>]` until a build
+  exists, and that is a Definition-of-Ready line, not a blank.
+- Executors must be the agents this delivery plan actually binds: a scenario for the API goes to
+  <qa-api-stack>, a journey to <qa-ui-stack | qa-mobile-stack>, a manual case to `qa-test-case-designer`.
+- <the per-task trap: the greenfield repo with no harness yet (rows are `proposed`, and say so), the story
+  with a `[TBD]` criterion, the platform matrix nobody has stated>
+
+Gate: none — a test plan is a document; your step-5 review (scope closed, every AC traced, every executor
+resolves, every Ready and Done line checkable) is the check.
+
+Commit: `<the commit message>`.
+
+Your `As built` note lists each plan's path, its scenario count by executor, and every open question.
+Write into the `Q` blocks below the `TP-` rows each one automates — they were left unfilled for this reason.
+Close out per the plan's "Close-out — every task" before you stop.
+````
+
+---
+
+### TD2 — <title: the test cases for <stories>> (qa-test-case-designer, qa)
+
+````
+Depends on: <TD1; ids only>
+Agent: qa-test-case-designer · Stack: qa
+
+You are `qa-test-case-designer`. Task TD2 of docs/plans/<NNN>-<initiative>/delivery-plan.md: write one
+test-case suite per story for <US6–US10>, from the stories and the test plan.
+
+Read your agent definition, then load exactly these skills: `<qa-stack>:requirements-breakdown`,
+`<qa-stack>:test-design-techniques`, `<qa-stack>:cross-feature-test-design`, `<qa-stack>:test-case-writer`.
+
+Read, in this order — these sections only, not the whole artifacts:
+1. CLAUDE.md.
+2. The plan: §3 task TD2; `stories.md` <US ids> — whole.
+3. The test plan(s) for those stories — the paths are in TD1's `As built` note: §2 versions and §8
+   environment (they become each suite's Setup), §10 the `TP-` rows bound to `qa-test-case-designer`.
+4. `docs/business-model/` for the stories' entities and decisions, where it exists.
+5. The plan's "Close-out — every task".
+
+Deliverable: <copied verbatim from the task block — it names the suites>.
+
+Build:
+- Per story, a basis `docs/test-cases/<NNN>-<slug>-basis.md` and a suite `docs/test-cases/<NNN>-<slug>.md`:
+  journeys first (one per included part), then rules and calculations, states, connections, fields last.
+- Every case's `Source` carries the `US<n> AC<k>` it proves and its `TP-` row; every AC has a case.
+- <the task's own bullets, copied>
+
+Out of scope: executing the cases; automation (<the Q tasks>); Gherkin (`qa-bdd-<stack>`).
+
+Traps:
+- One suite per story, never one per epic: a suite that covers two stories cannot be traced or re-run alone.
+- An expected figure is computed from the story's rule, with its working; a number the story does not
+  give is a question for the author, never invented.
+- <the per-task trap>
+
+Gate: none — a test-case suite is a document; your step-5 review and depth gate are the check.
+
+Commit: `<the commit message>`.
+
+Your `As built` note lists each suite's path, its case counts by layer, and any AC with no case and why.
+Close out per the plan's "Close-out — every task" before you stop.
+````
+
+---
+
 ### Q1 — <title> (<qa-api-stack | qa-ui-stack | qa-mobile-stack>, qa)
 
 ````
 Depends on: <ids only, or none>
+Agent: <exact qa agent name> · Stack: qa
 
 You are `<exact qa agent name>`. Task Q1 of docs/plans/<NNN>-<initiative>/delivery-plan.md: write the
 acceptance tests for <the resource group or journeys>, against the stubs, before the implementation.
@@ -132,6 +235,8 @@ Read, in this order — these sections only, not the whole artifacts:
 2. The plan: §3 task Q1; `api-surface.md` §<n.n> — the endpoint blocks this task tests; §4 — the
    validation catalog's standard set (V8.6 is the stub response); `stories.md` <US ids> — the ACs
    each test cites; for journeys, `experience-plan.md` <J ids> and the screens' `Test ids:` lines.
+   Where the plan has `TD` tasks: the epic's test plan §10 — the `TP-` rows bound to you (the path is
+   in the test-plan task's `As built` note); each test carries its `TP-` id beside its AC id.
 3. The OpenAPI asset the contract task generated from the stubs — its path is in <the contract task>'s
    `As built` note — and the existing acceptance-test project, if any, as the fixture pattern.
 4. The plan's "Close-out — every task".
@@ -171,13 +276,14 @@ Close out per the plan's "Close-out — every task" before you stop.
 
 ````
 Depends on: <every task nothing else waits for>
+Agent: <exact agent name> · Stack: <stack>
 
 You are `<exact agent name>`. Task F3 of docs/plans/<NNN>-<initiative>/delivery-plan.md:
-<the mission>. **You are the last runnable task, so you run the whole set and carry the close-out.**
+<the mission>. **You are the gate task, the last task that builds and runs code, so you run the whole set.**
 
 … (the same reading list / deliverable / build / traps shape) …
 
-Gate (this is the last runnable task, so it runs the whole set once more across the plan, in run order):
+Gate (this is the gate task, so it runs the whole set once more across the plan, in run order):
   <the project's own install, build, test, typecheck, lint and format commands>
   <the coverage floor — plan-format.md §5: the changed-file list from git, then each stack's
    coverage command; ≥ 80% of the branches the plan wrote (Swift: lines)>
@@ -192,11 +298,66 @@ fixture a `Q` task wrote it is read-only: record a dated `D<n>` with both readin
 A coverage shortfall is fixed by writing the missing tests — never by excluding a file that has logic
 or lowering the number; record the figure per stack and every file left out.
 
-Also write <the docs this plan owes> and the repository-state note. This block normally deletes the
-last one, so the close-out files the plan — the whole initiative folder. (If `<blocked id>` is still
-holding a block, the plan stays in `docs/plans/`: say so in `Status:`; that block files it.)
+<Where the plan has `TD` tasks:> Check each test plan's §11 Definition of Done against what the run
+showed, tick what holds, and name every item that does not in your `As built` note.
+
+Write no product documentation: `DOC1` below does that from the code you leave. Your `As built` note
+is its lead, so say what landed, where, and what is built but unverified. Merge the default branch
+into the plan's branch (close-out step 6) so `DOC1` documents the merged code. `DOC1` files the plan.
+<In a plan whose header says `Documentation task: none`, this block deletes the last one and files
+the plan itself.>
 
 Commit: `<the commit message>`.
+Close out per the plan's "Close-out — every task" before you stop.
+````
+
+---
+
+### DOC1 — <title: the documentation for <areas | features>> (<be-documenter | be-feature-documenter>, docs)
+
+````
+Depends on: <the gate task's id; ids only>
+Agent: <be-documenter | be-feature-documenter> · Stack: docs
+
+You are `<be-documenter | be-feature-documenter>`. Task DOC1 of
+docs/plans/<NNN>-<initiative>/delivery-plan.md, the plan's last task: update the documentation to
+describe what this plan landed, from the code.
+
+Read your agent definition and run it in <REFRESH mode over the areas below | update mode for the
+features below>; load the skills its steps name.
+
+Read, in this order:
+1. CLAUDE.md.
+2. The plan: its `Status:` line, §3 task DOC1, and the `As built` notes of every task above — they say
+   what landed and where. They are leads: every statement you write is backed by code you read this session.
+3. The existing documents for <the areas | the features> in <docs/business-model/ | docs/features/>.
+4. `stories.md` <US ids> — for the words the business uses, never as evidence of what was built.
+5. The plan's "Close-out — every task".
+
+Deliverable: <copied verbatim from the task block — it names the documents>.
+
+Build:
+- Re-trace <AREA ids | the features> over the files `git diff --stat <the plan's first commit>..HEAD` lists.
+- Update each existing document in place; write the set for an area or feature that has none.
+- <the task's own bullets, copied>
+
+Out of scope: any change to source, tests or configuration — a defect the trace finds goes in the
+document's findings and in your report. Documenting what the plan intended and did not build.
+
+Traps:
+- The plan is not the evidence. Where an `As built` note and the code disagree, the code wins and the
+  disagreement is a line in your report.
+- What `Status:` lists as built but unverified is documented as built, with the unverified part said.
+- <the per-task trap: the area whose worked example changes because a rule's number changed, the feature
+  that moved between areas>
+
+Gate: own tests — `<the documenter's doc-lint command over the documents this task touched>`; expect clean.
+
+Commit: `<the commit message>`.
+
+You delete the last prompt block, so the filing is yours: rewrite `Status:` one final time and move
+<this plan | the initiative folder> to `docs/plans/implemented/`. <Where a blocked task still holds a
+block below: the plan stays in `docs/plans/` until it clears.>
 Close out per the plan's "Close-out — every task" before you stop.
 ````
 
@@ -226,7 +387,8 @@ The **workshop-booking** pack, caught after the contract wave has landed (its
 Run them one session each. Every block is complete on its own and opens with its `Depends on:` line.
 B1 and B2 share the .NET solution, so B2 waits for B1 and nothing runs beside anything. **Every task gates
 what it built:** each block's `Gate:` line names its commands. No block but F4's runs the unfiltered suite —
-F4 runs the whole set once more for the plan and fixes what it catches.
+F4 is the gate task: it runs the whole set once more for the plan and fixes what it catches. DOC1 then
+updates the documentation from the merged code and files the plan.
 
 **Gates run locally.** Commit locally; ask before `git push`.
 
@@ -237,8 +399,9 @@ F4 runs the whole set once more for the plan and fixes what it catches.
 | 3 | B1 | `E1` | `US3` | `be` | `timetable-api` | `be-dotnet` | ~112k | C1 | — |
 | 4 | B2 | `E3` | `US9` | `be` | `profile` | `be-dotnet` | ~95k | C1 | — |
 | 5 | F4 | `E1` | `US3` | `fe` | `timetable-ui` | `fe-react` | ~150k | B1, B2 | — |
+| 6 | DOC1 | — | — | `docs` | `docs` | `be-documenter` | ~110k | F4 | — |
 
-**H1 and C1 have landed, and their prompts are deleted.** B1, B2 and F4 are live.
+**H1 and C1 have landed, and their prompts are deleted.** B1, B2, F4 and DOC1 are live.
 
 ---
 
@@ -246,6 +409,7 @@ F4 runs the whole set once more for the plan and fixes what it catches.
 
 ````
 Depends on: C1
+Agent: be-dotnet · Stack: be
 
 You are `be-dotnet`. Task B1 of docs/plans/003-workshop-booking/delivery-plan.md: implement the
 Workshops and Sessions resources so a studio admin can publish a workshop and add sessions to it.
@@ -317,6 +481,6 @@ Close out per the plan's "Close-out — every task" before you stop.
   session to run the unfiltered suite spends its context on work that belongs to the last task.
 - **When the next task binds to a different agent, say so above the close-out line.** The agent writing the
   repair is not the agent who will run it, and a block that quietly changes hands is one nobody adopts.
-- **The filing duty goes on whichever block will be the last.** Normally that is the last runnable task's, but a task that was blocked on a person outlives it — then the duty is on *that* block, and the last runnable task's says the plan stays in `docs/plans/` until it clears. Getting this wrong leaves a finished plan in the live folder, or files one that is still waiting.
+- **The filing duty goes on whichever block will be the last.** Normally that is the documentation task's (`DOC1`), but a task that was blocked on a person outlives it — then the duty is on *that* block, and the documentation task's says the plan stays in `docs/plans/` until it clears. Getting this wrong leaves a finished plan in the live folder, or files one that is still waiting.
 - **Partial / blocked / diverged keeps the block on the same task**, with a `**Picking up from:**` line
   naming what remains and where inside the task to start. The task's unfinished bullets are that list.

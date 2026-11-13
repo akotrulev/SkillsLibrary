@@ -4,7 +4,7 @@ paths:
   - "docs/plans/*/delivery-plan.md"
 ---
 
-<!-- dev rules v3 (2026-11-06): plans. Installed by /dev:rules; edit to fit this project, re-run to compare with the plugin's copy. -->
+<!-- dev rules v4 (2026-11-13): plans. Installed by /dev:rules; edit to fit this project, re-run to compare with the plugin's copy. -->
 
 # Plan document standards
 
@@ -31,7 +31,9 @@ Apply to every plan you write, edit, run a task from, or review. Severity: **blo
 - `**Gate: own tests**` names filtered commands (scoped build, its tests, coverage over its files), never the whole suite; `**Gate: none**` says why. The last task runs the whole set, the ≥ 80% branch floor over the plan's code and the telemetry smoke when service behaviour changed, fixes what it finds, and holds no feature work. *major*
 - An implementation task's gate also reruns every acceptance test an earlier task of the plan turned green in the same app, and runs acceptance tests through the runner the last task's gate uses (the project's gate script, scoped), never a bespoke command whose build, data or load differs. *major*
 - The last task's gate carries the fix loop: the whole set once; each failure reproduced and fixed with the narrowest command; only the failed rerun; the whole set once more to close. Never a full run to check one fix; a failure that moves between runs is an isolation or scheduling defect to fix in the code, owned setup or gate script, never retried until green; inside a `Q` test or fixture it is a `D<n>`, the test left as it is. *major*
-- Order: contract, schema, shared types and stubs answering `501 not-implemented`; then the `Q` acceptance tests, red on the stubs; then backend, shared packages, frontend and mobile. Human prerequisites come first. *major*
+- Order: contract, schema, shared types and stubs answering `501 not-implemented`; then, in a plan that serves stories, the `TD` test-design tasks (the test plan per epic by `qa-test-planner`, then the test-case suites per story by `qa-test-case-designer`); then the `Q` acceptance tests, red on the stubs, automating the scenarios the test plan binds to them; then backend, shared packages, frontend and mobile. Human prerequisites come first. *major*
+- The plan's last task is the documentation task: `DOC1`, stack `docs`, agent `be-documenter` (or `be-feature-documenter` where the project documents per feature), after the gate task and depending on it. It updates the documentation from the code that landed, never from the plan, and files the plan. The gate task writes no product documentation. Left out only with `Documentation task: none — <why>` in the header. *major*
+- A plan that serves stories and has no `TD` tasks says in its header who opted out and why. The last task checks each test plan's Definition of Done and records unmet lines in `Status:`. *major*
 - `**Not in <id>:**` names what belongs elsewhere. A stack-cut task that cannot be demonstrated says so; never a fake success or an empty list. *major*
 - Acceptance tests a `Q` task wrote are read-only to every later task but the gate. A test you believe wrong stays red, recorded as a dated `D<n>` with both readings. *blocker*
 
@@ -49,4 +51,4 @@ Apply to every plan you write, edit, run a task from, or review. Severity: **blo
 - Re-read the plan just before your close-out edits; touch only your task block, your prompt block and the landed line. Commit on the current branch, your own files by path, never `git add -A`; never check out the default branch. *blocker*
 - Append a dated `**As built:**` with `file:line` or command output; never edit an earlier note. A divergence is a dated `D<n>`, never absorbed. Rewrite every block below yours that your work invalidated. *major*
 - Delete your prompt only after the work is committed, in a follow-up commit `docs: delete <id>'s prompt (<plan>)`; never stop between the two. With other tasks of the plan running beside you under Plan Queue, do not commit, stash, reset or check out: delete it as your last edit. Stopping mid-task or blocked: keep it, with `Picking up from:` or the blocker and its owner. *blocker*
-- The last task merges the default branch into the plan's branch before deleting its prompt, keeping both sides' rows. Deleting the last block files the plan: final `Status:`, `git mv` into `docs/plans/implemented/`, its row in that README. Never edit a plan after it moves. *major*
+- The gate task merges the default branch into the plan's branch before deleting its prompt, keeping both sides' rows. Deleting the last block files the plan: final `Status:`, `git mv` into `docs/plans/implemented/`, its row in that README. Never edit a plan after it moves. *major*

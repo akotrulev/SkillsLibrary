@@ -154,6 +154,12 @@ everything that session needs and names nothing it does not:
   nothing runnable. The last block carries the project's own commands for the whole set in run order, the
   instruction to **fix what they find rather than hand it back**, and the fix loop (plan format §5) with
   the project's narrowest-rerun and rerun-failed commands filled in.
+- **A `TD` block** names one of two agents. The test-plan block (`qa-test-planner`) reads the epics and
+  stories it covers whole, the surfaces by section, and the repo for the harness; the test-case block
+  (`qa-test-case-designer`) reads its stories whole and the test plan's §2, §8 and §10 by the path in the
+  test-plan task's `As built`. Both say `Gate: none` with the reason, and the test-plan block ends by
+  writing each `Q` block's `TP-` rows into it. Budget them on the stories read and the documents written:
+  a plan is ~6k written, a suite with its basis ~12k.
 - **A `Q` block** reads the endpoint blocks it tests by section (`api-surface.md` §5.2, not §5), the
   validation catalog's standard set, the ACs it proves (`stories.md` US7–US9), and the OpenAPI asset's
   path from the contract task's `As built`. Its traps are red for the right reason — red on the
@@ -185,8 +191,11 @@ per plan; a copy that drifts from §7 is two contracts.
 
 Two things stay this skill's to get right, because the close-out section cannot know them:
 
-- **Which block files the plan.** Normally the last runnable task's; where a blocked task sits below it, the
-  filing falls to that block, and the last runnable task's block says the plan stays in `docs/plans/` until it
+- **The last block is the documentation task's** (`DOC1`): the documenter agent, reading the plan's `As
+  built` notes as leads and the code as evidence, its gate the doc lint. Budget it on the areas re-traced
+  (~15k each) and the documents updated (~8k per area set); over ~150k it is split by area.
+- **Which block files the plan.** Normally the documentation task's; where a blocked task sits below it, the
+  filing falls to that block, and the documentation task's block says the plan stays in `docs/plans/` until it
   clears (plan format §8).
 - **Which block writes which.** Every `Blocked on <id>` placeholder is matched by a line in that
   task's own block, above its close-out line.
@@ -217,6 +226,7 @@ The standards the `**Budget:**` lines and the prompt blocks must meet (drivers i
 6. The last runnable block runs the whole set, with the project's own commands in run order and the instruction to fix what they find. Every other code block says `Gate: own tests` with its filtered commands and the colour it expects; only a block with nothing runnable says `Gate: none`, and says why. Every implementation block in a test-first plan repeats the read-only rule.
 7. `## Close-out — every task` sits directly above `## Prompts — one per task`, verbatim from plan format §7; every block names it last in its reading list and ends with its close-out line; and the block that will delete the **last** one is the one the filing falls to.
 8. Blocked tasks appear with their blocker and its owner.
+9. A plan that serves stories has its `TD` blocks (the test plan, then the test cases) above the `Q` blocks, each `Gate: none` with its reason; the last block is `DOC1`, the documenter agent, with the doc lint as its gate, or the header says why there is none.
 
 ## Handoffs
 
