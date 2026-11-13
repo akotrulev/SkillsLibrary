@@ -2,7 +2,7 @@
 
 The Level 3 example for `dev:doc-business-model`: the same **Session credits & charges** area as [example-area.md](example-area.md) (Level 1) and [example-behind-the-scenes.md](example-behind-the-scenes.md) (Level 2), written for developers and AI agents. Every code name, path, status code and tier tag the other two levels keep out is here. **Shape, heading names, local ids and the evidence index are normative; domain content, paths and line numbers are illustrative.**
 
-Note what the example demonstrates: tables over prose; one fact per row with its evidence on the same row; local ids (`EP1`, `R4`, `DB2`…) the evidence index and other agents can cite; Mermaid for the state machine and the multi-participant flow; the same plain part names as Level 2 mapped to class names; a section with nothing to report (*Integrations*, *Configuration*) stating the search that found nothing; a Finding carrying its boundary condition — the only place in the set where behaviour is called a defect; and an evidence index whose Section cells cite `Flow · step N` for every flow of Levels 1 and 2, with its one `#inferred` row naming the open question that carries it.
+Note what the example demonstrates: tables over prose; one fact per row with its evidence on the same row; local ids (`EP1`, `R4`, `DB2`…) the evidence index and other agents can cite; Mermaid for the state machine and the multi-participant flow; the same plain part names as Level 2 mapped to class names; a section with nothing to report (*Integrations*, *Configuration*) stating the search that found nothing; a Finding carrying its boundary condition — the only place in the set where behaviour is called a defect; and an evidence index whose Section cells cite `Task · step N` (and, in Level 1, `Task · outcome N`) for every flow of Levels 1 and 2, with its one `#inferred` row naming the open question that carries it.
 
 ---
 
@@ -152,6 +152,11 @@ None found. Search: `ActivitySource`, `Meter`, `ILogger` calls in `src/Credits/`
 | Scheduling service | `SessionService` (`src/Scheduling/`) |
 | Overage note | `AccruedOverage` |
 | Plan (client term on the staff screen) | `MembershipPlan` |
+| Session credits | `nav.credits` in `Resources/staff-ui.en.json` |
+| Monthly allowance | `plans.monthlyCredits`; `MembershipPlan.MonthlyCredits` |
+| Overage rate (per credit) | `plans.overageRate`; `MembershipPlan.OverageRate` |
+| Personal overage rate | `members.overageOverride`; `Member.OverageRateOverride` |
+| Cancel session | `sessions.cancel`; `SessionService.CancelSession` |
 | Overage rate override (staff screen) | `Member.OverageRateOverride` |
 | Session tier: Standard · Workshop · Masterclass | `SessionTier` enum display names |
 | Credits used | `Member.CreditsUsed` |
@@ -182,32 +187,52 @@ None found. Search: `ActivitySource`, `Meter`, `ILogger` calls in `src/Credits/`
 
 | Level | Section | Statement | Evidence | Tier |
 |---|---|---|---|---|
-| Guide | Overview | Overage accrues during the month, posted once at month start | see **R7**, **EV4** | `#observed` |
-| Guide | Overview | A booking is priced once, after it is confirmed, and never re-priced | see **EV1**, **R1**; no re-pricing path (search: `Reprice`, `Recalculate` under `src/Credits/`) | `#observed` |
-| Guide | Overview | Returned credits never reduce an accrued overage | no reader of returned credits outside future pricing (search: `ReturnedCredits` under `src/`); Q2 | `#observed` |
-| Guide | Overview | Appears to exist so members can book beyond their plan without being refused | comment at `CreditPricingService.cs:9`; Q5 | `#inferred` |
-| Guide | Setup | Plan, tier, member override and precedence; staff set them | see **DB1**, **R3**, **EP2**, **EP6**, **EP7**, `SessionTier.cs:11` | `#observed` |
-| Guide | Setup | Validations and the messages staff see | see **R9**, **DB1**, **ERR1**, **ERR2** | `#observed` |
-| Guide | Setup | Cut-off, posting time, no roll-over fixed in code | see **R10**; Q1, Q3 | `#observed` |
-| Guide | Scope | No *Scope* section — applies to every member | search: `Eligib`, `AppliesTo` under `src/Credits/` — none | `#observed` |
-| Guide | Booking a seat · steps 1–2 | Credit cost from tier; credits remaining | see **R1**, **R2** | `#observed` |
-| Guide | Booking a seat · steps 3–4 | Spend or overage; rate precedence | see **R2**, **R3** | `#observed` |
-| Guide | Booking a seat · step 5 | Overage accrued, never refused | see **R2**, **R4** | `#observed` |
-| Guide | Cancelling a booking · step 1 | Early or staff cancellation returns credits and removes the accrual | see **R5** | `#observed` |
-| Guide | Cancelling a booking · step 2 | Late member cancellation returns nothing | see **R6**; Q4 | `#observed` |
+| Guide | Important | A booking is priced once, after it is confirmed, and never re-priced | see **EV1**, **R1**; no re-pricing path (search: `Reprice`, `Recalculate` under `src/Credits/`) | `#observed` |
+| Guide | Important | Returned credits never reduce an accrued overage | no reader of returned credits outside future pricing (search: `ReturnedCredits` under `src/`); Q2 | `#observed` |
+| Guide | Who uses it | Members see own balances; staff manage plans, tiers and overrides and always return credits | see **EP1**, **EP2**, **EP6**, **EP7**, **R5** | `#observed` |
+| Guide | Who uses it | Applies to every member — no eligibility limits | search: `Eligib`, `AppliesTo` under `src/Credits/` — none | `#observed` |
+| Guide | How it fits together | Overage accrues during the month, posted once at month start | see **R7**, **EV4** | `#observed` |
+| Guide | How it fits together | Credit, session tier, overage and overage rate as defined; Credits per seat by tier | see **R1**, **R2**, **R3**, **DB1**, `SessionTier.cs:11` | `#observed` |
+| Guide | How it fits together | A booking's credits: spent, returned or kept, overage accrued then posted | see **DB3**, **R2**, **R5**, **R6**, **R7** | `#observed` |
+| Guide | Book a session | No member screen found; steps are plain verbs without labels | search: member-facing routes, pages and `Resources/*.en.json` keys for booking under `src/` — only `Resources/staff-ui.en.json` | `#observed` |
+| Guide | Book a session · steps 1–2 | A member books a seat; the seat is allocated by Bookings | see **EV1** | `#observed` |
+| Guide | Book a session · outcome 1 | Credit cost from the session tier | see **R1** | `#observed` |
+| Guide | Book a session · outcome 2 | Credits remaining; enough credits means spend, no charge | see **R2** | `#observed` |
+| Guide | Book a session · outcome 3 | Shortfall becomes an overage; rate precedence | see **R2**, **R3** | `#observed` |
+| Guide | Book a session · outcome 4 | Overage recorded against the member, not yet charged | see **R2**, **DB3** | `#observed` |
+| Guide | Book a session · outcome 5 | A booking is never refused for lack of credits | see **R4** | `#observed` |
+| Guide | Book a session | Example: 2 of 3 credits remain, shortfall 1 × £6.00 = £6.00 | see **R2** | `#observed` |
+| Guide | Cancel a booking | No member screen found; steps are plain verbs without labels | search: as under Book a session | `#observed` |
+| Guide | Cancel a booking · steps 1–2 | A member cancels; the cancellation says who cancelled | see **EV2** | `#observed` |
+| Guide | Cancel a booking · outcome 1 | 24 hours or more ahead returns credits and removes the accrual | see **R5** | `#observed` |
+| Guide | Cancel a booking · outcome 2 | Late member cancellation returns nothing | see **R6**; Q4 | `#observed` |
+| Guide | Cancel a booking · outcome 3 | Returned credits are for future bookings only | see **R5**; no reader of returned credits outside future pricing (search: `ReturnedCredits` under `src/`) | `#observed` |
+| Guide | Cancel a booking | A late cancellation cannot be undone | see **R6** | `#observed` |
+| Guide | Set up plans and tiers · steps 1–4 | Staff set plan, monthly credits, rate, tier cost and a member's personal rate with the staff screen's labels | see **EP2**, **EP6**, **EP7**, **DB1**; labels at `staff-ui.en.json:2`, `:5`, `:6`, `:8` | `#observed` |
+| Guide | Set up plans and tiers · outcome 1 | A change applies to future bookings only | see **R1**, **DB4** | `#observed` |
+| Guide | Set up plans and tiers · outcome 2 | A member's personal rate wins over the plan's | see **R3** | `#observed` |
+| Guide | Set up plans and tiers | Validations and the messages staff see | see **R9**, **DB1**, **ERR1**, **ERR2** | `#observed` |
+| Guide | Cancel a member's booking · steps 1–2 | Staff cancel a member's booking | see **EV2** | `#observed` |
+| Guide | Cancel a member's booking · outcome 1 | A staff cancellation always returns the credits and removes the accrual | see **R5** | `#observed` |
+| Guide | Cancel a member's booking | Cancel session cancels each booking one by one; label at `staff-ui.en.json:11` | see **EV3** | `#observed` |
 | Guide | Monthly posting · steps 1–2 | One charge per member per run; zero sum posts nothing | see **R7** | `#observed` |
 | Guide | Monthly posting · step 3 | Credits reset, no roll-over | see **R8** | `#observed` |
-| Guide | How it connects | Starts from Bookings and Scheduling; sets off nothing; shares bookings read-only | see **EV1**, **EV2**, **EV3**, **EV4**, **DB2** | `#observed` |
-| Guide | Who can do what | Member sees own balances; staff manage plans, tiers and overrides and always return credits | see **EP1**, **EP2**, **EP6**, **EP7**, **R5** | `#observed` |
+| Guide | Rules and limits | Plan, tier, member override and precedence; staff set them | see **DB1**, **R3**, **EP2**, **EP6**, **EP7**, `SessionTier.cs:11` | `#observed` |
+| Guide | Rules and limits | Validations: unique name, whole-number credits, non-negative rates | see **R9**, **DB1** | `#observed` |
+| Guide | Rules and limits | Cut-off, posting time, no roll-over fixed in code | see **R10**; Q1, Q3 | `#observed` |
+| Guide | Rules and limits | A tier or rate change affects future bookings only | see **R1**, **DB4** | `#observed` |
+| Guide | A month in numbers | Ana's March, her £6.00 posted, one unused credit lost; Ben's £4.50 | see **R2**, **R3**, **R5**, **R6**, **R7**, **R8** | `#observed` |
+| Guide | Related areas | Starts from Bookings and Scheduling; sets off nothing; shares bookings read-only | see **EV1**, **EV2**, **EV3**, **EV4**, **DB2** | `#observed` |
+| Guide | Open questions | Appears to exist so members can book beyond their plan without being refused | comment at `CreditPricingService.cs:9`; Q5 | `#inferred` |
 | Behind the scenes | At a glance | Nothing here talks to an outside service | search under Integrations | `#observed` |
 | Behind the scenes | The parts involved | Part names and what each does | see Business ↔ code vocabulary; **EV1**–**EV4** | `#observed` |
 | Behind the scenes | The parts involved | Credits service runs after the booking is saved; billing job at 00:00 on the 1st | see **EV1**, **EP5** | `#observed` |
-| Behind the scenes | Booking a seat · step 1 | Booking saved and confirmed before pricing | see **EV1** | `#observed` |
-| Behind the scenes | Booking a seat · step 2 | How soon the credits service is told is not shown | no delay, poll interval or schedule visible at `Outbox.cs:22`; Q9 | `#observed` |
-| Behind the scenes | Booking a seat · steps 3–4 | Cost copied onto the booking; overage note added | see **R1**, **R2**, **DB4** | `#observed` |
-| Behind the scenes | Cancelling a booking · steps 1–2 | Cancellation saved, then the credits service is told who cancelled | see **EV2** | `#observed` |
-| Behind the scenes | Cancelling a booking · step 3 | A repeated cancellation message returns the credits twice | see **F1** | `#observed` |
-| Behind the scenes | Cancelling a booking | Staff cancelling a session cancels each booking one by one | see **EV3** | `#observed` |
+| Behind the scenes | Book a session · step 1 | Booking saved and confirmed before pricing | see **EV1** | `#observed` |
+| Behind the scenes | Book a session · step 2 | How soon the credits service is told is not shown | no delay, poll interval or schedule visible at `Outbox.cs:22`; Q9 | `#observed` |
+| Behind the scenes | Book a session · steps 3–4 | Cost copied onto the booking; overage note added | see **R1**, **R2**, **DB4** | `#observed` |
+| Behind the scenes | Cancel a booking · steps 1–2 | Cancellation saved, then the credits service is told who cancelled | see **EV2** | `#observed` |
+| Behind the scenes | Cancel a booking · step 3 | A repeated cancellation message returns the credits twice | see **F1** | `#observed` |
+| Behind the scenes | Cancel a member's booking | Staff cancelling a session cancels each booking one by one | see **EV3** | `#observed` |
 | Behind the scenes | Monthly posting · steps 1–3 | Runs at 00:00 on the 1st; one charge per member per run; reset for everyone | see **EP5**, **R7**, **R8** | `#observed` |
 | Behind the scenes | What is remembered, and where | Plan values, tier costs and personal rate changed only by staff | see **EP2**, **EP6**, **EP7**, **DB1** | `#observed` |
 | Behind the scenes | What is remembered, and where | Booking cost written once at pricing; credits used has three writers; notes and ledger writers | see **DB2**, **DB3**, **DB4**, **EV4** | `#observed` |

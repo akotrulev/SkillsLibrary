@@ -2,7 +2,7 @@
 
 **Goal:** `dev:doc-business-model` writes guides (Level 1) and behind-the-scenes accounts (Level 2) that read in the order a person meets the product — who uses it, the few ideas and one picture of how it fits together, then each person's tasks in the order life happens — with Mermaid diagrams, GitHub-style callouts and examples beside the rule they show, screen labels the trace found and never invented ones, no internal ids in the body, and lengths the lint enforces. It works on greenfield and brownfield alike: a new KB is written in this shape, and existing documentation is only ever updated in place into it, never recreated (D8), with a check that no number or quoted message was lost. A script turns any guide into one standalone, consistently styled `.html` file to send to a client.
 
-**Status:** Not started. T1 is next. The agentic-shop pilot (that repo's plan 168, task D1) waits for this plan's W1 and for the user to update the `dev` plugin there; that plan's F1 draws three callout kinds and must add `[!WARNING]`, the fourth kind this plan allows (D6). The rule-based evals (`evals/`) are agent runs and are not part of any gate here: until the user runs the fixture eval (the row under W1 in the prompts table), the new shape is proven only by the golden examples passing the lint.
+**Status:** All five tasks have landed (2026-11-13) and the plan is filed. Delivered: the reader-first Level 1, Level 2 and overview shapes, the INDEX line, in-place update of an old-shape set, `doc-lint.py` (new rules, `old-shape`, `index-line`, `--kept-from`/`fact-kept`), `render-html.py`, and — in W1 — the catalog, README, the two rule files, `requirements-breakdown` and the evals brought in line. The whole set ran green (230 tests; doc-lint 99% branch on both scripts; the three examples 0 errors / 0 warnings; `--kept-from 92f14828` no `fact-kept`; headless Chrome draws 1 diagram; `plugin-surface-check` OK). Built but unverified: the lint and `fact-kept` on a real KB, the pages in anything but headless Chrome, and the rule-based evals, which are agent runs not part of any gate: until the user runs the fixture eval (`evals/README.md`, eval 1) the new shape is proven only by the golden examples passing the lint. The agentic-shop pilot (that repo's plan 168, task D1) waits for the user to update the `dev` plugin there; that plan's F1 draws three callout kinds and must add `[!WARNING]`, the fourth kind this plan allows (D6). `token-audit.py` exits 1 on 84 pre-existing body-size violations (the baseline before this plan); this plan added none net, but `business-documentation/SKILL.md` grew 19.6k → 30.6k characters, already over 16k.
 
 ## 1. What already exists, and what is missing
 
@@ -275,6 +275,16 @@ Costs: offline, the reader gets a one-line notice in place of the picture.
 
 **D12 — A screen label is evidence.** Bold in a `Where:` line or a person's step must be in Level 3's vocabulary table, and a task whose screen the trace did not find is written without labels. Otherwise D2's "press **Place order**" invites invented buttons wherever the UI lives in another repository. Costs: a backend-only codebase yields guides with no `Where:` paths until someone supplies the screens.
 
+**D13 (2026-11-13, T1) — `internal-ids` runs on the Level 1 area guide only, not on Level 2.** §6 lists it for Levels 1–2. The old `example-behind-the-scenes.md` carries `FLOW-004`, `Q6`, `Q9` in its body and must keep passing until T2 rewrites it, and the overview guide still lists AREA ids until T3. T1 ran it on Level 1 area guides; T2 extends it to Level 2 (after moving the ids into `## About this document` / the open-questions first cell) and keeps the overview out until T3. `alerts` already covers Levels 1–2. Also: Level 1's `**Id:**` joined `HEADER_PREFIXES`, and the example's "Cancel a member's booking" has no `**Where:**` because the fixture has no label for cancelling one booking (`Cancel session` cancels a whole session, so it appears in a `[!NOTE]`).
+
+**D14 (2026-11-13, T2) — three small readings the plan left open.** (a) `length` and `task-unique` run on every set, the overview included (the plan says "Level 1"); `diagram` runs on every Level 1 file; `internal-ids`, `flow-mirror`, `limits`, `long-sentence` and `labels` run on area sets only, so the overview stays untouched until T3. (b) Level 2's `**Audience:**` is read from the top only — the same line in `## About this document` is reported missing — while its other metadata is read from About, and `header_line` falls back to the top for both Levels 1–2. (c) `length` counts a header line (`**Created:**`…, `**Levels:**`) as nothing, and a word is any whitespace- or pipe-separated token holding a letter or digit, so `£6.00` is one word and a table's `|---|` none. Costs: a Level 2 file that moves its Audience under About fails `audience` instead of passing quietly.
+
+**D15 (2026-11-13, T3) — `old-shape` also covers the overview, and the INDEX check keys on the guide's link.** (a) §6 defines `old-shape` as `## How it works` and no `## Who uses it`; an old overview has `## Overview` and `## The areas` and never `## How it works`, so under the plan's text it would have drawn a wall of `sections` ERRORs the day the plugin updates, which is what D8 exists to prevent. The lint treats an overview guide with `## The areas` and no `## Who uses it` as old-shape. (b) `index-line` finds a set's line as the one whose link is the guide's path relative to `--dir`, so a set not under `areas/` (a feature folder) is never checked and a set the lint reports as `old-shape` or `set-complete` is skipped. (c) `fact-kept` reads a number as a digit run not preceded by a word character, `.` or `-` (so `AREA-004`, `Q7` and a sha are not facts), skips header lines, list numbers and link targets, and reads a quoted message as the text between `“…”` or `"…"` compared with whitespace collapsed. A fact found at no level of the set is reported once, at its first line in the old file. A `--kept-from` revision git cannot resolve exits 2 rather than printing nothing. Costs: a number written as a word, or a fact stated without a number or quotation, is invisible to `fact-kept`.
+
+**D16 (2026-11-13, T4) — four readings the renderer made.** (a) `--dir` renders the files holding a `**Audience:** shareable` line (anywhere), not "every Level 1 guide by name": a KB's `INDEX.md`, glossary and notes carry no such line and stay out, while an overview qualifies. (b) The `**Levels:**` and `**Audience:**` header lines are dropped from the page (the Levels links would all render as text or point at the page itself), and Audience is still read first to decide the "Internal — not for sharing" line. (c) A link is a guide link when it ends `.md` and is not a Level 2/3 file by name (`.behind-the-scenes.md`, `.technical[.topic].md`); a link to another `.md` that is no guide (an `INDEX.md`) cannot be told apart by name and becomes a dead `.html` link, which beats guessing from the disk because the pages are sent as a set. `https:`, `http:`, `mailto:` and `#` links stay. (d) A page with no diagram loads no script at all, so it makes no request. Alert icons are CSS glyphs, not inline `<svg>`, so the gate's `grep -c "<svg"` counts only drawn diagrams. Costs: (c)'s dead link for a non-guide `.md`; a page whose diagram fails to parse shows Mermaid's own error graphic, not the notice.
+
+**D17 (2026-11-13, W1) — the old section names `005` cites, and two readings W1 made.** (a) `docs/plans/005-cross-feature-test-design.md` cites the guide's old section names (`How it connects` at lines 13, 29, 71, 443 and 832; `How it works` at 445; `Setup` at 348, 387 and 732). The new names are `Related areas`, the `For <person>` tasks and `Rules and limits`. The plan is a record and was not edited: whoever runs 005 next maps `How it connects` → `Related areas`, `How it works` → the `### <task>` sections under `## For <person>`, `Setup` → `Rules and limits`. (b) The plan's W1 prompt said "record as D16", but T4 had taken D16; this is D17. (c) `be-documenter.md` (agent file, 14,000-character budget) and `feature-trace/SKILL.md` (16,000) went over their budgets with the new text; both were tightened by deleting repeated wording, not rules (one descriptive sentence, "doubles as the security-review map and negative-test matrix", was dropped from `feature-trace`). `business-documentation/SKILL.md` was already over 16,000 at the baseline and was left over: moving the Level 1 shape out would change what `be-documenter` Step 4 reads. Costs: that file is the largest `dev` body after `delivery-plan` and `solution-blueprint`.
+
 ## Answered questions (2026-11-13)
 
 **O1 — Title as a question (Trading212 style)?** No: the title is the area's plain name.
@@ -308,6 +318,7 @@ All tasks are `docs` on `general-purpose`, as in every library plan. Paths are r
 - `BD/references/example-technical.md`: re-cite every evidence-index row whose Level is Guide to the new task headings, `· step N` and `· outcome N`; add to the first column of *Business ↔ code vocabulary* every staff-screen label the guide now shows in bold; nothing else changes. Level 2's rows are T2's.
 - `BD/references/level-3-technical.md`: in the evidence-index rules, a statement in a task cites `<Task> · step N` or `<Task> · outcome N`; the example table's `Guide | Overview` and `Guide | Setup` rows cite sections that exist in §2 (`Open questions`, `Rules and limits`).
 - `BD/scripts/doc-lint.py` + `test_doc_lint.py`: §6's T1 rows — Level 1 `sections`, flow parents with steps and outcomes for Level 1, `header` from `## About this document` in Level 1 with `**Id:**`, `internal-ids`, `alerts`, the mermaid-fence treatment in `code-nouns`/`jargon`, `example`; `qid-unique` and `ref-resolves` keep reading `## Open questions`. Update the module docstring's rule list. Level 2 and overview rules stay as they are until T2/T3, so the old example-behind-the-scenes still passes.
+- **As built (2026-11-13):** Level 1 shape in `BD/SKILL.md` ("## Level 1 — the guide", "### Header block", discipline 3, "Language discipline"), `references/example-area.md` rewritten (members' tasks Book a session / Cancel a booking carry no `**Where:**` and no bold; staff tasks Set up plans and tiers / Cancel a member's booking; `[!IMPORTANT]`, `[!NOTE]`, `[!WARNING]`; `stateDiagram-v2`; Monthly posting; Rules and limits; A month in numbers; Q1–Q5 kept). `example-technical.md`: 38 Guide evidence rows re-cited, five staff labels added to the vocabulary table (Session credits, Monthly allowance, Overage rate (per credit), Personal overage rate, Cancel session). `level-3-technical.md`: citation rules incl. `· outcome N`, the opening callout cited `Important`, a no-screen task's negative-search row. `doc-lint.py`: `sections`, `flow_tasks()`/`flows()` returning `(steps, outcomes)`, `header` from About with `**Id:**` first, `internal-ids`, `alerts`, `example`, `mermaid_prose()`; `load()` anchors on the `**Levels` line. Proof: `python3 BD/scripts/doc-lint.py <three examples>` → `0 error(s), 0 warning(s)`; 103 tests pass; `doc-lint.py` 99% (361 stmts, 142 branches, one miss at the `__main__` guard).
 - **Not in T1:** Level 2, and the `length`, `limits`, `long-sentence`, `labels`, `diagram`, `task-unique` and roadmap-promise rules (T2); the overview, INDEX, `old-shape`, `fact-kept`, the trace's `Where in the product` column and the agents (T3) — `SKILL.md` names that column as it will exist; the renderer (T4); the catalog, README, evals and `requirements-breakdown` (W1).
 
 ### T2 — the Level 2 account follows Level 1, and the lint measures what a reader feels
@@ -324,6 +335,7 @@ All tasks are `docs` on `general-purpose`, as in every library plan. Paths are r
 - `doc-lint.py` + tests: Level 2 `sections`, flow parents for Level 2, `header` in Level 2 (Audience read from the top), `flow-mirror` as an ordered subset, `task-unique`, `length` for all three levels, `limits`, `long-sentence`, `labels`, `diagram`, the roadmap promises in `guarantee-words`. Update the docstring.
 - Where one of the new rules reports a finding on `example-area.md`, fix the example, not the rule: T1 wrote it to §2 without these checks.
 - **Not in T2:** the overview, INDEX, `old-shape`, `fact-kept`, the trace column, the agents (T3).
+- **As built (2026-11-13):** `level-2-behind-the-scenes.md` rewritten to §3 (follows the guide, Audience on top, About last, ids and `Q<n>` out of the body, 3,000-word ceiling). `example-behind-the-scenes.md`: `## For members` (Book a session, Cancel a booking), `## For staff` (Cancel a member's booking — the whole-session cancellation paragraph lives here), `## What happens automatically` (Monthly posting); *Set up plans and tiers* is left out (nothing behind it beyond what the guide and *What is remembered* say); `FLOW-004` moved to `**Models:**`, `Q6`/`Q9` in the body became "see *Open questions*". `example-technical.md`: the 12 Behind-the-scenes rows re-cited to the new headings (the staff-cancel row now cites *Cancel a member's booking*). `example-area.md`: three sentences over 30 words split (lines 83, 208, 209), no fact changed. `doc-lint.py`: `check_flow_mirror` (ordered subset over `(section, task)` pairs, `outline()`), `check_task_unique`, `check_length` (`Doc.reader_lines()`), `check_limits`, `check_long_sentence` (`sentences()`), `check_labels`, `check_diagram`, `ROADMAP_PROMISE` in `check_guarantee_words`, Level 2 `sections`/flow parents/`header`/`internal-ids`; docstring updated. Proof: `python3 -m unittest discover -s BD/scripts` → 154 tests OK; `doc-lint.py <three examples>` → `0 error(s), 0 warning(s)`; `doc-lint.py` coverage 99% (478 stmts, 208 branches, one miss at the `__main__` guard). Built but unverified: the lint on any real KB — the evals were not run.
 
 ### T3 — the overview, INDEX lines, and updating an old set in place without losing a fact
 
@@ -342,6 +354,7 @@ a scratch KB under `$TMPDIR` holding one old-shape set (copy of `example-area.md
 - `be-documenter.md`: Step 0 (Orient) reports which existing sets are old-shape; Step 4's row and the REFRESH paragraph name the new sections, `Where:` and the no-screen form, the in-place update (D8: move, add what is missing, re-trace only the delta, run `--kept-from`, never recreate), and the length ERRORs with §2's order for what leaves a guide; the final report gives the render command (`uv run …/render-html.py --out <dir> --dir docs/business-model`) — T4 writes the script, so the line names it as it will exist. `be-feature-documenter.md`: the same, for `docs/features/` (an existing feature document is updated in place).
 - `codebase-survey/references/documentation-plan.md`: a REFRESH plan over an old-shape KB sizes each area as an in-place update — reading the three existing files, the targeted lookup for `Who uses it`/`Where:`/diagram, and a re-trace only of the delta's paths — and its last task's whole-KB lint has no `old-shape` WARN left and its `--kept-from` run no unexplained `fact-kept`.
 - `doc-lint.py` + tests: overview `sections` (both plain levels), `old-shape`, `index-line` (new-shape sets only), `--kept-from` and `fact-kept`. Keep the comparison a pure function over the old and new text, with the `git show <rev>:./<file>` read beside it, so the unit tests need no repository. Update the docstring.
+- **As built (2026-11-13):** `system-overview.md` reference rewritten to §4 (Who uses it, The journey, Areas by who uses them, About this document; Level 2 gains About, Audience on top). `BD/SKILL.md`: the INDEX line shape in the Output table, the greenfield/brownfield sentence opening Level 1, a new reconcile step 2 "An old-shape set is updated in place" (D8's six actions; D8 point 7 is its sub-step 6), step 5 "Update, don't rewrite" says layout moves are not struck through and re-checks the diagram, self-check item 2. `ba-project-memory`: the `## Areas` example line is §5's. `feature-trace`: `Client vocabulary` has `Where in the product (screen › control)`; `trace-recipes.md` has a new "Part 3a — Where in the product" (Next.js, React Router, Blazor). `be-documenter.md` and `be-feature-documenter.md`: the in-place-update invariant, old-shape sets reported on arrival, Step 4/REFRESH wording, `--kept-from` allowed in the lint line, report lines for old-shape sets, kept facts, over-length guides and the printed render command. `documentation-plan.md`: K1's gate and a closing paragraph sizing a REFRESH over an old-shape KB as an in-place update. `doc-lint.py`: `is_old_shape` (short-circuits `lint_set`), `check_index_line`, `fact_lines`/`lost_facts` (pure), `git_show`/`revision_exists` (the git reads), `check_kept`, `--kept-from`; docstring updated. Proof: `python3 -m unittest discover -s BD/scripts` → 186 tests OK; `doc-lint.py` coverage 99% (546 stmts, 234 branches, one miss at the `__main__` guard); the three examples → `0 error(s), 0 warning(s)`; `--kept-from 92f14828` over them → `0 error(s), 0 warning(s)` (no `fact-kept`); scratch KB under `$TMPDIR/kb011` (old set from 92f14828 + new set + INDEX): exit 0 with exactly one `old-shape` WARN and no `index-line`; the new set's INDEX line removed → exit 1 on `index-line`. Built but unverified: the lint on a real KB, and `fact-kept` against a real in-place update (the golden examples are the only old/new pair tested).
 - **Not in T3:** the renderer (T4); `evals/`, `qa/manual/requirements-breakdown/SKILL.md`, `docs/skills-catalog.md`, `README.md`, `engineering-practices/rules/feature-docs.md`, `business-analysis/skills/rules/business-model.md` (W1). `docs/plans/005-cross-feature-test-design.md` cites old section names but is another plan in flight: do not edit it; W1 records it.
 
 ### T4 — `render-html.py`: a guide as one standalone page
@@ -356,6 +369,7 @@ a scratch KB under `$TMPDIR` holding one old-shape set (copy of `example-area.md
 - Alerts: markdown-it has no GFM-alert rule — transform the blockquote tokens whose first inline starts `[!NOTE]`/`[!TIP]`/`[!IMPORTANT]`/`[!WARNING]`, in a small function with its own tests. An unknown kind renders as a plain blockquote (the lint already refuses it at source).
 - The client's page (§7): the About section reduced to "Last updated <date>", `~~old~~ → new` rendered as `new`, the internal line on a file whose Audience is `internal`, and the one-line notice shown in place of a diagram when the Mermaid script did not load — each with its own test.
 - `BD/SKILL.md`: a short "## Sharing a guide" section — the command, D9, what the reader loses offline.
+- **As built (2026-11-13):** `BD/scripts/render-html.py` (PEP 723, `markdown-it-py==4.3.0`, `mdit-py-plugins==0.7.0` — the newest `uv` resolved today; `anchors_plugin` gives the heading ids) and `BD/scripts/test_render_html.py` (44 tests); Mermaid `11.17.2` (jsdelivr 200) with `integrity="sha384-EOXBFmc3gx5mb+vn0vPvvGqACToJD24hhacX5Yx+8NUUQrHIle/Qi5Bg9o3zKwW2"` computed from that file. Alerts are done on the blockquote's tokens (`apply_alerts`, re-parsing the inline after the marker); a mermaid fence becomes an `html_block` holding `<pre class="mermaid">` and the one-line notice (CSS hides the source until Mermaid sets `data-processed`); nothing is fetched but the Mermaid script, and only on a page with a diagram. Both agent forms work as written (`--out <dir> --dir …`, `--out <dir> <file.md>`; tested). `SKILL.md` gained `## Sharing a guide`. The two pins are written into W1's gate line and its prompt. Divergences: D16. Proof: 44 tests OK; `coverage report` 99% (the one miss is the `__main__` line); `render-html.py --out "$TMPDIR/render" --dir BD/references` wrote `example-area.html` and `system-overview.html`; headless Chrome on `example-area.html` with `--dump-dom` prints `1` for `grep -c "<svg"` while the file on disk holds 0, so the diagram drew (Chrome here, Mermaid 11.17.2). Built but unverified: other mail clients and browsers; a KB-wide `--dir` on a real KB.
 - **Not in T4:** wiring into agentic-shop (plan 168 there renders through `/admin/docs`; its D1 runs this script once for the pilot).
 
 ### W1 — the close-out: catalog, README, rules, evals, and the whole set
@@ -366,7 +380,7 @@ a scratch KB under `$TMPDIR` holding one old-shape set (copy of `example-area.md
 **Budget:** ~100k — CLAUDE.md files 20k, this plan's Status, As-built notes and Decisions 10k, `docs/skills-catalog.md` documenter paragraphs only (grep `be-documenter\|doc-business-model\|business-documentation`) 8k + 3k, `README.md` two command rows 1k, `engineering-practices/rules/feature-docs.md` 3k + 2k, `business-analysis/skills/rules/business-model.md` 3k + 2k, `qa/manual/requirements-breakdown/SKILL.md` (its section references) 3k, `evals/evals.json` + `README.md` 4k + 3k, gate output 15k, fixes 10k, reasoning 13k.
 **Gate (this is the last task, so it runs the whole set once more across the plan, in run order):**
 `python3 -m unittest discover -s BD/scripts -p 'test_doc_lint.py'` ·
-`uv run --with markdown-it-py==<pin> --with mdit-py-plugins==<pin> --with coverage coverage run --branch -m unittest discover -s BD/scripts && uv run --with coverage coverage report -m --include='*doc-lint.py,*render-html.py'` (≥ 80% of the branches the plan wrote) ·
+`uv run --with markdown-it-py==4.3.0 --with mdit-py-plugins==0.7.0 --with coverage coverage run --branch -m unittest discover -s BD/scripts && uv run --with coverage coverage report -m --include='*doc-lint.py,*render-html.py'` (≥ 80% of the branches the plan wrote) ·
 `python3 BD/scripts/doc-lint.py BD/references/example-area.md BD/references/example-behind-the-scenes.md BD/references/example-technical.md` (0 errors, 0 warnings) ·
 `python3 BD/scripts/doc-lint.py --kept-from 92f14828 BD/references/example-area.md BD/references/example-behind-the-scenes.md BD/references/example-technical.md` (no `fact-kept` line) ·
 `uv run BD/scripts/render-html.py --out "$TMPDIR/render" --dir BD/references` and T4's headless-Chrome line ·
@@ -379,6 +393,8 @@ a scratch KB under `$TMPDIR` holding one old-shape set (copy of `example-area.md
 - Record in the plan's Decisions a dated `D<n>` that `docs/plans/005-cross-feature-test-design.md` cites the old guide section names, for whoever runs 005 next.
 - Fix what the gate finds by the fix loop; a failure may be T1–T4's.
 - Commit and push to `master` (this repo's rule). Then tell the user, in this order: run the fixture eval (`evals/README.md`, eval 1) before the pilot, because an instruction defect is cheaper to find on the fixture than on 28 areas; update the `dev` plugin in agentic-shop; add `[!WARNING]` to that repo's plan 168 F1; then run plan 168 (F1, then D1).
+
+- **As built (2026-11-13):** `docs/skills-catalog.md` (`be-documenter`, `business-documentation`, lint and `be-feature-documenter` paragraphs: reader-first shape, the new lint rules, `old-shape`, `--kept-from`, `render-html.py`, in-place update); `README.md` (both command rows); `engineering-practices/rules/feature-docs.md` (About-section rule, Level 1 and Level 2 shape bullets, in-place update); `business-analysis/skills/rules/business-model.md`; `qa/manual/requirements-breakdown/SKILL.md` (the feature-documents row now names `For <person>` tasks, `Who uses it`, `Related areas`); `evals/evals.json` (evals 1 and 2 gain five shape expectations; the worked-example line says where it sits) and `evals/README.md`. No existing expectation named an old section, and the Golden-copy checks are unchanged. Gate: 186 tests in `test_doc_lint.py`; 230 in the whole `scripts` directory; coverage `doc-lint.py` 99% (missing `907`) and `render-html.py` 99% (missing `294`), over 80%; the three examples 0 errors, 0 warnings; `--kept-from 92f14828` printed no `fact-kept`; `render-html.py --dir` wrote `example-area.html` and `system-overview.html`; headless Chrome counted 1 `<svg>`; `plugin-surface-check.py` OK. `token-audit.py` exits 1 on 84 violations that all exist at the baseline (`be-documenter.md` and `feature-trace/SKILL.md`, which W1's text had pushed over, were tightened back; D17). Built but unverified: the evals, which are agent runs. Not done: committing and pushing, which the queue does.
 
 ## Close-out — every task
 
@@ -419,283 +435,6 @@ Run them in order, one session each; each block is complete on its own. Every ta
 
 | # | Stack | Agent | Depends on | Runs beside | Budget |
 |---|---|---|---|---|---|
-| T1 | `docs` | `general-purpose` | none | — | ~140k |
-| T2 | `docs` | `general-purpose` | T1 | — | ~133k |
-| T3 | `docs` | `general-purpose` | T2 | — | ~135k |
-| T4 | `docs` | `general-purpose` | T3 | — | ~80k |
-| W1 | `docs` | `general-purpose` | T1, T2, T3, T4 | — | ~100k |
 | — | run the fixture eval (`evals/README.md`, eval 1); update the `dev` plugin in agentic-shop; add `[!WARNING]` to its plan 168 F1; run plan 168 | **the user** | W1 | — | — |
 
-None has landed; every prompt is live.
-
----
-
-### T1 — the Level 1 guide shape, its golden example and the lint that reads it (general-purpose, docs)
-
-````
-Depends on: none
-Agent: general-purpose · Stack: docs
-
-You are working in the SkillsLibrary repo. Task T1 of docs/plans/011-documenter-reader-first-shape.md:
-make `dev:doc-business-model`'s Level 1 guide read in the order a person meets the product, prove it
-with the golden example, and make the lint read the new shape.
-
-Read, in this order:
-1. CLAUDE.md (Comments, KISS, Test code rules).
-2. The plan: §1, §2, §6 (the rows marked T1), D2–D7, D10, D12, task T1, and "Close-out — every task".
-3. backend/_shared/business-documentation/SKILL.md — "Six disciplines", "Header block",
-   "## Level 1 — the guide", "Language discipline — by level".
-4. backend/_shared/business-documentation/references/example-area.md (whole), then
-   example-technical.md — only "## Evidence index" and "## Business ↔ code vocabulary".
-5. backend/_shared/business-documentation/references/level-3-technical.md — only the evidence-index
-   example table and its rules.
-6. backend/_shared/business-documentation/scripts/doc-lint.py (whole) and test_doc_lint.py (whole).
-7. backend/_shared/business-documentation/evals/fixture/src/Workshops.Api/Resources/staff-ui.en.json
-   — the only screen labels the toy system has.
-
-Build what task T1 lists: SKILL.md's Level 1 section per §2; example-area.md rewritten in that shape
-with the hard cases (member tasks in the no-screen form, staff tasks with labels, a task two people do
-under two headings, a rule nobody triggers), every fact, number and quoted message kept;
-example-technical.md's Guide evidence-index rows re-cited and its vocabulary table carrying the labels
-the guide shows; level-3-technical.md's citation rules; the lint's T1 rules with a passing and a
-failing test each, and the docstring's rule list updated.
-
-Traps:
-- The old example-behind-the-scenes.md must still pass the lint after T1: only Level 1 rules change
-  here. Do not add `flow-mirror`, `length`, `limits`, `long-sentence`, `labels`, `diagram` or
-  `task-unique` (T2), nor `old-shape`, `index-line` or `fact-kept` (T3). Write the example to §2's
-  limits all the same.
-- Three places in doc-lint.py assume the metadata is on top: `load()` finds the document's start by
-  walking back from the `**Created` line, `header_line()` scans only the first 20 body lines, and
-  `prose()` drops lines by their header prefix. With the block in `## About this document` each one
-  must be re-anchored — the start on the document's own `# ` title, the header lines read from the
-  About section — and the golden-example preamble must still be skipped.
-- "What happens next" is a bulleted list, not a continued numbering: `flows()` counts numbered items
-  as steps and those bullets as outcomes, and `index-steps` checks `· step N` and `· outcome N`.
-- A ```mermaid fence must not trip the inline-code check. Only its quoted labels and the text after a
-  `:` are prose for `code-nouns` and `jargon` — a class name in a label is still an ERROR, a node id
-  is not read.
-- `internal-ids` exempts `## About this document` and the first cell of open-questions rows only. The
-  `**Levels:**` line stays at the top and links filenames, not ids.
-- The guide's open questions stay under `## Open questions` — there is no `## For the product owner`
-  heading, so a `## For …` heading is always a person's tasks.
-- The member tasks have no screen in the fixture: no `**Where:**`, no bold label, steps in plain verbs.
-  Do not invent a member screen to make the example look complete.
-
-Gate: own tests —
-  python3 -m unittest discover -s backend/_shared/business-documentation/scripts
-  python3 backend/_shared/business-documentation/scripts/doc-lint.py backend/_shared/business-documentation/references/example-area.md backend/_shared/business-documentation/references/example-behind-the-scenes.md backend/_shared/business-documentation/references/example-technical.md
-  uv run --with coverage coverage run --branch -m unittest discover -s backend/_shared/business-documentation/scripts && uv run --with coverage coverage report -m --include='*doc-lint.py'
-Coverage: ≥ 80% of the branches T1 wrote — the `Missing` column lists each unexecuted branch as
-`from->to`; count the ones inside the functions you added or changed.
-Do not run the evals.
-
-Commit: `feat(documenters): reader-first Level 1 guide — tasks per person, diagrams, callouts (011 T1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### T2 — the Level 2 account follows Level 1, and the lint measures what a reader feels (general-purpose, docs)
-
-````
-Depends on: T1
-Agent: general-purpose · Stack: docs
-
-You are working in the SkillsLibrary repo. Task T2 of docs/plans/011-documenter-reader-first-shape.md:
-make Level 2 (behind the scenes) follow Level 1's sections and tasks, prove it with the golden
-example, and add the lint rules that measure size, sentences, labels and the diagram.
-
-Read, in this order:
-1. CLAUDE.md (Comments, KISS, Test code rules).
-2. The plan: §2 (the bullets on labels, limits, the diagram, Good to know, and "When a guide is over
-   its length"), §3, §6 (rows marked T2), D3–D7, D10, D12, task T2 and T1's As-built note, and
-   "Close-out — every task".
-3. backend/_shared/business-documentation/references/level-2-behind-the-scenes.md (whole).
-4. backend/_shared/business-documentation/references/example-area.md as T1 left it (whole) — the
-   sections and task headings Level 2 follows, and the document the new rules read.
-5. references/example-behind-the-scenes.md (whole); example-technical.md — "## Evidence index" and
-   "## Business ↔ code vocabulary"; references/level-3-technical.md — the split-by-topic paragraph
-   (for the Level 3 `length` rule).
-6. scripts/doc-lint.py and test_doc_lint.py as T1 left them.
-
-Build what task T2 lists: the Level 2 reference per §3; example-behind-the-scenes.md reordered into
-T1's `## For …` sections and task headings, same order, metadata in `## About this document` and the
-Audience line on top; the Behind-the-scenes evidence-index rows re-cited; the lint's T2 rules with a
-passing and a failing test each.
-
-Traps:
-- `flow-mirror` is an ordered subset: Level 2 may leave out a Level 1 task with nothing behind it, and
-  may not add or reorder one. It compares the `##` section titles and the `###` headings — not the
-  lanes. Do not invent a lane to keep a task in.
-- `length` counts words outside fenced blocks and `## About this document`, table cells included; for
-  Level 3 it counts the main file without `## Evidence index`, and each topic sibling on its own.
-- `labels` reads bold only in a `**Where:**` line and in a person's numbered steps, and matches it
-  against the first column of Level 3's vocabulary table as a phrase, case-insensitively. Bold in
-  outcomes, tables and callouts is not a label.
-- `long-sentence` skips tables, fenced blocks and formula lines (`Name = expression`); a list item is
-  its own sentence.
-- `diagram` applies to Level 1 (area and overview); Level 2's who-tells-whom diagram keeps its type.
-- The roadmap promises join `guarantee-words` as patterns, not as the bare words "not yet": "an order
-  that has not yet shipped" is a state, not a promise.
-- A finding from a new rule on example-area.md is fixed in the example, never by loosening the rule.
-
-Gate: own tests — the three commands in T1's gate line (unit tests, the lint over the three examples,
-coverage over `*doc-lint.py`); ≥ 80% of the branches T2 wrote; the lint over the three examples prints
-no `length`, `limits`, `long-sentence`, `labels`, `diagram`, `task-unique`, `flow-mirror` or
-`guarantee-words` line. Do not run the evals.
-
-Commit: `feat(documenters): Level 2 follows the guide's tasks; lint measures size, sentences, labels (011 T2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### T3 — the overview, INDEX lines, and updating an old set in place without losing a fact (general-purpose, docs)
-
-````
-Depends on: T2
-Agent: general-purpose · Stack: docs
-
-You are working in the SkillsLibrary repo. Task T3 of docs/plans/011-documenter-reader-first-shape.md:
-reshape the system overview, fix the INDEX line, give the trace its screen-path column, teach the
-reconcile procedure and both documenter agents to update an old-shape set in place (brownfield: never
-recreate; greenfield writes the new shape directly), and add the lint rules that make a half-updated
-KB lint green and an update that lost a fact visible.
-
-Read, in this order:
-1. CLAUDE.md (Comments, KISS, Test code rules).
-2. The plan: §4, §5, §6 (rows marked T3), D8, D10, D12, task T3, the As-built notes of T1–T2, and
-   "Close-out — every task".
-3. backend/_shared/business-documentation/references/system-overview.md (whole).
-4. backend/_shared/business-documentation/SKILL.md — "Output", "Reconcile procedure", "Self-check".
-5. business-analysis/skills/ba-project-memory/SKILL.md — "## INDEX.md format" only.
-6. backend/_shared/agents/be-documenter.md (whole); be-feature-documenter.md (whole).
-7. backend/_shared/codebase-survey/references/documentation-plan.md (whole).
-8. backend/_shared/feature-trace/SKILL.md — the `Client vocabulary` paragraph and table;
-   references/trace-recipes.md — the client-vocabulary searches.
-9. scripts/doc-lint.py and test_doc_lint.py as T2 left them.
-
-Build what task T3 lists. The render command in the agents' report line is
-`uv run ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/render-html.py --out <dir> --dir docs/business-model`
-— T4 writes that script; name it as it will exist.
-
-Traps:
-- `old-shape` must short-circuit: a set it flags gets that one WARN and no other check, or an
-  agentic-shop KB with 27 old sets drowns in ERRORs (D8).
-- `index-line` runs only in `--dir` mode, only when `<dir>/INDEX.md` exists, and only for sets that are
-  not old-shape; feature folders (docs/features/) have no INDEX and must not fail.
-- `fact-kept` compares text, so keep the comparison a pure function (old guide and Level 2 text in,
-  the new three levels' text in, findings out) and the `git show <rev>:./<file>` read beside it; the
-  unit tests then need no repository. A number inside an id (`AREA-004`) is not a fact; a
-  `~~old~~ → new` mark keeps the old value present, which is right.
-- If `--kept-from 92f14828` reports a `fact-kept` on the golden examples, T1 or T2 dropped a fact:
-  restore it in the example. Do not narrow the rule to make the line go away.
-- docs/plans/005-cross-feature-test-design.md cites old section names: do not edit it (another plan in
-  flight); W1 records it. The evals and qa/manual/requirements-breakdown are W1's.
-- D8 is the user's rule: existing documentation is only updated, never recreated. The agents must not
-  delete and regenerate a file, must keep `Created`, `#confirmed` statements and evidence rows, must
-  re-trace only the code delta, and close the update with a `--kept-from` run. Write it so an agent
-  cannot read "update" as "regenerate and diff".
-
-Gate: own tests — the three commands in T1's gate line (coverage over the branches T3 wrote), plus:
-  S="$TMPDIR/kb011" && rm -rf "$S" && mkdir -p "$S/areas"
-  git show 92f14828:backend/_shared/business-documentation/references/example-area.md > "$S/areas/old.md"   (and its two siblings as old.behind-the-scenes.md / old.technical.md, the same way)
-  copy the current three examples in as new.*.md; write an INDEX.md with a §5 line for the new set and an old-style line for the old one
-  python3 backend/_shared/business-documentation/scripts/doc-lint.py --dir "$S"   → exit 0, exactly one old-shape WARN, no index-line
-  remove the new set's INDEX line → exit 1 on index-line
-  python3 backend/_shared/business-documentation/scripts/doc-lint.py --kept-from 92f14828 backend/_shared/business-documentation/references/example-area.md backend/_shared/business-documentation/references/example-behind-the-scenes.md backend/_shared/business-documentation/references/example-technical.md   → no fact-kept line
-Do not run the evals.
-
-Commit: `feat(documenters): reader-first overview, INDEX line, in-place update of old sets with a kept-facts check (011 T3)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### T4 — `render-html.py`: a guide as one standalone page (general-purpose, docs)
-
-````
-Depends on: T3
-Agent: general-purpose · Stack: docs
-
-You are working in the SkillsLibrary repo. Task T4 of docs/plans/011-documenter-reader-first-shape.md:
-write the script that turns a guide into one standalone, consistently styled HTML page a client can
-be sent.
-
-Read, in this order:
-1. CLAUDE.md (Comments, KISS, Test code rules).
-2. The plan: §7, D1, D9, D11, task T4, and "Close-out — every task".
-3. backend/_shared/business-documentation/references/example-area.md (whole) — your test input.
-4. backend/_shared/business-documentation/scripts/test_doc_lint.py — the first 30 lines, for how a
-   test imports a hyphenated script.
-
-Build what task T4 lists: `scripts/render-html.py` (PEP 723, `uv run`), `scripts/test_render_html.py`
-(every branch: alerts of each of the four kinds and an unknown kind, a mermaid fence, a guide link, a
-Level 2/3 link, a relative non-guide link, an https link, the About section reduced to its date with
-and without a `Last updated` line, a `~~old~~ → new` mark, an internal file, `--dir` vs named files,
-`--out` missing), and SKILL.md's "## Sharing a guide".
-
-Traps:
-- markdown-it has no GitHub-alert rule; transform the blockquote's tokens, do not regex the HTML.
-- Pin exact versions (markdown-it-py, mdit-py-plugins, Mermaid 11.x on jsdelivr) after checking they
-  resolve, and compute the script tag's `integrity` from the exact file you pinned; then write the two
-  Python pins into W1's gate line in this plan (Close-out step 3).
-- The page must work opened from disk (`file://`): no fetches besides the Mermaid script.
-- Nothing internal reaches the page: no id, sha or model link from `## About this document`, no struck
-  old value. A lone `~~text~~` with no arrow is ordinary strikethrough and stays.
-- When Mermaid does not load, the reader sees the one-line notice, never the diagram's source.
-
-Gate: own tests —
-  uv run --with markdown-it-py==<pin> --with mdit-py-plugins==<pin> --with coverage coverage run --branch -m unittest discover -s backend/_shared/business-documentation/scripts -p 'test_render*.py' && uv run --with coverage coverage report -m --include='*render-html.py'   (≥ 80%)
-  uv run backend/_shared/business-documentation/scripts/render-html.py --out "$TMPDIR/render" --dir backend/_shared/business-documentation/references
-  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --virtual-time-budget=15000 --dump-dom "file://$TMPDIR/render/example-area.html" | grep -c "<svg"   → 1 or more: the diagram drew
-  Without Chrome on the machine, write the drawn diagram into `Status:` as unverified; do not claim it.
-
-Commit: `feat(documenters): render-html.py — a guide as one standalone page (011 T4)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### W1 — the close-out: catalog, README, rules, evals, and the whole set (general-purpose, docs)
-
-````
-Depends on: T1, T2, T3, T4
-Agent: general-purpose · Stack: docs
-
-You are working in the SkillsLibrary repo. Task W1 of docs/plans/011-documenter-reader-first-shape.md:
-bring every library surface that describes the documenter in line with the plan, run the whole set,
-fix what it finds, and file the plan.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: Status, §2–§7 headings, Decisions, every task's As-built note, task W1, and
-   "Close-out — every task".
-3. docs/skills-catalog.md — only the paragraphs `grep -n "be-documenter\|doc-business-model\|business-documentation\|be-feature-documenter"` finds.
-4. README.md — the `/dev:document-system` and `/dev:document-feature` rows.
-5. engineering-practices/rules/feature-docs.md; business-analysis/skills/rules/business-model.md.
-6. qa/manual/requirements-breakdown/SKILL.md — grep for "How it works", "Who can do what",
-   "How it connects", "Going deeper" and read those paragraphs only.
-7. backend/_shared/business-documentation/evals/evals.json and evals/README.md.
-
-Build what task W1 lists, then run the gate.
-
-Traps:
-- The catalog is ~200 KB: edit only the documenter paragraphs; never read it whole.
-- token-audit's `dev` row: if the new SKILL.md text pushed it over, move detail into a reference that
-  loads only when writing that level — do not delete rules.
-- The evals' "Golden-copy check" expectations are facts about the fixture, not the shape — keep them.
-  The new expectations are in task W1; the fixture's only screen labels are in `staff-ui.en.json`.
-- The fix loop: run the whole set once, fix each failure with the narrowest rerun, rerun only what
-  failed, then the whole set once more.
-
-Gate (this is the last task, so it runs the whole set once more across the plan, in run order):
-  python3 -m unittest discover -s backend/_shared/business-documentation/scripts -p 'test_doc_lint.py'
-  uv run --with markdown-it-py==<pin> --with mdit-py-plugins==<pin> --with coverage coverage run --branch -m unittest discover -s backend/_shared/business-documentation/scripts && uv run --with coverage coverage report -m --include='*doc-lint.py,*render-html.py'
-    (≥ 80% of the branches the plan wrote: files from `git diff --name-only "$(git log --diff-filter=A --format=%h -1 -- docs/plans/011-documenter-reader-first-shape.md)" HEAD`; the `Missing` column lists each unexecuted branch as `from->to`)
-  python3 backend/_shared/business-documentation/scripts/doc-lint.py backend/_shared/business-documentation/references/example-area.md backend/_shared/business-documentation/references/example-behind-the-scenes.md backend/_shared/business-documentation/references/example-technical.md   → 0 errors, 0 warnings
-  python3 backend/_shared/business-documentation/scripts/doc-lint.py --kept-from 92f14828 backend/_shared/business-documentation/references/example-area.md backend/_shared/business-documentation/references/example-behind-the-scenes.md backend/_shared/business-documentation/references/example-technical.md   → no fact-kept line
-  uv run backend/_shared/business-documentation/scripts/render-html.py --out "$TMPDIR/render" --dir backend/_shared/business-documentation/references
-  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --virtual-time-budget=15000 --dump-dom "file://$TMPDIR/render/example-area.html" | grep -c "<svg"   → 1 or more
-  python3 tools/plugin-surface-check.py
-  python3 tools/token-audit.py
-
-Commit: `docs(documenters): catalog, README, rules and evals for the reader-first shape (011 W1)`; push to master.
-Finish by telling the user, in this order: run the fixture eval (evals/README.md, eval 1) before the
-pilot; update the `dev` plugin in agentic-shop; add `[!WARNING]` to that repo's
-docs/plans/168-docs-diagrams-and-reader-first-pilot.md F1; then run plan 168 (F1, then D1).
-Close out per the plan's "Close-out — every task" before you stop.
-````
+All five tasks have landed; no prompt block remains.

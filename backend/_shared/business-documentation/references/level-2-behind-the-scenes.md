@@ -6,41 +6,51 @@ Still plain language, but for a reader who wants to know **how the work actually
 
 ```markdown
 # <Area name> — Behind the scenes
-<header block: Created · Owned by · Derived from · Audience: internal · Levels>
 
-## At a glance               ← 3–5 sentences and one simple diagram of the parts and who tells whom
-## The parts involved        ← | Part | What it does here | Runs when |
-## What happens behind the scenes
-### <Flow — same names as Level 1>
+<One sentence: what this explains.>
+
+**Levels:** [Guide](…) · [Behind the scenes](…) · [Technical reference](…)
+**Audience:** internal
+
+## At a glance                       ← 3–5 sentences and one simple diagram of the parts and who tells whom
+## The parts involved                ← | Part | What it does here | Runs when |
+## For <person>                      ← Level 1's sections, same titles, same order
+### <Task — same heading as Level 1>   ← lanes: Straight away · Afterwards · On a schedule
+## What happens automatically        ← when Level 1 has it; its `###` headings are Level 1's
 ## What is remembered, and where
-## Timing and ordering       ← what must come first, what can happen twice or out of order, two people at once
+## Timing and ordering               ← what must come first, what can happen twice or out of order, two people at once
 ## When parts fail or are slow
-## Outside services          ← optional: only when the area talks to one
-## Settings and switches     ← optional: only when something differs by environment, customer or switch
-## If you change this        ← what else is affected
-## Open questions            ← numbering continues from Level 1 (Q5, Q6 …)
+## Outside services                  ← optional: only when the area talks to one
+## Settings and switches             ← optional: only when something differs by environment, customer or switch
+## If you change this                ← what else is affected
+## Open questions                    ← numbering continues from Level 1 (Q5, Q6 …)
+## About this document               ← Created · Owned by · Derived from · Models, last
 ```
 
 Every section is required except the two marked optional, which are **dropped** when they do not apply — never written to say there is nothing — and the search that proved it is one row in Level 3's evidence index.
 
-**Audience.** The header carries `**Audience:** internal`. A person may promote it to `shareable` after reading it; an agent never does.
+**Follows the guide.** `## For <person>`, `## What happens automatically` and their `###` headings are Level 1's — same wording, same order, none added (lint `flow-mirror`). A task with **nothing behind it** — nothing happens beyond what the guide already says — is left out rather than padded, and no lane is invented to keep it in. A task two people do keeps its second heading ("Cancel a member's booking"), short, and points at the first by name. Task headings are unique in the file (lint `task-unique`).
+
+**Audience.** `**Audience:** internal` stays at the top, under `**Levels:**`: its job is to stop the file being forwarded, and at the bottom it cannot. A person may promote it to `shareable` after reading it; an agent never does. The other metadata closes the file in `## About this document`, where the `FLOW-nnn` / `ENT-nnn` / `DEC-nnn` links also go: **no internal id and no `Q<n>` appears in the body** (lint `internal-ids`) — a body line points at the question by its words ("see *Open questions*"), and the number sits only in that table's first column.
+
+**Length.** Up to 3,000 words, counted outside fenced blocks and `## About this document`, table cells included (lint `length`). Past that, detail moves to Level 3.
 
 **At a glance** carries one **Mermaid** diagram: boxes are the *parts* (named exactly as in *The parts involved*), arrows are "tells" / "asks" / "saves to", each labelled in business words ("booking confirmed"). Five to nine boxes. It is a **who-tells-whom picture, never a second copy of a flow**:
 
-- In a `be-documenter` run (a KB with `flows/` exists), any branching path is linked as `FLOW-nnn` and not redrawn.
+- In a `be-documenter` run (a KB with `flows/` exists), any branching path is named in words and linked from `## About this document` (`Models`), never redrawn.
 - In a feature run (no KB), the Level 2 diagram is the authoritative one; draw the branching path here.
 
 If no flow of the area has background or scheduled work, *At a glance* says so in one sentence ("Everything here happens while the person waits; nothing runs later or on a schedule").
 
 **The parts involved** names every part once, in a plain role name — "the booking service", "the monthly billing job", "the member record" — with what it does here and when it runs. The mapping to class and module names is Level 3's *Business ↔ code vocabulary*; the same plain name is used for the same part in every document of the set.
 
-**Each flow** repeats Level 1's flow (same `###` heading) with the machinery added, as numbered steps under up to three lanes, in the order they happen:
+**Each task** repeats Level 1's task (same `###` heading) with the machinery added, as numbered steps under up to three lanes, in the order they happen:
 
 - **Straight away (while the person waits)** — what is done and saved before they get their answer, and which part does it.
 - **Afterwards (in the background)** — what is set off afterwards: who is told, what they do, whether the person is told when it finishes. A duration is stated only where the code shows a delay, schedule or poll interval; otherwise it is unknown and an open question.
 - **On a schedule** — anything the clock starts.
 
-**A lane with nothing in it is dropped**, never written as "nothing happens". Steps stay numbered continuously across lanes so the evidence index can cite `<Flow> · step N`. Close a flow with **What the person notices if a later step fails** only when the flow has a later step (a lane after *Straight away*, or more than one scheduled step); a flow done entirely while the person waits does not carry it.
+**A lane with nothing in it is dropped**, never written as "nothing happens". Steps stay numbered continuously across lanes so the evidence index can cite `<Task> · step N`. Close a task with **What the person notices if a later step fails** only when the task has a later step (a lane after *Straight away*, or more than one scheduled step); a task done entirely while the person waits does not carry it. Callouts are allowed, with the four kinds Level 1 uses.
 
 **What is remembered, and where** — a table: Information · Kept as (plain: "on the member's record", "a line on the booking", "in the accounts ledger") · Who may change it. Name the *only* writer where there is one.
 
@@ -60,4 +70,4 @@ Level 2 **states what happens and never judges it**. "The credits are returned t
 
 Plain sentences, the Level 1 standard, with these everyday technical words allowed once each is explained in passing: *database, background job, scheduled job, message / notification (between parts), retry, queue ("a waiting line"), outside service, switch (feature switch), environment (test / live)*. Third-party services are named by product ("the payments provider, Stripe"). **Banned:** class, method, table and column names (a client's own term listed in the first column of Level 3's *Business ↔ code vocabulary* stays), file names and paths, HTTP verbs and status codes, exception types, SQL, framework and library names, inline code, tier tags, `file:line`, and the defect words above.
 
-Under about 2,000 words.
+Under about 2,000 words in practice; 3,000 is the lint's ceiling.

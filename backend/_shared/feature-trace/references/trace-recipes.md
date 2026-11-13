@@ -156,6 +156,30 @@ Prisma's `schema.prisma` is a single high-value read: constraints, defaults, cas
 
 ---
 
+## Part 3a — Where in the product: routes and navigation labels
+
+The guide names the screen and control a person uses (`**Where:** **Your orders** → **Cancel order**`) and a label is evidence: record it in `Client vocabulary`'s *Where in the product* column only from a route or navigation entry you read. A search that finds no screen is recorded as the search, never as a guess. The same searches serve the targeted lookup when an old-shape set is updated in place.
+
+```bash
+# Next.js — App Router and Pages Router routes are the folders and files
+find app pages -name 'page.*' -o -name 'route.*' -o -name '*.tsx' -path 'pages/*' 2>/dev/null
+grep -rn "href=\|<Link\|usePathname\|router\.push" --include='*.tsx' app components 2>/dev/null
+
+# React Router — the route table, then the navigation that points into it
+grep -rn "createBrowserRouter\|<Route \|path: ['\"]\|<NavLink\|<Link " --include='*.tsx' --include='*.ts' src/
+
+# Blazor — @page routes and NavLink menus
+grep -rn "^@page\|<NavLink" --include='*.razor' .
+
+# the label's own text: locale files first, then literals next to the control
+find . -path ./node_modules -prune -o \( -path '*locales*' -o -path '*i18n*' -o -name '*.resx' \) -print
+grep -rn "aria-label=\|<button\|<Button\|title=" --include='*.tsx' --include='*.razor' src/ app/ 2>/dev/null
+```
+
+Read the route to the page that holds the control and the navigation entry that reaches it; the path is `<menu or page title> › <control text>`. A control whose text lives in a translation file is cited by the file's value for the project's default language. When the client app is in another repository, the backend alone shows no screen: record the negative search per task.
+
+---
+
 ## Part 3b — Following a seam (the Edges inventory)
 
 Stop 9 and the Edges inventory need three answers per emitted event or written field: **who reacts**, **who reads**, and **how the reaction runs**. Take the emitted type's name and its string form (topic, queue, routing key, event name) and search both.

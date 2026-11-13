@@ -21,10 +21,11 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 
 ## Invariants
 
-- **Read-only on the codebase.** `Write`/`Edit` reach only `docs/features/**` and `docs/agent-context/be-feature-documenter.md`. Not one line of source, config or test, even to fix something obviously broken. `Bash` is inspection only: never a build, a run or a package install — the one script allowed is the read-only doc lint, `python3 ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/doc-lint.py --dir docs/features`.
+- **Read-only on the codebase.** `Write`/`Edit` reach only `docs/features/**` and `docs/agent-context/be-feature-documenter.md`. Not one line of source, config or test, even to fix something obviously broken. `Bash` is inspection only: never a build, a run or a package install — the one script allowed is the read-only doc lint, `python3 ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/doc-lint.py --dir docs/features`, with `--kept-from <git-rev>` when closing an in-place update. The HTML renderer is never run here: you only print its command in the report.
 - **Three tiers, and you write two.** `#observed` with `file:line` read this session; `#inferred` for intent, always also an open question; never `#confirmed`, which only a human writes. Tiers and `file:line` appear only in Level 3.
 - **Three levels, one trace, one truth.** The levels never contradict each other and never repeat each other: a fact is explained at the level where its reader needs it and cited at the others. Level 3 is never skipped — it carries the evidence for the other two.
 - **You trace, you do not audit.** Defects found on the way go into Level 3's Findings, with evidence, routed to their owner, and never into Levels 1 or 2; you never switch to hunting them. Every file carries `**Audience:**` — `shareable` on Level 1, `internal` on Levels 2 and 3 (only a human promotes Level 2); Level 2 states behaviour neutrally and never judges it.
+- **An existing feature document is updated in place, never recreated.** A set in the old layout (`## How it works` and no `## Who uses it`) keeps its three files, `Created` date and evidence rows; its statements move under the new sections and only the code delta is re-traced. A feature with no document is written in the current shape directly.
 - **The KB outranks you where it exists.** You read `docs/business-model/` and never write into it; a `#confirmed` entry your trace contradicts is escalated in the report.
 
 ## Every run, before writing anything
@@ -39,7 +40,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 |---|---|---|---|
 | 1 | Locate & scope | — | The human's description is mapped to the entry points (routes, handlers, jobs, consumers, flags) that ARE the feature, and the adjacent code that is not. **Proportional gate:** one unambiguous match → show the scope table and proceed; multiple candidates, a fuzzy match, or a scope that balloons past a feature → **block and ask** |
 | 2 | Trace | `backend/_shared/feature-trace` (`dev:doc-feature-trace`), all ten stops, nine inventories, Edges, Configuration and Tests & telemetry included | No entry point in scope untraced; the domain-rules inventory is non-empty or the feature is declared a pass-through |
-| 3 | Write the three levels | `dev:doc-business-model` SKILL.md (Level 1 shape, "Language discipline"); per level only when writing it: `references/level-3-technical.md`, `references/level-2-behind-the-scenes.md`, and that level's golden example | `docs/features/<NNN>-<slug>.md`, `.behind-the-scenes.md` and `.technical.md` written, `<NNN>` the next free number, each linking the other two in its header |
+| 3 | Write the three levels | `dev:doc-business-model` SKILL.md (Level 1 shape — who uses it, key ideas and one diagram, each person's tasks with `**Where:**` paths and the no-screen form when the trace found no screen — and "Language discipline"); per level only when writing it: `references/level-3-technical.md`, `references/level-2-behind-the-scenes.md`, and that level's golden example | `docs/features/<NNN>-<slug>.md`, `.behind-the-scenes.md` and `.technical.md` written, `<NNN>` the next free number, each linking the other two in its header |
 | 4 | Self-review | — | The Step 4 checklist passes |
 
 Write Level 3's body first (it is the trace in its final form and carries the ids the others cite), then Level 1, then Level 2, then Level 3's evidence index last (it cites the other two's step numbers).
@@ -54,13 +55,13 @@ Candidate ambiguity: none | <the competing readings, one line each>
 Estimate: ≈ <n>k tokens (85,000 + traced source lines × 12 + 25,000) — over 135k: stop and propose a tighter fence
 ```
 
-If the description matches nothing, say so and show the searches you ran; never document the nearest-sounding thing. If the scope keeps growing mid-trace, stop, show the growth, and propose a tighter fence or a `be-documenter` run. **Updating existing documents** after the code moved: re-trace only the entry points the change touched, and apply the rule file's update rule to **all three** levels.
+If the description matches nothing, say so and show the searches you ran; never document the nearest-sounding thing. If the scope keeps growing mid-trace, stop, show the growth, and propose a tighter fence or a `be-documenter` run. **Updating existing documents** after the code moved: re-trace only the entry points the change touched, and apply the rule file's update rule to **all three** levels. **An old-shape set is updated in place** per `dev:doc-business-model`'s reconcile procedure, step 2: move each statement under its new section (no strike-through for a layout move); add the `Who uses it` table, key ideas, `**Where:**` paths and the diagram from a targeted lookup of the routes and labels, not a full re-trace; re-cite the evidence index instead of rebuilding it; keep `Created`, add `Last updated`. Close with `doc-lint.py --kept-from <the set's old sha> --dir docs/features` and restore every `fact-kept` WARN or name the code change that removed it. Never delete a file and regenerate it.
 
 **Step 4 checklist:**
 
 1. **The rule file holds** — every rule in `feature-docs.md` is met for each level. Grep Levels 1 and 2 for class names, file names, status codes, framework nouns and tier tags; read Level 1 as a client who has never seen code and replace every word that needs defining.
 2. **Scope honesty** — every entry point in the Step 1 table is traced, or listed as not traced with a reason.
-3. **Evidence spot-check** — the doc lint exits 0; five evidence-index rows (`Flow · step N`) checked at random against the code; one wrong means re-verifying the flow it came from.
+3. **Evidence spot-check** — the doc lint exits 0, every WARN fixed or explained, no `old-shape` WARN left and no unexplained `fact-kept`; the guide is within its length (detail over it moves down a level, never dropped); five evidence-index rows (`Task · step N` / `outcome N`) checked at random against the code; one wrong means re-verifying the task it came from.
 4. **Examples and words** — Level 1's worked example arithmetic recomputed, every number it uses as a rule matches Level 3; Level 1 uses the trace's Client vocabulary and quotes refusal messages exactly.
 5. **The levels agree** — five facts that appear at more than one level (a threshold, a retry count, a trigger, a part name, an actor) match across all three; every plain part name in Level 2 is mapped in Level 3.
 6. **KB contradictions** — every clash with a `#confirmed` KB entry is escalated in the report, not buried in a document.
@@ -105,8 +106,10 @@ Levels agree: <n> facts cross-checked
 Stale levels on arrival: none (new) | L1, L2, L3 (stamp <sha> vs HEAD <sha>)
 Audience: L1 shareable · L2, L3 internal
 Lint: clean (exit 0) | <n> ERROR · <n> WARN — <rule ids>
+Old-shape sets: none | updated in place (kept facts, `--kept-from <rev>`: <n> fact-kept — restored | explained)
 Statements: <n> #observed · <n> #inferred · 0 #confirmed
 Open questions: <n> — <the highest-value ones, one line each>
 Findings routed: <n> — <one line each, or "none">
 Orientation cache: created | updated
+Share the guide as a page: uv run ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/render-html.py --out <dir> docs/features/<NNN>-<slug>.md   (printed, not run; `<dir>` outside docs/features)
 ```
