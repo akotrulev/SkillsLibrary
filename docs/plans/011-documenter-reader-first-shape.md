@@ -2,7 +2,7 @@
 
 **Goal:** `dev:doc-business-model` writes guides (Level 1) and behind-the-scenes accounts (Level 2) that read in the order a person meets the product — who uses it, the few ideas and one picture of how it fits together, then each person's tasks in the order life happens — with Mermaid diagrams, GitHub-style callouts and examples beside the rule they show, screen labels the trace found and never invented ones, no internal ids in the body, and lengths the lint enforces. It works on greenfield and brownfield alike: a new KB is written in this shape, and existing documentation is only ever updated in place into it, never recreated (D8), with a check that no number or quoted message was lost. A script turns any guide into one standalone, consistently styled `.html` file to send to a client.
 
-**Status:** Not started. T1 is next. The agentic-shop pilot (that repo's plan 168, task D1) waits for this plan's W1 and for the user to update the `dev` plugin there; that plan's F1 draws three callout kinds and must add `[!WARNING]`, the fourth kind this plan allows (D6). The rule-based evals (`evals/`) are agent runs and are not part of any gate here: until the user runs the fixture eval (the row under W1 in the prompts table), the new shape is proven only by the golden examples passing the lint.
+**Status:** T1 is built (2026-11-13): the Level 1 shape is in `BD/SKILL.md`, `example-area.md` is a guide in that shape, the lint reads it and the three examples pass with 0 errors and 0 warnings; the Level 2 example and the Level 2 / overview lint rules are still the old ones. T2 is next. The agentic-shop pilot (that repo's plan 168, task D1) waits for this plan's W1 and for the user to update the `dev` plugin there; that plan's F1 draws three callout kinds and must add `[!WARNING]`, the fourth kind this plan allows (D6). The rule-based evals (`evals/`) are agent runs and are not part of any gate here: until the user runs the fixture eval (the row under W1 in the prompts table), the new shape is proven only by the golden examples passing the lint.
 
 ## 1. What already exists, and what is missing
 
@@ -275,6 +275,8 @@ Costs: offline, the reader gets a one-line notice in place of the picture.
 
 **D12 — A screen label is evidence.** Bold in a `Where:` line or a person's step must be in Level 3's vocabulary table, and a task whose screen the trace did not find is written without labels. Otherwise D2's "press **Place order**" invites invented buttons wherever the UI lives in another repository. Costs: a backend-only codebase yields guides with no `Where:` paths until someone supplies the screens.
 
+**D13 (2026-11-13, T1) — `internal-ids` runs on the Level 1 area guide only, not on Level 2.** §6 lists it for Levels 1–2. The old `example-behind-the-scenes.md` carries `FLOW-004`, `Q6`, `Q9` in its body and must keep passing until T2 rewrites it, and the overview guide still lists AREA ids until T3. T1 ran it on Level 1 area guides; T2 extends it to Level 2 (after moving the ids into `## About this document` / the open-questions first cell) and keeps the overview out until T3. `alerts` already covers Levels 1–2. Also: Level 1's `**Id:**` joined `HEADER_PREFIXES`, and the example's "Cancel a member's booking" has no `**Where:**` because the fixture has no label for cancelling one booking (`Cancel session` cancels a whole session, so it appears in a `[!NOTE]`).
+
 ## Answered questions (2026-11-13)
 
 **O1 — Title as a question (Trading212 style)?** No: the title is the area's plain name.
@@ -308,6 +310,7 @@ All tasks are `docs` on `general-purpose`, as in every library plan. Paths are r
 - `BD/references/example-technical.md`: re-cite every evidence-index row whose Level is Guide to the new task headings, `· step N` and `· outcome N`; add to the first column of *Business ↔ code vocabulary* every staff-screen label the guide now shows in bold; nothing else changes. Level 2's rows are T2's.
 - `BD/references/level-3-technical.md`: in the evidence-index rules, a statement in a task cites `<Task> · step N` or `<Task> · outcome N`; the example table's `Guide | Overview` and `Guide | Setup` rows cite sections that exist in §2 (`Open questions`, `Rules and limits`).
 - `BD/scripts/doc-lint.py` + `test_doc_lint.py`: §6's T1 rows — Level 1 `sections`, flow parents with steps and outcomes for Level 1, `header` from `## About this document` in Level 1 with `**Id:**`, `internal-ids`, `alerts`, the mermaid-fence treatment in `code-nouns`/`jargon`, `example`; `qid-unique` and `ref-resolves` keep reading `## Open questions`. Update the module docstring's rule list. Level 2 and overview rules stay as they are until T2/T3, so the old example-behind-the-scenes still passes.
+- **As built (2026-11-13):** Level 1 shape in `BD/SKILL.md` ("## Level 1 — the guide", "### Header block", discipline 3, "Language discipline"), `references/example-area.md` rewritten (members' tasks Book a session / Cancel a booking carry no `**Where:**` and no bold; staff tasks Set up plans and tiers / Cancel a member's booking; `[!IMPORTANT]`, `[!NOTE]`, `[!WARNING]`; `stateDiagram-v2`; Monthly posting; Rules and limits; A month in numbers; Q1–Q5 kept). `example-technical.md`: 38 Guide evidence rows re-cited, five staff labels added to the vocabulary table (Session credits, Monthly allowance, Overage rate (per credit), Personal overage rate, Cancel session). `level-3-technical.md`: citation rules incl. `· outcome N`, the opening callout cited `Important`, a no-screen task's negative-search row. `doc-lint.py`: `sections`, `flow_tasks()`/`flows()` returning `(steps, outcomes)`, `header` from About with `**Id:**` first, `internal-ids`, `alerts`, `example`, `mermaid_prose()`; `load()` anchors on the `**Levels` line. Proof: `python3 BD/scripts/doc-lint.py <three examples>` → `0 error(s), 0 warning(s)`; 103 tests pass; `doc-lint.py` 99% (361 stmts, 142 branches, one miss at the `__main__` guard).
 - **Not in T1:** Level 2, and the `length`, `limits`, `long-sentence`, `labels`, `diagram`, `task-unique` and roadmap-promise rules (T2); the overview, INDEX, `old-shape`, `fact-kept`, the trace's `Where in the product` column and the agents (T3) — `SKILL.md` names that column as it will exist; the renderer (T4); the catalog, README, evals and `requirements-breakdown` (W1).
 
 ### T2 — the Level 2 account follows Level 1, and the lint measures what a reader feels
@@ -419,80 +422,15 @@ Run them in order, one session each; each block is complete on its own. Every ta
 
 | # | Stack | Agent | Depends on | Runs beside | Budget |
 |---|---|---|---|---|---|
-| T1 | `docs` | `general-purpose` | none | — | ~140k |
 | T2 | `docs` | `general-purpose` | T1 | — | ~133k |
 | T3 | `docs` | `general-purpose` | T2 | — | ~135k |
 | T4 | `docs` | `general-purpose` | T3 | — | ~80k |
 | W1 | `docs` | `general-purpose` | T1, T2, T3, T4 | — | ~100k |
 | — | run the fixture eval (`evals/README.md`, eval 1); update the `dev` plugin in agentic-shop; add `[!WARNING]` to its plan 168 F1; run plan 168 | **the user** | W1 | — | — |
 
-None has landed; every prompt is live.
+T1 has landed; T2–T4 and W1 are live.
 
 ---
-
-### T1 — the Level 1 guide shape, its golden example and the lint that reads it (general-purpose, docs)
-
-````
-Depends on: none
-Agent: general-purpose · Stack: docs
-
-You are working in the SkillsLibrary repo. Task T1 of docs/plans/011-documenter-reader-first-shape.md:
-make `dev:doc-business-model`'s Level 1 guide read in the order a person meets the product, prove it
-with the golden example, and make the lint read the new shape.
-
-Read, in this order:
-1. CLAUDE.md (Comments, KISS, Test code rules).
-2. The plan: §1, §2, §6 (the rows marked T1), D2–D7, D10, D12, task T1, and "Close-out — every task".
-3. backend/_shared/business-documentation/SKILL.md — "Six disciplines", "Header block",
-   "## Level 1 — the guide", "Language discipline — by level".
-4. backend/_shared/business-documentation/references/example-area.md (whole), then
-   example-technical.md — only "## Evidence index" and "## Business ↔ code vocabulary".
-5. backend/_shared/business-documentation/references/level-3-technical.md — only the evidence-index
-   example table and its rules.
-6. backend/_shared/business-documentation/scripts/doc-lint.py (whole) and test_doc_lint.py (whole).
-7. backend/_shared/business-documentation/evals/fixture/src/Workshops.Api/Resources/staff-ui.en.json
-   — the only screen labels the toy system has.
-
-Build what task T1 lists: SKILL.md's Level 1 section per §2; example-area.md rewritten in that shape
-with the hard cases (member tasks in the no-screen form, staff tasks with labels, a task two people do
-under two headings, a rule nobody triggers), every fact, number and quoted message kept;
-example-technical.md's Guide evidence-index rows re-cited and its vocabulary table carrying the labels
-the guide shows; level-3-technical.md's citation rules; the lint's T1 rules with a passing and a
-failing test each, and the docstring's rule list updated.
-
-Traps:
-- The old example-behind-the-scenes.md must still pass the lint after T1: only Level 1 rules change
-  here. Do not add `flow-mirror`, `length`, `limits`, `long-sentence`, `labels`, `diagram` or
-  `task-unique` (T2), nor `old-shape`, `index-line` or `fact-kept` (T3). Write the example to §2's
-  limits all the same.
-- Three places in doc-lint.py assume the metadata is on top: `load()` finds the document's start by
-  walking back from the `**Created` line, `header_line()` scans only the first 20 body lines, and
-  `prose()` drops lines by their header prefix. With the block in `## About this document` each one
-  must be re-anchored — the start on the document's own `# ` title, the header lines read from the
-  About section — and the golden-example preamble must still be skipped.
-- "What happens next" is a bulleted list, not a continued numbering: `flows()` counts numbered items
-  as steps and those bullets as outcomes, and `index-steps` checks `· step N` and `· outcome N`.
-- A ```mermaid fence must not trip the inline-code check. Only its quoted labels and the text after a
-  `:` are prose for `code-nouns` and `jargon` — a class name in a label is still an ERROR, a node id
-  is not read.
-- `internal-ids` exempts `## About this document` and the first cell of open-questions rows only. The
-  `**Levels:**` line stays at the top and links filenames, not ids.
-- The guide's open questions stay under `## Open questions` — there is no `## For the product owner`
-  heading, so a `## For …` heading is always a person's tasks.
-- The member tasks have no screen in the fixture: no `**Where:**`, no bold label, steps in plain verbs.
-  Do not invent a member screen to make the example look complete.
-
-Gate: own tests —
-  python3 -m unittest discover -s backend/_shared/business-documentation/scripts
-  python3 backend/_shared/business-documentation/scripts/doc-lint.py backend/_shared/business-documentation/references/example-area.md backend/_shared/business-documentation/references/example-behind-the-scenes.md backend/_shared/business-documentation/references/example-technical.md
-  uv run --with coverage coverage run --branch -m unittest discover -s backend/_shared/business-documentation/scripts && uv run --with coverage coverage report -m --include='*doc-lint.py'
-Coverage: ≥ 80% of the branches T1 wrote — the `Missing` column lists each unexecuted branch as
-`from->to`; count the ones inside the functions you added or changed.
-Do not run the evals.
-
-Commit: `feat(documenters): reader-first Level 1 guide — tasks per person, diagrams, callouts (011 T1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### T2 — the Level 2 account follows Level 1, and the lint measures what a reader feels (general-purpose, docs)
 
@@ -537,6 +475,11 @@ Traps:
 - The roadmap promises join `guarantee-words` as patterns, not as the bare words "not yet": "an order
   that has not yet shipped" is a state, not a promise.
 - A finding from a new rule on example-area.md is fixed in the example, never by loosening the rule.
+- T1 ran `internal-ids` on the Level 1 area guide only (D13). Extend it to Level 2: move `FLOW-004`,
+  `Q6`, `Q9` and the like out of the example's body, keeping every fact; the overview stays out until T3.
+- T1's doc-lint.py has `flow_tasks(doc)` (line, heading, body lines per task) and `flows(doc)` →
+  `{(line, heading): (steps, outcomes)}`; `mermaid_prose()` reduces a mermaid line to its quoted labels
+  and text after a colon; `Doc.is_flow_section()` / `is_area_guide()`. Reuse them.
 
 Gate: own tests — the three commands in T1's gate line (unit tests, the lint over the three examples,
 coverage over `*doc-lint.py`); ≥ 80% of the branches T2 wrote; the lint over the three examples prints

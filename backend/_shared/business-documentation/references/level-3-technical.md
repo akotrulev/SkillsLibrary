@@ -51,16 +51,18 @@ The closing table that backs Levels 1 and 2:
 
 | Level | Section | Statement | Evidence | Tier |
 |---|---|---|---|---|
-| Guide | Setup | Exposure fee % is defined per group | `ExposureGroup.cs:14` | `#observed` |
+| Guide | Rules and limits | Exposure fee % is defined per group | `ExposureGroup.cs:14` | `#observed` |
 | Guide | Daily accrual · step 3 | Base & account interest formula | see **R2** | `#observed` |
+| Guide | Place an order · outcome 2 | The order is charged the exposure fee | see **R3** | `#observed` |
 | Behind the scenes | Pricing a fill · steps 2–4 | A redelivered notification is priced a second time | see **F1** | `#observed` |
-| Guide | Overview | The fee exists to cover losses on margin loans | comment at `ExposureFeeCalculator.cs:9`; Q1 | `#inferred` |
+| Guide | Open questions | The fee exists to cover losses on margin loans | comment at `ExposureFeeCalculator.cs:9`; Q1 | `#inferred` |
 
 Rules:
 
 - **Every statement in Levels 1 and 2** that states a parameter, formula, threshold, step, branch, connection, timing or failure behaviour has a row. One row per statement, short.
 - **Level** is exactly `Guide` or `Behind the scenes`.
-- **Section cites where the statement lives.** A statement inside a flow cites the flow's `###` heading exactly, then ` · step N` or ` · steps N–M` (`Booking a seat · step 3`); an unnumbered statement in a flow cites the heading alone. Any other statement cites its section name (`Overview`, `Setup`, `Timing and ordering`); an absent optional section is cited by its name with the search that proved it. Every `###` flow of Level 1's *How it works* and Level 2's *What happens behind the scenes* has at least one row, and a cited step number exists in that flow.
+- **Section cites where the statement lives.** A statement inside a flow cites the flow's `###` heading exactly, then ` · step N` or ` · steps N–M` for a numbered step (`Booking a seat · step 3`). In a Level 1 task, a statement in a bullet under **What happens next** cites ` · outcome N` or ` · outcomes N–M`, counted from the top of that list; so a task cites `<Task> · step N` or `<Task> · outcome N`. An unnumbered statement in a flow (its example, its callout, its screen search) cites the heading alone. Any other statement cites its section name (`Who uses it`, `Rules and limits`, `Open questions`, `Timing and ordering`); a guide's opening callout is cited `Important`; an absent optional section is cited by its name with the search that proved it. Every `###` flow under Level 1's `## For …` sections and *What happens automatically*, and under Level 2's *What happens behind the scenes*, has at least one row, and a cited step or outcome number exists in that flow.
+- **A task with no screen found** has a row citing the task's heading alone, whose evidence is the negative search (the routes, pages and label files searched), so the guide's plain steps are shown to be honest.
 - **Evidence.** Every `#observed` row has evidence: `file:line` read this session, or `see **X**` where `X` resolves to a Level 3 row id (`R4`, `EV1`, `ERR1`, `F1`). Bold is reserved for row ids; a section is cited by name in plain text ("see Integrations"). Every `#inferred` row names a `Q<n>` or `T<n>`. A negative claim names its search.
 - A Level 2 failure or timing statement that is also a finding cites the finding id.
 
