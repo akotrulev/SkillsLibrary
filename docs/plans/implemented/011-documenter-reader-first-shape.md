@@ -2,7 +2,7 @@
 
 **Goal:** `dev:doc-business-model` writes guides (Level 1) and behind-the-scenes accounts (Level 2) that read in the order a person meets the product — who uses it, the few ideas and one picture of how it fits together, then each person's tasks in the order life happens — with Mermaid diagrams, GitHub-style callouts and examples beside the rule they show, screen labels the trace found and never invented ones, no internal ids in the body, and lengths the lint enforces. It works on greenfield and brownfield alike: a new KB is written in this shape, and existing documentation is only ever updated in place into it, never recreated (D8), with a check that no number or quoted message was lost. A script turns any guide into one standalone, consistently styled `.html` file to send to a client.
 
-**Status:** T1, T2, T3 and T4 are built (2026-11-13): the Level 1 and Level 2 shapes, the three golden examples, the reader-first overview, the INDEX line, the in-place update of an old-shape set (reconcile step 2, both documenter agents, the survey's REFRESH plan) and the lint (`old-shape`, `index-line`, `--kept-from`/`fact-kept` beside the T1–T2 rules); the three examples pass with 0 errors and 0 warnings, `--kept-from 92f14828` over them finds no lost fact, and 186 tests pass. Built but unverified: the lint and `fact-kept` on a real KB, and the pages in anything but headless Chrome. The renderer (`render-html.py`, pins `markdown-it-py==4.3.0`, `mdit-py-plugins==0.7.0`, Mermaid 11.17.2 with integrity) draws the golden example's diagram in headless Chrome (checked 2026-11-13). Still to build: W1, which closes. The agentic-shop pilot (that repo's plan 168, task D1) waits for this plan's W1 and for the user to update the `dev` plugin there; that plan's F1 draws three callout kinds and must add `[!WARNING]`, the fourth kind this plan allows (D6). The rule-based evals (`evals/`) are agent runs and are not part of any gate here: until the user runs the fixture eval (the row under W1 in the prompts table), the new shape is proven only by the golden examples passing the lint.
+**Status:** All five tasks have landed (2026-11-13) and the plan is filed. Delivered: the reader-first Level 1, Level 2 and overview shapes, the INDEX line, in-place update of an old-shape set, `doc-lint.py` (new rules, `old-shape`, `index-line`, `--kept-from`/`fact-kept`), `render-html.py`, and — in W1 — the catalog, README, the two rule files, `requirements-breakdown` and the evals brought in line. The whole set ran green (230 tests; doc-lint 99% branch on both scripts; the three examples 0 errors / 0 warnings; `--kept-from 92f14828` no `fact-kept`; headless Chrome draws 1 diagram; `plugin-surface-check` OK). Built but unverified: the lint and `fact-kept` on a real KB, the pages in anything but headless Chrome, and the rule-based evals, which are agent runs not part of any gate: until the user runs the fixture eval (`evals/README.md`, eval 1) the new shape is proven only by the golden examples passing the lint. The agentic-shop pilot (that repo's plan 168, task D1) waits for the user to update the `dev` plugin there; that plan's F1 draws three callout kinds and must add `[!WARNING]`, the fourth kind this plan allows (D6). `token-audit.py` exits 1 on 84 pre-existing body-size violations (the baseline before this plan); this plan added none net, but `business-documentation/SKILL.md` grew 19.6k → 30.6k characters, already over 16k.
 
 ## 1. What already exists, and what is missing
 
@@ -283,6 +283,8 @@ Costs: offline, the reader gets a one-line notice in place of the picture.
 
 **D16 (2026-11-13, T4) — four readings the renderer made.** (a) `--dir` renders the files holding a `**Audience:** shareable` line (anywhere), not "every Level 1 guide by name": a KB's `INDEX.md`, glossary and notes carry no such line and stay out, while an overview qualifies. (b) The `**Levels:**` and `**Audience:**` header lines are dropped from the page (the Levels links would all render as text or point at the page itself), and Audience is still read first to decide the "Internal — not for sharing" line. (c) A link is a guide link when it ends `.md` and is not a Level 2/3 file by name (`.behind-the-scenes.md`, `.technical[.topic].md`); a link to another `.md` that is no guide (an `INDEX.md`) cannot be told apart by name and becomes a dead `.html` link, which beats guessing from the disk because the pages are sent as a set. `https:`, `http:`, `mailto:` and `#` links stay. (d) A page with no diagram loads no script at all, so it makes no request. Alert icons are CSS glyphs, not inline `<svg>`, so the gate's `grep -c "<svg"` counts only drawn diagrams. Costs: (c)'s dead link for a non-guide `.md`; a page whose diagram fails to parse shows Mermaid's own error graphic, not the notice.
 
+**D17 (2026-11-13, W1) — the old section names `005` cites, and two readings W1 made.** (a) `docs/plans/005-cross-feature-test-design.md` cites the guide's old section names (`How it connects` at lines 13, 29, 71, 443 and 832; `How it works` at 445; `Setup` at 348, 387 and 732). The new names are `Related areas`, the `For <person>` tasks and `Rules and limits`. The plan is a record and was not edited: whoever runs 005 next maps `How it connects` → `Related areas`, `How it works` → the `### <task>` sections under `## For <person>`, `Setup` → `Rules and limits`. (b) The plan's W1 prompt said "record as D16", but T4 had taken D16; this is D17. (c) `be-documenter.md` (agent file, 14,000-character budget) and `feature-trace/SKILL.md` (16,000) went over their budgets with the new text; both were tightened by deleting repeated wording, not rules (one descriptive sentence, "doubles as the security-review map and negative-test matrix", was dropped from `feature-trace`). `business-documentation/SKILL.md` was already over 16,000 at the baseline and was left over: moving the Level 1 shape out would change what `be-documenter` Step 4 reads. Costs: that file is the largest `dev` body after `delivery-plan` and `solution-blueprint`.
+
 ## Answered questions (2026-11-13)
 
 **O1 — Title as a question (Trading212 style)?** No: the title is the area's plain name.
@@ -392,6 +394,8 @@ a scratch KB under `$TMPDIR` holding one old-shape set (copy of `example-area.md
 - Fix what the gate finds by the fix loop; a failure may be T1–T4's.
 - Commit and push to `master` (this repo's rule). Then tell the user, in this order: run the fixture eval (`evals/README.md`, eval 1) before the pilot, because an instruction defect is cheaper to find on the fixture than on 28 areas; update the `dev` plugin in agentic-shop; add `[!WARNING]` to that repo's plan 168 F1; then run plan 168 (F1, then D1).
 
+- **As built (2026-11-13):** `docs/skills-catalog.md` (`be-documenter`, `business-documentation`, lint and `be-feature-documenter` paragraphs: reader-first shape, the new lint rules, `old-shape`, `--kept-from`, `render-html.py`, in-place update); `README.md` (both command rows); `engineering-practices/rules/feature-docs.md` (About-section rule, Level 1 and Level 2 shape bullets, in-place update); `business-analysis/skills/rules/business-model.md`; `qa/manual/requirements-breakdown/SKILL.md` (the feature-documents row now names `For <person>` tasks, `Who uses it`, `Related areas`); `evals/evals.json` (evals 1 and 2 gain five shape expectations; the worked-example line says where it sits) and `evals/README.md`. No existing expectation named an old section, and the Golden-copy checks are unchanged. Gate: 186 tests in `test_doc_lint.py`; 230 in the whole `scripts` directory; coverage `doc-lint.py` 99% (missing `907`) and `render-html.py` 99% (missing `294`), over 80%; the three examples 0 errors, 0 warnings; `--kept-from 92f14828` printed no `fact-kept`; `render-html.py --dir` wrote `example-area.html` and `system-overview.html`; headless Chrome counted 1 `<svg>`; `plugin-surface-check.py` OK. `token-audit.py` exits 1 on 84 violations that all exist at the baseline (`be-documenter.md` and `feature-trace/SKILL.md`, which W1's text had pushed over, were tightened back; D17). Built but unverified: the evals, which are agent runs. Not done: committing and pushing, which the queue does.
+
 ## Close-out — every task
 
 Before you stop, in this order, in this file. Another task may be running in this working tree:
@@ -431,62 +435,6 @@ Run them in order, one session each; each block is complete on its own. Every ta
 
 | # | Stack | Agent | Depends on | Runs beside | Budget |
 |---|---|---|---|---|---|
-| W1 | `docs` | `general-purpose` | T1, T2, T3, T4 | — | ~100k |
 | — | run the fixture eval (`evals/README.md`, eval 1); update the `dev` plugin in agentic-shop; add `[!WARNING]` to its plan 168 F1; run plan 168 | **the user** | W1 | — | — |
 
-T1, T2, T3 and T4 have landed; W1 is live.
-
----
-
-### W1 — the close-out: catalog, README, rules, evals, and the whole set (general-purpose, docs)
-
-````
-Depends on: T1, T2, T3, T4
-Agent: general-purpose · Stack: docs
-
-You are working in the SkillsLibrary repo. Task W1 of docs/plans/011-documenter-reader-first-shape.md:
-bring every library surface that describes the documenter in line with the plan, run the whole set,
-fix what it finds, and file the plan.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: Status, §2–§7 headings, Decisions, every task's As-built note, task W1, and
-   "Close-out — every task".
-3. docs/skills-catalog.md — only the paragraphs `grep -n "be-documenter\|doc-business-model\|business-documentation\|be-feature-documenter"` finds.
-4. README.md — the `/dev:document-system` and `/dev:document-feature` rows.
-5. engineering-practices/rules/feature-docs.md; business-analysis/skills/rules/business-model.md.
-6. qa/manual/requirements-breakdown/SKILL.md — grep for "How it works", "Who can do what",
-   "How it connects", "Going deeper" and read those paragraphs only.
-7. backend/_shared/business-documentation/evals/evals.json and evals/README.md.
-
-Build what task W1 lists, then run the gate.
-
-Traps:
-- The catalog is ~200 KB: edit only the documenter paragraphs; never read it whole.
-- token-audit's `dev` row: if the new SKILL.md text pushed it over, move detail into a reference that
-  loads only when writing that level — do not delete rules.
-- The evals' "Golden-copy check" expectations are facts about the fixture, not the shape — keep them.
-  The new expectations are in task W1; the fixture's only screen labels are in `staff-ui.en.json`.
-- The fix loop: run the whole set once, fix each failure with the narrowest rerun, rerun only what
-  failed, then the whole set once more.
-- T3 left `evals/`, `requirements-breakdown`, the catalog, README and the two rule files as they were; D15
-  (the overview counts as old-shape too) and the `--kept-from`/`old-shape`/`index-line` rules belong in the
-  catalog's lint paragraph. Record the 005 plan's old section names as a dated D16 (the next free number).
-
-Gate (this is the last task, so it runs the whole set once more across the plan, in run order):
-  python3 -m unittest discover -s backend/_shared/business-documentation/scripts -p 'test_doc_lint.py'
-  uv run --with markdown-it-py==4.3.0 --with mdit-py-plugins==0.7.0 --with coverage coverage run --branch -m unittest discover -s backend/_shared/business-documentation/scripts && uv run --with coverage coverage report -m --include='*doc-lint.py,*render-html.py'
-    (≥ 80% of the branches the plan wrote: files from `git diff --name-only "$(git log --diff-filter=A --format=%h -1 -- docs/plans/011-documenter-reader-first-shape.md)" HEAD`; the `Missing` column lists each unexecuted branch as `from->to`)
-  python3 backend/_shared/business-documentation/scripts/doc-lint.py backend/_shared/business-documentation/references/example-area.md backend/_shared/business-documentation/references/example-behind-the-scenes.md backend/_shared/business-documentation/references/example-technical.md   → 0 errors, 0 warnings
-  python3 backend/_shared/business-documentation/scripts/doc-lint.py --kept-from 92f14828 backend/_shared/business-documentation/references/example-area.md backend/_shared/business-documentation/references/example-behind-the-scenes.md backend/_shared/business-documentation/references/example-technical.md   → no fact-kept line
-  uv run backend/_shared/business-documentation/scripts/render-html.py --out "$TMPDIR/render" --dir backend/_shared/business-documentation/references
-  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --disable-gpu --virtual-time-budget=15000 --dump-dom "file://$TMPDIR/render/example-area.html" | grep -c "<svg"   → 1 or more
-  python3 tools/plugin-surface-check.py
-  python3 tools/token-audit.py
-
-Commit: `docs(documenters): catalog, README, rules and evals for the reader-first shape (011 W1)`; push to master.
-Finish by telling the user, in this order: run the fixture eval (evals/README.md, eval 1) before the
-pilot; update the `dev` plugin in agentic-shop; add `[!WARNING]` to that repo's
-docs/plans/168-docs-diagrams-and-reader-first-pilot.md F1; then run plan 168 (F1, then D1).
-Close out per the plan's "Close-out — every task" before you stop.
-````
+All five tasks have landed; no prompt block remains.

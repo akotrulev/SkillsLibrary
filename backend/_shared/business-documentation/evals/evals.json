@@ -12,7 +12,7 @@
         "The three level files for the feature exist under docs/features/: the guide <name>.md, <name>.behind-the-scenes.md and <name>.technical.md; the only other files for it there are Level 3 topic splits named <name>.technical.<topic>.md",
         "`python3 scripts/doc-lint.py --dir <output dir>` exits 0",
         "The exact values £6.00, 8 credits, 24 hours and 3 credits appear in the Level 1 guide",
-        "The Level 1 worked example contains at least one overage arithmetic line of the form shortfall credits × rate = amount, built only from values that exist in the fixture (tier costs 1/2/3, plan allowances 8 or 16 credits, rates £6.00 or £5.00, or a personal rate the example states as an assumption), and every arithmetic line in the example is correct",
+        "The Level 1 worked example (inside the task that prices, or under `A … in numbers`) contains at least one overage arithmetic line of the form shortfall credits × rate = amount, built only from values that exist in the fixture (tier costs 1/2/3, plan allowances 8 or 16 credits, rates £6.00 or £5.00, or a personal rate the example states as an assumption), and every arithmetic line in the example is correct",
         "No `#confirmed` tier tag appears in any of the three level files except the one sentence in Level 3's `How to read this` legend that says it is never written",
         "Level 1 contains no HTTP status code, no file name (*.cs, *.json), no class name (e.g. CreditPricingService, BookingCancelledHandler, OverageChargeJob, Outbox) and neither the word 'handler' nor 'outbox'",
         "Level 3 has a Finding that a redelivered booking confirmation is priced twice (no idempotency key), with a boundary condition (e.g. delivery fails after the save, the retry spends credits / accrues overage a second time)",
@@ -28,7 +28,12 @@
         "Golden-copy check: no level says staff (or anyone) can set or clear a member's personal overage rate through the system",
         "Golden-copy check: no level says a crash part-way through monthly posting leaves some members charged and others not; if Level 3 discusses a partial failure of monthly posting, it is that allowances can be reset while no charges are saved",
         "Golden-copy check: every file path cited in Level 3 exists in the fixture (e.g. src/Workshops.Api/Credits/CreditPricingService.cs); none of src/Credits/…, src/Shared/Outbox.cs or migrations/007 appears",
-        "Golden-copy check: at least one level names a second plan, Plus, with 16 credits a month at £5.00 per overage credit"
+        "Golden-copy check: at least one level names a second plan, Plus, with 16 credits a month at £5.00 per overage credit",
+        "Reader-first shape: the first `##` heading of the Level 1 guide is `Who uses it`, and its sections follow `How it fits together`, one `For <person>` section per person in that table, then optional sections, `Open questions` and `About this document` last",
+        "No `AREA-`, `FLOW-`, `ENT-`, `DEC-`, `EVT-`, `RX-` or `INV-` id appears in the Level 1 or Level 2 body; they appear only under `About this document` (a `Q<n>` only in the first column of the open-questions table)",
+        "Level 2's `###` task headings are Level 1's task headings, with the same words and in the same order; Level 2 adds none (it may leave a task out)",
+        "The fixture has no member screen: the member tasks in Level 1 carry no `**Where:**` line and no bold label (the guide's bold is only ever a screen label)",
+        "Every bold label in a staff task of Level 1 is a value in fixture/src/Workshops.Api/Resources/staff-ui.en.json (Session credits, Monthly allowance, Overage rate (per credit), Overage, Personal overage rate, Credits used this month, Session tier, Cancel session)"
       ]
     },
     {
@@ -42,7 +47,7 @@
         "The three level files for the credits area exist under docs/business-model/areas/: the guide <name>.md, <name>.behind-the-scenes.md and <name>.technical.md; the only other files for it there are Level 3 topic splits named <name>.technical.<topic>.md",
         "`python3 scripts/doc-lint.py --dir <output dir>` exits 0",
         "The exact values £6.00, 8 credits, 24 hours and 3 credits appear in the Level 1 guide",
-        "The Level 1 worked example contains at least one overage arithmetic line of the form shortfall credits × rate = amount, built only from values that exist in the fixture (tier costs 1/2/3, plan allowances 8 or 16 credits, rates £6.00 or £5.00, or a personal rate the example states as an assumption), and every arithmetic line in the example is correct",
+        "The Level 1 worked example (inside the task that prices, or under `A … in numbers`) contains at least one overage arithmetic line of the form shortfall credits × rate = amount, built only from values that exist in the fixture (tier costs 1/2/3, plan allowances 8 or 16 credits, rates £6.00 or £5.00, or a personal rate the example states as an assumption), and every arithmetic line in the example is correct",
         "No `#confirmed` tier tag appears in any of the three level files except the one sentence in Level 3's `How to read this` legend that says it is never written",
         "Level 1 contains no HTTP status code, no file name (*.cs, *.json), no class name (e.g. CreditPricingService, BookingCancelledHandler, OverageChargeJob, Outbox) and neither the word 'handler' nor 'outbox'",
         "Level 3 has a Finding that a redelivered booking confirmation is priced twice (no idempotency key), with a boundary condition (e.g. delivery fails after the save, the retry spends credits / accrues overage a second time)",
@@ -60,7 +65,12 @@
         "Golden-copy check: every file path cited in Level 3 exists in the fixture (e.g. src/Workshops.Api/Credits/CreditPricingService.cs); none of src/Credits/…, src/Shared/Outbox.cs or migrations/007 appears",
         "Golden-copy check: at least one level names a second plan, Plus, with 16 credits a month at £5.00 per overage credit",
         "The system overview set exists under docs/business-model/: system-overview.md, system-overview.behind-the-scenes.md and system-overview.technical.md",
-        "docs/business-model/INDEX.md has one line for the credits area that names all three of its level files"
+        "docs/business-model/INDEX.md has one line for the credits area that names all three of its level files",
+        "Reader-first shape: the first `##` heading of the Level 1 guide is `Who uses it`, and its sections follow `How it fits together`, one `For <person>` section per person in that table, then optional sections, `Open questions` and `About this document` last",
+        "No `AREA-`, `FLOW-`, `ENT-`, `DEC-`, `EVT-`, `RX-` or `INV-` id appears in the Level 1 or Level 2 body; they appear only under `About this document` (a `Q<n>` only in the first column of the open-questions table)",
+        "Level 2's `###` task headings are Level 1's task headings, with the same words and in the same order; Level 2 adds none (it may leave a task out)",
+        "The fixture has no member screen: the member tasks in Level 1 carry no `**Where:**` line and no bold label (the guide's bold is only ever a screen label)",
+        "Every bold label in a staff task of Level 1 is a value in fixture/src/Workshops.Api/Resources/staff-ui.en.json (Session credits, Monthly allowance, Overage rate (per credit), Overage, Personal overage rate, Credits used this month, Session tier, Cancel session)"
       ]
     },
     {

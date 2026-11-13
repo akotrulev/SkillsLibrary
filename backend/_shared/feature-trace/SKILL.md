@@ -5,7 +5,7 @@ description: Use when one area of an existing backend must be traced in depth in
 
 # Feature Trace — recovering behavior from code
 
-Depth, one area at a time. The output is **structured evidence**, not prose: nine inventories, every item with its `file:line`, ready for `dev:doc-business-model` to turn into three documents. One trace serves all three readers: the guide needs rules and formulas, behind-the-scenes needs the Edges (who tells whom, when, what happens on failure), the technical reference needs everything with exact names, paths, contracts, configuration, tests and telemetry. A second trace per reader is the waste this prevents.
+Depth, one area at a time. The output is **structured evidence**, not prose: nine inventories, every item with its `file:line`, ready for `dev:doc-business-model` to turn into three documents. One trace serves all three readers: the guide needs rules and formulas, behind-the-scenes the Edges, the technical reference everything with exact names, paths and contracts. A second trace per reader is waste.
 
 The discipline: **separate what the code does from what you think it means.** Every extracted item is `#observed` with a `file:line` read this session. Intent is a separate, marked layer; where it is not recoverable, the honest output is the behavior plus a question.
 
@@ -73,7 +73,7 @@ Every condition, threshold, calculation and eligibility test the code enforces �
 Write the rule as the business would state it. **Record the number, not a rounding** — "30 days", not "about a month".
 
 ### 3. Validations & gates
-Authorization, input validation, preconditions, state guards — each with its failure in user terms **and** the technical outcome (status or problem type, exception type). Where the person sees a message, **quote the refusal text verbatim** with its source (`"You can't cancel within 24 hours of the session."` — `Resources/Bookings.en.resx:12`); "none shown — searched …" when it reaches the user as a bare status. It doubles as the security-review map and negative-test matrix.
+Authorization, input validation, preconditions, state guards — each with its failure in user terms **and** the technical outcome (status or problem type, exception type). Where the person sees a message, **quote the refusal text verbatim** with its source (`"You can't cancel within 24 hours of the session."` — `Resources/Bookings.en.resx:12`); "none shown — searched …" for a bare status.
 
 ### 4. Entity states & transitions
 Per owned entity: the states, the moves, who triggers each, and what is blocked — from enums, status columns, guard clauses and the transitions the code *refuses*. **Refusals matter as much as transitions:** a missing arrow is a business rule ("a shipped order never returns to pending"), usually written nowhere else.
@@ -105,7 +105,7 @@ The tests covering the area (path and line, what each covers, what none covers �
 
 ## Harvest the client's words
 
-Record the client's own words, so the guide speaks them instead of code names: UI copy, translation and resource files, email and notification templates, validation and problem-detail text, enum display names, domain terms in docs and test names. Each goes in `Client vocabulary` with where seen, **where in the product** it is met, and its code name; a code name with no client term is recorded with the search. Where the UI is in the repository, record the screen and control path as `screen › control` (`Your orders › Cancel order`) from the routes, navigation and the label's own file; where it is not, or the search finds nothing, record the search instead — that negative row is what lets the guide take its no-screen form (no `**Where:**` line, no bold label) honestly instead of inventing a button. `references/trace-recipes.md` has the per-stack searches.
+Record the client's own words, so the guide speaks them: UI copy, resource files, templates, validation text, enum display names, domain terms in docs and tests. Each goes in `Client vocabulary` with where seen, where in the product, and its code name; a code name with no client term gets the search. Where the UI is in the repository, record `screen › control` (`Your orders › Cancel order`) from routes and navigation; else record the search — that row lets the guide take its no-screen form instead of inventing a button. `references/trace-recipes.md` has the per-stack searches.
 
 ## Evidence rules
 
