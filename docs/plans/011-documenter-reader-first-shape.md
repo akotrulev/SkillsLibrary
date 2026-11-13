@@ -2,7 +2,7 @@
 
 **Goal:** `dev:doc-business-model` writes guides (Level 1) and behind-the-scenes accounts (Level 2) that read in the order a person meets the product — who uses it, the few ideas and one picture of how it fits together, then each person's tasks in the order life happens — with Mermaid diagrams, GitHub-style callouts and examples beside the rule they show, screen labels the trace found and never invented ones, no internal ids in the body, and lengths the lint enforces. It works on greenfield and brownfield alike: a new KB is written in this shape, and existing documentation is only ever updated in place into it, never recreated (D8), with a check that no number or quoted message was lost. A script turns any guide into one standalone, consistently styled `.html` file to send to a client.
 
-**Status:** T1 is built (2026-11-13): the Level 1 shape is in `BD/SKILL.md`, `example-area.md` is a guide in that shape, the lint reads it and the three examples pass with 0 errors and 0 warnings; the Level 2 example and the Level 2 / overview lint rules are still the old ones. T2 is next. The agentic-shop pilot (that repo's plan 168, task D1) waits for this plan's W1 and for the user to update the `dev` plugin there; that plan's F1 draws three callout kinds and must add `[!WARNING]`, the fourth kind this plan allows (D6). The rule-based evals (`evals/`) are agent runs and are not part of any gate here: until the user runs the fixture eval (the row under W1 in the prompts table), the new shape is proven only by the golden examples passing the lint.
+**Status:** T1 and T2 are built (2026-11-13): the Level 1 and Level 2 shapes are in `BD/SKILL.md` and `level-2-behind-the-scenes.md`, the three golden examples follow them, and the lint reads both and measures size, sentences, labels and the diagram; the three examples pass with 0 errors and 0 warnings and 154 tests pass. Still the old rules: the overview and INDEX (T3), the renderer (T4). T3 is next. The agentic-shop pilot (that repo's plan 168, task D1) waits for this plan's W1 and for the user to update the `dev` plugin there; that plan's F1 draws three callout kinds and must add `[!WARNING]`, the fourth kind this plan allows (D6). The rule-based evals (`evals/`) are agent runs and are not part of any gate here: until the user runs the fixture eval (the row under W1 in the prompts table), the new shape is proven only by the golden examples passing the lint.
 
 ## 1. What already exists, and what is missing
 
@@ -277,6 +277,8 @@ Costs: offline, the reader gets a one-line notice in place of the picture.
 
 **D13 (2026-11-13, T1) — `internal-ids` runs on the Level 1 area guide only, not on Level 2.** §6 lists it for Levels 1–2. The old `example-behind-the-scenes.md` carries `FLOW-004`, `Q6`, `Q9` in its body and must keep passing until T2 rewrites it, and the overview guide still lists AREA ids until T3. T1 ran it on Level 1 area guides; T2 extends it to Level 2 (after moving the ids into `## About this document` / the open-questions first cell) and keeps the overview out until T3. `alerts` already covers Levels 1–2. Also: Level 1's `**Id:**` joined `HEADER_PREFIXES`, and the example's "Cancel a member's booking" has no `**Where:**` because the fixture has no label for cancelling one booking (`Cancel session` cancels a whole session, so it appears in a `[!NOTE]`).
 
+**D14 (2026-11-13, T2) — three small readings the plan left open.** (a) `length` and `task-unique` run on every set, the overview included (the plan says "Level 1"); `diagram` runs on every Level 1 file; `internal-ids`, `flow-mirror`, `limits`, `long-sentence` and `labels` run on area sets only, so the overview stays untouched until T3. (b) Level 2's `**Audience:**` is read from the top only — the same line in `## About this document` is reported missing — while its other metadata is read from About, and `header_line` falls back to the top for both Levels 1–2. (c) `length` counts a header line (`**Created:**`…, `**Levels:**`) as nothing, and a word is any whitespace- or pipe-separated token holding a letter or digit, so `£6.00` is one word and a table's `|---|` none. Costs: a Level 2 file that moves its Audience under About fails `audience` instead of passing quietly.
+
 ## Answered questions (2026-11-13)
 
 **O1 — Title as a question (Trading212 style)?** No: the title is the area's plain name.
@@ -327,6 +329,7 @@ All tasks are `docs` on `general-purpose`, as in every library plan. Paths are r
 - `doc-lint.py` + tests: Level 2 `sections`, flow parents for Level 2, `header` in Level 2 (Audience read from the top), `flow-mirror` as an ordered subset, `task-unique`, `length` for all three levels, `limits`, `long-sentence`, `labels`, `diagram`, the roadmap promises in `guarantee-words`. Update the docstring.
 - Where one of the new rules reports a finding on `example-area.md`, fix the example, not the rule: T1 wrote it to §2 without these checks.
 - **Not in T2:** the overview, INDEX, `old-shape`, `fact-kept`, the trace column, the agents (T3).
+- **As built (2026-11-13):** `level-2-behind-the-scenes.md` rewritten to §3 (follows the guide, Audience on top, About last, ids and `Q<n>` out of the body, 3,000-word ceiling). `example-behind-the-scenes.md`: `## For members` (Book a session, Cancel a booking), `## For staff` (Cancel a member's booking — the whole-session cancellation paragraph lives here), `## What happens automatically` (Monthly posting); *Set up plans and tiers* is left out (nothing behind it beyond what the guide and *What is remembered* say); `FLOW-004` moved to `**Models:**`, `Q6`/`Q9` in the body became "see *Open questions*". `example-technical.md`: the 12 Behind-the-scenes rows re-cited to the new headings (the staff-cancel row now cites *Cancel a member's booking*). `example-area.md`: three sentences over 30 words split (lines 83, 208, 209), no fact changed. `doc-lint.py`: `check_flow_mirror` (ordered subset over `(section, task)` pairs, `outline()`), `check_task_unique`, `check_length` (`Doc.reader_lines()`), `check_limits`, `check_long_sentence` (`sentences()`), `check_labels`, `check_diagram`, `ROADMAP_PROMISE` in `check_guarantee_words`, Level 2 `sections`/flow parents/`header`/`internal-ids`; docstring updated. Proof: `python3 -m unittest discover -s BD/scripts` → 154 tests OK; `doc-lint.py <three examples>` → `0 error(s), 0 warning(s)`; `doc-lint.py` coverage 99% (478 stmts, 208 branches, one miss at the `__main__` guard). Built but unverified: the lint on any real KB — the evals were not run.
 
 ### T3 — the overview, INDEX lines, and updating an old set in place without losing a fact
 
@@ -422,73 +425,14 @@ Run them in order, one session each; each block is complete on its own. Every ta
 
 | # | Stack | Agent | Depends on | Runs beside | Budget |
 |---|---|---|---|---|---|
-| T2 | `docs` | `general-purpose` | T1 | — | ~133k |
 | T3 | `docs` | `general-purpose` | T2 | — | ~135k |
 | T4 | `docs` | `general-purpose` | T3 | — | ~80k |
 | W1 | `docs` | `general-purpose` | T1, T2, T3, T4 | — | ~100k |
 | — | run the fixture eval (`evals/README.md`, eval 1); update the `dev` plugin in agentic-shop; add `[!WARNING]` to its plan 168 F1; run plan 168 | **the user** | W1 | — | — |
 
-T1 has landed; T2–T4 and W1 are live.
+T1 and T2 have landed; T3, T4 and W1 are live.
 
 ---
-
-### T2 — the Level 2 account follows Level 1, and the lint measures what a reader feels (general-purpose, docs)
-
-````
-Depends on: T1
-Agent: general-purpose · Stack: docs
-
-You are working in the SkillsLibrary repo. Task T2 of docs/plans/011-documenter-reader-first-shape.md:
-make Level 2 (behind the scenes) follow Level 1's sections and tasks, prove it with the golden
-example, and add the lint rules that measure size, sentences, labels and the diagram.
-
-Read, in this order:
-1. CLAUDE.md (Comments, KISS, Test code rules).
-2. The plan: §2 (the bullets on labels, limits, the diagram, Good to know, and "When a guide is over
-   its length"), §3, §6 (rows marked T2), D3–D7, D10, D12, task T2 and T1's As-built note, and
-   "Close-out — every task".
-3. backend/_shared/business-documentation/references/level-2-behind-the-scenes.md (whole).
-4. backend/_shared/business-documentation/references/example-area.md as T1 left it (whole) — the
-   sections and task headings Level 2 follows, and the document the new rules read.
-5. references/example-behind-the-scenes.md (whole); example-technical.md — "## Evidence index" and
-   "## Business ↔ code vocabulary"; references/level-3-technical.md — the split-by-topic paragraph
-   (for the Level 3 `length` rule).
-6. scripts/doc-lint.py and test_doc_lint.py as T1 left them.
-
-Build what task T2 lists: the Level 2 reference per §3; example-behind-the-scenes.md reordered into
-T1's `## For …` sections and task headings, same order, metadata in `## About this document` and the
-Audience line on top; the Behind-the-scenes evidence-index rows re-cited; the lint's T2 rules with a
-passing and a failing test each.
-
-Traps:
-- `flow-mirror` is an ordered subset: Level 2 may leave out a Level 1 task with nothing behind it, and
-  may not add or reorder one. It compares the `##` section titles and the `###` headings — not the
-  lanes. Do not invent a lane to keep a task in.
-- `length` counts words outside fenced blocks and `## About this document`, table cells included; for
-  Level 3 it counts the main file without `## Evidence index`, and each topic sibling on its own.
-- `labels` reads bold only in a `**Where:**` line and in a person's numbered steps, and matches it
-  against the first column of Level 3's vocabulary table as a phrase, case-insensitively. Bold in
-  outcomes, tables and callouts is not a label.
-- `long-sentence` skips tables, fenced blocks and formula lines (`Name = expression`); a list item is
-  its own sentence.
-- `diagram` applies to Level 1 (area and overview); Level 2's who-tells-whom diagram keeps its type.
-- The roadmap promises join `guarantee-words` as patterns, not as the bare words "not yet": "an order
-  that has not yet shipped" is a state, not a promise.
-- A finding from a new rule on example-area.md is fixed in the example, never by loosening the rule.
-- T1 ran `internal-ids` on the Level 1 area guide only (D13). Extend it to Level 2: move `FLOW-004`,
-  `Q6`, `Q9` and the like out of the example's body, keeping every fact; the overview stays out until T3.
-- T1's doc-lint.py has `flow_tasks(doc)` (line, heading, body lines per task) and `flows(doc)` →
-  `{(line, heading): (steps, outcomes)}`; `mermaid_prose()` reduces a mermaid line to its quoted labels
-  and text after a colon; `Doc.is_flow_section()` / `is_area_guide()`. Reuse them.
-
-Gate: own tests — the three commands in T1's gate line (unit tests, the lint over the three examples,
-coverage over `*doc-lint.py`); ≥ 80% of the branches T2 wrote; the lint over the three examples prints
-no `length`, `limits`, `long-sentence`, `labels`, `diagram`, `task-unique`, `flow-mirror` or
-`guarantee-words` line. Do not run the evals.
-
-Commit: `feat(documenters): Level 2 follows the guide's tasks; lint measures size, sentences, labels (011 T2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### T3 — the overview, INDEX lines, and updating an old set in place without losing a fact (general-purpose, docs)
 

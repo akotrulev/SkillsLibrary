@@ -227,12 +227,12 @@ None found. Search: `ActivitySource`, `Meter`, `ILogger` calls in `src/Credits/`
 | Behind the scenes | At a glance | Nothing here talks to an outside service | search under Integrations | `#observed` |
 | Behind the scenes | The parts involved | Part names and what each does | see Business ↔ code vocabulary; **EV1**–**EV4** | `#observed` |
 | Behind the scenes | The parts involved | Credits service runs after the booking is saved; billing job at 00:00 on the 1st | see **EV1**, **EP5** | `#observed` |
-| Behind the scenes | Booking a seat · step 1 | Booking saved and confirmed before pricing | see **EV1** | `#observed` |
-| Behind the scenes | Booking a seat · step 2 | How soon the credits service is told is not shown | no delay, poll interval or schedule visible at `Outbox.cs:22`; Q9 | `#observed` |
-| Behind the scenes | Booking a seat · steps 3–4 | Cost copied onto the booking; overage note added | see **R1**, **R2**, **DB4** | `#observed` |
-| Behind the scenes | Cancelling a booking · steps 1–2 | Cancellation saved, then the credits service is told who cancelled | see **EV2** | `#observed` |
-| Behind the scenes | Cancelling a booking · step 3 | A repeated cancellation message returns the credits twice | see **F1** | `#observed` |
-| Behind the scenes | Cancelling a booking | Staff cancelling a session cancels each booking one by one | see **EV3** | `#observed` |
+| Behind the scenes | Book a session · step 1 | Booking saved and confirmed before pricing | see **EV1** | `#observed` |
+| Behind the scenes | Book a session · step 2 | How soon the credits service is told is not shown | no delay, poll interval or schedule visible at `Outbox.cs:22`; Q9 | `#observed` |
+| Behind the scenes | Book a session · steps 3–4 | Cost copied onto the booking; overage note added | see **R1**, **R2**, **DB4** | `#observed` |
+| Behind the scenes | Cancel a booking · steps 1–2 | Cancellation saved, then the credits service is told who cancelled | see **EV2** | `#observed` |
+| Behind the scenes | Cancel a booking · step 3 | A repeated cancellation message returns the credits twice | see **F1** | `#observed` |
+| Behind the scenes | Cancel a member's booking | Staff cancelling a session cancels each booking one by one | see **EV3** | `#observed` |
 | Behind the scenes | Monthly posting · steps 1–3 | Runs at 00:00 on the 1st; one charge per member per run; reset for everyone | see **EP5**, **R7**, **R8** | `#observed` |
 | Behind the scenes | What is remembered, and where | Plan values, tier costs and personal rate changed only by staff | see **EP2**, **EP6**, **EP7**, **DB1** | `#observed` |
 | Behind the scenes | What is remembered, and where | Booking cost written once at pricing; credits used has three writers; notes and ledger writers | see **DB2**, **DB3**, **DB4**, **EV4** | `#observed` |

@@ -80,7 +80,7 @@ You can book a seat on any session. If your credits have run out, the booking st
 
 **Example**
 
-Ana is on the Basic plan: 8 monthly credits, an overage rate of £6.00. On 11 March she has used 6 credits and books *Sculpture masterclass*, a Masterclass that costs 3 credits.
+Ana is on the Basic plan: 8 monthly credits, an overage rate of £6.00. On 11 March she has used 6 credits. She books *Sculpture masterclass*, a Masterclass that costs 3 credits.
 
 Credits remaining = 8 − 6 = 2
 Overage credits = 3 − 2 = 1
@@ -205,8 +205,8 @@ Ana is on the Basic plan with no personal override. Ben is also on Basic but car
 
 Walking through the lines that matter:
 
-- **11 Mar.** Credit cost 3, credits remaining 8 − 6 = 2. 2 is less than 3, so 2 credits are spent and the shortfall is 3 − 2 = 1 overage credit. Overage charge = 1 × £6.00 = £6.00, accrued.
-- **15 Mar.** The workshop's 2 credits come back, so Ana has 2 credits again — but the £6.00 accrued on 11 Mar stays, because a returned credit never re-prices an earlier booking.
+- **11 Mar.** Credit cost 3, credits remaining 8 − 6 = 2. 2 is less than 3, so 2 credits are spent. The shortfall is 3 − 2 = 1 overage credit. Overage charge = 1 × £6.00 = £6.00, accrued.
+- **15 Mar.** The workshop's 2 credits come back, so Ana has 2 credits again. The £6.00 accrued on 11 Mar stays, because a returned credit never re-prices an earlier booking.
 - **1 Apr.** One charge of £6.00 is posted. Ana's 1 unused credit is lost; she starts April with 8.
 
 **Ben's override.** Had Ben made the 11 Mar booking in Ana's position, his shortfall would have been charged at his personal rate: 1 × £4.50 = £4.50.

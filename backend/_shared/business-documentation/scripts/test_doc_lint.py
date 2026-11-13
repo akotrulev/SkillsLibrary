@@ -59,14 +59,22 @@ def guide(audience="shareable", body="Members book sessions.", flow=FLOW, sectio
     return f"# Area\n\n{body}\n\n{LEVELS}\n\n{text}\n"
 
 
-def behind(audience="internal", body="The booking service tells the credits service.", questions="| Q2 | When? | Staleness |"):
-    return document("Area — Behind the scenes", audience, {
+BEHIND_FLOW = "### Booking a seat\n\n1. Saved.\n2. Priced."
+
+
+def behind(audience="internal", body="The booking service tells the credits service.", questions="| Q2 | When? | Staleness |",
+           flow=BEHIND_FLOW, sections=None, sha="abc1234"):
+    parts = {
         "At a glance": body, "The parts involved": "| Part | Does |\n|---|---|",
-        "What happens behind the scenes": "### Booking a seat\n\n1. Saved.\n2. Priced.",
+        "For members": flow,
+        **(sections or {}),
         "What is remembered, and where": "Bookings.", "Timing and ordering": "In order.",
         "When parts fail or are slow": "Retried.", "If you change this": "Check pricing.",
         "Open questions": f"| # | Question | Why |\n|---|---|---|\n{questions}",
-    })
+        "About this document": about(audience, sha, identifier="").replace(f"**Audience:** {audience}\n", ""),
+    }
+    text = "\n\n".join(f"## {heading}\n\n{content}" for heading, content in parts.items())
+    return f"# Area — Behind the scenes\n\nHow it works.\n\n{LEVELS}\n**Audience:** {audience}\n\n{text}\n"
 
 
 def technical(audience="internal", sha="abc1234", index_rows=None, extra="", tquestions="| T1 | Ordering? |",
@@ -104,6 +112,34 @@ def overview_set():
             ]),
         }, name),
     }
+
+
+def words(count):
+    return " ".join(["word"] * count)
+
+
+def prose(count):
+    return " ".join(["Word."] * count)
+
+
+def sentence(count):
+    return "Word " + " ".join(["word"] * (count - 1)) + "."
+
+
+def task(name):
+    return f"### {name}\n\n1. Do it."
+
+
+def cited(*headings, levels=("Guide", "Behind the scenes")):
+    return OBSERVED_ROWS + [f"| {level} | {h} | Done | see **R1** | `#observed` |" for h in headings for level in levels]
+
+
+def limited_task(steps, outcomes, alerts):
+    parts = ["### Booking a seat", *(f"{i}. Step." for i in range(1, steps + 1)), "**What happens next**",
+             *(f"- Outcome {i}." for i in range(1, outcomes + 1)),
+             *(f"> [!NOTE]\n> Alert {i}." for i in range(1, alerts + 1))]
+    return "\n\n".join(parts[:1]) + "\n\n" + "\n".join(parts[1:1 + steps]) + "\n\n" + parts[1 + steps] + "\n\n" + "\n".join(
+        parts[2 + steps:2 + steps + outcomes]) + "".join("\n\n" + a for a in parts[2 + steps + outcomes:])
 
 
 def without_section(text, title):
@@ -597,6 +633,254 @@ class DocLintTests(unittest.TestCase):
     def test_should_pass_example_when_guide_has_a_story_in_numbers(self):
         flow = FLOW.replace("**What happens next**", "**What happens next**\n\n- Priced:\n\n  Credit cost = the tier's cost")
         self.write_set(guide_text=guide(flow=flow, sections={"A month in numbers": "Ana pays 3."}))
+        self.assert_clean()
+
+    def test_should_report_sections_when_behind_lacks_about_section(self):
+        self.write_set(behind_text=without_section(behind(), "About this document"))
+        self.assert_fires("sections")
+
+    def test_should_report_sections_when_behind_has_no_for_section(self):
+        self.write_set(behind_text=behind().replace("## For members", "## Flows"))
+        self.assert_fires("sections")
+
+    def test_should_report_audience_when_behind_keeps_it_only_in_about(self):
+        text = behind().replace("**Audience:** internal\n\n", "\n").replace("**Created:**", "**Audience:** internal\n**Created:**")
+        self.write_set(behind_text=text)
+        self.assert_fires("audience")
+
+    def test_should_report_header_when_behind_about_lacks_created(self):
+        self.write_set(behind_text=behind().replace("**Created:** 2026-08-02\n", ""))
+        self.assert_fires("header")
+
+    def test_should_report_internal_ids_when_behind_body_names_a_flow_id(self):
+        self.write_set(behind_text=behind(body="Branches are in FLOW-004."))
+        self.assert_fires("internal-ids")
+
+    def test_should_report_internal_ids_when_behind_body_names_a_question(self):
+        self.write_set(behind_text=behind(body="How soon is not shown (Q2)."))
+        self.assert_fires("internal-ids")
+
+    def test_should_pass_internal_ids_when_behind_ids_sit_in_about_and_first_cell(self):
+        text = behind().replace("**Derived from:**", "**Models:** [FLOW-004 pricing]\n**Derived from:**")
+        self.write_set(behind_text=text)
+        self.assert_clean()
+
+    def test_should_pass_flow_mirror_when_behind_leaves_a_guide_task_out(self):
+        guide_text = guide(sections={"For staff": task("Cancel a member's booking")})
+        self.write_set(guide_text=guide_text, technical_text=technical(index_rows=cited("Cancel a member's booking", levels=("Guide",))))
+        self.assert_clean()
+
+    def test_should_report_flow_mirror_when_behind_adds_a_task(self):
+        self.write_set(behind_text=behind(sections={"For staff": task("Extra")}),
+                       technical_text=technical(index_rows=cited("Extra", levels=("Behind the scenes",))))
+        self.assert_fires("flow-mirror")
+
+    def test_should_report_flow_mirror_when_behind_adds_a_section(self):
+        self.write_set(behind_text=behind(sections={"What happens automatically": ""}))
+        self.assert_fires("flow-mirror")
+
+    def test_should_report_flow_mirror_when_behind_reorders_tasks(self):
+        guide_text = guide(flow=FLOW + "\n\n" + task("Cancel a seat"))
+        behind_text = behind(flow=task("Cancel a seat") + "\n\n" + BEHIND_FLOW)
+        self.write_set(guide_text=guide_text, behind_text=behind_text,
+                       technical_text=technical(index_rows=cited("Cancel a seat")))
+        self.assert_fires("flow-mirror")
+
+    def test_should_report_flow_mirror_when_behind_moves_a_task_to_another_section(self):
+        guide_text = guide(sections={"For staff": task("Cancel a seat")})
+        behind_text = behind(flow=BEHIND_FLOW + "\n\n" + task("Cancel a seat"))
+        self.write_set(guide_text=guide_text, behind_text=behind_text,
+                       technical_text=technical(index_rows=cited("Cancel a seat")))
+        self.assert_fires("flow-mirror")
+
+    def test_should_report_task_unique_when_guide_repeats_a_heading(self):
+        self.write_set(guide_text=guide(flow=FLOW + "\n\n" + FLOW))
+        self.assert_fires("task-unique")
+
+    def test_should_report_task_unique_when_behind_repeats_a_heading(self):
+        self.write_set(behind_text=behind(flow=BEHIND_FLOW + "\n\n" + BEHIND_FLOW))
+        self.assert_fires("task-unique")
+
+    def test_should_pass_length_when_guide_is_at_the_limit(self):
+        self.write_set(guide_text=guide(sections={"Good to know": prose(2400)}))
+        self.assert_clean()
+
+    def test_should_report_length_when_guide_is_over_the_limit(self):
+        self.write_set(guide_text=guide(sections={"Good to know": words(2500)}))
+        self.assert_fires("length")
+
+    def test_should_report_length_when_behind_is_over_the_limit(self):
+        self.write_set(behind_text=behind(body=words(3000)))
+        self.assert_fires("length")
+
+    def test_should_not_count_about_fences_or_table_pipes_when_measuring_length(self):
+        fenced = "```text\n" + words(3000) + "\n```"
+        about_words = words(3000)
+        text = guide(sections={"Good to know": fenced}).replace("**Audience:**", about_words + "\n**Audience:**")
+        self.write_set(guide_text=text)
+        self.assert_clean()
+
+    def test_should_count_table_cells_when_measuring_length(self):
+        row = "| " + " | ".join(["cell"] * 10) + " |"
+        table = "| a | b |\n|---|---|\n" + "\n".join([row] * 250)
+        self.write_set(guide_text=guide(sections={"Rules and limits": table}))
+        self.assert_fires("length")
+
+    def test_should_report_length_when_level_3_is_over_the_limit(self):
+        self.write_set(technical_text=technical(extra="\n\n" + words(4100)))
+        self.assert_fires("length")
+
+    def test_should_not_count_the_evidence_index_when_measuring_level_3(self):
+        rows = OBSERVED_ROWS + [f"| Guide | Booking a seat | {words(5)} | see **R1** | `#observed` |"] * 800
+        self.write_set(technical_text=technical(index_rows=rows))
+        self.assert_clean()
+
+    def test_should_measure_each_level_3_topic_sibling_on_its_own(self):
+        self.write_set()
+        (self.folder / "a.technical.moves.md").write_text(
+            f"# Area — Technical reference: moves\n\n{LEVELS}\n\n## Data\n\n{words(4100)}\n", encoding="utf-8")
+        self.assert_fires("length")
+
+    def test_should_pass_limits_when_a_task_is_at_every_limit(self):
+        flow = limited_task(steps=7, outcomes=5, alerts=1)
+        self.write_set(guide_text=guide(flow=flow))
+        self.assert_clean()
+
+    def test_should_warn_limits_when_a_task_has_eight_steps(self):
+        self.write_set(guide_text=guide(flow=limited_task(steps=8, outcomes=1, alerts=0)))
+        self.assert_fires("limits", "WARN")
+
+    def test_should_warn_limits_when_a_task_has_six_outcomes(self):
+        self.write_set(guide_text=guide(flow=limited_task(steps=1, outcomes=6, alerts=0)))
+        self.assert_fires("limits", "WARN")
+
+    def test_should_warn_limits_when_a_task_has_two_alerts(self):
+        self.write_set(guide_text=guide(flow=limited_task(steps=1, outcomes=1, alerts=2)))
+        self.assert_fires("limits", "WARN")
+
+    def test_should_warn_limits_when_there_are_seven_key_ideas(self):
+        ideas = "\n".join(f"- **Term{chr(97 + i)}** — one line" for i in range(7))
+        self.write_set(guide_text=guide(sections={"How it fits together": ideas}))
+        self.assert_fires("limits", "WARN")
+
+    def test_should_pass_limits_when_there_are_six_key_ideas_and_entries(self):
+        ideas = "\n".join(f"- **Term{chr(97 + i)}** — one line" for i in range(6))
+        entries = "\n\n".join(f"### Question {chr(97 + i)}?\n\nYes." for i in range(6))
+        self.write_set(guide_text=guide(sections={"How it fits together": ideas, "Good to know": entries}))
+        self.assert_clean()
+
+    def test_should_warn_limits_when_there_are_seven_good_to_know_entries(self):
+        entries = "\n\n".join(f"### Question {chr(97 + i)}?\n\nYes." for i in range(7))
+        self.write_set(guide_text=guide(sections={"Good to know": entries}))
+        self.assert_fires("limits", "WARN")
+
+    def test_should_pass_long_sentence_when_a_sentence_has_thirty_words(self):
+        self.write_set(guide_text=guide(body=sentence(30)))
+        self.assert_clean()
+
+    def test_should_warn_long_sentence_when_a_sentence_has_thirty_one_words(self):
+        self.write_set(guide_text=guide(body=sentence(31)))
+        self.assert_fires("long-sentence", "WARN")
+
+    def test_should_warn_long_sentence_when_the_sentence_wraps_over_two_lines(self):
+        self.write_set(guide_text=guide(body=sentence(16) + "\n" + sentence(16).lower().rstrip(".") + "."))
+        self.assert_fires("long-sentence", "WARN")
+
+    def test_should_treat_each_list_item_as_its_own_sentence(self):
+        self.write_set(guide_text=guide(sections={"Good to know": f"- {sentence(20)}\n- {sentence(20)}"}))
+        self.assert_clean()
+
+    def test_should_split_sentences_when_a_line_holds_two(self):
+        self.write_set(guide_text=guide(body=sentence(20) + " " + sentence(20)))
+        self.assert_clean()
+
+    def test_should_skip_long_sentence_when_in_a_table_formula_or_fence(self):
+        table = f"| a | b |\n|---|---|\n| {sentence(40)} | x |"
+        formula = "Credit cost = " + " ".join(["tier"] * 40)
+        fence = "```text\n" + sentence(40) + "\n```"
+        self.write_set(guide_text=guide(sections={"Rules and limits": table, "Good to know": formula + "\n\n" + fence}))
+        code, out = self.run_dir()
+        self.assertNotIn("long-sentence", out)
+
+    def test_should_pass_labels_when_where_line_and_steps_use_vocabulary_labels(self):
+        flow = "### Cancel an order\n\n**Where:** **Your orders** → **Cancel order**\n\n1. Press **Cancel order**."
+        vocabulary = "| Your orders | `x` |\n| Cancel order | `y` |"
+        self.write_set(guide_text=guide(flow=flow), behind_text=behind(flow=task("Cancel an order")),
+                       technical_text=technical(vocabulary=vocabulary, index_rows=cited("Cancel an order")))
+        self.assert_clean()
+
+    def test_should_match_a_label_as_a_phrase_when_it_ends_in_punctuation(self):
+        flow = "### Set a rate\n\n1. Set **Overage rate (per credit)**."
+        vocabulary = "| Overage rate (per credit) | `x` |"
+        self.write_set(guide_text=guide(flow=flow), behind_text=behind(flow=task("Set a rate")),
+                       technical_text=technical(vocabulary=vocabulary, index_rows=cited("Set a rate")))
+        self.assert_clean()
+
+    def test_should_report_labels_when_where_line_names_an_unknown_label(self):
+        flow = "### Cancel an order\n\n**Where:** **Your orders**\n\n1. Open it."
+        self.write_set(guide_text=guide(flow=flow), technical_text=technical(index_rows=cited("Cancel an order")))
+        self.assert_fires("labels")
+
+    def test_should_report_labels_when_a_step_names_an_unknown_label(self):
+        flow = "### Cancel an order\n\n1. Press **Cancel order**."
+        self.write_set(guide_text=guide(flow=flow), technical_text=technical(index_rows=cited("Cancel an order")))
+        self.assert_fires("labels")
+
+    def test_should_not_read_bold_in_outcomes_or_automatic_work_as_labels(self):
+        flow = FLOW.replace("- Credits are spent.", "- You see **Booked**.")
+        automatic = "### Monthly posting\n\n**Trigger:** monthly.\n\n1. Post **Charge**.\n\n**Result:** done."
+        self.write_set(guide_text=guide(flow=flow, sections={"What happens automatically": automatic}),
+                       technical_text=technical(index_rows=cited("Monthly posting", levels=("Guide",))))
+        code, out = self.run_dir()
+        self.assertNotIn(" labels ", out)
+
+    def test_should_pass_diagram_when_one_quoted_flowchart_is_drawn(self):
+        body = "```mermaid\nflowchart LR\n  a[\"Member\"] -- \"books\" --> b[(\"Ledger\")]\n```"
+        self.write_set(guide_text=guide(sections={"How it fits together": body}))
+        self.assert_clean()
+
+    def test_should_report_diagram_when_two_diagrams_are_drawn(self):
+        fence = "```mermaid\nstateDiagram-v2\n  [*] --> a: Book\n```"
+        self.write_set(guide_text=guide(sections={"How it fits together": fence + "\n\n" + fence}))
+        self.assert_fires("diagram")
+
+    def test_should_report_diagram_when_the_type_is_not_allowed(self):
+        body = "```mermaid\nsequenceDiagram\n  a->>b: Book\n```"
+        self.write_set(guide_text=guide(sections={"How it fits together": body}))
+        self.assert_fires("diagram")
+
+    def test_should_report_diagram_when_a_flowchart_label_is_not_quoted(self):
+        body = "```mermaid\nflowchart LR\n  a[Member] --> b[\"Ledger\"]\n```"
+        self.write_set(guide_text=guide(sections={"How it fits together": body}))
+        self.assert_fires("diagram")
+
+    def test_should_not_limit_behind_to_the_guide_diagram_rules_when_it_draws_a_flowchart_with_bare_labels(self):
+        body = "```mermaid\nflowchart LR\n  S[Scheduling] -- \"cancels\" --> B[Booking]\n```"
+        self.write_set(behind_text=behind(body=body))
+        self.assert_clean()
+
+    def test_should_warn_guarantee_words_when_a_line_starts_not_yet(self):
+        self.write_set(guide_text=guide(sections={"Good to know": "Not yet."}))
+        self.assert_fires("guarantee-words", "WARN")
+
+    def test_should_warn_guarantee_words_when_a_list_item_starts_not_yet(self):
+        self.write_set(guide_text=guide(sections={"Good to know": "- Not yet — planned."}))
+        self.assert_fires("guarantee-words", "WARN")
+
+    def test_should_warn_guarantee_words_when_coming_soon(self):
+        self.write_set(behind_text=behind(body="Roll-over is coming soon."))
+        self.assert_fires("guarantee-words", "WARN")
+
+    def test_should_warn_guarantee_words_when_not_yet_available(self):
+        self.write_set(guide_text=guide(body="Roll-over is not yet available."))
+        self.assert_fires("guarantee-words", "WARN")
+
+    def test_should_warn_guarantee_words_when_in_a_future_release(self):
+        self.write_set(guide_text=guide(body="Roll-over arrives in a future release."))
+        self.assert_fires("guarantee-words", "WARN")
+
+    def test_should_pass_guarantee_words_when_not_yet_describes_a_state(self):
+        self.write_set(guide_text=guide(body="An order that has not yet shipped can be cancelled."))
         self.assert_clean()
 
     def test_should_exit_with_usage_when_two_files_given(self):
