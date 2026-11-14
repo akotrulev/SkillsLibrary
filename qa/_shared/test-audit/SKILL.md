@@ -180,10 +180,3 @@ assert the stored status.
 A test reads the generated OpenAPI file and compares it to the committed contract. It looks like a source grep,
 but the committed file is the declared contract and nothing else guards drift. **Retain**, and list it under
 Retained with that contract.
-
-## Provenance
-
-`garrytan/gstack@5276afe3f2a09c2b8a83a4c15d87106b41e6e3c6` — `/test-audit`. MIT. Adapted: the value bar,
-low-value catalogue, retention bar and evidence card are upstream's idea, rewritten as a read-only,
-stack-agnostic sweep that saves to `docs/audits/` and never edits a test. Upstream's apply-an-approved-batch
-step, gstack preamble, telemetry and state paths are dropped.

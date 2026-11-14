@@ -7,7 +7,7 @@ description: Use when a React UI is slow or heavy (re-renders, memo/Compiler, bu
 
 Owns making a React app fast and keeping it fast across four cost centers that behave differently on the App Router: **render throughput** (how often and how cheaply components re-render), **bundle & startup** (how much JS ships and when it hydrates), **server render** (how the RSC tree fetches and streams), and the **concurrency** features that keep input responsive under load. Plus the **diagnostics** to measure them and the **budgets** to hold the line.
 
-The **primary source** for the concrete recipes is the Vercel React/Next performance ruleset vendored at `frontend/react/vendor/reference/rules/` (the `rerender-*`, `bundle-*`, `server-*`, `async-*`, `js-*`, `client-*` families) — this skill is the curated, house-style entry point to it; reach into a specific rule file for the deep example.
+The **primary source** for the concrete recipes is the React performance rule set bundled at `frontend/react/bundled/reference/rules/` (the `rerender-*`, `bundle-*`, `server-*`, `async-*`, `js-*`, `client-*` families) — this skill is the curated, house-style entry point to it; reach into a specific rule file for the deep example.
 
 **Version rule:** detect the React/Next major first (`package.json`). `key`, derive-don't-effect, `useDeferredValue`/`useTransition`, `next/dynamic`, and parallel fetching behave the same across 18/19. The **React 19** delta is the **React Compiler** — with it on (default in new Next 15 apps), most `useMemo`/`useCallback`/`React.memo` is automatic; you add them by hand only where the compiler can't prove safety. On **React 18** memoization is manual. Never assume the Compiler is on without checking `next.config` / the babel plugin. The Vite SPA lane has no RSC — the bundle/startup levers still apply; the server-render section doesn't.
 
@@ -241,7 +241,7 @@ Beyond the rule files, this skill's own rules:
 
 ## Handoffs
 
-- Conceptual "why does this re-render / hydrate" → [`basics`](../basics/SKILL.md); the full Vercel rule files → `frontend/react/vendor/reference/rules/`
+- Conceptual "why does this re-render / hydrate" → [`basics`](../basics/SKILL.md); the full rule files → `frontend/react/bundled/reference/rules/`
 - CSS/layout/asset styling → [`styling`](../styling/SKILL.md); breakpoint/layout perf → [`responsive-design`](../responsive-design/SKILL.md)
 - Fetch/cache correctness (revalidate, dedup, `cache`) → [`data-fetching`](../data-fetching/SKILL.md)
 - Live-data as a feature (not perf) → [`realtime`](../realtime/SKILL.md)

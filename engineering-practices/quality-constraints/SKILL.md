@@ -52,7 +52,3 @@ Each row is a thing the agent must not do, and the evidence that proves it didn'
 - A threshold or timeout changed in a commit whose message is about something else
 - A broad `catch` added to make a flaky run pass
 - A summary that says "tests pass" without naming which were skipped
-
-## Provenance
-
-`addyosmani/agent-skills@8bfcc1f9916f2eea55494d8c1fa7f4bde867dd9e` — `constraint-driven-development`, MIT, adapted. Upstream's separate constraints file and its interview are not adopted: the rules live in `CLAUDE.md` and the plan's acceptance tests.

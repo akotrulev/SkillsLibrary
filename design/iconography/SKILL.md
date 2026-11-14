@@ -9,7 +9,7 @@ Owns icons and share imagery as a *system*, stack-agnostic: one family, one libr
 
 **What this skill owns:** the icon-family decision, the library choice, inline-SVG discipline, the icon+label policy, and OG/social-image craft. **What it does not own:** the *color values* (`design/visual-identity` taste + `design/design-tokens` structure — icons consume `currentColor`, they don't define palette), the accessible-label *mechanics* and the icon-only-button *rule* (a stack's `accessibility` / `ui-rules` — this skill points there), a component library's install/theming (a stack's `component-library`), or logo *creation* (off-mission).
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** 105 curated icons carry their library, import code, usage, style, **semantic role**, and **allowed contexts** — the last two decide whether a glyph may be decorative, meaningful, or interactive in a given spot:
+**Corpus authority.** The facts this skill decides with come from the [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** 105 curated icons carry their library, import code, usage, style, **semantic role**, and **allowed contexts** — the last two decide whether a glyph may be decorative, meaningful, or interactive in a given spot:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<icon purpose> <context>" --domain icons

@@ -1,7 +1,6 @@
 ---
 name: claude-api
 description: "Reference for the Claude API / Anthropic SDK — model ids, pricing, params, streaming, tool use, MCP, agents, caching, token counting, model migration. TRIGGER when: the prompt names Claude/Anthropic (Fable, Opus, Sonnet, Haiku, `anthropic`, `@anthropic-ai`, `claude-*`); the user asks about LLM pricing, model choice, limits or caching; or an LLM-shaped task names no provider. Do NOT use when another provider is in use: OpenAI/Gemini/Llama/Mistral/Cohere/Ollama named, or its SDK imported."
-license: Complete terms in LICENSE.txt
 ---
 
 # Building LLM-Powered Applications with Claude

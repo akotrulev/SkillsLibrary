@@ -68,7 +68,7 @@ export default function RootLayout() {
 }
 ```
 
-`Stack` is a **native stack** — keep it: `vendor/react-native-guidelines/rules/navigation-native-navigators.md`. Prefer native header options over custom header components.
+`Stack` is a **native stack** — keep it: `bundled/react-native-guidelines/rules/navigation-native-navigators.md`. Prefer native header options over custom header components.
 
 ## Typed routes
 
@@ -131,7 +131,7 @@ export default function RootLayout() {
 <Stack.Screen name="pick-date" options={{ presentation: 'formSheet', sheetAllowedDetents: [0.5, 1] }} />
 ```
 
-A modal or sheet is a **route**, so it survives a link, restores after process death and closes with the system back gesture. Use `presentation: 'modal'` or `'formSheet'` before a JS bottom-sheet library; native modal and menu patterns are [`ui-components`](../ui-components/SKILL.md)'s (`vendor/.../rules/ui-native-modals.md`).
+A modal or sheet is a **route**, so it survives a link, restores after process death and closes with the system back gesture. Use `presentation: 'modal'` or `'formSheet'` before a JS bottom-sheet library; native modal and menu patterns are [`ui-components`](../ui-components/SKILL.md)'s (`bundled/.../rules/ui-native-modals.md`).
 
 ## Native tabs
 

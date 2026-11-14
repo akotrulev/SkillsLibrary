@@ -11,7 +11,7 @@ Owns the **experience decisions a product UI is built from**: who uses it and fo
 
 Stack-agnostic and code-free by design: a planner loads it to write an experience plan, a frontend agent loads it to fill its decision record, and neither gets a component out of it.
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** 119 UX guidelines, each with platform, description, do/don't, good and bad code examples, and severity:
+**Corpus authority.** The facts this skill decides with come from the [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** 119 UX guidelines, each with platform, description, do/don't, good and bad code examples, and severity:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<observable outcome>" --domain ux

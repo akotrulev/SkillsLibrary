@@ -48,7 +48,7 @@ Batches (59 files — ✅ all done 2026-07-16):
 
 **Result:** always-on desc tokens — fe-react 10,055→6,426 · fe-blazor 9,597→6,467 (−33%/−36%); qa-* −4%; data −16%. 67 files remain in the 500–800 band (next node).
 
-- [x] **500–800 band (66 files, 2026-07-16):** all trimmed to ≤500 (`frontend/react/vendor/view-transitions` deliberately skipped — vendored upstream, excluded from the audit). Final always-on desc tokens: fe-react 5,953 (−41% vs baseline) · fe-blazor 5,681 (−41%) · qa-java 7,281 / qa-dotnet 7,631 / qa-ts 7,131 (−9%) · be-* 2,979–3,470 (−23%) · data 1,452 (−33%) · business-analysis 1,051 (−26%). Description gate is GREEN.
+- [x] **500–800 band (66 files, 2026-07-16):** all trimmed to ≤500 (`frontend/react/bundled/view-transitions` deliberately skipped — bundled seed, excluded from the audit). Final always-on desc tokens: fe-react 5,953 (−41% vs baseline) · fe-blazor 5,681 (−41%) · qa-java 7,281 / qa-dotnet 7,631 / qa-ts 7,131 (−9%) · be-* 2,979–3,470 (−23%) · data 1,452 (−33%) · business-analysis 1,051 (−26%). Description gate is GREEN.
 
 Then (follow-up node): the 500–800 char band (70 files) — same recipe, lower priority.
 

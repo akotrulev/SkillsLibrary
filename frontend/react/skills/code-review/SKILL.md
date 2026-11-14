@@ -47,7 +47,7 @@ Detect the installed React (and Next.js) major and whether the React Compiler is
 1. Read the rule files, then each changed file end to end.
 2. Identify the **render target** (App Router RSC / Vite SPA) and, for each file, whether it's a Server or Client Component — half the findings depend on it.
 3. Walk the rules, top offenders first: the server and client boundary, hooks and effects, rendering and state, then data regions and the rest.
-4. Cross-reference the vendored Vercel rules (`frontend/react/vendor/reference/`) for perf / Next.js specifics.
+4. Cross-reference the bundled React performance rules (`frontend/react/bundled/reference/`) for perf / Next.js specifics.
 5. Per finding: file and line, the rule broken, a one-sentence fix. The severity is the tag on the rule, never a new judgment.
 6. **Do not rewrite.** Hand off to [`component-writer`](../component-writer/SKILL.md).
 
@@ -68,8 +68,8 @@ End with one line: `Rules: project .claude/rules/fe-react/ | plugin copy (not in
 
 - Rewrite → [`component-writer`](../component-writer/SKILL.md)
 - Conceptual lookup → [`basics`](../basics/SKILL.md)
-- Vercel rule deep-dive → `frontend/react/vendor/reference/`
-- Composition deep-dive → `frontend/react/vendor/composition-patterns`
+- React performance rule deep-dive → `frontend/react/bundled/reference/`
+- Composition deep-dive → `frontend/react/bundled/composition-patterns`
 - Component tests to lock a fix → [`component-testing`](../component-testing/SKILL.md)
 - UI test-code review → **peer** `qa/typescript/skills/ui-test-author/review`
 - Auth0 wiring review → `auth/auth0-react`

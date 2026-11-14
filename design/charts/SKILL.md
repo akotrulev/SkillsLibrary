@@ -9,7 +9,7 @@ Owns the **design** of product-facing charts, dashboards, and reports, stack-agn
 
 **What this skill owns:** the chart-type choice, the viz palette system, dashboard composition and stat-tile anatomy, and chart-element discipline. **What it does not own:** the charting-library code (Recharts / Chart.js / a Blazor chart component — a future stack `charts` skill), the queries that feed a chart (`data/`), metric *definitions* and SLO targets ([`qa/manual/quality-metrics`](../../qa/manual/quality-metrics/SKILL.md)), and **ops/service** dashboards ([`observability/dashboards`](../../observability/dashboards/SKILL.md) owns RED/USE/golden-signals — this skill owns *product* dashboards a user reads).
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** 25 chart types, each with its data-volume threshold, color guidance, accessibility grade and risk, a11y fallback, and library notes:
+**Corpus authority.** The facts this skill decides with come from the [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** 25 chart types, each with its data-volume threshold, color guidance, accessibility grade and risk, a11y fallback, and library notes:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<the question the chart answers>" --domain chart

@@ -98,7 +98,7 @@ export function useCreateOrder() {
 
 ## `useState` / `useReducer` and derived state
 
-State is the minimal ground truth; everything else is computed in render. Mirroring a computed value into a second `useState` kept in sync by an effect is the most common RN state bug: `vendor/react-native-guidelines/rules/state-ground-truth.md`, `react-state-minimize.md`.
+State is the minimal ground truth; everything else is computed in render. Mirroring a computed value into a second `useState` kept in sync by an effect is the most common RN state bug: `bundled/react-native-guidelines/rules/state-ground-truth.md`, `react-state-minimize.md`.
 
 ```tsx
 const [items, setItems] = useState<Item[]>([]);

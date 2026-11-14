@@ -149,7 +149,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 
 - **A form is a scroll view** with `keyboardShouldPersistTaps="handled"` — otherwise the first tap on a button only dismisses the keyboard.
 - **Prefer `KeyboardAwareScrollView`** (keyboard-controller) or `KeyboardAvoidingView` with `behavior="padding"` on iOS and the manifest's `adjustResize` on Android (the Expo default); do not hand-pad with `Keyboard.addListener` and state — it re-renders per frame.
-- **`contentInset`** is the cheap way to add keyboard space to a scroller (`vendor/react-native-guidelines/rules/ui-scrollview-content-inset.md`).
+- **`contentInset`** is the cheap way to add keyboard space to a scroller (`bundled/react-native-guidelines/rules/ui-scrollview-content-inset.md`).
 - **Sticky submit** above the keyboard uses keyboard-controller's `KeyboardStickyView`; a modal sheet form follows the sheet's own insets.
 - **Dismiss** on scroll (`keyboardDismissMode="interactive"` on iOS, `"on-drag"` on Android) — never trap the keyboard open.
 - Test on a small iPhone, a tall Android and with the hardware keyboard attached.

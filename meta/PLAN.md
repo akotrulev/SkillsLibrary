@@ -2,7 +2,7 @@
 
 Source: audit of `meta/skill-creator` + `meta/writing-skills`, 2026-07-12.
 
-**Context.** `meta/` holds the two skill-authoring skills. The audit found: (1) the two skills directly contradict each other on how to write a skill description; (2) neither references the library's real authoring authority (`.skill-template/`, CLAUDE.md conventions); (3) `writing-skills` is unregistered, collides with `skill-creator` on triggers, and carries stale obra/superpowers leftovers; (4) its Iron Law mandates per-edit subagent pressure-testing, violating the library's conservative agent-spawning policy; (5) assorted mechanical nits.
+**Context.** `meta/` holds the two skill-authoring skills. The audit found: (1) the two skills directly contradict each other on how to write a skill description; (2) neither references the library's real authoring authority (`.skill-template/`, CLAUDE.md conventions); (3) `writing-skills` is unregistered, collides with `skill-creator` on triggers, and carries stale leftovers that reference skills outside this library; (4) its Iron Law mandates per-edit subagent pressure-testing, violating the library's conservative agent-spawning policy; (5) assorted mechanical nits.
 
 **Ground rules for executing this plan:**
 - Run one phase at a time, checking items off as they land. Commit per phase.
@@ -32,7 +32,7 @@ Decision to make with the user before executing: **(a) merge** or **(b) register
 
 - **Option (a) — merge & retire (recommended):** move the unique content into `skill-creator/references/` and delete the rest.
   - Unique content worth preserving: the CSO section (description trap + keyword coverage), the rationalization-table / red-flags / loophole-closing patterns for discipline skills, `testing-skills-with-subagents.md`, `persuasion-principles.md`.
-  - Redundant with skill-creator or upstream-specific: anatomy/structure sections, word-count budgets, Iron Law framing, deployment checklist.
+  - Redundant with skill-creator or irrelevant to this library: anatomy/structure sections, word-count budgets, Iron Law framing, deployment checklist.
 - **Option (b) — keep & fence:** keep `writing-skills` as a standalone reference skill with a non-colliding description: `Use for the TDD/pressure-testing discipline when hardening a skill against rationalization; use skill-creator for the interactive create→eval→improve loop.`
 
 Steps (written for option (a); adapt if (b) is chosen):
@@ -42,20 +42,20 @@ Steps (written for option (a); adapt if (b) is chosen):
 - [ ] 2.3 Create `skill-creator/references/discipline-skills.md` from the rationalization tables, red-flags list, loophole-closing, and spirit-vs-letter material; fold in a pointer to `persuasion-principles.md`.
 - [ ] 2.4 Move `testing-skills-with-subagents.md` and `persuasion-principles.md` to `skill-creator/references/`; update internal links. Move `graphviz-conventions.dot` + `render-graphs.js` too, or drop them if the flowchart guidance is cut.
 - [ ] 2.5 Add a short "Hardening discipline skills" pointer section to `skill-creator/SKILL.md` referencing the new files ("read when the skill enforces a rule agents will rationalize around").
-- [ ] 2.6 Delete `meta/writing-skills/`; update `README.md` lines 64 and 174 (folder listing + provenance table) to reflect the merge.
+- [ ] 2.6 Delete `meta/writing-skills/`; update `README.md` lines 64 and 174 (folder listing + skills table) to reflect the merge.
 - [ ] 2.7 Commit: `meta: fold writing-skills into skill-creator references, retire the standalone skill`.
 
-## Phase 3 — Purge stale upstream (obra/superpowers) references
+## Phase 3 — Purge stale external-skill references
 
 Applies to whichever files survive Phase 2.
 
-- [ ] 3.1 Replace `superpowers:test-driven-development` / `superpowers:systematic-debugging` with `ep-test-driven-development` / `dev:debugging` (the library's adapted names).
+- [ ] 3.1 Replace references to skills outside this library with the library's own (`dev:verify`, `dev:debugging`).
 - [ ] 3.2 Delete the personal-skills-directory note (`~/.claude/skills`, `~/.agents/skills/` Codex path) — irrelevant to this repo's layout.
-- [ ] 3.3 Delete the deployment-checklist items "push to your fork" / "contribute back via PR" — upstream leftovers; replace with the library's actual finish step (update the domain plan/handoff docs, commit).
+- [ ] 3.3 Delete the deployment-checklist items "push to your fork" / "contribute back via PR" — leftovers; replace with the library's actual finish step (update the domain plan/handoff docs, commit).
 - [ ] 3.4 Fix the `@`-link self-contradiction: `@graphviz-conventions.dot` and `@testing-skills-with-subagents.md` use the force-load syntax the same skill forbids. Change to plain-name references with "read when…" guidance.
 - [ ] 3.5 Reframe the Iron Law: subagent pressure-testing becomes a **recommended verification step**, subject to the library's cost-before-speed spawning policy (each extra agent is a deliberate spend, per `ep-delegate-to-subagents` / `ep-parallel-agents`). Remove the "delete it, start over" absolutism for edits; keep the core insight (untested skills fail in ways you won't predict — verify before shipping).
-- [ ] 3.6 Grep sweep: `grep -rn "superpowers\|~/.agents\|your fork" meta/` returns nothing.
-- [ ] 3.7 Commit: `meta: purge superpowers-upstream leftovers, gate subagent testing behind spawning policy`.
+- [ ] 3.6 Grep sweep: `grep -rn "~/.agents\|your fork" meta/` returns nothing.
+- [ ] 3.7 Commit: `meta: purge external-skill leftovers, gate subagent testing behind spawning policy`.
 
 ## Phase 4 — Anchor to the library's house conventions
 
@@ -68,16 +68,16 @@ Applies to whichever files survive Phase 2.
 
 - [ ] 5.1 Fix duplicate `### 4.` headings (Token Efficiency and Cross-Referencing) and the Discovery Workflow numbering skip (`1,3,4,5,6`) — in whichever file the content lands after Phase 2.
 - [ ] 5.2 Lowercase the frontmatter example `name: Skill-Name-With-Hyphens` → `name: skill-name-with-hyphens`.
-- [ ] 5.3 Add a provenance header to `anthropic-best-practices.md` (source URL + import date); strip `theme={null}` artifacts and dead relative `/en/docs/...` links.
+- [ ] 5.3 Strip `theme={null}` artifacts and dead relative `/en/docs/...` links from `anthropic-best-practices.md`.
 - [ ] 5.4 De-duplicate: `skill-creator/SKILL.md`'s anatomy/progressive-disclosure section vs `anthropic-best-practices.md` — keep the inline version terse, point to the reference file for depth.
 - [ ] 5.5 Redirect `skill-creator`'s eval workspace: `<skill-name>-workspace/` sibling dir → a top-level `eval-workspaces/<skill-name>/` (or the session scratchpad); add `eval-workspaces/` to `.gitignore` so eval artifacts never leak into plugins or git.
-- [ ] 5.6 Commit: `meta: mechanical fixes — numbering, naming example, provenance, eval-workspace path`.
+- [ ] 5.6 Commit: `meta: mechanical fixes — numbering, naming example, eval-workspace path`.
 
 ## Phase 6 — Verify
 
 - [ ] 6.1 Re-read both final SKILL.md(s) end-to-end for internal consistency (no surviving contradiction between description rule, budgets, testing policy).
-- [ ] 6.2 `grep -rn "superpowers\|Skill-Name-With\|@graphviz\|@testing-skills" meta/` — clean.
-- [ ] 6.3 Confirm `README.md` folder listing + provenance table match the final state of `meta/`.
+- [ ] 6.2 `grep -rn "Skill-Name-With\|@graphviz\|@testing-skills" meta/` — clean.
+- [ ] 6.3 Confirm `README.md` folder listing + skills table match the final state of `meta/`.
 - [ ] 6.4 Trigger sanity check: skill-creator's description still triggers on "create a skill", "improve this skill", "run evals on the skill"; no collision remains (writing-skills either gone or fenced).
 - [ ] 6.5 Final commit if anything moved in verification.
 

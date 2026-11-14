@@ -90,7 +90,7 @@ const config: ExpoConfig = {
 export default config;
 ```
 
-- Permission strings, entitlements and fonts are plugin options, not `Info.plist` edits. Fonts load through the `expo-font` plugin: `vendor/react-native-guidelines/rules/fonts-config-plugin.md`.
+- Permission strings, entitlements and fonts are plugin options, not `Info.plist` edits. Fonts load through the `expo-font` plugin: `bundled/react-native-guidelines/rules/fonts-config-plugin.md`.
 - **CNG:** `npx expo prebuild --clean` regenerates `ios/` and `android/` from config (clean is the default on SDK 57). A hand edit to a generated folder is lost on the next prebuild — put it in a plugin.
 - `scheme` is the deep-link prefix; links are [`navigation`](../navigation/SKILL.md)'s.
 
@@ -111,7 +111,7 @@ src/
 assets/
 ```
 
-Route files are thin: they compose feature organisms from `src/features/*`; business logic never lives in a route file. Import third-party UI through one design-system folder: `vendor/react-native-guidelines/rules/imports-design-system-folder.md`. The `@/*` alias maps to `src/*`.
+Route files are thin: they compose feature organisms from `src/features/*`; business logic never lives in a route file. Import third-party UI through one design-system folder: `bundled/react-native-guidelines/rules/imports-design-system-folder.md`. The `@/*` alias maps to `src/*`.
 
 ## Quality gates every project ships with
 
@@ -135,7 +135,7 @@ eas submit --platform ios
 
 ## Monorepo
 
-Keep **native dependencies in the app package** (`vendor/.../rules/monorepo-native-deps-in-app.md`) and **one version of each dependency across packages** (`monorepo-single-dependency-versions.md`). SDK 57 resolves workspaces by default; do not hand-edit Metro for a pnpm workspace unless `expo-doctor` asks.
+Keep **native dependencies in the app package** (`bundled/.../rules/monorepo-native-deps-in-app.md`) and **one version of each dependency across packages** (`monorepo-single-dependency-versions.md`). SDK 57 resolves workspaces by default; do not hand-edit Metro for a pnpm workspace unless `expo-doctor` asks.
 
 ## Rules
 

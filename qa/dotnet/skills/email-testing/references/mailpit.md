@@ -330,7 +330,7 @@ public async Task GenerateInvoice_SendsPdfAttachment()
 
 ### Body assertions
 - Prefer **link / OTP extraction** over substring matching the entire HTML — copy changes break those tests every release.
-- For visual / template-shape checks, use `qa/dotnet/skills/visual-regression` on a rendered preview, not Mailpit's HTML.
+- Template HTML and copy → [`html-snapshots.md`](html-snapshots.md); pixel-level checks → `qa/dotnet/skills/visual-regression` on a rendered preview, not Mailpit's HTML.
 
 ### Attachments
 - Validate content type **and** magic bytes for binary attachments (PDF, ZIP, PNG). Filename + content-type alone are user-controlled.

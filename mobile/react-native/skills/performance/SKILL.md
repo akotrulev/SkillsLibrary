@@ -42,9 +42,9 @@ Detect first: whether the compiler is on (`app.json` / `babel.config.js`), which
 - Crash reporting, release-health thresholds → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md)
 - Native Swift / Kotlin → `mobile-ios:performance` / `mobile-android:performance`
 
-## List rules — the vendored set
+## List rules — the bundled set
 
-Authority: `mobile/react-native/vendor/react-native-guidelines/rules/`. Skills point in by filename; the vendored tree is never edited.
+Authority: `mobile/react-native/bundled/react-native-guidelines/rules/`. Skills point in by filename; the bundled rule set is loaded by path.
 
 | File | Rule |
 |---|---|
@@ -84,7 +84,7 @@ export function OrdersList({ rows }: { rows: OrderRow[] }) {
 
 With the compiler on, it memoizes components and hooks at build time. So:
 
-- **Do not hand-write `useMemo`, `useCallback` or `memo` for render cost.** They are noise the compiler already handles, and the vendored rules say so (`list-performance-callbacks.md`, `list-performance-inline-objects.md`: "if you aren't using React Compiler, wrap these with `useCallback`").
+- **Do not hand-write `useMemo`, `useCallback` or `memo` for render cost.** They are noise the compiler already handles, and the bundled rules say so (`list-performance-callbacks.md`, `list-performance-inline-objects.md`: "if you aren't using React Compiler, wrap these with `useCallback`").
 - **Keep them where identity is a contract:** an effect dependency that must not change, a value handed to a native or Reanimated worklet boundary, a stable `renderItem` handed to a list on a project **without** the compiler, and `memo()` on a list row on a project where profiling shows the row re-rendering.
 - **Write code the compiler can analyse.** Destructure functions at the top of render rather than dotting into an object — `rules/react-compiler-destructure-functions.md`; use `.get()` / `.set()` on Reanimated shared values, never `.value` — `rules/react-compiler-reanimated-shared-values.md` ([`animation`](../animation/SKILL.md)). No mutation of props, state or refs during render; a component the compiler bails out on is reported by `npx react-compiler-healthcheck`.
 - **It does not fix data shape.** A parent that rebuilds the data array every render, or a row that fetches, is still slow — the list rules above apply with or without the compiler.
@@ -138,7 +138,7 @@ The standards this skill's output must meet are the mobile-react-native rule fil
 
 1. Detect the compiler, list library, image component and any startup instrumentation.
 2. Profile the slow path on a release build and name the cause (re-render, JS block, bundle, image).
-3. Apply the matching rule from the vendored set or the sections above — one cause per change.
+3. Apply the matching rule from the bundled set or the sections above — one cause per change.
 4. Re-measure; record before and after in the change description.
 5. Add or update a `testID` on any list container touched ([`test-ids`](../test-ids/SKILL.md)).
 

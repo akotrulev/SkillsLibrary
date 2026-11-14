@@ -5,7 +5,7 @@ status: active
 candidateKinds: ["slow_route"]
 frameworks: ["next@>=13.0.0"]
 priority: 70
-citations: ["https://react.dev/reference/react/cache", "vercel-react-best-practices:server-parallel-fetching", "vercel-react-best-practices:server-cache-react"]
+citations: ["https://react.dev/reference/react/cache", "react-performance-rules:server-parallel-fetching", "react-performance-rules:server-cache-react"]
 maxBriefChars: 850
 ---
 

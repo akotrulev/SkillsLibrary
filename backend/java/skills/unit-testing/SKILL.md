@@ -212,6 +212,10 @@ void should_RoundHalfUp_when_ThirdDecimalPresent(BigDecimal input, BigDecimal ex
 
 `@MethodSource` for constructed cases, `@EnumSource` for exhausting an enum (which also fails when someone adds a constant — a useful alarm), `@ValueSource` for single values.
 
+## Beyond example tests
+
+- [`references/snapshot-testing.md`](references/snapshot-testing.md) — a large output's whole shape is the contract (ApprovalTests).
+
 ## `BigDecimal` — the Java-specific trap
 
 **`assertThat(x).isEqualTo(y)` on `BigDecimal` compares scale too**: `2.50` is *not* equal to `2.5`. Use **`isEqualByComparingTo`** unless the scale itself is the contract — and when it is, assert it explicitly:

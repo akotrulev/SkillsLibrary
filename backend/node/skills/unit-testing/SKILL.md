@@ -239,6 +239,11 @@ it.each([
 });
 ```
 
+## Beyond example tests
+
+- [`references/property-based-testing.md`](references/property-based-testing.md) — a rule over a whole input range or a stateful unit vs a model (fast-check).
+- [`references/snapshot-testing.md`](references/snapshot-testing.md) — a large output's whole shape is the contract (Vitest snapshots).
+
 ## Money — the JS-specific trap
 
 **Never `number` floats for money.** `0.1 + 0.2 !== 0.3`, and `toBe` will show you exactly that. Use **integer minor units** (the house default per `solution-planner`'s data-model conventions) or a decimal library, and assert on integers. A money test whose expected value is `0.30000000000000004` is a design finding, not a test to adjust.

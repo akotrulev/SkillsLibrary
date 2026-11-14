@@ -34,7 +34,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 | 2 | Author features | `qa/_shared/bdd/feature-file-writer` | All features parse; steps deduped into the catalog; Background, Outlines and tags applied; every TC-ID and AC mapped |
 | 3 | Bind steps | `qa/typescript/skills/gherkin-step-code` + `references/playwright-bdd.md` (web) or `references/cucumberjs-appium.md` (mobile) | No undefined or ambiguous step |
 | 4 | Implement against page objects | `gherkin-step-code` + its reference; `page-object-design`; web: `page-objects-from-url`, `ui-test-author/playwright`, `evidence-capture`; mobile: `mobile-screen-objects`, `ui-test-author/appium` | The smoke scenario (Background + one Outline) runs green end to end; the rest bound or explicitly deferred |
-| 5 | Review | `qa/typescript/skills/bdd-reviewer`, `qa/typescript/skills/ui-test-author/review` | No blocker or major left; traceability complete |
+| 5 | Review | `qa/typescript/skills/bdd-reviewer`, `qa/typescript/skills/ui-test-author/review`; `qa/_shared/change-coverage-review` *(when the input is a PR or diff)* | No blocker or major left; traceability complete |
 
 Run what you write: a step whose code never executed has not passed its gate. Invoked for a single step, do only that step.
 

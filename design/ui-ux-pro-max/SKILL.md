@@ -1,16 +1,15 @@
 ---
 name: corpus
-description: Use when a design decision needs the vendored corpus (styles, palettes, font pairings, UX guidelines, icons). Triggers "pick a font pairing". Not for the judgment on top (visual-identity).
+description: Use when a design decision needs the design corpus (styles, palettes, font pairings, UX guidelines, icons). Triggers "pick a font pairing". Not for the judgment on top (visual-identity).
 metadata:
-  author: nextlevelbuilder
   version: "2.13.0"
 ---
 
-# UI/UX Pro Max — the vendored design-intelligence corpus
+# UI/UX Pro Max — the design-intelligence corpus
 
 **This skill is the source of truth for design data.** Where a `design/*` skill and this corpus disagree on a *fact* — which palette suits a product type, which font pairing carries a mood, what the UX guideline for a pattern is, which chart fits a data shape, what a stack's UI convention is — **the corpus wins.** The prose skills own the judgment layered on top: how the library states a rule, which lane a decision belongs to, what the review checklist asks. They do not own the catalog.
 
-Everything runs **offline** against the pinned snapshot under `data/`. No network call, no API key, no external dependency beyond Python 3.
+Everything runs **offline** against the data under `data/`. No network call, no API key, no external dependency beyond Python 3.
 
 **What this skill owns:** the searchable corpus and its query contract, the `--design-system` generator and its persistence layout, the two reference rulesets (`references/quick-reference.md` — 119 UX guidelines by priority; `references/pro-rules.md` — native/mobile polish rules + the canonical pre-delivery checklist). **What it does not own:** any of the decisions the other `design/` skills make with the results — identity ([`design:visual-identity`](../visual-identity/SKILL.md)), token tiers ([`design:tokens`](../design-tokens/SKILL.md)), IA and page anatomy ([`design:app-structure`](../ux-patterns/SKILL.md)), the audit ([`design-auditor`](../agents/design-auditor.md)).
 
@@ -73,7 +72,7 @@ Extract:
 - **Product type**: SaaS, e-commerce, portfolio, dashboard, entertainment, tool, productivity, hybrid.
 - **Target audience & context**: age group, usage context (commute, leisure, work).
 - **Style keywords**: playful, vibrant, minimal, dark mode, content-first, immersive, …
-- **Stack**: detect it from the project — `package.json` deps (react/next/vue/svelte/nuxt/@angular), `pubspec.yaml` (Flutter), `*.xcodeproj`/`Package.swift` (SwiftUI), `composer.json` (Laravel), `*.csproj` + `.razor` (Blazor — no upstream stack file; use the house [Blazor skills](../../frontend/blazor/)), React Native markers (`app.json` + `react-native`). If nothing is detectable and stack guidance matters, **ask**. Never assume a stack — a hardcoded default silently misroutes every recommendation.
+- **Stack**: detect it from the project — `package.json` deps (react/next/vue/svelte/nuxt/@angular), `pubspec.yaml` (Flutter), `*.xcodeproj`/`Package.swift` (SwiftUI), `composer.json` (Laravel), `*.csproj` + `.razor` (Blazor — no stack file; use the house [Blazor skills](../../frontend/blazor/)), React Native markers (`app.json` + `react-native`). If nothing is detectable and stack guidance matters, **ask**. Never assume a stack — a hardcoded default silently misroutes every recommendation.
 
 ## Step 2 — generate the design system (required for new pages/projects)
 
@@ -148,7 +147,7 @@ python3 ".../search.py" "<keyword>" --stack <stack>
 
 **All 22 stacks ship:** `react` · `nextjs` · `vue` · `svelte` · `astro` · `nuxtjs` · `nuxt-ui` · `angular` · `laravel` · `swiftui` · `react-native` · `flutter` · `jetpack-compose` · `html-tailwind` · `shadcn` · `threejs` · `javafx` · `wpf` · `winui` · `avalonia` · `uno` · `uwp`.
 
-Use the stack detected in Step 1. **Blazor has no upstream file** — for Blazor, take stack conventions from [`frontend/blazor`](../../frontend/blazor/) and the design judgment from this corpus.
+Use the stack detected in Step 1. **Blazor has no stack file** — for Blazor, take stack conventions from [`frontend/blazor`](../../frontend/blazor/) and the design judgment from this corpus.
 
 ## If a search returns 0 results
 
@@ -182,8 +181,6 @@ Then synthesize design system + domain results, layer the owning skill's judgmen
 python3 "design/ui-ux-pro-max/scripts/validate_data.py"
 ```
 
-Refreshing from upstream is a **snapshot** operation, recorded in [`design/ATTRIBUTIONS.md`](../ATTRIBUTIONS.md): copy `src/ui-ux-pro-max/{data,scripts}` from the pinned commit, re-run the validator, and update the commit/date in the attribution entry.
-
 ## Review checklist
 
 - A **stack was detected, not assumed** — or the user was asked.
@@ -201,5 +198,5 @@ Refreshing from upstream is a **snapshot** operation, recorded in [`design/ATTRI
 - [`design:motion`](../motion/SKILL.md) — owns how the `gsap` presets are applied and gated behind `prefers-reduced-motion`.
 - [`design:landing-patterns`](../landing-patterns/SKILL.md) — owns the `landing` section-order and conversion patterns.
 - [`design:app-structure`](../ux-patterns/SKILL.md) · [`design:ux-review`](../ux-review/SKILL.md) — consume `--domain ux` for design and for review.
-- [`design:ui-code-audit`](../ui-code-audit/SKILL.md) — pairs the Vercel guidelines with `--stack` and `--domain react` rules.
+- [`design:ui-code-audit`](../ui-code-audit/SKILL.md) — pairs the web interface guidelines with `--stack` and `--domain react` rules.
 - [`design-auditor`](../agents/design-auditor.md) — the whole-design audit; queries this corpus per section.

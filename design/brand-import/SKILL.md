@@ -9,7 +9,7 @@ The brownfield counterpart to [`design/visual-identity`](../visual-identity/SKIL
 
 **What this skill owns:** the extract → normalize → gap-fill pipeline, the fidelity-mode decision, and the discipline of extending a brand *in its own voice*. **What it does not own:** the token tier/naming mechanics (`design/design-tokens`), inventing an identity where none exists (`visual-identity`), preset themes (`theme-presets`), or logo/asset *creation* (off-mission — this reads a logo, it doesn't draw one).
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Gap-filling is where it matters: when the brand book never specified a status set, a dark mode, a muted tier, or a body face, take the missing values from the nearest corpus palette or pairing rather than inventing them:
+**Corpus authority.** The facts this skill decides with come from the [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Gap-filling is where it matters: when the brand book never specified a status set, a dark mode, a muted tier, or a body face, take the missing values from the nearest corpus palette or pairing rather than inventing them:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<brand mood> <industry>" --domain color
@@ -86,7 +86,7 @@ So the handoff is: this skill produces the token system from the brand → visua
 
 ## Example-brand fixture
 
-When you need a worked example or a stand-in brand to demonstrate the pipeline, use the **Anthropic brand** (from Anthropic's `brand-guidelines` skill) as the fixture: primitives `#141413` (dark), `#faf9f5` (light), `#b0aea5` / `#e8e6dc` (grays), accents `#d97757` / `#6a9bcc` / `#788c5d`; **Poppins** (Arial fallback) for headings ≥24pt, **Lora** (Georgia fallback) for body. It's a realistic brownfield case — three accents but no status set, faces but no scale, no dark mode — so it exercises every gap-fill branch. (Provenance noted in [`../ATTRIBUTIONS.md`](../ATTRIBUTIONS.md).)
+When you need a worked example or a stand-in brand to demonstrate the pipeline, use the **Anthropic brand** as the fixture: primitives `#141413` (dark), `#faf9f5` (light), `#b0aea5` / `#e8e6dc` (grays), accents `#d97757` / `#6a9bcc` / `#788c5d`; **Poppins** (Arial fallback) for headings ≥24pt, **Lora** (Georgia fallback) for body. It's a realistic brownfield case — three accents but no status set, faces but no scale, no dark mode — so it exercises every gap-fill branch.
 
 ## Review checklist
 

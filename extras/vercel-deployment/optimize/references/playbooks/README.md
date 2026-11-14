@@ -41,7 +41,7 @@ Each playbook is a Markdown file with a fixed shape so the recommender can parse
 (Anti-patterns specific to this profile)
 
 ## Cross-references
-(Rec IDs from recommendations.md or rule names from vercel-react-best-practices)
+(Rec IDs from recommendations.md or rule names from react-performance-rules)
 ```
 
 ## Contributing a new playbook
@@ -50,4 +50,4 @@ Each playbook is a Markdown file with a fixed shape so the recommender can parse
 2. Create `references/playbooks/<profile>.md` matching the schema.
 3. Add detection signals to the table above (the heuristics live in the recommender code; document them here).
 4. Update the playbook selection matrix in `references/scoring.md`.
-5. Run `node --test packages/vercel-optimize-tests/test/support-topics.test.mjs packages/vercel-optimize-tests/test/investigation-brief.test.mjs`. No tests directly cover playbooks (they're content), but the schema validator runs in CI.
+5. Run `node scripts/check-citations.mjs` and `node scripts/check-docs-fresh.mjs`.

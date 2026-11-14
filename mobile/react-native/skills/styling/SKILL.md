@@ -72,11 +72,11 @@ const styles = StyleSheet.create({
 });
 ```
 
-- `StyleSheet.create`, not inline literals, for anything reused or inside a list item — an inline `style={{…}}` allocates per render: `vendor/react-native-guidelines/rules/list-performance-inline-objects.md`.
+- `StyleSheet.create`, not inline literals, for anything reused or inside a list item — an inline `style={{…}}` allocates per render: `bundled/react-native-guidelines/rules/list-performance-inline-objects.md`.
 - Compose with arrays; the last wins. Atoms accept an optional `style` prop so callers extend.
 - **No cascade:** a parent `color` does not reach child `<Text>`; set it on the `<Text>` or in an `AppText` atom.
 
-## Modern patterns (vendored `rules/ui-styling.md`)
+## Modern patterns (bundled `rules/ui-styling.md`)
 
 - `borderCurve: 'continuous'` beside every `borderRadius`.
 - `gap` on the parent for space between, `padding` for space within — not `marginBottom` per child.
@@ -116,7 +116,7 @@ export type Tokens = { space: typeof space; text: typeof text; radius: typeof ra
 
 One ratio (1.2 dense · 1.25 · 1.333 editorial) from one base, as tokens. Hierarchy lives in reusable `<Text>` atoms, not selectors. Two to three weights; display text slightly negative tracking; body line-height looser than headings. Sizes come from tokens, never `fontSize: 17`.
 
-- **System fonts first** — San Francisco on iOS, Roboto on Android — unless the brand needs a custom face. A custom font loads through the **`expo-font` config plugin**, not runtime `loadAsync` in render: `vendor/.../rules/fonts-config-plugin.md`, [`project-setup`](../project-setup/SKILL.md).
+- **System fonts first** — San Francisco on iOS, Roboto on Android — unless the brand needs a custom face. A custom font loads through the **`expo-font` config plugin**, not runtime `loadAsync` in render: `bundled/.../rules/fonts-config-plugin.md`, [`project-setup`](../project-setup/SKILL.md).
 - **Text scales with the system setting and is never locked** — no `allowFontScaling={false}`; design for the largest sizes ([`accessibility`](../accessibility/SKILL.md)).
 
 ## Dark mode
@@ -154,7 +154,7 @@ export function useTokens() {
 Android is edge-to-edge and iOS draws under the notch, home indicator and translucent bars; **content must clear them deliberately.**
 
 - Expo Router mounts `SafeAreaProvider` at the root; read insets with `useSafeAreaInsets()` from `react-native-safe-area-context`.
-- **Scrollable screens:** `contentInsetAdjustmentBehavior="automatic"` on the `ScrollView` / list, not a `SafeAreaView` wrapped around it: `vendor/.../rules/ui-safe-area-scroll.md`. Native stack headers and native tabs inset for you.
+- **Scrollable screens:** `contentInsetAdjustmentBehavior="automatic"` on the `ScrollView` / list, not a `SafeAreaView` wrapped around it: `bundled/.../rules/ui-safe-area-scroll.md`. Native stack headers and native tabs inset for you.
 - **Non-scrolling fixed chrome** (a bottom bar, a banner): `paddingBottom: insets.bottom`, `paddingTop: insets.top`.
 - **Keyboard** insets are [`forms`](../forms/SKILL.md)'s.
 - Never hardcode `44` or `34` for a notch or indicator — insets differ per device and orientation.

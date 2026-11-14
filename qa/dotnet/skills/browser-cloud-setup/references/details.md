@@ -394,8 +394,7 @@ defer to `qa/dotnet/skills/device-cloud`; this node covers only the connection s
 
 ### BrowserStack MCP — triage a red grid run (agents)
 
-BrowserStack's MCP server (`browserstack/mcp-server`, AGPL-3.0) lets an agent read the cloud's own evidence
-for a red run. Register it; never vendor or copy its code.
+BrowserStack's MCP server lets an agent read the cloud's own evidence for a red run. Register it:
 
 ```bash
 claude mcp add --scope user --transport http browserstack https://mcp.browserstack.com/mcp

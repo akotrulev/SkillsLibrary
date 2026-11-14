@@ -37,7 +37,7 @@ Screen objects come from the real UI, never guesses, through the `appium-mcp` se
 | 1 | Foundations | `page-object-design` *(as screen objects)*, `mobile-app-crawler` *(many screens)*, `mobile-screen-explorer` + `mobile-screen-objects` *(live app)*, `test-data-builder`, `test-login-tokens` *(auth)*, `evidence-capture` + `references/appium.md`, `device-cloud` or `browser-cloud-setup` *(vendor grid)* | Build clean; the app installs and one smoke flow is green on the target device |
 | 2 | Author tests | `ui-test-author/appium`, `mobile-native-features` *(OS surfaces)*, `data-driven-testing` | `dotnet test` green on the target device; every flow maps to a test or a deferral |
 | 3 | Deep verification *(each only if in scope)* | `network-mocking` · `db-testing/connection` · `email-testing`. Read only the `references/<tool>.md` matching the project's tool | `dotnet test` green including the new layers |
-| 4 | Review | `ui-test-author/review` | No blocker or major left |
+| 4 | Review | `ui-test-author/review`; `qa/_shared/change-coverage-review` *(when the input is a PR or diff)* | No blocker or major left |
 
 **Conformance audit.** "Audit our test suite" loads `standards-audit` alone (also `/qa-dotnet:audit`; `scope: mobile` narrows it): read-only, saved to `docs/audits/`, no step runs and nothing is fixed.
 

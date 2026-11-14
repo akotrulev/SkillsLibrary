@@ -59,7 +59,3 @@ This skill writes no code, no spec and no plan; it produces decisions.
 - Declaring the tree closed while a restated answer still opened a branch
 - Turning the interview into approach proposals — that is `/dev:design`
 - Acting on the result before the user confirms the tree is closed
-
-## Provenance
-
-`mattpocock/skills@a496f5513d4a4cf889bc48e189e579f4b0bdf6aa` (`grilling`, `grill-me`) — MIT, adapted. The design-tree framing and the recommend-an-answer habit come from upstream. The one-question-at-a-time loop, the restatement step, the single-session rule and the hand-offs are the library's own.

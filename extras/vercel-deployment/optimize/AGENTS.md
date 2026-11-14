@@ -23,26 +23,3 @@ Do not use it for projects that are not deployed on Vercel, greenfield projects 
 5. Verify recommendations mechanically before rendering the report.
 
 The hard rules are in [references/doctrine.md](./references/doctrine.md): observability first, deterministic gates, candidate-bound scope, and version-aware citations.
-
-## Install
-
-Preferred:
-
-```bash
-npx skills add vercel-labs/agent-skills --skill vercel-optimize
-```
-
-Manual project install:
-
-```bash
-mkdir -p .agents/skills
-cp -R <agent-skills-repo>/skills/vercel-optimize .agents/skills/
-```
-
-Then add this to the project `AGENTS.md`:
-
-```md
-When optimizing Vercel cost or performance, follow
-`.agents/skills/vercel-optimize/SKILL.md` before proposing changes.
-Collect Vercel metrics before reading source files.
-```

@@ -42,7 +42,7 @@ The **procedure** (modes, artifacts, evidence rules, severity, report templates,
 | Procedure copies to maintain | **8** | **1** | 3 |
 | Path resolution in installed plugins | Trivially fine | **Fine — `engineering-practices/*` is already bundled into all eight `qa-*`/`fe-*`/`be-*` plugins** (verified in `marketplace.json`) | Fine within a domain |
 | Fits existing precedent | The library's "self-contained plugin" doctrine | `dev:audit-spec` + `dev:audit-feature` already live there — this is the **third audit lane** | `qa/_shared/performance` + tool skill; `backend/_shared/pattern-guide` + stack skill |
-| Risk | Procedure drift across 8 files; a fix to the evidence rules has to land 8× | Engine's description could out-trigger the stack skills → must carry an explicit "do NOT invoke directly" clause (the `vendor/*` lesson, `frontend/PLAN.md` F4) | Two engines to keep in sync; frontend left out |
+| Risk | Procedure drift across 8 files; a fix to the evidence rules has to land 8× | Engine's description could out-trigger the stack skills → must carry an explicit "do NOT invoke directly" clause (the `bundled/*` lesson, `frontend/PLAN.md` F4) | Two engines to keep in sync; frontend left out |
 
 **Chosen: Option B** (implemented 2026-07-25 for the engine, `be-dotnet`, and `qa-dotnet`; the react refactor is still outstanding). One procedure, eight checklists. `engineering-practices/` is the only folder already bundled into every stack plugin, it already hosts the sibling audit lanes, and the third-lane framing is clean: **SPEC lane** (code vs the user's spec) · **FEATURE lane** (spec-less behaviour trace) · **CONVENTION lane** (code vs the plugin's fixed rule set).
 
@@ -281,7 +281,7 @@ The engine now ships everywhere it can, which makes the remaining gaps purely ab
 | Risk | Mitigation |
 |---|---|
 | **Checklist drifts from the skills it audits** | Every section names its owning skill and the skill wins on conflict; a disagreement is itself a reportable finding. Any future skill edit that changes a hard rule should touch that section's row — worth adding to the domain PLANs |
-| **Engine out-triggers the stack skills** (the `vendor/*` failure mode) | Explicit "do NOT invoke directly" clause, no user-typed triggers in the engine description |
+| **Engine out-triggers the stack skills** (the `bundled/*` failure mode) | Explicit "do NOT invoke directly" clause, no user-typed triggers in the engine description |
 | **Four overlapping audit lanes confuse users** | The three-way fence table is mandatory in every stack skill: `reviewer` (one diff, inline) · `standards-audit` (whole repo vs the plugin's rules, saved, rounds) · `code-auditor`/`ep-*-audit` (vs the user's spec, or a spec-less feature trace) |
 | **Version-lane false positives** | Version gate is Phase 0 of every run and every version-keyed row carries a lane tag |
 | **Report bloat → ignored reports** | ~30-finding cap with per-family overflow; grouped findings; leverage-ordered priority table |

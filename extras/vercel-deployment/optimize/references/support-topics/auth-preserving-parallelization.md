@@ -5,7 +5,7 @@ status: active
 candidateKinds: ["slow_route"]
 frameworks: ["*"]
 priority: 90
-citations: ["vercel-react-best-practices:async-parallel", "vercel-react-best-practices:server-parallel-fetching"]
+citations: ["react-performance-rules:async-parallel", "react-performance-rules:server-parallel-fetching"]
 maxBriefChars: 900
 ---
 

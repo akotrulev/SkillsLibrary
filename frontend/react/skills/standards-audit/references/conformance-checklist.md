@@ -214,7 +214,7 @@ If the repo gitignores generated *source* you still need to read (a `src/generat
 ---
 
 ## K — Performance
-*Owning skill: [`performance`](../../performance/SKILL.md) · vendored ruleset `frontend/react/vendor/reference/`*
+*Owning skill: [`performance`](../../performance/SKILL.md) · bundled ruleset `frontend/react/bundled/reference/`*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|

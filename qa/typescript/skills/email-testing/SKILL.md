@@ -19,6 +19,7 @@ shared by every tool in the family.
 | `references/mailosaur.md` | Hosted inbox SaaS — real MX delivery path, team-visible inbox, spam analysis |
 | `references/gmail-imap.md` | Real Gmail mailbox over IMAP — true end-to-end delivery through the real provider |
 | `references/sendgrid-sandbox.md` | SendGrid sandbox mode — assert the send-API call without delivering anything |
+| `references/html-snapshots.md` | Add-on to `mailpit.md`: snapshot the rendered email HTML with `toMatchFileSnapshot`, scrubbing recipients, tokens and links |
 
 ## Decision matrix — pick the tool
 

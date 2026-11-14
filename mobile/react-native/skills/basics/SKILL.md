@@ -64,12 +64,12 @@ Carries over unchanged: hooks and their rules, one-way data flow, keys, exhausti
 | React web | React Native | Rule |
 |---|---|---|
 | `<div>` | `<View>` | Flexbox is the only layout; column is the default direction |
-| bare text | `<Text>` | **All text inside `<Text>`** — `vendor/react-native-guidelines/rules/rendering-text-in-text-component.md` |
+| bare text | `<Text>` | **All text inside `<Text>`** — `bundled/react-native-guidelines/rules/rendering-text-in-text-component.md` |
 | `<a href>` | Expo Router `<Link href>` | A real link, not a handler on a `View` — [`navigation`](../navigation/SKILL.md) |
-| `<button>` | `<Pressable>` | `vendor/.../rules/ui-pressable.md` |
-| `<img>` | `Image` from `expo-image` | `vendor/.../rules/ui-expo-image.md` |
+| `<button>` | `<Pressable>` | `bundled/.../rules/ui-pressable.md` |
+| `<img>` | `Image` from `expo-image` | `bundled/.../rules/ui-expo-image.md` |
 | `<input>` | `<TextInput>` | Controlled the same way; see [`forms`](../forms/SKILL.md) |
-| scroll container | `ScrollView` (small) · FlashList / Legend List (lists) | Never `.map` a large array in a `ScrollView` — `vendor/.../rules/list-performance-virtualize.md` |
+| scroll container | `ScrollView` (small) · FlashList / Legend List (lists) | Never `.map` a large array in a `ScrollView` — `bundled/.../rules/list-performance-virtualize.md` |
 | CSS / `sx` | `StyleSheet.create` | No `@media`; responsiveness is `useWindowDimensions` — [`styling`](../styling/SKILL.md) |
 | `data-testid` | `testID` | [`test-ids`](../test-ids/SKILL.md) |
 
@@ -83,7 +83,7 @@ RN runs three contexts:
 | **UI / main** | Native views, layout, drawing | Never blocked by app code in the managed lane |
 | **Worklet** (UI runtime) | Reanimated worklets, Gesture Handler callbacks | Animates `transform` / `opacity` without the JS thread |
 
-Animating through React state re-renders on the JS thread; animate through shared values on the worklet runtime — [`animation`](../animation/SKILL.md), `vendor/.../rules/animation-gpu-properties.md`, `animation-derived-value.md`. A JS-thread frame budget is a correctness rule (CLAUDE.md § Mobile code rules).
+Animating through React state re-renders on the JS thread; animate through shared values on the worklet runtime — [`animation`](../animation/SKILL.md), `bundled/.../rules/animation-gpu-properties.md`, `animation-derived-value.md`. A JS-thread frame budget is a correctness rule (CLAUDE.md § Mobile code rules).
 
 ## New Architecture, briefly
 
@@ -108,11 +108,11 @@ Native configuration goes in **config plugins**, never hand edits to generated `
 
 - `use()` + Suspense, `useActionState`, `useOptimistic` work on device; there are no Server Actions, so an action is a plain async function. Forms use React Hook Form + Zod — [`forms`](../forms/SKILL.md).
 - `ref` is a plain prop; no `forwardRef` on React 19. On a React 18 project `forwardRef` is correct — do not flag it.
-- The React Compiler has Reanimated gotchas: `vendor/.../rules/react-compiler-reanimated-shared-values.md`, `react-compiler-destructure-functions.md`.
+- The React Compiler has Reanimated gotchas: `bundled/.../rules/react-compiler-reanimated-shared-values.md`, `react-compiler-destructure-functions.md`.
 
 ## State discipline
 
-One source of truth; derive everything else in render; subscribe to the minimum. `vendor/.../rules/state-ground-truth.md`, `react-state-minimize.md`, `react-state-fallback.md`, `react-state-dispatcher.md`; library choice in [`architecture`](../architecture/SKILL.md).
+One source of truth; derive everything else in render; subscribe to the minimum. `bundled/.../rules/state-ground-truth.md`, `react-state-minimize.md`, `react-state-fallback.md`, `react-state-dispatcher.md`; library choice in [`architecture`](../architecture/SKILL.md).
 
 ## Layering
 
@@ -130,9 +130,9 @@ Atom (one primitive, no domain) → molecule (a few atoms, one job) → organism
 | axe / Lighthouse | `accessibilityRole` / `accessibilityLabel`, VoiceOver, TalkBack | [`accessibility`](../accessibility/SKILL.md) |
 | Vitest + RTL | Jest + RNTL 14 (async APIs) | [`component-testing`](../component-testing/SKILL.md) |
 
-## The vendored rules pack
+## The bundled rules pack
 
-`mobile/react-native/vendor/react-native-guidelines/rules/` holds impact-ranked rules with incorrect-vs-correct examples. Reach it through the skill that routes into it ([`performance`](../performance/SKILL.md), [`animation`](../animation/SKILL.md), [`ui-components`](../ui-components/SKILL.md), [`navigation`](../navigation/SKILL.md), this skill), never as a standalone skill. The vendored tree is read-only.
+`mobile/react-native/bundled/react-native-guidelines/rules/` holds impact-ranked rules with incorrect-vs-correct examples. Reach it through the skill that routes into it ([`performance`](../performance/SKILL.md), [`animation`](../animation/SKILL.md), [`ui-components`](../ui-components/SKILL.md), [`navigation`](../navigation/SKILL.md), this skill), never as a standalone skill.
 
 ## Rules
 

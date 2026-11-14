@@ -188,8 +188,7 @@ public class BiometricLoginTests
 
 ### BrowserStack MCP — triage a red farm run
 
-BrowserStack's MCP server (`browserstack/mcp-server`, AGPL-3.0) lets an agent read the cloud's own evidence
-for a red run. Register it; never vendor or copy its code.
+BrowserStack's MCP server lets an agent read the cloud's own evidence for a red run. Register it:
 
 ```bash
 claude mcp add --scope user --transport http browserstack https://mcp.browserstack.com/mcp

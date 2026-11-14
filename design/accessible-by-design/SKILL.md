@@ -17,7 +17,7 @@ Owns the accessibility work that happens **before there is code to audit**: the 
 
 Automated tooling catches a minority of WCAG failures and almost none of the seven criteria below — they are not scannable, because a machine cannot tell whether an alternative path *exists*, only whether an attribute does. Decide here; author there; prove it in QA.
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Search one **observable outcome** at a time with explicit accessibility terms — `"focus not obscured"`, `"dragging movements"`, `"accessible authentication"`, `"error summary validation"` — then, if needed, the component domain, then the stack:
+**Corpus authority.** The facts this skill decides with come from the [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Search one **observable outcome** at a time with explicit accessibility terms — `"focus not obscured"`, `"dragging movements"`, `"accessible authentication"`, `"error summary validation"` — then, if needed, the component domain, then the stack:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<observable outcome>" --domain ux

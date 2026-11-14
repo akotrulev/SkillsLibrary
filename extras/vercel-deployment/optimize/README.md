@@ -4,18 +4,6 @@ Optimize cost and performance for supported projects on Vercel.
 
 This skill uses Vercel metrics to find high-impact improvements in your app. Every recommendation is backed by observed data, scoped code evidence, and version-aware docs.
 
-[![skills.sh](https://skills.sh/b/vercel-labs/agent-skills)](https://skills.sh/vercel-labs/agent-skills)
-
-## Install
-
-Install just this skill:
-
-```bash
-npx skills add vercel-labs/agent-skills --skill vercel-optimize
-```
-
-Manual install: copy `skills/vercel-optimize` into `.agents/skills/vercel-optimize` and reference `SKILL.md` from your project `AGENTS.md`.
-
 ## Requirements
 
 - Node.js 20+
@@ -81,11 +69,3 @@ The agent should collect metrics first. If it starts by reading source files or 
 - Citations are allow-listed. Unknown URLs and version-mismatched framework docs are stripped.
 - Project config contradictions are rejected. For example, the verifier blocks "enable Fluid Compute" when Fluid Compute is already on.
 - Cost impact uses magnitude framing, not invented exact savings.
-
-## Contributing
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md). New gates, scanners, playbooks, citations, and sanitizers need fixture coverage in `packages/vercel-optimize-tests`.
-
-## License
-
-MIT

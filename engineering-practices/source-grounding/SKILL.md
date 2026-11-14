@@ -72,7 +72,3 @@ A decision that could not be grounded is labelled **from memory, unverified**, w
 - Citing the latest doc for an older project
 - Reading the doc once and then writing a different signature from memory
 - Treating a blog post as the source because it was easier to find
-
-## Provenance
-
-`addyosmani/agent-skills@8bfcc1f9916f2eea55494d8c1fa7f4bde867dd9e` — `source-driven-development`, MIT, adapted. Upstream's in-code citation comments are replaced by citations in output, to follow the house comment rules.

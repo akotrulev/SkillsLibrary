@@ -127,7 +127,7 @@ Do not rewrite code during review. Point to the fix and let the human apply it.
 ## When uncertain
 
 - If a skill's instructions conflict with these global rules, the skill wins for its domain. Note the conflict in the response.
-- **Design facts come from the vendored corpus.** `design/ui-ux-pro-max` (imported from `nextlevelbuilder/ui-ux-pro-max-skill`, pinned in [`design/ATTRIBUTIONS.md`](design/ATTRIBUTIONS.md)) is the **source of truth** for which style, palette, font pairing, UX guideline, icon, chart type, motion preset, landing pattern or per-stack UI convention applies. Where it and a `design/*` skill — or these global rules — disagree on such a fact, **the corpus wins**; the prose skill supplies only the judgment layered on top. Query it before deciding, and cite the row. It settles facts, not process: the code-quality, comment, planning, and test rules above are unaffected.
+- **Design facts come from the design corpus.** `design/ui-ux-pro-max` is the **source of truth** for which style, palette, font pairing, UX guideline, icon, chart type, motion preset, landing pattern or per-stack UI convention applies. Where it and a `design/*` skill — or these global rules — disagree on such a fact, **the corpus wins**; the prose skill supplies only the judgment layered on top. Query it before deciding, and cite the row. It settles facts, not process: the code-quality, comment, planning, and test rules above are unaffected.
 - If a user request conflicts with these rules, follow the user but call out the deviation once.
 - If you don't have enough information to apply a pattern correctly, ask one clarifying question rather than guess.
 

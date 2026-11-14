@@ -11,7 +11,7 @@ The current framing from the field is worth stating plainly, because it decides 
 
 **What this skill owns:** the patterns — progress, visibility, control, approval, uncertainty, correction, disclosure, and the AI-specific states. **What it does not own:** the transport that delivers them (a stack's `realtime` / `data-fetching` — SSE, WebSocket, streamed responses, resumable runs), the prompt/model/tool design behind them (`ai-development/claude-api`), and proving the feature works (qa `ai-feature-testing`). Design the pattern here; build it there.
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** The AI-surface patterns below are this skill's own; the corpus supplies the general UX guidelines they sit on — streaming feedback, interruptibility, loading and empty states, focus behavior:
+**Corpus authority.** The facts this skill decides with come from the [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** The AI-surface patterns below are this skill's own; the corpus supplies the general UX guidelines they sit on — streaming feedback, interruptibility, loading and empty states, focus behavior:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<observable outcome>" --domain ux

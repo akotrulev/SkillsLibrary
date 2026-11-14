@@ -2,8 +2,6 @@
 
 What the skill collects in Step 1, where each signal comes from, and how it degrades when a capability is missing.
 
-All shapes here are covered by sanitized CLI fixtures in `packages/vercel-optimize-tests/test/fixtures/real-cli-output/`.
-
 ## Table of contents
 
 - [The `signals.json` shape](#the-signalsjson-shape)

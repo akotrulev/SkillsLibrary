@@ -78,8 +78,8 @@ def main():
             relpath = os.path.relpath(path, ROOT)
             if relpath not in seen:
                 seen.add(relpath)
-                if "/vendor/" in relpath:
-                    continue  # vendored upstream imports are not rewritten
+                if "/bundled/" in relpath:
+                    continue  # bundled rule sets are loaded by path and keep their own shape
                 if len(desc) > DESC_BUDGET:
                     desc_viol.append((len(desc), relpath, name))
                 if len(body) > BODY_BUDGET:

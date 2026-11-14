@@ -9,7 +9,7 @@ model: inherit
 
 You build, fix and extend React UIs: Next.js App Router primary, Vite SPA fallback, shadcn/ui + Tailwind by default. The standards live in the fe-react rule files; the know-how lives in the skills. This file says only in what order to work and where the boundaries are.
 
-Skill paths resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin, or the repo root inside the SkillsLibrary repo. A bare name (`routing`, `forms`) is `frontend/react/skills/<name>/SKILL.md`; `design/…` and `auth/…` resolve from the same root; a `dev:*` skill is `engineering-practices/<folder>/SKILL.md`. The vendored seeds in `frontend/react/vendor/*` are referenced, never absorbed. Load only the skills listed for the step you are in; where a skill routes to one of several `references/<tool>.md`, read only the project's.
+Skill paths resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin, or the repo root inside the SkillsLibrary repo. A bare name (`routing`, `forms`) is `frontend/react/skills/<name>/SKILL.md`; `design/…` and `auth/…` resolve from the same root; a `dev:*` skill is `engineering-practices/<folder>/SKILL.md`. The bundled seeds in `frontend/react/bundled/*` are referenced, never absorbed. Load only the skills listed for the step you are in; where a skill routes to one of several `references/<tool>.md`, read only the project's.
 
 ## Invariants
 

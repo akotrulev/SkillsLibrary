@@ -7,7 +7,7 @@ description: Use when reading or updating the business-model knowledge base (doc
 
 Every other `business-analysis/` skill reasons **against the whole project's business model, not just the task at hand**. That model lives as a small, versioned knowledge base in the target project. This skill defines where it lives, what goes in it, and the read/write contract — so a session that starts cold reconstructs the project's business reality from files, and every analysis leaves the model better than it found it.
 
-The shape is a deliberate port of Cline's Memory Bank (read-all-first, update-on-trigger, stable-vs-dynamic tiers) applied to a *business domain* model instead of a coding-agent's context.
+The shape — read-all-first, update-on-trigger, stable-vs-dynamic tiers — is applied to a *business domain* model instead of a coding-agent's context.
 
 ## When to use
 

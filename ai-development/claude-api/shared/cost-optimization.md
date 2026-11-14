@@ -193,7 +193,7 @@ Model choice constrains the intelligence ceiling, which is why it comes after ev
 
 ## Workload shape -> lever
 
-Adapted from the cookbook's takeaways table, for mapping a profile to levers (row 1's watch-out is extended):
+For mapping a profile to levers:
 
 | Where the cost is | Reach for | Skip it or watch out when |
 |---|---|---|

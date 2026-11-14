@@ -5,7 +5,7 @@ description: Use when structuring a marketing or landing page (section order, CT
 
 # Landing patterns — the section order a marketing page earns
 
-Owns the **structure** of a page whose job is to persuade in one visit: which of the 34 patterns fits the product, what sections it runs in what order, where the primary CTA sits, what color strategy the sections use, and the conversion rules the pattern carries. The catalog is the `landing` domain of the vendored corpus ([`design:corpus`](../ui-ux-pro-max/SKILL.md)) — **the source of truth for every pattern, its section order, and its conversion rules.**
+Owns the **structure** of a page whose job is to persuade in one visit: which of the 34 patterns fits the product, what sections it runs in what order, where the primary CTA sits, what color strategy the sections use, and the conversion rules the pattern carries. The catalog is the `landing` domain of the design corpus ([`design:corpus`](../ui-ux-pro-max/SKILL.md)) — **the source of truth for every pattern, its section order, and its conversion rules.**
 
 **Where this sits:** [`design:visual-identity`](../visual-identity/SKILL.md)'s marketing lane decides the *look* — the hero thesis, the signature element, the one aesthetic risk. This skill decides the *skeleton* those choices are hung on. [`design:app-structure`](../ux-patterns/SKILL.md) owns the other side of the fence: an **application's** IA, shell, and page anatomy. A brief with a marketing site and the app behind it uses both, and the app never inherits the landing page's structure.
 

@@ -5,7 +5,7 @@ description: Use when rendering HTML/CSS animation to an MP4 (product demo, walk
 
 # HTML → MP4 — route to HyperFrames
 
-HyperFrames (HeyGen, open source) renders HTML by seeking a paused timeline frame by frame, so each render is identical. It is a moving upstream framework with skills of its own; this skill **routes to them** and carries only the fallback needed to get started.
+HyperFrames (HeyGen, open source) renders HTML by seeking a paused timeline frame by frame, so each render is identical. It is an actively developed framework with skills of its own; this skill **routes to them** and carries only the fallback needed to get started.
 
 ## When to use
 
@@ -22,7 +22,7 @@ If `/hyperframes` is available (it comes with `/hyperframes-cli`), **stop here a
 
 | Need | Value |
 |---|---|
-| Skills | `npx hyperframes skills update` (installs the core set from upstream `main`) |
+| Skills | `npx hyperframes skills update` (installs the core skill set) |
 | Runtime | Node.js 22+ |
 | Encoder | FFmpeg on `PATH` |
 
@@ -48,12 +48,6 @@ Confirm the output file is non-empty and its duration matches the root `data-dur
 ## Stop here
 
 This skill does not teach Studio, the block registry, hosted or Lambda rendering, media generation or Remotion migration. Those are HyperFrames' own skills (`/hyperframes-cli`, `/hyperframes-registry`, `/media-use`, `/remotion-to-hyperframes`) — install and use them.
-
-## Provenance
-
-- **Upstream:** [`heygen-com/hyperframes`](https://github.com/heygen-com/hyperframes) @ `a04b45a6db0d1f724be9cf1985c3b13657195f0d`.
-- **License:** Apache-2.0 — [`LICENSE`](https://github.com/heygen-com/hyperframes/blob/a04b45a6db0d1f724be9cf1985c3b13657195f0d/LICENSE).
-- **Adoption:** routed. No upstream file or code is copied into this repository; the composition shape above is restated from upstream's `/hyperframes` contract in this skill's own words.
 
 ## Related
 

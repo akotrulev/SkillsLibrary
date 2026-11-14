@@ -50,7 +50,7 @@ B and G to K are read from source in every mode. L to P straddle both: their sou
 | D | Nielsen heuristics, per primary task | `design/ux-review` |
 | E | Flow friction | `design/ux-review` |
 | F | Responsiveness budget | `design/ux-review` |
-| G | UI code against the vendored Web Interface Guidelines | `design/ui-code-audit` |
+| G | UI code against the web interface guidelines | `design/ui-code-audit` |
 | H | Copy voice | `design/ux-writing` |
 | I | Charts and data display | `design/charts` |
 | J | Iconography and social imagery | `design/iconography` |
@@ -74,7 +74,7 @@ Not sections: `design/theme-presets` (nothing to conform to) and `design/ui-ux-p
 | 5 | Report | the engine's `references/report-template.md` | Design header (mode, tasks, screens, widths, driver) in the scope section; a judgment rollup per section; one-line fix direction naming the owning skill and agent |
 | 6 | Hostile self-review | the engine's Step 4 | Plus the design checks below |
 
-**Reconcile.** One root cause is one finding, filed at the altitude that owns the fix, naming its siblings: a hardcoded hex in a component is one **B** finding, not also A; a concept named three things is one **C** finding naming H and G. Where two altitudes disagree the owning house skill wins, and you say which and report it: `ux-writing`'s sentence case over the vendored Title Case (G emits nothing), `ux-patterns` over `visual-identity` for layout; a skill also beats the library's global rules in its domain. **L** wins over G on size and alternative-path decisions; **M** over E when leaving costs more than arriving; **O** over A on the motion specification, and a missing reduced-motion path is O, not L; **P** owns a marketing page's structure, **C** an application's. **N** never restates a transport bug: "the stream stalls" is the stack agent's; "a four-minute agent run shows a spinner and cannot be stopped" is the finding. A consistent, deliberate project convention is a noted deviation, not a finding.
+**Reconcile.** One root cause is one finding, filed at the altitude that owns the fix, naming its siblings: a hardcoded hex in a component is one **B** finding, not also A; a concept named three things is one **C** finding naming H and G. Where two altitudes disagree the owning house skill wins, and you say which and report it: `ux-writing`'s sentence case over the guidelines' Title Case (G emits nothing), `ux-patterns` over `visual-identity` for layout; a skill also beats the library's global rules in its domain. **L** wins over G on size and alternative-path decisions; **M** over E when leaving costs more than arriving; **O** over A on the motion specification, and a missing reduced-motion path is O, not L; **P** owns a marketing page's structure, **C** an application's. **N** never restates a transport bug: "the stream stalls" is the stack agent's; "a four-minute agent run shows a spinner and cannot be stopped" is the finding. A consistent, deliberate project convention is a noted deviation, not a finding.
 
 **Severity is impact on the user's task**: **blocker**, the task cannot be completed or data is lost; **major**, a heuristic clearly violated on a primary flow, or a defect family across the app; **minor**; **nit**. A corpus row's severity still overrides.
 

@@ -1,13 +1,5 @@
-<!--
-Vendored snapshot — Vercel Web Interface Guidelines.
-Upstream: https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
-Upstream commit: d0a657bfe87e86dd3a4753d7ec28c7e7dd7a88fe (2026-04-06)
-Retrieved: 2026-07-12. MIT-licensed at import time. See design/ATTRIBUTIONS.md.
-This is the pinned baseline the skill reads first; SKILL.md may prefer a fresh
-upstream fetch when the network is available, falling back silently to this copy.
--->
 ---
-description: Review UI code for Vercel Web Interface Guidelines compliance
+description: Review UI code for web interface guidelines compliance
 argument-hint: <file-or-pattern>
 ---
 

@@ -19,7 +19,7 @@ doc, an HTML page — or use it as a quick-start palette for a web app.
 > Factory is the quick-start when a brief doesn't warrant a bespoke
 > [`design/visual-identity`](../visual-identity/SKILL.md) system.
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** The 10 presets below remain the artifact/quick-start lane, but for a **web app** the corpus's 192 product palettes are the larger and better-matched set — query it before settling for a preset:
+**Corpus authority.** The facts this skill decides with come from the [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** The 10 presets below remain the artifact/quick-start lane, but for a **web app** the corpus's 192 product palettes are the larger and better-matched set — query it before settling for a preset:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<product type> <mood>" --domain color

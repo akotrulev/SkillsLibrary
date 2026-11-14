@@ -7,7 +7,7 @@ description: Use when deciding a UI's motion design (intensity tier, preset per 
 
 To turn finished markup into a rendered MP4, hand off to `html-video`.
 
-Owns the **motion catalog**: which of the seven motion categories a surface needs, at which of the three intensity tiers, with what duration, easing, do/don't, and cleanup obligation. The catalog is not invented here — it is the `gsap` domain of the vendored corpus ([`design:corpus`](../ui-ux-pro-max/SKILL.md)), **the source of truth for every value in it.** This skill is how the catalog is chosen from and applied.
+Owns the **motion catalog**: which of the seven motion categories a surface needs, at which of the three intensity tiers, with what duration, easing, do/don't, and cleanup obligation. The catalog is not invented here — it is the `gsap` domain of the design corpus ([`design:corpus`](../ui-ux-pro-max/SKILL.md)), **the source of truth for every value in it.** This skill is how the catalog is chosen from and applied.
 
 **The three-way fence:**
 

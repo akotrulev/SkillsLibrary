@@ -5,7 +5,7 @@ status: active
 candidateKinds: ["external_api_slow"]
 frameworks: ["next@>=13.0.0"]
 priority: 90
-citations: ["vercel-react-best-practices:async-parallel", "vercel-react-best-practices:server-parallel-fetching", "vercel-react-best-practices:server-cache-react"]
+citations: ["react-performance-rules:async-parallel", "react-performance-rules:server-parallel-fetching", "react-performance-rules:server-cache-react"]
 maxBriefChars: 850
 ---
 

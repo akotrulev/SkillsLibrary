@@ -57,7 +57,7 @@ The screen's data source (a hook that returns `{ data, status }`), its three out
 | Dynamic top/bottom space (keyboard, toolbar) | `contentInset` | animated padding | `ui-scrollview-content-inset.md` |
 | Measuring | `useLayoutEffect` + `onLayout` | `onLayout` alone | `ui-measure-views.md` |
 
-All rule files are `mobile/react-native/vendor/react-native-guidelines/rules/<file>`. Styling micro-rules (`borderCurve: 'continuous'`, `gap`, `boxShadow`) are `ui-styling.md` and owned by [`styling`](../styling/SKILL.md).
+All rule files are `mobile/react-native/bundled/react-native-guidelines/rules/<file>`. Styling micro-rules (`borderCurve: 'continuous'`, `gap`, `boxShadow`) are `ui-styling.md` and owned by [`styling`](../styling/SKILL.md).
 
 ```tsx
 import { Pressable, Text } from 'react-native';

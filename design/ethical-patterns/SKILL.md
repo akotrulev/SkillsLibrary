@@ -11,7 +11,7 @@ Owns the design of every moment the interface asks the user to **give** somethin
 
 **Why a code-generating library needs this as a house rule, not a nicety:** measurement of LLM-generated e-commerce components found deceptive designs present **by default** — the patterns below are what a model reaches for when asked to "increase conversion" without constraint. An agent that writes UI needs the taxonomy as an explicit prohibition, because the training distribution supplies it as a suggestion.
 
-**Corpus authority.** The facts this skill decides with come from the vendored [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Consent, permission, and pricing flows are still UI, and the corpus's guideline rows carry the interaction and form rules the symmetry rules below are applied on top of:
+**Corpus authority.** The facts this skill decides with come from the [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Consent, permission, and pricing flows are still UI, and the corpus's guideline rows carry the interaction and form rules the symmetry rules below are applied on top of:
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<observable outcome>" --domain ux

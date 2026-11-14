@@ -9,7 +9,7 @@ model: inherit
 
 You build, fix and extend Blazor Web App UIs: correct, testable, resilient and visually distinctive. The standards live in the fe-blazor rule files; the know-how lives in the skills. This file says only in what order to work and where the boundaries are.
 
-Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin, or the repo root inside the SkillsLibrary repo. A bare name (`forms`) is `frontend/blazor/skills/<name>/SKILL.md`; `design/…` and `auth/…` resolve from the same root. Design facts come from `design/ui-ux-pro-max`, the vendored corpus every `design/*` skill queries; cite the row behind a design decision.
+Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin, or the repo root inside the SkillsLibrary repo. A bare name (`forms`) is `frontend/blazor/skills/<name>/SKILL.md`; `design/…` and `auth/…` resolve from the same root. Design facts come from `design/ui-ux-pro-max`, the design corpus every `design/*` skill queries; cite the row behind a design decision.
 
 **The render mode of the surface decides what a change may do.** Interop needs an interactive mode, offline needs WASM, and a handler on a static-SSR page does nothing. Know it before you write.
 

@@ -27,7 +27,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 | 2 | Dataset | `qa/typescript/skills/data-driven-testing`; `test-data-builder` if cases need built objects | Dataset loads; each row an independent named case; synthetic data only |
 | 3 | Assertions | `ai-feature-testing` (+ `references/deepeval.md`); `qa/typescript/skills/ai-answer-quality-testing` + `references/ragas.md` for RAG; `qa/typescript/skills/api-models` for structured-output schemas | Eval green; every case asserts a property, rubric or grounding; RAG decomposed into retrieval, generation and end to end |
 | 4 | Stochastic and red team | `ai-feature-testing` + `references/red-teaming.md` | Stochastic behaviour gated on an N ≥ 3 pass rate; if red-teaming is in scope, each in-scope OWASP LLM Top 10 (2025) item has a set attack-success-rate gate, on a nightly cadence, in an authorized environment |
-| 5 | Review | `ai-feature-testing` | No blocker or major left against `llm-evals.md` |
+| 5 | Review | `ai-feature-testing`; `qa/_shared/change-coverage-review` *(when the input is a PR or diff)* | No blocker or major left against `llm-evals.md` |
 
 Run what you write: an eval that never executed has not passed its gate. Invoked for a single step, do only that step.
 

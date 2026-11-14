@@ -270,7 +270,7 @@ it('Should_AttachPdfInvoice_When_InvoiceIsEmailed', async () => {
 
 ### Body assertions
 - Extract structure (links, OTPs, headers); don't substring-match the full HTML — copy changes break those tests.
-- Visual / template-shape checks → `qa/typescript/skills/visual-regression`.
+- Template HTML and copy → [`html-snapshots.md`](html-snapshots.md); pixel-level checks → `qa/typescript/skills/visual-regression`.
 
 ### Attachments
 - Validate content type **and** magic bytes for binaries.
