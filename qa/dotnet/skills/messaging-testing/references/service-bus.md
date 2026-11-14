@@ -69,7 +69,7 @@ IntegrationTests/
 ## Local broker for tests — the Azure Service Bus emulator
 
 There is no in-memory Service Bus. For deterministic local + CI tests, run the **Azure Service Bus
-emulator** (`mcr.microsoft.com/azure-service-bus/service-bus-emulator`), which **depends on a SQL Edge**
+emulator** (`mcr.microsoft.com/azure-messaging/servicebus-emulator`), which **depends on a SQL Edge**
 container (`mcr.microsoft.com/azure-sql-edge`) for its store. The emulator reads a **`Config.json`** that
 declares the namespace, queues, topics and subscriptions up front (limits: **1 namespace, 50
 queues/topics**). The connection string carries `UseDevelopmentEmulator=true`.
@@ -96,8 +96,7 @@ public abstract class ServiceBusFixture
     {
         // The module declares its own readiness wait strategy and pulls the SQL Edge dependency.
         // Entities come from Config.json (mounted by the module); pin the image tag, never `latest`.
-        _broker = new ServiceBusBuilder()
-            .WithImage("mcr.microsoft.com/azure-service-bus/service-bus-emulator:1.1.2")
+        _broker = new ServiceBusBuilder("mcr.microsoft.com/azure-messaging/servicebus-emulator:1.1.2")
             .WithAcceptLicenseAgreement(true)   // ACCEPT_EULA=Y — required by the emulator
             .Build();
 

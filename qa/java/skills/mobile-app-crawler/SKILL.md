@@ -91,7 +91,7 @@ Confirm all of these before the first tap. **Ask, don't guess** — a crawl acts
 
 ### 2. Extract the current screen
 
-Run `mobile-screen-explorer`'s procedure against it — screenshot to confirm identity, one `appium_get_page_source` read, classify interactables vs assertion targets, assign each element its locator-ladder rung. Then:
+Run `mobile-screen-explorer`'s procedure against it — screenshot to confirm identity, one `appium_get_page_source` read (to a file, `crawl-policy.md` §3), classify interactables vs assertion targets, assign each element its locator-ladder rung. Then:
 
 - Compute the **screen signature** (see `references/crawl-policy.md`) and check it against Visited. Already there → this is a **revisit**: don't re-extract, just record the new inbound edge and pop the frontier.
 - New signature → write `docs/app-map/screens/<Screen>.md` with the element table, and append the screen's row to `screen-map.md`.

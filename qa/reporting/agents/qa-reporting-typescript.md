@@ -31,7 +31,8 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 | 1 | Wire Allure | `qa/reporting/typescript/skills/test-reports` | The project's own test script emits `allure-results/`; `allure generate` builds a report from that real run; failures carry attachments |
 | 2 | Tag by finding | `qa/reporting/typescript/skills/test-reports`, `qa/reporting/typescript/skills/flaky-test-quarantine` (its tag and category convention) | A representative test carries severity, feature/story and an issue or TMS link; the report groups by them; the label convention is written down for the team |
 | 3 | Detect and quarantine | `qa/reporting/typescript/skills/flaky-test-quarantine` | Flakes are found from Allure history and a nightly `--repeat-each` run, not from retries; a flaky test is tagged into quarantine, still runs and shows in the report, and does not fail the gating verdict |
-| 4 | Review | `qa/reporting/typescript/skills/flaky-test-quarantine` (its quarantine-hygiene checklist) | No blocker or major left; every quarantined test has an owner and an exit; counts are honest |
+| 4 | Triage a failed run *(when asked to diagnose one)* | `qa/reporting/typescript/skills/test-reports` (`references/trace-links.md`, *Triage a failed run*) | The linked trace and logs are read; the failure is lined up against the deploy and change timeline; 3–5 hypotheses are ranked, each with the test that would falsify it; the root-cause candidate is reported with its evidence (trace id, span, log line, deploy or commit) |
+| 5 | Review | `qa/reporting/typescript/skills/flaky-test-quarantine` (its quarantine-hygiene checklist) | No blocker or major left; every quarantined test has an owner and an exit; counts are honest |
 
 Run what you write: a reporting config that has never produced a report has not passed its gate.
 

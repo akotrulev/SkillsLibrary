@@ -49,6 +49,8 @@ of its sibling, and a test can be unique and still assert nothing.
    - **Near duplicates:** test files or bodies whose whitespace-stripped content hashes alike
    - **House-rule breaks:** `OR` in an assertion, `try`/`catch` in a test body, a sleep call, an `if` or loop
      driving assertions, several unrelated assertions in one test
+   - **Self-derived expectations and placeholders:** an expected value assigned from a production call;
+     `test@test.com`, `foo`, `bar` literals in test data
    A shortlist line is a lead, not a verdict.
 3. **Read the evidence.** For each lead, read the whole test, the production code that owns the behaviour, its
    callers and the overlapping tests. Read at most three files per candidate; stop at the candidate cap (default
@@ -62,7 +64,8 @@ of its sibling, and a test can be unique and still assert nothing.
 A test earns its place only with all four answers:
 
 1. What observable behaviour, invariant or independent contract does it protect?
-2. What credible regression makes it fail?
+2. What credible regression makes it fail? Name the production change — one edited line, one flipped
+   condition, one dropped field — that turns this test red. No such change means it protects nothing.
 3. Why does existing coverage not already catch that? A row in an existing parameterised test beats a
    near-duplicate.
 4. Does it need a production seam — an export, flag, wrapper or injection point — that no production caller
@@ -86,6 +89,19 @@ A match is a candidate unless the retention bar names the contract it guards.
 - Production code whose only callers are tests
 - House-rule breaks that make the test untrustworthy: an `OR` in an assertion, a swallowed error, a
   `try`/`catch` in the body, a fixed sleep, conditional logic driving assertions, an unrelated second behaviour
+- Expected values derived from the code under test — the expectation is computed by calling the production
+  function, its helper or its mapper (`expected = PriceCalculator.Total(order)`), so the test passes whatever
+  the code does. The expected value is a literal, a builder default or an independent oracle
+- AI-written test smells:
+  - **Closed loop** — the same agent run wrote the code and its test in one pass, so the test restates the
+    implementation's reading of the requirement, including its mistakes. Check `git log` for code and test
+    landing in one commit by an agent with no test written first; ask what requirement, not what code, the
+    expected value came from
+  - **Placeholder data** — `test@test.com`, `foo`, `bar`, `John Doe`, `123`: values no real user has, chosen
+    because they were the first to hand, which hide the boundaries and formats the field really accepts
+  - **Convention drift** — a test that ignores the suite's established builders, base class, client, naming or
+    assertion style and hand-rolls its own; it is a second way of doing one thing, and the next reader copies
+    whichever they find first
 
 ## Retention bar
 

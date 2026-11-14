@@ -316,6 +316,10 @@ The `qa/` section is the most fully built-out part of the library. Most code-pro
 | `api-contract-testing` | java · dotnet · typescript | Consumer/provider contract tests with Pact |
 | `contract-testing-pact` | _shared | Pact rules every stack's `api-contract-testing` references |
 | `load-testing` | java · dotnet · typescript | Load tests — Gatling (java) · NBomber (dotnet) · k6 (typescript) |
+| `benchmarks` | dotnet | BenchmarkDotNet microbenchmarks and CI speed/allocation gates |
+| `aspire-testing` | dotnet | Integration tests that start a .NET Aspire AppHost (`DistributedApplicationTestingBuilder`) |
+| `chaos-experiments` | _shared | Environment-level chaos with SLO steady state and abort conditions (Chaos Mesh · Litmus · AWS FIS · Chaos Studio) |
+| `change-coverage-review` | _shared | Is each behaviour change in a PR tested? Covered / Partial / Missing, plus testability smells |
 | `performance` | _shared | Workload modelling, SLOs, perf gates |
 | `test-first` | _shared | Write acceptance tests against `501 not-implemented` stubs, red for the right reason, before the implementation — cited as `qa-<stack>:test-first` |
 
@@ -332,6 +336,8 @@ The `qa/` section is the most fully built-out part of the library. Most code-pro
 | `file-storage-testing` | java · dotnet · typescript | Object-storage assertions — store picked inside via `references/` (s3/LocalStack · azure-blob/Azurite) |
 | `network-mocking` | java · dotnet · typescript | Intercept/mock/throttle browser traffic — layer picked inside via `references/` (playwright-routes · cdp · proxy) |
 | `realtime-stream-testing` | java · dotnet · typescript | Real-time WebSocket + SSE assertions |
+| `analytics-testing` | java · dotnet · typescript | Analytics beacons, `dataLayer` and consent gating (Consent Mode v2, GPC) |
+| `payment-testing` | java · dotnet · typescript | Payment flows against a provider sandbox (Stripe): test cards, 3DS, webhooks, idempotency |
 
 ### Grids & access
 

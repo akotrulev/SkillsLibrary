@@ -187,6 +187,15 @@ public void screenshotOnFailure(ITestResult result) {
 }
 ```
 
+## From a failed test to the backend trace
+
+Every test sends one W3C `traceparent` trace id on all its requests (`api-client-writer`'s
+`references/trace-context.md`; UI: `ui-test-author/playwright`'s `references/trace-correlation.md`). On
+failure the result gets a `telemetry` attachment (`text/uri-list`): the trace id, a Grafana Explore link to
+the trace in Tempo and one to its log lines in Loki. Grafana's base URL comes from `GRAFANA_URL`; unset, no
+link is written and the test is unaffected. The helper, the failure hook, the Explore URL format and the
+procedure for triaging a failed run: [`references/trace-links.md`](references/trace-links.md).
+
 ## Steps — `@Step` on page object methods
 
 ```java
@@ -289,6 +298,7 @@ The standards this skill's output must meet are the qa-java rule files, not a li
 - The generator is `allure-commandline` 2.46.1, as `allure.version` in Gradle and the npm pin in CI, equal to `qa/cicd/ci-conventions`.
 - The `AllureRestAssured` filter is wired in `BaseApiClient`, so the HTTP exchange attaches itself; redact it with `configureHttpExchange()`. Playwright failure evidence is `BaseTest`'s; this skill adds no Playwright hook, listener or attacher.
 - No `@Feature("misc")` catch-all and no `@Description` that paraphrases the test name; describe behaviour or link the spec.
+- A failed test carries the `telemetry` link attachment when `GRAFANA_URL` is set (`references/trace-links.md`); its absence never fails a test.
 - Logs larger than a few hundred KB are linked to Loki, not attached.
 - History is preserved across runs (the last 20–30); the report publishes from `main` to a stable URL, and PR builds publish to a PR-scoped URL or skip publishing.
 

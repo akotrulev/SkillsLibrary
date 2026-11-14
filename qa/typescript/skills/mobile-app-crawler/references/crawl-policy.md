@@ -103,6 +103,15 @@ If a denied action is the **only** remaining exit from a screen, do not tap it. 
 
 Every bound is user-overridable at the start and **recorded in the map header**. Whichever bound fires is named in the report — a crawl that stopped at `maxScreens` has produced a partial map and must say so.
 
+### Keep the context small
+
+A crawl reads forty screens' worth of page source, which floods the context when each read returns the XML
+inline. So the server is registered with `NO_UI=true` (no HTML inspector in any response), and every read is
+`appium_get_page_source` with `saveToFile: true`: it returns the saved file's path and size instead of the
+XML (in `PAGE_SOURCES_DIR`, else the OS temp directory). Read that file, or add `selector` (an XPath such as
+`//*[@clickable='true']`) to get a bounded summary of just the matching nodes (at most 100, siblings included);
+the file still holds the full tree. `NO_UI` alone does not save to a file.
+
 ### Stop conditions, in precedence order
 
 1. Session lost or app crashed → stop, report the last-known screen and the crash (a crash **is** a finding: file it via `qa/manual/bug-report-writer`)

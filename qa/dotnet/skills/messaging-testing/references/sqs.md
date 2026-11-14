@@ -103,8 +103,7 @@ public abstract class SqsFixture
     public async Task StartBrokerAsync()
     {
         // Pin the image tag, never `latest`. The module declares its own readiness wait strategy.
-        _localstack = new LocalStackBuilder()
-            .WithImage("localstack/localstack:3.5")
+        _localstack = new LocalStackBuilder("localstack/localstack:3.5")
             .Build();
         await _localstack.StartAsync();
 

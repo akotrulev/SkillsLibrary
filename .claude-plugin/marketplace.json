@@ -149,6 +149,8 @@
         "./qa/_shared/security-testing/vuln-reachability",
         "./qa/_shared/security-testing/source-audit",
         "./qa/_shared/test-audit",
+        "./qa/_shared/chaos-experiments",
+        "./qa/_shared/change-coverage-review",
         "./qa/_shared/security-testing/client-side-security",
         "./qa/_shared/security-testing/mobile-app-scan",
         "./qa/_shared/security-testing/mobile-runtime-testing",
@@ -220,7 +222,9 @@
         "./qa/manual/test-strategy",
         "./qa/reporting/java/skills/test-reports",
         "./qa/reporting/java/skills/flaky-test-quarantine",
-        "./qa/java/skills/rules"
+        "./qa/java/skills/rules",
+        "./qa/java/skills/analytics-testing",
+        "./qa/java/skills/payment-testing"
       ],
       "commands": [
         "./qa/_shared/commands/security.md",
@@ -291,6 +295,8 @@
         "./qa/_shared/security-testing/vuln-reachability",
         "./qa/_shared/security-testing/source-audit",
         "./qa/_shared/test-audit",
+        "./qa/_shared/chaos-experiments",
+        "./qa/_shared/change-coverage-review",
         "./qa/_shared/security-testing/client-side-security",
         "./qa/_shared/security-testing/mobile-app-scan",
         "./qa/_shared/security-testing/mobile-runtime-testing",
@@ -366,7 +372,11 @@
         "./qa/manual/test-strategy",
         "./qa/reporting/dotnet/skills/test-reports",
         "./qa/reporting/dotnet/skills/flaky-test-quarantine",
-        "./qa/dotnet/skills/rules"
+        "./qa/dotnet/skills/rules",
+        "./qa/dotnet/skills/aspire-testing",
+        "./qa/dotnet/skills/benchmarks",
+        "./qa/dotnet/skills/analytics-testing",
+        "./qa/dotnet/skills/payment-testing"
       ],
       "commands": [
         "./qa/_shared/commands/security.md",
@@ -438,6 +448,8 @@
         "./qa/_shared/security-testing/vuln-reachability",
         "./qa/_shared/security-testing/source-audit",
         "./qa/_shared/test-audit",
+        "./qa/_shared/chaos-experiments",
+        "./qa/_shared/change-coverage-review",
         "./qa/_shared/security-testing/client-side-security",
         "./qa/_shared/security-testing/mobile-app-scan",
         "./qa/_shared/security-testing/mobile-runtime-testing",
@@ -509,7 +521,9 @@
         "./qa/typescript/skills/ui-test-author/selenium",
         "./qa/typescript/skills/visual-regression",
         "./qa/typescript/skills/realtime-stream-testing",
-        "./qa/typescript/skills/rules"
+        "./qa/typescript/skills/rules",
+        "./qa/typescript/skills/analytics-testing",
+        "./qa/typescript/skills/payment-testing"
       ],
       "commands": [
         "./qa/_shared/commands/security.md",

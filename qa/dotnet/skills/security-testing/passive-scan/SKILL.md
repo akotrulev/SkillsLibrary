@@ -62,7 +62,7 @@ Your test project needs only NUnit + a JSON parser (`System.Text.Json`, already 
   <PackageReference Include="NUnit" Version="4.*" />
   <PackageReference Include="NUnit3TestAdapter" Version="4.*" />
   <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
-  <PackageReference Include="Testcontainers" Version="3.*" />   <!-- to stand up the SUT -->
+  <PackageReference Include="Testcontainers" Version="4.16.0" />
 </ItemGroup>
 ```
 
@@ -254,8 +254,7 @@ public class ZapBaselineTests
     public async Task StartApp()
     {
         // Stand up the SUT. Wait on a readiness condition.
-        _app = new ContainerBuilder()
-            .WithImage("myorg/web:latest")
+        _app = new ContainerBuilder("myorg/web:latest")
             .WithPortBinding(5000, true)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilHttpRequestIsSucceeded(r => r.ForPath("/health").ForPort(5000)))
             .Build();

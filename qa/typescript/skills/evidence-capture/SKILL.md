@@ -133,7 +133,7 @@ A deliberate recording lives in a **fixture**, never inline in a test body, and 
 
 An agent exploring a live page takes evidence with the Playwright MCP capture tools. The video and trace
 tools need the server registered with `--caps=devtools`:
-`claude mcp add --scope user playwright -- npx @playwright/mcp@latest --caps=testing,storage,devtools --isolated --output-dir=.playwright-mcp`.
+`claude mcp add --scope user playwright -- npx @playwright/mcp@0.0.85 --caps=testing,storage,devtools --isolated --output-dir=.playwright-mcp --redact-url-params=code,state,access_token,id_token`.
 When MCP is not connected, or a long session would flood the context, the same capture runs through
 `playwright-cli` (`npm i -g @playwright/cli@latest`) from `Bash`. MCP stays the primary route.
 
@@ -176,8 +176,9 @@ the browser without uploading it.
 - Mask what a screenshot must not show (`mask: [locator]`, or `style` to hide it). Record HAR with
   `content: 'omit'` and a `urlFilter` unless bodies are the point. A trace cannot be redacted, so tests run
   as disposable test users, never real accounts.
-- MCP's `--secrets <dotenv>` replaces secret values in tool responses; Playwright calls it "not a security
-  feature", so it never replaces disposable credentials.
+- MCP's `--secrets <dotenv>` replaces secret values in tool responses; `--redact-url-params=code,state,…`
+  does the same for the Auth0 `code` / `state` and the tokens a login redirect leaves in the URL.
+  Playwright calls both "not a security feature", so neither replaces disposable credentials.
 - Retention follows `qa/cicd/ci-conventions`: traces, videos and HAR 14 days, uploaded on failure only.
 
 ## Rules

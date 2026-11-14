@@ -60,7 +60,7 @@ Ask at most 3 questions; infer the rest from the existing test project.
 
 ## Deep-dive reference
 
-These sections live in `references/details.md` — **read it when the task touches them**: **Patterns** — secrets, the BrowserStack connect (`BrowserStackGrid`), one session per class (`GridSession`), the grid class, Sauce, Appium, capability blocks, parallelism (`testng-grid.xml` + `GridConcurrency`), session status, tunnels, Device Farm.
+These sections live in `references/details.md` — **read it when the task touches them**: **Patterns** — secrets, the BrowserStack connect (`BrowserStackGrid`), one session per class (`GridSession`), the grid class, Sauce, Appium, capability blocks, parallelism (`testng-grid.xml` + `GridConcurrency`), session status, tunnels, Device Farm, BrowserStack MCP triage of a red run by an agent.
 
 ## The web grid in one picture
 

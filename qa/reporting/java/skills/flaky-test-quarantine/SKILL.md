@@ -40,6 +40,7 @@ assumption, an order dependency, a real-but-rare backend hiccup. It is *not*:
 | Need to *know* which tests are flaky | **Detect** | Allure history marks (Flaky, Regressed, Fixed) |
 | A third-party sandbox or infra warm-up fails a clean run now and then, and the issue is filed | **Hotspot** | `@Test(retryAnalyzer = RetryOnce.class)` on that test only, with `@Issue` and a date |
 | A *known* flaky test, ticketed, not yet fixed | **Quarantine** | `@Test(groups = "flaky")` + `@Flaky` + `@Issue`; excluded from the gate, run in a non-gating lane |
+| A quarantined test whose cause is unknown | **De-flake** | Classify the cause, reproduce it on demand, fix it, prove it (`references/de-flake.md`) |
 | A test that fails the same way every run | **Fix the code/test** | Not flakiness — a real bug; no retry, no quarantine |
 | A flaky test no one will own/fix | **Delete it** | A test you don't trust and won't fix is worse than no test |
 
@@ -208,6 +209,16 @@ class, not a flakiness verdict: filing every timeout as "known flaky" hides real
 **Track flaky-rate over time, not per-run green.** A single green run proves nothing about a flaky test. The
 metric that matters is *flaky-rate* (flaky marks ÷ total tests) trending **down** — wire it into the team's
 quality dashboard (`qa/manual/quality-metrics`). A growing `flaky` group is a smell: tagging faster than fixing.
+
+## De-flake — classify the cause, reproduce it, fix it
+
+Quarantine contains a flake; this move ends it. Classify the cause — **test order / pollution** (bisect for the
+polluter, `engineering-practices/systematic-debugging/find-polluter.sh`), **timing** (wait on the condition,
+`engineering-practices/systematic-debugging/condition-based-waiting.md`), **shared data**, **environment**, or
+a **real product race** (a defect to file, never to retry). Then reproduce it on demand — repeat it N times,
+raise workers and CPU pressure, vary the order — and diff a passing run's evidence against a failing one's.
+The test leaves quarantine when the same recipe that reproduced the failure passes at the same pressure.
+Recipes and the comparison: [`references/de-flake.md`](references/de-flake.md).
 
 ## Deep-dive reference
 

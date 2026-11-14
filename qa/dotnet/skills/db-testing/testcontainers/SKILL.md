@@ -59,8 +59,7 @@ namespace IntegrationTests.Fixtures;
 
 public abstract class PostgresFixture
 {
-    private static readonly PostgreSqlContainer Container = new PostgreSqlBuilder()
-        .WithImage("postgres:17.2")
+    private static readonly PostgreSqlContainer Container = new PostgreSqlBuilder("postgres:17.2")
         .WithDatabase("appdb")
         .WithUsername("test")
         .WithPassword("test")
@@ -110,6 +109,29 @@ public abstract class PostgresFixture
     }
 }
 ```
+
+Testcontainers 4.10+ takes the image in the builder's constructor; the parameterless constructor (and `.WithImage` after it) is `[Obsolete]`. Pin `Testcontainers.*` packages to one 4.x version (4.16.0 verified 2026-11).
+
+### Assembly setup — `IntegrationTests/TestAssemblySetup.cs`
+
+Every in-process host (`WebApplicationFactory`, `Host.CreateApplicationBuilder`) watches `appsettings*.json` for changes by default, and each watcher costs an inotify instance; on Linux CI agents a suite that starts dozens of hosts exhausts the per-user limit and fails with `The configured user limit (128) on the number of inotify instances has been reached`. Turn reload off once, before any host starts:
+
+```csharp
+using System.Runtime.CompilerServices;
+
+namespace IntegrationTests;
+
+internal static class TestAssemblySetup
+{
+    [ModuleInitializer]
+    internal static void DisableConfigReload()
+    {
+        Environment.SetEnvironmentVariable("DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE", "false");
+    }
+}
+```
+
+The host reads `hostBuilder:reloadConfigOnChange` from its `DOTNET_`-prefixed environment, so this one variable covers every host the assembly creates; tests never edit config files at run time, so nothing is lost.
 
 ### Fixture that consumes the SUT via `WebApplicationFactory`
 
@@ -171,8 +193,7 @@ public class TransactionsIntegrationTests : PostgresFixture
 ### SQL Server variant
 
 ```csharp
-private static readonly MsSqlContainer Container = new MsSqlBuilder()
-    .WithImage("mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04")
+private static readonly MsSqlContainer Container = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-CU14-ubuntu-22.04")
     .WithPassword("Str0ng!Passw0rd")
     .Build();
 ```
@@ -182,8 +203,7 @@ Use `DbAdapter.SqlServer` in `RespawnerOptions` and `SchemasToInclude = ["dbo"]`
 ### MongoDB / Redis (no Respawn — clean explicitly)
 
 ```csharp
-private static readonly MongoDbContainer Mongo = new MongoDbBuilder()
-    .WithImage("mongo:7.0")
+private static readonly MongoDbContainer Mongo = new MongoDbBuilder("mongo:7.0")
     .Build();
 
 [SetUp]
@@ -202,8 +222,7 @@ Redis: `await redis.GetServer(...).FlushDatabaseAsync()` in `[SetUp]`.
 ### Custom wait strategy (only when the built-in module doesn't cover it)
 
 ```csharp
-new ContainerBuilder()
-    .WithImage("ghcr.io/myco/legacy-app:1.4.0")
+new ContainerBuilder("ghcr.io/myco/legacy-app:1.4.0")
     .WithPortBinding(8080, true)
     .WithWaitStrategy(Wait.ForUnixContainer()
         .UntilHttpRequestIsSucceeded(req => req.ForPort(8080).ForPath("/health")))

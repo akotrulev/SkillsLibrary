@@ -59,7 +59,7 @@ Ask at most 3 questions; infer the rest from the existing test project.
 
 ## Deep-dive reference
 
-These sections live in `references/details.md` — **read it when the task touches them**: **Patterns**.
+These sections live in `references/details.md` — **read it when the task touches them**: **Patterns**, including BrowserStack MCP triage of a red run by an agent.
 
 ## Rules
 

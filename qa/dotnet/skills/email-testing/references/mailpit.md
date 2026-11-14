@@ -51,8 +51,7 @@ namespace IntegrationTests.Fixtures;
 
 public abstract class MailpitFixture
 {
-    private static readonly IContainer Mailpit = new ContainerBuilder()
-        .WithImage("axllent/mailpit:v1.20.5")
+    private static readonly IContainer Mailpit = new ContainerBuilder("axllent/mailpit:v1.20.5")
         .WithPortBinding(1025, true) // SMTP
         .WithPortBinding(8025, true) // HTTP API + UI
         .WithEnvironment("MP_MAX_MESSAGES", "0") // disable rotation in tests

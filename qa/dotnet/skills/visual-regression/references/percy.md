@@ -196,6 +196,12 @@ There is no diff image to upload: the diff lives in Percy, linked from the statu
 log and each test's Allure link. A functional failure in a Percy class still gets `BaseTest`'s trace,
 screenshot and video.
 
+**An agent reading the result.** With the BrowserStack MCP registered (`browser-cloud-setup` →
+`references/details.md`), `fetchPercyChanges` summarizes what changed between the latest build and the one
+before, and `runPercyScan` runs a scan (local server only; the remote one disables it). The agent reports
+the changes and which look intended. It never calls `managePercyBuildApproval`, and no agent's `tools:`
+grants it: approving or rejecting a build stays with a person in Percy's review UI.
+
 ## Anti-patterns
 
 - **`Playwright.CreateAsync()`, a browser or a failure hook in a Percy class.** *Fix:* derive from `BaseTest`.

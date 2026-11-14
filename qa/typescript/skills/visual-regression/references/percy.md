@@ -183,6 +183,12 @@ the review. The build goes green once the diffs are approved, or at once when no
 3. A reviewer approves or rejects in Percy. Approving updates the branch baseline.
 4. On merge, the approved snapshots become the base branch's baseline.
 
+**An agent reading the result.** With the BrowserStack MCP registered (`browser-cloud-setup` →
+`references/details.md`), `fetchPercyChanges` summarizes what changed between the latest build and the one
+before, and `runPercyScan` runs a scan (local server only; the remote one disables it). The agent reports
+the changes and which look intended. It never calls `managePercyBuildApproval`, and no agent's `tools:`
+grants it: approving or rejecting a build stays with a person in Percy's review UI.
+
 ## Anti-patterns
 
 - **Committed `*-snapshots/` images alongside Percy.** *Fix:* delete them; the baseline is in Percy.

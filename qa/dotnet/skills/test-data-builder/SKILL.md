@@ -132,6 +132,57 @@ public void Cancelling_paid_order_refunds_to_card()
 - Seed Bogus deterministically per test run (`Randomizer.Seed = new Random(42)`) when randomness touches assertions.
 - **Never** assert on a random field — assert on the field you set; defaults are scaffolding.
 
+## Production-shaped data and PII
+
+- **Never copy production rows** into a builder default, a seed script, a fixture file or a test asset. A
+  dump, an export or a pasted record is personal data the moment it lands in the repo, a CI log or a report.
+- **Defaults are obviously synthetic but realistic**: a valid format and a plausible length, so validation and
+  layout are exercised, and nobody owns the value — `Mira Kovac`, `mira.kovac@example.com`,
+  `+44 7700 900123`. Reserved names only: `example.com` / `.test` domains (RFC 2606), Ofcom's
+  `07700 900000–900999` drama range or the US `555-0100–0199` range. Never `test@test.com`, `foo` or
+  `John Doe`: they hide the formats the field really accepts.
+- **When a test needs production shape** (real distributions, edge-case values, volume), mask a copy outside
+  the repo with a **deterministic pseudonymiser**: one keyed hash per field class, so a real value always maps
+  to the same fake one. Referential integrity survives — a customer id masked in `customers` and in `orders`
+  still joins — and a rerun rebuilds the same dataset. The key comes from the secret store, never the repo;
+  without it the mapping cannot be rebuilt by hashing a phone book.
+
+| Field class | Masked as |
+|---|---|
+| Email | `user.<token>@example.com` |
+| Phone | a number in the fictional range, picked by the hash |
+| Name, address | a faker seeded from the hash |
+| Ids, account numbers | a prefix plus the token, same length and format where the API validates it |
+| Free text (notes, comments) | replaced whole — it carries PII no pattern finds |
+| Date of birth | shifted by a hash-derived number of days, same age band |
+
+```csharp
+public sealed class Pseudonymizer(byte[] key)
+{
+    public string Email(string real) => $"user.{Token(real, "email")}@example.com";
+    public string Phone(string real) => $"+44 7700 900{Number(real, "phone", 1000):D3}";
+    public string FullName(string real) => Seeded(real, "name").Name.FullName();
+    public string StreetAddress(string real) => Seeded(real, "address").Address.StreetAddress();
+    public string CustomerId(string real) => $"cus_{Token(real, "customer")}";
+
+    private Faker Seeded(string real, string fieldClass) =>
+        new() { Random = new Randomizer(Number(real, fieldClass, int.MaxValue)) };
+
+    private string Token(string real, string fieldClass) =>
+        Convert.ToHexString(Hash(real, fieldClass), 0, 6).ToLowerInvariant();
+
+    private int Number(string real, string fieldClass, int bound) =>
+        (int)(BitConverter.ToUInt32(Hash(real, fieldClass)) % (uint)bound);
+
+    private byte[] Hash(string real, string fieldClass) =>
+        HMACSHA256.HashData(key, Encoding.UTF8.GetBytes($"{fieldClass}:{real}"));
+}
+```
+
+Mask every column that identifies a person on its own or combined (postcode + date of birth + gender); amounts,
+enums and timestamps that carry no identity stay as they are. Before the set is used, grep it for the source's
+email domains and phone prefixes — a hit fails the masking job.
+
 ## Aggregate / child relationships
 
 ```csharp

@@ -31,11 +31,11 @@ This is the mobile counterpart of the web `qa/dotnet/skills/page-objects-from-ur
 The **Appium MCP server** must be connected. If its tools (`mcp__appium-mcp__appium_session_management`, `mcp__appium-mcp__appium_get_page_source`, …) are not available, stop and tell the user to add it:
 
 ```
-claude mcp add --scope user appium-mcp -e SCREENSHOTS_DIR=docs/app-map/screenshots -e APPIUM_MCP_DOCS_ENABLED=true -- npx -y appium-mcp@latest
+claude mcp add --scope user appium-mcp -e SCREENSHOTS_DIR=docs/app-map/screenshots -e APPIUM_MCP_DOCS_ENABLED=true -e NO_UI=true -- npx -y appium-mcp@1.99.3
 ```
 
 - `appium-mcp` **embeds the UiAutomator2 and XCUITest drivers**, so a local Android or iOS session needs no separate Appium server. A server on `http://127.0.0.1:4723` is needed only for a `remoteServerUrl` session (a device farm or a shared Appium). A device must still be connected: `adb devices` for Android, a booted simulator or a UDID for iOS.
-- `SCREENSHOTS_DIR` decides where `appium_screenshot` writes. Without it the server writes to `os.tmpdir()`, so set it to `docs/app-map/screenshots` for the crawler.
+- `SCREENSHOTS_DIR` sets where screenshots land (else `os.tmpdir()`); `NO_UI=true` drops the HTML inspector.
 - `appium_ai` (vision-based element finding) is opt-in and needs three variables: `AI_VISION_ENABLED=true`, `AI_VISION_API_BASE_URL` and `AI_VISION_API_KEY`. Treat it as optional.
 - `appium_documentation_query` and `appium_skills` exist only when `APPIUM_MCP_DOCS_ENABLED=true`. They answer environment, doctor and driver-specific locator questions from the official Appium docs; prefer them over guessing or forums.
 - Never start a session blindly — see Session lifecycle.
@@ -47,7 +47,7 @@ claude mcp add --scope user appium-mcp -e SCREENSHOTS_DIR=docs/app-map/screensho
 | Discover / pick device | `mcp__appium-mcp__select_device` |
 | Create / attach / list / select / delete a session | `mcp__appium-mcp__appium_session_management` |
 | Install / launch / terminate / query app state | `mcp__appium-mcp__appium_app_lifecycle` |
-| **Enumerate every element on screen (XML)** | `mcp__appium-mcp__appium_get_page_source` |
+| **Enumerate every element on screen (XML)** | `mcp__appium-mcp__appium_get_page_source` (big screen: `saveToFile: true`) |
 | Locate one element by a strategy | `mcp__appium-mcp__appium_find_element` |
 | Find an ambiguous element by natural language | `mcp__appium-mcp__appium_ai` *(optional)* |
 | Tap / double-tap / long-press / swipe / scroll-to-element | `mcp__appium-mcp__appium_gesture` |

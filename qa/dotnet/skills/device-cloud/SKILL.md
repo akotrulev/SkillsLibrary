@@ -54,7 +54,7 @@ Device Farm is a **remote-run** farm: it runs an uploaded test package on its ow
 
 ## Deep-dive reference
 
-`references/details.md` holds the **BrowserStack App Automate** path with its code: the app upload, the device matrix read from configuration, the real-device driver factory, the mid-session `DeviceFeatures`, and a worked test — **read it when the task touches them**.
+`references/details.md` holds the **BrowserStack App Automate** path with its code: the app upload, the device matrix read from configuration, the real-device driver factory, the mid-session `DeviceFeatures`, a worked test, and the **agent tooling on the farm** (BrowserStack MCP triage of a red run, `appium-mcp` against a cloud hub) — **read it when the task touches them**.
 
 ## Secrets — env only, never logged
 

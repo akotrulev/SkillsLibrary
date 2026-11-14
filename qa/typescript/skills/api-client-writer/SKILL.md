@@ -294,6 +294,13 @@ async function createUnchecked(body: Record<string, unknown>): Promise<ApiRespon
 
 Only add these overloads when the test plan requires them — not by default.
 
+## Trace context
+
+Every request a test sends carries a W3C `traceparent` header with one trace id per test, so a failed test
+links to the backend's trace and logs. `createBaseClient`'s `execute` adds the header once, so every generated client inherits it and no client
+constructor changes; the reporting setup file's `onTestFailed` reads the same trace id for the report link. The header goes to the API under
+test only, never to a third-party client. Code and the W3C format: [`references/trace-context.md`](references/trace-context.md).
+
 ## Rules
 
 The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `api-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
@@ -308,3 +315,4 @@ The standards this skill's output must meet are the qa-typescript rule files, no
 5. Generate the file at `src/clients/{api}/{resource}Client.ts`.
 6. Run the project's own typecheck script with the package manager `packageManager` names — expect 0 errors.
 7. Run the project's own lint script on `src/clients/{api}/{resource}Client.ts` — expect 0 errors.
+8. Confirm the base client sends `traceparent` (`references/trace-context.md`); add it once if it does not.

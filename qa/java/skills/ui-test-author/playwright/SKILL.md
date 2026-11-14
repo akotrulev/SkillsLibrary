@@ -84,6 +84,8 @@ files go at the project root.
 | [`references/locators.md`](references/locators.md) | The ladder, `getBy*`, `filter` / `and` / `or`, chaining from a component root, `parent.locator(child)` and the 1.64 `within()` line, `visible()`, frames, strictness, `describe()`, `addLocatorHandler`, the test-id attribute, agent-facing locators |
 | [`references/assertions.md`](references/assertions.md) | The web-first set (accessible name, role, `containsClass`, URL, aria snapshots), one expected condition, the one-shot-read ban, timeouts, `waitForCondition`, subject naming without a message parameter, HTTP responses |
 | [`references/emulation-and-mobile-web.md`](references/emulation-and-mobile-web.md) | Explicit device options, touch, viewport, media features, locale and geolocation, `page.clock()`, offline, and why emulation is not a device |
+| [`references/trace-correlation.md`](references/trace-correlation.md) | One `traceparent` trace id per test on app-origin requests only (a scoped context route, never `extraHTTPHeaders`), and the failure link to the backend trace |
+| [`qa/java/skills/api-test-author/writer/references/generation-checks.md`](../../api-test-author/writer/references/generation-checks.md) | The scenario × oracle table before any code, and the hallucination gate that reports every test id missing from the app source as `MISSING` |
 | [`assets/build.gradle.kts`](assets/build.gradle.kts) | The pins, Allure 3, TestNG with `testng.xml`, `PLAYWRIGHT_JAVA_SRC`, `installPlaywrightBrowsers` and a `playwright` CLI task |
 | [`assets/settings.gradle.kts`](assets/settings.gradle.kts), [`assets/testng.xml`](assets/testng.xml) | The project name; the suite with `parallel="classes"` |
 | [`assets/BaseTest.java`](assets/BaseTest.java) | The lifecycle: browser per class, context and page per test, `BASE_URL`, `HEADED`, `launchOptions()` / `contextOptions()`, failure evidence to Allure |
@@ -130,7 +132,8 @@ The build is `assets/build.gradle.kts`: the pins above, Allure on allure-java 3,
 ## Generation steps
 
 1. Detect the installed Playwright, TestNG and Allure versions and the project layout; match them.
-2. Confirm the feature, scenarios, locators, auth, data and devices with the user.
+2. Confirm the feature, scenarios, locators, auth, data and devices with the user. Write the scenario ×
+   oracle table (generation checks §1) before any code.
 3. If the project has no `BaseTest`, add `assets/BaseTest.java`, `testng.xml` and the build files. If it has
    one with static Playwright fields or `parallel="methods"`, migrate it to the asset's shape first.
 4. For each screen, write or extend `pages/<Name>Page.java` from `assets/LoginPage.java`: one
@@ -140,7 +143,7 @@ The build is `assets/build.gradle.kts`: the pins above, Allure on allure-java 3,
    `@BeforeMethod`, one `@Test` per scenario with a `Should_X_When_Y` name and groups.
 6. For signed-in classes, add `AuthSetup` and override `contextOptions()`; for devices, override it with the
    device's options.
-7. Run `./gradlew installPlaywrightBrowsers test` (0 failures) and debug with `HEADED=1` or
+7. Run the hallucination gate (generation checks §2) and report every `MISSING` test id. Run `./gradlew installPlaywrightBrowsers test` (0 failures) and debug with `HEADED=1` or
    `PWDEBUG=1`.
 
 ## Handoffs

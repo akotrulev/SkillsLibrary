@@ -169,6 +169,14 @@ public class PostUserTest extends BaseTest {
 | 400 validation | **raw** | status assert + `response.as(ValidationErrorDto.class)`; assert the field name in the errors map |
 | Malformed JSON / extra-missing property | **raw** via `createRaw(String)` / `Map<String, Object>` overload | status assert only — add these overloads via `api-client-writer` when the plan requires them |
 
+## Generation checks
+
+Two checks bracket the code, both in [`references/generation-checks.md`](references/generation-checks.md):
+**oracles first** — a scenario × oracle table (response, data, negative, side effect), taken from the
+contract or the requirement and never from the code, before any test is written; and a **hallucination gate**
+after — every endpoint (and test id) the new tests use is looked up in the stored OpenAPI spec (and the app
+source) and reported `MISSING` instead of guessed.
+
 ## Rules
 
 The standards this skill's output must meet are the qa-java rule files, not a list here: `qa-java.md` (core) and `qa-java-api.md`. Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
@@ -184,10 +192,12 @@ The standards this skill's output must meet are the qa-java rule files, not a li
 ## Generation steps
 
 1. Determine the **source of truth**: OpenAPI/Swagger spec, test-case document, or verbal scenarios. From a spec, derive the scenario set per endpoint (happy, 401, 404, 400 validation, boundary). From a test-case document, map one test method per TC-ID.
-2. For each resource in scope, verify the record DTOs (`models/{api}/{resource}/`) and the `{Resource}Client` exist. Create missing ones via `qa/java/skills/api-models` then `qa/java/skills/api-client-writer` before writing any test.
-3. Author one test class per operation, picking patterns from the scenario matrix. Body-manipulation cases (malformed JSON, extra/missing property) require the optional raw/`Map` client overloads — add them via `api-client-writer`.
-4. Verify every test name follows `Should_X_When_Y` and asserts one behavior; verify every TC-ID (when given) maps to a test or is explicitly deferred.
-5. Run `./gradlew :apitests:test` — expect 0 failures.
+2. Write the scenario × oracle table (`references/generation-checks.md` §1) — no test code before it exists.
+3. For each resource in scope, verify the record DTOs (`models/{api}/{resource}/`) and the `{Resource}Client` exist. Create missing ones via `qa/java/skills/api-models` then `qa/java/skills/api-client-writer` before writing any test.
+4. Author one test class per operation, picking patterns from the scenario matrix. Body-manipulation cases (malformed JSON, extra/missing property) require the optional raw/`Map` client overloads — add them via `api-client-writer`.
+5. Verify every test name follows `Should_X_When_Y` and asserts one behavior; verify every TC-ID (when given) maps to a test or is explicitly deferred.
+6. Run the hallucination gate (`references/generation-checks.md` §2); report every `MISSING` endpoint and write no test against it.
+7. Run `./gradlew :apitests:test` — expect 0 failures.
 
 ## Handoffs
 

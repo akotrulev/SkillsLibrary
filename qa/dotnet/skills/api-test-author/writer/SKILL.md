@@ -38,6 +38,14 @@ The reference fixture is `ApiTests/Tests/RecurringDepositTests.cs`. Mirror its s
 
 These sections live in `references/details.md` — **read it when the task touches them**: **Templates**.
 
+## Generation checks
+
+Two checks bracket the code, both in [`references/generation-checks.md`](references/generation-checks.md):
+**oracles first** — a scenario × oracle table (response, data, negative, side effect), taken from the
+contract or the requirement and never from the code, before any test is written; and a **hallucination gate**
+after — every endpoint (and test id) the new tests use is looked up in the stored OpenAPI spec (and the app
+source) and reported `MISSING` instead of guessed.
+
 ## Rules
 
 The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `automation.md` and `api.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
@@ -70,9 +78,10 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 1. Ask: **new fixture** or **adding methods to an existing fixture**?
 2. Ask: which client/resource to use.
 3. Ask: which scenario(s) to cover (happy path, unauthorized, not found, validation error, etc.).
-4. Read the canonical example `ApiTests/Tests/RecurringDepositTests.cs` to confirm the expected style for both templates before generating.
-5. If the DTO doesn't exist yet, use the `qa/dotnet/skills/api-models` skill to generate it. If the test asserts a `ProblemDetails` extension field that's missing from `ProblemDetailsDto` (e.g. a new `{entity}Id`), add it via `qa/dotnet/skills/api-models` rather than reading from `Errors`.
-6. Generate the file or add the method(s) to the target fixture:
+4. Write the scenario × oracle table (`references/generation-checks.md` §1) — no test code before it exists.
+5. Read the canonical example `ApiTests/Tests/RecurringDepositTests.cs` to confirm the expected style for both templates before generating.
+6. If the DTO doesn't exist yet, use the `qa/dotnet/skills/api-models` skill to generate it. If the test asserts a `ProblemDetails` extension field that's missing from `ProblemDetailsDto` (e.g. a new `{entity}Id`), add it via `qa/dotnet/skills/api-models` rather than reading from `Errors`.
+7. Generate the file or add the method(s) to the target fixture:
    - **200 happy path** → apply the rich happy-path template (request fields + server-generated fields + `GetById` round-trip in `Assert.Multiple`). For Pause/Resume/Cancel-style action endpoints, assert state change + `UpdatedOn` + invariants.
    - **400 validation** → apply the strict ProblemDetails template; expect `Type="ValidationViolation"`, `Title="Validation violation"`, and `Errors["FieldName"]` containing the FluentValidation message fragment.
    - **404 not found** → apply the strict ProblemDetails template; expect `Type="BusinessViolation"`, `Title="Business rule violation"`, `ErrorCode="{ENTITY}_NOT_FOUND"`, plus the relevant `{entity}Id`/`accountId` extension fields.
@@ -82,4 +91,5 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
    - For 4xx tests, use the raw `RestResponse` overload, call `AttachBody(response)`, then `Deserialize<ProblemDetailsDto>(response)` from `BaseApiTest`.
    - Use explicit types (no `var`) for all local variables in test methods.
    - Track any resource the test creates (`_createdIds.Add(dto.Id)`) and delete it in `[TearDown]` — no `try`/`finally` in the test, no `try`/`catch` in the teardown.
-7. Run `dotnet build ApiTests/ApiTests.csproj` — expect 0 errors.
+8. Run the hallucination gate (`references/generation-checks.md` §2); report every `MISSING` endpoint and write no test against it.
+9. Run `dotnet build ApiTests/ApiTests.csproj` — expect 0 errors.

@@ -274,6 +274,7 @@ export function browserStackCreds(): BrowserStackCreds {
 
 ## Cross-references
 
+- **`references/details.md`** — agent tooling on the farm: BrowserStack MCP triage of a red run, `appium-mcp` against a cloud hub
 - **`qa/typescript/skills/browser-cloud-setup`** — hub, capability blocks, parallelism, tunnels, status
 - **`qa/typescript/skills/ui-test-author/appium`** — the pages, tests and `BaseTest.ts` that run unchanged on a farm; its Versions table owns the pins
 - **`qa/typescript/skills/evidence-capture`** — a farm run keeps the dashboard URL and the status, not a local video

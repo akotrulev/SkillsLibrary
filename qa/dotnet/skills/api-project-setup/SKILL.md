@@ -38,7 +38,7 @@ Versions are pinned **once** in `Directory.Packages.props` (CPM) — each `.cspr
 | Reporting | `Allure.NUnit` | **2.15.0** | Wiring owned by `qa-reporting-dotnet`; this scaffold only leaves the per-project `allureConfig.json` hook. |
 | Allure CLI | not a NuGet tool | — | Installed and pinned by `qa/reporting/dotnet/skills/test-reports`; this scaffold installs none. |
 
-Optional, add only when the spec demands it: `Testcontainers.PostgreSql` 4.1.0 (real-DB verification), `PactNet` (contracts), gRPC (`Grpc.Net.Client` 2.66.0), GraphQL.
+Optional, add only when the spec demands it: `Testcontainers.PostgreSql` 4.16.0 (real-DB verification), `PactNet` (contracts), gRPC (`Grpc.Net.Client` 2.66.0), GraphQL.
 
 ## Prerequisites & local setup
 

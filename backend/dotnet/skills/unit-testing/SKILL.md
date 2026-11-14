@@ -200,6 +200,12 @@ public void Should_RoundHalfAwayFromZero_When_ThirdDecimalPresent(decimal input,
 
 `[TestCaseSource]` for cases that need construction, `[Values]`/`[Combinatorial]` for small matrices. **One boundary per case** — a 12-column `[TestCase]` row is a builder waiting to happen.
 
+## Beyond example tests
+
+- [`references/property-based-testing.md`](references/property-based-testing.md) — a rule over a whole input range or a stateful unit vs a model (CsCheck).
+- [`references/snapshot-testing.md`](references/snapshot-testing.md) — a large output's whole shape is the contract (Verify).
+- [`references/risk-hotspots.md`](references/risk-hotspots.md) — rank thinly covered methods by CRAP to choose what to test first.
+
 ## Test data
 
 - 1–3 fields: inline literals, named via local constants when the value carries meaning (`const string ExpiredCard = "4000000000000069";`).
@@ -254,10 +260,8 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 
 ## Handoffs
 
-- Contract / integration / E2E tests through the API → **peer** [`qa-api-dotnet`](../../../../qa/dotnet/agents/qa-api-dotnet.md)
-- Real-DB verification, Testcontainers → **peer** `qa/dotnet/skills/db-testing/*`
-- Do the tests actually catch faults? → **peer** `qa/dotnet/skills/test-quality-check` (Stryker.NET)
-- Suite-scale builders / ObjectMother → **peer** `qa/dotnet/skills/test-data-builder`
+Besides the peers under *When NOT to use*:
+
 - Flaky test triage / quarantine → **peer** `qa/reporting/dotnet/skills/flaky-test-quarantine`
 - The class under test needs a seam / a pattern → [`pattern-writer`](../pattern-writer/SKILL.md)
 - Reviewing the tests with the change → [`code-review`](../code-review/SKILL.md)

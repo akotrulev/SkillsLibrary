@@ -128,8 +128,7 @@ public abstract class BlobFixture
     public async Task StartStoreAsync()
     {
         // Pin the image tag, never `latest`. The module declares its own readiness wait strategy.
-        _azurite = new AzuriteBuilder()
-            .WithImage("mcr.microsoft.com/azure-storage/azurite:3.31.0")
+        _azurite = new AzuriteBuilder("mcr.microsoft.com/azure-storage/azurite:3.31.0")
             .Build();
         await _azurite.StartAsync();
 

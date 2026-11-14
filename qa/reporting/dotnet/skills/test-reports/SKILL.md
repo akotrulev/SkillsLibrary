@@ -180,6 +180,15 @@ public void AttachScreenshotOnFailure()
 }
 ```
 
+## From a failed test to the backend trace
+
+Every test sends one W3C `traceparent` trace id on all its requests (`api-client-writer`'s
+`references/trace-context.md`; UI: `ui-test-author/playwright`'s `references/trace-correlation.md`). On
+failure the result gets a `telemetry` attachment (`text/uri-list`): the trace id, a Grafana Explore link to
+the trace in Tempo and one to its log lines in Loki. Grafana's base URL comes from `GRAFANA_URL`; unset, no
+link is written and the test is unaffected. The helper, the failure hook, the Explore URL format and the
+procedure for triaging a failed run: [`references/trace-links.md`](references/trace-links.md).
+
 ## Steps — `AllureApi.Step(...)`
 
 Wrap non-trivial workflows so the report shows a step tree, not a wall of actions:
@@ -252,6 +261,7 @@ known-flaky is `qa/reporting/dotnet/skills/flaky-test-quarantine`'s.
   own.
 - Report published from `main` to a stable URL; PR builds publish to a PR-scoped URL or skip publish.
 - `categories.json` tuned to the project's failure modes, with the quarantine bucket first.
+- A failed test carries the `telemetry` link attachment when `GRAFANA_URL` is set (`references/trace-links.md`); its absence never fails a test.
 - One reporter convention across the entire .NET test project — never mix `Allure.NUnit` and `Allure.XUnit`
   writing into the same `allure-results/`.
 - No `Thread.Sleep` in `[TearDown]` waiting for attachments to flush — adapter is sync.

@@ -134,7 +134,7 @@ helper. Code for each is in `references/playwright.md`.
 
 An agent exploring a live page takes evidence with the Playwright MCP capture tools. The video and trace
 tools need the server registered with `--caps=devtools`:
-`claude mcp add --scope user playwright -- npx @playwright/mcp@latest --caps=testing,storage,devtools --isolated --output-dir=.playwright-mcp`.
+`claude mcp add --scope user playwright -- npx @playwright/mcp@0.0.85 --caps=testing,storage,devtools --isolated --output-dir=.playwright-mcp --redact-url-params=code,state,access_token,id_token`.
 When MCP is not connected, or a long session would flood the context, the same capture runs through
 `playwright-cli` (`npm i -g @playwright/cli@latest`) from `Bash`. MCP stays the primary route. Both need
 Node; the .NET project does not.
@@ -182,8 +182,9 @@ uploaded), or from Allure's attachment.
   state (`<WorkDirectory>/auth-user.json`) is under `bin/` for the same reason.
 - Mask what a screenshot must not show (`Mask`, or `Style` to hide it); record HAR with
   `HarContentPolicy.Omit` unless bodies are the point. A trace cannot be redacted: test users are disposable.
-- MCP's `--secrets <dotenv>` masks values in tool responses; it is "not a security feature" and never
-  replaces disposable credentials.
+- MCP's `--secrets <dotenv>` masks values in tool responses; `--redact-url-params=code,state,…`
+  does the same for the Auth0 `code` / `state` and the tokens a login redirect leaves in the URL.
+  Playwright calls both "not a security feature", so neither replaces disposable credentials.
 - Retention follows `qa/cicd/ci-conventions`: traces, videos and HAR 14 days, uploaded on failure only.
 
 ## Rules

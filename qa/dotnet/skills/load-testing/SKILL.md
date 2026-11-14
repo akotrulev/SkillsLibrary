@@ -18,7 +18,7 @@ Authors NBomber 6.x scenarios in C# against deployed services. NBomber is the ri
 - New perf work without a strong C# preference → `qa/typescript/skills/load-testing`
 - JVM-native author experience → `qa/java/skills/load-testing`
 - Functional behavior tests → `qa/dotnet/skills/api-test-author/writer`
-- Microbenchmarks (loop bodies, parsing speed) → BenchmarkDotNet
+- Microbenchmarks (loop bodies, parsing speed, allocations) → `qa/dotnet/skills/benchmarks` (BenchmarkDotNet)
 - Defining the SLO itself → `qa/manual/quality-metrics`
 
 Load `qa/_shared/performance` for workload models, open-loop vs closed-loop guidance, environment policy, and the reporting template.

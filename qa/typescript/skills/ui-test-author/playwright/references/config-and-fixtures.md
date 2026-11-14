@@ -148,3 +148,20 @@ generator and healer agent definitions into the repo. They are optional: the `qa
 not depend on them. A repo that uses them regenerates the definitions after every Playwright upgrade,
 because they are versioned with Playwright. Failing tests are diagnosed from the trace through the
 `npx playwright trace` CLI [1.59].
+
+`init-agents` also writes `.mcp.json` with the test MCP server, `playwright-test`. Without the agents it is
+registered on its own, at the project's `@playwright/test` version:
+
+```bash
+claude mcp add --scope project playwright-test -- npx playwright run-test-mcp-server
+```
+
+It exposes `test_list`, `test_run`, `test_debug` (runs one test and pauses at the failure) and the browser
+tools against the paused page. A stale locator is healed live: `test_run` the one test → `test_debug` →
+`browser_snapshot` → `browser_generate_locator` on the element → patch the page object → `test_run` again.
+
+**Guard the healer.** Its instructions tell it to fix assertions and expected values, and to mark a test it
+cannot fix `test.fixme()`. Never run it on acceptance (`Q`) tests: they are read-only, and a red one means
+the code is wrong. On other tests its diff is a proposal; reject any change to an assertion, an expected
+value or a `fixme`. The planner's `specs/*.md` overlaps `qa-test-case-designer`'s suites: where both
+exist, the designer's suite is the basis.

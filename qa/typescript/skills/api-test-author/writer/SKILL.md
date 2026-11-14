@@ -154,6 +154,14 @@ describe('POST /api/users', () => {
 - One `describe(...)` per endpoint or scenario family; titles read like behavior sentences. When a test-case document drives generation, prefix the title with the TC-ID (`'TC-USER-001: returns all users when authorized'`) so Allure traces test → case — or call `allure.tms('TC-USER-001', '<link>')` where `allure-vitest` is wired.
 - Each `it(...)` builds its own client; tokens come from `authHelper`, never read inside the client. Never reassign module-level state across tests.
 
+## Generation checks
+
+Two checks bracket the code, both in [`references/generation-checks.md`](references/generation-checks.md):
+**oracles first** — a scenario × oracle table (response, data, negative, side effect), taken from the
+contract or the requirement and never from the code, before any test is written; and a **hallucination gate**
+after — every endpoint (and test id) the new tests use is looked up in the stored OpenAPI spec (and the app
+source) and reported `MISSING` instead of guessed.
+
 ## Rules
 
 The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `api-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
@@ -161,10 +169,12 @@ The standards this skill's output must meet are the qa-typescript rule files, no
 ## Generation steps
 
 1. Determine the **source of truth**: OpenAPI/Swagger spec, test-case document, or verbal scenarios. From a spec, derive the scenario set per endpoint (happy, 401, 404, 400 validation, boundary). From a test-case document, map one `it(...)` per TC-ID and carry the id into the title (or `allure.tms`).
-2. For each resource in scope, verify the Zod schema + inferred types (`models/{api}/{resource}/`) and the `{resource}Client` exist. Create missing ones via `qa/typescript/skills/api-models` then `qa/typescript/skills/api-client-writer` before writing any spec.
-3. Author one spec file per operation, picking patterns from the scenario matrix. Body-manipulation cases (malformed JSON, extra/missing property) require the optional `createRaw` / `createUnchecked` client methods — add them via `api-client-writer`.
-4. Verify every test title describes behavior (and carries the TC-ID when a document exists) and asserts one behavior; verify every TC-ID maps to a test or is explicitly deferred.
-5. Run the project's own typecheck script (with the package manager `packageManager` names), then `npx vitest run` — expect 0 type errors and 0 failures.
+2. Write the scenario × oracle table (`references/generation-checks.md` §1) — no test code before it exists.
+3. For each resource in scope, verify the Zod schema + inferred types (`models/{api}/{resource}/`) and the `{resource}Client` exist. Create missing ones via `qa/typescript/skills/api-models` then `qa/typescript/skills/api-client-writer` before writing any spec.
+4. Author one spec file per operation, picking patterns from the scenario matrix. Body-manipulation cases (malformed JSON, extra/missing property) require the optional `createRaw` / `createUnchecked` client methods — add them via `api-client-writer`.
+5. Verify every test title describes behavior (and carries the TC-ID when a document exists) and asserts one behavior; verify every TC-ID maps to a test or is explicitly deferred.
+6. Run the hallucination gate (`references/generation-checks.md` §2); report every `MISSING` endpoint and write no test against it.
+7. Run the project's own typecheck script (with the package manager `packageManager` names), then `npx vitest run` — expect 0 type errors and 0 failures.
 
 ## Handoffs
 

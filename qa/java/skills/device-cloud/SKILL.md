@@ -63,7 +63,7 @@ A device farm is one of two fundamentally different shapes. Get this right first
 
 ## Deep-dive reference
 
-These sections live in `references/details.md` — **read it when the task touches them**: **Live-session farm — BrowserStack App Automate (the canonical path)**.
+These sections live in `references/details.md` — **read it when the task touches them**: **Live-session farm — BrowserStack App Automate (the canonical path)**; **Agent tooling on the farm** — BrowserStack MCP triage of a red run, `appium-mcp` against a cloud hub.
 
 ## Remote-run farm — AWS Device Farm
 

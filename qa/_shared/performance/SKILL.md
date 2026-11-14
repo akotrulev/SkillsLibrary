@@ -99,6 +99,24 @@ The perf test by itself only knows what the **caller** sees. To diagnose, correl
 
 If client p95 says 800ms and server p95 says 50ms, the bottleneck is the network / proxy / client setup — not the service. Always capture both sides.
 
+## When a threshold fails: hand off to a profiler
+
+A failed threshold says *that* a route is slow; a profile says *where the time goes*. Hand off only when the split
+above puts the time **on the server** (server p95 close to client p95) and the traces show it inside the service's
+own spans, not in a downstream call or a DB query (those go to the owning service, or to `db-testing`).
+
+1. **Reproduce at the failing load.** Rerun the failing scenario at the step that breached, against one instance.
+2. **Profile during the measured window**, never during warm-up: counters first (is it CPU, GC, thread-pool
+   starvation, lock contention?), then a CPU or wall-clock profile for 30–60 s at the breach load.
+3. **Attach the evidence to the failing run** and to the bug: the load report (scenario, route, threshold,
+   measured p95/p99), the profile file **and** a rendered flame graph, the counter export for the same window,
+   the trace ids of 2–3 slow requests, the build SHA and environment, and the exact capture commands.
+4. **Hand over** to the service's developers with the bug (`qa/manual/bug-report-writer`). The fix is theirs; the
+   rerun of the same scenario against the same threshold is the QA gate that closes it.
+
+Per-stack commands (.NET `dotnet-counters` / `dotnet-trace`, Java JFR / async-profiler, Node `--cpu-prof` /
+Clinic.js) and continuous profiling with Grafana Pyroscope are in **`references/profiling.md`**.
+
 ## Reporting
 
 Every release run produces a report with:
@@ -166,7 +184,8 @@ A clean review = no blocker or major rows after fixes, plus a per-scenario PASS/
 ## When NOT to use any of these tools
 
 - Functional behavior tests → `qa/<stack>/skills/api-test-author/writer` / `qa/<stack>/skills/ui-test-author/<tool>`
-- Unit / microbenchmarks (loop bodies, parsing speed) → BenchmarkDotNet (.NET) / JMH (Java) / Vitest bench (TS)
+- Unit / microbenchmarks (loop bodies, parsing speed) → BenchmarkDotNet via `qa-dotnet:benchmarks` (`qa/dotnet/skills/benchmarks`) / JMH (Java) / Vitest bench (TS)
+- Environment-level chaos under load (pod kills, injected latency, SLO-based aborts) → `qa/_shared/chaos-experiments`
 - Production-side observability → `observability/dashboards`
 - Defining the SLO itself → `qa/manual/quality-metrics`
 
@@ -178,6 +197,7 @@ A clean review = no blocker or major rows after fixes, plus a per-scenario PASS/
 - SLO targets the test validates → `qa/manual/quality-metrics`
 - Grafana dashboards for server-side correlation → `observability/dashboards`
 - LogQL / PromQL for queries during the test → `observability/queries`
+- A failed threshold with the time on the server → `references/profiling.md` (profiler hand-off)
 - Test strategy that calls out where perf testing fits → `qa/manual/test-strategy`
 - Pipeline integration → `qa/cicd/<stack>/skills/ci-pipelines` (its `references/<host>.md`) or `devops/<ci>`
 - Allure publishing for perf reports → `qa/reporting/<stack>/skills/test-reports`

@@ -80,7 +80,7 @@ Ask at most 3 questions; infer the rest from the existing test project.
 
 [`references/details.md`](references/details.md) holds the code — **secrets**, **web on BrowserStack**
 (`GridConnection`, a grid fixture, `GridSession`), **Sauce `saucectl`**, **mobile on a grid**, the **capability
-blocks**, **parallelism**, the **tunnel**, and **AWS Device Farm**. Read it when the task touches them.
+blocks**, **parallelism**, the **tunnel**, **AWS Device Farm**, and **BrowserStack MCP** triage of a red run by an agent. Read it when the task touches them.
 
 ## Rules
 

@@ -115,8 +115,7 @@ public abstract class RabbitMqFixture
     public async Task StartBrokerAsync()
     {
         // The module declares its own readiness wait strategy. Pin the image tag, never `latest`.
-        _broker = new RabbitMqBuilder()
-            .WithImage("rabbitmq:3.13-management")
+        _broker = new RabbitMqBuilder("rabbitmq:3.13-management")
             .Build();
         await _broker.StartAsync();
         ConnectionString = _broker.GetConnectionString();   // amqp://guest:guest@host:port

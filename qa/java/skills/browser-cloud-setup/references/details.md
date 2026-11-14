@@ -493,3 +493,52 @@ Match the `localIdentifier` to the cap (`bstack:options.localIdentifier`, or `br
 ### AWS Device Farm — the different paradigm
 
 Device Farm is **not a caps-on-a-hub grid**. You upload the app + a test package (e.g. `APPIUM_JAVA_TESTNG_TEST_PACKAGE`) to a **project ARN**, then schedule a run against a **device-pool ARN** via the AWS SDK for Java (`DeviceFarmClient.scheduleRun`). For live/client-side Appium, create a remote-access session and read the `remoteDriverEndpoint` from `getRemoteAccessSession`; for desktop browsers, the TestGrid APIs mint a short-lived signed Selenium URL you hand to a `RemoteWebDriver`. The wiring is AWS-SDK calls, not capability JSON. For the full device-pool/ARN orchestration defer to `qa/java/skills/device-cloud`; this node covers only the connection shape.
+
+### BrowserStack MCP — triage a red grid run (agents)
+
+BrowserStack's MCP server (`browserstack/mcp-server`, AGPL-3.0) lets an agent read the cloud's own evidence
+for a red run. Register it; never vendor or copy its code.
+
+```bash
+claude mcp add --scope user --transport http browserstack https://mcp.browserstack.com/mcp
+```
+
+Then `/mcp` in a session signs in with OAuth, so no username or access key lands in any config. The remote
+server has no Local Testing: it cannot reach `localhost`, a VPN or a firewalled staging host, and it disables
+the tools that need local files (`runPercyScan`, `addPercySnapshotCommands`, …). Where those are needed, run
+the package locally from a project `.mcp.json` that takes the keys from the environment (Claude Code expands
+`${VAR}` there, so the committed file holds only the placeholders):
+
+```json
+{
+  "mcpServers": {
+    "browserstack": {
+      "command": "npx",
+      "args": ["-y", "@browserstack/mcp-server@2.6.8"],
+      "env": {
+        "BROWSERSTACK_USERNAME": "${BROWSERSTACK_USERNAME}",
+        "BROWSERSTACK_ACCESS_KEY": "${BROWSERSTACK_ACCESS_KEY}"
+      }
+    }
+  }
+}
+```
+
+The version is pinned for the same reason as the Playwright and Appium servers: the agents name its tools
+in `tools:`. They are granted the triage and scan tools by name, never the five core catalog tools
+(`listProducts`, `describeEntity`, `searchCapability`, `describeCapability`, `invokeCapability`), which reach
+every write the account allows.
+
+| Need | Tool |
+|---|---|
+| The build's tests, and which failed | `listTestIds` (status `failed`), `listSessions` |
+| One session's logs | `getFailureLogs` |
+| The screenshots the cloud took | `fetchAutomationScreenshots` |
+| Build details and the quality-gate result | `fetchBuildInsights` |
+| AI root-cause analysis | `fetchRCA` (numeric test id) |
+| Selectors BrowserStack healed during the run | `fetchSelfHealedSelectors` |
+
+- `fetchRCA` and `fetchSelfHealedSelectors` **propose**. A fix lands in the page object only after the agent
+  has reproduced the failure, and never in an acceptance (`Q`) test: a red one means the app is wrong.
+- The session's video and dashboard links from `listSessions` go into the bug report; the files are not
+  committed.

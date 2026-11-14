@@ -218,6 +218,13 @@ public Response getAll(int page, int resultsPerPage) {
 }
 ```
 
+## Trace context
+
+Every request a test sends carries a W3C `traceparent` header with one trace id per test, so a failed test
+links to the backend's trace and logs. `BaseApiClient.spec()` adds a REST Assured `TraceparentFilter` once, so every generated client inherits it and no client
+constructor changes; `BaseApiTest`'s `@AfterMethod` reads the same trace id for the report link. The header goes to the API under
+test only, never to a third-party client. Code and the W3C format: [`references/trace-context.md`](references/trace-context.md).
+
 ## Rules
 
 The standards this skill's output must meet are the qa-java rule files, not a list here: `qa-java.md` (core) and `qa-java-api.md`. Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
@@ -307,3 +314,4 @@ Only add these overloads when the test plan requires them — not by default.
 4. Ensure the required DTOs exist under `models/{api}/{resource}/`. If not, run `qa/java/skills/api-models` first.
 5. Generate the file at `src/test/java/com/{org}/apitests/clients/{api}/{Resource}Client.java`.
 6. Run `./gradlew :apitests:compileTestJava` — expect 0 errors.
+7. Confirm the base client sends `traceparent` (`references/trace-context.md`); add it once if it does not.

@@ -35,12 +35,16 @@ policy**, not test authoring.
 The Playwright MCP server, registered by the user (a plugin agent cannot set server flags on itself):
 
 ```bash
-claude mcp add --scope user playwright -- npx @playwright/mcp@latest --caps=testing,storage,devtools --isolated --output-dir=.playwright-mcp
+claude mcp add --scope user playwright -- npx @playwright/mcp@0.0.85 --caps=testing,storage,devtools --isolated --output-dir=.playwright-mcp --redact-url-params=code,state,access_token,id_token
 ```
 
 - `--caps=testing` → `browser_generate_locator` and the `browser_verify_*` checks; `storage` →
-  `browser_storage_state` / `browser_set_storage_state`; `devtools` → tracing and video.
+  `browser_storage_state` / `browser_set_storage_state`; `devtools` → tracing, video and recording.
 - `--isolated` keeps the profile in memory; `--output-dir` collects auto-named outputs.
+- `--redact-url-params` swaps the Auth0 `code` / `state` and token values a login redirect puts in the
+  URL for `<redacted>` in tool responses. Like `--secrets`, a convenience, not a security boundary.
+- The version is pinned: agents name its tools in `tools:`, so an upstream rename silently drops one.
+  Bump it deliberately and re-check the names.
 - Append `--codegen=csharp` so the code each action returns is C#, and `--test-id-attribute=<attr>` when
   the app does not use `data-testid`.
 - Append `--no-webmcp` when the server must not expose the page's own WebMCP tools (`webmcp_*`). The qa
@@ -83,6 +87,14 @@ Confirm before extracting. **Ask, don't guess**:
   credentials → **stop and ask**.
 - Confirm the right page loaded — `browser_verify_element_visible` `{ role, accessibleName }` on the
   expected heading or landmark — before extracting. Wrong page → ask.
+
+**A journey the user demonstrates** (a flow too stateful to explore, or the user offers to show it):
+`browser_start_recording`, the user performs it in the browser and says when it is done, then
+`browser_stop_recording` returns the actions as C# (`--codegen=csharp`). That code is raw material, never
+the page object: group its steps by the page they ran on, replace each recorded locator with the
+element's test id (pass B on every page the flow crossed), and name each action for the user's intent
+(`SignInAsync(user)`, not a fill and a click). Drop recorded hard waits and CSS chains; both extraction passes
+still run on each page.
 
 ### 3. Extract elements — two passes, both required
 

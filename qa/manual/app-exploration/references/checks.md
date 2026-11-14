@@ -115,6 +115,8 @@ When a document gives the formula, the document is the oracle and its line is ci
 | The session behaves (L) | Open a signed-in address signed out; sign out and press back | Protected content shown; a cached page still usable after sign-out | Critical |
 | Roles see their own (F, with two accounts) | Open one account's record address as the other | The other account's data is shown or can be changed | Blocker; hand to `qa-security` |
 | Mobile lifecycle (L) | Background and reopen; rotate; lose and regain the network where the device allows | Lost input, a blank screen, stale data shown as fresh, a crash | Major |
+| A region fails on its own (L) | `probes.md` §2 failure states: a `500` on the region's request, then offline | The region blank, spinning or empty; the whole screen lost; one message for a server error and for offline; no retry; raw error text | Major |
+| Denied permission, deep links (L) | `probes.md` §5: deny the permission, reach the feature; open each documented deep link, a missing record and a malformed one | A crash or dead end on the denied path; a link that opens the wrong screen, crashes, or skips sign-in | Major; Critical when sign-in is skipped |
 
 ## 7. Forms and input
 

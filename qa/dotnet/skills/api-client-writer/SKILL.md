@@ -196,6 +196,13 @@ public RestResponse GetAll(int page, int resultsPerPage)
 }
 ```
 
+## Trace context
+
+Every request a test sends carries a W3C `traceparent` header with one trace id per test, so a failed test
+links to the backend's trace and logs. `BaseApiClient` registers a RestSharp `TraceparentInterceptor` once, so every generated client inherits it and no client
+constructor changes; `BaseApiTest`'s `[TearDown]` reads the same trace id for the report link. The header goes to the API under
+test only, never to a third-party client. Code and the W3C format: [`references/trace-context.md`](references/trace-context.md).
+
 ## Rules
 
 The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `automation.md` and `api.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
@@ -275,3 +282,4 @@ Only add these overloads when the test plan requires them — not by default.
 4. Ensure the required DTOs exist in `Models/{Api}/{Resource}Models/`. If not, run the `api-models` skill first.
 5. Generate the file at `ApiTests/Clients/{Api}/{Resource}Client.cs`.
 6. Run `dotnet build ApiTests/ApiTests.csproj` — expect 0 errors.
+7. Confirm the base client sends `traceparent` (`references/trace-context.md`); add it once if it does not.

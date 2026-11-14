@@ -14,6 +14,7 @@ The output is implementation-agnostic Markdown: a manual script, a test-manageme
 - A requirement, story, AC set or spec needs test cases
 - A feature needs its end-to-end journeys and business rules written down as executable cases
 - An exploration report (`qa/manual/app-exploration`, or a human's session report) lists **test-case candidates**: they go through `requirements-breakdown` first, and their cases carry `#observed <finding id>` as `Source`
+- Existing cases to lint or rank for automation → *Lint mode*
 
 ## When NOT to use
 
@@ -161,6 +162,10 @@ Run before emitting; fix every row that fails.
 
 - [ ] The **suite**: groups in the business-first order; the **Balance** line in the header and the balance check passed; one Setup, one Cleanup (or "nothing to clean"); the techniques applied and the basis named; saved at `docs/test-cases/<NNN>-<slug>.md` or the project's convention
 - [ ] Every **case**: a title stating the behaviour and its outcome in the business's words; one goal; steps at intent altitude, a journey with its checkpoints; an expected result that is the business effect, one value; concrete data and realistic invalid input (`password: "''"`, not `<invalid>`); Technique, Priority, Type and Source filled; only delta preconditions (`—` if none)
+
+## Lint mode
+
+Existing cases are linted (findings only) and ranked for automation by `references/lint-and-automation-score.md`.
 
 ## Example
 

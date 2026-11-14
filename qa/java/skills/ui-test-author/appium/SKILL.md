@@ -159,6 +159,10 @@ The standards this skill's output must meet are the qa-java rule files, not a li
 
 A visible element missing from the page source is usually an accessibility, app-state, active-app (a system alert) or native-versus-WebView problem; fix that before the locator. For doctor failures and driver questions the Appium docs tools (`mcp__appium-mcp__appium_documentation_query`, `mcp__appium-mcp__appium_skills`, on when `APPIUM_MCP_DOCS_ENABLED=true`) answer from the official docs.
 
+Never use `appium_generate_tests`: it records the scenario through MCP calls and emits one flat test with the
+locators inline (its code templates are Java PageFactory), bypassing the screen objects. Locators come from
+`mobile-screen-explorer`; the code comes from this skill's assets.
+
 ## Handoffs
 
 - Selectors on the live app → `qa/java/skills/mobile-screen-explorer`

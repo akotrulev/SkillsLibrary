@@ -64,9 +64,9 @@ resilience library (**Polly**), and the runner (NUnit) change.
 ```xml
 <!-- Tests.csproj (excerpt) -->
 <ItemGroup>
-  <PackageReference Include="Testcontainers" Version="4.1.0" />
-  <PackageReference Include="Testcontainers.Toxiproxy" Version="4.1.0" />
-  <PackageReference Include="Testcontainers.PostgreSql" Version="4.1.0" />
+  <PackageReference Include="Testcontainers" Version="4.16.0" />
+  <PackageReference Include="Testcontainers.Toxiproxy" Version="4.16.0" />
+  <PackageReference Include="Testcontainers.PostgreSql" Version="4.16.0" />
   <PackageReference Include="Toxiproxy.Net" Version="2.1.0" />
   <PackageReference Include="Polly" Version="8.5.0" />
   <PackageReference Include="NUnit" Version="4.2.2" />

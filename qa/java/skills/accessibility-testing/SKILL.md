@@ -37,6 +37,14 @@ Before a scan, assert what the feature promises with Playwright's own web-first 
 finds *rule* violations nobody wrote a test for. The matchers and the aria-snapshot grammar are in
 `qa/java/skills/ui-test-author/playwright/references/assertions.md` §1–§2; this skill does not repeat them.
 
+## An optional BrowserStack scan
+
+An agent with the BrowserStack MCP registered (`browser-cloud-setup` → `references/details.md`) can run
+`startAccessibilityScan` on a deployed page URL, with `wcagVersion` set to WCAG 2.2 AA, and read the issues
+with `fetchAccessibilityIssues`. It is a one-off look, never the gate: the axe run in the suite stays the
+gate, and a scan finding becomes an axe assertion or a ticketed allow-list row. The remote server cannot
+reach `localhost` or a firewalled host.
+
 ## Shared rules (both tools)
 
 - The conformance target is **WCAG 2.2 AA**: axe tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`,

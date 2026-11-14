@@ -159,6 +159,12 @@ plus Node for `@percy/cli`.
 There is no diff image to upload: the diff lives in Percy, linked from the status check and the
 `percy exec` log. A functional failure in a Percy class still gets `BaseTest`'s screenshot, trace and video.
 
+**An agent reading the result.** With the BrowserStack MCP registered (`browser-cloud-setup` →
+`references/details.md`), `fetchPercyChanges` summarizes what changed between the latest build and the one
+before, and `runPercyScan` runs a scan (local server only; the remote one disables it). The agent reports
+the changes and which look intended. It never calls `managePercyBuildApproval`, and no agent's `tools:`
+grants it: approving or rejecting a build stays with a person in Percy's review UI.
+
 ## Anti-patterns
 
 - **A `Playwright.create()`, browser or `@AfterMethod` teardown in a Percy class.** *Fix:* extend `BaseTest`.

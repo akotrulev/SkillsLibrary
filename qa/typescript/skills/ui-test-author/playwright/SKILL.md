@@ -80,6 +80,8 @@ change. The config leaves `testDir` at its default, so it finds the specs either
 | [`references/assertions.md`](references/assertions.md) | The web-first set (accessible name, description and error, role, classes, value, URL forms, aria snapshots), one expected condition, the one-shot-read ban, `expect.poll` / `toPass` / `expect.soft`, failure messages |
 | [`references/config-and-fixtures.md`](references/config-and-fixtures.md) | The canonical config setting by setting, fixture kinds, the setup project, `webServer`, `TestProject.default`, retries and locks, tags, the CLI, the 1.64 breaking changes, Test Agents |
 | [`references/emulation-and-mobile-web.md`](references/emulation-and-mobile-web.md) | Device projects, touch, `screen`, viewport, media features, locale and geolocation, `page.clock`, offline, and why emulation is not a device |
+| [`references/trace-correlation.md`](references/trace-correlation.md) | One `traceparent` trace id per test on app-origin requests only (a scoped context route, never `extraHTTPHeaders`), and the failure link to the backend trace |
+| [`qa/typescript/skills/api-test-author/writer/references/generation-checks.md`](../../api-test-author/writer/references/generation-checks.md) | The scenario × oracle table before any code, and the hallucination gate that reports every test id missing from the app source as `MISSING` |
 | [`assets/playwright.config.ts`](assets/playwright.config.ts) | The canonical config |
 | [`assets/fixtures.ts`](assets/fixtures.ts) | Page-object fixtures, `testUser`, and `seededUser` (API-seeded, deleted in teardown) |
 | [`assets/auth.setup.ts`](assets/auth.setup.ts) | The setup project's sign-in, saving the storage state |
@@ -104,7 +106,8 @@ The standards this skill's output must meet are the qa-typescript rule files, no
 ## Generation steps
 
 1. Detect the installed `@playwright/test` version and the project layout; match them.
-2. Confirm the feature, scenarios, locators, auth, data and devices with the user.
+2. Confirm the feature, scenarios, locators, auth, data and devices with the user. Write the scenario ×
+   oracle table (generation checks §1) before any code.
 3. For each screen, write or extend `tests/pages/<Name>Page.ts` from `assets/LoginPage.ts`: one
    `readonly Locator` per element on the highest ladder rung, components for reused regions, `goto()`,
    intent methods. Add a `missing-testids.md` row for every fallback.
@@ -112,7 +115,7 @@ The standards this skill's output must meet are the qa-typescript rule files, no
 5. Write `tests/specs/<feature>.spec.ts` from `assets/login.spec.ts`: one `test()` per scenario with a
    `Should_X_When_Y` name, page objects from fixtures, `{ tag }`, `test.step` for long journeys.
 6. For signed-in flows, make sure the setup project exists and the spec's project depends on it.
-7. Run `npx playwright test` (0 failures) and check new locators in `npx playwright test --ui` before
+7. Run the hallucination gate (generation checks §2) and report every `MISSING` test id. Run `npx playwright test` (0 failures) and check new locators in `npx playwright test --ui` before
    committing.
 
 ## Handoffs

@@ -40,6 +40,14 @@ Never a floating `4.*` or a `Version=` on the `PackageReference` — central pac
 **Rule of thumb:** axe is the **gate** — no new violations, per component, in the existing run. Lighthouse is
 the **broad audit and trend**. They are complementary; many teams run both.
 
+## An optional BrowserStack scan
+
+An agent with the BrowserStack MCP registered (`browser-cloud-setup` → `references/details.md`) can run
+`startAccessibilityScan` on a deployed page URL, with `wcagVersion` set to WCAG 2.2 AA, and read the issues
+with `fetchAccessibilityIssues`. It is a one-off look, never the gate: the axe run in the suite stays the
+gate, and a scan finding becomes an axe assertion or a ticketed allow-list row. The remote server cannot
+reach `localhost` or a firewalled host.
+
 ## Shared rules (every tool)
 
 - **The native assertions come first.** axe finds rule violations; it does not know what a control *should*

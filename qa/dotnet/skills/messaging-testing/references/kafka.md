@@ -105,7 +105,7 @@ public abstract class KafkaFixture
     public async Task StartBrokerAsync()
     {
         // Pin the image tag, never `latest`. The module declares its own readiness wait strategy.
-        _broker = new KafkaBuilder().WithImage("confluentinc/cp-kafka:7.6.1").Build();
+        _broker = new KafkaBuilder("confluentinc/cp-kafka:7.6.1").Build();
         await _broker.StartAsync();
         BootstrapServers = _broker.GetBootstrapAddress();
         Probe = new KafkaProbe(BootstrapServers);

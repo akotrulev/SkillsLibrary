@@ -177,6 +177,15 @@ test('Should_ShowOrderTotal_When_CartHasTwoItems', { tag: '@checkout' }, async (
 });
 ```
 
+## From a failed test to the backend trace
+
+Every test sends one W3C `traceparent` trace id on all its requests (`api-client-writer`'s
+`references/trace-context.md`; UI: `ui-test-author/playwright`'s `references/trace-correlation.md`). On
+failure the result gets a `telemetry` attachment (`text/uri-list`): the trace id, a Grafana Explore link to
+the trace in Tempo and one to its log lines in Loki. Grafana's base URL comes from `GRAFANA_URL`; unset, no
+link is written and the test is unaffected. The helper, the failure hook, the Explore URL format and the
+procedure for triaging a failed run: [`references/trace-links.md`](references/trace-links.md).
+
 ## Steps
 
 `test.step('Sign in', async () => { … })` is captured by `allure-playwright` automatically and also shows in the Playwright trace — prefer it in Playwright Test. In Vitest, wrap a non-trivial workflow with `allure.step`:
@@ -237,48 +246,10 @@ The full platform YAML, sharding and evidence uploads live in `qa/cicd/typescrip
     publish_dir: allure-report
 ```
 
-### Azure Pipelines
+### Azure Pipelines and GitLab CI
 
-```yaml
-- task: PublishPipelineArtifact@1
-  condition: always()
-  inputs:
-    targetPath: $(System.DefaultWorkingDirectory)/allure-results
-    artifact: allure-results
-
-- script: |
-    npm i -g allure-commandline@2.46.1
-    allure generate allure-results -o $(Build.ArtifactStagingDirectory)/allure-report --clean
-  displayName: Generate Allure report
-  condition: succeededOrFailed()
-
-- task: PublishHtmlReport@1
-  condition: succeededOrFailed()
-  inputs:
-    reportDir: $(Build.ArtifactStagingDirectory)/allure-report
-    tabName: Allure
-```
-
-### GitLab CI
-
-```yaml
-publish:allure:
-  stage: publish
-  image: node:24
-  needs: [test]
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: always
-  before_script:
-    - apt-get update && apt-get install -y default-jre-headless
-    - npm i -g allure-commandline@2.46.1
-  script:
-    - mkdir -p allure-results/history
-    - cp -r public/history/. allure-results/history/ 2>/dev/null || true
-    - allure generate allure-results --clean -o public
-  artifacts:
-    paths: [public/]
-```
+The same five steps; the publish jobs are in `qa/cicd/typescript/skills/ci-pipelines`
+(`references/azure-pipelines.md`, `references/gitlab-ci.md`), with the same CLI pin.
 
 ## History & trends
 
@@ -311,6 +282,7 @@ Place at the project root and copy it into `allure-results/` before `allure gene
 - `allure-results/` uploaded as a CI artifact on **every** run, even on test failure.
 - History preserved across runs (last 20–30 retained).
 - Report published from `main` to a stable URL; PR builds publish to a PR-scoped URL or skip publish.
+- A failed test carries the `telemetry` link attachment when `GRAFANA_URL` is set (`references/trace-links.md`); its absence never fails a test.
 - `categories.json` lives at the project root and is copied into `allure-results/` during CI.
 
 ## What NOT to do

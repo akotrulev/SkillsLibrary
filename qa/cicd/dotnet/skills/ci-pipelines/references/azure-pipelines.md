@@ -332,11 +332,53 @@ jobs:
 
 - **No `-- Playwright.Shard=i/N`.** `Microsoft.Playwright.NUnit` ignores it ("Playwright>Shard is not implemented") and every agent would run the whole suite; the class filter is the shard. `BaseTest`'s `[Parallelizable(ParallelScope.Self)]` keeps a class on one worker, so a class is the unit.
 - **No headless flag.** `BaseTest` is headless unless `HEADED=1` (the runsettings set `Headless`), which only a local run sets.
-- `--with-deps` installs OS packages through `sudo` on the agent; the 1.63.0 binding installs its own Chromium build. Do not cache browsers.
+- `--with-deps` installs OS packages through `sudo` on the agent; the 1.63.0 binding installs its own Chromium build. Do not cache browsers by default; the measured exception is *Optional: caching Playwright browsers* below.
 - `BASE_URL`, `E2E_USER` and `E2E_PASSWORD` come through OIDC: `BaseTest` throws without `BASE_URL`, and the root-namespace `AuthSetup` signs in once per shard before any fixture runs.
 - `playwright-artifacts-<n>` is published **on failure only** (`condition: failed()`): the screenshot, trace and video of each failed test plus any deliberate recording. A green run leaves the folder empty.
 - The quarantine lane is a second, non-gating job in this template — the same steps without `UiShards` and `strategy`, running `--filter "TestCategory=Flaky"` with `continueOnError: true` on its test step, per `qa/reporting/dotnet/skills/flaky-test-quarantine`.
 - **Running in the pinned image** instead of installing browsers — what visual baselines need (`qa/dotnet/skills/visual-regression`): give the job `container: mcr.microsoft.com/playwright/dotnet:v1.63.0-noble` and drop the install line; the image carries the .NET 10 SDK and the browsers. The tag must equal the Playwright version, and there is no `-jammy` .NET image since 1.60. `AzureCLI@2` runs inside the container, which has no Azure CLI, so a container job tests only pages that need no fetched credentials. The visual job is not a container job: it is the `docker run` step in `qa/dotnet/skills/visual-regression/references/playwright-snapshots.md` §8.
+
+### Optional: caching Playwright browsers
+
+**Off by default.** Playwright's CI guide discourages caching browser binaries: restoring the cache takes about as long as downloading them, and on Linux the OS dependencies are not cacheable anyway. Adopt this only after timing both variants of the UI job on your agents (several runs each) and finding the cached one faster — then keep the timings in the PR that adds it.
+
+Playwright keeps browsers in `~/.cache/ms-playwright` on Linux. `Cache@2` needs a path it can address through a pipeline variable, so the job moves that folder with `PLAYWRIGHT_BROWSERS_PATH` (pipeline variables reach scripts as environment variables, and Playwright reads it). The key is the Playwright package version read from `Directory.Packages.props`, so a version bump misses the cache and downloads the browsers that version pins. These steps replace the *Build + install Playwright browsers* step of the UI shard:
+
+```yaml
+  - job: UiTests
+    variables:
+      PLAYWRIGHT_BROWSERS_PATH: $(Pipeline.Workspace)/ms-playwright
+    steps:
+      - script: |
+          VERSION=$(grep -oP 'PackageVersion\s+Include="Microsoft\.Playwright[\w.]*"\s+Version="\K[^"]+' Directory.Packages.props | head -n 1)
+          test -n "$VERSION"
+          echo "##vso[task.setvariable variable=playwrightVersion]$VERSION"
+        displayName: Read the Playwright version
+
+      - task: Cache@2
+        displayName: Cache Playwright browsers
+        inputs:
+          key: 'playwright | "$(Agent.OS)" | "$(playwrightVersion)" | chromium'
+          path: $(PLAYWRIGHT_BROWSERS_PATH)
+          cacheHitVar: BROWSERS_RESTORED
+
+      - script: dotnet build UiTests/UiTests.csproj -c $(buildConfiguration)
+        displayName: Build
+
+      - script: pwsh UiTests/bin/$(buildConfiguration)/net10.0/playwright.ps1 install --with-deps chromium
+        displayName: Install Playwright browsers
+        condition: and(succeeded(), ne(variables.BROWSERS_RESTORED, 'true'))
+
+      - script: pwsh UiTests/bin/$(buildConfiguration)/net10.0/playwright.ps1 install-deps chromium
+        displayName: Install Playwright OS dependencies
+        condition: and(succeeded(), eq(variables.BROWSERS_RESTORED, 'true'))
+```
+
+- **A cache hit still runs `install-deps`.** The cache holds the browser binaries, not the system libraries they load; skipping `install-deps` fails at browser launch on a fresh agent image.
+- `PLAYWRIGHT_BROWSERS_PATH` must be set for the **test** step too — as a job variable it is, so the tests find the browsers where the install put them.
+- `test -n "$VERSION"` fails the job when the props file has no `Microsoft.Playwright*` pin, instead of caching under an empty key.
+- The browser name is part of the key: a job that installs `chromium firefox` uses a key naming both.
+- A container job on the pinned `mcr.microsoft.com/playwright/dotnet` image already carries the browsers; it caches nothing.
 
 ### Allure publish with history — `pipelines/templates/allure-publish.yml`
 

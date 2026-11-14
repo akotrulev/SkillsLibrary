@@ -85,6 +85,9 @@ namespace itself, because NUnit runs a `[SetUpFixture]` only for the namespace i
 | [`references/locators.md`](references/locators.md) | The ladder, `GetBy*`, `Filter` / `And` / `Or`, component roots, `parent.Locator(child)` and the 1.64 `Within()` line, `Visible`, frames, strictness, `Describe()`, overlays, the test-id attribute, agent-facing locators |
 | [`references/assertions.md`](references/assertions.md) | The web-first set (accessible name, role, classes, URL, aria snapshots), one expected condition, no one-shot reads, timeouts, `Expect(locator, "message")`, `Assert.ThrowsAsync`, HTTP responses |
 | [`references/emulation-and-mobile-web.md`](references/emulation-and-mobile-web.md) | `Playwright.Devices[...]`, touch, viewport, media features, locale, geolocation, `Page.Clock`, offline |
+| [`references/blazor.md`](references/blazor.md) | Blazor apps: wait for interactivity on a condition (enabled control or marker attribute, never `NetworkIdle` or polling `Blazor`), assert `#blazor-error-ui` hidden after every journey in a `BlazorTest` base |
+| [`references/trace-correlation.md`](references/trace-correlation.md) | One `traceparent` trace id per test on app-origin requests only (a scoped context route, never `extraHTTPHeaders`), and the failure link to the backend trace |
+| [`qa/dotnet/skills/api-test-author/writer/references/generation-checks.md`](../../api-test-author/writer/references/generation-checks.md) | The scenario × oracle table before any code, and the hallucination gate that reports every test id missing from the app source as `MISSING` |
 | [`assets/Directory.Packages.props`](assets/Directory.Packages.props), [`assets/UiTests.csproj`](assets/UiTests.csproj) | The pins in one place; a versionless project that picks up the runsettings |
 | [`assets/ui.runsettings`](assets/ui.runsettings) | `BrowserName`, `LaunchOptions` / `Headless`, `ExpectTimeout`, `TestIdAttribute` |
 | [`assets/BaseTest.cs`](assets/BaseTest.cs) | `BASE_URL`, `ContextOptions()` amending the base, tracing, failure evidence to NUnit and Allure |
@@ -111,8 +114,9 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 ## Generation steps
 
 1. Detect the installed Playwright, NUnit and Allure versions, the TFM, CPM and the project layout; match
-   them.
-2. Confirm the feature, scenarios, locators, auth, data and devices with the user.
+   them. A Blazor app under test: read `references/blazor.md` and derive the tests from its `BlazorTest`.
+2. Confirm the feature, scenarios, locators, auth, data and devices with the user. Write the scenario ×
+   oracle table (generation checks §1) before any code.
 3. No `BaseTest` yet: add `assets/BaseTest.cs`, `ui.runsettings` and `RunSettingsFilePath`. One whose
    `ContextOptions()` returns `new()`, a `[SetUpFixture]` outside the root namespace, or inline `Version=`
    under CPM: fix that first.
@@ -123,7 +127,7 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
    `[SetUp]`, one `[Test]` per scenario with a `Should_X_When_Y` name and categories.
 6. For signed-in fixtures, keep `AuthSetup` in the root namespace and amend `ContextOptions()` with
    `StorageStatePath`; for devices, amend it from `Playwright.Devices[...]`.
-7. Build, install the browser with `pwsh bin/Debug/net10.0/playwright.ps1 install chromium`, and run
+7. Run the hallucination gate (generation checks §2) and report every `MISSING` test id. Build, install the browser with `pwsh bin/Debug/net10.0/playwright.ps1 install chromium`, and run
    `dotnet test` (0 failures); debug with `HEADED=1` or `PWDEBUG=1`.
 
 ## Handoffs

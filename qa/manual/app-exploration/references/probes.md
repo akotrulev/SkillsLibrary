@@ -7,8 +7,12 @@ The tool calls and snippets behind `checks.md`. A probe returns **candidates**: 
 **Primary: the Playwright MCP server**, registered by the user (an agent cannot set server flags on itself):
 
 ```bash
-claude mcp add --scope user playwright -- npx @playwright/mcp@latest --caps=testing,storage,devtools --isolated --output-dir=.playwright-mcp
+claude mcp add --scope user playwright -- npx @playwright/mcp@0.0.85 --caps=testing,storage,devtools,network --isolated --output-dir=.playwright-mcp --redact-url-params=code,state,access_token,id_token
 ```
+
+- `network` adds `browser_route`, `browser_unroute` and `browser_network_state_set` for the failure-state probe in §2. Otherwise it is the line the `qa-ui-*` agents give, so one registration serves both.
+- `--redact-url-params` swaps the Auth0 `code` / `state` and the tokens a login redirect leaves in the URL for `<redacted>` in tool responses. It, `--secrets` and `--allowed-origins` are conveniences, not a security boundary (Playwright's own words): the safe-action floor and a disposable account are what protect the environment.
+- The version is pinned: the agent names its tools in `tools:`, so an upstream rename silently drops one. Bump it deliberately and re-check the names.
 
 **Fallback: `playwright-cli`** through `Bash` (`npm i -g @playwright/cli@latest`, or `npx playwright cli`), when the server is not connected or a long run would flood the context: it writes snapshots to `.playwright-cli/page-*.yml` and you read only what you need. Neither available: stop and give the user the command above.
 
@@ -24,6 +28,7 @@ claude mcp add --scope user playwright -- npx @playwright/mcp@latest --caps=test
 | Dialogs, tabs | `browser_handle_dialog`, `browser_tabs` | `dialog-dismiss`, `tab-list`, `tab-select <i>` |
 | Screenshot | `browser_take_screenshot` `{ filename: "evidence/<date>-<slug>/F-07-cart-total.png", fullPage: true }` | `screenshot --filename=<f> --full-page` |
 | Keep a login | `browser_storage_state`, `browser_set_storage_state` | `state-save <f>`, `state-load <f>` |
+| Fail a request, go offline | `browser_route` `{ pattern, status: 500 }`, `browser_unroute`; `browser_network_state_set` `{ state: "offline" }` | `route "<pattern>" --status=500`, `unroute "<pattern>"`; `network-state-set offline` |
 | End | `browser_close` | `close` |
 
 - A snapshot ref (`e15`) is valid within one snapshot; take a new snapshot after any navigation or change.
@@ -218,6 +223,13 @@ It judges solid colours only. Text over an image, a gradient or a translucent la
 
 Figures outside a table (a basket summary, a dashboard tile) are read from the snapshot.
 
+**Failure states: one data region at a time.** Find the region's request in `browser_network_requests`, then:
+
+1. `browser_route` `{ pattern: "**/api/orders*", status: 500, contentType: "application/json", body: "{}" }`, reload, and look. The region shows a failed state with a way to retry; search, filters and the header keep working; no raw error text shows. Then `browser_unroute` `{ pattern }`.
+2. `browser_network_state_set` `{ state: "offline" }`, act on the region (refresh, next page, a filter), and look: the screen says it is offline, in words that differ from the server error. Then `{ state: "online" }`: the region recovers without a reload.
+
+Route reads only, never a write. The answers are faked in the browser, so nothing reaches the server and the probe runs in both modes. A blank region, an endless spinner, an empty list, a whole screen lost to one region, or one message for both causes is the finding.
+
 ## 3. Recomputing numbers
 
 Copy the figures exactly as shown, then recompute. Never in the head, never with binary floats:
@@ -248,6 +260,8 @@ The finding carries the figures as read, the working and the result: `shown €7
 | Alerts and permission dialogs | `appium_alert` |
 | WebView content | `appium_context` (switch to `WEBVIEW_*`, then the web probes apply) |
 | Rotate, background and reopen | `appium_orientation`, `appium_app_lifecycle` |
+| Deny or reset a permission | `appium_mobile_permissions` |
+| Open a deep link; clear the app's data | `appium_app_lifecycle` `deep_link`; `clear` |
 | Window size, density | `appium_get_window_size`, `appium_mobile_device_info` |
 | Screenshot, recording | `appium_screenshot`, `appium_screen_recording` |
 
@@ -299,3 +313,7 @@ PY
 - An element that crosses the edge inside a scrolling list is the next row, not a defect: confirm on the screenshot.
 - Overlap, truncation, alignment and contrast are judged on the screenshot; the source does not show them.
 - Links, copy, numbers, behaviour and forms are checked exactly as on the web, reading the text from the source.
+
+**The denied path.** Deny the permission a feature needs, then reach the feature. Android: `appium_mobile_permissions` `{ action: "update", permissions: "android.permission.CAMERA", permissionChangeAction: "revoke" }` (revoking restarts the app's process). iOS Simulator: `{ action: "update", id: "<bundle id>", access: { camera: "no" } }`, and `{ action: "reset", service: "camera" }` brings the prompt back. A crash, a dead end or a screen that asks again with no way forward is the finding: the denied path must be a working screen.
+
+**Deep links.** `appium_app_lifecycle` `{ action: "deep_link", url: "myapp://orders/42" }` for each route the app documents, then one for a record that does not exist and one malformed. A wrong screen, a crash, or a protected screen opened while signed out is the finding. `clear` wipes the app's data: run it last, in full mode, only to check the first-run screens, never to get back to a known place.

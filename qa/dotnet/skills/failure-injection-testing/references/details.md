@@ -98,13 +98,11 @@ public abstract class BaseChaosTest
     [OneTimeSetUp]
     public async Task StartInfrastructure()
     {
-        Dependency = new PostgreSqlBuilder()
-            .WithImage("postgres:16-alpine")
+        Dependency = new PostgreSqlBuilder("postgres:16-alpine")
             .WithNetwork(Network)
             .WithNetworkAliases("db")                          // the upstream host on the shared network
             .Build();
-        Toxiproxy = new ToxiproxyBuilder()
-            .WithImage("ghcr.io/shopify/toxiproxy:2.11.0")
+        Toxiproxy = new ToxiproxyBuilder("ghcr.io/shopify/toxiproxy:2.11.0")
             .WithNetwork(Network)
             .Build();
         await Dependency.StartAsync();

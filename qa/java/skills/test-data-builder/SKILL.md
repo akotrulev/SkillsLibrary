@@ -150,6 +150,68 @@ Same shape works under JUnit 5; the runner doesn't care.
 - Seed DataFaker deterministically per test run (`new Faker(new Random(42))`) when randomness touches assertions.
 - **Never** assert on a random field — assert on the field you set; defaults are scaffolding.
 
+## Production-shaped data and PII
+
+- **Never copy production rows** into a builder default, a seed script, a fixture file or a test asset. A
+  dump, an export or a pasted record is personal data the moment it lands in the repo, a CI log or a report.
+- **Defaults are obviously synthetic but realistic**: a valid format and a plausible length, so validation and
+  layout are exercised, and nobody owns the value — `Mira Kovac`, `mira.kovac@example.com`,
+  `+44 7700 900123`. Reserved names only: `example.com` / `.test` domains (RFC 2606), Ofcom's
+  `07700 900000–900999` drama range or the US `555-0100–0199` range. Never `test@test.com`, `foo` or
+  `John Doe`: they hide the formats the field really accepts.
+- **When a test needs production shape** (real distributions, edge-case values, volume), mask a copy outside
+  the repo with a **deterministic pseudonymiser**: one keyed hash per field class, so a real value always maps
+  to the same fake one. Referential integrity survives — a customer id masked in `customers` and in `orders`
+  still joins — and a rerun rebuilds the same dataset. The key comes from the secret store, never the repo;
+  without it the mapping cannot be rebuilt by hashing a phone book.
+
+| Field class | Masked as |
+|---|---|
+| Email | `user.<token>@example.com` |
+| Phone | a number in the fictional range, picked by the hash |
+| Name, address | a faker seeded from the hash |
+| Ids, account numbers | a prefix plus the token, same length and format where the API validates it |
+| Free text (notes, comments) | replaced whole — it carries PII no pattern finds |
+| Date of birth | shifted by a hash-derived number of days, same age band |
+
+```java
+public final class Pseudonymizer {
+    private static final HexFormat HEX = HexFormat.of();
+    private final Mac mac;
+
+    public Pseudonymizer(byte[] key) throws GeneralSecurityException {
+        mac = Mac.getInstance("HmacSHA256");
+        mac.init(new SecretKeySpec(key, "HmacSHA256"));
+    }
+
+    public String email(String real) { return "user." + token(real, "email") + "@example.com"; }
+    public String phone(String real) { return "+44 7700 900%03d".formatted(number(real, "phone", 1000)); }
+    public String fullName(String real) { return seeded(real, "name").name().fullName(); }
+    public String streetAddress(String real) { return seeded(real, "address").address().streetAddress(); }
+    public String customerId(String real) { return "cus_" + token(real, "customer"); }
+
+    private Faker seeded(String real, String fieldClass) {
+        return new Faker(new Random(number(real, fieldClass, Integer.MAX_VALUE)));
+    }
+
+    private String token(String real, String fieldClass) { return HEX.formatHex(hash(real, fieldClass), 0, 6); }
+
+    private int number(String real, String fieldClass, int bound) {
+        return Math.floorMod(ByteBuffer.wrap(hash(real, fieldClass)).getInt(), bound);
+    }
+
+    private byte[] hash(String real, String fieldClass) {
+        return mac.doFinal((fieldClass + ":" + real).getBytes(StandardCharsets.UTF_8));
+    }
+}
+```
+
+`Mac` is not thread-safe: one `Pseudonymizer` per masking thread. `Faker` is DataFaker's `net.datafaker.Faker`.
+
+Mask every column that identifies a person on its own or combined (postcode + date of birth + gender); amounts,
+enums and timestamps that carry no identity stay as they are. Before the set is used, grep it for the source's
+email domains and phone prefixes — a hit fails the masking job.
+
 ## Aggregate / child relationships
 
 ```java
