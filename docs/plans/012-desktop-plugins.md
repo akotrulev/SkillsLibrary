@@ -2,7 +2,7 @@
 
 **Goal:** Two marketplace plugins in one new `desktop/` domain. `desktop-macos` covers Swift, SwiftUI and the AppKit lane. `desktop-windows` covers WinUI on Windows App SDK 2.x with C#, plus WPF, WinForms and C++/WinRT lanes. Each has the library's plugin shape: a coding standard installed as path-scoped rules, the common use-case skills, a step-by-step agent that works on greenfield and brownfield, two commands and a conformance audit. A shared desktop layer (distribution, security, observability) is bundled into both, and native Auth0 skills ship with them. The QA plugins gain a desktop E2E lane: three skills and a `qa-desktop-<lang>` agent in each of `qa-java`, `qa-dotnet` and `qa-typescript`, driven by the same test ids the dev agents emit.
 
-**Status:** Planned 2026-11-15; no task has landed. Research is done and saved beside this plan in `docs/research/012-desktop-plugins/{macos,windows,cross-platform-and-qa}.md`. Every fact in §4 comes from those files, verified on 2026-11-15; the §4.6 items are not verified. **Next:** C1, then S1–S3, M1 and W1 side by side. Built but unverified, once landed: no agent has been run against a real Mac or Windows app, and no desktop E2E suite has run on a real runner.
+**Status:** Planned 2026-11-15; research is saved beside this plan in `docs/research/012-desktop-plugins/{macos,windows,cross-platform-and-qa}.md`; every fact in §4 comes from those files, verified on 2026-11-15, and the §4.6 items are not verified. **Built:** the `desktop/` domain and code rules (C1), the shared layer and native Auth0 (S1–S3), both desktop plugins complete — `desktop-macos` (M1–M5) and `desktop-windows` (W1–W6, with the C++/WinRT lane, D16) — and the QA desktop shared rules and TypeScript lane (E1). **Next:** E2 and E3 side by side, then I1, then G1. Built but unverified: no agent has been run against a real Mac or Windows app, no desktop E2E suite has run on a real runner, and no library check, surface check or token audit has run on `desktop/` (G1).
 
 **Test design:** none. This plan serves no stories (it builds skills, not a product), so it has no `TD` tasks.
 **Documentation task:** none. This library's documentation is `CLAUDE.md`'s map, `docs/skills-catalog.md` and `README.md`, which G1 writes from the files that landed (as plan 002's G1 did). `be-documenter` documents applications, not a skills library.
@@ -819,6 +819,8 @@ Cost: a second test runner family beside NUnit and MSTest (D8), and a lines-base
 - The agent covers the four lanes (C#: WinUI / WPF / WinForms; C++/WinRT) through §7's steps and §7.2's commands; detection decides the lane. Its Related agents name the three `qa-desktop-<lang>` agents.
 - **Not in W6:** marketplace wiring (I1).
 
+- **As built (2026-11-15):** as planned, no divergence, no new `D<n>`. `desktop/windows/skills/migration/SKILL.md` (10.4k chars; description 196) with six references in `references/` (`dotnet-8-9-to-10` (dated, 2026-11-10), `windows-app-sdk-1-to-2` (dated; the `DISABLE_XAML_GENERATED_MAIN` rename, `GetForUnpackaged`, pickers), `framework-to-dotnet10`, `uwp-to-winui`, `wpf-to-winui-or-modernize` (decision record first, in place by default), `winforms-modernization`; MAUI and Win32/MFC are mentions only). `code-review/SKILL.md` (8.2k; `name: conventions-review`, folder `code-review`; one lane per file, screenshot pass with `winapp ui screenshot` and a PowerShell fallback), `standards-audit/SKILL.md` (10.1k; Step 0 detects per project, and the lane filter keeps the 14 `[C++]` rows (B12, C12, N1, S1, X13–X22) out of C# reports and the reverse), `rules/SKILL.md` (7.3k) with the twelve §8.6 files beside it (`csharp.md`, `winui-xaml.md`, `wpf.md`, `winforms.md`, `cppwinrt.md` with the four D16 globs, `win-accessibility.md`, `win-styling.md`, `win-localization.md`, `dotnet-networking.md`, `win-persistence.md`, `win-tests.md`, `package-config.md`; header comment `desktop-windows rules v1 (2026-11-15)`). `agents/desktop-windows.md` (11.5k chars; description 548; a lane-detection table picks the lane skill and a per-lane command table carries the §7.2 and D16 C++ commands; carries the template's `Gate:` sentence verbatim and names `qa-desktop-java`, `qa-desktop-dotnet`, `qa-desktop-typescript` in Boundaries, which G1's name check covers). `commands/{desktop-windows,audit}.md`. The checklist `desktop/windows/skills/standards-audit/references/conformance-checklist.md` now ends with `## Section index` (21 rows; K, L, U `fragment`; every row range matches the file, A1–A7 through X1–X22). Built but unverified: the `winapp ui screenshot` flags (the skill says to confirm with `--help`); the WPF and WinForms rule files share the XAML and form globs with WinUI's, so `rules` step 5 fits them per project; the migration references carry only what the research verified and tell the move to read the 2.0 breaking-change list and the .NET 10 compatibility list at move time; whether Windows App SDK 2.6 lists `net11.0-windows` (§4.6) stays unchecked. No file outside `desktop/windows/` and this plan changed.
+
 ### E1 — QA desktop: shared rules and the TypeScript lane
 
 **Stack:** `qa` · **Agent:** `general-purpose`
@@ -831,6 +833,8 @@ Cost: a second test runner family beside NUnit and MSTest (D8), and a lines-base
 - Rewrite E2's and E3's prompts for anything they must mirror: shared-skill section names and the explorer's report shape.
 - **Not in E1:** the Java and .NET lanes (E2, E3).
 
+**As built (2026-11-15):** as planned, no divergence. Peer ranges confirmed from the npm registry: `appium-mac2-driver@4.6.1`, `appium-wincore-driver@3.3.2` and `appium-novawindows-driver@1.5.0` all declare `appium ^3.0.0-rc.2`, which includes 3.8.0; automation names `Mac2` (use `mac2`), `Wincore`, `NovaWindows`; no `D<n>` needed. Files: `qa/_shared/desktop-testing/SKILL.md` (12.8k chars), `qa/typescript/skills/desktop-project-setup/SKILL.md` (11.8k), `desktop-screen-explorer/SKILL.md` (13.6k), `desktop-window-objects/SKILL.md` (10.3k), `skills/rules/desktop-tests.md` (14 rules), `agents/qa-desktop-typescript.md` (9.6k; description 580), `commands/desktop.md`. Descriptions 188-195 chars. `skills/rules/SKILL.md` lists `desktop-tests.md` (nine files now) and `skills/rules/qa-typescript.md` paths gained `desktop-tests/`, `tests/desktop/` and `src/windows/`. The lane writes `wdio.desktop.conf.ts` (not `wdio.conf.ts`) so the desktop and mobile configs can sit in one repo. Facts taken from the driver docs on 2026-11-15: Mac2 `macos: listWindows` and `adjustWindow` exist from driver 4.5.0; WinCore has `windows: getWindows`, `switchToWindowByTitle` and `appium:ms:waitForAppLaunch`; Mac2 strategy names are `predicate string` and `class chain`. Built but unverified: WebdriverIO's `-ios predicate string:` shorthand does not map to Mac2's unprefixed names, so the explorer says to send them through `driver.findElement('predicate string', …)`, which no run confirmed; the WinCore capability table came from the npm README, whose text is for 4.x, so the 3.3.2 capability set is unconfirmed; WinCore's `id` strategy being the `RuntimeId` comes from `desktop-windows:test-ids`; no `appium-mcp` desktop session was possible (the server failed to connect), so nothing ran against a page source. Gate: none (D11). Not committed: the queue commits.
+
 ### E2 — QA desktop: the Java lane
 
 **Stack:** `qa` · **Agent:** `general-purpose`
@@ -842,6 +846,8 @@ Cost: a second test runner family beside NUnit and MSTest (D8), and a lines-base
 - Mirror E1. Use TestNG + `java-client` 11: `Mac2Driver`, and for WinCore, `BaseOptions` or `WindowsOptions` with `automationName` overridden.
 - **Not in E2:** the `qa/dotnet` tree (E3, which runs beside this task).
 
+**As built (2026-11-15):** as planned, no divergence. Files: `qa/java/skills/desktop-project-setup/SKILL.md` (14.1k chars; description 190), `desktop-screen-explorer/SKILL.md` (13.9k; 199), `desktop-window-objects/SKILL.md` (11.2k; 195), `skills/rules/desktop-tests.md` (15 rules), `agents/qa-desktop-java.md`, `commands/desktop.md`. `skills/rules/SKILL.md` lists `desktop-tests.md` (nine files now); `skills/rules/qa-java.md` paths gained `desktop-tests`, `windows` under test sources and `src/main`. Names: package `com.example.desktoptests` with `support/{Env,DesktopDriverFactory,BaseDesktopTest}`, `windows/{BaseWindow,LibraryWindow,AlbumRow}`, `tests/SmokeTest`; env vars `PLATFORM` (`macos`|`windows`), `APP_ID`, `APP_ARGUMENTS`, `APPIUM_URL`; the Gradle, settings, `Env` and `testng.xml` files are reused from the mobile assets, not copied. `WindowsOptions` has `automationName` overridden to `Wincore`. Mac2's `predicate string` and `class chain` go through `driver.findElement("predicate string", value)` because `AppiumBy.iOSNsPredicateString` sends the `-ios` name. Built but unverified: no code compiled; `Mac2Options` setter names (`setBundleId`, `setArguments`), `WindowsOptions.setApp` and `AppiumDriver.findElement(String, String)` are from the java-client package layout and memory, and the skill says so; the Mac2 strategy workaround is unconfirmed against java-client 11; WinCore's 3.3.2 capability set is unconfirmed (as E1). Gate: none (D11). Not committed: the queue commits.
+
 ### E3 — QA desktop: the .NET lane
 
 **Stack:** `qa` · **Agent:** `general-purpose`
@@ -852,6 +858,8 @@ Cost: a second test runner family beside NUnit and MSTest (D8), and a lines-base
 
 - Mirror E1. Use NUnit + `Appium.WebDriver` 9; FlaUI is the Windows-only alternative, and Playwright .NET covers WebView2 content.
 - **Not in E3:** the `qa/java` tree (E2).
+
+**As built (2026-11-15):** as planned, with these facts. Files in `qa/dotnet/`: `skills/desktop-project-setup/SKILL.md` (13.0k chars, description 197), `skills/desktop-screen-explorer/SKILL.md` (13.0k, 190), `skills/desktop-window-objects/SKILL.md` (13.3k, 178), `skills/rules/desktop-tests.md` (14 rules), `agents/qa-desktop-dotnet.md` (9.8k; description 576), `commands/desktop.md`. `skills/rules/SKILL.md` lists `desktop-tests.md` (ten files now; E1's TypeScript count is nine); its table and step 5 gained `*DesktopTests` and `FlaUI.UIA3`/`BaseWindow` detection, and the `paths:` of `automation.md` and `suite-config.md` gained `DesktopTests`. Names: project `DesktopTests`, folder `DesktopTests/Windows/`, `BaseWindow`, `VerifyWindowLoaded()`, `BaseDesktopTest`, `AppiumDriverFactory`, `AppLauncher` (FlaUI), `desktop.runsettings`, env vars `PLATFORM` (`macos`|`windows`), `APP_ID`, `APP_ARGUMENTS`, `APPIUM_URL`. Facts checked 2026-11-15: `Appium.WebDriver` has `MacDriver` and `WindowsDriver` (constructors take `AppiumOptions`), and no `Mac2Driver` class, so the lane sets `automationName` to `mac2` on `MacDriver`; Playwright .NET WebView2 docs give `ConnectOverCDPAsync("http://127.0.0.1:<port>")`, `Contexts[0].Pages[0]`, `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS` and a per-worker `WEBVIEW2_USER_DATA_FOLDER`; FlaUI wiki: `Application.Launch`/`Attach`, disposing the `Application` closes the app, `ConditionFactory.ByAutomationId`, `FindFirstDescendant`, `Retry.WhileNull` with `throwOnTimeout`/`timeoutMessage`. Built but unverified: no C# was compiled; the `MacDriver` use against a live Mac2 session, sending `predicate string`/`class chain` through `Driver.FindElement("predicate string", value)`, and the FlaUI calls (`WaitWhileMainHandleIsMissing`, `GetAllTopLevelWindows`, `ModalWindows`, `Retry.WhileNull` parameters, `Capture.Screen()`) are from the wiki or memory, and the skills say so; WinCore's 3.3.2 capability set (`ms:waitForAppLaunch`) is from E1's unconfirmed README reading. No `D<n>` needed. Gate: none (D11). Not committed: the queue commits.
 
 ### I1 — marketplace, surface check, planning lane and QA wiring
 
@@ -939,122 +947,9 @@ Run them one Plan Queue session each; every block is complete on its own. After 
 | G1 | `docs` | `general-purpose` | I1 | — | ~140k |
 | — | add `desktop` to rule 1's stack list in `~/.claude/CLAUDE.md` (D13), and enable `desktop-<os>` in a real project to try the agent | **the user** | G1 | — | — |
 
-C1, S1, S3, W2, W3, M3, M4, M5, W4 and W5 have landed; every other prompt below is live.
+C1, S1, S2, S3, M1–M5, W1–W6, E1 and E2 have landed; every other prompt below is live.
 
 ---
-
-### W6 — Windows migration, review, audit, rules, agent and commands (general-purpose, docs)
-
-````
-Depends on: W5, S1, S2, S3
-Agent: general-purpose · Stack: docs
-
-Task W6 of docs/plans/012-desktop-plugins.md: finish `desktop-windows`: migration, code-review, standards-audit, the rules skill, the agent and the two commands.
-
-Deliverable: `desktop/windows/skills/{migration,code-review,standards-audit,rules}/` exist (rules with the twelve §8.6 files); `desktop/windows/agents/desktop-windows.md` ≤ 14,000 characters; `desktop/windows/commands/{desktop-windows,audit}.md` exist; the checklist ends with a section index.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §5, §6.3, §7, §8 (all), D8, D10, §10, W4's As built note, and "Close-out — every task".
-3. `.skill-template/agent.md`; `mobile/android/agents/mobile-android.md`; `mobile/android/commands/*`.
-4. `mobile/android/skills/{migration,code-review,standards-audit}/SKILL.md` and `mobile/ios/skills/rules/` (procedure to copy).
-5. `docs/research/012-desktop-plugins/windows.md` §10–§11.
-6. The `name:` of every `desktop/windows/skills/*/SKILL.md`, `desktop/_shared/*/SKILL.md` and `auth/auth0-windows/SKILL.md`.
-
-Traps:
-- W5 appended checklist rows M1–M13, N2–N11, O1–O16, P1–P10, R1–R10 and S2–S11 (with W4's N1 and S1): the closing section index counts them. `error-handling` has `references/writes-and-dependencies.md`.
-- One agent, four lanes: detection (basics) picks the lane, and the steps table loads the lane skill. Keep it within 14,000 characters by routing, not teaching.
-- The agent carries the template's `Gate:` line verbatim and names the three `qa-desktop-<lang>` agents (they land in E1–E3).
-- `migration` covers .NET 8/9 → 10 (out of support since 2026-11-10) and Windows App SDK 1.x → 2.x.
-- The C++ lane facts (W4, D16; read `desktop/windows/skills/cpp-winrt/SKILL.md` and its `references/`): `cppwinrt.md` carries `paths:` `**/*.cpp`, `**/*.h`, `**/*.idl`, `**/*.vcxproj` fitted to the project, and the `CLAUDE.md` § Windows (C++/WinRT) rules: projected values and `com_ptr` on implementation types with `winrt::make`, `get_strong()` / `get_weak()` taken before the first `co_await`, parameters by value, resume on the dispatcher queue, `hresult_error` caught once at the boundary, `/W4 /WX /permissive-`, GoogleTest over a XAML-free core library. The agent's C++ commands: build `msbuild App.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:TreatWarningAsError=true`; run `winapp run .\App.vcxproj`; static `/analyze` (`EnableMicrosoftCodeAnalysis`) and clang-tidy where configured; tests `msbuild CoreTests.vcxproj …` then `.\x64\Debug\CoreTests.exe`; coverage `Microsoft.CodeCoverage.Console collect --settings coverage.config .\x64\Debug\CoreTests.exe` (80% of lines; `llvm-cov` branches where present); package `winapp pack .\App.vcxproj -c Release --arch x64 --cert .\devcert.pfx`. Detection: a `.vcxproj` with `Microsoft.Windows.CppWinRT`. The checklist's X section already has `[C++]` rows X13-X22; the audit skill's lane filter must keep `[C++]` rows out of C# reports and the reverse.
-
-Gate: none. Documents only (D11).
-Commit: `feat(desktop-windows): migration, review, audit, rules, agent, commands (012 W6)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### E1 — QA desktop: shared rules and the TypeScript lane (general-purpose, qa)
-
-````
-Depends on: M4, W5
-Agent: general-purpose · Stack: qa
-
-Task E1 of docs/plans/012-desktop-plugins.md: write the shared desktop-testing skill and the TypeScript desktop E2E lane.
-
-Deliverable: `qa/_shared/desktop-testing/SKILL.md` exists. In `qa/typescript/`: `skills/{desktop-project-setup,desktop-screen-explorer,desktop-window-objects}/SKILL.md`, `skills/rules/desktop-tests.md` (listed in that rules skill's table), `agents/qa-desktop-typescript.md` and `commands/desktop.md` exist. The Mac2 4.6.1 and WinCore 3.3.2 Appium peer ranges are confirmed against Appium 3.8.0.
-
-Read, in this order:
-1. CLAUDE.md (§ Test code rules).
-2. The plan: §4.4–§4.5, §6.6, §8.5, D9, §10, and "Close-out — every task".
-3. `docs/research/012-desktop-plugins/cross-platform-and-qa.md` Part B.
-4. Patterns: `qa/typescript/agents/qa-mobile-typescript.md`, `qa/typescript/commands/mobile.md`, `qa/typescript/skills/{mobile-project-setup,mobile-screen-explorer,mobile-screen-objects}/SKILL.md`, `qa/typescript/skills/rules/{SKILL.md,mobile-tests.md}`.
-5. The two dev `test-ids` skills: `desktop/macos/skills/test-ids/SKILL.md`, `desktop/windows/skills/test-ids/SKILL.md`.
-
-Traps:
-- Version pins follow §4.4–§4.5. Install drivers with an explicit `@version`. If a peer range excludes 3.8.0, record a dated `D<n>` and do not bump the library pin (Q3).
-- Never the legacy Windows driver or WinAppDriver (D9). Electron and Tauri are out of scope (Q1).
-- `missing-testids.md` routes to `desktop-macos` / `desktop-windows`.
-- Rewrite E2's and E3's prompt blocks for anything they must mirror: shared-skill section names and the explorer's report shape.
-
-Gate: none. Documents only (D11). Do not run `tools/qa-version-check.py`; G1 runs it.
-Commit: `feat(qa): desktop E2E shared rules and TypeScript lane (012 E1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### E2 — QA desktop: the Java lane (general-purpose, qa)
-
-````
-Depends on: E1
-Agent: general-purpose · Stack: qa
-
-Task E2 of docs/plans/012-desktop-plugins.md: write the Java desktop E2E lane.
-
-Deliverable: in `qa/java/`: `skills/{desktop-project-setup,desktop-screen-explorer,desktop-window-objects}/SKILL.md`, `skills/rules/desktop-tests.md` (listed in its rules skill), `agents/qa-desktop-java.md` and `commands/desktop.md` exist.
-
-Read, in this order:
-1. CLAUDE.md (§ Test code rules).
-2. The plan: §4.4, §6.6, §8.5, D9, §10, E1's As built note, and "Close-out — every task".
-3. `docs/research/012-desktop-plugins/cross-platform-and-qa.md` B.5–B.6.
-4. `qa/_shared/desktop-testing/SKILL.md` and E1's three `qa/typescript/skills/desktop-*` skills: the pattern to mirror.
-5. `qa/java/agents/qa-mobile-java.md`, `qa/java/commands/mobile.md`, `qa/java/skills/{mobile-project-setup,mobile-screen-objects}/SKILL.md`, `qa/java/skills/rules/{SKILL.md,mobile-tests.md}`.
-
-Traps:
-- `WindowsOptions` hard-sets `automationName` to `Windows`. For WinCore, override it or use `BaseOptions`.
-- TestNG and `java-client` 11 at the library pins.
-- E3 runs beside you in `qa/dotnet/`: touch only `qa/java/` and this plan's E2 blocks.
-
-Gate: none. Documents only (D11).
-Commit: `feat(qa-java): desktop E2E lane (012 E2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### E3 — QA desktop: the .NET lane (general-purpose, qa)
-
-````
-Depends on: E1
-Agent: general-purpose · Stack: qa
-
-Task E3 of docs/plans/012-desktop-plugins.md: write the .NET desktop E2E lane, including FlaUI.
-
-Deliverable: in `qa/dotnet/`: `skills/{desktop-project-setup,desktop-screen-explorer,desktop-window-objects}/SKILL.md` (FlaUI 5.0.0 lane in setup and window objects), `skills/rules/desktop-tests.md` (listed in its rules skill), `agents/qa-desktop-dotnet.md` and `commands/desktop.md` exist.
-
-Read, in this order:
-1. CLAUDE.md (§ Test code rules).
-2. The plan: §4.4, §6.6, §8.5, D9, §10, E1's As built note, and "Close-out — every task".
-3. `docs/research/012-desktop-plugins/cross-platform-and-qa.md` B.1, B.5–B.6.
-4. `qa/_shared/desktop-testing/SKILL.md` and E1's three `qa/typescript/skills/desktop-*` skills.
-5. `qa/dotnet/agents/qa-mobile-dotnet.md`, `qa/dotnet/commands/mobile.md`, `qa/dotnet/skills/{mobile-project-setup,mobile-screen-objects}/SKILL.md`, `qa/dotnet/skills/rules/{SKILL.md,mobile-tests.md}`.
-
-Research first: FlaUI 5.0.0 with UIA3 against WinUI and WPF; Playwright .NET `ConnectOverCDPAsync` for WebView2 (at the library's 1.63 pin).
-
-Traps:
-- NUnit + `Appium.WebDriver` 9 is the default; FlaUI is the Windows-only alternative, chosen per suite, never mixed in one suite.
-- E2 runs beside you in `qa/java/`: touch only `qa/dotnet/` and this plan's E3 blocks.
-
-Gate: none. Documents only (D11).
-Commit: `feat(qa-dotnet): desktop E2E lane with FlaUI (012 E3)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### I1 — marketplace, surface check, planning lane and QA wiring (general-purpose, docs)
 

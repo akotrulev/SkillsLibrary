@@ -2,8 +2,8 @@
 paths:
   - "**/*.runsettings"
   - "**/{allureConfig,reqnroll}.json"
-  - "**/*{ApiTests,UiTests,AppiumTests,MobileTests,E2ETests,IntegrationTests,AcceptanceTests,BddTests,Bdd.Tests,PerfTests,PerformanceTests,LoadTests,TestCore}/**/*.csproj"
-  - "**/*{ApiTests,UiTests,AppiumTests,MobileTests,E2ETests,IntegrationTests,AcceptanceTests,BddTests,Bdd.Tests,PerfTests,PerformanceTests,LoadTests,TestCore}/**/appsettings*.json"
+  - "**/*{ApiTests,UiTests,AppiumTests,MobileTests,DesktopTests,E2ETests,IntegrationTests,AcceptanceTests,BddTests,Bdd.Tests,PerfTests,PerformanceTests,LoadTests,TestCore}/**/*.csproj"
+  - "**/*{ApiTests,UiTests,AppiumTests,MobileTests,DesktopTests,E2ETests,IntegrationTests,AcceptanceTests,BddTests,Bdd.Tests,PerfTests,PerformanceTests,LoadTests,TestCore}/**/appsettings*.json"
 ---
 
 <!-- qa-dotnet rules v1 (2026-11-03): suite config. Installed by /qa-dotnet:rules; edit the paths above to fit this project. -->

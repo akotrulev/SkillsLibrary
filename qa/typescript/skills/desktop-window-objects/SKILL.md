@@ -1,0 +1,169 @@
+---
+name: desktop-window-objects
+description: Use when creating or updating a WebdriverIO window object for a macOS or Windows app from explored elements. Triggers "create a window object". Not for finding elements (desktop-screen-explorer).
+---
+
+# QA — Desktop Window Object Builder (TypeScript)
+
+Turns a discovered element inventory into a **WebdriverIO window object**: a `BaseWindow` subclass under `src/windows/`. It consumes the element table and locator rungs from `qa/typescript/skills/desktop-screen-explorer` (or an inventory the user supplies) and emits or updates one window class. It owns **codegen, multi-window and dialog handling, waits, and the create/update diff**. The shared rules (id contract, window-object rules, window scoping) are `qa/_shared/desktop-testing`; the Mocha spec conventions are `qa/typescript/skills/ui-test-author/appium`. The mobile twin is `qa/typescript/skills/mobile-screen-objects`.
+
+## When to use
+
+- Elements for a window were discovered and now need a class.
+- An existing window object must be reconciled against a freshly explored window.
+- The user describes a window's elements and ids directly and wants the class emitted.
+
+## When NOT to use
+
+- Locators are not known yet → `qa/typescript/skills/desktop-screen-explorer` first. Never fabricate one.
+- Writing the tests that use the object → `qa/typescript/skills/ui-test-author/appium`.
+- Mobile screens → `qa/typescript/skills/mobile-screen-objects`; web pages → `qa/typescript/skills/page-objects-from-url`.
+- Reviewing an existing object → `qa/typescript/skills/ui-test-author/review`.
+- Java / .NET → `qa/java/skills/desktop-window-objects` / `qa/dotnet/skills/desktop-window-objects`.
+
+## Inputs needed
+
+1. **Window name** (PascalCase: `LibraryWindow`, `SettingsWindow`, `ExportDialog`) and whether it is a main window, a document window, a sheet or a dialog.
+2. **Element list**: per element the name, type and rung from the explorer (the test id first, `~id`).
+3. **Landmark**: one container id that proves the window is up (used by `verifyWindowLoaded()`).
+4. **Actions**: user-intent actions, and for each whether it opens another window or dialog (→ its class).
+5. **Target project**: repo path and the existing `src/windows/` convention.
+
+## Conventions
+
+The standards an emitted object must meet are the qa-typescript rule files `desktop-tests.md` and `qa-typescript.md` (the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/`). The codegen specifics:
+
+- Element access goes through `BaseWindow`'s helpers, in ladder order: `byTestId` (`$('~id')`, the same on both platforms) → `within(container).byTestId` for rows → a label or native query as a named fallback → XPath last.
+- Each id is a `private static readonly {ELEMENT}_ID` constant (a fallback is `{ELEMENT}_FALLBACK`); elements are `private get` accessors.
+- Navigation actions return `Promise<{Destination}>` (`return new {Destination}()`); same-window actions return `Promise<void>`.
+- Folder `src/windows/`, file `src/windows/<Window>.ts`. Repeating rows are scoped components that do not extend `BaseWindow`.
+- Per-platform ids (only where one object serves both apps) live in a locator map keyed by platform: one accessor per element, and no action branches on the platform.
+
+## Template
+
+```typescript
+import { $, browser } from '@wdio/globals';
+import type { ChainablePromiseElement } from 'webdriverio';
+
+export abstract class BaseWindow {
+  private static readonly TIMEOUT_MS = 10_000;
+
+  protected byTestId(id: string): ChainablePromiseElement {
+    return $(`~${id}`);
+  }
+
+  protected async waitUntilDisplayed(element: ChainablePromiseElement, what: string): Promise<void> {
+    await browser.waitUntil(() => element.isDisplayed(), {
+      timeout: BaseWindow.TIMEOUT_MS,
+      timeoutMsg: `Expected ${what} to be displayed within ${BaseWindow.TIMEOUT_MS} ms`,
+    });
+  }
+
+  abstract verifyWindowLoaded(): Promise<void>;
+}
+```
+
+```typescript
+import { expect } from '@wdio/globals';
+import { BaseWindow } from './BaseWindow.js';
+import { AlbumRow } from './AlbumRow.js';
+
+export class LibraryWindow extends BaseWindow {
+  private static readonly ROOT_ID = 'Library.Window';
+  private static readonly SEARCH_ID = 'Library.SearchField';
+  private static readonly ALBUM_TABLE_ID = 'Library.AlbumTable';
+
+  private get root() { return this.byTestId(LibraryWindow.ROOT_ID); }
+  private get search() { return this.byTestId(LibraryWindow.SEARCH_ID); }
+  private get albumTable() { return this.byTestId(LibraryWindow.ALBUM_TABLE_ID); }
+
+  async verifyWindowLoaded(): Promise<void> {
+    await expect(this.root).toBeDisplayed({ message: 'Expected LibraryWindow to be visible but Library.Window was not found' });
+  }
+
+  async searchFor(text: string): Promise<void> {
+    await this.search.setValue(text);
+  }
+
+  albumAt(position: number): AlbumRow {
+    return new AlbumRow(this.albumTable, position);
+  }
+}
+```
+
+The scoped row is re-resolved from its container on each call, because a Windows `AutomationId` repeats across rows and is unique among siblings only:
+
+```typescript
+import type { ChainablePromiseElement } from 'webdriverio';
+
+export class AlbumRow {
+  private static readonly ROW_ID = 'Library.Row';
+  private static readonly TITLE_ID = 'Library.Row.Title';
+
+  constructor(private readonly table: ChainablePromiseElement, private readonly position: number) {}
+
+  private get row() { return this.table.$$(`~${AlbumRow.ROW_ID}`)[this.position]; }
+  private get title() { return this.row.$(`~${AlbumRow.TITLE_ID}`); }
+
+  async titleText(): Promise<string> {
+    return this.title.getText();
+  }
+
+  async open(): Promise<void> {
+    await this.row.doubleClick();
+  }
+}
+```
+
+On macOS a row that combines its children (`.accessibilityElement(children: .combine)`) exposes only the row id: read the row's own `label` or `value` and drop the child accessor.
+
+A fallback (no id yet): name the constant `*_FALLBACK`, use a label or native query before XPath, and add the row to `missing-testids.md`. This one is Windows, where `name=` reads the UIA `Name`; on Mac2 `name` is the `identifier`, so a macOS label fallback is a `predicate string` on `label`:
+
+```typescript
+private static readonly EXPORT_BUTTON_FALLBACK = 'Export…';
+private get exportButton() { return $(`name=${ExportDialog.EXPORT_BUTTON_FALLBACK}`); }
+```
+
+## Multi-window and dialogs
+
+- **A window object is bound to one window.** The action that opens another window returns the destination's object, and the destination's constructor or `verifyWindowLoaded()` switches to it. Switching is a helper in `BaseWindow`, never inline in a test.
+- **Mac2:** find the window with `driver.executeScript('macos: listWindows', [])` (driver 4.5.0 and later) and match on `title`. **WinCore:** `driver.getWindowHandles()` omits untitled windows, so use `windows: getWindows` and match on `title` or `className`, then `driver.switchToWindow(handle)`.
+- Switch back to the previous window object after a dialog closes: the action that confirms or cancels returns the parent window's object.
+- Wait for the destination's landmark, never for a duration. A dialog that must appear is asserted with `waitUntil` on the window count or on its landmark, with a message naming the dialog.
+- A system panel (open/save, permission) is another process: model it as its own small object with ids read from its tree, or report it. A UAC prompt is never driven.
+- A quit with unsaved work is asserted: the confirmation prompt appears, then the test chooses.
+
+## Waits
+
+`BaseWindow.waitUntilDisplayed` and the `waitFor*` element commands (`waitForDisplayed`, `waitForEnabled`) are the only waits. Add a new wait to the base class, never inline in a window object or a spec, and no `browser.pause` anywhere. The timeout message names the element and the window.
+
+## Procedure
+
+1. **Check for an existing object.** Glob `**/src/windows/<Window>.ts`. Exists → **update** (step 4). The project has no `src/windows/` → run `qa/typescript/skills/desktop-project-setup` first.
+2. **Map each element to a constant and accessor** by its rung. Test-id elements use `byTestId`; fallbacks are `*_FALLBACK` with a `missing-testids.md` row. Each repeating group becomes a scoped component addressed inside its container.
+3. **Write the class** per the conventions: constants, `private get` accessors, `verifyWindowLoaded()` on the landmark, one intent-named `async` action per user action, one query method per datum a test reads. Stub any destination window that does not exist.
+4. **Update mode, diff before writing:**
+   - New element, not in the class → add constant and accessor or action.
+   - Constant in the class, element gone from the window → flag and **ask** before deleting (it may belong to a state not reached).
+   - An id changed → update the constant and note it as a breaking rename.
+   - A fallback where an id now exists → upgrade to `byTestId`, rename, remove the row from `missing-testids.md`.
+   - Never reorder or rename public methods tests already call without flagging it.
+5. **Verify:** `npx tsc --noEmit` clean. Confirm the landmark matches what the explorer reported.
+6. **Report:** class created or updated (diff summary), counts (id-backed / fallback / ⚠ XPath), destination stubs, open questions.
+
+## Rules
+
+- **Discovery is not this skill's job**: never invent a locator.
+- One class per window; update in place rather than creating a duplicate.
+- A window object takes no driver; `$` appears only in `BaseWindow` and scoped components. The only assertion inside an object is `verifyWindowLoaded()`.
+- Everything else is the rule files named under Conventions; where they and this skill disagree, the rule files win.
+
+## Handoffs
+
+- Discovering the elements → `qa/typescript/skills/desktop-screen-explorer`
+- Scaffold and OS prerequisites → `qa/typescript/skills/desktop-project-setup`
+- Writing the tests → `qa/typescript/skills/ui-test-author/appium`
+- Object architecture (base classes, sub-folders) → `qa/typescript/skills/page-object-design`
+- Missing ids → the `desktop-macos` or `desktop-windows` agent
+- Shared rules → `qa/_shared/desktop-testing`
+- Java / .NET siblings → `qa/java/skills/desktop-window-objects` / `qa/dotnet/skills/desktop-window-objects`

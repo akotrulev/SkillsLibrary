@@ -1,8 +1,8 @@
 ---
 paths:
-  - "**/{apitests,api-tests,uitests,ui-tests,mobiletests,mobile-tests,e2e,e2e-tests,acceptance-tests,test-automation}/**/*.java"
-  - "**/src/{test,integrationTest}/java/**/{tests,pages,pom,screens,components,flows,clients,models,steps,stepdefs,hooks,support,builders,mothers,probes,seeders,llm}/**/*.java"
-  - "**/src/main/java/**/pom/**/*.java"
+  - "**/{apitests,api-tests,uitests,ui-tests,mobiletests,mobile-tests,desktop-tests,e2e,e2e-tests,acceptance-tests,test-automation}/**/*.java"
+  - "**/src/{test,integrationTest}/java/**/{tests,pages,pom,screens,windows,components,flows,clients,models,steps,stepdefs,hooks,support,builders,mothers,probes,seeders,llm}/**/*.java"
+  - "**/src/main/java/**/{pom,windows}/**/*.java"
   - "**/src/gatling/**/*.java"
 ---
 

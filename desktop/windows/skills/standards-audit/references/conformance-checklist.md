@@ -426,3 +426,31 @@ Not applicable without P/Invoke, COM or C++ projects.
 | X22 | C++/WinRT build support is the NuGet package, current and not experimental `[C++]` | A `.vcxproj` with `<CppWinRTEnabled>` and no `Microsoft.Windows.CppWinRT`; a prerelease CppWinRT or Windows App SDK package; `CppWinRTOptimized` turned off | `rg -n "Microsoft.Windows.CppWinRT\|CppWinRTEnabled\|CppWinRTOptimized" -g '*.vcxproj' -g '*.props'` | minor |
 
 ---
+
+## Section index
+
+| § | Section | Rows | Owner |
+|---|---|---|---|
+| A | Version lane, toolchain & migration hygiene | A1–A7 | `project-setup`, `migration`, `basics` |
+| B | Project structure, strictness & language standard | B1–B12 | `project-setup`, `basics` |
+| C | Architecture, state & DI | C1–C12 | `architecture` |
+| D | UI components & platform conventions | D1–D23 | `ui-components`, `wpf`, `winforms` |
+| E | Styling, theming, motion & adaptive layout | E1–E11 | `styling` |
+| F | Windows, navigation & commands | F1–F13 | `windows-and-navigation` |
+| G | Forms & input | G1–G13 | `forms` |
+| H | Networking & realtime | H1–H11 | `networking` |
+| I | Storage, documents & sync | I1–I13 | `offline-and-storage` |
+| J | Platform integration, permissions & background | J1–J22 | `platform-integration`, `activation-and-notifications` |
+| K | Security | fragment | `desktop/_shared/security` |
+| L | Distribution & store compliance | fragment | `desktop/_shared/distribution` |
+| M | Accessibility | M1–M13 | `accessibility` |
+| N | Performance | N1–N11 | `performance` |
+| O | Error resilience | O1–O16 | `error-handling` |
+| P | Localization | P1–P10 | `languages` |
+| R | Testability & test ids | R1–R10 | `test-ids` |
+| S | Dev-side tests | S1–S12 | `unit-testing` |
+| U | Observability & logging | fragment | `desktop/_shared/observability` |
+| V | Comments & KISS | V1–V8 | `engineering-practices/code-comments`, CLAUDE.md § Simplicity |
+| X | Interop & native code | X1–X22 | `interop`, `cpp-winrt` (N/A without P/Invoke, COM or C++ projects) |
+
+Sections Q (motion) and T (release) are unused: motion is in E, release in L. Fragment sections hold the rows of their `audit-checks.md` whose `Platforms` column names `windows`. **Lane tags:** the `[C++]` rows are B12, C12, N1, S1 and X13–X22 (14 rows); they are reported only against C++/WinRT projects, and every other row is reported against C# projects in its own idiom. `[WinUI]`, `[WPF]` and `[WinForms]` rows are reported only in their lane.
