@@ -623,6 +623,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 - Write both checklist skeletons per §8.2. The V rows are adapted from the mobile-ios checklist's V rows, with the platform globs.
 - **Not in C1:** any skill body, the marketplace (I1), the map row and catalog (G1).
 
+**As built (2026-11-15):** as planned, no divergence. `CLAUDE.md:237` `## Desktop code rules` (§5 verbatim, from `Both platforms:` to the W4 note); `CLAUDE.md:316` under-construction line now lists `desktop/`, `auth/auth0-macos`, `auth/auth0-windows`. Tree: `desktop/{macos,windows}/{skills,agents,commands}/.gitkeep` and `desktop/_shared/.gitkeep` (the first task writing into each folder deletes its `.gitkeep`). Skeletons: `desktop/{macos,windows}/skills/standards-audit/references/conformance-checklist.md`, 21 `##` headings each (A–P, R, S, U, V, X; no Q or T), rows only in V (V1–V8). K, L, U point at `desktop/_shared/<skill>/references/audit-checks.md` by the `Platforms` column; X on macOS says N/A. Empty sections carry the owner line and the table header, so each skill task appends rows under it. The skeletons have no closing `## Section index`; each platform's last task writes it (§8.2). Unverified: nothing was run (Gate: none).
+
 ### S1 — shared: distribution
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -902,38 +904,9 @@ Run them one Plan Queue session each; every block is complete on its own. After 
 | G1 | `docs` | `general-purpose` | I1 | — | ~140k |
 | — | add `desktop` to rule 1's stack list in `~/.claude/CLAUDE.md` (D13), and enable `desktop-<os>` in a real project to try the agent | **the user** | G1 | — | — |
 
-No task has landed; every prompt below is live.
+C1 has landed; every other prompt below is live.
 
 ---
-
-### C1 — the desktop domain, the code rules and the checklist skeletons (general-purpose, docs)
-
-````
-Depends on: none
-Agent: general-purpose · Stack: docs
-
-Task C1 of docs/plans/012-desktop-plugins.md: create the `desktop/` domain, put the Desktop code rules into CLAUDE.md, and write the two conformance-checklist skeletons.
-
-Deliverable: `CLAUDE.md` has `## Desktop code rules` (§5 verbatim) and lists `desktop/`, `auth/auth0-macos`, `auth/auth0-windows` as under construction; `desktop/{macos,windows}/{skills,agents,commands}/` and `desktop/_shared/` exist; both `desktop/<os>/skills/standards-audit/references/conformance-checklist.md` skeletons hold every §8.1 heading with its owners and rows only in V.
-
-Read, in this order:
-1. CLAUDE.md (§ Mobile code rules and the Repository map's under-construction line, `CLAUDE.md:266`).
-2. The plan: §2, §5, §8.1–§8.2, D6, D11, and "Close-out — every task".
-3. `mobile/ios/skills/standards-audit/references/conformance-checklist.md`: its header text and section V only.
-
-Do:
-- Insert §5 into CLAUDE.md directly after § Mobile code rules, verbatim. Add `desktop/`, `auth/auth0-macos`, `auth/auth0-windows` to the under-construction line.
-- Create the §2 tree. Git tracks no empty folders: put a `.gitkeep` in each empty one.
-- Write both checklist skeletons per §8.2: the header adapted to macOS / Windows, every §8.1 section heading with its owners (K, L, U say they take the `desktop/_shared/<skill>/references/audit-checks.md` rows whose `Platforms` column names the platform; X on macOS says N/A), and V rows adapted from mobile-ios's V rows with the §8.2 globs.
-
-Traps:
-- Q and T are unused letters (D6): do not write those headings.
-- Do not touch the marketplace, `docs/skills-catalog.md` or README (I1, G1).
-
-Gate: none. Documents only; the plan gates once, in G1.
-Commit: `feat(desktop): domain skeleton, Desktop code rules, checklist skeletons (012 C1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S1 — shared: distribution (general-purpose, docs)
 

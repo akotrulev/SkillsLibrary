@@ -234,6 +234,56 @@ Per stack:
   dispatchers injected. No `!!` outside tests. KSP, never kapt. Room / DataStore over raw SQLite /
   `SharedPreferences`. R8 full mode and a Baseline Profile in release builds.
 
+## Desktop code rules
+
+Both platforms:
+
+- **Platform conventions first.** The app looks and behaves like its OS: native menus, title bar, controls, system fonts and the OS's standard shortcuts. It is never a web page in a window and never imitates the other OS. Design facts come from `design/ui-ux-pro-max` (`--stack swiftui | winui | wpf`).
+- **Keyboard-first.** Every command is reachable from the keyboard, focus order is complete and visible, and standard shortcuts are kept. On macOS every command lives in the menu bar in the standard order, with unavailable items disabled, never hidden. On Windows commands carry access keys and accelerators.
+- **Windows are resizable, restore their size and position, and survive monitor and DPI changes.** Several windows on the same data share one source of truth, never a copy per window.
+- **The UI thread never blocks**: no disk, network, database or heavy compute on the main actor or the dispatcher thread. Results return to it through the platform's mechanism (`@MainActor`, `DispatcherQueue.TryEnqueue`).
+- **Lifecycle is part of the requirement.** Work a window starts is cancelled when it closes. Wake from sleep, a network change and window reactivation trigger a revalidate. Quitting with unsaved work asks first, and relaunch restores state.
+- **Every data region has loading / loaded / failed states, plus stale and offline.** A failure is scoped to the response-dependent subtree. It raises one persistent banner inside the window content (an inline banner on macOS, an `InfoBar` on WinUI) that only the user dismisses. A background failure never raises a modal alert.
+- **Least privilege.** Ship sandboxed: App Sandbox on macOS, packaged MSIX with minimal capabilities on Windows. Never require admin or root. Every entitlement and capability carries a recorded reason.
+- **Secrets never ship in the binary, `Info.plist`, `appsettings.json` or plain files.** Tokens live only in the Keychain, `PasswordVault` or DPAPI. Nothing sensitive goes in logs, `UserDefaults` or settings storage.
+- **Permissions** (macOS TCC, Windows privacy consent) are asked at the moment of use. The denied path is a working screen that links to the system settings page.
+- **Only signed, verified updates.** On macOS: Developer ID + notarization + a Sparkle EdDSA feed, or the Mac App Store. On Windows: the Store, or MSIX / Artifact-Signed binaries with a signed feed. An update never restarts the app over unsaved work.
+- **Embedded web content is locked down** (`WKWebView`, WebView2): a navigation allowlist, no devtools in release, and every bridge message validated as untrusted input. So are URL schemes, file activation and IPC messages.
+- **Accessible by default.** Every interactive element is labelled (`accessibilityLabel`, `AutomationProperties.Name`). Increase Contrast / High Contrast, Reduce Motion / animation effects and Reduce Transparency are honoured. Text scales wherever the platform offers it, and no state is shown by colour alone.
+- **Every interactive element and list container carries the platform's test id**: `accessibilityIdentifier` (macOS) or `AutomationProperties.AutomationId` (Windows). Ids are PascalCase dot-separated and static, **never the accessibility label**.
+- Constructor / initializer injection only; no service locator; no static mutable state; async all the way, never blocking on a result.
+- **Dev-side tests** cover the logic the agent writes: Swift Testing; NUnit for view models and services, and the MSTest WinUI Unit Test App only for code that needs XAML types (D8); the C++ lane's framework (W4). The floor is ≥ 80% of branches in Test code rules, or lines on Swift. Desktop E2E belongs to the `qa-desktop-<lang>` peer.
+- Never up-level a toolchain, SDK, TFM, deployment target or Windows App SDK major as a side effect of other work.
+
+Per platform:
+
+- **macOS (Swift):**
+  - Swift 6 mode and the concurrency rules of § Mobile code rules (iOS).
+  - SwiftUI first; AppKit where the codebase is AppKit.
+  - Settings live in a `Settings` scene. Commands read focused state through `@FocusedValue`. Open windows with `openWindow`.
+  - File access goes only through open/save panels and security-scoped bookmarks, with start/stop balanced. Full Disk Access is never assumed.
+  - Login items and helpers use `SMAppService`; IPC uses XPC.
+  - Developer ID builds use Hardened Runtime and are notarized and stapled. Mac App Store builds have no self-updater and no licence keys.
+  - A universal binary is a decision tied to the deployment target.
+  - Use `os.Logger` only.
+- **Windows (C#):**
+  - New apps use WinUI on Windows App SDK 2.x; WPF and WinForms codebases stay what they are.
+  - MVVM with CommunityToolkit.Mvvm source generators. DI through `Microsoft.Extensions.Hosting` or constructor wiring, never a locator.
+  - Use `x:Bind` over `{Binding}`.
+  - Packaged MSIX by default.
+  - Single instancing through `AppInstance`, never a hand-rolled mutex. Use the Windows App SDK pickers.
+  - Experimental-channel APIs never ship.
+  - Lists are virtualized.
+  - Structured logging through `ILogger`.
+- **Windows (C++/WinRT):**
+  - Use `winrt::com_ptr` and value types; no raw `new`/`delete`.
+  - A coroutine that touches `this` after a suspension holds `get_strong()` or `get_weak()`.
+  - Return to the UI thread through `wil::resume_foreground` / the dispatcher queue.
+  - `winrt::hresult_error` is handled at the boundaries.
+  - Warnings are errors.
+
+  W4 verifies each C++ rule against current Microsoft docs and rewrites this bullet in `CLAUDE.md` if a fact differs.
+
 ## Backend code rules
 
 - One pattern per problem — flag stacking (e.g. Repository + Unit-of-Work + Specification + Mediator + Decorator on one CRUD slice) as a smell in reviews, per the global Pattern-application rule.
@@ -263,5 +313,5 @@ Each top-level folder owns a domain, is **stack-first and domain-encapsulated** 
 | `tooling/` | Agent-drivable surfaces over a project — capability contract → MCP server / CLI | `tooling` |
 | `engineering-practices/` | Language-agnostic developer-workflow spine + audit lanes; also `backend/_shared` planning and documentation | `dev` (a dependency of `qa-*`, `fe-*`, `mobile-*`, `be-*`, `devops`, `business-analysis`) |
 
-**Under construction — ignore, do not upload to the remote:** `auth/cognito-{blazor,react}`, `communication/`.
+**Under construction — ignore, do not upload to the remote:** `auth/cognito-{blazor,react}`, `communication/`, `desktop/`, `auth/auth0-macos`, `auth/auth0-windows`.
 
