@@ -1,6 +1,6 @@
 # C++/WinRT — unit tests and coverage
 
-The decision is recorded as D16 in `docs/plans/012-desktop-plugins.md`. Sources checked 2026-11-15 on learn.microsoft.com and github.com: Test apps built with the Windows App SDK and WinUI 3 (2026-09-10), the Microsoft Unit Testing Framework for C++ API reference (page dated 2019, in VS 2022/2026 docs), Create and run unit tests with Google Test for C++, Determine code testing coverage, Microsoft.CodeCoverage.Console, the LLVM Source-based Code Coverage page, the OpenCppCoverage README.
+The decision is recorded as D16 in `docs/plans/implemented/012-desktop-plugins.md`. Sources checked 2026-11-15 on learn.microsoft.com and github.com: Test apps built with the Windows App SDK and WinUI 3 (2026-09-10), the Microsoft Unit Testing Framework for C++ API reference (page dated 2019, in VS 2022/2026 docs), Create and run unit tests with Google Test for C++, Determine code testing coverage, Microsoft.CodeCoverage.Console, the LLVM Source-based Code Coverage page, the OpenCppCoverage README.
 
 ## Framework: GoogleTest
 

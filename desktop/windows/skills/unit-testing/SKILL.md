@@ -1,6 +1,6 @@
 ---
 name: unit-testing
-description: Use when Windows app logic needs a dev-side unit test: view models, services, NUnit, fakes, TimeProvider, the WinUI Unit Test App, coverage. Triggers "unit-test this view model". Not for E2E (qa-desktop-dotnet).
+description: Use when Windows app logic needs a dev-side unit test: view models, services, NUnit, fakes, TimeProvider, WinUI Unit Test App. Triggers "unit-test this view model". Not for E2E (qa-desktop-dotnet).
 ---
 
 # Windows — Unit Testing (NUnit + fakes)
@@ -122,7 +122,7 @@ public sealed class OrdersViewModelTests
 
 - A fake is a small class implementing the interface the view model actually depends on, with `Returns(...)` and `Fails(kind)` methods. An interface that has the real service and one fake has two implementations: it is earned (CLAUDE.md § Simplicity).
 - A mock library is for **a call sequence that is the behaviour** (the order of save then notify). Never a mock of `HttpClient`; fake the `HttpMessageHandler` (a `StubHandler` returning a canned `HttpResponseMessage`) for the typed client's own tests.
-- **No in-memory substitute for a database you ship against** (EF `UseInMemoryDatabase`, SQLite standing in for another engine): a unit test over a data layer uses a fake of the data interface; the real-engine behaviour is an integration test in the `be-*` / `qa-api` lane, or a local SQLite test only where SQLite is the shipped store (`desktop-windows:offline-and-storage`).
+- **No in-memory substitute for a database you ship against** (EF `UseInMemoryDatabase`, SQLite standing in for another engine): a unit test over a data layer uses a fake of the data interface; the real-engine behaviour is an integration test in the `be-*` / `qa-api-<stack>` lane, or a local SQLite test only where SQLite is the shipped store (`desktop-windows:offline-and-storage`).
 - Time and random go through `TimeProvider` and an injected seed; `Guid.NewGuid()` in logic goes behind the same seam if a test reads it.
 
 ## The WinUI Unit Test App (code that needs XAML types)

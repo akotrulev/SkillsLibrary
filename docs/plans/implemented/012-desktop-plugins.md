@@ -2,7 +2,7 @@
 
 **Goal:** Two marketplace plugins in one new `desktop/` domain. `desktop-macos` covers Swift, SwiftUI and the AppKit lane. `desktop-windows` covers WinUI on Windows App SDK 2.x with C#, plus WPF, WinForms and C++/WinRT lanes. Each has the library's plugin shape: a coding standard installed as path-scoped rules, the common use-case skills, a step-by-step agent that works on greenfield and brownfield, two commands and a conformance audit. A shared desktop layer (distribution, security, observability) is bundled into both, and native Auth0 skills ship with them. The QA plugins gain a desktop E2E lane: three skills and a `qa-desktop-<lang>` agent in each of `qa-java`, `qa-dotnet` and `qa-typescript`, driven by the same test ids the dev agents emit.
 
-**Status:** Planned 2026-11-15; research is saved beside this plan in `docs/research/012-desktop-plugins/{macos,windows,cross-platform-and-qa}.md`; every fact in §4 comes from those files, verified on 2026-11-15, and the §4.6 items are not verified. **Built:** the `desktop/` domain and code rules (C1), the shared layer and native Auth0 (S1–S3), both desktop plugins complete — `desktop-macos` (M1–M5) and `desktop-windows` (W1–W6, with the C++/WinRT lane, D16) — and the QA desktop shared rules and TypeScript lane (E1). **Next:** G1. I1 (marketplace, surface check, planning lane, QA wiring) landed 2026-11-15. Built but unverified: no agent has been run against a real Mac or Windows app, no desktop E2E suite has run on a real runner, and no library check, surface check or token audit has run on `desktop/` (G1).
+**Status:** Filed 2026-11-15. **Delivered:** the `desktop/` domain and code rules (C1), the shared layer and native Auth0 (S1–S3), `desktop-macos` (M1–M5) and `desktop-windows` (W1–W6, with the C++/WinRT lane, D16), the QA desktop lane in `qa-typescript`, `qa-java` and `qa-dotnet` (E1–E3), the marketplace, surface check, planning lane and QA wiring (I1), and the documentation in `CLAUDE.md`, `docs/skills-catalog.md` and `README.md` (G1). §11's five checks pass. **Built but unverified (facts as of 2026-11-15):** no agent has been run against a real Mac or Windows app, and no desktop E2E suite has run on a real runner. **Next:** the user's global `~/.claude/CLAUDE.md` rule-1 edit (D13), and Q1–Q3.
 
 **Test design:** none. This plan serves no stories (it builds skills, not a product), so it has no `TD` tasks.
 **Documentation task:** none. This library's documentation is `CLAUDE.md`'s map, `docs/skills-catalog.md` and `README.md`, which G1 writes from the files that landed (as plan 002's G1 did). `be-documenter` documents applications, not a skills library.
@@ -885,6 +885,7 @@ Cost: a second test runner family beside NUnit and MSTest (D8), and a lines-base
 - Documentation per §9: § Stack defaults `**Desktop**` line, § Version policy macOS and Windows lines, § Repository map `desktop/` row, the under-construction line, the catalog (recompute the command count, never guess it) and the README.
 - Rewrite `**Status:**` one last time. Name what is delivered and what is unverified: no agent has been run against a real app, no desktop E2E has run on a runner, and the facts are as of 2026-11-15. Name what is next: Q1–Q3, and the user's global-rules edit.
 - **Not in G1:** feature work of any kind.
+- **As built (2026-11-15):** as planned, with these facts. Docs: `CLAUDE.md` § Stack defaults `**Desktop**` line, § Version policy macOS and Windows lines (the Windows line records that .NET 8/9 are flagged for desktop, deviating from the general .NET line, D2), § Repository map `desktop/` row, plugin count 22 → 24, and `desktop/` plus both auth folders left the under-construction line. `docs/skills-catalog.md`: scope paragraph, plugin table row, command surface rows (75 command files, 85 registrations, recomputed: `find`/`git ls-files` over `*/commands/*.md` gives 75; the marketplace `commands` arrays sum to 85; was 68/78), `## Desktop dev catalog`. `README.md`: 24 plugins, install lines, `:rules` row, command table, layout line, status row. Gate (all run from the repo root, in order): 1 `json.tool` exit 0; 2 `plugin-surface-check.py` `OK`; 3 `qa-version-check.py` exit 0; 4 `token-audit.py | grep` first printed four `desktop-windows` descriptions over 200 characters (`unit-testing` 211, `error-handling` 206, `performance` 202, `languages` 202); trimmed each in place under 200; the grep now prints only the two plugin rows of the audit's summary table (`desktop-macos`, `desktop-windows`), no violation line; 5 library check first failed on `unresolved name: desktop/windows/skills/unit-testing/SKILL.md: qa-api` (fixed to `qa-api-<stack>`, W3's file) and on the under-construction line (cleared once the checks passed), then printed `OK`; the whole set reran green. No entry was added to `ALLOW`; it stays `{"data-testid"}`. `docs/plans/implemented/` has no README, so no row. No `D<n>` needed. Built but unverified: as the Status line says. Not committed: the queue commits.
 
 ## Close-out — every task
 
@@ -922,7 +923,7 @@ block and the line that says which have landed.
 
 ## Prompts — one per task
 
-Run them one Plan Queue session each; every block is complete on its own. After C1, the tasks S1, S2, S3, M1 and W1 run side by side. The M chain and the W chain then each run in order, because each chain shares one checklist file. E1 waits for M4 and W5. E2 and E3 run beside each other. I1 has landed; G1 runs last. Only G1 runs anything (§11): no other block runs `tools/token-audit.py`, `tools/plugin-surface-check.py`, `tools/qa-version-check.py`, §11's script, a linter or a build. Counting your own files with `wc -m` is allowed. No block edits `docs/plans/implemented/**`, `docs/audits/**` or `docs/research/**`. **Unattended sessions refuse some shell forms** (plan 001): no brace expansion, no `$VAR` expansion, no `.sh` files, and nothing written outside the worktree, not even `/tmp`. Scratch work goes in an untracked `scratch/` folder inside the worktree, deleted before committing. This repo commits straight to `master`.
+Run them one Plan Queue session each; every block is complete on its own. After C1, the tasks S1, S2, S3, M1 and W1 run side by side. The M chain and the W chain then each run in order, because each chain shares one checklist file. E1 waits for M4 and W5. E2 and E3 run beside each other. I1 and G1 have landed. Only G1 runs anything (§11): no other block runs `tools/token-audit.py`, `tools/plugin-surface-check.py`, `tools/qa-version-check.py`, §11's script, a linter or a build. Counting your own files with `wc -m` is allowed. No block edits `docs/plans/implemented/**`, `docs/audits/**` or `docs/research/**`. **Unattended sessions refuse some shell forms** (plan 001): no brace expansion, no `$VAR` expansion, no `.sh` files, and nothing written outside the worktree, not even `/tmp`. Scratch work goes in an untracked `scratch/` folder inside the worktree, deleted before committing. This repo commits straight to `master`.
 
 | # | Stack | Agent | Depends on | Runs beside | Budget |
 |---|---|---|---|---|---|
@@ -948,37 +949,6 @@ Run them one Plan Queue session each; every block is complete on its own. After 
 | G1 | `docs` | `general-purpose` | I1 | — | ~140k |
 | — | add `desktop` to rule 1's stack list in `~/.claude/CLAUDE.md` (D13), and enable `desktop-<os>` in a real project to try the agent | **the user** | G1 | — | — |
 
-C1, S1, S2, S3, M1–M5, W1–W6, E1 and E2 have landed; every other prompt below is live.
+Every task has landed; no prompt is left.
 
 ---
-
-### G1 — documentation, the gate and filing the plan (general-purpose, docs)
-
-````
-Depends on: I1
-Agent: general-purpose · Stack: docs
-
-Task G1 of docs/plans/012-desktop-plugins.md: document the desktop domain, run the plan's whole gate, fix what it finds, and file the plan.
-
-Deliverable: `CLAUDE.md`, `docs/skills-catalog.md` and `README.md` describe the desktop domain and the QA desktop lane; §11's five checks pass; this plan is in `docs/plans/implemented/`.
-
-Read, in this order:
-1. CLAUDE.md (§ Stack defaults, § Version policy, § Repository map).
-2. The plan: header, §2, §4.1–§4.2, §9, §11, every task's As built note, `## Decisions` (dated ones too), and "Close-out — every task".
-3. `docs/skills-catalog.md`: the scope paragraph, the slash-command surface table and `## Mobile dev catalog` (the section pattern). `README.md`: the layout line and the status table.
-
-Do:
-- Documentation per §9. Recompute the command count from the marketplace; never guess it.
-- Run §11 steps 1–5 in order. Fix by the fix loop: the whole set once; each failure fixed and rerun with the narrowest command; the whole set once more. A failure may belong to any task above.
-- Justify every `ALLOW` addition in your As built note.
-- Rewrite `**Status:**` one last time per the task block, delete this prompt, and `git mv` the plan to `docs/plans/implemented/012-desktop-plugins.md` with its row in that folder's README if one exists.
-
-Traps:
-- `token-audit.py` exits non-zero on violations that existed before this plan; read the grep (§11 step 4), not the exit code.
-- `desktop/` and the two auth folders leave CLAUDE.md's under-construction line only after the checks pass.
-- After filing, tell the user the remaining steps: the global `~/.claude/CLAUDE.md` rule-1 edit (D13), and Q1–Q3.
-
-Gate (this is the last task, so it runs the whole set once more across the plan, in run order): §11 steps 1–5.
-Commit: `docs: desktop domain in CLAUDE.md, catalog and README; plan 012 gate (012 G1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````

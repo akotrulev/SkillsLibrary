@@ -1,6 +1,6 @@
 ---
 name: performance
-description: Use when a Windows app starts slowly, janks, leaks or ships big: x:Bind, virtualization, handler leaks, Native AOT, trimming, WPR, PerfView. Triggers "it is slow". Not for crash triage (error-handling).
+description: Use when a Windows app starts slowly, janks, leaks or ships big: x:Bind, virtualization, handler leaks, Native AOT, trimming, WPR. Triggers "it is slow". Not for crash triage (error-handling).
 ---
 
 # Windows — Performance

@@ -17,6 +17,7 @@ You are a senior AI engineer and a senior automation QA engineer. You follow bes
 - **Python worker**: Python 3.13 primary / 3.12 and 3.14 supported — only for the one isolated upload-processing worker (Pillow, rembg, VTracer); uv + ruff + mypy `--strict`, pydantic at the boundary
 - **Rust backend**: current stable Rust, edition 2024 (2021 supported) + tokio + axum + sqlx; `thiserror` in modules, `anyhow` only in `main`; lints configured once in `Cargo.toml`
 - **Mobile**: React Native + Expo primary (Expo Router, development builds, EAS) · Swift / SwiftUI (iOS) · Kotlin / Jetpack Compose (Android), with a Kotlin Multiplatform lane — each its own `mobile-*` plugin under `mobile/`
+- **Desktop**: macOS — Swift 6.4 / SwiftUI primary, AppKit lane (`desktop-macos`) · Windows 11 — WinUI on Windows App SDK 2.x with C# on .NET 10 LTS, plus WPF, WinForms and C++/WinRT lanes (`desktop-windows`) — each its own `desktop-*` plugin under `desktop/`; desktop E2E is the `qa-desktop-<lang>` agent in each QA plugin
 - **Test runners**: NUnit (.NET), TestNG (Java), Vitest or Jest (TS), pytest (Python), `cargo test` / cargo-nextest (Rust), Playwright (UI), Appium (mobile); dev-side in mobile apps — Swift Testing (iOS), JUnit 4 + Robolectric (Android), Jest + RNTL (React Native)
 - **JVM build tool**: Gradle (Kotlin DSL) for new projects
 - **Auth**: Auth0 — Authorization Code + PKCE for SPAs, Client Credentials for service-to-service
@@ -147,6 +148,8 @@ Core stack versions:
 - **React 19 primary / 18 tagged fallback** (an 18 pattern is correct for 18, not obsolete); **Next.js 15 primary / 14 fallback** (App Router primary; Pages Router legacy; Vite SPA + React Router 7 is the non-RSC lane).
 - **React Native / Expo: SDK 57 primary** (RN 0.86, React 19.2, Node ≥ 22.13) **/ SDK 55–56 supported / SDK 54 the floor** (last SDK where the legacy architecture can be on — the migration bridge only; below 54 is a finding plus a migration run, never authored for). SDK 58 (beta) becomes primary the day it ships stable. New-Architecture only since RN 0.82.
 - **iOS / Swift: Xcode 27 + Swift 6.4 + iOS 27 SDK primary / Xcode 26.x + Swift 6.2–6.3 supported; deployment target iOS 17 primary / iOS 16 supported** (below 16 is the UIKit lane only, flagged). Swift 6 language mode for new modules; Swift 5-mode modules migrate one module at a time. Never raise a deployment target as a side effect.
+- **macOS / Swift: Xcode 27 + Swift 6.4 + macOS 27 SDK primary / Xcode 26.x + Swift 6.2–6.3 supported; deployment target macOS 15 primary for a new app / macOS 14 supported** (existing apps keep theirs; macOS 13 is the supported floor, below it is the AppKit lane only, flagged; macOS 12 is Xcode 27's hard floor). Swift 6 language mode for new modules. arm64-only only when the target is ≥ 27. The original Developer ID CA expires 2027-02-01: re-sign `.pkg` files with a G2 certificate. Never raise a deployment target as a side effect.
+- **Windows / .NET: Windows App SDK 2.6.x + .NET 10 LTS primary / .NET 11 STS supported; TFM `net10.0-windows10.0.26100.0`, API floor Windows 10 1809.** .NET 8 and 9 are out of support since 2026-11-10 — flag them, never target them (this deviates from the .NET 10 / 8–9 line above for desktop apps). Windows App SDK 1.x is out of support (a migration finding); experimental-channel APIs never ship. WPF and WinForms apps stay what they are; never add WinUI to one as a side effect. Packaged MSIX is the default.
 - **Android / Kotlin: Kotlin 2.4 + AGP 9.4 + Gradle 9.6 primary / Kotlin 2.0–2.3 and AGP 8.x supported in brownfield; compileSdk 37, targetSdk 36, minSdk 24; Compose BOM 2026.09; JDK 21 toolchain (17 minimum).** Play requires new apps and updates to target API 36.
 - **Data engines** (probe the live server, never up-level it): PostgreSQL 18 / 15–17 · SQL Server 2025 / 2022 / 2019 / Azure SQL evergreen · MySQL 8.4 LTS / 9.x / 8.0 · MongoDB 8.0 LTS / 7.0 · Redis 8.x / 7.2–7.4 + Valkey fork · Elasticsearch 9.x / 8.x + OpenSearch 3.x fork; DynamoDB / Cosmos DB track SDK majors + creation-time-immutable constraints.
 
@@ -296,12 +299,13 @@ Per platform:
 
 ## Repository map
 
-Each top-level folder owns a domain, is **stack-first and domain-encapsulated** (a folder's skills are loaded only by its own agents), and ships as one or more marketplace plugins (22 in all). **Bundle within a category, depend across categories:** sharing inside `qa-*`, `fe-*`, `mobile-*` or `be-*` is bundled, and anything several categories use lives in one plugin they declare in `dependencies` (`dev`, `design`). Full per-skill detail is in [`docs/skills-catalog.md`](docs/skills-catalog.md).
+Each top-level folder owns a domain, is **stack-first and domain-encapsulated** (a folder's skills are loaded only by its own agents), and ships as one or more marketplace plugins (24 in all). **Bundle within a category, depend across categories:** sharing inside `qa-*`, `fe-*`, `mobile-*` or `be-*` is bundled, and anything several categories use lives in one plugin they declare in `dependencies` (`dev`, `design`). Full per-skill detail is in [`docs/skills-catalog.md`](docs/skills-catalog.md).
 
 | Folder | Domain | Plugin(s) |
 |---|---|---|
 | `qa/` | Test automation + manual test design, reporting, CI/CD, security scanning | `qa-java` · `qa-dotnet` · `qa-typescript` |
 | `frontend/blazor/`, `frontend/react/` | Frontend dev stacks (+ `design/`, `auth/auth0-*`) | `fe-blazor` · `fe-react` |
+| `desktop/` | Desktop client dev stacks — macOS (Swift / SwiftUI, AppKit), Windows (WinUI / C#, WPF, WinForms, C++/WinRT) + the shared distribution / security / observability layer (+ `design/`, `auth/auth0-{macos,windows}`); desktop E2E lives in the `qa-*` plugins | `desktop-macos` · `desktop-windows` |
 | `mobile/` | Mobile dev stacks — React Native (Expo), iOS (Swift), Android (Kotlin + KMP) + the shared store-compliance / security / release / observability / in-app-purchases layer (+ `design/`, `auth/auth0-{react-native,ios,android}`) | `mobile-react-native` · `mobile-ios` · `mobile-android` |
 | `design/` | Stack-agnostic aesthetic-craft layer | `design` (a dependency of `fe-*` and `mobile-*`) |
 | `backend/` | Design-pattern + persistence dev stacks; the sandboxed Python upload worker (`backend/python/`); Rust services and crates (`backend/rust/`); planning (`solution-planner`) + reverse-docs (`be-documenter`) | `be-dotnet` · `be-java` · `be-node` · `be-python` · `be-rust` |
@@ -314,5 +318,5 @@ Each top-level folder owns a domain, is **stack-first and domain-encapsulated** 
 | `tooling/` | Agent-drivable surfaces over a project — capability contract → MCP server / CLI | `tooling` |
 | `engineering-practices/` | Language-agnostic developer-workflow spine + audit lanes; also `backend/_shared` planning and documentation | `dev` (a dependency of `qa-*`, `fe-*`, `mobile-*`, `be-*`, `devops`, `business-analysis`) |
 
-**Under construction — ignore, do not upload to the remote:** `auth/cognito-{blazor,react}`, `communication/`, `desktop/`, `auth/auth0-macos`, `auth/auth0-windows`.
+**Under construction — ignore, do not upload to the remote:** `auth/cognito-{blazor,react}`, `communication/`.
 

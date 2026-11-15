@@ -6,14 +6,14 @@ A shared library of Claude skills and rules for backend, frontend, DevOps, obser
 
 ### Install as a Claude Code plugin (recommended)
 
-The repo is a Claude Code plugin marketplace of **22 plugins**. Add it once, then install **one plugin per category** for your project — `qa-*`, `fe-*`, `mobile-*`, `be-*` are the categories with several stacks; every other plugin is its own category. Claude Code handles fetching and updates, no cloning or syncing required.
+The repo is a Claude Code plugin marketplace of **24 plugins**. Add it once, then install **one plugin per category** for your project — `qa-*`, `fe-*`, `mobile-*`, `desktop-*`, `be-*` are the categories with several stacks; every other plugin is its own category. Claude Code handles fetching and updates, no cloning or syncing required.
 
 **Shared layers install themselves.** Anything used by more than one category lives in exactly one plugin, and the others declare it as a `dependency`:
 
 | Plugin | Pulls in |
 |---|---|
 | `qa-*` · `be-*` · `devops` · `business-analysis` | `dev` |
-| `fe-*` · `mobile-*` | `dev` + `design` |
+| `fe-*` · `mobile-*` · `desktop-*` | `dev` + `design` |
 | `data` · `tooling` · `training-data` · `penetration-testing` · `security-governance` | nothing |
 
 `dev` is the delivery lane (design, planning, documentation, audits, debugging); `design` is the visual/UX craft layer with the `ui-ux-pro-max` design corpus. Installing a plugin installs its dependencies too; enabling them per project is covered below.
@@ -30,6 +30,8 @@ The repo is a Claude Code plugin marketplace of **22 plugins**. Add it once, the
 /plugin install mobile-react-native@skills-library # React Native + Expo (SDK 57) mobile toolkit
 /plugin install mobile-ios@skills-library          # Swift / SwiftUI iOS toolkit
 /plugin install mobile-android@skills-library      # Kotlin / Jetpack Compose Android toolkit (+ Kotlin Multiplatform)
+/plugin install desktop-macos@skills-library        # Swift / SwiftUI macOS toolkit (+ AppKit lane)
+/plugin install desktop-windows@skills-library      # WinUI / C# Windows 11 toolkit (+ WPF, WinForms, C++/WinRT)
 /plugin install be-dotnet@skills-library           # .NET 10 backend design-pattern + EF Core + Auth0/Cognito toolkit
 /plugin install be-java@skills-library             # Java 21 / Spring Boot backend design-pattern + JPA + Auth0/Cognito toolkit
 /plugin install be-node@skills-library             # Node 24 / TypeScript backend design-pattern + Prisma toolkit
@@ -66,6 +68,7 @@ A model can run them too: asked to "set up this project", it reads `enabledPlugi
 | `/be-dotnet:rules` · `/be-java:rules` · `/be-node:rules` · `/be-python:rules` · `/be-rust:rules` | the stack's source, persistence, test and config files |
 | `/fe-react:rules` · `/fe-blazor:rules` | components, styles, tests, config |
 | `/mobile-ios:rules` · `/mobile-android:rules` · `/mobile-react-native:rules` | the app's source, UI, persistence, tests, localisation |
+| `/desktop-macos:rules` · `/desktop-windows:rules` | the app's source, UI, persistence, tests, localisation |
 | `/qa-java:rules` · `/qa-dotnet:rules` · `/qa-typescript:rules` | test suites, page objects, API clients, test CI jobs |
 | `/data:rules` | SQL, schema and migration files (engine files only for the engines the project uses) |
 | `/devops:rules` | Dockerfiles, compose, Kubernetes/Helm, Terraform/Bicep, build and deploy pipelines, env/config files |
@@ -127,7 +130,7 @@ Three skills are **unregistered and loaded by path only** — they never appear 
 
 **Every skill is already slash-invocable as `/<plugin>:<name>`** — `/design:tokens`, `/business-analysis:stories`, `/qa-<stack>:bug-report-writer`, `/dev:audit-feature` — and the commands below are the agent entry points. Prefer the agent for anything that touches code: an agent's first act is version detection (TFM / React major / engine version / Node major) plus reading existing files for conventions, and a skill invoked directly skips all of it — the exact way a .NET 8 repo ends up with a .NET 10 recipe.
 
-**Naming scheme.** A plugin's front-door command is the plugin's name; every read-only conformance audit is `:audit`; every other command is a short role or topic. 68 command files, 78 registrations.
+**Naming scheme.** A plugin's front-door command is the plugin's name; every read-only conformance audit is `:audit`; every other command is a short role or topic. 75 command files, 85 registrations.
 
 **`qa-java` · `qa-dotnet` · `qa-typescript`** — 12 commands each (`qa-dotnet` has 13 — see `:audit`); substitute your stack for `<stack>`:
 
@@ -166,6 +169,13 @@ The 17 `design` craft skills (`/design:corpus` — **the source of truth for des
 |---|---|---|
 | `/mobile-<stack>` | what to build, fix, or extend | the step-by-step mobile app workflow for that stack |
 | `/mobile-<stack>:audit` | *(none — or a path/section limiter)* | read-only sweep of the app against the plugin's conventions → findings report in `docs/audits/` |
+
+**`desktop-macos` · `desktop-windows`** — 2 commands each:
+
+| Command | Argument | Runs |
+|---|---|---|
+| `/desktop-<os>` | what to build, fix, or extend | the step-by-step desktop app workflow for that platform |
+| `/desktop-<os>:audit` | *(none — or a path/section limiter)* | read-only sweep of the app against the plugin's conventions → findings report in `docs/audits/` |
 
 **`be-dotnet` · `be-java` · `be-node` · `be-python` · `be-rust`** — `be-dotnet` 3 commands, `be-java`, `be-node` and `be-rust` 2, `be-python` 1 (no `:observability`). Note the backend stacks are `dotnet` / `java` / **`node`** / `python` / `rust`, not the QA triplet:
 
@@ -262,6 +272,7 @@ backend/                # Backend dev stacks: dotnet/java/node pattern reference
 data/                   # Per-engine skills (Postgres, SQL Server, MySQL, Mongo, Redis, DynamoDB, Cosmos, Elasticsearch) + shared (migrations, caching, query opt, schema design) + data-architect agent
 frontend/               # Frontend dev stacks: blazor/ (fe-blazor skills + agent), react/ (fe-react skills + agent + bundled rule sets)
 mobile/                 # Mobile dev stacks: react-native/ (Expo, 23 skills + bundled rule set), ios/ (Swift, 23), android/ (Kotlin + KMP, 24), _shared/ (store compliance, security, release, observability, in-app purchases) + the mobile-* agents
+desktop/                # Desktop dev stacks: macos/ (Swift / SwiftUI + AppKit, 25 skills), windows/ (WinUI / C#, WPF, WinForms, C++/WinRT, 25), _shared/ (distribution, security, observability) + the desktop-* agents; desktop E2E is the qa-desktop-* lane in qa/
 business-analysis/      # Cross-feature business-flow reasoning: skills + business-analyst agent
 auth/                   # Auth0 setup per stack
 devops/                 # Platform lane: docker, kubernetes, IaC (Bicep/Terraform), AWS/Azure deploy, CI pipelines, env config + devops-engineer & devops-auditor agents
@@ -455,6 +466,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the templates in [`.skill-template/
 | data                  | authored + shipped — 8 version-aware per-engine skills (postgresql, sqlserver, mysql, mongodb, redis, dynamodb, cosmosdb, elasticsearch) + 4 cross-engine `_shared` skills + the `data-architect` agent; `data` plugin |
 | frontend              | authored + shipped — `frontend/blazor/` (22 skills + `fe-blazor` agent; `fe-blazor` plugin) and `frontend/react/` (24 skills incl. the `standards-audit` self-audit + `fe-react` agent + bundled rule sets; `fe-react` plugin); React Native lives in `mobile/` |
 | mobile                | authored + shipped — `mobile/react-native/` (23 skills + `mobile-react-native` agent), `mobile/ios/` (23 + `mobile-ios`), `mobile/android/` (24 incl. Kotlin Multiplatform + `mobile-android`), each with a `standards-audit` self-audit + `/mobile-<stack>:audit`; 5 `mobile/_shared/` skills bundled within the category into all three; `auth/auth0-{react-native,ios,android}`; `mobile-react-native` · `mobile-ios` · `mobile-android` plugins. Unverified: no agent has been run against a real app |
+| desktop               | authored — `desktop/macos/` (25 skills + `desktop-macos` agent), `desktop/windows/` (25 + `desktop-windows`), each with a `standards-audit` self-audit + 3 `_shared` skills + `auth/auth0-{macos,windows}`; `desktop-macos` and `desktop-windows` plugins, with the `qa-desktop-<lang>` E2E lane in the QA plugins. Unverified: no agent has been run against a real Mac or Windows app and no desktop E2E has run on a runner (facts as of 2026-11-15) |
 | business-analysis     | authored + shipped — 10 skills (authoring + reasoning lanes) + the `requirements-author` and `business-analyst` agents; `business-analysis` plugin |
 | auth                  | scaffolding |
 | devops                | authored + shipped — 9 cloud/CI-keyed skills (docker, kubernetes, infrastructure-as-code, aws-deployment, azure-deployment, github-actions, gitlab-ci, azure-pipelines, environment-config) + the `devops-engineer` (build) and `devops-auditor` (read-only conformance audit, `/devops:audit`) agents, both gated on a tool-stack confirmation before any skill loads; `devops` plugin |
