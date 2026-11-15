@@ -252,7 +252,7 @@ Both platforms:
 - **Accessible by default.** Every interactive element is labelled (`accessibilityLabel`, `AutomationProperties.Name`). Increase Contrast / High Contrast, Reduce Motion / animation effects and Reduce Transparency are honoured. Text scales wherever the platform offers it, and no state is shown by colour alone.
 - **Every interactive element and list container carries the platform's test id**: `accessibilityIdentifier` (macOS) or `AutomationProperties.AutomationId` (Windows). Ids are PascalCase dot-separated and static, **never the accessibility label**.
 - Constructor / initializer injection only; no service locator; no static mutable state; async all the way, never blocking on a result.
-- **Dev-side tests** cover the logic the agent writes: Swift Testing; NUnit for view models and services, and the MSTest WinUI Unit Test App only for code that needs XAML types (D8); the C++ lane's framework (W4). The floor is ≥ 80% of branches in Test code rules, or lines on Swift. Desktop E2E belongs to the `qa-desktop-<lang>` peer.
+- **Dev-side tests** cover the logic the agent writes: Swift Testing; NUnit for view models and services, and the MSTest WinUI Unit Test App only for code that needs XAML types (D8); GoogleTest for the C++/WinRT lane (012 D16). The floor is ≥ 80% of branches in Test code rules, or lines on Swift. Desktop E2E belongs to the `qa-desktop-<lang>` peer.
 - Never up-level a toolchain, SDK, TFM, deployment target or Windows App SDK major as a side effect of other work.
 
 Per platform:
@@ -276,13 +276,14 @@ Per platform:
   - Lists are virtualized.
   - Structured logging through `ILogger`.
 - **Windows (C++/WinRT):**
-  - Use `winrt::com_ptr` and value types; no raw `new`/`delete`.
-  - A coroutine that touches `this` after a suspension holds `get_strong()` or `get_weak()`.
-  - Return to the UI thread through `wil::resume_foreground` / the dispatcher queue.
-  - `winrt::hresult_error` is handled at the boundaries.
-  - Warnings are errors.
+  - Hold a WinRT object as its projected value type and a COM interface or implementation type in `winrt::com_ptr`; create implementation types with `winrt::make` / `make_self`; no raw `new`/`delete`.
+  - A coroutine or handler that touches `this` after a suspension holds `get_strong()` (or `get_weak()`, promoted before use), taken before the first suspension point; coroutine parameters are passed by value.
+  - Return to the UI thread by awaiting the dispatcher queue (`wil::resume_foreground` or `winrt::resume_foreground`); never block on an async operation there.
+  - Expected failures are return values; `winrt::hresult_error` is caught once at the boundary and mapped to the failed state.
+  - Warnings are errors (`/W4 /WX /permissive-`).
+  - Tests are GoogleTest over a XAML-free core library; the floor is 80% of lines, or of branches where `llvm-cov` reports them.
 
-  W4 verifies each C++ rule against current Microsoft docs and rewrites this bullet in `CLAUDE.md` if a fact differs.
+  Verified against learn.microsoft.com on 2026-11-15 (012 W4, D16).
 
 ## Backend code rules
 
