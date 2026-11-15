@@ -5,44 +5,58 @@ description: Use when one area of an existing backend must be traced in depth in
 
 # Feature Trace — recovering behavior from code
 
-Depth, one area at a time. The output is **structured evidence**, not prose: nine inventories, every item with its `file:line`, ready for `dev:doc-business-model` to turn into a user guide — who can do what, in what steps, under which rules — and for the KB models. The guide needs the actors and their permissions, the rules and formulas, the client's words and the refusal texts; the models need the rest.
+One area at a time, in depth. The output is **structured evidence**, not prose: ten inventories, every item with its `file:line`, for `dev:doc-business-model` to turn into a user guide and for the KB models. The guide needs tasks and actors, rules (each with the task a person meets it in), formulas, the client's words and refusal texts; the models need the rest. A **profile** says how much of the rest is recorded (*Two profiles*).
 
-The discipline: **separate what the code does from what you think it means.** Every extracted item is `#observed` with a `file:line` read this session. Intent is a separate, marked layer; where it is not recoverable, the honest output is the behavior plus a question.
+The discipline: **separate what the code does from what you think it means.** Every extracted item is `#observed` with a `file:line` read this session. Intent is a separate, marked layer; where unrecoverable, the output is the behavior plus a question.
 
-**Prerequisite:** a confirmed area from `dev:doc-codebase-survey` (entry points, depth), or `be-feature-documenter`'s confirmed Step 1 scope table.
+**Prerequisite:** a confirmed area from `dev:doc-codebase-survey` or `be-feature-documenter`'s confirmed Step 1 scope table.
 
 ## When to use
 
-- Step 2 of a `be-documenter` run, once the area split is confirmed; a `REFRESH` re-trace of moved code
+- Step 2 of a `be-documenter` run (area split confirmed) or `be-feature-documenter` run (scope table confirmed); a `REFRESH` re-trace of moved code
 - Learning what a module enforces before changing it
 
 ## When NOT to use
 
 - Areas not mapped yet → `dev:doc-codebase-survey`
-- Defect findings with severities → `dev:audit-feature` (same technique; it asks what is wrong, this asks what is true). A defect noticed while tracing is a finding to report — never switch to auditing
+- Defect findings with severities → `dev:audit-feature` (it asks what is wrong, this asks what is true). A defect noticed while tracing is a finding to report — never switch to auditing
 - The readable write-up → `dev:doc-business-model`; this skill produces its evidence
 
 ## Output
 
-Per-area evidence: working material for `be-documenter` Steps 3–4, never a KB artifact or raw content of `docs/business-model/`. Evidence consumed within the session stays there (or in the scratchpad, if the area is large); evidence that must survive it goes to `.trace/`.
+Per-area evidence for the documenter's write step (`be-documenter` Steps 3–4), never a KB artifact or content of `docs/business-model/`; it stays in the session (or scratchpad) unless it must survive it.
 
-**Multi-session runs persist the trace.** When a FULL run spans confirmed sessions, one that ends between Trace and Write would lose its evidence. So a run that will not reach Write in the same session persists each completed area's inventory to **`docs/business-model/.trace/<area>.md`** — working files, never in `INDEX.md`, each opening with:
+**Multi-session runs persist the trace** (`full` profile only; `be-feature-documenter` runs one session). A run that will not reach Write in the same session persists each completed area's inventory to **`docs/business-model/.trace/<area>.md`** — working files, never in `INDEX.md`, each opening:
 
 ```markdown
 **Working trace by `be-documenter` @ <commit> on <date> — not a KB artifact**
 ```
 
-On resume, a persisted trace is a **lead, not evidence**: spot-check three citations at the current commit; if it moved or a check fails, re-trace. Step 5 (Consolidate) deletes `.trace/` once every write-up cites its evidence; a leftover `.trace/` means a run ended before consolidation.
+On resume a persisted trace is a **lead, not evidence**: spot-check three citations at the current commit; if code moved or a check fails, re-trace. Step 5 (Consolidate) deletes `.trace/` once every write-up cites its evidence; a leftover one means a run ended before consolidation.
 
 ---
 
+## Tasks first
+
+Before walking entry points, list what people do. Sources in order — the first that exists leads, the others fill gaps:
+
+1. **The UI in the repository** — routes, navigation, screens, forms, web and mobile (`references/trace-recipes.md` Part 3a).
+2. **Journey tests and `docs/test-cases/` suites**, where the repository has them (Part 5).
+3. **The experience plan** — `docs/plans/<NNN>-<initiative>/experience-plan.md`, its screen ↔ endpoint matrix.
+
+Each **Tasks** row is one goal in the person's words, with its actor, the screen and control that start it, and every entry point it calls.
+
+- A task calls one or more entry points; one entry point can serve several tasks. **The guide's tasks come from this inventory, never one per endpoint.**
+- Every entry point lands in exactly one place: a task's *Entry points it calls*; **automatic work** (a schedule, timeout, consumer or event nobody triggers by hand — its Edges row says what people notice); a **no-screen task** (an API, CLI or webhook a person or partner calls — *Screen › control* is `none — searched …`); or **parked** with a reason.
+- A task found only in a test or plan, whose entry point does not exist, is a finding (planned, not built), not a task.
+
 ## The trace path
 
-For **every** entry point, walk this path in order; each stop answers a different business question, and skipping one loses a category of rule:
+For **every** entry point, walk this path in order, in both profiles — each stop answers a different business question; skipping one loses a category of rule:
 
 | Stop | The business question it answers | What to extract |
 |---|---|---|
-| 1. **Entry point** | What can someone ask the system to do? | The capability, in a verb phrase; who can invoke it |
+| 1. **Entry point** | What can someone ask the system to do? | The capability, in a verb phrase; who can invoke it; the task that reaches it, or automatic work |
 | 2. **Authorization** | Who is allowed to do it? | Roles, permissions, scopes; ownership and tenancy checks ("any user" vs "the owner") |
 | 3. **Input validation** | What counts as a valid request? | Required fields, formats, ranges, allowed values, cross-field rules |
 | 4. **Preconditions & lookups** | What must already be true? | Referenced things that must exist, be visible, be in a permitted state |
@@ -55,150 +69,121 @@ For **every** entry point, walk this path in order; each stop answers a differen
 
 **Follow the call, do not skim the file:** a five-line handler often delegates to twenty conditions. Depth `full` follows calls to where decisions are made; `shallow` stops at stop 5 and says so.
 
-## The nine inventories
+## Two profiles
 
-### 1. Capabilities
-What a user or system can make this area do: one business-language verb phrase each, with actor and entry point, plus the entry point's **contract** in one line (request → response, or the schema file holding it) and its **authorization** string (policy, permission, scope).
+The caller names the profile: `be-documenter` runs `full` (the KB models need every column); `be-feature-documenter` runs `guide` (no models to feed). None named: `full`. **`file:line` stays on every item in both.** A profile is independent of **depth** (`full` / `shallow`, how far calls are followed); the inventory reference says how each inventory reduces under **`guide`**.
 
-> "A customer can cancel an order that has not yet shipped (`OrdersController.cs:88`)" `#observed`
+| Inventory | `full` | `guide` |
+|---|---|---|
+| 1. Tasks | kept | kept |
+| 2. Capabilities | kept | reduced |
+| 3. Business rules | kept | kept |
+| 4. Validations & gates | kept | reduced |
+| 5. Entity states & transitions | kept | reduced |
+| 6. Decision points | kept | kept |
+| 7. Integrations | kept | reduced |
+| 8. Edges | kept | reduced |
+| 9. Configuration & switches | kept | reduced |
+| 10. Tests & telemetry | kept | dropped |
+| Client vocabulary · Intent notes · Findings | kept | kept |
 
-### 2. Business rules
-Every condition, threshold, calculation and eligibility test the code enforces — what the business cares most about, and most likely written nowhere else.
+Under `guide`, tests are still **read** as leads for intent and example values.
 
-| Rule | Condition | Effect | Evidence | Tier |
-|---|---|---|---|---|
-| Refund window | Order closed more than 30 days ago | Refund rejected | `RefundService.cs:88` | `#observed` |
-| Free shipping | Order total ≥ 5000 minor units and tenant has `freeShipping` enabled | Shipping cost set to 0 | `ShippingCalculator.cs:41` | `#observed` |
+## The ten inventories
 
-Write the rule as the business would state it. **Record the number, not a rounding** — "30 days", not "about a month".
+Load `references/inventories.md` before writing any inventory: it has every column list, worked row, `guide` reduction and rule. In brief:
 
-### 3. Validations & gates
-Authorization, input validation, preconditions, state guards — each with its failure in user terms **and** the technical outcome (status or problem type, exception type). Where the person sees a message, **quote the refusal text verbatim** with its source (`"You can't cancel within 24 hours of the session."` — `Resources/Bookings.en.resx:12`); "none shown — searched …" for a bare status.
+### 1. Tasks
+Built first (*Tasks first*).
 
-### 4. Entity states & transitions
-Per owned entity: the states, the moves, who triggers each, and what is blocked — from enums, status columns, guard clauses and the transitions the code *refuses*. **Refusals matter as much as transitions:** a missing arrow is a business rule ("a shipped order never returns to pending"), usually written nowhere else.
+| # | Task (the person's words) | Who | Screen › control | Entry points it calls | Source |
+|---|---|---|---|---|---|
+| 1 | Cancel a booking | Member | Your bookings › Cancel booking | `POST /bookings/{id}/cancel` | `app/bookings/page.tsx:42` |
 
-### 5. Decision points
-Any branch where more than two inputs combine to select an outcome (pricing, eligibility, routing, discounting, risk scoring): the inputs, the combinations, the result of each. Decision tables built from them expose the code's gaps and contradictions.
+Every role, administrators included; an unfound control is `none — searched …`, never a guess.
 
-### 6. Integrations
-Per external system: the trigger, what is sent (business-level, not payload schemas), what comes back, and **what happens when it fails** — timeout, retry, fallback, or unhandled (a finding).
+### 2. Capabilities
+A verb phrase each, with actor, entry point, contract, authorization (`guide`: capability and actor).
 
-### 7. Edges
-Where this area touches another, one hop out. For every emitted event, message, outbox row or notification, find its consumers (`file:line`, owning area). For every written field, find the readers **and other writers**, scheduled jobs' queries included. State how each reaction runs and what happens when it fails.
+### 3. Business rules
+Every condition, threshold, calculation and eligibility test the code enforces; the number, not a rounding. Columns: Rule, Condition, Effect, **Inputs**, **Met in**, Evidence, Tier. *Met in* names the task or automatic work where a person meets the rule; *Inputs* is filled for every calculation, in the client's words, with its rounding, day-count and currency conventions.
 
-| # | Entry point | Kind | Reads | Writes | Also written by | Emits | Reacted to by (one hop out) | Mode | On failure | Evidence |
-|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | `POST /bookings/{id}/cancel` | command | `Booking.status`, `Session.start` | `Booking.status`, `Session.seats_taken` | `Booking.status`: `BookingExpiryJob.cs:31` (Scheduling) | `BookingCancelled` | `BookingCancelledHandler.cs:19` (Credits) | after commit, `?` | `?` | `BookingService.cs:88-104` |
+### 4. Validations & gates
+Authorization, input validation, preconditions, state guards: user-terms failure, technical outcome, refusal text verbatim with source (`guide`: failure and message only).
 
-- **Kind**: `command`, `schedule`, `timeout`, `external`, `event`. **Mode**: `in request`, `after commit, <guarantee>`, `scheduled`, `best effort`. **On failure**: rolls back, retried n× then dead-letter, compensates, unhandled.
-- **A mode or guarantee the code does not show is `?`.** A library name proves nothing: at-least-once only where a retry, redelivery or missing acknowledgement is visible in code or configuration.
-- **A negative claim names its search**: "no consumer of `BookingCancelled` — searched `BookingCancelled`, `booking.cancelled` under `src/`".
-- Stop at one hop; the consumer's own events are its row when its area is traced.
-- **Also record, for the models and for what a person notices:** what runs after commit; the retry count and what follows the last retry; a reaction's delay where the code shows a delay, schedule or poll interval. Anything not shown is `?`.
+### 5. Entity states & transitions
+States, moves, triggers and the transitions the code refuses (a missing arrow is a rule). Per state, record **whether the product shows it to a person** (label and where, or `not shown — searched …`); the guide diagrams only shown states (`guide`: shown statuses only).
 
-### 8. Configuration & switches
-Every configuration key, option class, environment variable name, feature flag and behaviour-changing constant: where defined, default, effect, whether it varies per environment or tenant. **Names only — never a secret's value.** A constant that looks like it should be configurable (cut-off, rate, window) is recorded with its number and is an open question. "None — searched …" is recorded.
+### 6. Decision points
+Branches where more than two inputs select an outcome: inputs, combinations, results.
 
-### 9. Tests & telemetry
-The tests covering the area (path and line, what each covers, what none covers — boundaries especially) and the telemetry emitted (decision-point logs, spans, metrics; library and names). Tests evidence intent, never behaviour. A missing test or telemetry is a technical finding.
+### 7. Integrations
+Per external system: trigger, what is sent and returned, failure behavior (unhandled is a finding), what a person notices (`guide`: that only).
+
+### 8. Edges
+One hop out: every emitted event, message, outbox row or notification with its consumers; every written field with its readers and other writers (`full`). Each row states how the reaction runs and fails; **What people notice** is filled for every row, above all automatic work (`none` where nobody notices). An unshown mode or guarantee is `?`; a negative claim names its search. **Reads, Writes, Also written by and Mode are recorded in the `full` profile only.**
+
+### 9. Configuration & switches
+Every key, option class, environment variable name, flag and behaviour-changing constant: default, effect, variation, who can change it. Names only, never a secret's value (`guide`: value and who can change it).
+
+### 10. Tests & telemetry
+Tests covering the area and telemetry emitted, with gaps (`guide`: not recorded).
 
 ## Harvest the client's words
 
-Record the client's own words, so the guide speaks them: UI copy, resource files, templates, validation text, enum display names, domain terms in docs and tests. Each goes in `Client vocabulary` with where seen, where in the product, and its code name; a code name with no client term gets the search. Where the UI is in the repository, record `screen › control` (`Your orders › Cancel order`) from routes and navigation; else record the search — that row lets the guide take its no-screen form instead of inventing a button. `references/trace-recipes.md` has the per-stack searches.
+Record the client's own words so the guide speaks them: UI copy, resource files, templates, validation text, enum display names, domain terms in docs and tests. Each goes in `Client vocabulary` with where seen, where in the product and its code name; a code name with no client term gets the search. Statuses a person sees are recorded here as shown. Where the UI is in the repository, record `screen › control` (`Your orders › Cancel order`) from routes and navigation; else the search, so the guide takes its no-screen form instead of inventing a button. `references/trace-recipes.md` has the per-stack searches.
 
 ## Evidence rules
 
-- **Every item carries `file:line`, read this session** — not from the cache, a prior run or memory. The map says where to look; only the read is evidence.
-- **Negative claims name their search.** "No rate limiting" is usable only as: *searched for `RateLimit|Throttle|Bucket` across `src/Ordering/**` — no matches* `#observed`.
-- **Tier every item.** `#observed` for behavior; `#inferred` for intent or purpose. Never `#confirmed`.
+- **Every item carries `file:line`, read this session** — not from the cache, a prior run or memory; only the read is evidence.
+- **Negative claims name their search:** *searched for `RateLimit|Throttle|Bucket` across `src/Ordering/**` — no matches* `#observed`, never a bare "no rate limiting".
+- **Tier every item:** `#observed` for behavior, `#inferred` for intent. Never `#confirmed`.
+- **Intent has sources of two kinds.** A purpose **stated** by a story of the plan that built the area (`docs/plans/**/stories.md`, `requirements.md`, `epics.md`, also under `implemented/`; cite `US<n>`/`AC<k>` and `file:line`) or by a `#confirmed` KB entry (cite its id) goes in `Intent notes` with that source as basis, and its question cell reads `none — stated`. Comments, tests, naming and commit messages are **leads**: a probable purpose, the question kept. Stories come from the folder the caller names, else a search of `docs/plans/**` for the area's terms; none found is normal. Where a story and the code disagree, the code is the behavior and the gap is a `contradiction` finding with both readings.
 - **Comments and tests evidence intent, not behavior.** "30-day window per card scheme rules" is a strong `#inferred` *why*; only code evidences *what*. A stale comment contradicting the code is a finding.
-- **Commit history is a source for intent** — `git log -S'<the constant>'` or `git log --follow <file>` often surfaces the ticket. Cite it; still `#inferred` unless the message states the rule outright.
+- **Commit history is a source for intent** — `git log -S'<the constant>'` or `git log --follow <file>` often surfaces the ticket. Cite it; still `#inferred` unless the message states the rule.
 - **Config and flags change the answer.** A rule inside `if (featureFlags.NewPricing)` is conditional: record both branches and which environments run which, or `[TBD - who knows the flag state]`.
 
 ## What to do with things that are not documentation
 
-You are tracing, not auditing; handle what you find like this and keep moving:
-
-| Found | Do |
-|---|---|
-| A defect (wrong calculation, missing check, unhandled failure) | A **finding to report**, with evidence. Never fix it, switch to auditing, or document it as intended behavior |
-| Unreachable code (no route, dead flag, no caller anywhere) | Record it as unreachable; **never document it as a capability** — the most common way generated docs go wrong |
-| A trigger whose caller is outside the repository (a message nothing here publishes, a handler another service calls) | **Not unreachable.** A capability, plus a finding and the open question "who triggers this?" |
-| Two contradicting rules | Both with evidence; escalate — `business-analyst` owns which wins |
-| A rule whose purpose is unrecoverable | The behavior plus an open question — a normal outcome, not a failed trace |
-| Something that should obviously change | Route it to the owning `be-<stack>` agent; you do not change code |
+You trace, not audit. Load `references/trace-record.md` (*Handling what is not documentation*) when you meet a defect, unreachable code, a trigger whose caller is outside the repository, contradicting rules, an unrecoverable purpose, or something that should change. Always: a defect is a finding, never fixed or documented as intended; unreachable code is never a capability; you never change code.
 
 ## Trace record shape
 
-```markdown
-## Area: <name> — trace evidence
-**Traced:** YYYY-MM-DD · **Depth:** full | shallow · **Commit:** <sha>
-**Entry points covered:** <n>/<n> — <any not covered, and why>
+Load `references/trace-record.md` before writing the record or a persisted `.trace/<area>.md`: the full template, one section per inventory plus `Client vocabulary`, `Intent notes (#inferred)` and `Findings (not documentation)`.
 
-### Capabilities
-| # | Capability | Actor | Entry point | Evidence |
+Header: `**Traced:** YYYY-MM-DD · **Depth:** full | shallow · **Profile:** full | guide · **Commit:** <sha>`.
 
-### Business rules
-| # | Rule | Condition | Effect | Evidence | Tier |
-
-### Validations & gates
-| # | Check | Applies to | On failure (user-visible) | Exact message shown (verbatim, source) | Evidence |
-
-### Entity states
-| Entity | States | Transitions (trigger → from → to) | Refused transitions | Evidence |
-
-### Decision points
-| # | Decision | Inputs | Outcomes | Evidence |
-
-### Integrations
-| System | Trigger | Sends | Expects | On failure | Evidence |
-
-### Edges
-| # | Entry point | Kind | Reads | Writes | Also written by | Emits | Reacted to by (one hop out) | Mode | On failure | Evidence |
-
-### Configuration & switches
-| # | Key / constant | Defined at | Default | Effect | Varies by | Evidence |
-
-### Tests & telemetry
-| # | Kind (test / log / span / metric) | Name / path | Covers | Gap | Evidence |
-
-### Client vocabulary
-| Client term | Where seen | Where in the product (screen › control) | Code name |
-
-### Intent notes (`#inferred`)
-| Observation | Probable purpose | Basis (comment / test / commit / naming) | Question for the business |
-
-### Findings (not documentation)
-| # | What | Evidence | Kind (defect / unreachable / contradiction / stale comment) |
-```
 
 ## Self-check before handing off
 
-1. Every entry point the ledger assigns to this area is traced, or listed as not traced with a reason.
-2. Every inventory item has `file:line` read this session; every negative claim names its search.
-3. Every item is tiered; no `#confirmed`.
-4. The domain-rules inventory is not empty, or the area is declared a pass-through — an empty rules table usually means the trace stopped at stop 5.
-5. Refused state transitions are recorded, not only permitted ones.
-6. Every integration has a stated failure behavior, including "unhandled".
-7. Findings sit in the findings list, out of the documentation stream.
-8. Every emitted event has its reactors, or a negative search naming what was searched.
-9. Every written field has its readers and other writers, jobs' queries included.
-10. Every reaction states its mode and failure behavior, or `?` — never a guessed guarantee.
-11. Configuration and constants are inventoried (or a negative search recorded); no secret value is written.
-12. Tests and telemetry are inventoried with their gaps, or a negative search recorded.
-13. Client words are in `Client vocabulary`; every user-facing refusal quotes its exact text and source (or the search that found none).
+1. Tasks are built from the sources in order, each with its actor and entry points — not one per endpoint.
+2. Every entry point the ledger assigns to this area is traced and sits in a task, automatic work, a no-screen task, or is listed as not traced / parked with a reason.
+3. Every inventory item has `file:line` read this session; every negative claim names its search.
+4. Every item is tiered; no `#confirmed`.
+5. The rules inventory is not empty, or the area is declared a pass-through — an empty table usually means the trace stopped at stop 5.
+6. Every rule says where a person meets it; every calculation lists its inputs in the client's words and its conventions.
+7. Refused state transitions are recorded, not only permitted ones; every status says whether the product shows it to a person.
+8. Every integration has a stated failure behavior, including "unhandled" (`guide`: as the person experiences it).
+9. Findings sit in the findings list, out of the documentation stream.
+10. Every emitted event has its reactors, or a negative search naming what was searched.
+11. Every piece of automatic work says what each person notices, or `none`.
+12. `full`: every written field has its readers and other writers, jobs' queries included.
+13. `full`: every reaction states its mode and failure behavior, or `?` — never a guessed guarantee.
+14. Configuration and constants are inventoried (or a negative search recorded); no secret value written.
+15. `full`: tests and telemetry are inventoried with their gaps, or a negative search recorded.
+16. Client words are in `Client vocabulary`; every user-facing refusal quotes its exact text and source (or the search finding none).
+17. A purpose from a story or `#confirmed` entry carries its source and no question; every other purpose is `#inferred` with its question.
 
 ## Handoffs
 
-- **→ `business-analysis:process-flow`** — orchestration and failure paths become `FLOW-nnn` diagrams.
-- **→ `business-analysis:state-grid`** — inventory 4 becomes `ENT-nnn` state × event grids; refused transitions are its meaningful `—` cells.
-- **→ `business-analysis:decision-table`** — inventory 5 becomes `DEC-nnn` tables with a declared hit policy; completeness exposes the combinations the code never handles.
-- **→ `business-analysis:dependency-map`** — Edges become `events.md`, `shared-data.md`, `invariants.md`; `be-documenter` writes them, `be-feature-documenter` does not.
-- **→ `dev:doc-business-model`** — the guide: capabilities by actor (every role, administrators included), rules and decisions, client vocabulary with its screen paths, exact refusal text; Edges become the guide's *Related areas*.
-- **→ `code-auditor`** — the findings list, through the run's report; it never lands in the guide.
-- **→ `qa-test-case-designer`** — rules and validations are a test basis; thresholds are BVA seeds.
+- **→ `business-analysis:process-flow`** (`full`) — orchestration and failure paths become `FLOW-nnn` diagrams.
+- **→ `business-analysis:state-grid`** (`full`) — inventory 5 becomes `ENT-nnn` state × event grids; refused transitions are its `—` cells.
+- **→ `business-analysis:decision-table`** (`full`) — inventory 6 becomes `DEC-nnn` tables with a declared hit policy; completeness exposes combinations the code never handles.
+- **→ `business-analysis:dependency-map`** (`full`) — Edges become `events.md`, `shared-data.md`, `invariants.md`; `be-documenter` writes them, `be-feature-documenter` does not.
+- **→ `dev:doc-business-model`** — the guide: Tasks as the guide's tasks by actor (every role, administrators included); rules with where a person meets them (*Rules and limits*); calculations with inputs (*How it is calculated*); automatic work as what each person notices; statuses and whether the product shows them (state diagram only then); decisions; client vocabulary with screen paths; exact refusal text; stated purposes; Edges become only the guide's *See also*.
+- **→ `code-auditor`** — the findings list, through the run's report; never the guide.
+- **→ `qa-test-case-designer`** — tasks, rules and validations are a test basis; thresholds are BVA seeds.
 
 ## Version policy
 
-Where rules hide is **stack- and version-specific** — `references/trace-recipes.md` has the per-stack searches, keyed to `CLAUDE.md`'s Stack defaults: **.NET 10 / 8-9** · **Java 21 + Spring Boot 3.x** · **Node 24 / 22**. Take stack and version from orientation; searching for idioms the version does not use silently under-reports rules.
+Rules hide in **stack- and version-specific** places; `references/trace-recipes.md` has the per-stack searches, keyed to `CLAUDE.md`'s Stack defaults: **.NET 10 / 8-9** · **Java 21 + Spring Boot 3.x** · **Node 24 / 22**; for screens, **React 19 / 18** (Next.js App Router, Vite + React Router) · **Blazor** · **React Native / Expo Router (SDK 57 primary)** · **SwiftUI** · **Jetpack Compose**. Take stack and version from orientation; idioms the version lacks under-report rules.

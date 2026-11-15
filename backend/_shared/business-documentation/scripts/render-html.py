@@ -10,15 +10,23 @@
 
 Usage:
   render-html.py --out <dir> <file.md>...   render the named guides
-  render-html.py --out <dir> --dir <folder> render every guide under <folder> whose Audience is shareable
+  render-html.py --out <dir> --dir <folder> render every guide or delivery note under <folder> that is shareable
 
-One <name>.html per input, written to --out; nothing is written anywhere else and nothing is committed.
+A file is shareable when its closing stamp comment ("<!-- guide · … · audience: shareable -->" or
+"<!-- delivery · … -->") says so; a guide still in the earlier shape, with no stamp comment, is shareable when
+its "**Audience:** shareable" line says so. A file with neither is skipped by --dir; a file named on the command
+line is rendered as given.
+
+One <name>.html per input, written flat to --out; nothing is written anywhere else and nothing is committed.
+Render a delivery note's folder and the guides it links to into the same --out, and its links to a guide's task
+("../business-model/areas/<area>.md#<task>") become "<area>.html#<task>", which resolve beside it.
 The page carries inline CSS and its screenshots embedded, so it travels as one file. It makes one request:
 the pinned, integrity-checked Mermaid script, and only when the guide holds a diagram. Without it the reader
 sees a one-line notice instead of the diagram.
 
-A client's page carries nothing internal: "## About this document" shrinks to "Last updated <date>", a
-reconcile mark "~~old~~ -> new" shows only "new", and a link to anything that is not a guide shows its text.
+A client's page carries nothing internal: the stamp comment is dropped, "## About this document" shrinks to
+"Last updated <date>" (Last updated, else Delivered, else Created), a reconcile mark "~~old~~ -> new" shows
+only "new", and a link to anything that is not a guide shows its text.
 """
 
 import argparse
@@ -41,7 +49,9 @@ NO_DIAGRAM_NOTICE = "This diagram needs an internet connection"
 ABOUT_HEADING = re.compile(r"^## About this document\s*$", re.MULTILINE)
 NEXT_H2 = re.compile(r"^## ", re.MULTILINE)
 LAST_UPDATED = re.compile(r"^\*\*Last updated:\*\*\s*(\d{4}-\d{2}-\d{2})", re.MULTILINE)
+DELIVERED = re.compile(r"^\*\*Delivered:\*\*\s*(\d{4}-\d{2}-\d{2})", re.MULTILINE)
 CREATED = re.compile(r"^\*\*Created:\*\*\s*(\d{4}-\d{2}-\d{2})", re.MULTILINE)
+STAMP = re.compile(r"^<!-- (?:guide|delivery) · (.+) -->[ \t]*\n?", re.MULTILINE)
 SHAREABLE = re.compile(r"^\*\*Audience:\*\*\s*shareable\b", re.MULTILINE)
 DROPPED_HEADER_LINES = re.compile(r"^\*\*(Levels|Audience):\*\*.*\n?", re.MULTILINE)
 RECONCILE_MARK = re.compile(r"~~[^~\n]+~~\s*→\s*")
@@ -123,7 +133,7 @@ def new_markdown() -> MarkdownIt:
 def cut_about(text: str) -> tuple[str, str | None]:
     """Remove "## About this document" and return the text without it, and its date.
 
-    The date is the Last updated line, else the Created line, else None.
+    The date is the Last updated line, else the Delivered line, else the Created line, else None.
     """
     heading = ABOUT_HEADING.search(text)
     if not heading:
@@ -131,13 +141,13 @@ def cut_about(text: str) -> tuple[str, str | None]:
     following = NEXT_H2.search(text, heading.end())
     end = following.start() if following else len(text)
     section = text[heading.start():end]
-    found = LAST_UPDATED.search(section) or CREATED.search(section)
+    found = LAST_UPDATED.search(section) or DELIVERED.search(section) or CREATED.search(section)
     return text[:heading.start()] + text[end:], found.group(1) if found else None
 
 
 def client_source(text: str) -> tuple[str, str | None]:
     """The markdown a client may see, and the date the page closes with."""
-    text, date = cut_about(text)
+    text, date = cut_about(STAMP.sub("", text))
     text = RECONCILE_MARK.sub("", text)
     return DROPPED_HEADER_LINES.sub("", text), date
 
@@ -264,17 +274,23 @@ def render_page(source: str, fallback_title: str, folder: Path = Path(".")) -> s
     )
 
 
+def is_shareable(text: str) -> bool:
+    """Whether the stamp comment says audience: shareable, or, with no stamp, the old Audience line does."""
+    stamp = STAMP.search(text)
+    if not stamp:
+        return bool(SHAREABLE.search(text))
+    fields = (part.partition(": ") for part in stamp.group(1).split(" · "))
+    return {key: value for key, _, value in fields}.get("audience") == "shareable"
+
+
 def shareable_files(folder: Path) -> list[Path]:
-    return [
-        path for path in sorted(folder.rglob("*.md"))
-        if SHAREABLE.search(path.read_text(encoding="utf-8"))
-    ]
+    return [path for path in sorted(folder.rglob("*.md")) if is_shareable(path.read_text(encoding="utf-8"))]
 
 
 def parse_arguments(argv: list[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Render documentation guides as standalone HTML pages.")
     parser.add_argument("--out", type=Path, required=True, help="folder the pages are written to")
-    parser.add_argument("--dir", type=Path, help="render every shareable guide under this folder")
+    parser.add_argument("--dir", type=Path, help="render every shareable guide or delivery note under this folder")
     parser.add_argument("files", nargs="*", type=Path, help="guides to render as given")
     arguments = parser.parse_args(argv)
     if arguments.dir and not arguments.dir.is_dir():

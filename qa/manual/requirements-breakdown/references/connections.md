@@ -27,7 +27,7 @@ Input: an owner id (`E<n>`, `AREA-nnn`) or a trigger id (`EVT-nnn`). Read `INDEX
 
 ## 2. Trace Edges → §8
 
-When the KB lacks the feature, or is stale, the agent's Code mode runs `dev:doc-feature-trace`. Its **Edges** inventory maps column by column:
+When the KB lacks the feature, or is stale, the agent's Code mode runs `dev:doc-feature-trace` at profile `full`; a `guide`-profile trace records no Reads, Writes, Also written by or Mode, and those cells are `?`. Its **Edges** inventory maps column by column:
 
 | Edges column | §8 |
 |---|---|

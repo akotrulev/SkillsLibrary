@@ -4,6 +4,8 @@ A rule you do not find is a rule your documentation silently claims does not exi
 
 Take the stack and version from the orientation pass. Searching for idioms the project's version does not use under-reports, and under-reporting is invisible — nothing tells you the rule was there.
 
+Parts: **1** the seven hiding places · **2** the silent-rule catalogue · **3** per-stack searches (backend rules; **3a** screens, navigation, labels and forms per UI stack; **3b** following a seam) · **4** git archaeology · **5** reading tasks from journey tests and test-case suites.
+
 ---
 
 ## Part 1 — The seven hiding places (stack-agnostic)
@@ -156,27 +158,85 @@ Prisma's `schema.prisma` is a single high-value read: constraints, defaults, cas
 
 ---
 
-## Part 3a — Where in the product: routes and navigation labels
+## Part 3a — Where people do things: screens, navigation, labels, forms
 
-The guide names the screen and control a person uses (`**Where:** **Your orders** → **Cancel order**`) and a label is evidence: record it in `Client vocabulary`'s *Where in the product* column only from a route or navigation entry you read. A search that finds no screen is recorded as the search, never as a guess. The same searches serve the targeted lookup when an old-shape set is updated in place.
+The Tasks inventory and the guide name the screen and control a person uses (`**Where:** **Your orders** → **Cancel order**`), and a label is evidence: record it in the Tasks row's *Screen › control* and in `Client vocabulary` only from a route or navigation entry you read. A search that finds no screen is recorded as the search, never as a guess. Per UI stack, four questions: where screens and navigation are declared, where labels and messages live, where forms and their validation text live, and which entry point a screen calls. The same searches serve the targeted lookup when an old-shape set is updated in place.
+
+### React — Next.js App Router (Pages Router: `pages/`) and Vite + React Router
 
 ```bash
-# Next.js — App Router and Pages Router routes are the folders and files
-find app pages -name 'page.*' -o -name 'route.*' -o -name '*.tsx' -path 'pages/*' 2>/dev/null
-grep -rn "href=\|<Link\|usePathname\|router\.push" --include='*.tsx' app components 2>/dev/null
-
-# React Router — the route table, then the navigation that points into it
-grep -rn "createBrowserRouter\|<Route \|path: ['\"]\|<NavLink\|<Link " --include='*.tsx' --include='*.ts' src/
-
-# Blazor — @page routes and NavLink menus
-grep -rn "^@page\|<NavLink" --include='*.razor' .
-
-# the label's own text: locale files first, then literals next to the control
-find . -path ./node_modules -prune -o \( -path '*locales*' -o -path '*i18n*' -o -name '*.resx' \) -print
-grep -rn "aria-label=\|<button\|<Button\|title=" --include='*.tsx' --include='*.razor' src/ app/ 2>/dev/null
+# screens and navigation — Next: a route is a folder holding page.tsx
+find app pages -name 'page.*' -o -name 'layout.*' -o -name 'route.*' 2>/dev/null | sort
+grep -rn "<Link\|href=\|redirect(\|router\.push\|usePathname" --include='*.tsx' --include='*.ts' app components 2>/dev/null
+# screens and navigation — Vite: the route table, then the navigation that points into it
+grep -rn "createBrowserRouter\|<Route \|path: ['\"]\|<NavLink\|<Link \|useNavigate" --include='*.tsx' --include='*.ts' src/
+# labels and messages — locale files first, then literals beside the control
+find . -path ./node_modules -prune -o \( -path '*locales*' -o -path '*messages*' -o -path '*i18n*' \) -name '*.json' -print
+grep -rn "useTranslations\|getTranslations\|useTranslation\|\bt(['\"]\|aria-label=\|<button\|<Button\|title=" --include='*.tsx' app/ src/ components/ 2>/dev/null
+# forms and validation text — schema messages are the refusal texts
+grep -rn "useForm\|zodResolver\|useActionState\|z\.\(string\|number\|object\)\|message: ['\"]" --include='*.tsx' --include='*.ts' app/ src/ components/ lib/ 2>/dev/null
+# screen → entry point — server action, route handler, typed client or fetch behind the submit handler
+grep -rn "'use server'\|fetch(\|useMutation\|useQuery\|apiClient\.\|client\.\(GET\|POST\|PUT\|PATCH\|DELETE\)" --include='*.tsx' --include='*.ts' app/ src/ components/ lib/ 2>/dev/null
 ```
 
-Read the route to the page that holds the control and the navigation entry that reaches it; the path is `<menu or page title> › <control text>`. A control whose text lives in a translation file is cited by the file's value for the project's default language. When the client app is in another repository, the backend alone shows no screen: record the negative search per task.
+### Blazor
+
+```bash
+# screens and navigation — @page routes, NavLink menus, programmatic navigation
+grep -rn "^@page\|<NavLink\|NavigateTo(" --include='*.razor' .
+# labels and messages — resource files and localizers, then literals
+find . -name '*.resx' -not -path './bin/*' -not -path './obj/*'
+grep -rn "IStringLocalizer\|Localizer\[\|@Loc\[\|<button\|<FluentButton\|<MudButton" --include='*.razor' --include='*.cs' .
+# forms and validation text — EditForm, DataAnnotations and FluentValidation messages
+grep -rn "<EditForm\|<ValidationMessage\|<ValidationSummary\|DataAnnotationsValidator\|ErrorMessage =\|WithMessage(" --include='*.razor' --include='*.cs' .
+# screen → entry point — a typed HttpClient, or an injected application service when the circuit runs server-side
+grep -rn "@inject\|\[Inject\]\|GetFromJsonAsync\|PostAsJsonAsync\|HttpClient" --include='*.razor' --include='*.cs' .
+```
+
+### React Native — Expo Router
+
+```bash
+# screens and navigation — files under app/ are routes; (group) folders and _layout.tsx hold Stack and Tabs
+find app -name '*.tsx' | sort
+grep -rn "<Stack\.Screen\|<Tabs\.Screen\|<Link\|router\.\(push\|replace\|navigate\)\|href=" --include='*.tsx' --include='*.ts' app/ src/ components/
+# labels and messages — locale files, then literals beside the control
+find . -path ./node_modules -prune -o \( -path '*locales*' -o -path '*i18n*' -o -path '*translations*' \) -name '*.json' -print
+grep -rn "useTranslation\|\bt(['\"]\|accessibilityLabel=\|title=\|<Text>" --include='*.tsx' app/ src/ components/
+# forms and validation text
+grep -rn "useForm\|zodResolver\|z\.\(string\|number\|object\)\|message: ['\"]\|<TextInput" --include='*.tsx' --include='*.ts' app/ src/ components/
+# screen → entry point — query hooks and the API client behind the handler
+grep -rn "useMutation\|useQuery\|fetch(\|apiClient\.\|client\.\(GET\|POST\|PUT\|PATCH\|DELETE\)" --include='*.tsx' --include='*.ts' app/ src/
+```
+
+### SwiftUI
+
+```bash
+# screens and navigation — views, stacks, tabs, destinations and presented sheets
+grep -rn ": View {\|NavigationStack\|NavigationSplitView\|NavigationLink\|\.navigationDestination\|TabView\|\.sheet(\|\.fullScreenCover(" --include='*.swift' .
+# labels and messages — string catalogs (or legacy .strings), then literals beside the control
+find . -name '*.xcstrings' -o -name 'Localizable.strings' -o -name '*.stringsdict'
+grep -rn "Text(\"\|Button(\"\|Label(\"\|String(localized:\|LocalizedStringKey\|\.navigationTitle(" --include='*.swift' .
+# forms and validation text — Form, TextField, alerts, LocalizedError descriptions
+grep -rn "Form {\|TextField(\|\.alert(\|errorDescription\|LocalizedError" --include='*.swift' .
+# screen → entry point — the view model or service the button's action awaits, down to the API client
+grep -rn "\.task {\|Task {\|URLSession\|APIClient\|@Observable" --include='*.swift' .
+```
+
+### Jetpack Compose
+
+```bash
+# screens and navigation — the NavHost graph, route definitions, bottom bar
+grep -rn "NavHost\|composable(\|composable<\|navigation(\|navigate(\|NavigationBar\|NavigationBarItem" --include='*.kt' .
+# labels and messages — strings.xml per locale, then stringResource at the control
+find . -path '*/res/values*' -name 'strings.xml' -not -path '*/build/*'
+grep -rn "stringResource(\|pluralStringResource(\|R\.string\." --include='*.kt' .
+# forms and validation text — fields, their error state and supporting text
+grep -rn "OutlinedTextField\|TextField(\|supportingText\|isError" --include='*.kt' .
+# screen → entry point — ViewModel → repository → the Retrofit interface or Ktor call
+grep -rn "@GET(\|@POST(\|@PUT(\|@PATCH(\|@DELETE(\|httpClient\.\(get\|post\|put\|patch\|delete\)\|collectAsStateWithLifecycle" --include='*.kt' .
+```
+
+Read the route to the screen that holds the control and the navigation entry that reaches it; the path is `<menu or screen title> › <control text>`. A control whose text lives in a translation file is cited by the file's value for the project's default language. **Screen to entry point:** follow the control's handler to the client call and match its method and path (or action name) to the backend entry point; that pair is a Tasks row's *Entry points it calls*. When the client app is in another repository, the backend alone shows no screen: record the negative search per task.
 
 ---
 
@@ -252,3 +312,26 @@ git blame -L <start>,<end> <file>                   # who and when, for the exac
 ```
 
 A commit message naming a ticket or stating the reason upgrades an unknown to a solid `#inferred` with a citation. It is still not `#confirmed` — a commit message is one engineer's understanding at one moment, and that is exactly what an open question to the business is for.
+
+---
+
+## Part 5 — Cross-stack: reading tasks from journey tests and test-case suites
+
+When the repository has journey (end-to-end) tests or `docs/test-cases/` suites, they list what people do in nearly the person's own words, and they are the second source for the Tasks inventory (after the UI, before the experience plan).
+
+```bash
+# journey tests — Playwright / Cypress specs, Gherkin features, Appium and Maestro flows
+find . -path ./node_modules -prune -o \( -name '*.spec.ts' -o -name '*.e2e.*' -o -name '*.feature' -o -path '*e2e*' -o -path '*journeys*' -o -path '*.maestro*' \) -print
+grep -rn "Feature:\|Scenario:\|test(\|test.describe(\|\[Test\]\|@Test" <the journey folders>
+# page objects — a method name is a person's action
+grep -rn "async \w*(\|public \(async \)\?\(Task\|void\) \w*(" <the page-object folders>
+# test-case suites — one per story, cases citing the story and criterion
+ls docs/test-cases/
+grep -n "^## \|^### \|TC-\|US[0-9]\|AC[0-9]" docs/test-cases/*.md
+```
+
+- **A task is a goal, not a test.** A scenario or case whose steps run from a screen to a result a person wanted ("a member cancels a booking and sees the credits back") is a task; its boundary and refusal variants are **rules and validations**, not more tasks.
+- **Steps give `screen › control`:** the page-object method, the locator's visible name (`getByRole('button', { name: 'Cancel booking' })`), the case's "click …" step. Confirm each against the UI search (Part 3a) — a control the tests name and the UI does not have is a finding.
+- **Assertions give example values and refusal text:** the expected message, the number in the expected balance. Cite them as leads for the guide's example; the rule's value still comes from the code.
+- **Source** is the test or case `file:line`. A case's `US<n>`/`AC<k>` citation is the stated-purpose source for `Intent notes`, and the story is read at its own file.
+- A skipped or deleted test is a lead that the behavior may no longer hold: record it, never silently drop the task.

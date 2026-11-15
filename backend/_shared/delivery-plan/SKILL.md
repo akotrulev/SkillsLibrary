@@ -55,7 +55,7 @@ project's whole suite, lint or typecheck beyond what those commands include. The
 the whole set once more across the plan, ending with the coverage floor when the plan writes code, and
 **fixes what it finds rather than handing it back** by the fix loop (plan format §5). **The plan's last
 task is the documentation task** (`DOC1`, the documenter agent), which updates the documentation from
-the code that landed and files the plan. An implementation task's gate also reruns the acceptance tests earlier tasks turned green
+the code that landed, writes the delivery note and files the plan. An implementation task's gate also reruns the acceptance tests earlier tasks turned green
 in the same app, through the runner the last task's gate uses, so that loop stays short. It holds no feature work when the plan has any. A plan stopped halfway has
 each landed task's own tests green, but the whole suite has not run. See Step 4.
 
@@ -116,7 +116,7 @@ Do not brainstorm tasks. Read them out of the detail pack, in this order — the
 | `experience-plan.md` §2 + §4 screen catalog | The **app-shell task** (shell, nav, home — once, bound to `fe-react` / `fe-blazor` with `design:app-structure`; in a test-first plan every screen route renders a placeholder), then one frontend task per screen or per journey's screen set (a list and its detail are one coherent task), each after the endpoints it calls and citing its screen ids |
 | `experience-plan.md` journeys + the `Test ids:` lines | **Journey tasks** (`Q`, `qa-ui-<stack>` / `qa-mobile-<stack>` / `qa-desktop-<lang>`) — after the app shell and the stubs, before the screens they specify; red on the screens' placeholders |
 | `api-surface.md` outbound webhooks + background work | Job/consumer tasks |
-| The plan itself | **The documentation task**, last in the order and depending on the gate task: `DOC1`, stack `docs`, agent `be-documenter` where the project keeps `docs/business-model/` (or has no documentation yet), `be-feature-documenter` where it documents per feature in `docs/features/`. It re-traces the areas or features this plan's tasks touched and updates their guides from the code at HEAD, never from the plan, with screenshots captured from the running environment the task names. `Gate: own tests` is the doc lint over what it touched. Split by area (`DOC1`, `DOC2`) when over budget (`plan-format.md` §5) |
+| The plan itself | **The documentation task**, last in the order and depending on the gate task: `DOC1`, stack `docs`, agent `be-documenter` where the project keeps `docs/business-model/` (or has no documentation yet), `be-feature-documenter` where it documents per feature in `docs/features/`. It re-traces the areas or features this plan's tasks touched and updates their guides from the code at HEAD, never from the plan, takes purpose from the plan's stories and writes the delivery note `docs/deliveries/<NNN>-<plan-slug>.md` (what was delivered, what changed, which stories were not). The task names the non-production environment for the screenshots and where its test logins are kept, or says there is none: the guides then land with screenshots pending and `Status:` lists them as built but unverified. `Gate: own tests` is the doc lint over what it touched and over `docs/deliveries`. Split by area (`DOC1`, `DOC2`) when over budget (`plan-format.md` §5) |
 | `api-surface.md` endpoint map | **The OpenAPI-asset task** — one standard task. **Test-first:** the stub task generates the spec from the stubs, so the `Q` tasks have their typed client first; the asset is regenerated through `qa/_shared/api-spec-assets`' diff lane after the last endpoint task. **Test-after:** after the last endpoint task, the `be-<stack>` agent generates the spec from the implemented surface. Either way it is committed canonicalized as `{service}-openapi-YYYY-MM-DD.json`, so `qa/_shared/api-spec-assets` has its canonical input and every later contract change flows through that skill's diff-driven lane instead of being reverse-engineered. Greenfield plans include it by default; skip only when the repo already keeps the asset |
 
 Anything not traceable to a row above is either missing from the design pack (go add it there) or is not needed.
@@ -717,7 +717,7 @@ that lands anything.>
     plan's Definition of Done. A plan without `TD` tasks records the opt-out in its header.
 17. **The plan's last task is the documentation task**: `DOC1`, stack `docs`, agent `be-documenter` or
     `be-feature-documenter`, depending on the gate task, its deliverable naming the documents it updates
-    and its gate the doc lint; or the header says `Documentation task: none — <why>`. The gate task's
+    and the delivery note, its prompt naming the environment or saying none, and its gate the doc lint; or the header says `Documentation task: none — <why>`. The gate task's
     `Files` name no product documentation.
 18. The prompt block that will delete the last block carries the filing duty — rewrite `Status:`, then move the whole initiative folder into `docs/plans/implemented/` — and this pack's `NNN` was taken from the high-water mark across `docs/plans/` **and** `docs/plans/implemented/`.
 
@@ -735,7 +735,7 @@ that lands anything.>
   and delete their own block in a follow-up commit once the work is committed.
 - **→ Mission Control** — paste the document, point at the repo.
 - **→ `be-documenter` / `be-feature-documenter`** — the plan's last task: the documentation updated from
-  the code that landed, and the plan filed.
+  the code that landed, the delivery note, and the plan filed.
 - **→ `qa-test-planner` / `qa-test-case-designer`** — the `TD` tasks: the test plan per epic, then the
   test-case suites per story, read by the `Q` tasks and checked by the last task.
 - **→ `data-architect` / `tooling-engineer` / `devops-engineer` / `observability-engineer-<stack>` /

@@ -14,7 +14,7 @@ Every `*.md` beside this SKILL.md, except SKILL.md itself, is a rule file. The o
 |---|---|
 | `plans.md`: the plan document, its tasks, its prompts and the close-out every task runs | `docs/plans/*.md`, `docs/plans/*/delivery-plan.md` |
 | `audits.md`: rounds never rewritten, permanent `NNN` and finding ids, Resolved only in a new round after re-reading the code, evidence rules, the three finding classes | `docs/audits/*-requirements.md`, `docs/audits/*-audit-r*.md` |
-| `feature-docs.md`: one guide per feature, written for every user (administrators included), plain language, never `#confirmed` or an invented purpose, the worked example, a few screenshots from a non-production environment, updated in place when the code changes | `docs/features/*-*.md` (skips `INVENTORY.md`) |
+| `feature-docs.md`: one guide per feature for every user (administrators included), the business analysts and the product owner: in short, every rule in one table, the calculations, plain language, never `#confirmed` or an invented purpose, open questions answered and folded in, the worked example, a few screenshots that never block the text, updated in place when the code changes | `docs/features/*-*.md` (skips `INVENTORY.md`) |
 
 Finished plans in `docs/plans/implemented/` match no glob on purpose: later work reads them often and never edits them. The other files of a planning pack get no dev rule: `requirements.md`, `epics.md` and `stories.md` are the business-analysis plugin's (`/business-analysis:rules`), and the detail artifacts (`blueprint.md`, `data-model.md`, …) are written only by `solution-planner`, which loads their skills.
 

@@ -1,6 +1,6 @@
 ---
 name: qa-feature-spec-writer
-description: Use to document ONE feature and write its e2e-only test cases from a single trace — the docs/features guide (every role, administrators included, with a few screenshots of the running product) plus a docs/test-cases basis and suite, every case on a public surface or an existing test hook. Triggers "document this feature and write its e2e test cases", "spec this inventory row". Docs only. NOT docs alone (be-feature-documenter), cases without the e2e rule (qa-test-case-designer), or automation (qa-api/ui/mobile-<stack>).
+description: Use to document ONE feature and write its e2e-only test cases from a single trace — the docs/features guide (every role, administrators included, with a few screenshots when an environment is given) plus a docs/test-cases basis and suite, every case on a public surface or an existing test hook. Triggers "document this feature and write its e2e test cases", "spec this inventory row". Docs only. NOT docs alone (be-feature-documenter), cases without the e2e rule (qa-test-case-designer), or automation (qa-api/ui/mobile-<stack>).
 tools: Read, Write, Edit, Bash, Glob, Grep, mcp__playwright__browser_navigate, mcp__playwright__browser_navigate_back, mcp__playwright__browser_snapshot, mcp__playwright__browser_find, mcp__playwright__browser_click, mcp__playwright__browser_type, mcp__playwright__browser_fill_form, mcp__playwright__browser_select_option, mcp__playwright__browser_press_key, mcp__playwright__browser_hover, mcp__playwright__browser_handle_dialog, mcp__playwright__browser_wait_for, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_resize, mcp__playwright__browser_tabs, mcp__playwright__browser_close
 model: inherit
 ---
@@ -18,8 +18,8 @@ Paths resolve against `${CLAUDE_PLUGIN_ROOT}/` in an installed plugin (the plugi
 | When | Read | Why |
 |---|---|---|
 | Every run, first | `engineering-practices/agent-orientation-cache/SKILL.md` | The cache at `docs/agent-context/qa-feature-spec-writer.md` |
-| Steps 1 and 3 | `backend/_shared/agents/be-feature-documenter.md` — **Every run, before writing anything** step 4 (the screens gate), the **Steps** table, **Document contract — `docs/features/<NNN>-<feature-slug>.md`**, **Step 5 checklist** | Screens gate, scope gate, guide shape, capture, self-review |
-| Step 2 | `backend/_shared/feature-trace/SKILL.md` (`dev:doc-feature-trace`) | The ten stops and nine inventories |
+| Steps 1 and 3 | `backend/_shared/agents/be-feature-documenter.md` — **Every run, before writing anything** items 4–6 (intent sources, folding answered questions, screens: ask once, never block), the **Steps** table, **Document contract — `docs/features/<NNN>-<feature-slug>.md`**, **Step 5 checklist** | Intent sources, answers, screens, scope gate, guide shape, capture, self-review |
+| Step 2 | `backend/_shared/feature-trace/SKILL.md` (`dev:doc-feature-trace`) | The ten stops, *Tasks first*, the ten inventories and the profiles; you run `full` |
 | Step 3 | `backend/_shared/business-documentation/SKILL.md` — the guide shape and *Screenshots* — and `references/example-area.md`, as `be-feature-documenter` names them | Shape, tone, worked example, screenshots |
 | Step 4 | `qa/manual/agents/qa-test-case-designer.md` — **Code mode — a feature in the code → test basis**, **Steps**, **Step 1 detail** to **Step 5 detail**, **Report** | The five steps and the depth gate |
 | Step 4, per its Load column | The `qa/manual/` skills that table lists, including `test-case-writer` | Suite format |
@@ -36,8 +36,8 @@ Paths resolve against `${CLAUDE_PLUGIN_ROOT}/` in an installed plugin (the plugi
 |---|---|---|---|---|
 | 0 | Orient | `engineering-practices/agent-orientation-cache` against `docs/agent-context/qa-feature-spec-writer.md` | The seam inventory on a FULL verdict | Verdict in one line; seams listed |
 | 1 | Locate & scope | `be-feature-documenter.md` **Steps** table, step 1 (proportional gate and the Step 1 scope table) | Takes the `NNN` | Scope table shown |
-| 2 | Trace, once | `dev:doc-feature-trace`, all ten stops, nine inventories | Nothing — this trace record feeds steps 3 and 4 | Every scoped entry point traced |
-| 3 | Write the feature guide | `be-feature-documenter.md` steps 3–4, **Document contract — `docs/features/<NNN>-<feature-slug>.md`** and **Step 5 checklist** | — | The guide written, its screenshots captured; checklist passes |
+| 2 | Trace, once | `dev:doc-feature-trace`, profile `full`, all ten stops, ten inventories (Tasks first) | Profile `full`, not `be-feature-documenter`'s `guide`: step 4's §8 reads Edges columns `guide` drops (Reads, Writes, Also written by, Mode). The record feeds steps 3 and 4 | Every scoped entry point traced, each in a task, automatic work, a no-screen task or parked |
+| 3 | Write the feature guide | `be-feature-documenter.md` steps 3–4, **Document contract — `docs/features/<NNN>-<feature-slug>.md`** and **Step 5 checklist** | — | The guide written, its screenshots captured or `**Screenshots:** pending — <why>`; checklist passes |
 | 4 | Write the suite | `qa-test-case-designer.md` **Steps**, steps 1–5, with the **Step 1 detail** to **Step 5 detail** paragraphs. Step 1 takes the document and the trace record as its basis | The e2e rule in steps 3–5 | Suite and basis written; depth gate and e2e gate pass |
 | 5 | Report | — | Marks the `INVENTORY.md` row `documented + suite` when the file exists | The report below |
 
@@ -102,11 +102,12 @@ Added to the rows of the depth gate in `qa-test-case-designer.md` **Step 5 detai
 ```
 Orientation: <verdict> · seams: <n> hooks (<n> unconfirmed in the environment)
 Feature: <name> — <n> entry points traced
-Written: docs/features/<NNN>-<slug>.md (+ <n> screenshots) · docs/test-cases/<NNN>-<slug>-basis.md · docs/test-cases/<NNN>-<slug>.md
+Written: docs/features/<NNN>-<slug>.md (+ <n> screenshots, or pending — what is needed) · docs/test-cases/<NNN>-<slug>-basis.md · docs/test-cases/<NNN>-<slug>.md
 Cases: <n> — by surface (API n · UI n · Mobile n · Webhook n) · by seam (public n · hook n · needs-hook n) · by layer
 Depth gate: <result> · E2E gate: <result>
 Hooks needed: <n> — one line each, routed to be-<stack>
 Not e2e-testable: <n> — one line each
+Answers folded: <n> | none
 Open questions: <n> — the highest-value ones
 INVENTORY: row #<n> marked | no inventory
 ```

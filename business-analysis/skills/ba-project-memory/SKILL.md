@@ -30,8 +30,8 @@ Lives **in the target repo**, versioned with the code, diffable and PR-reviewabl
 docs/business-model/
 ├── INDEX.md              # loaded first, every session — one line per artifact + relevance hook
 ├── glossary.md           # canonical terms; the terminology-drift defense
-├── system-overview.md    # what the system is, for whom, the area map + cross-area journeys — plain-language guide, owned by dev:doc-business-model
-├── areas/<area>.md       # one functional area per file (AREA-nnn), the user guide: who uses it (administrators included), each person's tasks, worked examples, open questions — owned by dev:doc-business-model
+├── system-overview.md    # in short, who uses the system, the area map + cross-area journeys — plain-language guide, owned by dev:doc-business-model
+├── areas/<area>.md       # one functional area per file (AREA-nnn), the guide for users, analysts and the product owner: in short, who uses it (administrators included), each person's tasks, every rule, the calculations, worked examples, open questions with their answers — owned by dev:doc-business-model
 ├── areas/screenshots/<area>/   # the guide's few screenshots, captured from the running product
 ├── flows/<flow>.md       # one business flow per file (FLOW-nnn) — owned by business-analysis:process-flow
 ├── entities/<entity>.md  # one state model per business entity (ENT-nnn) — owned by business-analysis:state-grid
@@ -127,7 +127,7 @@ When no `docs/business-model/` exists and the user wants one:
 3. Do **not** backfill the whole model speculatively. The KB accretes as features are analyzed; seed it only with what the current task's analysis actually produces.
 4. Offer `/business-analysis:rules`, so the KB's standards load in every later session that edits it.
 
-**The one exception — evidence-based backfill from code.** The `be-documenter` agent deliberately populates the KB in bulk by reading an existing implementation. That does not violate the rule above, because the rule forbids *speculation*, not *volume*: every model row it writes (`flows/`, `entities/`, `decisions/`, the dependency map) is `#observed` with a `file:line` read that session, or `#inferred` and simultaneously raised as an open question. The area guides carry no tags: they are user documentation — who uses the area, each person's tasks, worked examples — and every inferred purpose in them is an open question. It never writes `#confirmed` — promotion is a human act — and it never overwrites a `#confirmed` entry, since a human's confirmation outranks a trace. See `backend/_shared/business-documentation`.
+**The one exception — evidence-based backfill from code.** The `be-documenter` agent deliberately populates the KB in bulk by reading an existing implementation. That does not violate the rule above, because the rule forbids *speculation*, not *volume*: every model row it writes (`flows/`, `entities/`, `decisions/`, the dependency map) is `#observed` with a `file:line` read that session, or `#inferred` and simultaneously raised as an open question. The area guides carry no tags: they are user documentation — who uses the area, each person's tasks, every rule, the calculations, worked examples — and every purpose that no answered question, plan story or `#confirmed` entry states is an open question; the documenter folds each answered question into the guide and lists it for `business-analyst`, who decides whether a model row becomes `#confirmed`. It never writes `#confirmed` — promotion is a human act — and it never overwrites a `#confirmed` entry, since a human's confirmation outranks a trace. See `backend/_shared/business-documentation`.
 
 ## Provenance — telling generated from hand-authored
 
@@ -136,6 +136,8 @@ An artifact derived from code rather than from requirements carries, beneath its
 ```markdown
 **Derived from:** code by `be-documenter` @ `<commit sha>` on YYYY-MM-DD
 ```
+
+A guide carries it differently: its provenance is the `source: be-documenter @ <sha>` of the stamp comment that closes the file (`**Derived from:**` is not written on a guide), and the id, owner, models and stories sit in the same comment.
 
 Without it a generated `#inferred` line is indistinguishable from a business decision someone actually made — and the whole value of the KB is that a reader can tell which is which. On refresh, re-verify the citations against the current commit and re-stamp; a `file:line` that has silently drifted is worse than none, because it still looks checkable.
 

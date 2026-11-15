@@ -331,31 +331,43 @@ Read, in this order:
 2. The plan: its `Status:` line, §3 task DOC1, and the `As built` notes of every task above — they say
    what landed and where. They are leads: every statement you write is backed by code you read this session.
 3. The existing documents for <the areas | the features> in <docs/business-model/ | docs/features/>.
-4. `stories.md` <US ids> — for the words the business uses, never as evidence of what was built.
+4. The plan's initiative folder `docs/plans/<NNN>-<initiative>/`: `requirements.md`, `epics.md` and
+   `stories.md` <US ids> — the source of purpose (what a rule is for, what a capability is for) and the
+   words the business uses; never evidence of what was built.
 5. The plan's "Close-out — every task".
 
-Deliverable: <copied verbatim from the task block — it names the documents>.
+Deliverable: <copied verbatim from the task block — it names the documents and the delivery note>.
 
-Screens: the guides' screenshots come from <the environment, by name>; its address and the test logins
-per role are <where the person keeps them — never their values>. If you do not have them, ask before tracing.
+Screens: <the guides' screenshots come from <the environment, by name>; its address and the test logins
+per role are <where the person keeps them — never their values>. | none: this plan has no non-production
+environment — the guides carry `**Screenshots:** pending — no environment`, `Status:` says so under
+built-but-unverified, and a later "capture the screenshots for <guide>" run closes it.> Either way, ask
+once and write on; screenshots never block the text.
 
 Build:
+- Fold the answered open questions of every existing guide in scope, before anything else is written.
 - Re-trace <AREA ids | the features> over the files `git diff --stat <the plan's first commit>..HEAD` lists.
 - Update each existing guide in place; write the guide for an area or feature that has none. Every role,
-  administrators included, has its section; re-capture the screenshot of every task whose screen changed.
+  administrators included, has its section; with an environment, re-capture the screenshot of every task
+  whose screen changed.
+- Write the delivery note `docs/deliveries/<NNN>-<plan-slug>.md` last, from the code at HEAD and the
+  guides just written, per the documenter skill's `references/delivery-note.md`.
 - <the task's own bullets, copied>
 
 Out of scope: any change to source, tests or configuration — a defect the trace finds goes in your
-report, never into a guide. Documenting what the plan intended and did not build.
+report, never into a guide. Documenting in a guide what the plan intended and did not build.
 
 Traps:
 - The plan is not the evidence. Where an `As built` note and the code disagree, the code wins and the
   disagreement is a line in your report.
 - What `Status:` lists as built but unverified is documented as built, with the unverified part said.
+- A story the code does not do, or does differently, is a row of the delivery note's *Not delivered*
+  table and a line of your report — never a sentence of a guide, and never a judging word.
 - <the per-task trap: the area whose worked example changes because a rule's number changed, the feature
   that moved between areas>
 
-Gate: own tests — `<the documenter's doc-lint command over the documents this task touched>`; expect clean.
+Gate: own tests — `<the documenter's doc-lint command over the documents this task touched>` and over
+`docs/deliveries`; expect clean (a `screenshots-pending` WARN stands when no environment was given).
 
 Commit: `<the commit message>`.
 

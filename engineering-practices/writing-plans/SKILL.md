@@ -127,7 +127,8 @@ them — the sequence itself carries the ordering, and the third task is "the th
   set and holds no feature work when the plan has any. The **documentation task** is the plan's last
   task: `DOC1`, stack `docs`, agent `be-documenter` (or `be-feature-documenter` where the project
   documents per feature), depending on the gate task. It updates the documentation from the code that
-  landed, never from the plan, and files the plan. Left out only with `Documentation task: none — <why>`
+  landed, never from the plan, writes the delivery note (`docs/deliveries/`) and files the plan; it names the
+  non-production environment for screenshots or says there is none, and never blocks on it. Left out only with `Documentation task: none — <why>`
   in the header (format reference §5).
 - **A plan that serves stories plans its testing too:** `TD` tasks after the contract and before the `Q`
   tasks, the test plan per epic (`qa-test-planner`), then the test-case suites per story
@@ -306,7 +307,7 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
     plan writes code, and it holds no feature work when the plan has any. What a halfway stop leaves is
     stated in the plan.
 12. **Documentation check:** the plan's last task is `DOC1` (stack `docs`, the documenter agent),
-    depends on the gate task, names the documents it updates, and its gate is the doc lint; or the header
+    depends on the gate task, names the documents it updates and the delivery note, and its gate is the doc lint; or the header
     says `Documentation task: none — <why>`. The gate task writes no product documentation.
 13. **Filing check:** the documentation task's block carries the filing duty; where a blocked task will
     outlive it, that block says the plan stays in `docs/plans/` until it clears; the plan's own number was taken from the high-water mark across both

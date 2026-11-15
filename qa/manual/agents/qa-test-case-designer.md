@@ -25,7 +25,7 @@ Every step reads what the step above wrote and names the step below in its repor
 5    Q    qa-api / qa-ui / qa-mobile        → acceptance tests, red on the stubs, automating the TP rows bound to them
 6    B F  be-* / fe-* / mobile-*            → the code; each task turns its Q tests green
 7    gate (the last code task)              → the whole set green; each test plan's Definition of Done checked
-8    DOC  be-documenter | be-feature-documenter → the documentation updated from the code that landed; the plan filed
+8    DOC  be-documenter | be-feature-documenter → the documentation updated from the code that landed, the delivery note docs/deliveries/<NNN>-<plan-slug>.md; the plan filed
 Without a delivery plan, 3 and 4 run on their own: /qa-<stack>:test-plan <initiative folder>, then /qa-<stack>:test-cases <plan or story>.
 ```
 
@@ -63,7 +63,7 @@ Step 1 runs as an `app-exploration` session, under its run mode, safe-action flo
 
 ## Code mode — a feature in the code → test basis
 
-Step 1 runs as a trace: load `backend/_shared/feature-trace/SKILL.md` (`dev:doc-feature-trace`) and follow its ten stops over **every kind** of entry point (endpoints, jobs, consumers, handlers). Its Edges inventory, one hop out, feeds step 2. Everything is `#observed` with `file:line`; intent the code cannot show is `#assumption` plus a question. Code that disagrees with docs is a finding, not a silent choice; defects go to `bug-report-writer`. `requirements-breakdown` takes the trace as input and writes the basis, §8 included.
+Step 1 runs as a trace: load `backend/_shared/feature-trace/SKILL.md` (`dev:doc-feature-trace`) and follow its ten stops over **every kind** of entry point (endpoints, jobs, consumers, handlers), profile `full` (the `guide` profile drops the Edges columns step 2 needs). Its Tasks inventory feeds the journeys, its Edges inventory, one hop out, step 2. Everything is `#observed` with `file:line`; intent the code cannot show is `#assumption` plus a question. Code that disagrees with docs is a finding, not a silent choice; defects go to `bug-report-writer`. `requirements-breakdown` takes the trace as input and writes the basis, §8 included.
 
 **Exit gate:** every entry point traced, every row sourced `file:line`, the basis written, disagreements listed.
 

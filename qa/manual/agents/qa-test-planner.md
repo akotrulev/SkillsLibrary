@@ -25,7 +25,7 @@ Every step reads what the step above wrote and names the step below in its repor
 5    Q    qa-api / qa-ui / qa-mobile        → acceptance tests, red on the stubs, automating the TP rows bound to them
 6    B F  be-* / fe-* / mobile-*            → the code; each task turns its Q tests green
 7    gate (the last code task)              → the whole set green; each test plan's Definition of Done checked
-8    DOC  be-documenter | be-feature-documenter → the documentation updated from the code that landed; the plan filed
+8    DOC  be-documenter | be-feature-documenter → the documentation updated from the code that landed, the delivery note docs/deliveries/<NNN>-<plan-slug>.md; the plan filed
 Without a delivery plan, 3 and 4 run on their own: /qa-<stack>:test-plan <initiative folder>, then /qa-<stack>:test-cases <plan or story>.
 ```
 

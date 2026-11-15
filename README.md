@@ -245,8 +245,8 @@ The ten skills (`/business-analysis:scoping`, `/business-analysis:epics`, `/busi
 |---|---|---|
 | `/dev:refine` | a loose description of what you want built | the front door: batched questions, then `requirements.md` + `epics.md` (`E1..En`) + `stories.md` (`US1..USn`) in a new initiative folder, ready for `/dev:plan-system`. Also extends or audits an existing backlog |
 | `/dev:plan-system` | the initiative folder from `/dev:refine`, the requirements, or `resume` | plan a whole application: an approved high-level blueprint, then the detail pack — DB structure, experience plan, service→resource→endpoint surface with request/response bodies, shared validation catalog, external dependencies — then the epic map (which lanes can run at once) and a task list where **every task is one epic, one story, one stack, one agent and one session**, closing with the plan's own `## Prompts — one per task` section: one ready-to-paste prompt per task, in one self-contained, queueable document. Writes plans, never code |
-| `/dev:document-system` | the system or area, or `refresh` | the reverse: read an existing backend, split it into functional areas (you confirm the split), trace each one, and write what it does from the **end user's** perspective into `docs/business-model/` — one guide per area, organised by who uses it (administrators included) and what each person does: tasks with screen paths, steps and callouts, a diagram, worked examples with real numbers, open questions, and a few screenshots captured from a running non-production environment (at most one per task). The KB's flowcharts, decision tables and state grids are linked by ID, their rows tiered `#observed` / `#inferred` with `file:line`; never invents intent. A system that needs more than one session gets a runnable plan (`docs/plans/NNN-document-<system>.md`, one task per session) instead of being documented in the survey session. An existing documentation set is updated in place into the reader-first shape, never regenerated; `scripts/render-html.py` turns a guide into one shareable HTML page. Read-only on code |
-| `/dev:document-feature` | the feature, in your own words (e.g. "the refund flow") | document **one** feature of an existing codebase: locate the implementation, trace it end to end, and write one guide from one trace — `docs/features/<NNN>-<slug>.md`: who uses it (administrators included), how it fits together, each person's tasks, worked examples, open questions, and a few screenshots captured from a running non-production environment. No KB writes; read-only on code |
+| `/dev:document-system` | the system or area, or `refresh` | the reverse: read an existing backend, split it into functional areas (you confirm the split), trace each one, and write what it does into `docs/business-model/` — one guide per area for users, analysts and the product owner, organised by who uses it (administrators included) and what each person does: an *In short*, tasks with screen paths and steps, every rule in one table, the calculations, worked examples with real numbers, open questions whose answers the next run folds in, and a few screenshots from a running non-production environment when one is given (otherwise marked pending, never blocking). As a plan's last task it also writes the delivery note. The KB's flowcharts, decision tables and state grids are linked by ID, their rows tiered `#observed` / `#inferred` with `file:line`; never invents intent. A system that needs more than one session gets a runnable plan (`docs/plans/NNN-document-<system>.md`, one task per session) instead of being documented in the survey session. An existing documentation set is updated in place into the reader-first shape, never regenerated; `scripts/render-html.py` turns a guide into one shareable HTML page. Read-only on code |
+| `/dev:document-feature` | the feature, in your own words (e.g. "the refund flow") | document **one** feature of an existing codebase: locate the implementation, trace it end to end, and write one guide from one trace — `docs/features/<NNN>-<slug>.md`: an *In short*, who uses it (administrators included), each person's tasks, every rule and calculation, worked examples, open questions with their answers, and a few screenshots from a running non-production environment when one is given. As a plan's last task it also writes the delivery note. No KB writes; read-only on code |
 | `/dev:audit` | spec, stories, feature, or area | read-only audit engagement (the `code-auditor` agent), saved to `docs/audits/` — owns both the spec-vs-code and spec-less feature lanes; `dev:audit-spec` / `dev:audit-feature` remain invocable for a one-off |
 
 `/dev:design` (one clear feature → approved technical design/spec in `docs/specs/`; a loose or multi-capability ask → `/dev:refine`) and `/dev:plan-feature` (approved spec → a self-contained plan document in `docs/plans/`: the gap table, the decisions, one flat ordered task list, and one paste-ready prompt per task) are **skills** in `dev`, typed the same way.
@@ -402,7 +402,7 @@ One chain. Every step reads what the step above wrote and names the step below i
 5    Q    qa-api / qa-ui / qa-mobile        → acceptance tests, red on the stubs, automating the TP rows bound to them
 6    B F  be-* / fe-* / mobile-*            → the code; each task turns its Q tests green
 7    gate (the last code task)              → the whole set green; each test plan's Definition of Done checked
-8    DOC  be-documenter | be-feature-documenter → the documentation updated from the code that landed; the plan filed
+8    DOC  be-documenter | be-feature-documenter → the documentation updated from the code that landed, the delivery note `docs/deliveries/<NNN>-<plan-slug>.md`; the plan filed
 Without a delivery plan, 3 and 4 run on their own: /qa-<stack>:test-plan <initiative folder>, then /qa-<stack>:test-cases <plan or story>.
 ```
 
@@ -425,7 +425,7 @@ Test-first is the default for any plan that delivers an API surface or a journey
 | 5 | Acceptance tasks `Q` | `qa-api-*`, then `qa-ui-*` / `qa-mobile-*` | API and journey tests from the contract | **red** on `not-implemented` |
 | 6 | Implementation `B`, `F` | `be-*`, then `fe-*` / `mobile-*` | the logic, unit-tested to the 80% branch floor, instrumented | acceptance tests turn **green**, read-only |
 | 7 | The gate | the last code task | build, whole suite, lint, coverage, telemetry smoke, each test plan's Definition of Done | all green |
-| 8 | Documentation `DOC1` | `be-documenter` / `be-feature-documenter` | the documentation updated from the code that landed; the plan filed | doc lint |
+| 8 | Documentation `DOC1` | `be-documenter` / `be-feature-documenter` | the documentation updated from the code that landed, the delivery note `docs/deliveries/<NNN>-<plan-slug>.md`; the plan filed | doc lint |
 
 - **The tests come from a different agent, from the contract, before the code exists.**
 - **The implementer cannot change them** — passing a test by editing it is how test-first fails with LLMs.
@@ -438,7 +438,7 @@ One repo per product: `contracts/` (OpenAPI/AsyncAPI) · `services/<name>/{src/M
 
 ## How an existing system is documented
 
-For a system nobody wrote requirements or user docs for: `/dev:document-system` for a whole system, `/dev:document-feature` for one feature. Both are read-only on the code, and both need a running non-production environment and a test login per role (administrators included) for the screenshots.
+For a system nobody wrote requirements or user docs for: `/dev:document-system` for a whole system, `/dev:document-feature` for one feature. Both are read-only on the code. A running non-production environment and a test login per role (administrators included) are asked for once, for the screenshots; without them the guide is written in full and marked pending until a capture pass.
 
 | # | Step | Who | Produces |
 |---|---|---|---|
@@ -447,11 +447,11 @@ For a system nobody wrote requirements or user docs for: `/dev:document-system` 
 | 3 | Area tasks `A1…An`, one session each, in the reading order | `be-documenter` | per area: its guide and screenshots, with its flows, state grids and decision tables |
 | 4 | Consolidation `K1` | `be-documenter` | the system overview, the consolidated KB, the lint over all of `docs/business-model/` |
 
-Every area, and every single feature, is written once, as a guide (`<name>.md`) for the people who use the product and for the client and product owner: who uses it — administrators included — then each person's tasks in plain language, numbered steps, formulas, a worked example with real numbers, and a few screenshots of the running product (at most one per task, never one per step).
+Every area, and every single feature, is written once, as a guide (`<name>.md`) for the people who use the product, the business analysts and the product owner: an *In short*, who uses it — administrators included — then each person's tasks in plain language and numbered steps, every rule in one table, the calculations, a worked example with real numbers, and a few screenshots of the running product (at most one per task, never one per step).
 
 - **A plan you run, not one long session.** Commit the plan, then run its prompts through Plan Queue. A system that fits one session (about 2,000 traced lines) skips the plan and is documented straight away.
 - **Area tasks run in sequence, never beside each other:** they write the same KB files, and later areas reuse the actors and terms earlier ones set.
-- **Nothing is invented.** Every statement comes from code the documenter read that session; a purpose the code does not show is an open question. `doc-lint.py` checks each guide and its screenshots before it is handed over.
+- **Nothing is invented.** Every statement comes from code the documenter read that session; a purpose the code does not show is an open question, taken only from an answer, the plan's stories or a confirmed KB entry. `doc-lint.py` checks each guide and its screenshots before it is handed over.
 - **The estimate is stated up front:** 85k fixed per session, plus traced source lines × 12 and 25k per area (the guide and its screenshots), capped at 135k.
 
 ## Adding a new skill

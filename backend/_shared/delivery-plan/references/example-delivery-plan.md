@@ -82,7 +82,7 @@ grounding — every task below traces to a row, and a row with no task is someth
 | Traces, logs and RED metrics reaching a local Grafana stack from the first request | — | `C9` — the OpenTelemetry SDK, structured logging, the resource attributes, `deploy/local/` and a RED dashboard; each implementation task then instruments what it builds (`B2` names its signals) |
 | Business dashboards and alert rules | — | `B6`, once the named signals exist |
 | One verified build, suite and format pass across the plan | — | `B7`, the last runnable task |
-| Documentation that describes what was built, for the studio owner and for whoever maintains it | — | `DOC1`, the plan's last task: `be-documenter` writes the Scheduling, Booking and Membership areas in `docs/business-model/` from the code `B7` verified |
+| Documentation that describes what was built, for the studio owner and for whoever maintains it | — | `DOC1`, the plan's last task: `be-documenter` writes the Scheduling, Booking and Membership areas in `docs/business-model/` from the code `B7` verified, and the delivery note `docs/deliveries/<NNN>-<plan-slug>.md` for the studio owner |
 
 ## 2. Streams
 
@@ -366,9 +366,10 @@ commands like `C4`'s, `Q1`'s, `B2`'s and `F2`'s; the `human` tasks have no gate.
 - **`DOC1` is the plan's last task**, `Stack: docs`, agent `be-documenter`, depending on `B7`. It traces
   the three modules at HEAD and writes the Scheduling, Booking and Membership areas in
   `docs/business-model/` (a user guide each — members, staff and the studio owner as administrator, with
-  worked examples and screenshots from the staging environment), from the code and never from this plan: what `B7` recorded as built but
-  unverified is documented as built, with the unverified part said. Its gate is the doc lint over those
-  files. It would file the plan, but `B4` still holds a block.
+  worked examples and screenshots from the staging environment its prompt names), from the code and never from this plan, taking purpose from
+  `stories.md`: what `B7` recorded as built but unverified is documented as built, with the unverified part said.
+  It then writes the delivery note, where a story the code does not do (the confirmation email, until `B4`) is a *Not delivered* row.
+  Its gate is the doc lint over those files and `docs/deliveries`. It would file the plan, but `B4` still holds a block.
 - **`B4` sits below `B7` and `DOC1`**, because it is blocked on `H2`. `B7` is the last *runnable* code task
   and therefore runs the whole set; `B4` carries its own gate for whenever the sending domain clears, and
   its `As built` note says the Booking guide needs the confirmation email added.
@@ -488,7 +489,7 @@ green, but the whole suite has not run.
 | 26 | B6 | `E0` | — | `be` | `foundations-api` | A Grafana dashboard shows bookings placed by outcome and an alert fires on a sustained 5xx rate | `observability-engineer-dotnet` | ~95k | C9, B1, B2 |
 | 27 | DA1 | `E0` | — | `data` | `schema` | A written verdict on the capacity guard under concurrent booking, with any constraint change applied | `data-architect` | ~80k | C7 |
 | 28 | B7 | `E0` | — | `be` | `foundations-api` | The solution builds, the whole suite and the journeys pass, the format check is clean, and the repository-state note is written | `be-dotnet` | ~130k | all of the above |
-| 29 | DOC1 | `E0` | — | `docs` | `docs` | The Scheduling, Booking and Membership areas in `docs/business-model/` describe what this plan landed, each guide's tasks, rules and worked example matching the code at HEAD | `be-documenter` | ~120k | B7 |
+| 29 | DOC1 | `E0` | — | `docs` | `docs` | The Scheduling, Booking and Membership areas in `docs/business-model/` describe what this plan landed, each guide's tasks, rules and worked example matching the code at HEAD, and `docs/deliveries/<NNN>-<plan-slug>.md` states what was delivered and what was not | `be-documenter` | ~120k | B7 |
 | 30 | B4 | `E4` | `US14` | `be` | `email` | A confirmed booking produces a confirmation email, deliverable in dev against Mailpit | `be-dotnet` | ~90k | C4, B2, H2 |
 
 **`H1`, `C1`–`C9`, `TD1`–`TD2`, `Q1`–`Q3`, `B1` and `F1` have landed, and their prompts are deleted** — a prompt for a

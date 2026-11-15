@@ -113,7 +113,7 @@ Then, per area, state the plan:
 
 Ordering (≈ 4,500 lines) alone estimates 164k, over the cap, so it is split by sub-flow before it is scheduled.
 
-**Estimate each session's cost** with the rule of thumb `85,000 fixed (harness, skills, references, rule file, working overhead — once per session) + per area in it: traced source lines × 12 + 25,000 (its guide written and re-read, and its screenshots captured)` (traced lines: the files the area's entry points reach, counted with `wc -l`), and **schedule areas so each session stays ≤ 135k tokens** — the session budget is 150k, and the margin is for reading output back. An area whose own estimate exceeds 135k (more than about 2,000 traced lines) is split before it is scheduled; in practice most areas are one session each. When the orientation cache records a real run's actual figure, estimate from it instead.
+**Estimate each session's cost** with the rule of thumb `85,000 fixed (harness, skills, references, rule file, working overhead — once per session) + per area in it: traced source lines × 12 + 25,000 (its guide written and re-read, and its screenshots captured when an environment is given)` (traced lines: the files the area's entry points reach, counted with `wc -l`), and **schedule areas so each session stays ≤ 135k tokens** — the session budget is 150k, and the margin is for reading output back. An area whose own estimate exceeds 135k (more than about 2,000 traced lines) is split before it is scheduled; in practice most areas are one session each. When the orientation cache records a real run's actual figure, estimate from it instead.
 
 **Depth is a real choice.** `full` (every rule, every branch, every failure path) for areas where the business logic lives; `shallow` (capabilities and actors only) for pass-through, read-only, or CRUD-only areas. Documenting a read-only reporting area to the same depth as a pricing engine wastes the run's budget on the part with the fewest rules.
 
@@ -126,6 +126,8 @@ Confirm these three things specifically, because they are the ones that are expe
 1. **Are these the right area names?** — you derived them from code; the business may call them something else, and every artifact gets filed under them.
 2. **Is the split right?** — should anything merge or divide.
 3. **Is the scope right?** — everything, or a subset first; anything parked that should not be.
+
+The same message asks once, as a separate line, for a running non-production environment and a test login per role (administrators included) for the guides' screenshots. It is not one of the three confirmations and nothing waits on it: without one the guides are written in full with `**Screenshots:** pending`.
 
 Use the harness's structured-question tool if one is available. Do not begin tracing before the answer: a rename after Step 4 means re-filing every artifact and re-writing every cross-reference.
 

@@ -205,15 +205,20 @@ work when the plan has any, and it writes no product documentation.
   feature by feature in `docs/features/`. Never the agent that wrote the code.
 - **It updates the documentation from the code that landed, never from the plan.** It re-traces the areas
   or features the plan's tasks touched (their `As built` notes are leads, the code is the evidence),
-  updates the existing documents in place and writes the ones a new area or feature needs. What the
-  plan intended and did not build is not documented as built.
-- **Deliverable:** names the documents — "the Booking and Membership areas in `docs/business-model/`
-  describe what this plan landed: every guide's tasks, rules and worked example match the code at HEAD."
-- **It needs the product running.** The guides carry screenshots captured from a running non-production
-  environment, signed in as each role: the task names that environment and where the person keeps its
-  test logins (never their values), or the documenter asks for them before it traces.
-- **Gate:** `**Gate: own tests** — the documenter's doc lint over the documents it touched.`
-- **Over budget, it is split by area** — `DOC1`, `DOC2` — never handed to another agent.
+  updates the existing documents in place and writes the ones a new area or feature needs. It reads the
+  plan's stories (`stories.md`) as the source of purpose, never as evidence of what was built; what the
+  plan intended and did not build is not documented as built — it goes into the delivery note's
+  *Not delivered* table.
+- **Deliverable:** names the documents and the delivery note — "the Booking and Membership areas in
+  `docs/business-model/` describe what this plan landed: every guide's tasks, rules and worked example
+  match the code at HEAD; `docs/deliveries/<NNN>-<plan-slug>.md` states what people can do now, what
+  works differently and which stories were not delivered."
+- **Screenshots come from a non-production environment, and never block it.** The task names that
+  environment and where the person keeps its test logins (never their values). Without one the guides
+  land with `**Screenshots:** pending`, the plan's `Status:` line says so under built-but-unverified,
+  and a capture pass closes it later; the documentation task does not wait for it.
+- **Gate:** `**Gate: own tests** — the documenter's doc lint over the documents it touched and over docs/deliveries.`
+- **Over budget, it is split by area** — `DOC1`, `DOC2` — never handed to another agent; the last of them writes the delivery note.
 - **It closes the plan.** Being last, it deletes the last prompt block, so the filing in §8 is its.
   A blocked task still sits below it (§8); when that task lands later, its `As built` note says which
   documents it left behind, and `Status:` carries them.

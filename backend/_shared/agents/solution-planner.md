@@ -25,14 +25,14 @@ Every step reads what the step above wrote and names the step below in its repor
 5    Q    qa-api / qa-ui / qa-mobile / qa-desktop → acceptance tests, red on the stubs, automating the TP rows bound to them
 6    B F  be-* / fe-* / mobile-* / desktop-*  → the code; each task turns its Q tests green
 7    gate (the last code task)              → the whole set green; each test plan's Definition of Done checked
-8    DOC  be-documenter | be-feature-documenter → the documentation updated from the code that landed; the plan filed
+8    DOC  be-documenter | be-feature-documenter → the documentation updated from the code that landed, the delivery note docs/deliveries/<NNN>-<plan-slug>.md; the plan filed
 Without a delivery plan, 3 and 4 run on their own: /qa-<stack>:test-plan <initiative folder>, then /qa-<stack>:test-cases <plan or story>.
 ```
 
 **What happens next:** Plan Queue runs `delivery-plan.md`'s prompts. Steps 3 to 8 are **tasks you write into that plan**, in that order, after the human prerequisites (`H`) and the contract tasks (`C`: schema, stubs, telemetry base):
 
 - **Testing is planned inside the plan.** Every epic with stories gets a test plan and every story a test-case suite, as `TD` tasks. The `Q` tasks depend on the test-plan task and automate its scenarios.
-- **Every plan ends with the documentation task**: `DOC1`, stack `docs`, the documenter agent, depending on the gate task.
+- **Every plan ends with the documentation task**: `DOC1`, stack `docs`, the documenter agent, depending on the gate task; its prompt names the non-production environment for screenshots (or says there is none) and its deliverable includes the delivery note.
 - Either is left out only on the user's answer, recorded in the plan header.
 
 ## Invariants

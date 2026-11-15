@@ -105,9 +105,39 @@ class LinkTests(unittest.TestCase):
         self.assertIn('<a href="#rules">in</a>', html)
         self.assertIn('<a href="mailto:a@b.co">mail</a>', html)
 
+    def test_Should_KeepTheAnchor_When_DeliveryNoteLinksAGuideTask(self):
+        html = page(DELIVERY_NOTE)
+        self.assertIn('<a href="credits-and-charges.html#cancel-a-booking">Cancel a booking</a>', html)
+
+    def test_Should_AnchorTheTaskHeadingTheLinkPointsTo_When_GuideHasThatTask(self):
+        html = page("# T\n\n## For members\n\n### Cancel a member's booking\n")
+        self.assertIn('<h3 id="cancel-a-members-booking">', html)
+
+    def test_Should_PointFeatureGuideLinksToHtml_When_LinkTargetsAFeatureGuide(self):
+        html = page("# T\n\nSee [Booking](../features/003-booking.md#book-a-session).\n")
+        self.assertIn('<a href="003-booking.html#book-a-session">Booking</a>', html)
+
     def test_Should_RewriteLinksInsideTables_When_CellHoldsALink(self):
         html = page("# T\n\n| A |\n|---|\n| [x](x.md) · [y](y.png) |\n")
         self.assertIn('<td><a href="x.html">x</a> · y</td>', html)
+
+
+STAMPED_ABOUT = (
+    "## About this document\n\n**Created:** 2026-08-02\n**Last updated:** 2026-09-14\n"
+    "**Describes:** the product as it was on 2026-09-14\n\n"
+    "<!-- guide · id: AREA-004 · owner: dev:doc-business-model · source: be-documenter @ e5d7b02 · "
+    "models: FLOW-004 · stories: US2 · audience: shareable -->\n"
+)
+
+DELIVERY_NOTE = (
+    "# What was delivered — Session credits\n\nMembers can now spend credits.\n\n"
+    "## New — what people can do now\n| Story | Who | What they can do now | Read more |\n|---|---|---|---|\n"
+    "| US3 | Members | Cancel a booking | "
+    "[Cancel a booking](../business-model/areas/credits-and-charges.md#cancel-a-booking) |\n\n"
+    "## Not delivered\nEverything the plan set out to build was built.\n\n"
+    "## About this document\n**Delivered:** 2026-09-20\n**Describes:** the product as it was on 2026-09-20\n\n"
+    "<!-- delivery · plan: 004 · source: be-documenter @ e5d7b02 · stories: US3 · audience: shareable -->\n"
+)
 
 
 class ClientPageTests(unittest.TestCase):
@@ -148,6 +178,30 @@ class ClientPageTests(unittest.TestCase):
     def test_Should_KeepStrikethrough_When_NoArrowFollows(self):
         html = page("# T\n\nA ~~lone~~ mark.\n")
         self.assertIn("<s>lone</s>", html)
+
+    def test_Should_RenderNoStampComment_When_GuideEndsWithOne(self):
+        html = page(f"# T\n\nBody.\n\n{STAMPED_ABOUT}")
+        body = html.split("<article>")[1]
+        for internal in ("<!--", "&lt;!--", "AREA-004", "e5d7b02", "FLOW-004", "US2", "audience", "owner:"):
+            with self.subTest(internal=internal):
+                self.assertNotIn(internal, body)
+
+    def test_Should_CloseWithLastUpdatedDate_When_AboutCarriesAStamp(self):
+        html = page(f"# T\n\nBody.\n\n{STAMPED_ABOUT}")
+        self.assertIn('<p class="updated">Last updated 2026-09-14</p>', html)
+
+    def test_Should_DropTheStamp_When_ItSitsOutsideAbout(self):
+        html = page("# T\n\nBody.\n\n<!-- guide · source: be-documenter @ e5d7b02 · audience: shareable -->\n")
+        self.assertNotIn("e5d7b02", html)
+
+    def test_Should_CloseWithDeliveredDate_When_DocumentIsADeliveryNote(self):
+        html = page(DELIVERY_NOTE)
+        self.assertIn('<p class="updated">Last updated 2026-09-20</p>', html)
+        self.assertNotIn("<!--", html.split("<article>")[1])
+
+    def test_Should_KeepOnlyTheNewValue_When_AnAnswerCellHasAReconcileMark(self):
+        html = page("# T\n\n| # | Answer |\n|---|---|\n| Q1 | ~~12 hours~~ → 24 hours |\n")
+        self.assertIn("<td>24 hours</td>", html)
 
     def test_Should_DropLevelsAndAudienceLines_When_TheyOpenTheFile(self):
         html = page("# T\n\n**Levels:** [Guide](a.md) · [Technical](a.technical.md)\n\n**Audience:** shareable\n\nBody.\n")
@@ -235,10 +289,29 @@ class PageStructureTests(unittest.TestCase):
         self.assertIn('class="alert alert-important"', html)
         self.assertIn('class="alert alert-warning"', html)
         self.assertIn('<pre class="mermaid">', html)
-        self.assertIn("Last updated 2026-08-02", html)
-        for internal in ("AREA-004", "a3f9c21", "FLOW-004", "staging environment"):
+        self.assertIn("Last updated 2026-09-14", html)
+        for internal in ("AREA-004", "e5d7b02", "FLOW-004", "staging environment", "<!--", "audience", "owner:"):
             with self.subTest(internal=internal):
                 self.assertNotIn(internal, html)
+
+
+class GoldenExampleTests(unittest.TestCase):
+    def setUp(self):
+        source = (REFERENCES / "example-area.md").read_text(encoding="utf-8")
+        self.html = render_html.render_page(source, "example-area", REFERENCES)
+
+    def test_Should_ListTheReaderSectionsInContents_When_GoldenExampleIsRendered(self):
+        for section in ("In short", "Rules and limits", "How it is calculated", "See also", "Open questions"):
+            with self.subTest(section=section):
+                self.assertIn(f">{section}</a></li>", self.html)
+
+    def test_Should_ShowTheAnswerColumn_When_GoldenExampleIsRendered(self):
+        self.assertIn("<th>Answer</th>", self.html)
+
+    def test_Should_ShowNoAboutLines_When_GoldenExampleIsRendered(self):
+        for dropped in ("**Created", "Describes", "Screenshots", "About this document"):
+            with self.subTest(dropped=dropped):
+                self.assertNotIn(dropped, self.html)
 
 
 class MainTests(unittest.TestCase):
@@ -263,6 +336,30 @@ class MainTests(unittest.TestCase):
         self.assertEqual(0, code)
         self.assertEqual(["credits.html"], sorted(p.name for p in self.out.iterdir()))
         self.assertEqual(str(self.out / "credits.html"), printed.strip())
+
+    def test_Should_RenderGuideAndDeliveryNote_When_TheirStampsSayShareable(self):
+        (self.source / "deliveries").mkdir()
+        self.write("areas/credits.md", f"# Credits\n\n{STAMPED_ABOUT}")
+        self.write("deliveries/004-credits.md", DELIVERY_NOTE)
+        run_main("--out", str(self.out), "--dir", str(self.source))
+        self.assertEqual(["004-credits.html", "credits.html"], sorted(p.name for p in self.out.iterdir()))
+
+    def test_Should_SkipAGuide_When_ItsStampSaysInternal(self):
+        internal = STAMPED_ABOUT.replace("audience: shareable", "audience: internal")
+        self.write("areas/credits.md", f"# Credits\n\n{internal}")
+        run_main("--out", str(self.out), "--dir", str(self.source), str(self.write("areas/named.md", "# N\n")))
+        self.assertEqual(["named.html"], sorted(p.name for p in self.out.iterdir()))
+
+    def test_Should_PreferTheStamp_When_AnOldAudienceLineDisagrees(self):
+        stamped = STAMPED_ABOUT.replace("audience: shareable", "audience: internal")
+        self.write("areas/credits.md", f"# Credits\n\n**Audience:** shareable\n\n{stamped}")
+        run_main("--out", str(self.out), "--dir", str(self.source))
+        self.assertEqual([], list(self.out.iterdir()))
+
+    def test_Should_SkipAFile_When_ItHasNeitherStampNorAudienceLine(self):
+        self.write("areas/plain.md", "# Plain\n\nNothing about audience.\n")
+        run_main("--out", str(self.out), "--dir", str(self.source))
+        self.assertEqual([], list(self.out.iterdir()))
 
     def test_Should_RenderAFileAsGiven_When_ItIsNamedWhateverItsAudience(self):
         draft = self.write("areas/credits.draft.md", "# Draft\n\n**Audience:** internal\n")
