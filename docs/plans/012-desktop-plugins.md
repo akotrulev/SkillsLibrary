@@ -2,7 +2,7 @@
 
 **Goal:** Two marketplace plugins in one new `desktop/` domain. `desktop-macos` covers Swift, SwiftUI and the AppKit lane. `desktop-windows` covers WinUI on Windows App SDK 2.x with C#, plus WPF, WinForms and C++/WinRT lanes. Each has the library's plugin shape: a coding standard installed as path-scoped rules, the common use-case skills, a step-by-step agent that works on greenfield and brownfield, two commands and a conformance audit. A shared desktop layer (distribution, security, observability) is bundled into both, and native Auth0 skills ship with them. The QA plugins gain a desktop E2E lane: three skills and a `qa-desktop-<lang>` agent in each of `qa-java`, `qa-dotnet` and `qa-typescript`, driven by the same test ids the dev agents emit.
 
-**Status:** Planned 2026-11-15; research is saved beside this plan in `docs/research/012-desktop-plugins/{macos,windows,cross-platform-and-qa}.md`; every fact in §4 comes from those files, verified on 2026-11-15, and the §4.6 items are not verified. **Built:** the `desktop/` domain and code rules (C1), the shared layer and native Auth0 (S1–S3), both desktop plugins complete — `desktop-macos` (M1–M5) and `desktop-windows` (W1–W6, with the C++/WinRT lane, D16) — and the QA desktop shared rules and TypeScript lane (E1). **Next:** E2 and E3 side by side, then I1, then G1. Built but unverified: no agent has been run against a real Mac or Windows app, no desktop E2E suite has run on a real runner, and no library check, surface check or token audit has run on `desktop/` (G1).
+**Status:** Planned 2026-11-15; research is saved beside this plan in `docs/research/012-desktop-plugins/{macos,windows,cross-platform-and-qa}.md`; every fact in §4 comes from those files, verified on 2026-11-15, and the §4.6 items are not verified. **Built:** the `desktop/` domain and code rules (C1), the shared layer and native Auth0 (S1–S3), both desktop plugins complete — `desktop-macos` (M1–M5) and `desktop-windows` (W1–W6, with the C++/WinRT lane, D16) — and the QA desktop shared rules and TypeScript lane (E1). **Next:** G1. I1 (marketplace, surface check, planning lane, QA wiring) landed 2026-11-15. Built but unverified: no agent has been run against a real Mac or Windows app, no desktop E2E suite has run on a real runner, and no library check, surface check or token audit has run on `desktop/` (G1).
 
 **Test design:** none. This plan serves no stories (it builds skills, not a product), so it has no `TD` tasks.
 **Documentation task:** none. This library's documentation is `CLAUDE.md`'s map, `docs/skills-catalog.md` and `README.md`, which G1 writes from the files that landed (as plan 002's G1 did). `be-documenter` documents applications, not a skills library.
@@ -872,6 +872,7 @@ Cost: a second test runner family beside NUnit and MSTest (D8), and a lines-base
 - Marketplace per §9: build every array from `ls`. The planning lane per §9 and D13. The QA wiring per §9.
 - Add one Compose Multiplatform Desktop mention line to `mobile-android`'s KMP skill (D5).
 - **Not in I1:** the CLAUDE.md map and version lines, the catalog and README (G1).
+- **As built (2026-11-15):** as planned. `.claude-plugin/marketplace.json`: `desktop-macos` and `desktop-windows` after `mobile-android`, each 29 skills (25 own, the 3 `desktop/_shared/*`, `auth/auth0-<os>`, `rules`), 2 commands, 1 agent, keywords and descriptions in the `mobile-ios` voice, `dependencies ["dev", "design"]`; `qa-java`, `qa-dotnet` and `qa-typescript` gained the three `desktop-*` skills, `qa/_shared/desktop-testing`, `qa-desktop-<lang>` and `desktop.md`; the top-level description names `desktop-*`. A Python check found every `skills`, `commands` and `agents` path of every entry on disk (empty list of misses). `desktop` is in `STACK_CATEGORIES` (`tools/plugin-surface-check.py:35`). The `desktop` stack token ("the native desktop client app: macOS or Windows") is in `plan-format.md:119`, `delivery-plan/SKILL.md` (stack lists, `qa-desktop-<lang>` among the journey-task agents) and `solution-planner.md` (routing table, downstream agents, tasks line, experience-step skip clause), and CLAUDE.md § Planning says "a web, app or desktop tree". One desktop line in each `qa/*/skills/device-cloud/SKILL.md` Stack list; one Compose Multiplatform Desktop line in `kotlin-multiplatform/SKILL.md`; the desktop-agent fix routing is added to the two mobile scan skills under `qa/_shared/security-testing/` (the only peer lines naming `mobile-ios`). Built but unverified: no surface check, token audit or version check was run (G1). Not committed: the queue commits.
 
 ### G1 — documentation, the gate and filing the plan
 
@@ -921,7 +922,7 @@ block and the line that says which have landed.
 
 ## Prompts — one per task
 
-Run them one Plan Queue session each; every block is complete on its own. After C1, the tasks S1, S2, S3, M1 and W1 run side by side. The M chain and the W chain then each run in order, because each chain shares one checklist file. E1 waits for M4 and W5. E2 and E3 run beside each other. I1 waits for both chains and the QA lane, and G1 runs last. Only G1 runs anything (§11): no other block runs `tools/token-audit.py`, `tools/plugin-surface-check.py`, `tools/qa-version-check.py`, §11's script, a linter or a build. Counting your own files with `wc -m` is allowed. No block edits `docs/plans/implemented/**`, `docs/audits/**` or `docs/research/**`. **Unattended sessions refuse some shell forms** (plan 001): no brace expansion, no `$VAR` expansion, no `.sh` files, and nothing written outside the worktree, not even `/tmp`. Scratch work goes in an untracked `scratch/` folder inside the worktree, deleted before committing. This repo commits straight to `master`.
+Run them one Plan Queue session each; every block is complete on its own. After C1, the tasks S1, S2, S3, M1 and W1 run side by side. The M chain and the W chain then each run in order, because each chain shares one checklist file. E1 waits for M4 and W5. E2 and E3 run beside each other. I1 has landed; G1 runs last. Only G1 runs anything (§11): no other block runs `tools/token-audit.py`, `tools/plugin-surface-check.py`, `tools/qa-version-check.py`, §11's script, a linter or a build. Counting your own files with `wc -m` is allowed. No block edits `docs/plans/implemented/**`, `docs/audits/**` or `docs/research/**`. **Unattended sessions refuse some shell forms** (plan 001): no brace expansion, no `$VAR` expansion, no `.sh` files, and nothing written outside the worktree, not even `/tmp`. Scratch work goes in an untracked `scratch/` folder inside the worktree, deleted before committing. This repo commits straight to `master`.
 
 | # | Stack | Agent | Depends on | Runs beside | Budget |
 |---|---|---|---|---|---|
@@ -950,38 +951,6 @@ Run them one Plan Queue session each; every block is complete on its own. After 
 C1, S1, S2, S3, M1–M5, W1–W6, E1 and E2 have landed; every other prompt below is live.
 
 ---
-
-### I1 — marketplace, surface check, planning lane and QA wiring (general-purpose, docs)
-
-````
-Depends on: M5, W6, E2, E3, S1, S2, S3
-Agent: general-purpose · Stack: docs
-
-Task I1 of docs/plans/012-desktop-plugins.md: wire both desktop plugins and the QA desktop lane into the marketplace, the surface check and the planning lane.
-
-Deliverable: `.claude-plugin/marketplace.json` lists `desktop-macos` and `desktop-windows`, and the three QA entries list their desktop skills, agent and command, with every path existing on disk; `tools/plugin-surface-check.py` has `desktop` in `STACK_CATEGORIES`; the plan format, delivery plan and solution planner accept a `desktop` task routed to the two agents.
-
-Read, in this order:
-1. CLAUDE.md (§ Planning).
-2. The plan: §2, §9, D5, D13, and "Close-out — every task".
-3. The `mobile-ios` entry in `.claude-plugin/marketplace.json` (the shape) and the three `qa-*` entries.
-4. `engineering-practices/writing-plans/references/plan-format.md:119`; `backend/_shared/delivery-plan/SKILL.md:44,128,345`; `grep -n mobile backend/_shared/agents/solution-planner.md`.
-5. `qa/*/skills/device-cloud/SKILL.md` (where the one desktop line goes); `grep -rn "mobile-ios" qa/_shared/security-testing` (the peer lines); `mobile/android/skills/kotlin-multiplatform/SKILL.md`.
-
-Do:
-- Marketplace per §9: build every `skills` array from `ls`, never from memory. Then assert every path exists with a short Python one-liner (reading files is not a gate).
-- `STACK_CATEGORIES` gains `"desktop"`.
-- The planning lane and the CLAUDE.md § Planning one-stack bullet per §9.
-- QA lines per §9; one Compose Multiplatform Desktop mention line in the KMP skill (D5).
-
-Traps:
-- `plugin-surface-check.py` rule 5 forbids registering a folder from two categories: `desktop/_shared/*` goes only into the two desktop plugins, `qa/_shared/desktop-testing` only into the three QA plugins.
-- Do not run `plugin-surface-check.py`, `token-audit.py` or `qa-version-check.py`; G1 runs them.
-
-Gate: none. Wiring only; G1 runs every check (D11).
-Commit: `feat: wire desktop-macos, desktop-windows and the QA desktop lane (012 I1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### G1 — documentation, the gate and filing the plan (general-purpose, docs)
 

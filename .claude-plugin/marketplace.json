@@ -6,7 +6,7 @@
     "email": "alexandur.kotrulev@gmail.com"
   },
   "metadata": {
-    "description": "Stack-first skills library covering QA, frontend, mobile, backend, data, DevOps, security and business analysis: install one plugin per category in a project. `qa-{java,dotnet,typescript}` bundle every QA discipline — API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` and `mobile-{react-native,ios,android}` are step-by-step app dev-stack agents. `be-{dotnet,java,node}` are step-by-step backend dev-stack agents for design-pattern application, ORM persistence, observability and Auth0/Cognito service-side auth; `be-python` is the sandboxed upload-processing worker stack; `be-rust` is the Rust (axum + tokio + sqlx) service and library stack with async, performance and observability depth. `devops` ships the platform lane, `data` the database-engineering lane, `business-analysis` the cross-feature reasoning lane, and `tooling`, `training-data`, `penetration-testing` and `security-governance` the rest. Two shared layers arrive through plugin dependencies rather than copies: `dev` (developer workflow, planning, documentation and audits — a dependency of qa-*, fe-*, mobile-*, be-*, devops and business-analysis) and `design` (the design-craft layer — a dependency of fe-* and mobile-*).",
+    "description": "Stack-first skills library covering QA, frontend, mobile, desktop, backend, data, DevOps, security and business analysis: install one plugin per category in a project. `qa-{java,dotnet,typescript}` bundle every QA discipline — API/UI/mobile/performance/LLM/BDD authoring and verification, manual-QA process, CI/CD, reporting, and OWASP-mapped security. `fe-{blazor,react}` and `mobile-{react-native,ios,android}` and `desktop-{macos,windows}` are step-by-step app dev-stack agents. `be-{dotnet,java,node}` are step-by-step backend dev-stack agents for design-pattern application, ORM persistence, observability and Auth0/Cognito service-side auth; `be-python` is the sandboxed upload-processing worker stack; `be-rust` is the Rust (axum + tokio + sqlx) service and library stack with async, performance and observability depth. `devops` ships the platform lane, `data` the database-engineering lane, `business-analysis` the cross-feature reasoning lane, and `tooling`, `training-data`, `penetration-testing` and `security-governance` the rest. Two shared layers arrive through plugin dependencies rather than copies: `dev` (developer workflow, planning, documentation and audits — a dependency of qa-*, fe-*, mobile-*, desktop-*, be-*, devops and business-analysis) and `design` (the design-craft layer — a dependency of fe-*, mobile-* and desktop-*).",
     "version": "3.0.0"
   },
   "plugins": [
@@ -226,7 +226,11 @@
         "./qa/java/skills/analytics-testing",
         "./qa/java/skills/payment-testing",
         "./qa/java/skills/distributed-app-testing",
-        "./qa/java/skills/benchmarks"
+        "./qa/java/skills/benchmarks",
+        "./qa/java/skills/desktop-project-setup",
+        "./qa/java/skills/desktop-screen-explorer",
+        "./qa/java/skills/desktop-window-objects",
+        "./qa/_shared/desktop-testing"
       ],
       "commands": [
         "./qa/_shared/commands/security.md",
@@ -241,7 +245,8 @@
         "./qa/manual/commands/explore.md",
         "./qa/manual/commands/feature-spec.md",
         "./qa/reporting/java/commands/reporting.md",
-        "./qa/manual/commands/test-plan.md"
+        "./qa/manual/commands/test-plan.md",
+        "./qa/java/commands/desktop.md"
       ],
       "agents": [
         "./qa/_shared/agents/qa-security.md",
@@ -256,7 +261,8 @@
         "./qa/manual/agents/qa-explorer.md",
         "./qa/manual/agents/qa-feature-spec-writer.md",
         "./qa/manual/agents/qa-test-planner.md",
-        "./qa/reporting/agents/qa-reporting-java.md"
+        "./qa/reporting/agents/qa-reporting-java.md",
+        "./qa/java/agents/qa-desktop-java.md"
       ]
     },
     {
@@ -378,7 +384,11 @@
         "./qa/dotnet/skills/aspire-testing",
         "./qa/dotnet/skills/benchmarks",
         "./qa/dotnet/skills/analytics-testing",
-        "./qa/dotnet/skills/payment-testing"
+        "./qa/dotnet/skills/payment-testing",
+        "./qa/dotnet/skills/desktop-project-setup",
+        "./qa/dotnet/skills/desktop-screen-explorer",
+        "./qa/dotnet/skills/desktop-window-objects",
+        "./qa/_shared/desktop-testing"
       ],
       "commands": [
         "./qa/_shared/commands/security.md",
@@ -394,7 +404,8 @@
         "./qa/manual/commands/explore.md",
         "./qa/manual/commands/feature-spec.md",
         "./qa/reporting/dotnet/commands/reporting.md",
-        "./qa/manual/commands/test-plan.md"
+        "./qa/manual/commands/test-plan.md",
+        "./qa/dotnet/commands/desktop.md"
       ],
       "agents": [
         "./qa/_shared/agents/qa-security.md",
@@ -409,7 +420,8 @@
         "./qa/manual/agents/qa-explorer.md",
         "./qa/manual/agents/qa-feature-spec-writer.md",
         "./qa/manual/agents/qa-test-planner.md",
-        "./qa/reporting/agents/qa-reporting-dotnet.md"
+        "./qa/reporting/agents/qa-reporting-dotnet.md",
+        "./qa/dotnet/agents/qa-desktop-dotnet.md"
       ]
     },
     {
@@ -527,7 +539,11 @@
         "./qa/typescript/skills/analytics-testing",
         "./qa/typescript/skills/payment-testing",
         "./qa/typescript/skills/distributed-app-testing",
-        "./qa/typescript/skills/benchmarks"
+        "./qa/typescript/skills/benchmarks",
+        "./qa/typescript/skills/desktop-project-setup",
+        "./qa/typescript/skills/desktop-screen-explorer",
+        "./qa/typescript/skills/desktop-window-objects",
+        "./qa/_shared/desktop-testing"
       ],
       "commands": [
         "./qa/_shared/commands/security.md",
@@ -542,7 +558,8 @@
         "./qa/typescript/commands/mobile.md",
         "./qa/typescript/commands/performance.md",
         "./qa/typescript/commands/ui.md",
-        "./qa/manual/commands/test-plan.md"
+        "./qa/manual/commands/test-plan.md",
+        "./qa/typescript/commands/desktop.md"
       ],
       "agents": [
         "./qa/_shared/agents/qa-security.md",
@@ -557,7 +574,8 @@
         "./qa/typescript/agents/qa-llm-typescript.md",
         "./qa/typescript/agents/qa-mobile-typescript.md",
         "./qa/typescript/agents/qa-performance-typescript.md",
-        "./qa/typescript/agents/qa-ui-typescript.md"
+        "./qa/typescript/agents/qa-ui-typescript.md",
+        "./qa/typescript/agents/qa-desktop-typescript.md"
       ]
     },
     {
@@ -934,6 +952,128 @@
       ],
       "agents": [
         "./mobile/android/agents/mobile-android.md"
+      ]
+    },
+    {
+      "name": "desktop-macos",
+      "description": "Self-contained senior desktop developer plugin for native macOS apps in Swift + SwiftUI (Xcode 27 / Swift 6.4 / macOS 27 SDK primary, Xcode 26.x supported; SwiftUI first, AppKit lane for brownfield and what SwiftUI cannot do). Covers the full app build lifecycle end-to-end: project scaffold, architecture, windows and scenes, menus and commands, forms, documents, networking, offline data and storage, sandbox and permissions, background work and helpers, system integration, quality layers (accessibility, performance, error resilience, distribution, security, observability) and dev-side tests — plus migration, a code-review pass and a one-call read-only conformance audit (/desktop-macos:audit) that sweeps an existing codebase into a saved, re-runnable findings report. Bundles the Auth0 native auth skill and the step-by-step desktop-macos orchestrator agent. The stack-agnostic design-craft skills (the ui-ux-pro-max corpus is the source of truth for every design fact) arrive through the `design` plugin, and the developer-workflow skills (design, plan-feature, audits, session budgets) through the `dev` plugin — this plugin depends on both, so installing it is enough.",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "Aleksandar Kotrulev",
+        "email": "alexandur.kotrulev@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "macos",
+        "swift",
+        "swiftui",
+        "appkit",
+        "desktop"
+      ],
+      "category": "development",
+      "dependencies": [
+        "dev",
+        "design"
+      ],
+      "skills": [
+        "./desktop/macos/skills/accessibility",
+        "./desktop/macos/skills/appkit",
+        "./desktop/macos/skills/architecture",
+        "./desktop/macos/skills/background-and-helpers",
+        "./desktop/macos/skills/basics",
+        "./desktop/macos/skills/code-review",
+        "./desktop/macos/skills/documents",
+        "./desktop/macos/skills/error-handling",
+        "./desktop/macos/skills/forms",
+        "./desktop/macos/skills/languages",
+        "./desktop/macos/skills/menus-and-commands",
+        "./desktop/macos/skills/migration",
+        "./desktop/macos/skills/networking",
+        "./desktop/macos/skills/offline-and-storage",
+        "./desktop/macos/skills/performance",
+        "./desktop/macos/skills/project-setup",
+        "./desktop/macos/skills/sandbox-and-permissions",
+        "./desktop/macos/skills/standards-audit",
+        "./desktop/macos/skills/styling",
+        "./desktop/macos/skills/system-integration",
+        "./desktop/macos/skills/test-ids",
+        "./desktop/macos/skills/ui-components",
+        "./desktop/macos/skills/unit-testing",
+        "./desktop/macos/skills/windows-and-scenes",
+        "./desktop/_shared/distribution",
+        "./desktop/_shared/observability",
+        "./desktop/_shared/security",
+        "./auth/auth0-macos",
+        "./desktop/macos/skills/rules"
+      ],
+      "commands": [
+        "./desktop/macos/commands/desktop-macos.md",
+        "./desktop/macos/commands/audit.md"
+      ],
+      "agents": [
+        "./desktop/macos/agents/desktop-macos.md"
+      ]
+    },
+    {
+      "name": "desktop-windows",
+      "description": "Self-contained senior desktop developer plugin for native Windows apps in C# (WinUI on Windows App SDK 2.x, .NET 10 LTS, packaged MSIX, MVVM with CommunityToolkit.Mvvm primary; WPF and WinForms lanes for brownfield; C++/WinRT WinUI lane). Covers the full app build lifecycle end-to-end: project scaffold, architecture, windows and navigation, activation and notifications, platform integration, forms, networking, offline data and storage, interop, quality layers (accessibility, performance, error resilience, distribution, security, observability) and dev-side tests — plus migration, a code-review pass and a one-call read-only conformance audit (/desktop-windows:audit) that sweeps an existing codebase into a saved, re-runnable findings report. Bundles the Auth0 native auth skill and the step-by-step desktop-windows orchestrator agent. The stack-agnostic design-craft skills (the ui-ux-pro-max corpus is the source of truth for every design fact) arrive through the `design` plugin, and the developer-workflow skills (design, plan-feature, audits, session budgets) through the `dev` plugin — this plugin depends on both, so installing it is enough.",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "Aleksandar Kotrulev",
+        "email": "alexandur.kotrulev@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "windows",
+        "winui",
+        "wpf",
+        "winforms",
+        "desktop"
+      ],
+      "category": "development",
+      "dependencies": [
+        "dev",
+        "design"
+      ],
+      "skills": [
+        "./desktop/windows/skills/accessibility",
+        "./desktop/windows/skills/activation-and-notifications",
+        "./desktop/windows/skills/architecture",
+        "./desktop/windows/skills/basics",
+        "./desktop/windows/skills/code-review",
+        "./desktop/windows/skills/cpp-winrt",
+        "./desktop/windows/skills/error-handling",
+        "./desktop/windows/skills/forms",
+        "./desktop/windows/skills/interop",
+        "./desktop/windows/skills/languages",
+        "./desktop/windows/skills/migration",
+        "./desktop/windows/skills/networking",
+        "./desktop/windows/skills/offline-and-storage",
+        "./desktop/windows/skills/performance",
+        "./desktop/windows/skills/platform-integration",
+        "./desktop/windows/skills/project-setup",
+        "./desktop/windows/skills/standards-audit",
+        "./desktop/windows/skills/styling",
+        "./desktop/windows/skills/test-ids",
+        "./desktop/windows/skills/ui-components",
+        "./desktop/windows/skills/unit-testing",
+        "./desktop/windows/skills/windows-and-navigation",
+        "./desktop/windows/skills/winforms",
+        "./desktop/windows/skills/wpf",
+        "./desktop/_shared/distribution",
+        "./desktop/_shared/observability",
+        "./desktop/_shared/security",
+        "./auth/auth0-windows",
+        "./desktop/windows/skills/rules"
+      ],
+      "commands": [
+        "./desktop/windows/commands/desktop-windows.md",
+        "./desktop/windows/commands/audit.md"
+      ],
+      "agents": [
+        "./desktop/windows/agents/desktop-windows.md"
       ]
     },
     {

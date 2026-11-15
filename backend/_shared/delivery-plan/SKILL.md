@@ -41,7 +41,7 @@ in this document, in status reports, and when talking to the human.
 
 **Every task belongs to exactly one epic, one story, one stack and one agent, and is executed in one
 session.** The epic and story come from `epics.md` / `stories.md` by way of `epic-map.md`; the stack is
-one of `be` · `fe` · `mobile` · `ts` · `data` · `infra` · `qa` · `docs` · `human`; and the session budget is
+one of `be` · `fe` · `mobile` · `desktop` · `ts` · `data` · `infra` · `qa` · `docs` · `human`; and the session budget is
 derived by `dev:plan-session-budget` while the task is being authored, not measured afterwards.
 
 > **A task that touches both the API tree and the web tree is two tasks.** There is no mixed task at
@@ -114,7 +114,7 @@ Do not brainstorm tasks. Read them out of the detail pack, in this order — the
 | `api-surface.md` endpoint blocks + the validation catalog + the `Acceptance:` lines + the test plan's scenarios bound to `qa-api-<stack>` | **API acceptance tasks** (`Q`, `qa-api-<stack>`) — one per resource group that fits a session, after the stub task and the test-plan task and before the resource tasks that turn them green |
 | `integrations.md` dependency blocks | One client task per external system |
 | `experience-plan.md` §2 + §4 screen catalog | The **app-shell task** (shell, nav, home — once, bound to `fe-react` / `fe-blazor` with `design:app-structure`; in a test-first plan every screen route renders a placeholder), then one frontend task per screen or per journey's screen set (a list and its detail are one coherent task), each after the endpoints it calls and citing its screen ids |
-| `experience-plan.md` journeys + the `Test ids:` lines | **Journey tasks** (`Q`, `qa-ui-<stack>` / `qa-mobile-<stack>`) — after the app shell and the stubs, before the screens they specify; red on the screens' placeholders |
+| `experience-plan.md` journeys + the `Test ids:` lines | **Journey tasks** (`Q`, `qa-ui-<stack>` / `qa-mobile-<stack>` / `qa-desktop-<lang>`) — after the app shell and the stubs, before the screens they specify; red on the screens' placeholders |
 | `api-surface.md` outbound webhooks + background work | Job/consumer tasks |
 | The plan itself | **The documentation task**, last in the order and depending on the gate task: `DOC1`, stack `docs`, agent `be-documenter` where the project keeps `docs/business-model/` (or has no documentation yet), `be-feature-documenter` where it documents per feature in `docs/features/`. It re-traces the areas or features this plan's tasks touched and updates their guides from the code at HEAD, never from the plan, with screenshots captured from the running environment the task names. `Gate: own tests` is the doc lint over what it touched. Split by area (`DOC1`, `DOC2`) when over budget (`plan-format.md` §5) |
 | `api-surface.md` endpoint map | **The OpenAPI-asset task** — one standard task. **Test-first:** the stub task generates the spec from the stubs, so the `Q` tasks have their typed client first; the asset is regenerated through `qa/_shared/api-spec-assets`' diff lane after the last endpoint task. **Test-after:** after the last endpoint task, the `be-<stack>` agent generates the spec from the implemented surface. Either way it is committed canonicalized as `{service}-openapi-YYYY-MM-DD.json`, so `qa/_shared/api-spec-assets` has its canonical input and every later contract change flows through that skill's diff-driven lane instead of being reverse-engineered. Greenfield plans include it by default; skip only when the repo already keeps the asset |
@@ -125,7 +125,7 @@ Anything not traceable to a row above is either missing from the design pack (go
 
 - **Epic** — from `epic-map.md` §1. Foundation and contract tasks are `E0`, the planner-created epic that carries no stories; every other task names an `E` id from `epics.md`.
 - **Story** — the `US` id from `stories.md` the task serves. `E0` tasks have no story and say `—`. A task under `E1..En` that serves no story is either work the backlog is missing (go add it there) or work nobody asked for.
-- **Stack** — exactly one of `be` (backend, database, migrations) · `fe` (the web client) · `mobile` (the native or React Native client app) · `ts` (shared TypeScript packages — CLI, MCP, generated clients) · `data` · `infra` · `qa` · `docs` · `human`.
+- **Stack** — exactly one of `be` (backend, database, migrations) · `fe` (the web client) · `mobile` (the native or React Native client app) · `desktop` (the native desktop client app: macOS or Windows) · `ts` (shared TypeScript packages — CLI, MCP, generated clients) · `data` · `infra` · `qa` · `docs` · `human`.
 
 **One stack per task is a hard rule, and it is what makes the batching mechanical rather than a judgement call.** A row above that yields work in two trees yields two tasks: the endpoints are `be`, the screens that call them are `fe`, and the generated client between them is `ts`. Splitting them is not a cost — the tasks of one stack within one epic are already adjacent, so the split costs an ordering, not a session.
 
@@ -191,7 +191,7 @@ Three rules keep it honest:
 | Then | **The telemetry base** — its own batch, because its agent is `observability-engineer-<stack>`: the SDK wiring, the local Grafana stack and the RED dashboard, on the contract wave's scaffold |
 | Then | **Test-design batches** (`TD`) — the test plans for every epic in one `qa-test-planner` batch, then the test-case suites in as few `qa-test-case-designer` batches as fit |
 | Then | **API acceptance batches** (`Q`, `qa-api-<stack>`) — one per resource group that fits a session, written against the stubs and red on them, automating the test plan's scenarios bound to them |
-| Then | **Journey batches** (`Q`, `qa-ui-<stack>` / `qa-mobile-<stack>`) — written against the agreed test ids and red on the placeholders |
+| Then | **Journey batches** (`Q`, `qa-ui-<stack>` / `qa-mobile-<stack>` / `qa-desktop-<lang>`) — written against the agreed test ids and red on the placeholders |
 | Then | **Backend, one batch per module** — a module is a file tree one agent owns (`src/Booking/*`): its entities, domain rules, service, endpoint bodies, registration and unit tests, in a single task. Most-depended-on module first |
 | Then | **Frontend, one batch per screen area** — an area is one nav section of `experience-plan.md` §2 and the screens under it: their components, routes, states and wiring, in a single task, ordered by the nav map |
 | Last | The OpenAPI asset's regeneration, business dashboards and alert rules, rate limiting — then the **verification batch**: the full build, the whole test run (old and new), the journeys and the coverage floor, once more across the plan. The acceptance tests are not deferred to it: they ran red before the implementation, and each batch turned its own green. After it, **the documentation batch** (`DOC1`, the documenter agent) closes the plan |
@@ -342,7 +342,7 @@ Rules:
 
 - **`Epic`, `Story` and `Stack` are on every task, or on none.** `Epic` is an `E` id from
   `epic-map.md` (`E0` for foundation and contract work); `Story` is a `US` id from `stories.md`, or
-  `—` for an `E0` task; `Stack` is exactly one of `be` · `fe` · `mobile` · `ts` · `data` · `infra` · `qa` ·
+  `—` for an `E0` task; `Stack` is exactly one of `be` · `fe` · `mobile` · `desktop` · `ts` · `data` · `infra` · `qa` ·
   `docs` · `human`. A task naming two stacks is two tasks, reported as a plan defect rather than
   resolved by picking the larger one. A `Story` id that does not exist in `stories.md`, or an `Epic`
   that does not exist in `epic-map.md`, is a defect in the citation, not licence to invent the backlog
