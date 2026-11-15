@@ -10,9 +10,10 @@ Plugins cannot ship Claude Code rules, so this skill copies them into the projec
 
 | File (beside this SKILL.md) | Loads when the session touches |
 |---|---|
-| `qa-java.md`: simplicity, lifecycle, isolation, assertions, waits, secrets, reporting, flakes, comments | test-module folders (`apitests`, `ui-tests`, `e2e`, …), role folders under test sources (`tests`, `pages`, `clients`, `steps`, `builders`, …), `pom/` under `src/main`, `src/gatling` |
+| `qa-java.md`: simplicity, lifecycle, isolation, assertions, waits, secrets, reporting, flakes, comments | test-module folders (`apitests`, `ui-tests`, `e2e`, …), role folders under test sources (`tests`, `pages`, `windows`, `clients`, `steps`, `builders`, …), `pom/` and `windows/` under `src/main`, `src/gatling` |
 | `qa-java-api.md`: clients, DTOs, status and error assertions | `apitests` / `api-tests`, `clients/` and `models/` under test sources, `*Client` / `*Dto` test files |
 | `qa-java-ui.md`: locators, page objects, drivers, waits, Appium | `uitests` / `ui-tests` / `mobile-tests` / `e2e`, `pages/` `screens/` `components/` `flows/` under test sources, `*Page` / `*Screen` test files, `pom/` |
+| `desktop-tests.md`: window objects, `accessibility id` locators, window switching, Appium 3 desktop session | `desktop-tests` module folders, `windows/` and `support/` under test sources, `*Window` / `*Dialog` test files, `DesktopDriverFactory` |
 | `qa-java-bdd.md`: feature files, glue, hooks | `*.feature`, `steps/` `stepdefs/` `glue/` `hooks/`, `*Steps` / `*Hooks` |
 | `qa-java-data.md`: builders, seeders, probes, Testcontainers | `builders/` `mothers/` `db/` `probes/` `seeders/`, `*Builder` / `*Mother` / `*Probe` / `*Seeder` under test sources |
 | `qa-java-perf.md`: Gatling | `src/gatling/`, `*Simulation.java` |
@@ -32,7 +33,7 @@ Where a step needs the user's answer or agreement and nobody is there to give it
 ## Procedure
 
 1. **Find the project root**: `git rev-parse --show-toplevel`, or the working directory when it is not a git repo.
-2. **Check the source**: all eight rule files exist in `${CLAUDE_SKILL_DIR}`. If one is missing, stop and say so; never write a rule from memory.
+2. **Check the source**: all nine rule files exist in `${CLAUDE_SKILL_DIR}`. If one is missing, stop and say so; never write a rule from memory.
 3. **Copy each file** that is missing from the target: `mkdir -p <root>/.claude/rules/qa-java` and `cp` it byte for byte.
 4. **For each file already present**, `cmp` it with the source.
    - Identical: up to date.

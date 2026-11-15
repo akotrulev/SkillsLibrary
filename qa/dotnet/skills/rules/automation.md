@@ -1,6 +1,6 @@
 ---
 paths:
-  - "**/*{ApiTests,UiTests,AppiumTests,MobileTests,E2ETests,IntegrationTests,AcceptanceTests,BddTests,Bdd.Tests}/**/*.cs"
+  - "**/*{ApiTests,UiTests,AppiumTests,MobileTests,DesktopTests,E2ETests,IntegrationTests,AcceptanceTests,BddTests,Bdd.Tests}/**/*.cs"
   - "**/TestCore/**/*.cs"
 ---
 
@@ -10,7 +10,7 @@ paths:
 
 Apply these to every C# file of an automated suite you write, edit or review (tests, fixtures, clients, page objects, steps). The tag after a rule is the severity a review reports: **blocker** ships a bug or breaks a hard rule, **major** is a design or correctness problem, **minor** is style, **nit** is preference. API, web, mobile, BDD, data, database and config rules are separate files that load with their files.
 
-**The codebase wins.** Where the suite consistently does something another way (a naming shape, an assertion library), follow it and do not flag it. Detect versions before writing: the TFM (`net10.0` primary, `net8.0`/`net9.0` supported), NUnit 4.x, `Microsoft.Playwright` 1.63 (no 1.64-only API), `Appium.WebDriver` 9 for Appium 3 or 8.x for an Appium 2 device cloud. Never up-level a package, the SDK pin or the TFM as a side effect; never flag a down-level suite for lacking a newer API.
+**The codebase wins.** Where the suite consistently does something another way (a naming shape, an assertion library), follow it and do not flag it. Detect versions before writing: the TFM (`net10.0` primary, `net8.0`/`net9.0` supported), NUnit 4.x, `Microsoft.Playwright` 1.63 (no 1.64-only API), `Appium.WebDriver` 9 for Appium 3 or 8.x for an Appium 2 device cloud, `FlaUI.UIA3` 5.0.0 for a Windows-only desktop suite. Never up-level a package, the SDK pin or the TFM as a side effect; never flag a down-level suite for lacking a newer API.
 
 ## Test shape
 

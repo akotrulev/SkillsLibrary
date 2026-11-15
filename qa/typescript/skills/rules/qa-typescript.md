@@ -1,11 +1,12 @@
 ---
 paths:
   - "**/e2e/**/*.ts"
-  - "**/{e2e-tests,api-tests,apitests,ui-tests,mobile-tests,acceptance-tests}/**/*.ts"
-  - "**/tests/{api,ui,e2e,mobile,integration,specs,clients,schemas,operations,proto,pages,flows,builders,mothers,support}/**/*.ts"
+  - "**/{e2e-tests,api-tests,apitests,ui-tests,mobile-tests,desktop-tests,acceptance-tests}/**/*.ts"
+  - "**/tests/{api,ui,e2e,mobile,desktop,integration,specs,clients,schemas,operations,proto,pages,flows,builders,mothers,support}/**/*.ts"
   - "**/test/specs/**/*.ts"
   - "**/src/specs/**/*.ts"
   - "**/src/pages/{web,mobile}/**/*.ts"
+  - "**/src/windows/**/*.ts"
   - "**/{steps,step-definitions}/**/*.ts"
   - "**/playwright.config.ts"
   - "**/wdio*.conf.ts"

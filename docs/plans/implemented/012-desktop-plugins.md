@@ -2,7 +2,7 @@
 
 **Goal:** Two marketplace plugins in one new `desktop/` domain. `desktop-macos` covers Swift, SwiftUI and the AppKit lane. `desktop-windows` covers WinUI on Windows App SDK 2.x with C#, plus WPF, WinForms and C++/WinRT lanes. Each has the library's plugin shape: a coding standard installed as path-scoped rules, the common use-case skills, a step-by-step agent that works on greenfield and brownfield, two commands and a conformance audit. A shared desktop layer (distribution, security, observability) is bundled into both, and native Auth0 skills ship with them. The QA plugins gain a desktop E2E lane: three skills and a `qa-desktop-<lang>` agent in each of `qa-java`, `qa-dotnet` and `qa-typescript`, driven by the same test ids the dev agents emit.
 
-**Status:** Planned 2026-11-15; no task has landed. Research is done and saved beside this plan in `docs/research/012-desktop-plugins/{macos,windows,cross-platform-and-qa}.md`. Every fact in §4 comes from those files, verified on 2026-11-15; the §4.6 items are not verified. **Next:** C1, then S1–S3, M1 and W1 side by side. Built but unverified, once landed: no agent has been run against a real Mac or Windows app, and no desktop E2E suite has run on a real runner.
+**Status:** Filed 2026-11-15. **Delivered:** the `desktop/` domain and code rules (C1), the shared layer and native Auth0 (S1–S3), `desktop-macos` (M1–M5) and `desktop-windows` (W1–W6, with the C++/WinRT lane, D16), the QA desktop lane in `qa-typescript`, `qa-java` and `qa-dotnet` (E1–E3), the marketplace, surface check, planning lane and QA wiring (I1), and the documentation in `CLAUDE.md`, `docs/skills-catalog.md` and `README.md` (G1). §11's five checks pass. **Built but unverified (facts as of 2026-11-15):** no agent has been run against a real Mac or Windows app, and no desktop E2E suite has run on a real runner. **Next:** the user's global `~/.claude/CLAUDE.md` rule-1 edit (D13), and Q1–Q3.
 
 **Test design:** none. This plan serves no stories (it builds skills, not a product), so it has no `TD` tasks.
 **Documentation task:** none. This library's documentation is `CLAUDE.md`'s map, `docs/skills-catalog.md` and `README.md`, which G1 writes from the files that landed (as plan 002's G1 did). `be-documenter` documents applications, not a skills library.
@@ -349,7 +349,7 @@ Each agent follows `.skill-template/agent.md`: invariants, every-run steps (rule
 |---|---|---|---|
 | Build / run | `xcodebuild -scheme <Scheme> -destination 'platform=macOS' build`, then `open` the product | `winapp run` (or `dotnet build` + VS deploy for packaged) | `winapp run` on the `.vcxproj` / `msbuild` |
 | Static | `xcrun swift-format lint --recursive <dirs>`, `swiftlint` | `dotnet build -warnaserror` with the WinUI analyzer, `dotnet format --verify-no-changes` | `/W4 /WX` build; clang-tidy where configured |
-| Tests | `xcodebuild … test`; `swift test` in local packages | `dotnet test` (NUnit project; the WinUI Unit Test App where present) | W4 decides (D8) |
+| Tests | `xcodebuild … test`; `swift test` in local packages | `dotnet test` (NUnit project; the WinUI Unit Test App where present) | GoogleTest `.exe` over the core library (`msbuild CoreTests.vcxproj …`, then `.\x64\Debug\CoreTests.exe`); lines coverage with `Microsoft.CodeCoverage.Console collect` (D16) |
 | Screenshot for Step 5 | `screencapture -l <windowid> <file>` | `winapp ui screenshot`, or a PowerShell capture | same |
 
 ### 7.3 Brownfield: orientation cache fields
@@ -592,6 +592,16 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 
 **D12 — Native auth gets two new skills, `auth/auth0-macos` and `auth/auth0-windows`,** rather than reusing `auth/auth0-ios`, which rule 5 forbids across categories. Both use the RFC 8252 system-browser + PKCE flow. Cost: Auth0.swift guidance exists in two places (iOS and macOS), which can drift.
 
+**D14 (2026-11-15, S3) — Windows auth uses `Auth0.OidcClient.Core` plus a system-browser `IBrowser`, not `Auth0.OidcClient.WPF`.** Plan reading: name Auth0's .NET SDK for WinUI and WPF. Built: no WinUI package exists, and the WPF package embeds WebView2 for login, against §5 and RFC 8252. Cost: the browser integration is app code, and the Core package's API is unverified against source.
+
+**D15 (2026-11-15, S1) — Artifact Signing eligibility is wider than the research file says.** Plan reading (`windows.md` §6, §4.6): organizations in US/Canada/EU/UK, individuals in US/Canada. Official quickstart (learn.microsoft.com/azure/artifact-signing/quickstart, updated 2026-10-08): Public Trust for organizations in the US, Canada, EU, UK, Australia, New Zealand, Japan, South Korea, Singapore, Switzerland, Norway and Israel; individuals only in the US and Canada. The distribution skill states the official list. Cost: a re-check owed after 2027-01-15.
+
+**D16 (2026-11-15, W4) — The C++/WinRT lane tests with GoogleTest over a XAML-free core library, measures lines with `Microsoft.CodeCoverage.Console`, and the §5 C++ bullet is reworded.** Plan reading (D8, §5, §7.2): W4 chooses between the Microsoft C++ Unit Test Framework and GoogleTest and a coverage tool; the bullet said `com_ptr` and value types, `get_strong()` or `get_weak()`, `wil::resume_foreground`, "`hresult_error` is handled at the boundaries", "Warnings are errors". Built, from learn.microsoft.com and github.com (2026-11-15):
+- **Framework: GoogleTest.** The Microsoft framework's documented API has no parameterized or data-driven test, which the house rule against conditional logic in tests requires (`TEST_P` has it); its Windows Runtime asserts take C++/CX `T^`. GoogleTest ships in the same VS workload and runs as a plain `.exe`. Microsoft documents the WinUI Unit Test App only as C# MSTest (`winui-unittest` is C#): no C++ in-process XAML runner was found, so XAML-bound C++ stays thin and is covered by the `qa-desktop-<lang>` E2E suite.
+- **Coverage tool: `Microsoft.CodeCoverage.Console`** (native, static instrumentation; Visual Studio 2026 Community, Professional and Enterprise). It reports **blocks and lines, not branches**, so the floor is **80% of lines** (CLAUDE.md § Test code rules). `clang-cl` with `llvm-cov report` does report branches and then the floor is 80% of branches (not verified that VS ships the `llvm-cov` binaries). **OpenCppCoverage is archived and line-only: not used.**
+- **§5 bullet reworded in `CLAUDE.md`:** `com_ptr` takes implementation types and COM interfaces, and a projected type is already a smart pointer (`com_ptr<Projected>` does not compile); `get_strong()` is taken before the first suspension point and exists only on `winrt::implements` types; `winrt::resume_foreground` also queues (it returns `false` on shutdown, WIL throws `0x800701ab`); Microsoft says to avoid exceptions for expected failures, so `hresult_error` is caught once at the boundary; `/WX` is "to taste" in Microsoft's docs because generated stubs warn until implemented, and the rule keeps `/W4 /WX /permissive-` with stubs implemented first. Dev-side tests line in `CLAUDE.md` now names GoogleTest.
+Cost: a second test runner family beside NUnit and MSTest (D8), and a lines-based floor on the MSVC lane. Plan §5 and §7.2 are left as written; this entry and `CLAUDE.md` rule.
+
 **D13 — `desktop` is a new stack token and a new plugin category.** It goes into `plan-format.md`, `delivery-plan`, `solution-planner`, CLAUDE.md § Planning and `tools/plugin-surface-check.py`. The user's global `~/.claude/CLAUDE.md` rule 1 lists the stacks too; changing it is the user's step (the `—` row after G1), because no task writes outside the worktree. Cost: until the user edits it, the global rule and the library disagree on the stack list.
 
 ## Answered questions (2026-11-15)
@@ -623,6 +633,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 - Write both checklist skeletons per §8.2. The V rows are adapted from the mobile-ios checklist's V rows, with the platform globs.
 - **Not in C1:** any skill body, the marketplace (I1), the map row and catalog (G1).
 
+**As built (2026-11-15):** as planned, no divergence. `CLAUDE.md:237` `## Desktop code rules` (§5 verbatim, from `Both platforms:` to the W4 note); `CLAUDE.md:316` under-construction line now lists `desktop/`, `auth/auth0-macos`, `auth/auth0-windows`. Tree: `desktop/{macos,windows}/{skills,agents,commands}/.gitkeep` and `desktop/_shared/.gitkeep` (the first task writing into each folder deletes its `.gitkeep`). Skeletons: `desktop/{macos,windows}/skills/standards-audit/references/conformance-checklist.md`, 21 `##` headings each (A–P, R, S, U, V, X; no Q or T), rows only in V (V1–V8). K, L, U point at `desktop/_shared/<skill>/references/audit-checks.md` by the `Platforms` column; X on macOS says N/A. Empty sections carry the owner line and the table header, so each skill task appends rows under it. The skeletons have no closing `## Section index`; each platform's last task writes it (§8.2). Unverified: nothing was run (Gate: none).
+
 ### S1 — shared: distribution
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -634,6 +646,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 - Cover §6.5's distribution row, with Developer ID vs Mac App Store and Store vs sideload vs unpackaged as one-of-N decisions, each with its rule table.
 - Version facts: Sparkle 2.10.1, Velopack 1.2.161, Artifact Signing $9.99/month, the Developer ID CA expiring 2027-02-01. Re-check the §4.6 Artifact Signing eligibility item before writing it.
 - **Not in S1:** pipeline YAML (`devops-engineer`'s), security rules (S2).
+
+**As built (2026-11-15):** `desktop/_shared/distribution/SKILL.md` (12,289 chars; description 180), `references/macos.md` (6,974), `references/windows.md` (6,980), `references/audit-checks.md` (25 rows `L1…L25`, columns `| # | Check | Violation looks like | Find it with | Sev | Platforms |`, platforms `macos`/`windows`; L3 is the blocker-class 2027-02-01 `.pkg` row). Sparkle 2.10.1 and Velopack 1.2.161 re-checked current (1.2.158 deprecated); Artifact Signing eligibility re-checked and differs from the research file: D15. The 12 R-rules in SKILL.md cover signing and updates; pipeline YAML is named, not written. Built but unverified: no gate (D11); `rg` recipes were not run against a real project.
 
 ### S2 — shared: security and observability
 
@@ -647,6 +661,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 - Observability per §6.5. The Collector and backends belong to the be-* `observability-engineer-<stack>` agents and are named, not taught.
 - **Not in S2:** distribution (S1), auth (S3).
 
+**As built (2026-11-15):** `desktop/_shared/security/SKILL.md` (8,097 chars; description 199), `references/{macos,windows}.md` (7.2k, 8.1k) and `references/audit-checks.md` (31 rows `K1…K31`, columns `| # | Check | Violation looks like | Find it with | Sev | Platforms | DA |`, platforms `macos`/`windows`, every row cites its OWASP id, plus a DA1–DA10 map and a static-versus-dynamic table). `desktop/_shared/observability/SKILL.md` (7,944; description 192), `references/{macos,windows}.md` (5.2k, 5.6k) and `references/audit-checks.md` (21 rows `U1…U21`, columns `| # | Check | Violation looks like | Find it with | Sev | Platforms |`). No divergence from the plan. Researched: the OWASP Desktop App Security Top 10 has a single edition, **2021** (DA1 Injections … DA10 Insufficient Logging & Monitoring; owasp.org/projects/desktop-app-security-top-10), so the skill cites 2021 and says a newer edition is a finding, not a silent swap; Microsoft Learn *Dynamic-Link Library Security* and *Develop secure WebView2 apps* were read in full. Built but unverified: Apple's Hardened Runtime and `WKWebView` pages are script-rendered and returned only titles, so the library-validation, `DYLD_*`, `isInspectable` and `WKWebView` statements are marked *re-verify* in `security/references/macos.md`; the Swift XPC peer-requirement API name and the OTel Swift exporter and processor constructors are written from documented shape, not compiled; OpenTelemetry .NET 1.21.0 is the research file's pin and NuGet aggregators disagreed on the newest exporter patch; Sentry's `IsGlobalModeEnabled` desktop guidance was only in third-party mirrors, so it is left out. No `rg` recipe was run against a real project. Gate: none (D11).
+
 ### S3 — native desktop Auth0
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -657,6 +673,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 
 - Both skills use the system browser + PKCE flow and keep tokens in the Keychain / `PasswordVault` / DPAPI. Logout and refresh go through Auth0's credentials manager where the SDK has one.
 - **Not in S3:** server-side token validation (`be-*` auth skills).
+
+**As built (2026-11-15):** `auth/auth0-macos/SKILL.md` (Auth0.swift 3.x, macOS 12 minimum, universal links on macOS 14.4+, `ASWebAuthenticationSession`, one `CredentialsManager` on the Keychain, sandbox network-client entitlement) and `auth/auth0-windows/SKILL.md` exist; descriptions 185 and 183 characters, bodies 7.6k and 9.5k. **Divergence (D14):** Auth0 ships no WinUI package, and `Auth0.OidcClient.WPF` 4.4.0 logs in inside a WebView2 popup, which RFC 8252 §8.12 forbids. The Windows skill uses `Auth0.OidcClient.Core` with an app-written system-browser `IBrowser` (loopback or protocol activation) for both WinUI and WPF, and stores the refresh token in `PasswordVault` / DPAPI. Cited: auth0.com/docs/quickstart/native/wpf-winforms, github.com/auth0/auth0-oidc-client-net, nuget.org. Unverified: the `Auth0.OidcClient.Core` `Auth0ClientOptions.Browser` API and which OIDC package version it resolves were inferred from the WPF package's dependency list, not read from source, and the skill tells the agent to check first; no sample was compiled; whether the tenant accepts a variable loopback port was not confirmed. Auth0.swift's exact 3.x tag was not readable (README implies 3.3.x).
 
 ### M1 — macOS foundations
 
@@ -670,6 +688,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 - `project-setup` sets `SWIFT_VERSION` 6, sandbox and hardened runtime, and the deployment target and architectures per §4.1 / D4.
 - **Not in M1:** windows, menus and documents (M2).
 
+**As built (2026-11-15):** as planned except the frontmatter name: `desktop/macos/skills/basics/SKILL.md` has `name: concepts`, the same as `mobile-ios` (folder `basics`, name `concepts`, §2 Naming); routing clauses elsewhere say `basics` by folder. `basics` (11.3k chars) is adapted from `mobile/ios/skills/basics` **at commit `4858167e`** (`git log -1 --format=%h -- mobile/ios/skills/basics`), plus `references/concurrency.md` (3.8k, condensed from the iOS one) and a Mac-model table; it says the deployment-target lanes are a recommendation (D4). `project-setup` (11.3k), `architecture` (10.3k, with `references/tca.md`, TCA 1.26.2 as an existing-codebase lane), `ui-components` (11.8k) and `styling` (11.1k, motion and Reduce Motion folded in, D6); descriptions 182–193 chars. Version-lane tables keyed to §4.1 in all five. Checklist rows in `desktop/macos/skills/standards-audit/references/conformance-checklist.md`: A1–A9, B1–B17, C1–C10, D1–D13, E1–E13 (62 rows, columns as §8.2, tags `[mac15+]` `[mac27SDK]` `[mac13]` `[AppKit]` `[MAS]` `[DevID]`). Rows promised by later skills: D is shared with `appkit` (M2 appends D14 onward); F onward is untouched. Rule-file names cited in the skills (`xcode-config.md`, `swift.md`) are §8.6's. Built but unverified: Apple's `glassEffect` / `GlassEffectContainer` / `.glass` pages are script-rendered and returned only titles, so the names come from `macos.md` §2.4 and the iOS sibling and the skill tells the agent to confirm signatures in the installed SDK docs; Dynamic Type on macOS and AppKit's own design-compatibility key (§4.6) are stated as *not verified*, not as facts; the `dropDestination` 27.3 item is carried as not verified. No `rg` recipe was run against a real project; no code sample was compiled. Gate: none (D11). Not committed: the queue commits (task ran under Plan Queue).
+
 ### M2 — macOS windows, menus, forms, documents and AppKit
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -680,6 +700,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 
 - `menus-and-commands` carries the HIG menu order, disabled-not-hidden and the hidden menu icons of the 27 SDK. Re-check the §4.6 `dropDestination` item before writing drag rules.
 - **Not in M2:** networking, storage and platform skills (M3).
+
+**As built (2026-11-15):** as planned, no divergence. `desktop/macos/skills/windows-and-scenes/SKILL.md` (7.6k chars), `menus-and-commands` (6.6k), `forms` (7.6k), `documents` (7.0k), `appkit` (7.5k); descriptions 170-190 chars; version-lane tables keyed to §4.1 in all five. Checklist rows in `desktop/macos/skills/standards-audit/references/conformance-checklist.md`: D14-D20 (`[AppKit]`), F1-F15, G1-G12, I1-I9 (documents; `offline-and-storage` appends from I10). Re-checked: the `dropDestination(for:action:isTargeted:)` 27.3 item (§4.6) could not be settled (the Apple page rendered only its title), so `documents` says it is **not verified**, uses the API and writes no rule for or against it. Built but unverified: Apple's scene, `Document` and `NSHostingSceneRepresentation` pages are script-rendered, so the `Document` protocol spelling in `documents` comes from `macos.md` §2.3 and the skill tells the agent to confirm signatures in the installed SDK; `NSGestureRecognizerRepresentable` availability is marked to check; no sample was compiled and no `rg` recipe was run against a real project. Gate: none (D11). Not committed: the queue commits.
 
 ### M3 — macOS networking, storage, sandbox, background and system integration
 
@@ -692,6 +714,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 - Each skill per its §6.2 row. Every TCC permission gets a denied path that links to System Settings.
 - **Not in M3:** the quality layers (M4).
 
+**As built (2026-11-15):** as planned, no divergence. `desktop/macos/skills/networking/SKILL.md` (13.3k chars), `offline-and-storage` (12.2k), `sandbox-and-permissions` (14.5k), `background-and-helpers` (13.1k), `system-integration` (13.1k); descriptions 173-197 chars; version-lane tables keyed to §4.1 in all five. Checklist rows in `desktop/macos/skills/standards-audit/references/conformance-checklist.md`: H1-H15, I10-I20 (`offline-and-storage`, after documents' I1-I9), J1-J27 (tags `[MAS]` `[mac15+]` `[mac14+]` `[mac27SDK]` `[AppKit]`). Rows promised by later skills: none in H, I, J. Built but unverified: the `XPCSession` / `XPCListener` initializer labels and peer-requirement API, the `SCContentSharingPicker` and Controls availability version, the `com.apple.Notifications-Settings.extension` and `Privacy_*` Settings anchors, and the 27 `launchd` quarantine scope are written from `macos.md` §3 and documented shape, not compiled or re-read (Apple's pages are script-rendered); each skill tells the agent to confirm them in the installed SDK. `SMAppService.openSystemSettingsLoginItems()` and the four `status` values come from `macos.md` §3.3. No sample was compiled and no `rg` recipe was run against a real project. Gate: none (D11). Not committed: the queue commits.
+
 ### M4 — macOS quality layers, test ids and unit tests
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -702,6 +726,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 
 - `error-handling` applies §6.4, with rule bodies in `references/` from the start.
 - **Not in M4:** migration, review, audit, rules and agent (M5).
+
+**As built (2026-11-15):** as planned, no divergence. `desktop/macos/skills/{languages (name `i18n`, as mobile-ios), accessibility, performance, error-handling, test-ids, unit-testing}/SKILL.md` at 11.7k, 12.7k, 14.7k, 13.0k, 13.6k and 15.1k chars (all under 16k; unit-testing is above the 14k aim); descriptions 189-199 chars. `error-handling` carries its rule bodies in `references/windows-wake-and-versions.md` (7.4k: multi-window model, wake / reactivation revalidate, 401 ladder, version skew and Sparkle never restarting over unsaved work) and `references/writes-storage-and-dependencies.md` (7.9k: quit mid-write, revoked bookmark, full disk, dead XPC / web content); the banner is an inline `safeAreaInset` in the window content, no `NSAlert` for background failures (§6.4). Checklist rows in `desktop/macos/skills/standards-audit/references/conformance-checklist.md`: M1-M17, N1-N18, O1-O26, P1-P14, R1-R12, S1-S17. Rows promised by later skills: none in M, N, O, P, R, S. **Verified 2026-11-15 against the Mac2 driver docs** (appium.github.io/appium-mac2-driver locator-strategies and element-attributes): `accessibility id`, `id` and `name` are all aliases of the XCTest `identifier`; `className` maps to `elementType`; `label` is a separate attribute. `test-ids` states it as one table (element kind → identifier → what Mac2 reads → locator), plus the Mac2 session / permission facts from `cross-platform-and-qa.md` B.3; menu-bar items and system panels are marked not taggable / not verified. MetricKit on Mac checked: Apple's hang-diagnostics page lists macOS 12.0 as the minimum, diagnostics are delivered promptly on macOS 12+ and metrics at most about daily; the page's end-version metadata "27.2.0" and the macOS 27 `MetricManager` member names stay **unconfirmed** (Apple's MetricKit pages were script-rendered), so `performance` tags the two branches and tells the agent to compile against the 27 SDK. Built but unverified: Dynamic Type on macOS stays "not verified" (§4.6), and `accessibility` says so instead of claiming it; the `XCUIVoiceOverService` line comes from `macos.md` §5; the SwiftUI `focusSection()` / `onKeyPress` behaviour and `Table` cell-id reachability in a Mac2 page source are written from documented shape and flagged "confirm in the page source"; no sample was compiled and no `rg` recipe was run against a real project. Gate: none (D11). Not committed: the queue commits.
 
 ### M5 — macOS migration, review, audit, rules, agent and commands
 
@@ -715,6 +741,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 - The rule files are adapted from `mobile/ios/skills/rules/*.md`, with `paths:` fitted to Mac projects.
 - **Not in M5:** marketplace wiring (I1).
 
+**As built (2026-11-15):** as planned, no divergence. `desktop/macos/skills/migration/SKILL.md` (11.2k chars; description 184) with eight references in `references/` (`swift6-modules`, `observation-and-async`, `appkit-to-swiftui`, `catalyst-to-native`, `objc-to-swift`, `filedocument-to-document`, `apple-silicon-and-developer-id` (the 2027-02-01 CA and Intel → Apple silicon only, §4.1), `sdk-and-targets` (macOS 27 SDK, CocoaPods, target raises); Electron → native is a mention only). `code-review/SKILL.md` (8.3k; `name: conventions-review`, as `mobile-ios`; folder `code-review`), `standards-audit/SKILL.md` (10.0k), `rules/SKILL.md` (6.9k) with the ten §8.6 files beside it (`swift.md`, `swiftui-mac.md`, `appkit.md`, `mac-accessibility.md`, `mac-styling.md`, `mac-localization.md`, `swift-networking.md`, `swift-persistence.md`, `swift-tests.md`, `xcode-config.md`; header comment `desktop-macos rules v1 (2026-11-15)`), `agents/desktop-macos.md` (9.5k chars; description under 650; carries the template's `Gate:` sentence verbatim and names `qa-desktop-java`, `qa-desktop-dotnet`, `qa-desktop-typescript` in Boundaries, which G1's name check covers), `commands/{desktop-macos,audit}.md`. The checklist `desktop/macos/skills/standards-audit/references/conformance-checklist.md` now ends with `## Section index` (21 rows; X marked N/A, K, L, U `fragment`). The three description budgets were met (≤ 200); two were trimmed after a count. Built but unverified: the `-l` window-id route for `screencapture` (a CGWindowID read from `CGWindowListCopyWindowInfo`, with Screen Recording permission) is written from documented behaviour and was not run; `swift package migrate`, `NSHostingSceneRepresentation` and `Document` signatures are marked to confirm in the installed toolchain; no `rg` recipe was run against a real project. Gate: none (D11). Not committed: the queue commits.
+
 ### W1 — Windows foundations
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -725,6 +753,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 
 - `basics` holds the lane table and the detection markers (§6.3). Re-check the §4.6 template items (`TargetPlatformMinVersion`, `winui-mvvm` DI) before writing them.
 - **Not in W1:** windows, activation and platform skills (W2).
+
+**As built (2026-11-15):** as planned except the frontmatter name: `desktop/windows/skills/basics/SKILL.md` has `name: concepts`, as the mobile siblings do (folder `basics`; later skills route to it as `desktop-windows:concepts`). `basics` (10.4k chars: lane table, detection markers, the Q2 conflict note, Windows model, C# and XAML standard), `project-setup` (10.4k: VS, `dotnet new` and `winapp new` 0.8.0 templates, `Directory.Build.props`, central packages, WinUI analyzer, MSIX, `winapp` fallbacks), `architecture` (9.9k: CommunityToolkit.Mvvm 8.4 partial properties, Generic Host, sealed state, one `InfoBar`), `ui-components` (12.1k: `x:Bind`, virtualization, three-state region, `ContentDialog`, experimental fence), `styling` (11.5k: theme dictionaries with `HighContrast`, Mica, type ramp, corner radius, motion and `AnimationsEnabled`); descriptions all under 200. Checklist rows in `desktop/windows/skills/standards-audit/references/conformance-checklist.md`: A1-A7, B1-B11, C1-C11, D1-D11, E1-E11 (51 rows; tags `[WinUI]` `[WPF]` `[WinForms]` `[packaged]`). A also belongs to `migration` and D to `wpf` / `winforms`: later tasks append from A8 and D12. Re-checked 2026-11-15: the official template pack page (nuget.org `Microsoft.WindowsAppSDK.WinUI.CSharp.Templates`; learn.microsoft.com winapp WinUI guide, 2026-11-09) states a `net10.0` default and `net{N}.0-windows10.0.26100.0`, and says **nothing** about the `TargetPlatformMinVersion` default or whether `winui-mvvm` registers `Microsoft.Extensions.Hosting`; the skills say so, write `TargetPlatformMinVersion` `10.0.17763.0` explicitly and tell the agent to read the generated project. Type ramp (12/16 to 68/92 epx) and corner radii (`ControlCornerRadius` 4, `OverlayCornerRadius` 8) verified against learn.microsoft.com. Built but unverified: .NET 11 / C# 15 and the `net11.0-windows` TFM under WinAppSDK 2.6 (not in the release notes); the WinUI `Grid` short-form `RowDefinitions` was left out as unconfirmed; no sample was compiled and no `rg` recipe was run against a real project. Gate: none (D11). Not committed: the queue commits.
 
 ### W2 — Windows windows and navigation, activation and notifications, platform integration, forms
 
@@ -737,6 +767,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 - Re-check the §4.6 startup / background / share-target items before writing them.
 - **Not in W2:** networking, storage and lanes (W3).
 
+- **As built (2026-11-15):** as planned, no divergence. `desktop/windows/skills/windows-and-navigation/SKILL.md` (11.2k chars; window rules, `TitleBar`, `NavigationView` + `Frame`, commands and accelerators), `activation-and-notifications` (12.2k; `AppInstance` single instancing, untrusted-activation router, startup task, `AppNotificationManager`, WNS), `platform-integration` (11.5k; new pickers, clipboard, drag and drop, share, background tasks, widgets, WebView2 lockdown) with `references/windows-ai.md` (5.5k), `forms` (12.0k; `ObservableValidator`, field errors, server-error mapping, focus order); descriptions 180-195 chars. Checklist rows in `desktop/windows/skills/standards-audit/references/conformance-checklist.md`: F1-F13, G1-G13, J1-J22 (48 rows; section J is shared, `platform-integration` and `activation-and-notifications` both wrote it). Re-checked 2026-11-15 against learn.microsoft.com: `AppInstance` instancing page (2026-11-10: redirection is not terminal, await it, guard circular redirects, STA wait pattern) and the Phi Silica page (2026-10-16: replaced by Aion Instruct, Insider November 2026, retail and Phi Silica removed January 2027, no LAF token for Aion, LoRAs must be re-trained, GPU path still needs an Experimental Insider build). Background tasks: packaged only, `BackgroundTaskBuilder` with a `windows.comServer` extension, no `OnBackgroundActivated` in WinUI (Learn background-tasks page, via search summary). Built but unverified (§4.6): the startup-task page for Windows App SDK 2.x was not found (404), so `activation-and-notifications` carries the UWP-era `StartupTask` facts and says the 2.x rule is unverified; share-target activation in 2.x was not re-read, so `platform-integration` says so; the Aion Instruct API surface beyond the transition notice was not read; `FileOpenPicker` member names, `AIFeatureReadyResultState`, `DataTransferManagerInterop` and the push `PushNotificationManager` calls are written from documented shape and not compiled; no `rg` recipe was run against a real project. Gate: none (D11). Not committed: the queue commits.
+
 ### W3 — Windows networking, storage, interop, WPF and WinForms
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -747,6 +779,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 
 - `wpf` and `winforms` say plainly that the lane stays itself, with modernization in place. Moving to WinUI is a `migration` run, never a side effect.
 - **Not in W3:** the C++ lane (W4).
+
+- **As built (2026-11-15):** as planned, no divergence. `desktop/windows/skills/networking/SKILL.md` (11.0k chars; typed clients, resilience-handler timeout budget, cancellation, ProblemDetails to a typed `Failure`, `Retry-After`, single-flight token refresh, reachability, `ClientWebSocket` with backoff), `offline-and-storage` (11.2k; packaged vs unpackaged store table, settings, SQLite / EF Core migrations, `PasswordVault` with a DPAPI fallback, outbox), `interop` (10.3k; CsWinRT 2.3.1 with 3.0 preview not adopted, HWND per lane, `LibraryImport`, COM, XAML hosting as a recorded decision), `wpf` (11.5k; Fluent opt-in with "still in progress", `ThemeMode`, MVVM, modernize in place), `winforms` (12.2k; `SetColorMode`, `ShowDialogAsync`, per-monitor DPI, `VisualStylesMode.Net11` opt-in); descriptions 184-199 chars. Checklist rows in `desktop/windows/skills/standards-audit/references/conformance-checklist.md`: D12-D23 (D12, D13, D15-D17 `[WPF]`; D14, D19-D23 `[WinForms]`; D18 both), H1-H11, I1-I13, X1-X12 (59 rows). The prompt named a be-dotnet HTTP-client skill; none exists under `backend/dotnet/skills/` (no HTTP skill in that folder), so the voice came from the W2 skills. Re-checked 2026-11-15 on learn.microsoft.com: What's new in WPF for .NET 10 (Fluent styles added for nine controls, "Fluent UI style support is still in progress"; `ThemeMode` values `Light`/`Dark`/`System`/`None`); Credential Locker page (WinRT APIs usable from WPF/WinForms; 20 credentials per app; no packaging requirement stated); `LibraryImport` page (.NET 7+, `static partial`, `AllowUnsafeBlocks`, `StringMarshalling`); `ApplicationData.GetForUnpackaged` is in the API reference while the app-data guide still sends unpackaged apps to file I/O. Built but unverified (§4.6): `PasswordVault` without package identity is not stated either way by Microsoft (the skill probes it and falls back to DPAPI); `ThemeMode`'s experimental `WPF0001` status on .NET 10/11 was not confirmed; WPF Mica per window type, the WinUI-in-WPF/WinForms hosting package and wrappers for Windows App SDK 2.6, `SystemEvents` as the WinForms colour-change hook and the `VisualStylesMode.Net11` final state were not verified; code samples are written from documented shape and not compiled; no `rg` recipe was run against a real project. Gate: none (D11). Not committed: the queue commits.
 
 ### W4 — the C++/WinRT lane
 
@@ -760,6 +794,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 - Rewrite W6's prompt for any C++ fact it must carry: the rule file `cppwinrt.md` and the agent's C++ build / test commands in §7.2.
 - **Not in W4:** the shared quality layers (W5).
 
+- **As built (2026-11-15):** as planned, with the decision recorded as D16 and the `CLAUDE.md` bullet rewritten (`CLAUDE.md:278-286`; dev-side tests line `CLAUDE.md:255` names GoogleTest). `desktop/windows/skills/cpp-winrt/SKILL.md` (15.5k chars; description 197; ownership table, coroutine lifetime, UI thread, errors, IDL, WIL, build, tests), `references/project-and-idl.md` (project shape, runtime-class steps, Win32/COM, `winapp` and `msbuild` fallbacks) and `references/testing-and-coverage.md` (framework table, floor per toolchain, gate commands). Checklist rows in `desktop/windows/skills/standards-audit/references/conformance-checklist.md`: B12, C12, N1, S1 and X13-X22 (`[C++]`, 14 rows). **N1 and S1 are the first rows of N and S: W5 appends N2 and S2 onward.** Verified 2026-11-15 on learn.microsoft.com: strong and weak references (2026-09-19), advanced concurrency (2026-09-19; `resume_foreground` always queues since C++/WinRT 2.0), error handling (2026-07-02), Author APIs, `com_ptr` reference, the C++/WinRT introduction (2026-09-21: package sets `/std:c++17`, `/bigobj`, `/await`; `/WX` "to taste"), WinApp CLI WinUI guide (2026-11-09: `winapp run` / `pack` build `.vcxproj`), Microsoft's WinUI testing page (2026-09-10), Visual Studio coverage and `Microsoft.CodeCoverage.Console` pages, the WIL `cppwinrt_helpers.h` header, the LLVM source-based coverage page, the OpenCppCoverage README. Built but unverified: no sample was compiled; the `clang-cl` flag spelling and whether VS's Clang component ships `llvm-cov` and `llvm-profdata`; Cobertura export of native results from `Microsoft.CodeCoverage.Console`; the `IWindowNative` route to an `HWND`; the 2026 template's exact `.vcxproj` property names; WIL's version and its error-mapping header; a C++ in-process XAML test runner (none found); no `rg` recipe was run against a real project. W5's and W6's prompts were rewritten for these facts. Gate: none (D11). Not committed: the queue commits.
+
 ### W5 — Windows quality layers, test ids and unit tests
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -770,6 +806,7 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 
 - `unit-testing` per D8. `error-handling` per §6.4, with stowed-exception triage.
 - **Not in W5:** migration, review, audit, rules and agent (W6).
+- **As built (2026-11-15):** as planned, no divergence. `desktop/windows/skills/{languages (11.6k chars), accessibility (14.1k), performance (14.6k), error-handling (15.4k, plus `references/writes-and-dependencies.md`), test-ids (12.7k), unit-testing (15.7k)}/SKILL.md`; each `name:` is its folder name; descriptions ≤ 200. Checklist rows appended to `desktop/windows/skills/standards-audit/references/conformance-checklist.md`: M1–M13, N2–N11 (after W4's N1), O1–O16, P1–P10, R1–R10, S2–S11 (after W4's S1). `test-ids` carries the §8.5 mapping as one table (element kind → property → WinCore 3.3.2 / FlaUI 5.0.0): checked 2026-11-15 against the WinCore `API.md` (`accessibility id` = `AutomationId`; **`id` = `RuntimeId`**, never a stable locator; absolute `driver.$` versus relative `element.$`), the FlaUI.WebDriver README (`accessibility id`, `By.Id` and CSS `#id` map to the automation id) and Microsoft Learn "Use the AutomationID property" (unique among siblings only; absent on top-level windows, WPF elements with no id, Win32 controls with no control ID). `unit-testing` follows D8 and links `cpp-winrt/references/testing-and-coverage.md` for the C++ lane (D16) without restating its commands. Built but unverified: the WinForms `Name` → `AutomationId` mapping, where the id lands on a `ListViewItem` row, `PowerManager.SystemSuspendStatusChanged` on the SDK in use, WinDbg `!pde.dse`, plural support in MRT Core (stated as "none verified"), the `Root.FlowDirection` resource pattern, and coverage inside the WinUI Unit Test App; each is marked in the skill. Every `winapp` recipe carries 0.8.0.
 
 ### W6 — Windows migration, review, audit, rules, agent and commands
 
@@ -781,6 +818,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 
 - The agent covers the four lanes (C#: WinUI / WPF / WinForms; C++/WinRT) through §7's steps and §7.2's commands; detection decides the lane. Its Related agents name the three `qa-desktop-<lang>` agents.
 - **Not in W6:** marketplace wiring (I1).
+
+- **As built (2026-11-15):** as planned, no divergence, no new `D<n>`. `desktop/windows/skills/migration/SKILL.md` (10.4k chars; description 196) with six references in `references/` (`dotnet-8-9-to-10` (dated, 2026-11-10), `windows-app-sdk-1-to-2` (dated; the `DISABLE_XAML_GENERATED_MAIN` rename, `GetForUnpackaged`, pickers), `framework-to-dotnet10`, `uwp-to-winui`, `wpf-to-winui-or-modernize` (decision record first, in place by default), `winforms-modernization`; MAUI and Win32/MFC are mentions only). `code-review/SKILL.md` (8.2k; `name: conventions-review`, folder `code-review`; one lane per file, screenshot pass with `winapp ui screenshot` and a PowerShell fallback), `standards-audit/SKILL.md` (10.1k; Step 0 detects per project, and the lane filter keeps the 14 `[C++]` rows (B12, C12, N1, S1, X13–X22) out of C# reports and the reverse), `rules/SKILL.md` (7.3k) with the twelve §8.6 files beside it (`csharp.md`, `winui-xaml.md`, `wpf.md`, `winforms.md`, `cppwinrt.md` with the four D16 globs, `win-accessibility.md`, `win-styling.md`, `win-localization.md`, `dotnet-networking.md`, `win-persistence.md`, `win-tests.md`, `package-config.md`; header comment `desktop-windows rules v1 (2026-11-15)`). `agents/desktop-windows.md` (11.5k chars; description 548; a lane-detection table picks the lane skill and a per-lane command table carries the §7.2 and D16 C++ commands; carries the template's `Gate:` sentence verbatim and names `qa-desktop-java`, `qa-desktop-dotnet`, `qa-desktop-typescript` in Boundaries, which G1's name check covers). `commands/{desktop-windows,audit}.md`. The checklist `desktop/windows/skills/standards-audit/references/conformance-checklist.md` now ends with `## Section index` (21 rows; K, L, U `fragment`; every row range matches the file, A1–A7 through X1–X22). Built but unverified: the `winapp ui screenshot` flags (the skill says to confirm with `--help`); the WPF and WinForms rule files share the XAML and form globs with WinUI's, so `rules` step 5 fits them per project; the migration references carry only what the research verified and tell the move to read the 2.0 breaking-change list and the .NET 10 compatibility list at move time; whether Windows App SDK 2.6 lists `net11.0-windows` (§4.6) stays unchecked. No file outside `desktop/windows/` and this plan changed.
 
 ### E1 — QA desktop: shared rules and the TypeScript lane
 
@@ -794,6 +833,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 - Rewrite E2's and E3's prompts for anything they must mirror: shared-skill section names and the explorer's report shape.
 - **Not in E1:** the Java and .NET lanes (E2, E3).
 
+**As built (2026-11-15):** as planned, no divergence. Peer ranges confirmed from the npm registry: `appium-mac2-driver@4.6.1`, `appium-wincore-driver@3.3.2` and `appium-novawindows-driver@1.5.0` all declare `appium ^3.0.0-rc.2`, which includes 3.8.0; automation names `Mac2` (use `mac2`), `Wincore`, `NovaWindows`; no `D<n>` needed. Files: `qa/_shared/desktop-testing/SKILL.md` (12.8k chars), `qa/typescript/skills/desktop-project-setup/SKILL.md` (11.8k), `desktop-screen-explorer/SKILL.md` (13.6k), `desktop-window-objects/SKILL.md` (10.3k), `skills/rules/desktop-tests.md` (14 rules), `agents/qa-desktop-typescript.md` (9.6k; description 580), `commands/desktop.md`. Descriptions 188-195 chars. `skills/rules/SKILL.md` lists `desktop-tests.md` (nine files now) and `skills/rules/qa-typescript.md` paths gained `desktop-tests/`, `tests/desktop/` and `src/windows/`. The lane writes `wdio.desktop.conf.ts` (not `wdio.conf.ts`) so the desktop and mobile configs can sit in one repo. Facts taken from the driver docs on 2026-11-15: Mac2 `macos: listWindows` and `adjustWindow` exist from driver 4.5.0; WinCore has `windows: getWindows`, `switchToWindowByTitle` and `appium:ms:waitForAppLaunch`; Mac2 strategy names are `predicate string` and `class chain`. Built but unverified: WebdriverIO's `-ios predicate string:` shorthand does not map to Mac2's unprefixed names, so the explorer says to send them through `driver.findElement('predicate string', …)`, which no run confirmed; the WinCore capability table came from the npm README, whose text is for 4.x, so the 3.3.2 capability set is unconfirmed; WinCore's `id` strategy being the `RuntimeId` comes from `desktop-windows:test-ids`; no `appium-mcp` desktop session was possible (the server failed to connect), so nothing ran against a page source. Gate: none (D11). Not committed: the queue commits.
+
 ### E2 — QA desktop: the Java lane
 
 **Stack:** `qa` · **Agent:** `general-purpose`
@@ -804,6 +845,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 
 - Mirror E1. Use TestNG + `java-client` 11: `Mac2Driver`, and for WinCore, `BaseOptions` or `WindowsOptions` with `automationName` overridden.
 - **Not in E2:** the `qa/dotnet` tree (E3, which runs beside this task).
+
+**As built (2026-11-15):** as planned, no divergence. Files: `qa/java/skills/desktop-project-setup/SKILL.md` (14.1k chars; description 190), `desktop-screen-explorer/SKILL.md` (13.9k; 199), `desktop-window-objects/SKILL.md` (11.2k; 195), `skills/rules/desktop-tests.md` (15 rules), `agents/qa-desktop-java.md`, `commands/desktop.md`. `skills/rules/SKILL.md` lists `desktop-tests.md` (nine files now); `skills/rules/qa-java.md` paths gained `desktop-tests`, `windows` under test sources and `src/main`. Names: package `com.example.desktoptests` with `support/{Env,DesktopDriverFactory,BaseDesktopTest}`, `windows/{BaseWindow,LibraryWindow,AlbumRow}`, `tests/SmokeTest`; env vars `PLATFORM` (`macos`|`windows`), `APP_ID`, `APP_ARGUMENTS`, `APPIUM_URL`; the Gradle, settings, `Env` and `testng.xml` files are reused from the mobile assets, not copied. `WindowsOptions` has `automationName` overridden to `Wincore`. Mac2's `predicate string` and `class chain` go through `driver.findElement("predicate string", value)` because `AppiumBy.iOSNsPredicateString` sends the `-ios` name. Built but unverified: no code compiled; `Mac2Options` setter names (`setBundleId`, `setArguments`), `WindowsOptions.setApp` and `AppiumDriver.findElement(String, String)` are from the java-client package layout and memory, and the skill says so; the Mac2 strategy workaround is unconfirmed against java-client 11; WinCore's 3.3.2 capability set is unconfirmed (as E1). Gate: none (D11). Not committed: the queue commits.
 
 ### E3 — QA desktop: the .NET lane
 
@@ -816,6 +859,8 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 - Mirror E1. Use NUnit + `Appium.WebDriver` 9; FlaUI is the Windows-only alternative, and Playwright .NET covers WebView2 content.
 - **Not in E3:** the `qa/java` tree (E2).
 
+**As built (2026-11-15):** as planned, with these facts. Files in `qa/dotnet/`: `skills/desktop-project-setup/SKILL.md` (13.0k chars, description 197), `skills/desktop-screen-explorer/SKILL.md` (13.0k, 190), `skills/desktop-window-objects/SKILL.md` (13.3k, 178), `skills/rules/desktop-tests.md` (14 rules), `agents/qa-desktop-dotnet.md` (9.8k; description 576), `commands/desktop.md`. `skills/rules/SKILL.md` lists `desktop-tests.md` (ten files now; E1's TypeScript count is nine); its table and step 5 gained `*DesktopTests` and `FlaUI.UIA3`/`BaseWindow` detection, and the `paths:` of `automation.md` and `suite-config.md` gained `DesktopTests`. Names: project `DesktopTests`, folder `DesktopTests/Windows/`, `BaseWindow`, `VerifyWindowLoaded()`, `BaseDesktopTest`, `AppiumDriverFactory`, `AppLauncher` (FlaUI), `desktop.runsettings`, env vars `PLATFORM` (`macos`|`windows`), `APP_ID`, `APP_ARGUMENTS`, `APPIUM_URL`. Facts checked 2026-11-15: `Appium.WebDriver` has `MacDriver` and `WindowsDriver` (constructors take `AppiumOptions`), and no `Mac2Driver` class, so the lane sets `automationName` to `mac2` on `MacDriver`; Playwright .NET WebView2 docs give `ConnectOverCDPAsync("http://127.0.0.1:<port>")`, `Contexts[0].Pages[0]`, `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS` and a per-worker `WEBVIEW2_USER_DATA_FOLDER`; FlaUI wiki: `Application.Launch`/`Attach`, disposing the `Application` closes the app, `ConditionFactory.ByAutomationId`, `FindFirstDescendant`, `Retry.WhileNull` with `throwOnTimeout`/`timeoutMessage`. Built but unverified: no C# was compiled; the `MacDriver` use against a live Mac2 session, sending `predicate string`/`class chain` through `Driver.FindElement("predicate string", value)`, and the FlaUI calls (`WaitWhileMainHandleIsMissing`, `GetAllTopLevelWindows`, `ModalWindows`, `Retry.WhileNull` parameters, `Capture.Screen()`) are from the wiki or memory, and the skills say so; WinCore's 3.3.2 capability set (`ms:waitForAppLaunch`) is from E1's unconfirmed README reading. No `D<n>` needed. Gate: none (D11). Not committed: the queue commits.
+
 ### I1 — marketplace, surface check, planning lane and QA wiring
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -827,6 +872,7 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 - Marketplace per §9: build every array from `ls`. The planning lane per §9 and D13. The QA wiring per §9.
 - Add one Compose Multiplatform Desktop mention line to `mobile-android`'s KMP skill (D5).
 - **Not in I1:** the CLAUDE.md map and version lines, the catalog and README (G1).
+- **As built (2026-11-15):** as planned. `.claude-plugin/marketplace.json`: `desktop-macos` and `desktop-windows` after `mobile-android`, each 29 skills (25 own, the 3 `desktop/_shared/*`, `auth/auth0-<os>`, `rules`), 2 commands, 1 agent, keywords and descriptions in the `mobile-ios` voice, `dependencies ["dev", "design"]`; `qa-java`, `qa-dotnet` and `qa-typescript` gained the three `desktop-*` skills, `qa/_shared/desktop-testing`, `qa-desktop-<lang>` and `desktop.md`; the top-level description names `desktop-*`. A Python check found every `skills`, `commands` and `agents` path of every entry on disk (empty list of misses). `desktop` is in `STACK_CATEGORIES` (`tools/plugin-surface-check.py:35`). The `desktop` stack token ("the native desktop client app: macOS or Windows") is in `plan-format.md:119`, `delivery-plan/SKILL.md` (stack lists, `qa-desktop-<lang>` among the journey-task agents) and `solution-planner.md` (routing table, downstream agents, tasks line, experience-step skip clause), and CLAUDE.md § Planning says "a web, app or desktop tree". One desktop line in each `qa/*/skills/device-cloud/SKILL.md` Stack list; one Compose Multiplatform Desktop line in `kotlin-multiplatform/SKILL.md`; the desktop-agent fix routing is added to the two mobile scan skills under `qa/_shared/security-testing/` (the only peer lines naming `mobile-ios`). Built but unverified: no surface check, token audit or version check was run (G1). Not committed: the queue commits.
 
 ### G1 — documentation, the gate and filing the plan
 
@@ -839,6 +885,7 @@ Cost: a new category to wire (D13), and about 60 new skills to maintain.
 - Documentation per §9: § Stack defaults `**Desktop**` line, § Version policy macOS and Windows lines, § Repository map `desktop/` row, the under-construction line, the catalog (recompute the command count, never guess it) and the README.
 - Rewrite `**Status:**` one last time. Name what is delivered and what is unverified: no agent has been run against a real app, no desktop E2E has run on a runner, and the facts are as of 2026-11-15. Name what is next: Q1–Q3, and the user's global-rules edit.
 - **Not in G1:** feature work of any kind.
+- **As built (2026-11-15):** as planned, with these facts. Docs: `CLAUDE.md` § Stack defaults `**Desktop**` line, § Version policy macOS and Windows lines (the Windows line records that .NET 8/9 are flagged for desktop, deviating from the general .NET line, D2), § Repository map `desktop/` row, plugin count 22 → 24, and `desktop/` plus both auth folders left the under-construction line. `docs/skills-catalog.md`: scope paragraph, plugin table row, command surface rows (75 command files, 85 registrations, recomputed: `find`/`git ls-files` over `*/commands/*.md` gives 75; the marketplace `commands` arrays sum to 85; was 68/78), `## Desktop dev catalog`. `README.md`: 24 plugins, install lines, `:rules` row, command table, layout line, status row. Gate (all run from the repo root, in order): 1 `json.tool` exit 0; 2 `plugin-surface-check.py` `OK`; 3 `qa-version-check.py` exit 0; 4 `token-audit.py | grep` first printed four `desktop-windows` descriptions over 200 characters (`unit-testing` 211, `error-handling` 206, `performance` 202, `languages` 202); trimmed each in place under 200; the grep now prints only the two plugin rows of the audit's summary table (`desktop-macos`, `desktop-windows`), no violation line; 5 library check first failed on `unresolved name: desktop/windows/skills/unit-testing/SKILL.md: qa-api` (fixed to `qa-api-<stack>`, W3's file) and on the under-construction line (cleared once the checks passed), then printed `OK`; the whole set reran green. No entry was added to `ALLOW`; it stays `{"data-testid"}`. `docs/plans/implemented/` has no README, so no row. No `D<n>` needed. Built but unverified: as the Status line says. Not committed: the queue commits.
 
 ## Close-out — every task
 
@@ -876,7 +923,7 @@ block and the line that says which have landed.
 
 ## Prompts — one per task
 
-Run them one Plan Queue session each; every block is complete on its own. After C1, the tasks S1, S2, S3, M1 and W1 run side by side. The M chain and the W chain then each run in order, because each chain shares one checklist file. E1 waits for M4 and W5. E2 and E3 run beside each other. I1 waits for both chains and the QA lane, and G1 runs last. Only G1 runs anything (§11): no other block runs `tools/token-audit.py`, `tools/plugin-surface-check.py`, `tools/qa-version-check.py`, §11's script, a linter or a build. Counting your own files with `wc -m` is allowed. No block edits `docs/plans/implemented/**`, `docs/audits/**` or `docs/research/**`. **Unattended sessions refuse some shell forms** (plan 001): no brace expansion, no `$VAR` expansion, no `.sh` files, and nothing written outside the worktree, not even `/tmp`. Scratch work goes in an untracked `scratch/` folder inside the worktree, deleted before committing. This repo commits straight to `master`.
+Run them one Plan Queue session each; every block is complete on its own. After C1, the tasks S1, S2, S3, M1 and W1 run side by side. The M chain and the W chain then each run in order, because each chain shares one checklist file. E1 waits for M4 and W5. E2 and E3 run beside each other. I1 and G1 have landed. Only G1 runs anything (§11): no other block runs `tools/token-audit.py`, `tools/plugin-surface-check.py`, `tools/qa-version-check.py`, §11's script, a linter or a build. Counting your own files with `wc -m` is allowed. No block edits `docs/plans/implemented/**`, `docs/audits/**` or `docs/research/**`. **Unattended sessions refuse some shell forms** (plan 001): no brace expansion, no `$VAR` expansion, no `.sh` files, and nothing written outside the worktree, not even `/tmp`. Scratch work goes in an untracked `scratch/` folder inside the worktree, deleted before committing. This repo commits straight to `master`.
 
 | # | Stack | Agent | Depends on | Runs beside | Budget |
 |---|---|---|---|---|---|
@@ -902,575 +949,6 @@ Run them one Plan Queue session each; every block is complete on its own. After 
 | G1 | `docs` | `general-purpose` | I1 | — | ~140k |
 | — | add `desktop` to rule 1's stack list in `~/.claude/CLAUDE.md` (D13), and enable `desktop-<os>` in a real project to try the agent | **the user** | G1 | — | — |
 
-No task has landed; every prompt below is live.
+Every task has landed; no prompt is left.
 
 ---
-
-### C1 — the desktop domain, the code rules and the checklist skeletons (general-purpose, docs)
-
-````
-Depends on: none
-Agent: general-purpose · Stack: docs
-
-Task C1 of docs/plans/012-desktop-plugins.md: create the `desktop/` domain, put the Desktop code rules into CLAUDE.md, and write the two conformance-checklist skeletons.
-
-Deliverable: `CLAUDE.md` has `## Desktop code rules` (§5 verbatim) and lists `desktop/`, `auth/auth0-macos`, `auth/auth0-windows` as under construction; `desktop/{macos,windows}/{skills,agents,commands}/` and `desktop/_shared/` exist; both `desktop/<os>/skills/standards-audit/references/conformance-checklist.md` skeletons hold every §8.1 heading with its owners and rows only in V.
-
-Read, in this order:
-1. CLAUDE.md (§ Mobile code rules and the Repository map's under-construction line, `CLAUDE.md:266`).
-2. The plan: §2, §5, §8.1–§8.2, D6, D11, and "Close-out — every task".
-3. `mobile/ios/skills/standards-audit/references/conformance-checklist.md`: its header text and section V only.
-
-Do:
-- Insert §5 into CLAUDE.md directly after § Mobile code rules, verbatim. Add `desktop/`, `auth/auth0-macos`, `auth/auth0-windows` to the under-construction line.
-- Create the §2 tree. Git tracks no empty folders: put a `.gitkeep` in each empty one.
-- Write both checklist skeletons per §8.2: the header adapted to macOS / Windows, every §8.1 section heading with its owners (K, L, U say they take the `desktop/_shared/<skill>/references/audit-checks.md` rows whose `Platforms` column names the platform; X on macOS says N/A), and V rows adapted from mobile-ios's V rows with the §8.2 globs.
-
-Traps:
-- Q and T are unused letters (D6): do not write those headings.
-- Do not touch the marketplace, `docs/skills-catalog.md` or README (I1, G1).
-
-Gate: none. Documents only; the plan gates once, in G1.
-Commit: `feat(desktop): domain skeleton, Desktop code rules, checklist skeletons (012 C1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### S1 — shared: distribution (general-purpose, docs)
-
-````
-Depends on: C1
-Agent: general-purpose · Stack: docs
-
-Task S1 of docs/plans/012-desktop-plugins.md: write the shared desktop distribution skill.
-
-Deliverable: `desktop/_shared/distribution/{SKILL.md,references/macos.md,references/windows.md,references/audit-checks.md}` exist; the fragment holds `L` rows with a `Platforms` column.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §4.1–§4.3, §4.6, §6.5 (distribution row), §8.2, §8.3, §10, and "Close-out — every task".
-3. `docs/research/012-desktop-plugins/macos.md` §1.4 and §4; `windows.md` §2 (Packaging row) and §6.
-4. `mobile/_shared/release/SKILL.md` and `mobile/_shared/release/references/audit-checks.md`: the shape and the fragment columns.
-
-Do:
-- SKILL.md: when to use / not, a version-lane table, the channel decision per platform (Developer ID vs Mac App Store; Store vs MSIX sideload vs unpackaged + Velopack), the signing and update rules, the CI-runner pins and where secrets live. Per-platform detail goes in the two references.
-- `audit-checks.md`: rows `L1…Ln` with columns `| # | Check | Violation looks like | Find it with | Sev | Platforms |`.
-- Description ≤ 200 characters in the sibling form; body ≤ 16,000 (aim 14,000); `wc -m` as you go.
-
-Traps:
-- Re-check against the official page before writing it: Artifact Signing eligibility outside the US/Canada (§4.6), and Sparkle 2.10.1 / Velopack 1.2.161 still being current.
-- The 2027-02-01 Developer ID CA expiry is a blocker-class row for `.pkg` signing.
-- Pipeline YAML is `devops-engineer`'s: name it, do not write it.
-
-Gate: none. Documents only (D11).
-Commit: `feat(desktop): shared distribution skill (012 S1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### S2 — shared: security and observability (general-purpose, docs)
-
-````
-Depends on: C1
-Agent: general-purpose · Stack: docs
-
-Task S2 of docs/plans/012-desktop-plugins.md: write the shared desktop security and observability skills.
-
-Deliverable: `desktop/_shared/security/` and `desktop/_shared/observability/` exist, each with `SKILL.md` and `references/{macos,windows,audit-checks}.md`; `K` and `U` rows carry a `Platforms` column; each security row cites its OWASP Desktop App Security Top 10 id.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §4.3, §4.6, §5, §6.5 (security and observability rows), §8.2–§8.3, §10, and "Close-out — every task".
-3. `mobile/_shared/security/SKILL.md` + `references/audit-checks.md` and `mobile/_shared/observability/SKILL.md` + `references/audit-checks.md`: shape and columns.
-4. `docs/research/012-desktop-plugins/macos.md` §3.1, §7; `windows.md` §5 (credentials, WebView2), §6, §9.
-
-Research first (official sources): the current OWASP Desktop App Security Top 10 edition and ids; hardened runtime and library validation; Windows DLL search order and safe loading; WebView2 and `WKWebView` hardening; OTel Swift 2.6.0 and OpenTelemetry .NET in a desktop process; Sentry for macOS and WinUI.
-
-Traps:
-- What a static read cannot prove is marked **requires dynamic test → `qa-security`**, never passed.
-- The Collector, Tempo, Loki and Prometheus are the be-* `observability-engineer-<stack>` agents': name them, do not teach them.
-- Each SKILL.md ≤ 16,000 characters; description ≤ 200.
-
-Gate: none. Documents only (D11).
-Commit: `feat(desktop): shared security and observability skills (012 S2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### S3 — native desktop Auth0 (general-purpose, docs)
-
-````
-Depends on: C1
-Agent: general-purpose · Stack: docs
-
-Task S3 of docs/plans/012-desktop-plugins.md: write `auth/auth0-macos` and `auth/auth0-windows`.
-
-Deliverable: `auth/auth0-macos/SKILL.md` and `auth/auth0-windows/SKILL.md` exist; the Windows skill names the Auth0 .NET SDK it uses for WinUI and WPF, cited to its current docs page.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §5, §6.5 (auth rows), D12, §10, and "Close-out — every task".
-3. `auth/auth0-ios/SKILL.md` (shape and voice), and the headings of `auth/_shared/auth0-concepts` and `auth/_shared/oidc-concepts`.
-
-Research first: Auth0.swift on macOS (`ASWebAuthenticationSession`, `CredentialsManager`); which Auth0 .NET OIDC client package currently supports WinUI and WPF, and how its redirect works (loopback vs protocol activation); RFC 8252.
-
-Traps:
-- Never an embedded web view for login. System browser + PKCE only.
-- Tokens only in the Keychain / `PasswordVault` / DPAPI (§5).
-- Description ≤ 200 characters; `name:` follows the existing auth skills' frontmatter.
-
-Gate: none. Documents only (D11).
-Commit: `feat(auth): Auth0 for macOS and Windows desktop apps (012 S3)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### M1 — macOS foundations (general-purpose, docs)
-
-````
-Depends on: C1
-Agent: general-purpose · Stack: docs
-
-Task M1 of docs/plans/012-desktop-plugins.md: write the five macOS foundation skills.
-
-Deliverable: `desktop/macos/skills/{basics,project-setup,architecture,ui-components,styling}/SKILL.md` exist; the macOS checklist has rows in A–E.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §4.1, §4.6, §5, §6.1–§6.2, §8.2–§8.3, D3, D4, D6, §10, and "Close-out — every task".
-3. `docs/research/012-desktop-plugins/macos.md` §1, §2, §8.
-4. The siblings `mobile/ios/skills/{basics,project-setup,architecture,ui-components,styling}/SKILL.md`: frontmatter (`name:` convention), shape, size.
-5. `desktop/macos/skills/standards-audit/references/conformance-checklist.md` (C1's skeleton).
-
-Do:
-- Each skill per its §6.2 row, with a version-lane table keyed to §4.1. `styling` includes motion and Reduce Motion (D6).
-- `basics` is adapted from `mobile/ios/skills/basics` (D3). Put `git log -1 --format=%h -- mobile/ios/skills/basics` in your As built note.
-- Design facts cite `design/ui-ux-pro-max` with `--stack swiftui`.
-- Append A–E rows per §8.2 with the `[mac15+]`, `[mac27SDK]` and other tags.
-
-Traps:
-- The deployment-target lanes are a recommendation (D4); say so in `basics`.
-- Liquid Glass cannot be opted out of on the 27 SDK; confirm current glass API names against developer.apple.com before using them.
-- Description ≤ 200 characters, body ≤ 16,000 (aim 14,000); `wc -m` as you go.
-
-Gate: none. Documents only (D11).
-Commit: `feat(desktop-macos): foundations (012 M1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### M2 — macOS windows, menus, forms, documents and AppKit (general-purpose, docs)
-
-````
-Depends on: M1
-Agent: general-purpose · Stack: docs
-
-Task M2 of docs/plans/012-desktop-plugins.md: write `windows-and-scenes`, `menus-and-commands`, `forms`, `documents` and `appkit` for macOS.
-
-Deliverable: `desktop/macos/skills/{windows-and-scenes,menus-and-commands,forms,documents,appkit}/SKILL.md` exist; the macOS checklist has rows in D (`[AppKit]`), F, G and I (documents).
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §4.1, §4.6, §5, §6.2, §8.2–§8.3, §10, and "Close-out — every task".
-3. `docs/research/012-desktop-plugins/macos.md` §2.1–§2.5 and §2.7.
-4. Siblings for shape: `mobile/ios/skills/{navigation,forms,uikit}/SKILL.md`; M1's `desktop/macos/skills/basics/SKILL.md` for routing names.
-5. The macOS checklist as M1 left it: continue each section's numbering.
-
-Traps:
-- `pushWindow` does not exist on macOS: use `openWindow`. Commands read state through `@FocusedValue` / `focusedSceneValue`.
-- Menu items are disabled, never hidden. The 27 SDK hides menu icons by default.
-- New document code uses `Document`, not the deprecated `FileDocument`. Re-check the §4.6 `dropDestination` item before writing drag-and-drop rules.
-
-Gate: none. Documents only (D11).
-Commit: `feat(desktop-macos): windows, menus, forms, documents, AppKit (012 M2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### M3 — macOS networking, storage, sandbox, background and system integration (general-purpose, docs)
-
-````
-Depends on: M2
-Agent: general-purpose · Stack: docs
-
-Task M3 of docs/plans/012-desktop-plugins.md: write `networking`, `offline-and-storage`, `sandbox-and-permissions`, `background-and-helpers` and `system-integration` for macOS.
-
-Deliverable: `desktop/macos/skills/{networking,offline-and-storage,sandbox-and-permissions,background-and-helpers,system-integration}/SKILL.md` exist; the macOS checklist has rows in H, I and J.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §4.1, §5, §6.2, §8.2–§8.3, §10, and "Close-out — every task".
-3. `docs/research/012-desktop-plugins/macos.md` §3.
-4. Siblings: `mobile/ios/skills/{networking,offline-and-storage,device-features,system-integration}/SKILL.md`.
-5. The macOS checklist as M2 left it.
-
-Traps:
-- Every TCC permission has a working denied path that links to System Settings; Full Disk Access is never assumed.
-- Security-scoped bookmarks: start/stop balanced, and a stale bookmark is a recoverable state (§6.4).
-- Login items and helpers use `SMAppService`, never hand-installed launchd plists; IPC uses `XPCSession`.
-
-Gate: none. Documents only (D11).
-Commit: `feat(desktop-macos): networking, storage, sandbox, helpers, system integration (012 M3)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### M4 — macOS quality layers, test ids and unit tests (general-purpose, docs)
-
-````
-Depends on: M3
-Agent: general-purpose · Stack: docs
-
-Task M4 of docs/plans/012-desktop-plugins.md: write `languages`, `accessibility`, `performance`, `error-handling`, `test-ids` and `unit-testing` for macOS.
-
-Deliverable: the six `desktop/macos/skills/<folder>/SKILL.md` exist; the macOS checklist has rows in M, N, O, P, R and S; `test-ids` states the §8.5 Mac2 mapping, verified against the Mac2 driver docs.
-
-Read, in this order:
-1. CLAUDE.md (§ Test code rules too).
-2. The plan: §4.3–§4.4, §5, §6.4, §8.2–§8.3, §8.5, §10, and "Close-out — every task".
-3. `docs/research/012-desktop-plugins/macos.md` §5–§7; `cross-platform-and-qa.md` B.2.
-4. Siblings: `mobile/ios/skills/{languages,accessibility,performance,error-handling,test-ids,unit-testing}/SKILL.md`; the headings of `frontend/react/skills/error-handling/SKILL.md`.
-5. The macOS checklist as M3 left it.
-
-Traps:
-- `error-handling` applies §6.4: multi-window consistency, wake-from-sleep revalidation, no modal alerts for background failures. Rule bodies go in `references/` from the start.
-- Minimum control 20×20 pt and text 10 pt are macOS HIG facts (§4.3); MetricKit on Mac is checked before it is claimed.
-- E1 builds on your `test-ids` contract: state it as one table (element kind → identifier → what Mac2 reads).
-
-Gate: none. Documents only (D11).
-Commit: `feat(desktop-macos): quality layers, test ids, unit tests (012 M4)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### M5 — macOS migration, review, audit, rules, agent and commands (general-purpose, docs)
-
-````
-Depends on: M4, S1, S2, S3
-Agent: general-purpose · Stack: docs
-
-Task M5 of docs/plans/012-desktop-plugins.md: finish `desktop-macos`: migration, code-review, standards-audit, the rules skill, the agent and the two commands.
-
-Deliverable: `desktop/macos/skills/{migration,code-review,standards-audit,rules}/` exist (rules with the ten §8.6 files); `desktop/macos/agents/desktop-macos.md` ≤ 14,000 characters; `desktop/macos/commands/{desktop-macos,audit}.md` exist; the checklist ends with a section index.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §5, §6.2, §7, §8 (all), §10, and "Close-out — every task".
-3. `.skill-template/agent.md`; `mobile/ios/agents/mobile-ios.md`; `mobile/ios/commands/{mobile-ios,audit}.md`.
-4. `mobile/ios/skills/{migration,code-review,standards-audit}/SKILL.md` and `mobile/ios/skills/rules/` (the SKILL.md and the rule files to adapt).
-5. The `name:` of every `desktop/macos/skills/*/SKILL.md`, `desktop/_shared/*/SKILL.md` and `auth/auth0-macos/SKILL.md`, for the agent's routing.
-
-Traps:
-- The agent carries the template's `Gate:` line verbatim and names `qa-desktop-java`, `qa-desktop-dotnet` and `qa-desktop-typescript` as related agents. Those land in E1–E3, and G1 checks the names.
-- `migration` includes the 2027-02-01 Developer ID CA and Intel → Apple silicon only (§4.1).
-- The rules skill's procedure and unattended default are copied from the mobile-ios one; only the file table and paths change.
-
-Gate: none. Documents only (D11).
-Commit: `feat(desktop-macos): migration, review, audit, rules, agent, commands (012 M5)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### W1 — Windows foundations (general-purpose, docs)
-
-````
-Depends on: C1
-Agent: general-purpose · Stack: docs
-
-Task W1 of docs/plans/012-desktop-plugins.md: write the five Windows foundation skills.
-
-Deliverable: `desktop/windows/skills/{basics,project-setup,architecture,ui-components,styling}/SKILL.md` exist; the Windows checklist has rows in A–E.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §3, §4.2, §4.6, §5, §6.1, §6.3, §8.2–§8.3, D2, D5, D10, §10, and "Close-out — every task".
-3. `docs/research/012-desktop-plugins/windows.md` §1–§4.
-4. Siblings for shape and `name:` convention: `mobile/android/skills/{basics,project-setup,architecture,ui-components,styling}/SKILL.md`.
-5. `desktop/windows/skills/standards-audit/references/conformance-checklist.md` (C1's skeleton).
-
-Do:
-- `basics` holds the lane table (WinUI / WPF / WinForms / C++/WinRT) and the detection markers, and names MAUI, Avalonia and Uno as detected-not-taught (D5).
-- `.NET 10` primary, `11` supported, `8/9` flagged as out of support (D2). Note the CLAUDE.md conflict as Q2, do not edit the Version policy.
-- Design facts cite `design/ui-ux-pro-max` with `--stack winui` (and `--stack wpf` for the WPF lane).
-
-Traps:
-- Re-check the §4.6 template items (`TargetPlatformMinVersion` default, whether `winui-mvvm` wires `Microsoft.Extensions.Hosting`) before writing them.
-- `winapp` CLI is a public preview (0.8.0): every `winapp` recipe has a `dotnet` / Visual Studio fallback (D10).
-- Experimental-channel controls (`TableView`, `Chart`) never appear in a production recipe.
-
-Gate: none. Documents only (D11).
-Commit: `feat(desktop-windows): foundations (012 W1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### W2 — Windows windows and navigation, activation and notifications, platform integration, forms (general-purpose, docs)
-
-````
-Depends on: W1
-Agent: general-purpose · Stack: docs
-
-Task W2 of docs/plans/012-desktop-plugins.md: write `windows-and-navigation`, `activation-and-notifications`, `platform-integration` (with `references/windows-ai.md`) and `forms` for Windows.
-
-Deliverable: the four `desktop/windows/skills/<folder>/SKILL.md` and `platform-integration/references/windows-ai.md` exist; the Windows checklist has rows in F, G and J.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §4.2, §4.6, §5, §6.3, §8.2–§8.3, §10, and "Close-out — every task".
-3. `docs/research/012-desktop-plugins/windows.md` §3 and §5.
-4. W1's `desktop/windows/skills/basics/SKILL.md` for routing names; the Windows checklist as W1 left it.
-
-Traps:
-- Single instancing uses `AppInstance.FindOrRegisterForKey` / `RedirectActivationToAsync`, never a mutex. Pickers are the `Microsoft.Windows.Storage.Pickers` ones, constructed with `AppWindow.Id`.
-- Activation arguments (protocol, file, notification) are untrusted input, validated before routing (§5).
-- Re-check the §4.6 startup-task, background-task and share-target items, and the Phi Silica → "Aion Instruct" change, before writing them.
-
-Gate: none. Documents only (D11).
-Commit: `feat(desktop-windows): windows, activation, platform integration, forms (012 W2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### W3 — Windows networking, storage, interop, WPF and WinForms (general-purpose, docs)
-
-````
-Depends on: W2
-Agent: general-purpose · Stack: docs
-
-Task W3 of docs/plans/012-desktop-plugins.md: write `networking`, `offline-and-storage`, `interop`, `wpf` and `winforms` for Windows.
-
-Deliverable: the five `desktop/windows/skills/<folder>/SKILL.md` exist; the Windows checklist has rows in D (`[WPF]`, `[WinForms]`), H, I and X.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §4.2, §4.6, §5, §6.3, §8.2–§8.3, §10, and "Close-out — every task".
-3. `docs/research/012-desktop-plugins/windows.md` §1 (WPF, WinForms), §3, §10.
-4. The headings of the be-dotnet HTTP-client skill under `backend/dotnet/skills/` (find it with `ls`) for the typed-client voice; the Windows checklist as W2 left it.
-
-Traps:
-- `wpf` and `winforms` keep the lane itself; WinUI is a `migration` run, never a side effect. The WPF Fluent theme is still "in progress": say so with its version.
-- `ApplicationData` exists only with package identity. Re-check `PasswordVault` for unpackaged apps (§4.6).
-- CsWinRT 3.0 is a preview: not adopted (§4.2).
-
-Gate: none. Documents only (D11).
-Commit: `feat(desktop-windows): networking, storage, interop, WPF, WinForms (012 W3)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### W4 — the C++/WinRT lane (general-purpose, docs)
-
-````
-Depends on: W3
-Agent: general-purpose · Stack: docs
-
-Task W4 of docs/plans/012-desktop-plugins.md: write the C++/WinRT lane skill and settle its test and coverage tooling.
-
-Deliverable: `desktop/windows/skills/cpp-winrt/SKILL.md` and its `references/` exist. The Windows checklist has `[C++]` rows in X, plus one in each of B, C, N and S where the C++ rule differs. A dated `D<n>` records the C++ unit-test framework and coverage tool. The §5 C++/WinRT bullet in CLAUDE.md matches what you verified.
-
-Read, in this order:
-1. CLAUDE.md (§ Desktop code rules, C++/WinRT bullet).
-2. The plan: §4.2, §5, §6.3 (`cpp-winrt` row), §7.2, §8.2, D8, §10, and "Close-out — every task".
-3. `docs/research/012-desktop-plugins/windows.md` §1 (Other stacks) and §2 (`winapp` row).
-4. The Windows checklist as W3 left it.
-
-Research first (learn.microsoft.com, github.com/microsoft): C++/WinRT ownership and `com_ptr`, coroutines and `get_strong` / `get_weak`, resuming on the dispatcher queue (`wil::resume_foreground`), error handling with `hresult_error`, IDL / MIDL for XAML types, WIL; unit testing a C++/WinRT WinUI app (Microsoft C++ Unit Test Framework vs GoogleTest) and branch / line coverage (Visual Studio coverage, OpenCppCoverage).
-
-Traps:
-- Every C++ rule in §5 is verified before you write it. Where a fact differs, rewrite the CLAUDE.md bullet in place and add a dated `D<n>`.
-- Where branch coverage is not reported, the floor is 80% of lines (CLAUDE.md § Test code rules).
-- Rewrite W6's prompt block for the C++ facts it must carry: the `cppwinrt.md` rule file and the §7.2 C++ commands.
-
-Gate: none. Documents only (D11).
-Commit: `feat(desktop-windows): C++/WinRT lane (012 W4)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### W5 — Windows quality layers, test ids and unit tests (general-purpose, docs)
-
-````
-Depends on: W4
-Agent: general-purpose · Stack: docs
-
-Task W5 of docs/plans/012-desktop-plugins.md: write `languages`, `accessibility`, `performance`, `error-handling`, `test-ids` and `unit-testing` for Windows.
-
-Deliverable: the six `desktop/windows/skills/<folder>/SKILL.md` exist; the Windows checklist has rows in M, N, O, P, R and S; `test-ids` states the §8.5 `AutomationId` mapping, verified against the WinCore and FlaUI docs.
-
-Read, in this order:
-1. CLAUDE.md (§ Test code rules too).
-2. The plan: §4.3–§4.4, §5, §6.4, §8.2–§8.3, §8.5, D8, §10, and "Close-out — every task".
-3. `docs/research/012-desktop-plugins/windows.md` §7–§9; `cross-platform-and-qa.md` B.2.
-4. Siblings: `mobile/android/skills/{languages,accessibility,performance,error-handling,test-ids,unit-testing}/SKILL.md`; the headings of `frontend/react/skills/error-handling/SKILL.md`; W4's C++ testing decision in `## Decisions`.
-5. The Windows checklist as W4 left it.
-
-Traps:
-- `AutomationId` is unique among siblings only: containers carry their own id and rows are located inside them (§8.5).
-- `unit-testing` per D8: NUnit by default, the WinUI Unit Test App only for code that needs XAML types; the C++ lane links to `cpp-winrt`.
-- E1 builds on your `test-ids` contract: state it as one table (element kind → property → what WinCore / FlaUI read).
-
-Gate: none. Documents only (D11).
-Commit: `feat(desktop-windows): quality layers, test ids, unit tests (012 W5)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### W6 — Windows migration, review, audit, rules, agent and commands (general-purpose, docs)
-
-````
-Depends on: W5, S1, S2, S3
-Agent: general-purpose · Stack: docs
-
-Task W6 of docs/plans/012-desktop-plugins.md: finish `desktop-windows`: migration, code-review, standards-audit, the rules skill, the agent and the two commands.
-
-Deliverable: `desktop/windows/skills/{migration,code-review,standards-audit,rules}/` exist (rules with the twelve §8.6 files); `desktop/windows/agents/desktop-windows.md` ≤ 14,000 characters; `desktop/windows/commands/{desktop-windows,audit}.md` exist; the checklist ends with a section index.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §5, §6.3, §7, §8 (all), D8, D10, §10, W4's As built note, and "Close-out — every task".
-3. `.skill-template/agent.md`; `mobile/android/agents/mobile-android.md`; `mobile/android/commands/*`.
-4. `mobile/android/skills/{migration,code-review,standards-audit}/SKILL.md` and `mobile/ios/skills/rules/` (procedure to copy).
-5. `docs/research/012-desktop-plugins/windows.md` §10–§11.
-6. The `name:` of every `desktop/windows/skills/*/SKILL.md`, `desktop/_shared/*/SKILL.md` and `auth/auth0-windows/SKILL.md`.
-
-Traps:
-- One agent, four lanes: detection (basics) picks the lane, and the steps table loads the lane skill. Keep it within 14,000 characters by routing, not teaching.
-- The agent carries the template's `Gate:` line verbatim and names the three `qa-desktop-<lang>` agents (they land in E1–E3).
-- `migration` covers .NET 8/9 → 10 (out of support since 2026-11-10) and Windows App SDK 1.x → 2.x.
-
-Gate: none. Documents only (D11).
-Commit: `feat(desktop-windows): migration, review, audit, rules, agent, commands (012 W6)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### E1 — QA desktop: shared rules and the TypeScript lane (general-purpose, qa)
-
-````
-Depends on: M4, W5
-Agent: general-purpose · Stack: qa
-
-Task E1 of docs/plans/012-desktop-plugins.md: write the shared desktop-testing skill and the TypeScript desktop E2E lane.
-
-Deliverable: `qa/_shared/desktop-testing/SKILL.md` exists. In `qa/typescript/`: `skills/{desktop-project-setup,desktop-screen-explorer,desktop-window-objects}/SKILL.md`, `skills/rules/desktop-tests.md` (listed in that rules skill's table), `agents/qa-desktop-typescript.md` and `commands/desktop.md` exist. The Mac2 4.6.1 and WinCore 3.3.2 Appium peer ranges are confirmed against Appium 3.8.0.
-
-Read, in this order:
-1. CLAUDE.md (§ Test code rules).
-2. The plan: §4.4–§4.5, §6.6, §8.5, D9, §10, and "Close-out — every task".
-3. `docs/research/012-desktop-plugins/cross-platform-and-qa.md` Part B.
-4. Patterns: `qa/typescript/agents/qa-mobile-typescript.md`, `qa/typescript/commands/mobile.md`, `qa/typescript/skills/{mobile-project-setup,mobile-screen-explorer,mobile-screen-objects}/SKILL.md`, `qa/typescript/skills/rules/{SKILL.md,mobile-tests.md}`.
-5. The two dev `test-ids` skills: `desktop/macos/skills/test-ids/SKILL.md`, `desktop/windows/skills/test-ids/SKILL.md`.
-
-Traps:
-- Version pins follow §4.4–§4.5. Install drivers with an explicit `@version`. If a peer range excludes 3.8.0, record a dated `D<n>` and do not bump the library pin (Q3).
-- Never the legacy Windows driver or WinAppDriver (D9). Electron and Tauri are out of scope (Q1).
-- `missing-testids.md` routes to `desktop-macos` / `desktop-windows`.
-- Rewrite E2's and E3's prompt blocks for anything they must mirror: shared-skill section names and the explorer's report shape.
-
-Gate: none. Documents only (D11). Do not run `tools/qa-version-check.py`; G1 runs it.
-Commit: `feat(qa): desktop E2E shared rules and TypeScript lane (012 E1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### E2 — QA desktop: the Java lane (general-purpose, qa)
-
-````
-Depends on: E1
-Agent: general-purpose · Stack: qa
-
-Task E2 of docs/plans/012-desktop-plugins.md: write the Java desktop E2E lane.
-
-Deliverable: in `qa/java/`: `skills/{desktop-project-setup,desktop-screen-explorer,desktop-window-objects}/SKILL.md`, `skills/rules/desktop-tests.md` (listed in its rules skill), `agents/qa-desktop-java.md` and `commands/desktop.md` exist.
-
-Read, in this order:
-1. CLAUDE.md (§ Test code rules).
-2. The plan: §4.4, §6.6, §8.5, D9, §10, E1's As built note, and "Close-out — every task".
-3. `docs/research/012-desktop-plugins/cross-platform-and-qa.md` B.5–B.6.
-4. `qa/_shared/desktop-testing/SKILL.md` and E1's three `qa/typescript/skills/desktop-*` skills: the pattern to mirror.
-5. `qa/java/agents/qa-mobile-java.md`, `qa/java/commands/mobile.md`, `qa/java/skills/{mobile-project-setup,mobile-screen-objects}/SKILL.md`, `qa/java/skills/rules/{SKILL.md,mobile-tests.md}`.
-
-Traps:
-- `WindowsOptions` hard-sets `automationName` to `Windows`. For WinCore, override it or use `BaseOptions`.
-- TestNG and `java-client` 11 at the library pins.
-- E3 runs beside you in `qa/dotnet/`: touch only `qa/java/` and this plan's E2 blocks.
-
-Gate: none. Documents only (D11).
-Commit: `feat(qa-java): desktop E2E lane (012 E2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### E3 — QA desktop: the .NET lane (general-purpose, qa)
-
-````
-Depends on: E1
-Agent: general-purpose · Stack: qa
-
-Task E3 of docs/plans/012-desktop-plugins.md: write the .NET desktop E2E lane, including FlaUI.
-
-Deliverable: in `qa/dotnet/`: `skills/{desktop-project-setup,desktop-screen-explorer,desktop-window-objects}/SKILL.md` (FlaUI 5.0.0 lane in setup and window objects), `skills/rules/desktop-tests.md` (listed in its rules skill), `agents/qa-desktop-dotnet.md` and `commands/desktop.md` exist.
-
-Read, in this order:
-1. CLAUDE.md (§ Test code rules).
-2. The plan: §4.4, §6.6, §8.5, D9, §10, E1's As built note, and "Close-out — every task".
-3. `docs/research/012-desktop-plugins/cross-platform-and-qa.md` B.1, B.5–B.6.
-4. `qa/_shared/desktop-testing/SKILL.md` and E1's three `qa/typescript/skills/desktop-*` skills.
-5. `qa/dotnet/agents/qa-mobile-dotnet.md`, `qa/dotnet/commands/mobile.md`, `qa/dotnet/skills/{mobile-project-setup,mobile-screen-objects}/SKILL.md`, `qa/dotnet/skills/rules/{SKILL.md,mobile-tests.md}`.
-
-Research first: FlaUI 5.0.0 with UIA3 against WinUI and WPF; Playwright .NET `ConnectOverCDPAsync` for WebView2 (at the library's 1.63 pin).
-
-Traps:
-- NUnit + `Appium.WebDriver` 9 is the default; FlaUI is the Windows-only alternative, chosen per suite, never mixed in one suite.
-- E2 runs beside you in `qa/java/`: touch only `qa/dotnet/` and this plan's E3 blocks.
-
-Gate: none. Documents only (D11).
-Commit: `feat(qa-dotnet): desktop E2E lane with FlaUI (012 E3)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### I1 — marketplace, surface check, planning lane and QA wiring (general-purpose, docs)
-
-````
-Depends on: M5, W6, E2, E3, S1, S2, S3
-Agent: general-purpose · Stack: docs
-
-Task I1 of docs/plans/012-desktop-plugins.md: wire both desktop plugins and the QA desktop lane into the marketplace, the surface check and the planning lane.
-
-Deliverable: `.claude-plugin/marketplace.json` lists `desktop-macos` and `desktop-windows`, and the three QA entries list their desktop skills, agent and command, with every path existing on disk; `tools/plugin-surface-check.py` has `desktop` in `STACK_CATEGORIES`; the plan format, delivery plan and solution planner accept a `desktop` task routed to the two agents.
-
-Read, in this order:
-1. CLAUDE.md (§ Planning).
-2. The plan: §2, §9, D5, D13, and "Close-out — every task".
-3. The `mobile-ios` entry in `.claude-plugin/marketplace.json` (the shape) and the three `qa-*` entries.
-4. `engineering-practices/writing-plans/references/plan-format.md:119`; `backend/_shared/delivery-plan/SKILL.md:44,128,345`; `grep -n mobile backend/_shared/agents/solution-planner.md`.
-5. `qa/*/skills/device-cloud/SKILL.md` (where the one desktop line goes); `grep -rn "mobile-ios" qa/_shared/security-testing` (the peer lines); `mobile/android/skills/kotlin-multiplatform/SKILL.md`.
-
-Do:
-- Marketplace per §9: build every `skills` array from `ls`, never from memory. Then assert every path exists with a short Python one-liner (reading files is not a gate).
-- `STACK_CATEGORIES` gains `"desktop"`.
-- The planning lane and the CLAUDE.md § Planning one-stack bullet per §9.
-- QA lines per §9; one Compose Multiplatform Desktop mention line in the KMP skill (D5).
-
-Traps:
-- `plugin-surface-check.py` rule 5 forbids registering a folder from two categories: `desktop/_shared/*` goes only into the two desktop plugins, `qa/_shared/desktop-testing` only into the three QA plugins.
-- Do not run `plugin-surface-check.py`, `token-audit.py` or `qa-version-check.py`; G1 runs them.
-
-Gate: none. Wiring only; G1 runs every check (D11).
-Commit: `feat: wire desktop-macos, desktop-windows and the QA desktop lane (012 I1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### G1 — documentation, the gate and filing the plan (general-purpose, docs)
-
-````
-Depends on: I1
-Agent: general-purpose · Stack: docs
-
-Task G1 of docs/plans/012-desktop-plugins.md: document the desktop domain, run the plan's whole gate, fix what it finds, and file the plan.
-
-Deliverable: `CLAUDE.md`, `docs/skills-catalog.md` and `README.md` describe the desktop domain and the QA desktop lane; §11's five checks pass; this plan is in `docs/plans/implemented/`.
-
-Read, in this order:
-1. CLAUDE.md (§ Stack defaults, § Version policy, § Repository map).
-2. The plan: header, §2, §4.1–§4.2, §9, §11, every task's As built note, `## Decisions` (dated ones too), and "Close-out — every task".
-3. `docs/skills-catalog.md`: the scope paragraph, the slash-command surface table and `## Mobile dev catalog` (the section pattern). `README.md`: the layout line and the status table.
-
-Do:
-- Documentation per §9. Recompute the command count from the marketplace; never guess it.
-- Run §11 steps 1–5 in order. Fix by the fix loop: the whole set once; each failure fixed and rerun with the narrowest command; the whole set once more. A failure may belong to any task above.
-- Justify every `ALLOW` addition in your As built note.
-- Rewrite `**Status:**` one last time per the task block, delete this prompt, and `git mv` the plan to `docs/plans/implemented/012-desktop-plugins.md` with its row in that folder's README if one exists.
-
-Traps:
-- `token-audit.py` exits non-zero on violations that existed before this plan; read the grep (§11 step 4), not the exit code.
-- `desktop/` and the two auth folders leave CLAUDE.md's under-construction line only after the checks pass.
-- After filing, tell the user the remaining steps: the global `~/.claude/CLAUDE.md` rule-1 edit (D13), and Q1–Q3.
-
-Gate (this is the last task, so it runs the whole set once more across the plan, in run order): §11 steps 1–5.
-Commit: `docs: desktop domain in CLAUDE.md, catalog and README; plan 012 gate (012 G1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````

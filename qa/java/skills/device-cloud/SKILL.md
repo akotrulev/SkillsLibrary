@@ -18,6 +18,7 @@ Runs Java Appium tests against a **managed real-device cloud** — BrowserStack 
 - **Condition waits**: `org.awaitility:awaitility` for upload-status / run-result polling — never `Thread.sleep`
 - Farm support code under `src/test/java/.../support/farm/`; every Allure call is allure-java 3.0; credentials via **env vars only** (`BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY`; AWS creds via the default provider chain / OIDC)
 - Runs in CI under `qa/cicd/java/skills/ci-pipelines`; the page objects from `qa/java/skills/ui-test-author/appium` run **unchanged**
+- **Native desktop apps (macOS, Windows) are not on a device cloud:** they run on owned hardware, self-hosted; see `qa/_shared/desktop-testing`
 
 ## Does the farm run Appium 3?
 

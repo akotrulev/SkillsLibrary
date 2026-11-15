@@ -118,7 +118,7 @@ The shared module is built as a static framework and handed to Xcode. The Gradle
 
 ## Shared UI — opt-in
 
-Compose Multiplatform shares the UI as well. It is chosen deliberately, per project, not as a default: it makes iOS look and behave like Compose, which conflicts with "platform conventions first" unless the product accepts that. Decision criteria, setup and the iOS caveats are in [`references/compose-multiplatform.md`](references/compose-multiplatform.md). Absent that decision, the iOS app is SwiftUI over the shared ViewModels.
+Compose Multiplatform shares the UI as well. It is chosen deliberately, per project, not as a default: it makes iOS look and behave like Compose, which conflicts with "platform conventions first" unless the product accepts that. Decision criteria, setup and the iOS caveats are in [`references/compose-multiplatform.md`](references/compose-multiplatform.md). Absent that decision, the iOS app is SwiftUI over the shared ViewModels. Compose Multiplatform also targets desktop (JVM); native macOS and Windows apps are [`desktop-macos`](../../../../desktop/macos/skills/basics/SKILL.md)'s and [`desktop-windows`](../../../../desktop/windows/skills/basics/SKILL.md)'s, and a Compose Desktop project is detected there and named, not taught.
 
 ## Testing
 

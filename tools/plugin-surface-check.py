@@ -32,7 +32,7 @@ workflow-authoring
 BANNED_PREFIXES = ("be-shared-", "mobile-shared-", "ep-", "ba-", "td-", "tool-", "secgov-",
                    "pentest-", "purpleteam-", "auth-")
 BANNED_SUFFIXES = ("-java", "-dotnet", "-typescript", "-node", "-python", "-shared")
-STACK_CATEGORIES = ("qa", "fe", "be", "mobile")
+STACK_CATEGORIES = ("qa", "fe", "be", "mobile", "desktop")
 
 
 def category(plugin_name):

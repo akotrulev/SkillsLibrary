@@ -18,6 +18,7 @@ Runs TypeScript + WebdriverIO Appium tests against a **managed real-device cloud
 - Remote-run: `@aws-sdk/client-device-farm` (`DeviceFarmClient`)
 - Waits: `browser.waitUntil(...)`, and a bounded poll for AWS; never `browser.pause`
 - Farm code under `test/support/farm/`; credentials from env only (`BROWSERSTACK_USERNAME`, `BROWSERSTACK_ACCESS_KEY`; AWS through its default credential chain or OIDC)
+- **Native desktop apps (macOS, Windows) are not on a device cloud:** they run on owned hardware, self-hosted; see `qa/_shared/desktop-testing`
 
 ## Does the farm run Appium 3?
 

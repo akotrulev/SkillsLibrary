@@ -16,6 +16,7 @@ Runs .NET Appium tests against a **live-session real-device cloud** — BrowserS
 - Farm support code under `AppiumTests/Support/Farm/`; credentials via **env vars only** (`BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY`)
 - The page objects come from `ui-test-author/appium` and run **unchanged** on the farm; only the driver differs
 - Runs in CI under `qa/cicd/dotnet/skills/ci-pipelines`
+- **Native desktop apps (macOS, Windows) are not on a device cloud:** they run on owned hardware, self-hosted; see `qa/_shared/desktop-testing`
 
 ## Does the farm run Appium 3?
 

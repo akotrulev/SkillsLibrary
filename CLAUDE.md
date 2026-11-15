@@ -17,6 +17,7 @@ You are a senior AI engineer and a senior automation QA engineer. You follow bes
 - **Python worker**: Python 3.13 primary / 3.12 and 3.14 supported — only for the one isolated upload-processing worker (Pillow, rembg, VTracer); uv + ruff + mypy `--strict`, pydantic at the boundary
 - **Rust backend**: current stable Rust, edition 2024 (2021 supported) + tokio + axum + sqlx; `thiserror` in modules, `anyhow` only in `main`; lints configured once in `Cargo.toml`
 - **Mobile**: React Native + Expo primary (Expo Router, development builds, EAS) · Swift / SwiftUI (iOS) · Kotlin / Jetpack Compose (Android), with a Kotlin Multiplatform lane — each its own `mobile-*` plugin under `mobile/`
+- **Desktop**: macOS — Swift 6.4 / SwiftUI primary, AppKit lane (`desktop-macos`) · Windows 11 — WinUI on Windows App SDK 2.x with C# on .NET 10 LTS, plus WPF, WinForms and C++/WinRT lanes (`desktop-windows`) — each its own `desktop-*` plugin under `desktop/`; desktop E2E is the `qa-desktop-<lang>` agent in each QA plugin
 - **Test runners**: NUnit (.NET), TestNG (Java), Vitest or Jest (TS), pytest (Python), `cargo test` / cargo-nextest (Rust), Playwright (UI), Appium (mobile); dev-side in mobile apps — Swift Testing (iOS), JUnit 4 + Robolectric (Android), Jest + RNTL (React Native)
 - **JVM build tool**: Gradle (Kotlin DSL) for new projects
 - **Auth**: Auth0 — Authorization Code + PKCE for SPAs, Client Credentials for service-to-service
@@ -71,7 +72,7 @@ You are a senior AI engineer and a senior automation QA engineer. You follow bes
 - **A plan is one flat, ordered list of tasks**, ids carrying a letter prefix for the family of work and a number within it (`H1`, `C1`, `TD1`, `Q1`, `B1…Bn`, `F1…Fn`, `DOC1`). No grouping layer sits above them: not phases, not slices, not stages, not milestones — neither as structure nor as vocabulary. An agent's own operating procedure is numbered in **steps**; the actions inside one task are its **steps**; the work items a plan hands out are **tasks**.
 - **Workable order.** Each task can be started when its turn comes, because everything it needs was produced by a task above it. Every prerequisite that is not the task immediately above is written on the task as `Depends on:` and points backwards — a forward-pointing dependency is an ordering defect, not a note.
 - **One deliverable per task** — the observable thing that exists when the task is done, stated as a result rather than an activity ("`POST /orders` accepts a valid order and returns `201` with the created id", not "implement the orders service"). It is what `Done` means, and a task whose deliverable cannot be stated is not yet one task.
-- **One stack and one agent per task**, plus a `**Budget:**` line with its drivers itemized. A task touching the API tree and a web or app tree is two tasks, at any size; a task is split along a seam **inside** its own stack, never by handing part of it to another. Merge consecutive same-stack work until it would exceed the budget target — the goal is the **fewest sessions**, not the smallest tasks.
+- **One stack and one agent per task**, plus a `**Budget:**` line with its drivers itemized. A task touching the API tree and a web, app or desktop tree is two tasks, at any size; a task is split along a seam **inside** its own stack, never by handing part of it to another. Merge consecutive same-stack work until it would exceed the budget target — the goal is the **fewest sessions**, not the smallest tasks.
 - **Every task gates what it built.** Before it commits, a task builds what it touched and runs the tests for it: the tests it wrote, the acceptance tests it writes or must turn green (on a production build where they need one), and the **coverage** measure over the files it wrote (Test code rules). It leaves them green, fixing what stands in the way whichever task caused it. Its `**Gate:**` line names those exact commands (`**Gate: own tests**`, `plan-format.md` §5). It does not run the project's whole suite, lint or typecheck beyond what those commands include. A task with nothing runnable, such as a docs-only task, says `**Gate: none**` and says why. **The last runnable task runs the whole set once more across the plan**, ending with the **coverage floor** when the plan writes code, **fixes what it finds rather than handing it back** by the fix loop (`plan-format.md` §5: the whole set once, each failure fixed with the narrowest command, only the failed rerun, the whole set once more; a failure that moves between runs is an isolation or scheduling defect, fixed in the code, owned setup or gate script and never retried until green; inside a `Q` test or fixture it is a `D<n>`, the test left as it is). So that little is left for that loop, an implementation task's gate also reruns every acceptance test an earlier task of the plan turned green in the same app, and runs acceptance tests through the runner the last task's gate uses, never a bespoke command. It holds no feature work when the plan has any. A plan stopped halfway has each landed task's own tests green, but the whole suite has not run.
 - **Two tasks close a plan: the gate task, then the documentation task.** The gate task is the last task that builds and runs code; it writes no product documentation. **The plan's last task is `DOC1`**: stack `docs`, agent `be-documenter` (or `be-feature-documenter` where the project documents per feature), depending on the gate task. It updates the documentation from the code that landed, never from the plan, its gate is the doc lint, and it files the plan. Left out only with `Documentation task: none — <why>` in the header (`plan-format.md` §5).
 - **A plan that serves stories plans its testing.** After everything both sides bind to and before the `Q` tasks come the `TD` tasks: the test plan per epic (`qa-test-planner`: versions, what is tested, harness, scenarios, Definition of Ready and Done), then the test-case suites per story (`qa-test-case-designer`). The `Q` tasks depend on the test-plan task and automate the scenarios it binds to them; the gate task checks each test plan's Definition of Done. Left out only on the user's answer, recorded in the header (`plan-format.md` §4).
@@ -147,6 +148,8 @@ Core stack versions:
 - **React 19 primary / 18 tagged fallback** (an 18 pattern is correct for 18, not obsolete); **Next.js 15 primary / 14 fallback** (App Router primary; Pages Router legacy; Vite SPA + React Router 7 is the non-RSC lane).
 - **React Native / Expo: SDK 57 primary** (RN 0.86, React 19.2, Node ≥ 22.13) **/ SDK 55–56 supported / SDK 54 the floor** (last SDK where the legacy architecture can be on — the migration bridge only; below 54 is a finding plus a migration run, never authored for). SDK 58 (beta) becomes primary the day it ships stable. New-Architecture only since RN 0.82.
 - **iOS / Swift: Xcode 27 + Swift 6.4 + iOS 27 SDK primary / Xcode 26.x + Swift 6.2–6.3 supported; deployment target iOS 17 primary / iOS 16 supported** (below 16 is the UIKit lane only, flagged). Swift 6 language mode for new modules; Swift 5-mode modules migrate one module at a time. Never raise a deployment target as a side effect.
+- **macOS / Swift: Xcode 27 + Swift 6.4 + macOS 27 SDK primary / Xcode 26.x + Swift 6.2–6.3 supported; deployment target macOS 15 primary for a new app / macOS 14 supported** (existing apps keep theirs; macOS 13 is the supported floor, below it is the AppKit lane only, flagged; macOS 12 is Xcode 27's hard floor). Swift 6 language mode for new modules. arm64-only only when the target is ≥ 27. The original Developer ID CA expires 2027-02-01: re-sign `.pkg` files with a G2 certificate. Never raise a deployment target as a side effect.
+- **Windows / .NET: Windows App SDK 2.6.x + .NET 10 LTS primary / .NET 11 STS supported; TFM `net10.0-windows10.0.26100.0`, API floor Windows 10 1809.** .NET 8 and 9 are out of support since 2026-11-10 — flag them, never target them (this deviates from the .NET 10 / 8–9 line above for desktop apps). Windows App SDK 1.x is out of support (a migration finding); experimental-channel APIs never ship. WPF and WinForms apps stay what they are; never add WinUI to one as a side effect. Packaged MSIX is the default.
 - **Android / Kotlin: Kotlin 2.4 + AGP 9.4 + Gradle 9.6 primary / Kotlin 2.0–2.3 and AGP 8.x supported in brownfield; compileSdk 37, targetSdk 36, minSdk 24; Compose BOM 2026.09; JDK 21 toolchain (17 minimum).** Play requires new apps and updates to target API 36.
 - **Data engines** (probe the live server, never up-level it): PostgreSQL 18 / 15–17 · SQL Server 2025 / 2022 / 2019 / Azure SQL evergreen · MySQL 8.4 LTS / 9.x / 8.0 · MongoDB 8.0 LTS / 7.0 · Redis 8.x / 7.2–7.4 + Valkey fork · Elasticsearch 9.x / 8.x + OpenSearch 3.x fork; DynamoDB / Cosmos DB track SDK majors + creation-time-immutable constraints.
 
@@ -234,6 +237,57 @@ Per stack:
   dispatchers injected. No `!!` outside tests. KSP, never kapt. Room / DataStore over raw SQLite /
   `SharedPreferences`. R8 full mode and a Baseline Profile in release builds.
 
+## Desktop code rules
+
+Both platforms:
+
+- **Platform conventions first.** The app looks and behaves like its OS: native menus, title bar, controls, system fonts and the OS's standard shortcuts. It is never a web page in a window and never imitates the other OS. Design facts come from `design/ui-ux-pro-max` (`--stack swiftui | winui | wpf`).
+- **Keyboard-first.** Every command is reachable from the keyboard, focus order is complete and visible, and standard shortcuts are kept. On macOS every command lives in the menu bar in the standard order, with unavailable items disabled, never hidden. On Windows commands carry access keys and accelerators.
+- **Windows are resizable, restore their size and position, and survive monitor and DPI changes.** Several windows on the same data share one source of truth, never a copy per window.
+- **The UI thread never blocks**: no disk, network, database or heavy compute on the main actor or the dispatcher thread. Results return to it through the platform's mechanism (`@MainActor`, `DispatcherQueue.TryEnqueue`).
+- **Lifecycle is part of the requirement.** Work a window starts is cancelled when it closes. Wake from sleep, a network change and window reactivation trigger a revalidate. Quitting with unsaved work asks first, and relaunch restores state.
+- **Every data region has loading / loaded / failed states, plus stale and offline.** A failure is scoped to the response-dependent subtree. It raises one persistent banner inside the window content (an inline banner on macOS, an `InfoBar` on WinUI) that only the user dismisses. A background failure never raises a modal alert.
+- **Least privilege.** Ship sandboxed: App Sandbox on macOS, packaged MSIX with minimal capabilities on Windows. Never require admin or root. Every entitlement and capability carries a recorded reason.
+- **Secrets never ship in the binary, `Info.plist`, `appsettings.json` or plain files.** Tokens live only in the Keychain, `PasswordVault` or DPAPI. Nothing sensitive goes in logs, `UserDefaults` or settings storage.
+- **Permissions** (macOS TCC, Windows privacy consent) are asked at the moment of use. The denied path is a working screen that links to the system settings page.
+- **Only signed, verified updates.** On macOS: Developer ID + notarization + a Sparkle EdDSA feed, or the Mac App Store. On Windows: the Store, or MSIX / Artifact-Signed binaries with a signed feed. An update never restarts the app over unsaved work.
+- **Embedded web content is locked down** (`WKWebView`, WebView2): a navigation allowlist, no devtools in release, and every bridge message validated as untrusted input. So are URL schemes, file activation and IPC messages.
+- **Accessible by default.** Every interactive element is labelled (`accessibilityLabel`, `AutomationProperties.Name`). Increase Contrast / High Contrast, Reduce Motion / animation effects and Reduce Transparency are honoured. Text scales wherever the platform offers it, and no state is shown by colour alone.
+- **Every interactive element and list container carries the platform's test id**: `accessibilityIdentifier` (macOS) or `AutomationProperties.AutomationId` (Windows). Ids are PascalCase dot-separated and static, **never the accessibility label**.
+- Constructor / initializer injection only; no service locator; no static mutable state; async all the way, never blocking on a result.
+- **Dev-side tests** cover the logic the agent writes: Swift Testing; NUnit for view models and services, and the MSTest WinUI Unit Test App only for code that needs XAML types (D8); GoogleTest for the C++/WinRT lane (012 D16). The floor is ≥ 80% of branches in Test code rules, or lines on Swift. Desktop E2E belongs to the `qa-desktop-<lang>` peer.
+- Never up-level a toolchain, SDK, TFM, deployment target or Windows App SDK major as a side effect of other work.
+
+Per platform:
+
+- **macOS (Swift):**
+  - Swift 6 mode and the concurrency rules of § Mobile code rules (iOS).
+  - SwiftUI first; AppKit where the codebase is AppKit.
+  - Settings live in a `Settings` scene. Commands read focused state through `@FocusedValue`. Open windows with `openWindow`.
+  - File access goes only through open/save panels and security-scoped bookmarks, with start/stop balanced. Full Disk Access is never assumed.
+  - Login items and helpers use `SMAppService`; IPC uses XPC.
+  - Developer ID builds use Hardened Runtime and are notarized and stapled. Mac App Store builds have no self-updater and no licence keys.
+  - A universal binary is a decision tied to the deployment target.
+  - Use `os.Logger` only.
+- **Windows (C#):**
+  - New apps use WinUI on Windows App SDK 2.x; WPF and WinForms codebases stay what they are.
+  - MVVM with CommunityToolkit.Mvvm source generators. DI through `Microsoft.Extensions.Hosting` or constructor wiring, never a locator.
+  - Use `x:Bind` over `{Binding}`.
+  - Packaged MSIX by default.
+  - Single instancing through `AppInstance`, never a hand-rolled mutex. Use the Windows App SDK pickers.
+  - Experimental-channel APIs never ship.
+  - Lists are virtualized.
+  - Structured logging through `ILogger`.
+- **Windows (C++/WinRT):**
+  - Hold a WinRT object as its projected value type and a COM interface or implementation type in `winrt::com_ptr`; create implementation types with `winrt::make` / `make_self`; no raw `new`/`delete`.
+  - A coroutine or handler that touches `this` after a suspension holds `get_strong()` (or `get_weak()`, promoted before use), taken before the first suspension point; coroutine parameters are passed by value.
+  - Return to the UI thread by awaiting the dispatcher queue (`wil::resume_foreground` or `winrt::resume_foreground`); never block on an async operation there.
+  - Expected failures are return values; `winrt::hresult_error` is caught once at the boundary and mapped to the failed state.
+  - Warnings are errors (`/W4 /WX /permissive-`).
+  - Tests are GoogleTest over a XAML-free core library; the floor is 80% of lines, or of branches where `llvm-cov` reports them.
+
+  Verified against learn.microsoft.com on 2026-11-15 (012 W4, D16).
+
 ## Backend code rules
 
 - One pattern per problem — flag stacking (e.g. Repository + Unit-of-Work + Specification + Mediator + Decorator on one CRUD slice) as a smell in reviews, per the global Pattern-application rule.
@@ -245,12 +299,13 @@ Per stack:
 
 ## Repository map
 
-Each top-level folder owns a domain, is **stack-first and domain-encapsulated** (a folder's skills are loaded only by its own agents), and ships as one or more marketplace plugins (22 in all). **Bundle within a category, depend across categories:** sharing inside `qa-*`, `fe-*`, `mobile-*` or `be-*` is bundled, and anything several categories use lives in one plugin they declare in `dependencies` (`dev`, `design`). Full per-skill detail is in [`docs/skills-catalog.md`](docs/skills-catalog.md).
+Each top-level folder owns a domain, is **stack-first and domain-encapsulated** (a folder's skills are loaded only by its own agents), and ships as one or more marketplace plugins (24 in all). **Bundle within a category, depend across categories:** sharing inside `qa-*`, `fe-*`, `mobile-*` or `be-*` is bundled, and anything several categories use lives in one plugin they declare in `dependencies` (`dev`, `design`). Full per-skill detail is in [`docs/skills-catalog.md`](docs/skills-catalog.md).
 
 | Folder | Domain | Plugin(s) |
 |---|---|---|
 | `qa/` | Test automation + manual test design, reporting, CI/CD, security scanning | `qa-java` · `qa-dotnet` · `qa-typescript` |
 | `frontend/blazor/`, `frontend/react/` | Frontend dev stacks (+ `design/`, `auth/auth0-*`) | `fe-blazor` · `fe-react` |
+| `desktop/` | Desktop client dev stacks — macOS (Swift / SwiftUI, AppKit), Windows (WinUI / C#, WPF, WinForms, C++/WinRT) + the shared distribution / security / observability layer (+ `design/`, `auth/auth0-{macos,windows}`); desktop E2E lives in the `qa-*` plugins | `desktop-macos` · `desktop-windows` |
 | `mobile/` | Mobile dev stacks — React Native (Expo), iOS (Swift), Android (Kotlin + KMP) + the shared store-compliance / security / release / observability / in-app-purchases layer (+ `design/`, `auth/auth0-{react-native,ios,android}`) | `mobile-react-native` · `mobile-ios` · `mobile-android` |
 | `design/` | Stack-agnostic aesthetic-craft layer | `design` (a dependency of `fe-*` and `mobile-*`) |
 | `backend/` | Design-pattern + persistence dev stacks; the sandboxed Python upload worker (`backend/python/`); Rust services and crates (`backend/rust/`); planning (`solution-planner`) + reverse-docs (`be-documenter`) | `be-dotnet` · `be-java` · `be-node` · `be-python` · `be-rust` |

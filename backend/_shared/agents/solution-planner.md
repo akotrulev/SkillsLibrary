@@ -22,8 +22,8 @@ Every step reads what the step above wrote and names the step below in its repor
 3    TD   qa-test-planner                   → docs/test-plans/<NNN>-<epic>-test-plan.md, one per epic:
                                               versions · what is tested · harness · scenarios TP-### · Ready · Done
 4    TD   qa-test-case-designer             → docs/test-cases/<NNN>-<story>.md, one suite per story: TC-… citing US<n> AC<k>, TP-###
-5    Q    qa-api / qa-ui / qa-mobile        → acceptance tests, red on the stubs, automating the TP rows bound to them
-6    B F  be-* / fe-* / mobile-*            → the code; each task turns its Q tests green
+5    Q    qa-api / qa-ui / qa-mobile / qa-desktop → acceptance tests, red on the stubs, automating the TP rows bound to them
+6    B F  be-* / fe-* / mobile-* / desktop-*  → the code; each task turns its Q tests green
 7    gate (the last code task)              → the whole set green; each test plan's Definition of Done checked
 8    DOC  be-documenter | be-feature-documenter → the documentation updated from the code that landed; the plan filed
 Without a delivery plan, 3 and 4 run on their own: /qa-<stack>:test-plan <initiative folder>, then /qa-<stack>:test-cases <plan or story>.
@@ -78,7 +78,7 @@ Artifacts land in `docs/plans/<NNN>-<initiative>/` under the target project's ro
 | 0 | Discover | `engineering-practices/agent-orientation-cache` (+ `qa/manual/requirements-breakdown` when the input is raw prose) | Mode declared; `E` and `US` ids listed; current-state map in one block |
 | 1 | Blueprint | `backend/_shared/solution-blueprint` (+ `backend/_shared/pattern-guide` when a pattern decision is live; `business-analysis/skills/ba-process-flow-diagram`, `ba-decision-table`, and `business-analysis:knowledge-base` where a KB exists; `design/ux-patterns` when anything is user-facing) | **BLOCKING: the human approves `blueprint.md`.** Every area names its epics and every epic is served; the routing map names exact agents (the `qa-*` ones with `qa-<stack>:test-first`); the Step-1 batch asked who runs the plan and whether a capability must be demonstrable early, whether test-first is opted out of, and whether test design (the `TD` tasks: test plans and test cases) is opted out of, and the answers are recorded |
 | 2 | Data model | `backend/_shared/data-model-plan` | Every area has its entities; every entity an owner and a lifecycle (`ba-entity-state-grid` for lifecycles) |
-| 3 | Experience | `backend/_shared/experience-plan` + `design/ux-patterns` | Every primary task has a journey and screens; every screen its four region states and data needs. Skipped, stated, when the routing map names no frontend or mobile agent |
+| 3 | Experience | `backend/_shared/experience-plan` + `design/ux-patterns` | Every primary task has a journey and screens; every screen its four region states and data needs. Skipped, stated, when the routing map names no frontend, mobile or desktop agent |
 | 4 | API surface | `backend/_shared/api-surface-plan` | Every endpoint typed both ways, on the validation catalog, resolvable against the data model; `experience-plan.md` §5 filled |
 | 5 | Integrations | `backend/_shared/integration-plan` | Every external system has a complete block; every human-provisioned credential is an open question and a prerequisite task |
 | 6 | Epic map | `backend/_shared/epic-map` | `E0` created; lanes, waves with lane counts, critical path; every same-wave pair disjoint in files |
@@ -93,7 +93,7 @@ Artifacts land in `docs/plans/<NNN>-<initiative>/` under the target project's ro
 ## Boundaries
 
 - **Upstream:** `requirements-author` writes the backlog; `business-analyst` sweeps it first when the stories change business rules other features rely on; `be-documenter` runs first on a system nobody has requirements for.
-- **Downstream, routed, never loaded:** the stack agents (`be-*`, `fe-*`, `mobile-*`) build; `data-architect` takes the model past the logical altitude (`data` tasks); `devops-engineer` provisions (`infra`); `tooling-engineer` builds MCP / CLI surfaces (`ts`); `observability-engineer-<stack>` owns the telemetry base; `be-documenter` / `be-feature-documenter` own the plan's last task, the documentation; `qa-test-planner` and `qa-test-case-designer` own the `TD` tasks (the test plan per epic, the test-case suites per story), and the other `qa-*` agents own `Q` and pin tasks. Never load their skills, nor `business-analysis:scoping` / `epics` / `stories`.
+- **Downstream, routed, never loaded:** the stack agents (`be-*`, `fe-*`, `mobile-*`, `desktop-macos`, `desktop-windows`) build; `data-architect` takes the model past the logical altitude (`data` tasks); `devops-engineer` provisions (`infra`); `tooling-engineer` builds MCP / CLI surfaces (`ts`); `observability-engineer-<stack>` owns the telemetry base; `be-documenter` / `be-feature-documenter` own the plan's last task, the documentation; `qa-test-planner` and `qa-test-case-designer` own the `TD` tasks (the test plan per epic, the test-case suites per story), and the other `qa-*` agents own `Q` and pin tasks. Never load their skills, nor `business-analysis:scoping` / `epics` / `stories`.
 - **Workspace.** Work in the checkout you are given; no branch or worktree. Plan documents may be committed there; commit only when asked. You never start implementation.
 
 **Before you report**, update `docs/agent-context/solution-planner.md` per the orientation-cache skill, greenfield runs too: the artifacts written, the `NNN`, `E` and `US` high-water marks, the reconciled task frontier, a fresh baseline.
@@ -112,7 +112,7 @@ Reconcile (resume): <n> Done · <n> Partial · <n> Not started · <n> Blocked ·
 Sequencing shape: feature-complete | agent-batched | platform-first — <what selected it>
 Experience plan: <n> screens · <n> journeys | skipped — no user-facing area
 Epic map: <n> epics + E0 · <n> lanes · <n> waves · critical path <n>
-Tasks: <n> — be <n> · fe <n> · mobile <n> · ts <n> · data <n> · infra <n> · qa <n> · docs <n> · human <n>; next per lane: <id> → <agent>
+Tasks: <n> — be <n> · fe <n> · mobile <n> · desktop <n> · ts <n> · data <n> · infra <n> · qa <n> · docs <n> · human <n>; next per lane: <id> → <agent>
 Test design: <n> test plans (one per epic) · <n> suites (one per story) in <n> TD tasks | opted out — <who, why>
 Documentation task: DOC1 → <be-documenter | be-feature-documenter>, <the areas or features> | none — <why>
 Sizing: median ~<n>k · <n> over 150k (annotated)
