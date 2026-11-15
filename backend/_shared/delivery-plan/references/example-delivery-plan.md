@@ -365,8 +365,8 @@ commands like `C4`'s, `Q1`'s, `B2`'s and `F2`'s; the `human` tasks have no gate.
   the untested area: "the current behaviour of <area> is pinned by N tests, green on today's code."
 - **`DOC1` is the plan's last task**, `Stack: docs`, agent `be-documenter`, depending on `B7`. It traces
   the three modules at HEAD and writes the Scheduling, Booking and Membership areas in
-  `docs/business-model/` (a client guide with a worked example, the behind-the-scenes account and the
-  technical reference each), from the code and never from this plan: what `B7` recorded as built but
+  `docs/business-model/` (a user guide each — members, staff and the studio owner as administrator, with
+  worked examples and screenshots from the staging environment), from the code and never from this plan: what `B7` recorded as built but
   unverified is documented as built, with the unverified part said. Its gate is the doc lint over those
   files. It would file the plan, but `B4` still holds a block.
 - **`B4` sits below `B7` and `DOC1`**, because it is blocked on `H2`. `B7` is the last *runnable* code task

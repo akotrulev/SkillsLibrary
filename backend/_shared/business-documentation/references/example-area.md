@@ -1,16 +1,14 @@
-# Golden example, Level 1 — `areas/<area>.md` (the guide)
+# Golden example — `areas/<area>.md` (the guide)
 
-The Level 1 example for `dev:doc-business-model`: one area guide as a `be-documenter` run would write it into `docs/business-model/areas/credits-and-charges.md`. The system is the same **workshop-booking** toy the planner examples build — imagined here as an *inherited* codebase being documented after the fact. **Shape, tone and the example discipline are normative; domain content and citations are illustrative.**
+The example for `dev:doc-business-model`: one area guide as a `be-documenter` run would write it into `docs/business-model/areas/credits-and-charges.md`, with its one screenshot in `areas/screenshots/credits-and-charges/`. The system is the same **workshop-booking** toy the planner examples build — imagined here as an *inherited* codebase being documented after the fact. **Shape, tone, the example discipline and the screenshot discipline are normative; domain content and the screenshot are illustrative.**
 
-Note what the example demonstrates: a guide that reads in the order a person meets the product — who uses it, the few ideas and one picture of how it fits together, then each person's tasks in lifecycle order, with the example beside the rule it shows. Three hard cases are in it: the **member tasks have no screen** in this codebase, so they carry no `**Where:**` and no bold label; the **staff tasks** show only labels the staff screen has (each is in Level 3's vocabulary table); and **a task two people do** (cancelling a booking) sits under two headings. The rules nobody triggers (the 24-hour cut-off, the posting moment) sit in *Rules and limits* as "no — fixed in the system". There are no ids in the body, the metadata closes the file in *About this document*, and an inferred purpose lives only in *Open questions*. There is no `file:line`, tier tag, code noun, defect word or evidence table (those are Level 3: [example-technical.md](example-technical.md); the connections and failure handling are Level 2: [example-behind-the-scenes.md](example-behind-the-scenes.md)). Optional sections that do not apply (*Good to know*) are dropped, and the search that proved it is a row in Level 3's evidence index.
+Note what the example demonstrates: a guide that reads in the order a person meets the product — who uses it, the few ideas and one picture of how it fits together, then each person's tasks in lifecycle order, with the example beside the rule it shows. Four hard cases are in it: the **member tasks have no screen** in the product the documenter was given, so they carry no `**Where:**`, no bold label and no screenshot; the **staff — the area's administrators —** have their own section, and their busiest screen gets the guide's **one screenshot**, showing the example's own values (Basic, 8, £6.00, Ben's £4.50) and every label the steps name; the second staff task is not pictured, because it has no screen of its own; and **a task two people do** (cancelling a booking) sits under two headings. The rules nobody triggers (the 24-hour cut-off, the posting moment) sit in *Rules and limits* as "no — fixed in the system". There are no ids in the body, the metadata closes the file in *About this document*, and an inferred purpose lives only in *Open questions*. There is no `file:line`, tier tag, code noun or defect word. Optional sections that do not apply (*Good to know*) are dropped.
 
 ---
 
 # Session credits & charges
 
 Spend your plan's monthly credits on sessions, and pay only for the bookings that go beyond them.
-
-**Levels:** [Guide](credits-and-charges.md) · [Behind the scenes](credits-and-charges.behind-the-scenes.md) · [Technical reference](credits-and-charges.technical.md)
 
 > [!IMPORTANT]
 > A booking is priced once, after it is confirmed, from the tier cost and rate in force at that point — it is never re-priced afterwards. A credit returned by a later cancellation is available for future bookings; it does not reduce an overage already accrued.
@@ -114,6 +112,8 @@ You can cancel a booking yourself. Whether your credits come back depends on how
 You define the plans, the session tiers and, for a member who needs one, a personal overage rate.
 
 **Where:** **Session credits**
+
+![The Session credits screen: the Basic plan with 8 credits a month at £6.00 per overage credit, the three session tiers, and Ben's personal rate of £4.50](screenshots/credits-and-charges/set-up-plans-and-tiers.png)
 
 1. Open **Session credits**.
 2. Give a plan a name, its monthly credits in **Monthly allowance**, and its **Overage rate (per credit)**.
@@ -241,4 +241,5 @@ These are questions for the product owner that the code cannot answer.
 **Owned by:** `dev:doc-business-model`
 **Derived from:** code by `be-documenter` @ `a3f9c21` on 2026-08-02
 **Audience:** shareable
+**Screenshots:** captured from the staging environment on 2026-08-02
 **Models:** [FLOW-004 pricing a booking] · [ENT-003 accrued charge lifecycle] · [DEC-002 credit / overage split]

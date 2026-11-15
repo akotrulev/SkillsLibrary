@@ -1,102 +1,78 @@
 ---
 name: doc-business-model
-description: Use when traced behavior must be written up as a client guide, a behind-the-scenes account and a technical reference. Triggers "turn this trace into docs". Not for tracing code (doc-feature-trace).
+description: Use when traced behavior must be written up as a user guide for every role, admins included, with a few screenshots. Triggers "turn this trace into docs". Not for tracing code (doc-feature-trace).
 ---
 
-# Business Documentation — one trace, three documents, three readers
+# Business Documentation — one trace, one guide, every user
 
-The same accurate evidence has to serve a client who has never seen the code, a project or support lead who needs to know how the pieces hang together, and a developer or AI agent who must change it safely. One document cannot serve all three. So every area (and every feature) is written **three times, from one trace, at three levels**:
+Every area (and every feature) is written **once, as a guide**: what each person who uses it — customers, members, staff, **administrators** — can do there, step by step, in the words the product shows them, with a few screenshots of the running product where a picture saves a paragraph. There is no second, technical document: the guide is the documentation.
 
-| Level | File | Reader | Audience | Language | Answers |
-|---|---|---|---|---|---|
-| **1 — Guide** | `<name>.md` | Client, product owner, support | `shareable` | Plain. No technical talk at all | What is this, how is it set up, what happens when I use it, show me with numbers |
-| **2 — Behind the scenes** | `<name>.behind-the-scenes.md` | Project manager, analyst, ops | `internal` | Plain, with a few everyday technical words | Which parts are involved, who tells whom, what happens now and later, what is kept where, what happens when a part fails |
-| **3 — Technical reference** | `<name>.technical.md` | Developers and AI agents | `internal` | Fully technical: code names, paths, contracts, `file:line`, tiers | Where is it, what exactly does it do, what breaks if I change it, how do I know |
+| File | Reader | Audience | Language | Answers |
+|---|---|---|---|---|
+| `<name>.md` | Every user of the product, the client, product owner, support | `shareable` | Plain. No technical talk at all | Who uses this, what can I do here, where do I do it, what happens when I do, show me with numbers |
 
-Each level links to the other two from its header. A higher level never repeats the lower one's explanations — it links to them.
-
-**Load the level references only when writing that level:**
+**Load only when needed:**
 
 | Writing | Load |
 |---|---|
-| Level 1 (any set) | nothing extra — the shape is below |
-| Level 2 | [`references/level-2-behind-the-scenes.md`](references/level-2-behind-the-scenes.md) |
-| Level 3 | [`references/level-3-technical.md`](references/level-3-technical.md) |
-| `system-overview*.md` | [`references/system-overview.md`](references/system-overview.md) |
-| Checking tone or shape against a model | the matching golden example (below) |
+| An area or feature guide | nothing extra — the shape is below |
+| `system-overview.md` | [`references/system-overview.md`](references/system-overview.md) |
+| Checking tone or shape against a model | the golden example, [`references/example-area.md`](references/example-area.md) |
 
 Six disciplines carry the whole skill:
 
-1. **Write for the level's reader, and stay at that level.** Level 1 never says "handler"; Level 2 never says `OrderService.Cancel`; Level 3 never says "the part that looks after bookings" without the class name beside it.
-2. **Never let inference pass as fact — and keep the grammar in Level 3.** `#observed` is what the code does; `#inferred` is what you think it is for. Tiers and every `file:line` live in Level 3's **evidence index**; in Levels 1 and 2 an inferred purpose reads as uncertainty ("appears to exist so that…") and is a row in Open questions.
-3. **Simple, flows, examples.** Level 1 reads the same way every time: who uses it → how it fits together → each person's tasks in lifecycle order → **examples beside the rule they show**.
-4. **One fact, one home.** A statement is explained at the level where its reader needs it and cited at the others. The three levels never contradict each other; when evidence changes one, all three are re-checked and re-stamped.
-5. **Level 3 carries the proof for all three.** Every parameter, formula, threshold, step, branch, connection, timing and failure claim in Levels 1 and 2 has a row in Level 3's evidence index. Level 3 is never skipped. **Write order:** Level 3's body, then Level 1, then Level 2, then Level 3's evidence index last — it cites the step numbers of the other two. Level 3 runs up to about 4,000 words, not counting the index, then splits by topic (see its reference).
-6. **Levels 1 and 2 describe; only Level 3 judges.** Behaviour is stated factually and neutrally ("the credits are returned twice"). The words *bug, defect, flaw, broken, wrong, mistake, vulnerability* and *should have* never appear in Levels 1 or 2 — the lint warns on each, and each is fixed or explained in the report; text quoted verbatim from the product is exempt; classifying something as a defect happens only in Level 3's Findings, and a Level 2 statement that is also a finding has an evidence-index row citing it (`see **F1**`). Level 2 is `internal` because it is frank about failure, not because it is allowed to editorialise.
+1. **Write for the person, and stay plain.** The guide never says "handler", "endpoint" or a class name. If a sentence would make a non-technical user ask "what does that mean?", it does not belong here.
+2. **Never let inference pass as fact.** The guide states what the product does — the trace read it in the code this session. What you think a rule is *for* is never stated: it is a row in *Open questions*. "The code enforces X; I could not determine why" is a complete answer.
+3. **Simple, flows, examples.** Every guide reads the same way: who uses it → how it fits together → each person's tasks in lifecycle order → **examples beside the rule they show**.
+4. **Every person, administrators included.** Every role the trace found acting in the area — the person who uses the product, the one who runs it, the administrator who configures it — is a row in *Who uses it* and has its own `## For <role>` section. Administration screens are tasks, not footnotes.
+5. **A few screenshots, never one per step.** At most one per task, of the running product, where it saves words (see *Screenshots*).
+6. **Describe, never judge.** Behaviour is stated factually and neutrally ("the credits are returned twice"). The words *bug, defect, flaw, broken, wrong, mistake, vulnerability* and *should have* never appear — the lint warns on each; text quoted verbatim from the product is exempt. A defect found while tracing goes to the run's report, routed to `code-auditor`, never into the guide.
 
-**Prerequisites:** a confirmed area map (`dev:doc-codebase-survey`) and per-area evidence (`dev:doc-feature-trace`), including its `Client vocabulary` table and the verbatim refusal texts in inventory 3. **When `docs/business-model/` exists or is being written, load `business-analysis:knowledge-base` first** — it owns the KB layout, IDs, annotation grammar, and the read-first/update-after contract; a standalone feature run without a KB skips it.
+**Prerequisites:** a confirmed area map (`dev:doc-codebase-survey`) or feature scope, per-area evidence (`dev:doc-feature-trace`) including its `Client vocabulary` table and the verbatim refusal texts in inventory 3, and **a running environment of the product with a test login for every role** (see *Screenshots*). **When `docs/business-model/` exists or is being written, load `business-analysis:knowledge-base` first** — it owns the KB layout, IDs, annotation grammar, and the read-first/update-after contract; a standalone feature run without a KB skips it.
 
-**The golden examples are illustrations, never sources.** Every fact, number, currency, message and actor in a document comes from this run's trace. A claim that appears in an example but that the trace did not find (a currency symbol, who sets a rate, a message text) is not written — it becomes an open question.
+**The golden example is an illustration, never a source.** Every fact, number, currency, message, actor and screenshot in a guide comes from this run's trace and this run's capture. A claim that appears in the example but that the trace did not find (a currency symbol, who sets a rate, a message text) is not written — it becomes an open question.
 
 ## When to use
 
 - Steps 4–5 of a `be-documenter` run, and Step 3 of a `be-feature-documenter` run
-- A traced area needs its write-up refreshed after the code moved
+- A traced area needs its guide refreshed after the code moved
 
 ## When NOT to use
 
 - The code has not been traced yet → `dev:doc-feature-trace`
 - The deliverable is requirements for work *to be done* → `requirements-author`
-- The deliverable is defects → `dev:audit-feature`. Defects found while tracing go in Level 3's Findings, never into Levels 1 or 2
+- The deliverable is defects → `dev:audit-feature`
 
 ## Output — into the KB, under its contract
 
-Everything lands in **`docs/business-model/`**, per `business-analysis:knowledge-base`. A standalone feature (`be-feature-documenter`) uses the same three-file set under `docs/features/` with `<NNN>-<slug>` as the name.
+Everything lands in **`docs/business-model/`**, per `business-analysis:knowledge-base`. A standalone feature (`be-feature-documenter`) writes one guide under `docs/features/` with `<NNN>-<slug>` as the name.
 
 | File | Owner | This skill's role |
 |---|---|---|
-| `areas/<area>.md` (`AREA-nnn`) | **this skill** | Level 1 — the guide |
-| `areas/<area>.behind-the-scenes.md` | **this skill** | Level 2 |
-| `areas/<area>.technical.md` | **this skill** | Level 3 |
-| `system-overview.md`, `.behind-the-scenes.md`, `.technical.md` | **this skill** | The same three levels for the whole system |
+| `areas/<area>.md` (`AREA-nnn`) | **this skill** | The area's guide |
+| `areas/screenshots/<area>/<task>.png` | **this skill** | The guide's screenshots |
+| `system-overview.md` | **this skill** | The guide to the whole system |
 | `glossary.md` | shared | Terms, the client's own words, and the business ↔ code mapping |
-| `INDEX.md`, `active-context.md` | shared | Updated per the KB contract. **One `INDEX.md` line per area**, in this shape and no other (lint `index-line`): `- [<Area name>](areas/<name>.md) — AREA-nnn · <who, comma-separated> · <what a person does there, at most 20 words> · [behind the scenes](areas/<name>.behind-the-scenes.md) · [technical](areas/<name>.technical.md) · @ \`<sha>\``. The description is the area's row in the overview's `## Areas, by who uses them`. An existing line is edited into the shape together with its set, never regenerated |
-| `events.md`, `shared-data.md`, `invariants.md` | `business-analysis:dependency-map` | **Not yours.** Levels 2 and 3 cite them by id |
-| `flows/`, `entities/`, `decisions/` | `process-flow` · `state-grid` · `decision-table` | **Not yours.** You link to them by ID |
+| `INDEX.md`, `active-context.md` | shared | Updated per the KB contract. **One `INDEX.md` line per area**, in this shape and no other (lint `index-line`): `- [<Area name>](areas/<name>.md) — AREA-nnn · <who, comma-separated> · <what a person does there, at most 20 words> · @ \`<sha>\``. The description is the area's row in the overview's `## Areas, by who uses them`. An existing line is edited into the shape together with its guide, never regenerated |
+| `events.md`, `shared-data.md`, `invariants.md` | `business-analysis:dependency-map` | **Not yours.** |
+| `flows/`, `entities/`, `decisions/` | `process-flow` · `state-grid` · `decision-table` | **Not yours.** You link to them by ID in *About this document* |
 
-### Header block
+A feature guide's screenshots go in `docs/features/screenshots/<NNN>-<slug>/`.
 
-The lines below are mandatory on **every file** of a set, in this order:
-
-```markdown
-**Created:** YYYY-MM-DD
-**Owned by:** `dev:doc-business-model`
-**Derived from:** code by `be-documenter` @ `<commit sha>` on YYYY-MM-DD
-**Audience:** shareable | internal
-**Levels:** [Guide](<name>.md) · [Behind the scenes](<name>.behind-the-scenes.md) · [Technical reference](<name>.technical.md)
-```
-
-- **Where the block sits.** In **Levels 1 and 2** the reader meets one line on top — `**Levels:**` — and the rest closes the file in `## About this document` (Level 1's opens with `**Id:** AREA-nnn`; see Level 1 below). Level 2 keeps `**Audience:** internal` on top beside `**Levels:**`, because its job is to stop the file being forwarded. **Level 3 keeps the whole block on top**: its reader is an agent that needs the sha first.
-- **Audience** is `shareable` on Level 1 and `internal` on Levels 2 and 3. A person may promote Level 2 to `shareable` after reading it; an agent never does. Feature documents use the feature header (`**Generated by …**`) and carry the same `**Audience:**` line.
-- **Each file carries its own `Derived from` stamp.** The three files of a set always carry the **same sha** after a run: when any one is updated, all three are re-checked and re-stamped, and each gets `**Last updated:** YYYY-MM-DD by \`<skill>\`` beneath its creation line (the creation line is never overwritten).
-- **Never overwrite a `#confirmed` entry.** If your evidence contradicts it, record the contradiction in `active-context.md` and escalate it.
-
-**Golden examples** — the `workshop-booking` toy system as an inherited codebase, one area at all three levels: [`references/example-area.md`](references/example-area.md) (Level 1), [`references/example-behind-the-scenes.md`](references/example-behind-the-scenes.md) (Level 2), [`references/example-technical.md`](references/example-technical.md) (Level 3). Shape, tone, example discipline and the evidence index are normative; the domain content is illustrative.
+**Golden example** — the `workshop-booking` toy system as an inherited codebase, one area: [`references/example-area.md`](references/example-area.md). Shape, tone, example discipline and screenshot discipline are normative; the domain content is illustrative.
 
 ---
 
-## Level 1 — the guide
+## The guide
 
-**Greenfield or brownfield.** A FULL run on a project with no documentation writes this shape directly. A run on existing documentation **updates it in place** into this shape and never recreates it — the *Reconcile procedure*'s in-place step says how.
+**Greenfield or brownfield.** A FULL run on a project with no documentation writes this shape directly. A run on existing documentation **updates it in place** into this shape and never recreates it — the *Reconcile procedure* says how.
 
-The client-facing document. If a sentence would make a non-technical client ask "what does that mean?", it does not belong here. It reads in the order a person meets the product: who uses it, the few ideas and one picture of how it fits together, then each person's tasks in the order life happens.
+It reads in the order a person meets the product: who uses it, the few ideas and one picture of how it fits together, then each person's tasks in the order life happens.
 
 ```markdown
 # <Area name>
 
 <One sentence, the client's words: what a person can do here.>
-
-**Levels:** [Guide](<name>.md) · [Behind the scenes](<name>.behind-the-scenes.md) · [Technical reference](<name>.technical.md)
 
 > [!IMPORTANT]
 > <The one rule that governs everything below.>          ← optional
@@ -117,11 +93,13 @@ The client-facing document. If a sentence would make a non-technical client ask 
 ## About this document                                      ← the metadata, last
 ```
 
-Optional sections are **dropped** when they do not apply — never padded. The negative search that proved it is one row in Level 3's evidence index. **There is no evidence table in Level 1.**
+Optional sections are **dropped** when they do not apply — never padded.
 
-**Order of the people.** `## Who uses it` lists people in the order they meet the area (the customer who places an order before the owner who accepts it); the `## For <person>` sections follow that order, and inside each section the tasks follow the record's lifecycle (place → find again → cancel → rate → order again). The heading is `## For <plural or role>` — `## For customers`, `## For the owner`, `## For makers`. The guide's open questions stay under `## Open questions`; a `## For …` heading is always a person's tasks.
+**Order of the people.** `## Who uses it` lists people in the order they meet the area (the customer who places an order before the owner who accepts it, the owner before the administrator who configures the shop); the `## For <person>` sections follow that order, and inside each section the tasks follow the record's lifecycle (place → find again → cancel → rate → order again). The heading is `## For <plural or role>` — `## For customers`, `## For the owner`, `## For administrators`. The guide's open questions stay under `## Open questions`; a `## For …` heading is always a person's tasks.
 
-**The client's words.** Name things the way the client's own product names them — the button labels, screen titles, email wording and messages harvested in the trace's `Client vocabulary` table — not the way the code names them. Every term used goes to the glossary with its code name.
+**Administrators.** Settings, user and role management, approvals, imports and anything else a privileged person does on a back-office screen are tasks under `## For administrators` (or the role's own name), written exactly like any other person's: a `**Where:**` path, their steps, what happens next, a screenshot where it helps. *Rules and limits* says which values they can change ("on the <screen> screen") and links the task that changes them.
+
+**The client's words.** Name things the way the client's own product names them — the button labels, screen titles, email wording and messages harvested in the trace's `Client vocabulary` table and seen on the running screen — not the way the code names them. In a KB run every term used goes to the glossary with its code name.
 
 **A task:**
 
@@ -131,6 +109,8 @@ Optional sections are **dropped** when they do not apply — never padded. The n
 You can cancel an order yourself until the shop starts working on it; after that you ask.
 
 **Where:** **Your orders** → the order → **Cancel order**
+
+![The order page, with the Cancel order button below the order summary](screenshots/ordering/cancel-an-order.png)
 
 1. Open the order and press **Cancel order**.
 2. Give a reason if you like, and press **Confirm**.
@@ -151,48 +131,76 @@ You can cancel an order yourself until the shop starts working on it; after that
 ````
 
 - **Second person, imperative, to the person the section names.** Field names in *italics*. **One idea per sentence.**
-- **Bold is a screen label, and a label is evidence.** In a `**Where:**` line and in the person's steps, bold is only ever a label exactly as the screen shows it, and every such label is in the first column of Level 3's *Business ↔ code vocabulary*. Never invent a button.
-- **`**Where:**`** is the arrow path from the trace's `Where in the product` column (screen › control). A task reached through another channel names it without bold (`**Where:** your own AI assistant, through the shop's order tool`).
-- **No screen found** — the UI is not in this codebase, or the search came back empty: the task has no `**Where:**` line and no bold label, and its steps say what the person asks for in plain verbs ("Ask to cancel the booking"). The negative search is a Level 3 row. When no screen was found for the whole area, one open question asks where people do this.
-- **The person's steps are numbered; "What happens next" is a bulleted list of outcomes.** An outcome is something the person sees, receives or is charged; alternatives are separate bullets starting "If …". Everything else the system does — its checks, what it records, what it tells other parts — is Level 2's. The evidence index cites `<Task> · step N` and `<Task> · outcome N`, counted from the top of each list, so keep the order stable. An outcome that computes keeps the formula block: `Name = expression` on its own line, then `Where:`. Plain-text math (`×`, `SUM`, `ROUNDUP(x, 2)`), never code; rounding, day-count conventions and currency conversion are part of the formula, and the number is exact.
+- **Bold is a screen label, and a label is evidence.** In a `**Where:**` line and in the person's steps, bold is only ever a label exactly as the running screen shows it — the same text the trace's `Client vocabulary` holds. Never invent a button.
+- **`**Where:**`** is the arrow path from the trace's `Where in the product` column (screen › control), checked on the running screen. A task reached through another channel names it without bold (`**Where:** your own AI assistant, through the shop's order tool`).
+- **No screen** — the person does this through an API, an email, an outside system, or the screen is not part of the product you were given: the task has no `**Where:**` line, no bold label and no screenshot, and its steps say what the person asks for in plain verbs ("Ask to cancel the booking"). When no screen was found for the whole area, one open question asks where people do this.
+- **The person's steps are numbered; "What happens next" is a bulleted list of outcomes.** An outcome is something the person sees, receives or is charged; alternatives are separate bullets starting "If …". The system's internal checks and bookkeeping are not written. An outcome that computes keeps the formula block: `Name = expression` on its own line, then `Where:`. Plain-text math (`×`, `SUM`, `ROUNDUP(x, 2)`), never code; rounding, day-count conventions and currency conversion are part of the formula, and the number is exact.
 - **At most seven steps and five outcomes**; a task that needs more is two tasks.
 - **Task headings are unique in the guide**: a task two people do is named for each ("Cancel a booking" under members, "Cancel a member's booking" under staff), the second one short and pointing at the first by name.
-- **Automatic work** — a `###` under `## What happens automatically` — keeps the flow shape, because nobody acts: `**Trigger:**`, numbered steps in business verbs, `**Result:**`. Its steps are cited `· step N`.
-- **"If it doesn't go through"** — only where the code refuses with a user-visible outcome. *What you see* **quotes the exact message** from the trace's inventory 3, never a paraphrase; the third column is what to do, not what the system does. Drop the table when nothing is refused.
+- **Automatic work** — a `###` under `## What happens automatically` — keeps the flow shape, because nobody acts: `**Trigger:**`, numbered steps in business verbs, `**Result:**`. It has no screenshot.
+- **"If it doesn't go through"** — only where the product refuses with a user-visible outcome. *What you see* **quotes the exact message** from the trace's inventory 3, never a paraphrase; the third column is what to do, not what the system does. Drop the table when nothing is refused.
 - **An example sits inside the task that computes**, as `**Example**` and a few lines or a small table, numbers carried to the result. `## A <period> in numbers` exists only when one story's numbers carry across several tasks (credits spent on booking, returned on cancelling, posted at month end); it replaces a task example. Every number used as a rule is the code's exact value; every arithmetic line is shown and recomputed before handing off; invent only the incidental (names, dates, quantities) with one running cast; an example illustrates, never extends — where the code is silent, the example stops and the gap is an open question.
 - **Callouts** are GFM alerts and only four kinds: `[!IMPORTANT]` (a rule that governs — never a bold **Important:**), `[!NOTE]` (a prerequisite or where something else is handled), `[!TIP]` (a shortcut), `[!WARNING]` (an action that cannot be undone or that charges money — nothing else). At most one inside a task.
 - **`## How it fits together`** holds the key ideas, then the picture; it is left out only when the area has one task, no states and no term to explain.
-  - **Key ideas** — up to six `**Term** — one line` entries: the words the tasks use that a new reader would not know, and any concept that is not a task. The detail is Level 2's.
-  - **One Mermaid diagram**, nine nodes at most, labels in the client's words, node ids single lowercase words: a `stateDiagram-v2` of the area's main record when it has states, otherwise a `flowchart LR` (labels in double quotes) of the people and what passes between them. It is drawn from the trace's states and transitions and agrees with the `ENT-nnn` grid where the KB has one. **Every arrow is a task or automatic work in this guide** — the picture shows nothing the text does not say. It is the one place a model is redrawn; re-check it whenever a state or a transition changed.
-- **`## Rules and limits`** — `| Rule | Value | Can it be changed? |`; layered configuration adds a `Level` column and one line naming the precedence ("the most specific wins — member, then plan"). The answer in *Can it be changed?* is "on the <screen> screen", "by a deployment setting" or "no — fixed in the system". A hard-coded value is still stated with its number; Level 3 records that it is fixed, usually also an open question.
-- **`## Good to know`** — `### <what the person wants to know, in their words>` and an answer that starts with the direct answer ("Yes.", "No.", "Up to 12 months.") and then says what to do instead. It holds only what has no task to live in: what the product does not do, a limit that spans tasks, an unhandled case. It never repeats a row of "If it doesn't go through" or *Rules and limits*, has six entries at most, and **never promises** ("Not yet.", "coming soon" are roadmap claims no code shows). Every answer has an evidence-index row.
-- **`## Related areas`** — **Starts from**, **Sets off**, **Shares**, each a short list linking the other area's guide **by name**, in business words from the Edges inventory. The *how* is Level 2.
-- **`## Open questions`** — one line saying these are questions for the product owner that the code cannot answer, then `| # | Question | Why it matters |`, numbered `Q1…` (Level 2 continues the numbering). Every hard-coded number of unknown origin, every unhandled case — asked about the **rule**, not the code. **An inferred purpose appears here and nowhere else in Level 1**: the body states what happens, never "appears to exist so that".
-- **`## About this document`** — one per line, in this order: `**Id:**` (the `AREA-nnn`; a feature document has none), `**Created:**`, `**Last updated:**` (once the set has been updated), `**Owned by:**`, `**Derived from:**`, `**Audience:**`, `**Models:**` (the FLOW/ENT/DEC links). A feature document carries its `**Generated by …**` line here instead of `Owned by` / `Derived from`.
+  - **Key ideas** — up to six `**Term** — one line` entries: the words the tasks use that a new reader would not know, and any concept that is not a task.
+  - **One Mermaid diagram**, nine nodes at most, labels in the client's words, node ids single lowercase words: a `stateDiagram-v2` of the area's main record when it has states, otherwise a `flowchart LR` (labels in double quotes) of the people and what passes between them. It is drawn from the trace's states and transitions and agrees with the `ENT-nnn` grid where the KB has one. **Every arrow is a task or automatic work in this guide** — the picture shows nothing the text does not say. Re-check it whenever a state or a transition changed.
+- **`## Rules and limits`** — `| Rule | Value | Can it be changed? |`; layered configuration adds a `Level` column and one line naming the precedence ("the most specific wins — member, then plan"). The answer in *Can it be changed?* is "on the <screen> screen", "by a deployment setting" or "no — fixed in the system". A hard-coded value is still stated with its number, usually also an open question.
+- **`## Good to know`** — `### <what the person wants to know, in their words>` and an answer that starts with the direct answer ("Yes.", "No.", "Up to 12 months.") and then says what to do instead. It holds only what has no task to live in: what the product does not do, a limit that spans tasks, an unhandled case. It never repeats a row of "If it doesn't go through" or *Rules and limits*, has six entries at most, and **never promises** ("Not yet.", "coming soon" are roadmap claims no code shows).
+- **`## Related areas`** — **Starts from**, **Sets off**, **Shares**, each a short list linking the other area's guide **by name**, in business words from the Edges inventory.
+- **`## Open questions`** — one line saying these are questions for the product owner that the code cannot answer, then `| # | Question | Why it matters |`, numbered `Q1…`. Every hard-coded number of unknown origin, every unhandled case — asked about the **rule**, not the code. **An inferred purpose appears here and nowhere else**: the body states what happens, never "appears to exist so that".
+- **`## About this document`** — one per line, in this order: `**Id:**` (the `AREA-nnn`; a feature guide has none), `**Created:**`, `**Last updated:**` (once the guide has been updated), `**Owned by:**` (`dev:doc-business-model`), `**Derived from:**` (`code by be-documenter @ \`<commit sha>\` on YYYY-MM-DD`), `**Audience:** shareable`, `**Screenshots:**` (`captured from <environment name, never its address> on YYYY-MM-DD`), `**Models:**` (the FLOW/ENT/DEC links). A feature guide carries `**Generated by \`be-feature-documenter\` @ <commit> on <date>**` instead of `Owned by` / `Derived from`.
 
-**Ids.** `AREA-`, `FLOW-`, `ENT-`, `DEC-`, `EVT-`, `RX-`, `INV-` ids appear in Level 1 only inside `## About this document`; `Q<n>` only in the first column of the open-questions table. The KB keeps every id — `INDEX.md`, Level 3 and the models carry them.
+**Ids.** `AREA-`, `FLOW-`, `ENT-`, `DEC-`, `EVT-`, `RX-`, `INV-` ids appear only inside `## About this document`; `Q<n>` only in the first column of the open-questions table. The KB keeps every id — `INDEX.md` and the models carry them.
 
-**Length.** Under about 2,500 words, counted outside fenced blocks and `## About this document`. When a guide is over, detail moves out in this order until it fits: (1) an outcome the person does not notice → Level 2; (2) a rule nobody meets in a task → Level 3's *Configuration*; (3) a *Good to know* entry → the task it is closest to, as one sentence, or Level 2; (4) example lines beyond the one that shows the rule → `## A <period> in numbers`, or Level 3. Nothing is dropped; it moves down a level. Facts are never trimmed to pass.
+**Length.** Under about 2,500 words, counted outside fenced blocks and `## About this document`. When a guide is over, cut in this order until it fits: (1) an outcome the person does not notice; (2) a rule nobody meets in a task, unless an administrator changes it; (3) a *Good to know* entry → the task it is closest to, as one sentence; (4) example lines beyond the one that shows the rule → `## A <period> in numbers`. A guide still over splits by person: the administrators' tasks become their own guide, linked from *Related areas*. A fact a person meets in a task is never trimmed to pass.
 
 ---
 
-## Language discipline — by level
+## Screenshots
 
-The same fact, three ways:
+A screenshot shows a person where they are and what they are looking at. It replaces a paragraph of "on the left, below the summary…"; it never replaces the steps.
 
-| Level 3 (technical) | Level 2 (behind the scenes) | Level 1 (guide) |
-|---|---|---|
-| `POST /bookings/{id}/cancel` → 409 when `status != Pending` | The booking service refuses the cancellation and the page shows a message | You can only cancel an order that has not yet shipped |
-| unique index `(tenant_id, order_number)` | The order number is checked for clashes when the order is saved | Order numbers are unique within an organisation |
-| `BookingConfirmed` via outbox after commit; consumer gets 3 attempts in all, then dead-lettered | Once the booking is saved, the pricing step is told in the background; if it fails it is tried three times in all and then set aside | Your credits are worked out after the booking is confirmed |
-| F1: no idempotency key — redelivery double-prices | The same message can arrive twice, and the booking is then priced twice | — (not a client-facing rule) |
-| `Math.Ceiling(qty * price * rate * 100) / 100` | — (Level 2 links to Level 1) | SEC fee = ROUNDUP(Qty × Fill price × SEC rate, 2) |
+**Where they come from: the running product, captured by you.** Before writing, the run has the address of a running, **non-production** environment and a test login for every person in *Who uses it* that has a screen — administrators included. Without them the run **stops and asks**; it never captures from production, a design file, a mock-up or the code. Only the person can waive screenshots (for example, the screens live in a product nobody can run); a waived guide records `**Screenshots:** waived — <the person's reason>` in *About this document* and holds none. Logins are used in the browser and nowhere else: never written into a guide, the orientation cache, a plan, a trace or the report.
 
-Banned in **Level 1** (and in Level 2, beyond its allowed everyday words): class, method, table and column names, file names, status codes, exception types, framework nouns, inline code, jargon such as *endpoint, payload, handler, middleware, idempotent, eventual consistency*, tier tags, `file:line`, the defect words of discipline 6, and — in Level 1 — internal ids (`AREA-`, `FLOW-`, `ENT-`, `DEC-`, `EVT-`, `RX-`, `INV-`, and `Q<n>` outside the open-questions table's first column) anywhere but `## About this document`. **Bold in Level 1 is only a screen label** as the screen shows it, never emphasis. A word that needs a definition is replaced, not defined. A client's own technical-sounding word ("API keys", "claims handler") stays only when it is listed in the first column of Level 3's *Business ↔ code vocabulary*.
+**How many — few.**
 
-**Guarantee words** — *exactly once, at most one / once, immediately, instantly, as soon as, in real time, right away* — are lint warnings in Levels 1–2: a timing or delivery guarantee is written only when the code shows it and it has an evidence-index row; otherwise reword or ask. **Roadmap promises** — "Not yet.", "coming soon", "in a future version" — are the same kind of claim: no code shows them, so Level 1 never writes them.
+- **At most one per task**, and only for a task with a `**Where:**` line. Never one per step, never one of automatic work, never one in *Rules and limits*, *Good to know* or the overview.
+- **Pick the tasks where the picture saves the most words**: the first time a person meets a screen, a form with several fields, a busy administration screen, a path with three or more arrows. Skip a task whose screen an earlier screenshot in the guide already shows.
+- **Six per guide at most** (lint WARN beyond); a guide whose tasks have screens has at least one (lint ERROR when none and not waived).
 
-## Glossary
+**What it shows.**
+
+- The task's screen in the state the task describes, with the control from the `**Where:**` line visible. When the task has an `**Example**`, the screen shows the example's values (Ana, the Basic plan, £6.00) so the picture and the text agree.
+- Desktop viewport, 1280 × 800, the visible window only — not a full-page scroll. Crop to one region (a dialog, a form) when the rest of the screen is noise.
+- **Test data only.** No real person's name, email or payment detail, no secret, key or token, no internal address. If a screen cannot be shown without one, choose another record or ask.
+- Every bold label the task's steps name is visible on it and spelled the same. When the running screen's label differs from the code's text, the screen wins and the difference is an open question.
+
+**How it is written and filed.**
+
+- Right under the `**Where:**` line: `![<what the screen shows, one sentence in the client's words>](screenshots/<guide-name>/<task-slug>.png)`. The alt text is mandatory — it is what a screen reader and a reader without images get.
+- The file sits beside the guide at that relative path: `areas/screenshots/<area>/`, `docs/features/screenshots/<NNN>-<slug>/`. `<task-slug>` is the task heading in kebab case. PNG.
+- Capture with the browser tools the agent grants (`browser_navigate`, sign in, act, then `browser_take_screenshot`), and move the file into place when the tool saved it elsewhere.
+- Screenshots are committed with the guide — they are part of it. On an update, a task whose screen or steps changed is captured again; a screenshot whose task is gone is deleted.
+
+---
+
+## Language discipline
+
+The same fact, as the code says it and as the guide says it:
+
+| In the code | In the guide |
+|---|---|
+| `POST /bookings/{id}/cancel` → 409 when `status != Pending` | You can only cancel an order that has not yet shipped |
+| unique index `(tenant_id, order_number)` | Order numbers are unique within an organisation |
+| `BookingConfirmed` via outbox after commit | Your credits are worked out after the booking is confirmed |
+| `Math.Ceiling(qty * price * rate * 100) / 100` | SEC fee = ROUNDUP(Qty × Fill price × SEC rate, 2) |
+| `[Authorize(Roles = "Admin")]` on `PUT /plans/{id}` | Only administrators can change a plan |
+
+Banned in the guide: class, method, table and column names, file names, status codes, exception types, framework nouns, inline code, jargon such as *endpoint, payload, handler, middleware, idempotent, eventual consistency*, tier tags, `file:line`, the judging words of discipline 6, and internal ids (`AREA-`, `FLOW-`, `ENT-`, `DEC-`, `EVT-`, `RX-`, `INV-`, and `Q<n>` outside the open-questions table's first column) anywhere but `## About this document`. **Bold is only a screen label** as the screen shows it, never emphasis. A word that needs a definition is replaced, not defined. A client's own technical-sounding word ("API keys", "claims handler") stays when the product itself shows it — as a bold label, or a key idea.
+
+**Guarantee words** — *exactly once, at most one / once, immediately, instantly, as soon as, in real time, right away* — are lint warnings: a timing or delivery guarantee is written only when the code shows it; otherwise reword or ask. **Roadmap promises** — "Not yet.", "coming soon", "in a future version" — are the same kind of claim: no code shows them, so the guide never writes them.
+
+## Glossary (KB runs)
 
 Every domain term found, with its business meaning and the **mapping between the vocabularies** — the client's own term (from the trace's `Client vocabulary` table), what it means, and what the code calls it:
 
@@ -201,24 +209,23 @@ Every domain term found, with its business meaning and the **mapping between the
 | Order | A confirmed purchase, from placement to delivery | `Order`, `PurchaseOrder` (legacy) | order confirmation email | Two names for one concept `#observed` |
 | Account | The billing relationship, not the login | `Customer` | invoice header | **Drift:** "customer" means the *person* in Identity, the *billing entity* in Billing `#observed` |
 
-**Terminology drift is a finding, not a merge** — record both, flag it, and let `business-analyst` resolve it. Level 2's plain part names are in the glossary too.
+**Terminology drift is a finding, not a merge** — record both, flag it, and let `business-analyst` resolve it.
 
-## Reconcile procedure (every run that finds an existing set)
+## Reconcile procedure (every run that finds an existing guide)
 
-1. **Check staleness per file.** Read each existing file's `Derived from` sha, compare it with `HEAD` and the git delta for the area's paths, and report which of the three levels are stale. If any one is stale, all three are reconciled together.
-2. **An old-shape set is updated in place.** A set whose guide has `## How it works` and no `## Who uses it` (an overview: `## The areas` and no `## Who uses it`) is **updated, file by file, into the current shape — never deleted and regenerated, never rewritten from a fresh trace and compared**. Existing documentation is only ever updated:
-   1. **Same files, same history.** The three files are edited. `Created` is kept, a `Last updated` line is added, every `#confirmed` statement and every evidence-index row stays, and `~~old~~ → new` marks every changed fact.
-   2. **Move, don't rewrite.** Each existing statement goes under its new section: a flow to the `### <task>` under the `## For <person>` it belongs to; a system check the person does not notice to Level 2; Setup to `## Rules and limits`; How it connects to `## Related areas`; Who can do what to `## Who uses it`; the end example to the task it illustrates, or `## A <period> in numbers`; inline ids to `## About this document`; inferred purposes to `## Open questions`. Wording changes only where the shape demands it (second person; a step becomes the person's action). Over the length cap, detail moves down a level in the order the Level 1 section gives; nothing is dropped.
-   3. **Add only what the shape needs and the old trace lacks** — the `Who uses it` table, key ideas, `**Where:**` paths and labels, the diagram, callouts — from a **targeted** lookup (the UI routes and labels per `feature-trace`'s recipes, the trace's states), not a full re-trace. Where it finds no screen, the task takes the no-screen form.
-   4. **Re-trace only the code delta** — `git diff <Derived from sha>..HEAD` over the area's paths, as step 1 reads it. No delta, no re-trace.
-   5. **Re-cite the evidence index, do not rebuild it:** each row keeps its evidence and takes the new `<Task> · step N` or `· outcome N`.
-   6. **Check it, do not trust it.** Close the update with `doc-lint.py --kept-from <the set's old sha, or the commit before the update> --dir <folder>`: every `fact-kept` WARN is a number or quoted message the old guide or Level 2 had and no level has now — restore it, or name in the report the code change that removed it. The `INDEX.md` line of the set is edited into its shape in the same update.
-3. **Re-trace first.** The existing documents are a lead; the code is the evidence. (For an old-shape set, only the delta — step 2.4.)
-4. **Verdict every statement**: **Agrees** · **New** · **Gone** · **Contradicts**.
-5. **Update, don't rewrite** — `~~old~~ → new` keeps one generation of history inline and marks a changed **fact**; moving a statement to its new section is a layout move and is never struck through. Re-check the guide's diagram whenever a state or a transition changed (it is the one derived picture: its arrows are the guide's tasks, and it agrees with the `ENT-nnn` grid). Re-run the example's arithmetic whenever a number it uses changed; re-check Level 2's timing and failure statements; re-verify every `file:line` at the current commit and every evidence-index `Flow · step N` citation against the renumbered steps.
-6. **`Gone` needs care.** Say whether the feature was removed or your trace did not find it; never delete a `#confirmed` statement on the strength of a failed search.
-7. **`Contradicts` escalates.** Present the documented statement, the code evidence, and both readings — *stale documentation* vs *code defect*. Never silently pick one.
-8. **Re-stamp all three files** with the same sha and a `Last updated` line, and log the session in `active-context.md`. A REFRESH that deliberately re-traced only part of a set says so in the report.
+1. **Check staleness.** Read the guide's `Derived from` (or `Generated by`) sha, compare it with `HEAD` and the git delta for the area's paths, and report whether it is stale.
+2. **Existing documentation is updated in place — never deleted and regenerated, never rewritten from a fresh trace and compared.**
+   1. **Same file, same history.** The guide is edited. `Created` is kept, a `Last updated` line is added, and `~~old~~ → new` marks every changed fact.
+   2. **An old-shape guide** (`## How it works` and no `## Who uses it`; an overview with `## The areas`) moves each statement under its new section: a flow to the `### <task>` under the `## For <person>` it belongs to; a system check the person does not notice is dropped; Setup to `## Rules and limits`; How it connects to `## Related areas`; Who can do what to `## Who uses it`; the end example to the task it illustrates, or `## A <period> in numbers`; inline ids to `## About this document`; inferred purposes to `## Open questions`. Wording changes only where the shape demands it.
+   3. **Retired levels.** A `<name>.behind-the-scenes.md` or `<name>.technical*.md` beside the guide is from the three-level shape: read it as a lead for the update (a person or a screen it names that the guide lacks), then delete it — git keeps its history. The lint's `retired-level` WARN lists every one left.
+   4. **Add only what the shape needs** — the `Who uses it` table (every role, administrators included), key ideas, `**Where:**` paths and labels, the diagram, callouts, screenshots — from a **targeted** lookup (the UI routes and labels per `feature-trace`'s recipes, the running screen), not a full re-trace.
+   5. **Re-trace only the code delta** — `git diff <sha>..HEAD` over the area's paths. No delta, no re-trace.
+   6. **Check it, do not trust it.** Close the update with `doc-lint.py --kept-from <the guide's old sha, or the commit before the update> --dir <folder>`: every `fact-kept` WARN is a number or quoted message the old guide had and the new one has not — restore it, or name in the report the code change that removed it. The `INDEX.md` line is edited into its shape in the same update.
+3. **Verdict every statement** against the re-trace: **Agrees** · **New** · **Gone** · **Contradicts**.
+4. **Update, don't rewrite** — `~~old~~ → new` keeps one generation of history inline and marks a changed **fact**; moving a statement to its new section is a layout move and is never struck through. Re-check the diagram whenever a state or a transition changed; re-run the example's arithmetic whenever a number it uses changed; re-capture the screenshot of every task whose screen or steps changed.
+5. **`Gone` needs care.** Say whether the feature was removed or your trace did not find it; never delete a `#confirmed` KB statement on the strength of a failed search.
+6. **`Contradicts` escalates.** Present the documented statement, the code's behaviour, and both readings — *stale documentation* vs *code defect*. Never silently pick one.
+7. **Re-stamp** the guide with the new sha and a `Last updated` line, and log the session in `active-context.md` (KB runs).
 
 ## Self-check before handing off
 
@@ -226,37 +233,38 @@ Every domain term found, with its business meaning and the **mapping between the
 
 Then only what the lint cannot check:
 
-2. Every area from the confirmed map has its set, or is in "What is not documented" with a reason. **An `old-shape` WARN means that set is not done**: it is updated in place (reconcile step 2), never left as a passing lint. An in-place update closes with a `--kept-from` run, every `fact-kept` WARN restored or explained in the report.
-3. **The worked example's arithmetic is recomputed** and every number in it equals Level 3's.
-4. Every qualifying statement of Levels 1–2 has an evidence-index row — spot-check five.
-5. **The three levels agree** — cross-check five facts that appear at more than one level (a threshold, a retry count, a trigger, a name mapping, an actor).
-6. The client's terms and the exact refusal messages are used.
-7. `INDEX.md`, `active-context.md` and the glossary are updated.
-8. Nothing unreachable is documented as a capability.
+2. Every area from the confirmed map has its guide, or is in "What is not documented" with a reason. **An `old-shape` or `retired-level` WARN means that guide is not done.**
+3. **Every role is there.** Each role the trace found acting in the area — administrators included — is in *Who uses it* and has its `## For <role>` section.
+4. **The worked example's arithmetic is recomputed** and every number it uses as a rule is the code's exact value.
+5. **Five statements spot-checked against the code** at random (a threshold, a refusal message, a step, an outcome, a who-can-do-it); one wrong means re-checking its whole task.
+6. **Every screenshot looked at** once more: it is this task's screen, its labels match the steps, its data is test data, and nothing secret shows.
+7. The client's terms and the exact refusal messages are used.
+8. `INDEX.md`, `active-context.md` and the glossary are updated (KB runs).
+9. Nothing unreachable is documented as a capability.
 
 ## Sharing a guide
 
-A client reads a page, not a markdown file. `render-html.py` turns guides into standalone pages — a table of contents, styled alerts, tables, the diagram drawn — and never writes into the KB:
+A client reads a page, not a markdown file. `render-html.py` turns guides into standalone pages — a table of contents, styled alerts, tables, the screenshots embedded, the diagram drawn — and never writes into the KB:
 
 ```bash
 uv run ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/render-html.py --out <dir> --dir docs/business-model
 uv run ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/render-html.py --out <dir> docs/features/<NNN>-<slug>.md
 ```
 
-- **Rendered on demand, never committed.** Markdown stays the only source; a committed page drifts the first time the markdown is edited. Render again after every update and send the new files.
-- `--dir` renders every file under it marked `**Audience:** shareable` (the guides and `system-overview.md`); a named file is rendered as given, a Level 2 file only that way, with "Internal — not for sharing" under its title.
-- **The page carries nothing internal:** the About section becomes "Last updated <date>"; a `~~old~~ → new` mark shows only `new`; links to Level 2 and Level 3 files show their text; links to other guides point to the matching `.html` file, so send a set's pages together.
-- **Offline, the reader loses the picture.** The only request a page makes is the pinned Mermaid script; without it the diagram shows as "This diagram needs an internet connection" and every arrow is still a task in the text.
+- **Rendered on demand, never committed.** Markdown and its screenshots stay the only source. Render again after every update and send the new files.
+- `--dir` renders every guide under it marked `**Audience:** shareable`; a named file is rendered as given.
+- **One file per guide.** Screenshots are embedded in the page, so it can be sent on its own.
+- **The page carries nothing internal:** the About section becomes "Last updated <date>"; a `~~old~~ → new` mark shows only `new`; links to other guides point to the matching `.html` file, so send a set's pages together.
+- **Offline, the reader loses the diagram only.** The only request a page makes is the pinned Mermaid script; without it the diagram shows as "This diagram needs an internet connection" and every arrow is still a task in the text.
 
 ## Handoffs
 
 - **→ `business-analyst`** — the open questions, the terminology drift, and any contradiction between two areas' rules. It resolves conflicts and records precedence; you never invent it.
-- **→ `requirements-author`** — turns confirmed Level 1 documentation into epics and stories once the open questions are answered.
-- **→ `qa-test-case-designer`** — Level 1's flows, formulas and worked example are a test basis; Level 3's rules, errors and refused transitions are the negative-test matrix.
-- **→ `solution-planner`** — the area map and Level 3 are the inputs to an EXTEND run.
-- **→ `code-auditor`** — Level 3's Findings.
-- **→ any `be-<stack>` agent or AI assistant about to change the code** — start from Level 3's *Quick facts* and *Code map*; read *Changing this safely* before editing.
+- **→ `requirements-author`** — turns confirmed guides into epics and stories once the open questions are answered.
+- **→ `qa-test-case-designer`** — the guide's tasks, refusals, formulas and worked examples are a test basis.
+- **→ `solution-planner`** — the area map and the KB models are the inputs to an EXTEND run.
+- **→ `code-auditor`** — the defects the trace found, from the run's report.
 
 ## Version policy
 
-Version-agnostic — this skill writes prose, not code. The one version-sensitive input is the **evidence**: `file:line` references are valid only against the commit in each file's `Derived from` stamp. On a refresh, re-verify every citation against the current commit rather than carrying it forward; a citation that has silently drifted to a different line is worse than no citation.
+Version-agnostic — this skill writes prose, not code. The guide is valid against the commit in its `Derived from` stamp and the screenshots against the capture date in *About this document*; on a refresh, re-check both rather than carrying them forward.

@@ -5,7 +5,7 @@ description: Use when one area of an existing backend must be traced in depth in
 
 # Feature Trace — recovering behavior from code
 
-Depth, one area at a time. The output is **structured evidence**, not prose: nine inventories, every item with its `file:line`, ready for `dev:doc-business-model` to turn into three documents. One trace serves all three readers: the guide needs rules and formulas, behind-the-scenes the Edges, the technical reference everything with exact names, paths and contracts. A second trace per reader is waste.
+Depth, one area at a time. The output is **structured evidence**, not prose: nine inventories, every item with its `file:line`, ready for `dev:doc-business-model` to turn into a user guide — who can do what, in what steps, under which rules — and for the KB models. The guide needs the actors and their permissions, the rules and formulas, the client's words and the refusal texts; the models need the rest.
 
 The discipline: **separate what the code does from what you think it means.** Every extracted item is `#observed` with a `file:line` read this session. Intent is a separate, marked layer; where it is not recoverable, the honest output is the behavior plus a question.
 
@@ -95,7 +95,7 @@ Where this area touches another, one hop out. For every emitted event, message, 
 - **A mode or guarantee the code does not show is `?`.** A library name proves nothing: at-least-once only where a retry, redelivery or missing acknowledgement is visible in code or configuration.
 - **A negative claim names its search**: "no consumer of `BookingCancelled` — searched `BookingCancelled`, `booking.cancelled` under `src/`".
 - Stop at one hop; the consumer's own events are its row when its area is traced.
-- **Also record, for behind-the-scenes:** what is inside the transaction and what runs after commit; the retry count and what follows the last retry; any idempotency key, lock or version column guarding the write; a reaction's delay where the code shows a delay, schedule or poll interval. Anything not shown is `?`.
+- **Also record, for the models and for what a person notices:** what runs after commit; the retry count and what follows the last retry; a reaction's delay where the code shows a delay, schedule or poll interval. Anything not shown is `?`.
 
 ### 8. Configuration & switches
 Every configuration key, option class, environment variable name, feature flag and behaviour-changing constant: where defined, default, effect, whether it varies per environment or tenant. **Names only — never a secret's value.** A constant that looks like it should be configurable (cut-off, rate, window) is recorded with its number and is an open question. "None — searched …" is recorded.
@@ -195,8 +195,8 @@ You are tracing, not auditing; handle what you find like this and keep moving:
 - **→ `business-analysis:state-grid`** — inventory 4 becomes `ENT-nnn` state × event grids; refused transitions are its meaningful `—` cells.
 - **→ `business-analysis:decision-table`** — inventory 5 becomes `DEC-nnn` tables with a declared hit policy; completeness exposes the combinations the code never handles.
 - **→ `business-analysis:dependency-map`** — Edges become `events.md`, `shared-data.md`, `invariants.md`; `be-documenter` writes them, `be-feature-documenter` does not.
-- **→ `dev:doc-business-model`** — the three documents: capabilities, rules and decisions the guide (client vocabulary, exact refusal text); Edges the guide's *Related areas* and all of *Behind the scenes*; every inventory, with exact names, the technical reference.
-- **→ `code-auditor`** — the findings list; it lands in the technical reference's Findings, never in the plain-language levels.
+- **→ `dev:doc-business-model`** — the guide: capabilities by actor (every role, administrators included), rules and decisions, client vocabulary with its screen paths, exact refusal text; Edges become the guide's *Related areas*.
+- **→ `code-auditor`** — the findings list, through the run's report; it never lands in the guide.
 - **→ `qa-test-case-designer`** — rules and validations are a test basis; thresholds are BVA seeds.
 
 ## Version policy

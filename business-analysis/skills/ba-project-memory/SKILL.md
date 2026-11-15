@@ -31,10 +31,8 @@ docs/business-model/
 ├── INDEX.md              # loaded first, every session — one line per artifact + relevance hook
 ├── glossary.md           # canonical terms; the terminology-drift defense
 ├── system-overview.md    # what the system is, for whom, the area map + cross-area journeys — plain-language guide, owned by dev:doc-business-model
-├── system-overview.behind-the-scenes.md / .technical.md   # the same at two deeper levels — owned by dev:doc-business-model
-├── areas/<area>.md       # one functional area per file (AREA-nnn), the plain-language guide: overview, setup, how it works, worked example, open questions — owned by dev:doc-business-model
-├── areas/<area>.behind-the-scenes.md   # the same area, plain language: how the parts connect, timing, failures
-├── areas/<area>.technical.md           # the same area for developers and AI: code names, contracts, data, closing evidence index
+├── areas/<area>.md       # one functional area per file (AREA-nnn), the user guide: who uses it (administrators included), each person's tasks, worked examples, open questions — owned by dev:doc-business-model
+├── areas/screenshots/<area>/   # the guide's few screenshots, captured from the running product
 ├── flows/<flow>.md       # one business flow per file (FLOW-nnn) — owned by business-analysis:process-flow
 ├── entities/<entity>.md  # one state model per business entity (ENT-nnn) — owned by business-analysis:state-grid
 ├── decisions/<point>.md  # one merged decision table per shared decision point (DEC-nnn) — owned by business-analysis:decision-table
@@ -83,7 +81,7 @@ The standards every KB file must meet (what the KB holds, ids and traceability, 
 Read this file first, every session. One line per artifact; read the ones your task touches.
 
 ## Areas
-- [Ordering](areas/ordering.md) — AREA-003 · customers, support agents · Place, change, cancel and track an order · [behind the scenes](areas/ordering.behind-the-scenes.md) · [technical](areas/ordering.technical.md) · @ `4f2a91c`
+- [Ordering](areas/ordering.md) — AREA-003 · customers, support agents · Place, change, cancel and track an order · @ `4f2a91c`
 ## Entities
 - [Order](entities/order.md) — ENT-001; lifecycle Draft→…→Refunded; owners: checkout, fulfillment, refunds
 ## Flows
@@ -101,7 +99,7 @@ Read this file first, every session. One line per artifact; read the ones your t
 - [Active context](active-context.md) — last touched 2026-07-12; 3 open questions
 ```
 
-An area line has this shape and no other: `- [<Area name>](areas/<name>.md) — AREA-nnn · <who, comma-separated> · <what a person does there, at most 20 words> · [behind the scenes](…) · [technical](…) · @ \`<sha>\``; `dev:doc-business-model`'s lint (`index-line`) checks it. The description is the area's row in the system overview's *Areas, by who uses them*. A line in the older style is edited into the shape in place, together with its set when that set is updated, never regenerated; entity, flow and decision lines keep their shape.
+An area line has this shape and no other: `- [<Area name>](areas/<name>.md) — AREA-nnn · <who, comma-separated> · <what a person does there, at most 20 words> · @ \`<sha>\``; `dev:doc-business-model`'s lint (`index-line`) checks it. The description is the area's row in the system overview's *Areas, by who uses them*. A line in the older style is edited into the shape in place, together with its guide when that guide is updated, never regenerated; entity, flow and decision lines keep their shape.
 
 ## Feature slice
 
@@ -129,7 +127,7 @@ When no `docs/business-model/` exists and the user wants one:
 3. Do **not** backfill the whole model speculatively. The KB accretes as features are analyzed; seed it only with what the current task's analysis actually produces.
 4. Offer `/business-analysis:rules`, so the KB's standards load in every later session that edits it.
 
-**The one exception — evidence-based backfill from code.** The `be-documenter` agent deliberately populates the KB in bulk by reading an existing implementation. That does not violate the rule above, because the rule forbids *speculation*, not *volume*: every statement it writes is `#observed` with a `file:line` read that session, or `#inferred` and simultaneously raised as an open question. In `areas/` those tags and citations sit in the **evidence index of the area's `.technical.md`** rather than inline — the guide reads as a product spec (overview · setup · how it works · worked example · open questions) and the behind-the-scenes file as plain-language connections — but the tag per statement is still mandatory there. It never writes `#confirmed` — promotion is a human act — and it never overwrites a `#confirmed` entry, since a human's confirmation outranks a trace. See `backend/_shared/business-documentation`.
+**The one exception — evidence-based backfill from code.** The `be-documenter` agent deliberately populates the KB in bulk by reading an existing implementation. That does not violate the rule above, because the rule forbids *speculation*, not *volume*: every model row it writes (`flows/`, `entities/`, `decisions/`, the dependency map) is `#observed` with a `file:line` read that session, or `#inferred` and simultaneously raised as an open question. The area guides carry no tags: they are user documentation — who uses the area, each person's tasks, worked examples — and every inferred purpose in them is an open question. It never writes `#confirmed` — promotion is a human act — and it never overwrites a `#confirmed` entry, since a human's confirmation outranks a trace. See `backend/_shared/business-documentation`.
 
 ## Provenance — telling generated from hand-authored
 

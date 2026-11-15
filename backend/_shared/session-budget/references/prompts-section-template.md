@@ -336,13 +336,17 @@ Read, in this order:
 
 Deliverable: <copied verbatim from the task block — it names the documents>.
 
+Screens: the guides' screenshots come from <the environment, by name>; its address and the test logins
+per role are <where the person keeps them — never their values>. If you do not have them, ask before tracing.
+
 Build:
 - Re-trace <AREA ids | the features> over the files `git diff --stat <the plan's first commit>..HEAD` lists.
-- Update each existing document in place; write the set for an area or feature that has none.
+- Update each existing guide in place; write the guide for an area or feature that has none. Every role,
+  administrators included, has its section; re-capture the screenshot of every task whose screen changed.
 - <the task's own bullets, copied>
 
-Out of scope: any change to source, tests or configuration — a defect the trace finds goes in the
-document's findings and in your report. Documenting what the plan intended and did not build.
+Out of scope: any change to source, tests or configuration — a defect the trace finds goes in your
+report, never into a guide. Documenting what the plan intended and did not build.
 
 Traps:
 - The plan is not the evidence. Where an `As built` note and the code disagree, the code wins and the

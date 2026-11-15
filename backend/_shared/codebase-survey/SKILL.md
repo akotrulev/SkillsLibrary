@@ -23,7 +23,7 @@ It also produces the thing that keeps the whole exercise honest: a **coverage le
 
 ## Output
 
-The area map and reading plan. On a `be-documenter` run they are presented for confirmation and then recorded in the KB's `system-overview.md` (per `business-analysis:knowledge-base`) — the full per-surface coverage ledger included, as that file's Coverage appendix, so the KB can back its own coverage claim. In a run of more than one session they live in the plan's §2 until its last task writes the system overview. The orientation cache holds only the surface **counts** and the parked list; a 120-controller ledger belongs in the KB, not in a file meant to orient a run in one read.
+The area map and reading plan. On a `be-documenter` run they are presented for confirmation and then recorded in the KB's `system-overview.md` (per `business-analysis:knowledge-base`): each area under the people who use it, every parked surface under *What is not documented* with its reason. The per-surface coverage ledger is working material: it lives in the session, or in the plan's §2 in a run of more than one session, until the last task has checked every surface against an area or the parked list. The orientation cache holds only the surface **counts** and the parked list; a 120-controller ledger belongs in the KB, not in a file meant to orient a run in one read.
 
 ---
 
@@ -113,7 +113,7 @@ Then, per area, state the plan:
 
 Ordering (≈ 4,500 lines) alone estimates 164k, over the cap, so it is split by sub-flow before it is scheduled.
 
-**Estimate each session's cost** with the rule of thumb `85,000 fixed (harness, skills, references, rule file, working overhead — once per session) + per area in it: traced source lines × 12 + 25,000 (its three documents, written and re-read)` (traced lines: the files the area's entry points reach, counted with `wc -l`), and **schedule areas so each session stays ≤ 135k tokens** — the session budget is 150k, and the margin is for reading output back. An area whose own estimate exceeds 135k (more than about 2,000 traced lines) is split before it is scheduled; in practice most areas are one session each. When the orientation cache records a real run's actual figure, estimate from it instead.
+**Estimate each session's cost** with the rule of thumb `85,000 fixed (harness, skills, references, rule file, working overhead — once per session) + per area in it: traced source lines × 12 + 25,000 (its guide written and re-read, and its screenshots captured)` (traced lines: the files the area's entry points reach, counted with `wc -l`), and **schedule areas so each session stays ≤ 135k tokens** — the session budget is 150k, and the margin is for reading output back. An area whose own estimate exceeds 135k (more than about 2,000 traced lines) is split before it is scheduled; in practice most areas are one session each. When the orientation cache records a real run's actual figure, estimate from it instead.
 
 **Depth is a real choice.** `full` (every rule, every branch, every failure path) for areas where the business logic lives; `shallow` (capabilities and actors only) for pass-through, read-only, or CRUD-only areas. Documenting a read-only reporting area to the same depth as a pricing engine wastes the run's budget on the part with the fewest rules.
 

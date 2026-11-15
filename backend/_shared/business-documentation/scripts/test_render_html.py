@@ -1,3 +1,4 @@
+import base64
 import contextlib
 import importlib.util
 import io
@@ -93,13 +94,6 @@ class LinkTests(unittest.TestCase):
         self.assertIn('<a href="bookings.html">Bookings</a>', html)
         self.assertIn('<a href="plans.html#rules">Plans</a>', html)
 
-    def test_Should_ShowOnlyText_When_LinkTargetsLevel2OrLevel3(self):
-        for target in ("a.behind-the-scenes.md", "a.technical.md", "a.technical.rules.md#x"):
-            with self.subTest(target=target):
-                html = page(f"# T\n\nRead [the details]({target}) now.\n")
-                self.assertIn("Read the details now.", html)
-                self.assertNotIn(target, html)
-
     def test_Should_ShowOnlyText_When_RelativeLinkIsNotAGuide(self):
         html = page("# T\n\nSee [the diagram](../img/flow.png).\n")
         self.assertIn("See the diagram.", html)
@@ -112,7 +106,7 @@ class LinkTests(unittest.TestCase):
         self.assertIn('<a href="mailto:a@b.co">mail</a>', html)
 
     def test_Should_RewriteLinksInsideTables_When_CellHoldsALink(self):
-        html = page("# T\n\n| A |\n|---|\n| [x](x.md) · [y](y.technical.md) |\n")
+        html = page("# T\n\n| A |\n|---|\n| [x](x.md) · [y](y.png) |\n")
         self.assertIn('<td><a href="x.html">x</a> · y</td>', html)
 
 
@@ -161,17 +155,46 @@ class ClientPageTests(unittest.TestCase):
         self.assertNotIn("Levels", body)
         self.assertNotIn("Audience", body)
 
-    def test_Should_SayInternalUnderTheTitle_When_AudienceIsInternal(self):
-        html = page("# Behind\n\n**Levels:** [Guide](a.md)\n\n**Audience:** internal\n\nBody.\n")
-        self.assertIn("</h1>\n<p class=\"internal-banner\">Internal — not for sharing</p>", html)
 
-    def test_Should_NotSayInternal_When_AudienceIsShareable(self):
-        html = page("# T\n\n**Audience:** shareable\n\nBody.\n")
-        self.assertNotIn('class="internal-banner"', html.split("</style>")[1])
 
-    def test_Should_PutBannerFirst_When_InternalFileHasNoTitle(self):
-        html = page("**Audience:** internal\n\nBody.\n")
-        self.assertIn('<article>\n<p class="internal-banner">', html)
+class ScreenshotTests(unittest.TestCase):
+    PNG = b"\x89PNG\r\n\x1a\nfake"
+
+    def setUp(self):
+        self.scratch = tempfile.TemporaryDirectory()
+        self.addCleanup(self.scratch.cleanup)
+        self.folder = Path(self.scratch.name)
+        (self.folder / "screenshots").mkdir()
+        (self.folder / "screenshots" / "plans.png").write_bytes(self.PNG)
+
+    def render(self, markdown: str) -> str:
+        return render_html.render_page(markdown, "guide", self.folder)
+
+    def test_Should_EmbedTheFile_When_ScreenshotExistsBesideTheGuide(self):
+        html = self.render("# T\n\n![The plans screen](screenshots/plans.png)\n")
+        self.assertIn(f'src="data:image/png;base64,{base64.b64encode(self.PNG).decode()}"', html)
+
+    def test_Should_KeepAltText_When_ScreenshotIsEmbedded(self):
+        html = self.render("# T\n\n![The plans screen](screenshots/plans.png)\n")
+        self.assertIn('alt="The plans screen"', html)
+
+    def test_Should_LeavePathAsWritten_When_ScreenshotIsMissing(self):
+        html = self.render("# T\n\n![Gone](screenshots/gone.png)\n")
+        self.assertIn('src="screenshots/gone.png"', html)
+
+    def test_Should_LeavePathAsWritten_When_ImageIsRemote(self):
+        html = self.render("# T\n\n![Logo](https://example.com/logo.png)\n")
+        self.assertIn('src="https://example.com/logo.png"', html)
+
+    def test_Should_LeavePathAsWritten_When_FileIsNotAnImageType(self):
+        (self.folder / "notes.txt").write_text("x", encoding="utf-8")
+        html = self.render("# T\n\n![Notes](notes.txt)\n")
+        self.assertIn('src="notes.txt"', html)
+
+    def test_Should_EmbedTheGoldenExampleScreenshot_When_ItIsRenderedFromItsFolder(self):
+        source = (REFERENCES / "example-area.md").read_text(encoding="utf-8")
+        html = render_html.render_page(source, "example-area", REFERENCES)
+        self.assertIn('src="data:image/png;base64,', html)
 
 
 class PageStructureTests(unittest.TestCase):
@@ -213,7 +236,7 @@ class PageStructureTests(unittest.TestCase):
         self.assertIn('class="alert alert-warning"', html)
         self.assertIn('<pre class="mermaid">', html)
         self.assertIn("Last updated 2026-08-02", html)
-        for internal in ("AREA-004", "a3f9c21", "FLOW-004", "credits-and-charges.technical.md"):
+        for internal in ("AREA-004", "a3f9c21", "FLOW-004", "staging environment"):
             with self.subTest(internal=internal):
                 self.assertNotIn(internal, html)
 
@@ -234,7 +257,7 @@ class MainTests(unittest.TestCase):
 
     def test_Should_RenderOnlyShareableGuides_When_DirIsGiven(self):
         self.write("areas/credits.md", "# Credits\n\n**Audience:** shareable\n")
-        self.write("areas/credits.technical.md", "# Tech\n\n**Audience:** internal\n")
+        self.write("areas/credits.draft.md", "# Draft\n\n**Audience:** internal\n")
         self.write("INDEX.md", "# Index\n")
         code, printed = run_main("--out", str(self.out), "--dir", str(self.source))
         self.assertEqual(0, code)
@@ -242,11 +265,16 @@ class MainTests(unittest.TestCase):
         self.assertEqual(str(self.out / "credits.html"), printed.strip())
 
     def test_Should_RenderAFileAsGiven_When_ItIsNamedWhateverItsAudience(self):
-        level2 = self.write("areas/credits.behind-the-scenes.md", "# Behind\n\n**Audience:** internal\n")
-        code, _ = run_main("--out", str(self.out), str(level2))
+        draft = self.write("areas/credits.draft.md", "# Draft\n\n**Audience:** internal\n")
+        code, _ = run_main("--out", str(self.out), str(draft))
         self.assertEqual(0, code)
-        html = (self.out / "credits.behind-the-scenes.html").read_text(encoding="utf-8")
-        self.assertIn("Internal — not for sharing", html)
+        self.assertTrue((self.out / "credits.draft.html").is_file())
+
+    def test_Should_EmbedScreenshotsRelativeToTheGuide_When_RenderedThroughMain(self):
+        (self.source / "areas" / "shot.png").write_bytes(b"\x89PNG")
+        guide = self.write("areas/plans.md", "# Plans\n\n![The plans screen](shot.png)\n")
+        run_main("--out", str(self.out), str(guide))
+        self.assertIn("data:image/png;base64,", (self.out / "plans.html").read_text(encoding="utf-8"))
 
     def test_Should_RenderDirAndNamedFilesTogether_When_BothAreGiven(self):
         self.write("areas/a.md", "# A\n\n**Audience:** shareable\n")
@@ -278,7 +306,7 @@ class MainTests(unittest.TestCase):
         self.assertEqual(2, raised.exception.code)
         self.assertIn("is not a folder", errors.getvalue())
 
-    def test_Should_RenderTheFeatureGuideForm_When_OneLevel1FileIsNamed(self):
+    def test_Should_RenderTheFeatureGuideForm_When_OneFeatureGuideIsNamed(self):
         feature = self.write("003-booking.md", "# Booking\n\n**Audience:** shareable\n\nSee [Plans](plans.md).\n")
         code, _ = run_main("--out", str(self.out), str(feature))
         self.assertEqual(0, code)

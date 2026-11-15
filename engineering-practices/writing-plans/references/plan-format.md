@@ -209,6 +209,9 @@ work when the plan has any, and it writes no product documentation.
   plan intended and did not build is not documented as built.
 - **Deliverable:** names the documents — "the Booking and Membership areas in `docs/business-model/`
   describe what this plan landed: every guide's tasks, rules and worked example match the code at HEAD."
+- **It needs the product running.** The guides carry screenshots captured from a running non-production
+  environment, signed in as each role: the task names that environment and where the person keeps its
+  test logins (never their values), or the documenter asks for them before it traces.
 - **Gate:** `**Gate: own tests** — the documenter's doc lint over the documents it touched.`
 - **Over budget, it is split by area** — `DOC1`, `DOC2` — never handed to another agent.
 - **It closes the plan.** Being last, it deletes the last prompt block, so the filing in §8 is its.

@@ -9,20 +9,20 @@
 """Render a documentation guide as one standalone HTML page a client can be sent.
 
 Usage:
-  render-html.py --out <dir> <file.md>...   render the named files, whatever their level
-  render-html.py --out <dir> --dir <folder> render every file under <folder> whose Audience is shareable
-                                            (the Level 1 guides and system-overview.md)
+  render-html.py --out <dir> <file.md>...   render the named guides
+  render-html.py --out <dir> --dir <folder> render every guide under <folder> whose Audience is shareable
 
 One <name>.html per input, written to --out; nothing is written anywhere else and nothing is committed.
-The page carries inline CSS and makes one request: the pinned, integrity-checked Mermaid script, and only
-when the guide holds a diagram. Without it the reader sees a one-line notice instead of the diagram.
+The page carries inline CSS and its screenshots embedded, so it travels as one file. It makes one request:
+the pinned, integrity-checked Mermaid script, and only when the guide holds a diagram. Without it the reader
+sees a one-line notice instead of the diagram.
 
 A client's page carries nothing internal: "## About this document" shrinks to "Last updated <date>", a
-reconcile mark "~~old~~ -> new" shows only "new", links to Level 2 and Level 3 files and to anything that is
-not a guide show their text, and a file whose Audience is internal says so under its title.
+reconcile mark "~~old~~ -> new" shows only "new", and a link to anything that is not a guide shows its text.
 """
 
 import argparse
+import base64
 import html
 import re
 import sys
@@ -42,13 +42,12 @@ ABOUT_HEADING = re.compile(r"^## About this document\s*$", re.MULTILINE)
 NEXT_H2 = re.compile(r"^## ", re.MULTILINE)
 LAST_UPDATED = re.compile(r"^\*\*Last updated:\*\*\s*(\d{4}-\d{2}-\d{2})", re.MULTILINE)
 CREATED = re.compile(r"^\*\*Created:\*\*\s*(\d{4}-\d{2}-\d{2})", re.MULTILINE)
-INTERNAL = re.compile(r"^\*\*Audience:\*\*\s*internal\b", re.MULTILINE)
 SHAREABLE = re.compile(r"^\*\*Audience:\*\*\s*shareable\b", re.MULTILINE)
 DROPPED_HEADER_LINES = re.compile(r"^\*\*(Levels|Audience):\*\*.*\n?", re.MULTILINE)
 RECONCILE_MARK = re.compile(r"~~[^~\n]+~~\s*→\s*")
 ALERT = re.compile(r"^\[!(NOTE|TIP|IMPORTANT|WARNING)\][ \t]*\n?")
 KEPT_LINK = re.compile(r"^(https?:|mailto:|#)")
-INTERNAL_LEVEL = re.compile(r"\.(behind-the-scenes|technical)(\.[^/]*)?\.md$")
+IMAGE_TYPES = {".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp"}
 
 CSS = """
 :root{--bg:#fff;--fg:#1f2328;--muted:#59636e;--line:#d1d9e0;--soft:#f6f8fa;--link:#0b5fff;
@@ -85,11 +84,10 @@ pre.mermaid{display:none;margin:0}
 pre.mermaid[data-processed]{display:block}
 pre.mermaid[data-processed]+.diagram-notice{display:none}
 .diagram-notice{margin:0;padding:1rem;border:1px dashed var(--line);border-radius:6px;color:var(--muted)}
-.internal-banner{display:inline-block;margin:0 0 1rem;padding:.2rem .7rem;border:1px solid var(--warning);
-border-radius:6px;color:var(--warning);font-weight:600}
+img{display:block;max-width:100%;height:auto;margin:1rem 0;border:1px solid var(--line);border-radius:6px}
 .updated{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
 @media print{nav.toc{display:none}main{display:block;padding:0}
-table,pre.mermaid,.diagram,.alert,tr{break-inside:avoid}}
+table,pre.mermaid,.diagram,.alert,tr,img{break-inside:avoid}}
 """
 
 MERMAID_SCRIPTS = Template("""<script src="$url" integrity="$integrity" crossorigin="anonymous"></script>
@@ -149,7 +147,7 @@ def target_of(href: str) -> str | None:
     if KEPT_LINK.match(href):
         return href
     path, hash_mark, fragment = href.partition("#")
-    if not path.endswith(".md") or INTERNAL_LEVEL.search(path):
+    if not path.endswith(".md"):
         return None
     return f"{Path(path).stem}.html{hash_mark}{fragment}"
 
@@ -211,13 +209,22 @@ def apply_diagrams(tokens: list[Token]) -> bool:
     return found
 
 
-def add_internal_banner(tokens: list[Token]) -> None:
-    after_title = next(
-        (i + 1 for i, t in enumerate(tokens) if t.type == "heading_close" and t.tag == "h1"), 0
-    )
-    banner = Token("html_block", "", 0)
-    banner.content = '<p class="internal-banner">Internal — not for sharing</p>\n'
-    tokens.insert(after_title, banner)
+def embed_images(tokens: list[Token], folder: Path) -> None:
+    """Replace each screenshot's path with its bytes, so the page needs no folder beside it.
+
+    A path that is remote, of another type, or missing is left as written.
+    """
+    for token in tokens:
+        if token.type != "inline":
+            continue
+        for child in token.children:
+            if child.type != "image":
+                continue
+            source = folder / child.attrGet("src")
+            kind = IMAGE_TYPES.get(source.suffix.lower())
+            if kind and not KEPT_LINK.match(child.attrGet("src")) and source.is_file():
+                encoded = base64.b64encode(source.read_bytes()).decode("ascii")
+                child.attrSet("src", f"data:{kind};base64,{encoded}")
 
 
 def headings(tokens: list[Token], tag: str) -> list[tuple[str, str]]:
@@ -237,18 +244,16 @@ def toc_html(entries: list[tuple[str, str]]) -> str:
     return f'<nav class="toc" aria-label="Contents"><p>Contents</p><ul>\n{items}\n</ul></nav>\n'
 
 
-def render_page(source: str, fallback_title: str) -> str:
-    internal = bool(INTERNAL.search(source))
+def render_page(source: str, fallback_title: str, folder: Path = Path(".")) -> str:
     markdown, date = client_source(source)
     md = new_markdown()
     tokens = md.parse(markdown)
     rewrite_links(tokens)
+    embed_images(tokens, folder)
     apply_alerts(md, tokens)
     has_diagram = apply_diagrams(tokens)
     titles = headings(tokens, "h1")
     toc = toc_html(headings(tokens, "h2"))
-    if internal:
-        add_internal_banner(tokens)
     return PAGE.substitute(
         title=html.escape(titles[0][1] if titles else fallback_title),
         css=CSS,
@@ -270,7 +275,7 @@ def parse_arguments(argv: list[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Render documentation guides as standalone HTML pages.")
     parser.add_argument("--out", type=Path, required=True, help="folder the pages are written to")
     parser.add_argument("--dir", type=Path, help="render every shareable guide under this folder")
-    parser.add_argument("files", nargs="*", type=Path, help="markdown files to render as given")
+    parser.add_argument("files", nargs="*", type=Path, help="guides to render as given")
     arguments = parser.parse_args(argv)
     if arguments.dir and not arguments.dir.is_dir():
         parser.error(f"--dir {arguments.dir} is not a folder")
@@ -285,7 +290,7 @@ def main(argv: list[str] | None = None) -> int:
     arguments.out.mkdir(parents=True, exist_ok=True)
     for path in inputs:
         target = arguments.out / f"{path.stem}.html"
-        target.write_text(render_page(path.read_text(encoding="utf-8"), path.stem), encoding="utf-8")
+        target.write_text(render_page(path.read_text(encoding="utf-8"), path.stem, path.parent), encoding="utf-8")
         print(target)
     return 0
 
