@@ -1401,6 +1401,7 @@
       "commands": [
         "./security/commands/pentest.md",
         "./security/commands/provision.md",
+        "./security/commands/assess-repo.md",
         "./security/commands/engagement.md",
         "./security/commands/purple-team.md"
       ],

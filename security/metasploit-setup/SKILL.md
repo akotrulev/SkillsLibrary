@@ -139,6 +139,18 @@ The MCP server has its **own** dangerous-actions gate; this plugin has the **nin
 - **Secrets:** config and `.mcp.json` carrying the RPC password / auth token are `chmod 600` and live on the attacker box only. Nothing sensitive (RPC creds, bearer token, recovered loot) is committed to the assessed repo or written to `docs/security/`. The MCP server does not cache or log credentials; if logging is on, it redacts them.
 - **Input safety the server already enforces** (lean on it, do not re-implement): strict JSON schemas, IP/CIDR validation, restricted workspace names, port-range checks, a 500-char search cap, datastore caps, and 60 req/min rate limiting.
 
+## Operator handoff — the blocked-step fallback
+
+The engagement never stalls on a step the assistant cannot perform. A live act may be unavailable to the assistant for two reasons, and both resolve the same way: the nine-control gate makes it a **per-act, human-authorized** action (control 3), or the model's own safety layer declines to run that specific tool call. Either way, the **authorized human operator** runs it — they hold the authorization; the assistant plans, sequences and reads results. This is the division of labour the whole lane assumes, not an exception to it.
+
+**The protocol, at each such step:**
+
+1. **State the exact next action** — the precise command and nothing vague: the `msfconsole` lines (`use …`, every `set …`, `check`/`run`), or the `msf_module_execute` module + options, or the `msfvenom` line, with the in-scope target and the `LHOST`/`LPORT` already filled from the plan.
+2. **Hand it to the operator to run**, and say exactly what to paste back — the session id, the module result, the one proof line — **redacted of loot** (a hash/cred/PII is reported as *that* it came back, never its value; control 7).
+3. **On their result, record it in the action log** (command, target, time, ATT&CK id, outcome — control 8) and continue with the next step, re-reading the scope file first.
+
+The handoff is a checkpoint, not a dead end: the assistant keeps ownership of the sequence and the report, and resumes the moment the operator reports back. A step the operator declines or that returns "no" is logged as attempted-and-failed with the evidence, exactly like any other negative result — never retried silently, never worked around.
+
 ## 5. Teardown — feeds cleanup verification (control 4)
 
 Setup is reversible, and its reversal is part of the report's cleanup section:
@@ -152,6 +164,18 @@ msfdb stop                             # or keep the workspace DB for the report
 - Disable the dangerous tools (drop `--enable-dangerous-actions`) the moment exploitation ends.
 - Remove the MCP server entry from `.mcp.json` when the engagement closes; rotate any RPC/auth token that was issued.
 - Enumerate each of the above in the report's **cleanup verification** with the command that confirmed removal — the container is gone, the server is down, the token is rotated — exactly as the agent does for any planted artifact.
+
+## Given a repo — decide the setup and the tests
+
+When the engagement starts from a repository, the toolchain and the test plan are *derived from the code*, then run against the deployment. The repo is read statically (no target touched, no gate yet) to produce a **deploy profile** — exposed services/ports, stack and versions, auth model, dependency-CVE leads — which maps to the exact modules, MetaModules and payload shape to run. **The repo is not the target: Metasploit tests the running deployment the scope file names, never the source.** The full decision flow — repo-signal tables, surface→module mapping, payload selection, and what "proven" means per test — is `references/repo-to-tests.md`. It ends at the same gate: static reading is free, every live act needs the scope file and authorization.
+
+## Driving Metasploit — the operational references
+
+This skill provisions; the depth of *using* Metasploit lives in the references, so the agent operates the tool without leaving the engagement:
+
+- **`references/framework-operations.md`** — the open-source Framework, CLI + MCP: the msfconsole loop, the workspace DB, module taxonomy, payloads & `msfvenom`, meterpreter & post-exploitation, routing/pivoting, resource scripts, and the full 16-tool MCP server reference. This is the agent's default surface.
+- **`references/metasploit-pro.md`** — Metasploit **Pro** (licensed GUI product): auto-exploitation, the Vulnerability Validation Wizard, MetaModules, task chains, social-engineering campaigns, reporting, and the REST (`:3790`, `token:` header) + RPC (`pro.*`) APIs. **Divergence, stated once:** the plugin is Framework-first; the agent drives Pro **only through its REST/RPC API under the nine controls**, while Pro's web UI and irreversible wizards are **operator-run, not agent-driven**. `initial-access` still gains the foothold with the Framework.
+- **`references/repo-to-tests.md`** — the repo → deploy-profile → test-plan decision flow above.
 
 ## Hand-off
 
