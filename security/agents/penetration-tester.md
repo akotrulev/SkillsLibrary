@@ -49,6 +49,7 @@ If the project has the security-governance rules installed (`.claude/rules/secur
 
 | # | Step | Load | Done when |
 |---|---|---|---|
+| 0 | Provision the toolchain (only when msfconsole, the workspace DB, or the Metasploit MCP server is not yet up for this engagement) | `security/metasploit-setup` | Metasploit pinned by digest, an engagement-named workspace, and the MCP server registered read-only; no target touched |
 | 1 | Recon, passive first, rate- and scope-bounded | `security/recon-enumeration` | A surface map of in-scope assets only, each act logged with its ATT&CK id |
 | 2 | Initial access | `security/initial-access`, consuming a `qa-security` `exploit-validation` single-vuln proof as feedstock | A foothold, or "no foothold" with the attempts behind it; chain and payload logged |
 | 3 | Privilege escalation | `security/privilege-escalation` | Escalation proven or its absence evidenced; every act logged |
