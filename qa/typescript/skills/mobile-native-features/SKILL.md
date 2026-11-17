@@ -32,13 +32,13 @@ Appium tests for the **OS-level capabilities** a mobile app touches but a page-o
 
 ## Stack
 
-- Node 24, TypeScript `strict: true`; **WebdriverIO 10.0.2** with `@wdio/appium-service` on **Appium 3.8.0** (Appium 2 with WDIO 9 is the supported lane; the helpers below exist in both)
+- Node 24, TypeScript `strict: true`; **WebdriverIO 10.0.2** with `@wdio/appium-service` on **Appium 3.8.0** (Appium 2 with WDIO 9 is the supported lane; the commands below exist in both)
 - **Mocha** with `@wdio/mocha-framework`; `expect` from `@wdio/globals`
 - `@wdio/allure-reporter` — failure evidence is `ui-test-author/appium`'s `BaseTest.ts`; this skill adds no second hook
 - Reuses `BasePage`, the page objects and `wdio.conf.ts` of `qa/typescript/skills/ui-test-author/appium` unchanged
-- App path and device from env in `wdio.conf.ts`; helpers under `src/support/nativefeatures/`
+- App path and device from env in `wdio.conf.ts`; `NativeFeatures` under `src/support/nativefeatures/`
 
-WDIO 10 sends every one of these helpers through a `mobile:` extension, because Appium 3 removed the old `/appium/*` routes. Never hand-roll an HTTP call to one.
+WDIO 10 sends every one of these commands through a `mobile:` extension, because Appium 3 removed the old `/appium/*` routes. Never hand-roll an HTTP call to one.
 
 ## When to use
 
@@ -56,7 +56,7 @@ WDIO 10 sends every one of these helpers through a `mobile:` extension, because 
 - Token auth → `qa/typescript/skills/test-login-tokens`
 - Java / .NET → `qa/{java,dotnet}/skills/mobile-native-features`
 
-## The helper
+## The `NativeFeatures` object
 
 `NativeFeatures` owns every OS-surface call. A test reads: *drive the OS surface, assert the effect on a page object.* The id argument is a package on Android and a bundle id on iOS, so one private method builds the arguments.
 
@@ -78,8 +78,12 @@ export class NativeFeatures {
     await browser.fingerPrint(UNENROLLED_FINGERPRINT_ID);
   }
 
-  async sendIosBiometric(type: 'touchId' | 'faceId', match: boolean): Promise<void> {
-    await browser.execute('mobile: sendBiometricMatch', { type, match });
+  async approveIosBiometric(type: 'touchId' | 'faceId'): Promise<void> {
+    await browser.execute('mobile: sendBiometricMatch', { type, match: true });
+  }
+
+  async rejectIosBiometric(type: 'touchId' | 'faceId'): Promise<void> {
+    await browser.execute('mobile: sendBiometricMatch', { type, match: false });
   }
 
   async backgroundFor(seconds: number): Promise<void> {
@@ -107,7 +111,7 @@ export class NativeFeatures {
   }
 
   async dismissAlert(): Promise<void> {
-    await new NativeFeatures().dismissAlert();
+    await browser.dismissAlert();
   }
 
   async rotate(orientation: 'LANDSCAPE' | 'PORTRAIT'): Promise<void> {
@@ -188,7 +192,7 @@ describe('Biometric sign-in', () => {
     await new NativeFeatures().approveFingerprint(1);
 
     const dashboard = await login.awaitDashboard();
-    await expect(dashboard.root()).toBeDisplayed({ message: 'Dashboard after an approved fingerprint' });
+    await dashboard.verifyPageLoaded();
   });
 
   it('Should_ShowPinFallback_When_FingerprintIsRejected', async () => {
@@ -197,12 +201,12 @@ describe('Biometric sign-in', () => {
 
     await new NativeFeatures().rejectFingerprint();
 
-    await expect(login.pinFallback()).toBeDisplayed({ message: 'PIN fallback after a rejected fingerprint' });
+    expect(await login.isPinFallbackShown()).toBe(true);
   });
 });
 ```
 
-On an iOS simulator, call `mobile: enrollBiometric { isEnabled: true }` once, then `sendIosBiometric('faceId', true)` or `false`. No capability enrolls biometrics.
+On an iOS simulator, call `mobile: enrollBiometric { isEnabled: true }` once, then `approveIosBiometric('faceId')` or `rejectIosBiometric('faceId')`. No capability enrolls biometrics.
 
 A real device cannot take an injected read locally; BrowserStack and Sauce instrument the sensor, which `device-cloud` owns. Write the approve and reject assertions here and run them on the farm's injected biometric there.
 
@@ -219,7 +223,7 @@ describe('Promo code', () => {
 
     await sharePage.tapPasteCode();
 
-    await expect(checkoutPage.promoField()).toHaveValue('PROMO2026');
+    expect(await checkoutPage.promoCode()).toBe('PROMO2026');
   });
 });
 ```
@@ -249,7 +253,7 @@ A camera, photo or file picker is an OS surface you cannot drive in CI. Seed the
 - **Lifecycle events assert restored state on a bounded wait.** No `browser.pause` or `setTimeout` anywhere.
 - **Push tests assert the app's reaction**, not the send.
 - **Clipboard content is base64** in both directions.
-- Native-feature helpers live in `src/support/nativefeatures/`; no `any`, strict TypeScript, no secrets in code.
+- `NativeFeatures` lives in `src/support/nativefeatures/`; no `any`, strict TypeScript, no secrets in code.
 
 ## Cross-references
 

@@ -181,6 +181,15 @@ export class RabbitProbe {
       await conn.close();
     }
   }
+
+  /** Discard every message waiting on `queue`, so the next test starts from empty. */
+  async drain(queue: string): Promise<void> {
+    const conn: Connection = await amqp.connect(this.amqpUrl);
+    const channel: Channel = await conn.createChannel();
+    await channel.purgeQueue(queue);
+    await channel.close();
+    await conn.close();
+  }
 }
 ```
 
@@ -416,8 +425,8 @@ describe("FulfilmentConsumer", () => {
 
   beforeEach(async () => {
     conn = await amqp.connect(fixture.amqpUrl);
-    await drain("orders.q"); // independent tests — start from empty
-    await drain("shipments.q");
+    await probe.drain("orders.q"); // independent tests — start from empty
+    await probe.drain("shipments.q");
   });
 
   it("Should_publish_ShipmentReady_When_a_valid_OrderPaid_is_consumed", async () => {
@@ -436,12 +445,6 @@ describe("FulfilmentConsumer", () => {
     const shipment = JSON.parse(ready!) as { orderId: string };
     expect(shipment.orderId).toBe(orderId); // correlation preserved
   });
-
-  async function drain(queue: string): Promise<void> {
-    while ((await probe.get(queue, 300)) !== null) {
-      /* drain to empty */
-    }
-  }
 });
 ```
 
@@ -466,7 +469,7 @@ export const orders = {
 
 - **Eventual consistency = wait on a condition, never a sleep.** `expect.poll` over `channel.get` for the
   receive side; `expect.poll` for consumer side-effects. **No `setTimeout`-as-wait / `waitForTimeout`** —
-  `setTimeout` only as the poll cadence inside a bounded helper (and `expect.poll`'s `interval` already does
+  `setTimeout` only as the poll cadence inside a bounded wait condition (and `expect.poll`'s `interval` already does
   that for you).
 - **Declare the topology before publishing.** Exchanges, queues, and bindings in `beforeAll` (or a probe queue
   in `beforeEach`) — RabbitMQ routes at publish time and drops messages with no matching bound queue.

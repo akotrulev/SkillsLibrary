@@ -1,6 +1,6 @@
 # QA — Email Testing against a Real Mailbox over IMAP (TypeScript)
 
-Scaffolds a thin, intent-revealing wrapper over `imapflow` (Node 24 + TS) plus `mailparser`'s `simpleParser`, with Vitest / Playwright helpers that **poll a real provider mailbox** (Gmail / Outlook / any IMAP server) for a specific message — by recipient alias + subject + `since` time bound — extract HTML / text body / links / OTP codes, download attachments, and clean up by flagging the message `\Seen` / `\Deleted` rather than wiping an inbox.
+Scaffolds a thin, intent-revealing wrapper over `imapflow` (Node 24 + TS) plus `mailparser`'s `simpleParser`, with Vitest / Playwright fixtures that **poll a real provider mailbox** (Gmail / Outlook / any IMAP server) for a specific message — by recipient alias + subject + `since` time bound — extract HTML / text body / links / OTP codes, download attachments, and clean up by flagging the message `\Seen` / `\Deleted` rather than wiping an inbox.
 
 This is the sibling for flows that must exercise the **genuine provider inbox** — real MX, real spam/routing, real provider quirks — not an SMTP sink or a test-SaaS server. Two consequences shape the whole skill:
 
@@ -80,7 +80,7 @@ export function aliasFor(prefix = 'qa'): string {
 
 ### Intent-revealing wrapper — `tests/integration/email/mailbox.ts`
 
-Specs never drive `search` / `fetch` directly. They call `awaitSignupEmail`, `awaitEmail`, `markProcessed`. Connection lifecycle (connect once, lock INBOX per poll, logout on teardown) lives here — specs never leak an IMAP connection.
+Specs never drive `search` / `fetch` directly. They call `awaitSignupEmail`, `awaitEmail`, `markSeen`, `delete`. Connection lifecycle (connect once, lock INBOX per poll, logout on teardown) lives here — specs never leak an IMAP connection.
 
 ```ts
 import { ImapFlow } from 'imapflow';
@@ -154,15 +154,21 @@ export class Mailbox {
     return this.awaitEmail(sentTo, { subject: 'Welcome', since });
   }
 
-  /** Cleanup is per-message, not a wipe: flag processed (or delete + expunge). */
-  async markProcessed(uid: number, mode: 'seen' | 'delete' = 'seen'): Promise<void> {
+  /** Cleanup is per-message, not a wipe: flag the message processed. */
+  async markSeen(uid: number): Promise<void> {
     const lock = await this.client.getMailboxLock('INBOX');
     try {
-      if (mode === 'delete') {
-        await this.client.messageDelete(uid, { uid: true });
-      } else {
-        await this.client.messageFlagsAdd(uid, ['\\Seen'], { uid: true });
-      }
+      await this.client.messageFlagsAdd(uid, ['\\Seen'], { uid: true });
+    } finally {
+      lock.release();
+    }
+  }
+
+  /** Cleanup is per-message, not a wipe: delete + expunge this one message. */
+  async delete(uid: number): Promise<void> {
+    const lock = await this.client.getMailboxLock('INBOX');
+    try {
+      await this.client.messageDelete(uid, { uid: true });
     } finally {
       lock.release();
     }
@@ -223,9 +229,48 @@ describe('signup', () => {
     const activation = extractLink(message, '/activate?token=');
 
     expect(activation.searchParams.get('token')).toBeTruthy();
-    await mailbox.markProcessed(uid, 'delete');
+    await mailbox.delete(uid);
   });
 });
+```
+
+### Page object — `tests/e2e/pages/ResetPasswordPage.ts`
+
+```ts
+import type { Locator, Page } from '@playwright/test';
+
+export class ResetPasswordPage {
+  private readonly email: Locator;
+  private readonly sendCode: Locator;
+  private readonly code: Locator;
+  private readonly newPassword: Locator;
+  private readonly reset: Locator;
+  readonly confirmation: Locator;
+
+  constructor(private readonly page: Page) {
+    this.email = page.getByLabel('Email');
+    this.sendCode = page.getByRole('button', { name: 'Send code' });
+    this.code = page.getByLabel('Code');
+    this.newPassword = page.getByLabel('New password');
+    this.reset = page.getByRole('button', { name: 'Reset' });
+    this.confirmation = page.getByText('Password updated').describe('Password updated confirmation');
+  }
+
+  async goto(): Promise<void> {
+    await this.page.goto('/auth/reset');
+  }
+
+  async requestCode(email: string): Promise<void> {
+    await this.email.fill(email);
+    await this.sendCode.click();
+  }
+
+  async resetPassword(code: string, newPassword: string): Promise<void> {
+    await this.code.fill(code);
+    await this.newPassword.fill(newPassword);
+    await this.reset.click();
+  }
+}
 ```
 
 ### Playwright fixture — `tests/e2e/fixtures/mailbox.ts`
@@ -236,8 +281,9 @@ The fixture owns the connection lifecycle so specs never leak an IMAP session, a
 import { test as base } from '@playwright/test';
 import { Mailbox } from '../../integration/email/mailbox';
 import { aliasFor } from '../../integration/email/imap.config';
+import { ResetPasswordPage } from '../pages/ResetPasswordPage';
 
-export const test = base.extend<{ mailbox: Mailbox; recipient: string }>({
+export const test = base.extend<{ mailbox: Mailbox; recipient: string; resetPasswordPage: ResetPasswordPage }>({
   mailbox: async ({}, use) => {
     const m = new Mailbox();
     await m.connect();
@@ -245,6 +291,7 @@ export const test = base.extend<{ mailbox: Mailbox; recipient: string }>({
     await m.close();
   },
   recipient: async ({}, use) => use(aliasFor('e2e')),
+  resetPasswordPage: async ({ page }, use) => use(new ResetPasswordPage(page)),
 });
 export { expect } from '@playwright/test';
 ```
@@ -253,20 +300,16 @@ export { expect } from '@playwright/test';
 import { test, expect } from './fixtures/mailbox';
 import { extractOtp } from '../integration/email/extractors';
 
-test('reset password via emailed OTP', async ({ page, mailbox, recipient }) => {
+test('reset password via emailed OTP', async ({ resetPasswordPage, mailbox, recipient }) => {
   const since = new Date();
-  await page.goto('/auth/reset');
-  await page.getByLabel('Email').fill(recipient);
-  await page.getByRole('button', { name: 'Send code' }).click();
+  await resetPasswordPage.goto();
+  await resetPasswordPage.requestCode(recipient);
 
   const { uid, message } = await mailbox.awaitEmail(recipient, { subject: 'Reset code', since });
-  const otp = extractOtp(message);
+  await resetPasswordPage.resetPassword(extractOtp(message), 'Brand-N3w!');
 
-  await page.getByLabel('Code').fill(otp);
-  await page.getByLabel('New password').fill('Brand-N3w!');
-  await page.getByRole('button', { name: 'Reset' }).click();
-  await expect(page.getByText('Password updated')).toBeVisible();
-  await mailbox.markProcessed(uid, 'delete');
+  await expect(resetPasswordPage.confirmation).toBeVisible();
+  await mailbox.delete(uid);
 });
 ```
 
@@ -284,7 +327,7 @@ it('Should_AttachPdfInvoice_When_InvoiceEmailed', async () => {
 
   expect(pdf!.filename).toMatch(/^invoice-/);
   expect(pdf!.content.subarray(0, 4)).toEqual(Buffer.from('%PDF')); // magic bytes
-  await mailbox.markProcessed(uid, 'delete');
+  await mailbox.delete(uid);
 });
 ```
 
@@ -294,7 +337,7 @@ it('Should_AttachPdfInvoice_When_InvoiceEmailed', async () => {
 - **Per-test `+tag` alias** via `aliasFor()` — `base+{uuid}@domain` all land in the one real inbox but carry a unique `To`. Search by that exact `to`.
 - **Always `since`-bound the search** to the test's start time. The real inbox accumulates history; an unbounded search will match stale mail.
 - Search **server-side by To + Subject + since** (`client.search({...})`). Never fetch-all-then-filter client-side.
-- Cleanup is **per message**: flag `\Seen` or `\Deleted` + expunge via `markProcessed`. There is no Mailpit-style wipe and no Mailosaur-style unique-inbox throwaway — never `expunge` the whole INBOX.
+- Cleanup is **per message**: flag `\Seen` via `markSeen`, or `\Deleted` + expunge via `delete`. There is no Mailpit-style wipe and no Mailosaur-style unique-inbox throwaway — never `expunge` the whole INBOX.
 
 ### Waiting (poll-with-deadline, never a fixed sleep)
 - The wait is the `awaitEmail` **deadline loop** over the IMAP search. No bare `setTimeout` / `page.waitForTimeout` between send and assert.

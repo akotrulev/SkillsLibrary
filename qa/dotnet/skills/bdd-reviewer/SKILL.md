@@ -21,7 +21,7 @@ Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin qua
 
 ## The checklist is the rule file
 
-Every check, and the severity it reports, lives in one place: the qa-dotnet rule files `bdd.md` (feature files, step definitions, hooks), `automation.md` (core: assertions, async, errors, waits, comments) and `web-ui.md` or `mobile-ui.md` for the page objects the steps call.
+Every check, and the severity it reports, lives in one place: the qa-dotnet rule files `bdd.md` (feature files, step definitions, hooks), `automation.md` (core: assertions, async, errors, waits, comments) and `page-objects.md` plus `web-ui.md` or `mobile-ui.md` for the page objects the steps call.
 
 1. **The project's copies first**: `.claude/rules/qa-dotnet/` at the project root. The team may have edited them, and its edits win.
 2. **Otherwise the plugin's copies**: `qa/dotnet/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/qa-dotnet:rules` installs them.
@@ -42,7 +42,8 @@ Read every file that applies in full before the first finding. A rule loaded on 
 |----------|--------------------------------|-----------------------------------------|----------------------------------------|
 | major    | Login.feature:12               | Imperative step "click #submit"         | Raise to "When I sign in…"; move mechanic to LoginPage |
 | major    | AuthenticationSteps.cs:20      | new LoginPage(page) inside step         | Inject ScenarioState; reach page via _state |
-| minor    | CartSteps.cs:8                 | Two near-duplicate add-item steps       | Parameterize: "I add {int} items"      |
+| blocker  | FilterSteps.cs:31              | Empty body: "I export the results" passes doing nothing | Implement it, or tag the scenario `@not-automated` with a ticket and delete the binding |
+| major    | FilterSteps.cs:12              | "I select {string} for {string} filter" maps a field name to a control | One step per filter: "I select {string} for Deal Type filter" → `state.Filter.DealType.SelectAsync(option)` |
 ```
 
 After the table, add a `Rules: project .claude/rules/qa-dotnet/ | plugin copy (not installed)` line, then an **Overall** paragraph (2–3 sentences) and a **Traceability** line (TC-IDs/ACs covered vs. gaps ⚠️).
@@ -51,4 +52,4 @@ After the table, add a `Rules: project .claude/rules/qa-dotnet/ | plugin copy (n
 
 Input: a `Login.feature` whose every scenario repeats `Given I visit "/login"` / `When I fill "#email"…` and a single `LoginSteps.cs` newing up the page object per step.
 
-Findings: imperative steps (major) → factor login into `Background` + declarative step; per-step `new LoginPage` (major) → inject `ScenarioState`; mechanics in steps (major) → move to `LoginPage`. Overall: the layer works but reads as a script, not documentation, and duplicates mechanics across scenarios.
+Findings: imperative steps (major) → factor login into `Background` + declarative step; per-step `new LoginPage` (major) → inject `ScenarioState`; locators in steps (major) → move to `LoginPage`. A step acting on a control the page exposes (`state.Filter.DealType.SelectAsync(option)`) is not a finding: in a BDD suite the step is the intent layer (`bdd.md`). Overall: the layer works but reads as a script, not documentation, and duplicates mechanics across scenarios.

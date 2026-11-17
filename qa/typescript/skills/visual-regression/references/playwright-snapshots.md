@@ -92,8 +92,8 @@ export class DashboardPage {
   private readonly revenueSpinner: Locator;
 
   constructor(private readonly page: Page) {
-    this.revenueCard = page.getByTestId('Dashboard.RevenueCard');
-    this.lastSeen = page.getByTestId('Dashboard.LastSeen');
+    this.revenueCard = page.getByTestId('Dashboard.RevenueCard').describe('Revenue card');
+    this.lastSeen = page.getByTestId('Dashboard.LastSeen').describe('Last seen time');
     this.revenueSpinner = this.revenueCard.getByRole('progressbar');
   }
 

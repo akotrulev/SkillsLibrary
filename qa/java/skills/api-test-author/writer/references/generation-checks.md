@@ -16,6 +16,7 @@ For every scenario, before writing code, fill one row:
 |---|---|---|---|---|
 | Create order with two lines | `201`; body echoes both lines, `status` `Pending` · the confirmation banner shows the order number | `GET /orders/{id}` returns both lines and the total | no second order for the idempotency key; the cart is not left half-cleared | one `OrderPlaced` event; one confirmation email to the buyer |
 | Create order, empty cart | `400`, `ProblemDetails` `errors.lines` · the form error under the cart | no order row for the customer | no event, no email | none |
+| List orders filtered by `status=Pending` (reference data) | `200`; at least one item, then every item's `status` is `Pending` · every grid row's Status cell | `n/a`: read-only, nothing written | no item with another status; the curated records unchanged | none |
 
 - **Response / UI-state** — the status and the fields (API), or what the user sees: text, enabled state, URL,
   focus (UI).

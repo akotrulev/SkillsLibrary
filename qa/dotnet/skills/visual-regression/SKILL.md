@@ -67,7 +67,7 @@ diffs across many browsers stay noisy, or a page whose *content* changes must ke
   object navigates (`ui-test-author/playwright/references/emulation-and-mobile-web.md` §4, §6). Dynamic
   regions masked or hidden. No `Task.Delay`, no `WaitForTimeoutAsync`.
 - **Reach the state through page objects.** The test calls page-object intent methods and the visual
-  helper; it never calls `Page` itself. Locators carry `Describe(...)`.
+  check; it never calls `Page` itself. Locators carry `Describe(...)`.
 - **Visual tests run in the nightly lane**, never in the PR gate (`qa/cicd/ci-conventions`): the class carries
   `[Category("visual")]`, the gate's filter excludes `TestCategory=visual`, and a scheduled job runs
   `--filter TestCategory=visual`.

@@ -292,6 +292,35 @@ gatling-perf:
     paths: [perf/build/reports/gatling/]
 ```
 
+### Container lane — `test` stage
+
+The suite as an image built from the pipeline's commit, writing its single-file Allure report to a mounted folder. The Dockerfile, `run-tests.sh` and the jar are [`fat-jar-and-container.md`](fat-jar-and-container.md). The job needs a Docker daemon: the same `docker:dind` service as the Testcontainers job above.
+
+```yaml
+container-tests:
+  stage: test
+  image: docker:27
+  services:
+    - name: docker:27-dind
+      alias: docker
+  variables:
+    DOCKER_HOST: "tcp://docker:2376"
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_VERIFY: "1"
+    DOCKER_CERT_PATH: "/certs/client"
+  script:
+    - docker build -t api-tests .
+    - docker run --name suite -e API_URL api-tests
+  after_script:
+    - docker cp suite:/reports ./reports
+  artifacts:
+    when: always
+    paths: [reports/]
+    expire_in: 14 days
+```
+
+With dind a `-v` bind mount would name a path on the dind service, not in the job, so the report is copied out of the stopped container in `after_script`, which runs on a red run too. On a runner that mounts the host socket, drop the `services:` and `DOCKER_*` lines. The script is gating; only the artifacts are `when: always`.
+
 ## Rules
 
 ### Triggers

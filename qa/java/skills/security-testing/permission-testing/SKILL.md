@@ -45,7 +45,7 @@ Two axes of privilege escalation, both covered by the matrix:
 > **403 vs 404 — pin the project's leak policy.** Returning `403 Forbidden` for someone else's object
 > *confirms the object exists* (an enumeration/info leak). Many threat models prefer `404 Not Found` for
 > cross-tenant access so existence isn't disclosed. **Decide the policy per project and assert it
-> explicitly** — don't accept "either 4xx". The helper below takes the expected status so the policy is
+> explicitly** — don't accept "either 4xx". The assertion below takes the expected status so the policy is
 > codified, not assumed.
 
 ## The matrix model — the core of the skill
@@ -68,7 +68,8 @@ public record Actor(String name, TokenSupplier token) {
 
     @FunctionalInterface
     public interface TokenSupplier {
-        /** Resolve a Bearer token for this actor (cached for its lifetime by the auth0 helper). */
+        /** Resolve a Bearer token for this actor (cached by the token provider). */
+
         String get() throws Exception;
     }
 
@@ -116,7 +117,7 @@ public final class InvoiceFixtures {
 }
 ```
 
-### The deny helper — codify the policy
+### The deny assertion — codify the policy
 
 ```java
 // src/test/java/.../security/accesscontrol/AccessControlAssertions.java

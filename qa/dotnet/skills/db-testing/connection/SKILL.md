@@ -11,7 +11,7 @@ Wires .NET 8 NUnit tests to talk to a **real** database — seed fixtures via bu
 
 - A test must verify a row was written, an FK held, a trigger fired, or a soft-delete column was set.
 - Test setup needs to seed reference data (currencies, countries, plan tiers) that production reads.
-- Async write flows need a "wait until the projection catches up" helper.
+- Async write flows need a "wait until the projection catches up" wait condition.
 - Test suite leaks data between tests and needs a deterministic cleanup strategy.
 
 ## When NOT to use
@@ -241,7 +241,7 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 1. Confirm engine (Postgres default), schema-source (EF migrations / FluentMigrator), and which assertion queries each new test needs.
 2. Add `DbConnectionFactory` if not present; wire it via DI in the fixture base.
 3. For each new test set, scaffold an `<Aggregate>Seeder.cs` (write) and `<Aggregate>DbProbe.cs` (read), reusing builders from `qa/dotnet/skills/test-data-builder`.
-4. Add the polling helper if the SUT involves async projections.
+4. Add the `WaitForAsync` wait condition if the SUT involves async projections.
 5. Pick a cleanup strategy (Respawn default); wire `[OneTimeSetUp]` / `[TearDown]`.
 6. Run `dotnet test` — every test passes; no leaks between fixtures.
 

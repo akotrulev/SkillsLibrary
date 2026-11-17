@@ -46,7 +46,7 @@ and `matchesAriaSnapshot` from `qa/java/skills/ui-test-author/playwright/referen
 form gets both: an axe scan per state, and a native assertion for the error message the story specifies
 (§6).
 
-## 4. The shared helper — `support/A11yScan.java`
+## 4. The shared scan probe — `support/A11yScan.java`
 
 The conformance target is **WCAG 2.2 AA**, set once. Every scan attaches its violations and its
 incompletes **before** the test asserts, so a failure carries the evidence and incompletes are visible on
@@ -134,7 +134,7 @@ public final class A11yScan {
 
 - `withTags(List)` picks the ruleset, which is picking the WCAG level. `best-practice` adds axe's own
   recommendations beyond WCAG; add it here deliberately, never per test.
-- `include` / `exclude` take a CSS selector (or a list, `FromFrames`, `FromShadowDom`); the helper builds
+- `include` / `exclude` take a CSS selector (or a list, `FromFrames`, `FromShadowDom`); the probe builds
   them from test ids, so a test passes `"Signup.Form"`, never a selector. `exclude` is for embeds you do not
   own.
 - `disableRules` is only for a **documented** false positive, with its ticket and reason in
@@ -237,10 +237,10 @@ contrast with Percy's and Applitools' keys.
 - **`Thread.sleep` or `waitForTimeout` before `analyze()`.** *Fix:* the page object waits for the state.
 - **One scan per page, ignoring interactive states.** *Fix:* one scan per meaningful state.
 - **Tags that stop at WCAG 2.1 AA.** *Fix:* `wcag22aa` in `WCAG_22_AA`.
-- **Tags or excludes repeated per test.** They drift. *Fix:* the helper.
+- **Tags or excludes repeated per test.** They drift. *Fix:* the probe.
 - **`if (!results.getIncomplete().isEmpty()) System.out.println(…)`.** A condition in a test, and silent in
-  CI. *Fix:* the helper attaches the incompletes on every scan.
-- **`new AxeBuilder(page)` or `page.navigate` in a test.** *Fix:* the helper and the page objects.
+  CI. *Fix:* the probe attaches the incompletes on every scan.
+- **`new AxeBuilder(page)` or `page.navigate` in a test.** *Fix:* the probe and the page objects.
 - **A whole-page scan for one new component.** Legacy debt drowns the regression. *Fix:* `scanWithin`.
 - **`String.join(" ", node.getTarget())`.** `getTarget()` returns `Object`; it does not compile.
   *Fix:* `String.valueOf(node.getTarget())`.
@@ -250,12 +250,12 @@ contrast with Percy's and Applitools' keys.
 ## Rules
 
 - `com.deque.html.axe-core:playwright:4.13.0`, exact.
-- WCAG 2.2 AA tags, excludes and false positives live in one helper, built in the class's `@BeforeMethod`.
+- WCAG 2.2 AA tags, excludes and false positives live in one probe, built in the class's `@BeforeMethod`.
 - One logical assertion per test: the violation ids `isEmpty()` with `.as("<subject>")`, or a named subset.
 - Stabilize through the page object before a scan; scan once per meaningful state.
 - Every scan attaches its violations and incompletes with `Allure.attachment(..., AttachmentOptions)`.
 - Known debt is ticketed and only shrinks; false positives are documented.
-- Tests reach pages through page objects; selectors are built from test ids inside the helper.
+- Tests reach pages through page objects; selectors are built from test ids inside the probe.
 - Pair every scan of a story's form with the native assertion for what the story specifies.
 
 ## Cross-references

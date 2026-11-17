@@ -96,6 +96,7 @@ public abstract class SqsTestBase {
                     .withServices(Service.SQS, Service.SNS);
 
     protected SqsClient sqs;
+    protected SqsProbe queueProbe;
     protected String ordersUrl;
     protected String ordersDlqUrl;
 
@@ -109,6 +110,7 @@ public abstract class SqsTestBase {
                 .credentialsProvider(StaticCredentialsProvider.create(   // placeholder creds, never logged
                         AwsBasicCredentials.create(localstack.getAccessKey(), localstack.getSecretKey())))
                 .build();
+        queueProbe = new SqsProbe(sqs);
 
         // Declare the queues: DLQ first, then the source queue wired to it by a redrive policy.
         ordersDlqUrl = sqs.createQueue(b -> b.queueName("orders-dlq")).queueUrl();
@@ -279,16 +281,9 @@ receive than `maxReceiveCount`). Then receive from the **DLQ** to assert.
 public void Should_redrive_to_the_dlq_When_max_receive_count_is_exceeded() {
     sqs.sendMessage(b -> b.queueUrl(ordersUrl).messageBody("{ not valid order json }"));
 
-    // Receive-without-delete maxReceiveCount+1 times, resetting visibility to 0 each time to force fast
-    // redelivery. The bounded long-poll is the condition-wait; no Thread.sleep anywhere.
-    for (int attempt = 0; attempt < 4; attempt++) {   // 4 = maxReceiveCount(3) + 1 to trigger the move
-        ReceiveMessageResponse poll = sqs.receiveMessage(b -> b.queueUrl(ordersUrl)
-                .waitTimeSeconds(5).maxNumberOfMessages(1));
-        if (!poll.messages().isEmpty()) {
-            sqs.changeMessageVisibility(b -> b.queueUrl(ordersUrl)
-                    .receiptHandle(poll.messages().get(0).receiptHandle()).visibilityTimeout(0));
-        }
-    }
+    // Receive-without-delete maxReceiveCount+1 times (4 = 3 + 1 triggers the move); the probe resets
+    // visibility to 0 each time to force fast redelivery. Its bounded long-poll is the condition-wait.
+    queueProbe.receiveWithoutDelete(ordersUrl, 4);
 
     // Assert on the DLQ — long-poll the condition (the message lands), not a sleep.
     ReceiveMessageResponse dead = sqs.receiveMessage(b -> b.queueUrl(ordersDlqUrl)
@@ -335,22 +330,33 @@ subscriptions analogue. Use `RawMessageDelivery=true` so the queue gets your raw
 envelope.
 
 ```java
-@Test
-public void Should_fan_out_to_both_queues_When_an_order_event_is_published() {
-    SnsClient sns = SnsClient.builder()
+private SnsClient sns;
+private String topicArn;
+
+@BeforeMethod(alwaysRun = true)
+public void subscribeQueuesToTopic() {
+    sns = SnsClient.builder()
             .endpointOverride(localstack.getEndpoint()).region(Region.of(localstack.getRegion()))
             .credentialsProvider(StaticCredentialsProvider.create(
                     AwsBasicCredentials.create(localstack.getAccessKey(), localstack.getSecretKey())))
             .build();
 
-    String topicArn = sns.createTopic(b -> b.name("order-events")).topicArn();
+    topicArn = sns.createTopic(b -> b.name("order-events")).topicArn();
     for (String queueUrl : List.of(fulfilmentUrl, auditUrl)) {
         String arn = sqs.getQueueAttributes(b -> b.queueUrl(queueUrl)
                 .attributeNames(QueueAttributeName.QUEUE_ARN)).attributes().get(QueueAttributeName.QUEUE_ARN);
         sns.subscribe(b -> b.topicArn(topicArn).protocol("sqs").endpoint(arn)
                 .attributes(Map.of("RawMessageDelivery", "true")));
     }
+}
 
+@AfterMethod(alwaysRun = true)
+public void closeSns() {
+    sns.close();
+}
+
+@Test
+public void Should_fan_out_to_both_queues_When_an_order_event_is_published() {
     sns.publish(b -> b.topicArn(topicArn).message(Json.write(new OrderPlaced(UUID.randomUUID()))));
 
     // Each subscribed queue gets its own copy — long-poll both (the condition-wait).
@@ -366,20 +372,47 @@ public void Should_fan_out_to_both_queues_When_an_order_event_is_published() {
 
 ## Receiving a batch / draining
 
-To assert "exactly N messages were produced", drain in a loop with `waitTimeSeconds` and count — the bounded
-long-poll stops it hanging when fewer than N arrive. SQS returns **at most 10** per receive, so loop:
+To assert "exactly N messages were produced", drain with `waitTimeSeconds` and count — the bounded long-poll
+stops it hanging when fewer than N arrive. SQS returns **at most 10** per receive, so the probe loops:
 
 ```java
-List<Message> drained = new ArrayList<>();
-while (true) {
-    ReceiveMessageResponse page = sqs.receiveMessage(b -> b.queueUrl(ordersUrl)
-            .waitTimeSeconds(2).maxNumberOfMessages(10));
-    if (page.messages().isEmpty()) break;       // bounded wait returned empty → drained
-    drained.addAll(page.messages());
-    page.messages().forEach(m -> sqs.deleteMessage(d -> d.queueUrl(ordersUrl).receiptHandle(m.receiptHandle())));
-}
+List<Message> drained = queueProbe.drain(ordersUrl);
 assertThat(drained).hasSize(3);                 // SUT produced exactly 3
 ```
+
+`SqsProbe` (`src/test/java/.../messaging/SqsProbe.java`) holds both loops, so no test body does:
+
+```java
+public final class SqsProbe {
+
+    private final SqsClient sqs;
+
+    public SqsProbe(SqsClient sqs) { this.sqs = sqs; }
+
+    /** Receives `times` times without deleting, making each received message visible again at once. */
+    public void receiveWithoutDelete(String queueUrl, int times) {
+        for (int attempt = 0; attempt < times; attempt++) {
+            sqs.receiveMessage(b -> b.queueUrl(queueUrl).waitTimeSeconds(5).maxNumberOfMessages(1))
+                    .messages()
+                    .forEach(message -> sqs.changeMessageVisibility(b -> b.queueUrl(queueUrl)
+                            .receiptHandle(message.receiptHandle()).visibilityTimeout(0)));
+        }
+    }
+
+    /** Receives and deletes until a bounded long-poll returns empty; returns what it drained. */
+    public List<Message> drain(String queueUrl) {
+        List<Message> drained = new ArrayList<>();
+        while (true) {
+            List<Message> page = sqs.receiveMessage(b -> b.queueUrl(queueUrl)
+                    .waitTimeSeconds(2).maxNumberOfMessages(10)).messages();
+            if (page.isEmpty()) return drained;
+            drained.addAll(page);
+            page.forEach(m -> sqs.deleteMessage(d -> d.queueUrl(queueUrl).receiptHandle(m.receiptHandle())));
+        }
+    }
+}
+```
+
 
 ## Anti-patterns
 

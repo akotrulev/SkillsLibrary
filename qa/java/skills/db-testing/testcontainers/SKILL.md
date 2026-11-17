@@ -65,14 +65,14 @@ tasks.named<Test>("test") {
 }
 ```
 
-### Suite-shared container — `src/test/java/.../support/PostgresSupport.java`
+### Suite-shared container — `src/test/java/.../support/PostgresFixture.java`
 
 ```java
 package com.flexinvest.support;
 
 import org.testcontainers.containers.PostgreSQLContainer;
 
-public final class PostgresSupport {
+public final class PostgresFixture {
 
     public static final PostgreSQLContainer<?> POSTGRES =
         new PostgreSQLContainer<>("postgres:17.2")
@@ -85,7 +85,7 @@ public final class PostgresSupport {
         Runtime.getRuntime().addShutdownHook(new Thread(POSTGRES::stop));
     }
 
-    private PostgresSupport() {}
+    private PostgresFixture() {}
 }
 ```
 
@@ -108,9 +108,9 @@ public abstract class IntegrationTestBase extends AbstractTestNGSpringContextTes
 
     @DynamicPropertySource
     static void registerDatasource(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", PostgresSupport.POSTGRES::getJdbcUrl);
-        registry.add("spring.datasource.username", PostgresSupport.POSTGRES::getUsername);
-        registry.add("spring.datasource.password", PostgresSupport.POSTGRES::getPassword);
+        registry.add("spring.datasource.url", PostgresFixture.POSTGRES::getJdbcUrl);
+        registry.add("spring.datasource.username", PostgresFixture.POSTGRES::getUsername);
+        registry.add("spring.datasource.password", PostgresFixture.POSTGRES::getPassword);
         registry.add("spring.flyway.enabled", () -> "true");
     }
 }
@@ -204,7 +204,7 @@ The standards a Testcontainers fixture must meet are the qa-java rule files, not
 1. Read existing `src/test/java/.../integration` for base-class and naming conventions.
 2. Confirm migration tool (Flyway / Liquibase) and migration scripts location.
 3. Generate:
-   - `support/PostgresSupport.java` (or sibling for other engines)
+   - `support/PostgresFixture.java` (or sibling for other engines)
    - `support/IntegrationTestBase.java`
    - `support/datasets/empty.yml` (db-rider seed reset)
    - Concrete `{Feature}IT.java`

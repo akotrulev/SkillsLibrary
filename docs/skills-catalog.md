@@ -67,8 +67,9 @@ The `qa/` folder is the most built-out section. When a request matches one of th
 
 New-project setup = copy `qa/<stack>/` + `qa/manual/` + `qa/reporting/` + `qa/cicd/` + `qa/_shared/`.
 
-**Project scaffolding** (version-aware — .NET 10 primary, 8/9 supported; `mobile-project-setup` ships for all three stacks)
+**Project scaffolding** (version-aware — .NET 10 primary, 8/9 supported; `api-project-setup`, `ui-project-setup` and `mobile-project-setup` ship for all three stacks)
 - `api-project-setup` · `ui-project-setup` · `mobile-project-setup` · `performance-project-setup` — stand up a runnable test solution from zero (flat projects, shared `TestCore`, CPM version table, per-project config); composable into one multi-module solution — dotnet
+- `api-project-setup` · `ui-project-setup` — stand up a runnable, empty suite from zero: pinned versions, the base test, a role-named `Env` config loader with an override (`-D` system property in Java, `process.env` in TypeScript), one smoke test that proves the wiring, the run commands and a containerized run; Gradle Kotlin DSL + TestNG + RestAssured / Playwright 1.63 (java) · Vitest + fetch + Zod / Playwright Test 1.64 (typescript); they copy the author skills' assets instead of duplicating them — java · typescript
 - `mobile-project-setup` — stand up a runnable Appium 3 mobile test project from zero: Node 24, Android SDK / Xcode prerequisites, `appium setup` + `driver doctor`, the Gradle (TestNG, java-client 11) or WebdriverIO 10 (Mocha) layout around the `ui-test-author/appium` assets, capabilities from `PLATFORM` / `DEVICE_NAME` / `APP_PATH`, a first smoke; Step 0 of `qa-mobile-{java,typescript}` — java · typescript
 - `inhouse-framework-conventions` (`qa-<stack>:inhouse-framework-conventions`) — conventions for working inside the in-house Accelerator test-automation framework (JSON-driven screens) — dotnet · java · typescript
 
@@ -138,10 +139,10 @@ New-project setup = copy `qa/<stack>/` + `qa/manual/` + `qa/reporting/` + `qa/ci
 - `time-and-concurrency-testing` — run a scheduled job on demand, control the clock at a time boundary, fire concurrent requests behind a start gate, deliver a message or webhook twice; in-process host first, then a deployed-environment hook, else a named deferral — java · dotnet · typescript
 
 **Reporting & CI/CD (`qa/reporting/`, `qa/cicd/` — own agents, own skills)**
-- `reporting/<stack>/skills/test-reports` — Allure results — java · dotnet · typescript
+- `reporting/<stack>/skills/test-reports` — Allure results, plus the report as one self-contained HTML file (`allure generate --single-file`) for an artifact or attachment — java · dotnet · typescript
 - `reporting/<stack>/skills/flaky-test-quarantine` — detect/quarantine flaky tests, tag tests by finding — java · dotnet · typescript
 - `agents/qa-reporting-{java,dotnet,typescript}` — wire Allure → tag tests by finding → detect/quarantine flakes → review
-- `cicd/<stack>/skills/ci-pipelines` — shard matrix, Allure-publish step, perf gate, OIDC secrets; one skill, CI host picked inside via `references/` (github-actions · azure-pipelines · gitlab-ci) — java · dotnet · typescript
+- `cicd/<stack>/skills/ci-pipelines` — shard matrix, Allure-publish step, perf gate, OIDC secrets, and a container lane (image built from the working tree, pinned, exit code passed through, no baked secrets); the Java skill adds the runnable fat test jar (`references/fat-jar-and-container.md`); one skill, CI host picked inside via `references/` (github-actions · azure-pipelines · gitlab-ci) — java · dotnet · typescript
 - `cicd/ci-conventions` — language-agnostic pipeline conventions every `ci-pipelines` implementation references
 - `agents/qa-cicd-{java,dotnet,typescript}` — pipeline skeleton → shard/parallelize → gates & secrets (Allure-publish owned by qa-reporting, SCA gate owned by qa-security) → review
 

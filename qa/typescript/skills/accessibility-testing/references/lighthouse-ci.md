@@ -207,7 +207,7 @@ test(
 - **Several workers on one debugging port.** *Fix:* `workers: 1` on the Lighthouse project.
 - **Mixing the 0–100 and 0–1 scales.**
 - **A `categories:pwa` assertion.** The category is gone.
-- **An un-awaited `allure.attachment` in a sync helper.** *Fix:* the fixture's awaited `testInfo.attach`.
+- **An un-awaited `allure.attachment` in a sync function.** *Fix:* the fixture's awaited `testInfo.attach`.
 - **A 1.0 accessibility score reported as "accessible".**
 - **A committed `LHCI_TOKEN`.**
 

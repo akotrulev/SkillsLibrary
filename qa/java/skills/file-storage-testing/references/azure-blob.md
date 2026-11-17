@@ -231,16 +231,10 @@ public void Should_produce_a_thumbnail_blob_When_an_image_is_uploaded() {
 
     // 3. Wait on the SIDE-EFFECT, not on a clock. Awaitility polls until the derived blob exists (or times out).
     await().atMost(Duration.ofSeconds(10)).pollInterval(Duration.ofMillis(200))
-           .until(() -> propertiesOrNull("thumbnails/cat.png") != null);
+           .until(() -> container.getBlobClient("thumbnails/cat.png").exists());
 
     BlobProperties thumb = container.getBlobClient("thumbnails/cat.png").getProperties();
     assertThat(thumb.getContentType()).isEqualTo("image/png");   // one logical assertion: the derived blob
-}
-
-// HEAD-or-null probe: returns the properties if the blob exists, null otherwise (so Awaitility keeps waiting).
-private BlobProperties propertiesOrNull(String name) {
-    try { return container.getBlobClient(name).getProperties(); }
-    catch (BlobStorageException e) { if (e.getStatusCode() == 404) return null; throw e; }
 }
 ```
 
@@ -261,23 +255,39 @@ public void Should_upload_a_large_blob_in_blocks_When_staging_and_committing() {
     byte[] bytes = LargePayloads.ofSize(12 * 1024 * 1024);   // 12 MB → multiple blocks
     BlockBlobClient blockBlob = container.getBlobClient("backups/db-2026-06.dump").getBlockBlobClient();
 
-    List<String> blockIds = new ArrayList<>();
-    int blockSize = 4 * 1024 * 1024;                          // 4 MB blocks
-    for (int offset = 0; offset < bytes.length; offset += blockSize) {
-        // Block IDs must be equal-length base64 strings.
-        String id = Base64.getEncoder().encodeToString(UUID.randomUUID().toString().getBytes());
-        int len = Math.min(blockSize, bytes.length - offset);
-        blockBlob.stageBlock(id, new ByteArrayInputStream(bytes, offset, len), len);
-        blockIds.add(id);
-    }
-    blockBlob.commitBlockListWithResponse(new BlockBlobCommitBlockListOptions(blockIds)
-            .setHeaders(new BlobHttpHeaders().setContentType("application/octet-stream")), null, null);
+    new BlockUploader(blockBlob).upload(bytes, 4 * 1024 * 1024, "application/octet-stream");   // 4 MB blocks
 
     BlobProperties props = blockBlob.getProperties();
     assertThat(props.getBlobSize()).isEqualTo((long) bytes.length);   // assembled blob is the full size
     // NB: don't assert getContentMd5() == MD5(bytes) on a staged blob — it isn't auto-computed for block commits.
 }
 ```
+
+`BlockUploader` holds the staging loop, so the test body stays linear:
+
+```java
+public final class BlockUploader {
+
+    private final BlockBlobClient blob;
+
+    public BlockUploader(BlockBlobClient blob) { this.blob = blob; }
+
+    /** Stages `bytes` as numbered blocks of `blockSize`, then commits them into one blob. Block ids are
+     *  equal-length base64 strings, as the service requires. */
+    public void upload(byte[] bytes, int blockSize, String contentType) {
+        List<String> blockIds = new ArrayList<>();
+        for (int offset = 0; offset < bytes.length; offset += blockSize) {
+            String id = Base64.getEncoder().encodeToString(UUID.randomUUID().toString().getBytes());
+            int length = Math.min(blockSize, bytes.length - offset);
+            blob.stageBlock(id, new ByteArrayInputStream(bytes, offset, length), length);
+            blockIds.add(id);
+        }
+        blob.commitBlockListWithResponse(new BlockBlobCommitBlockListOptions(blockIds)
+                .setHeaders(new BlobHttpHeaders().setContentType(contentType)), null, null);
+    }
+}
+```
+
 
 > For the common "just upload a big stream" case, prefer `container.getBlobClient(name).upload(BinaryData, true)`
 > with `ParallelTransferOptions` — the SDK stages + commits for you. Hand-drive `stageBlock`/`commitBlockList`
@@ -453,7 +463,7 @@ public class ImageProcessingTest extends BlobFixture {
 
         // Wait on the derived blob (the condition-wait) — the worker runs async.
         await().atMost(Duration.ofSeconds(15)).pollInterval(Duration.ofMillis(250))
-               .until(() -> propertiesOrNull("thumbnails/photo.png") != null);
+               .until(() -> container.getBlobClient("thumbnails/photo.png").exists());
 
         BlobProperties thumb = container.getBlobClient("thumbnails/photo.png").getProperties();
         assertThat(thumb.getContentType()).isEqualTo("image/png");   // derived blob produced

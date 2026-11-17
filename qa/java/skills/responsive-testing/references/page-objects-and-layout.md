@@ -1,4 +1,4 @@
-# Page objects and the `Layout` helper — `qa-java:responsive-testing`
+# Page objects and the `Layout` probe — `qa-java:responsive-testing`
 
 The responsive tests in `SKILL.md` reach the page only through these classes, built in the test class's own
 `@BeforeMethod` after `BaseTest` has opened the page (`ui-test-author/playwright/references/lifecycle.md` §2).

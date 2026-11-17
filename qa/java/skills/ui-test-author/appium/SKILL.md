@@ -27,7 +27,7 @@ Scaffolds Appium page objects and TestNG mobile UI tests in Java, mirroring the 
 
 ## When to use
 
-- New page object under `src/main/java/pom/mobile/`, a scoped component (list row, card, sheet), or a TestNG test under `src/test/java/`
+- New page object under `src/main/java/pom/mobile/`, a region component (list row, card, sheet), a control component (picker, date picker, segmented control), or a TestNG test under `src/test/java/`
 - Gestures, WebView switching, app state or failure evidence in an Appium Java suite
 
 ## When NOT to use
@@ -52,12 +52,13 @@ Scaffolds Appium page objects and TestNG mobile UI tests in Java, mirroring the 
 |---|---|
 | `build.gradle.kts`, `settings.gradle.kts`, `testng.xml` | Exact pins, `selenium-support`, allure-java 3.0, `parallel="classes"` |
 | `AppiumDriverFactory.java` | One `AppiumDriver` per call from env (`PLATFORM`, `DEVICE_NAME`, `APP_PATH`, `PLATFORM_VERSION`, `APPIUM_URL`); the Android capabilities set `appium:settings[disableIdLocatorAutocompletion]` |
-| `Env.java` | The one `required(name)` helper |
+| `Env.java` | The suite's config class: `required(name)` fails naming the missing variable |
 | `BaseMobileTest.java` | Driver per class, the recording per test and, on failure, a screenshot, page source, device log and the recording; see `qa/java/skills/evidence-capture/references/appium.md` |
 | `BaseAppiumPage.java` | `testId` and the other ladder finders, `isTestIdVisible`, the abstract `verifyPageLoaded` |
 | `LoginPage.java`, `OrdersPage.java` | Screens; `signIn` returns the destination |
 | `OrderRow.java` | A scoped component: a row key, re-resolved on every call |
-| `OrdersTest.java` | One test |
+| `OrderSeeder.java` | Creates and deletes an order through the API (`API_URL`, `E2E_API_TOKEN`), asserting the exact status |
+| `OrdersTest.java` | Seeds its order and signs in in `@BeforeMethod`, deletes the order in `@AfterMethod`; the test body is one query and one assertion |
 
 ## Locator ladder
 
@@ -84,6 +85,8 @@ A repeating row cannot be found with a bare child locator, and a held element go
 3. Only when the platform can do the whole job in one query, scope there: an iOS class chain ``**/XCUIElementTypeCell[`name == "OrderRow"`]/**/XCUIElementTypeStaticText[`name == "OrderRow.Title"`]``. Mind the `UiSelector` caveat on Android.
 4. Components do **not** extend `BaseAppiumPage`. They use a small set of scoped finds and have no `verifyPageLoaded`; the host page owns the landmark.
 5. An Android XPath from an element starts with `.` (`.//x`); a bare `//x` can escape the element's scope.
+6. To check every row, the page returns one column's values (mapped from the rows `findElements` lists); the test asserts the list is not empty, then `allSatisfy` / `allMatch` over it, never a loop or the first row standing for the set. An id that embeds the row index is built inside the component from the index it resolves by content.
+7. A native control operated with more than one call (a picker wheel, a date picker, a segmented control) is a control component in `components.controls` at first use: it takes its container id, exposes intent with domain types (`select(LocalDate)`), and is held by the page that shows it.
 
 ## Gestures
 
@@ -137,7 +140,7 @@ Other removed endpoints have `mobile:` replacements that java-client 11's driver
 
 ## Rules
 
-The standards this skill's output must meet are the qa-java rule files, not a list here: `qa-java.md` (core) and `qa-java-ui.md`. Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the qa-java rule files, not a list here: `qa-java.md` (core), `qa-java-ui.md` and `qa-java-page-objects.md`. Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Conventions
 
@@ -154,7 +157,7 @@ The standards this skill's output must meet are the qa-java rule files, not a li
 1. Confirm the screen, platforms, landmark, elements with rungs, actions and destinations.
 2. For each element with no test id, record it in `missing-testids.md`; do not silently fall back to XPath.
 3. Write `src/main/java/pom/mobile/<Screen>Page.java`: constants, `verifyPageLoaded`, intent actions, and a scoped component for each repeating group.
-4. Stub missing destination pages; write the test with one `@Test` per scenario.
+4. Stub missing destination pages; write the test from `assets/OrdersTest.java`: data seeded and the screen reached in `@BeforeMethod(alwaysRun = true)`, records deleted in `@AfterMethod(alwaysRun = true)`, one `@Test` per scenario whose body is the action and its outcome.
 5. Run `./gradlew test` with `PLATFORM` set and expect zero failures. For a remote session, `curl -s http://127.0.0.1:4723/status` answers and `appium driver list --installed` lists the driver.
 
 A visible element missing from the page source is usually an accessibility, app-state, active-app (a system alert) or native-versus-WebView problem; fix that before the locator. For doctor failures and driver questions the Appium docs tools (`mcp__appium-mcp__appium_documentation_query`, `mcp__appium-mcp__appium_skills`, on when `APPIUM_MCP_DOCS_ENABLED=true`) answer from the official docs.

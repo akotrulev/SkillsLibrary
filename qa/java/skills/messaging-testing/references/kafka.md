@@ -113,12 +113,14 @@ public abstract class KafkaTestBase {
 
     protected String bootstrapServers;
     protected KafkaProbe probe;
+    protected KafkaProducer<String, String> producer;
 
     @BeforeClass(alwaysRun = true)
     public void startBroker() throws ExecutionException, InterruptedException {
         broker.start();
         bootstrapServers = broker.getBootstrapServers();
         probe = new KafkaProbe(bootstrapServers);
+        producer = newProducer();
 
         // Create the topics with a known partition count so partition/ordering assertions are deterministic.
         try (Admin admin = Admin.create(Map.of(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers))) {
@@ -130,11 +132,14 @@ public abstract class KafkaTestBase {
     }
 
     @AfterClass(alwaysRun = true)
-    public void stopBroker() { broker.stop(); }
+    public void stopBroker() {
+        if (producer != null) producer.close();
+        broker.stop();
+    }
 
-    // A short-lived producer for seeding input records. Block on the send future so the record is flushed
-    // before the test moves on — that's a confirm, not a sleep.
-    protected KafkaProducer<String, String> newProducer() {
+    // One producer per class for seeding input records. A test blocks on the send future so the record is
+    // flushed before it moves on — that's a confirm, not a sleep.
+    private KafkaProducer<String, String> newProducer() {
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
@@ -262,10 +267,8 @@ public void Should_write_a_shipment_row_When_an_OrderPaid_record_is_consumed() t
     UUID orderId = UUID.randomUUID();
 
     // 1. Produce the input record onto the topic the consumer subscribes to. Block on the send → flushed.
-    try (KafkaProducer<String, String> producer = newProducer()) {
-        producer.send(new ProducerRecord<>("orders", orderId.toString(),
-                Json.write(new OrderPaid(orderId)))).get();
-    }
+    producer.send(new ProducerRecord<>("orders", orderId.toString(),
+            Json.write(new OrderPaid(orderId)))).get();
 
     // 2. The SUT consumer is already running and picks it up.
 
@@ -293,9 +296,7 @@ group has committed.
 ```java
 @Test
 public void Should_let_a_fresh_group_reread_the_whole_log_When_a_prior_group_already_consumed() throws Exception {
-    try (KafkaProducer<String, String> producer = newProducer()) {
-        producer.send(new ProducerRecord<>("orders", "k1", "{\"orderId\":\"a\"}")).get();
-    }
+    producer.send(new ProducerRecord<>("orders", "k1", "{\"orderId\":\"a\"}")).get();
 
     // Group A reads and commits its offset — the record is NOT deleted.
     List<ConsumerRecord<String, String>> groupA = probe.records("orders", 1, Duration.ofSeconds(10));
@@ -321,10 +322,9 @@ record Seq(int seq) {}
 
 @Test
 public void Should_keep_per_key_ordering_When_records_share_a_key() throws Exception {
-    try (KafkaProducer<String, String> producer = newProducer()) {
-        for (int i = 1; i <= 3; i++)
-            producer.send(new ProducerRecord<>("orders", "cust-42", "{\"seq\":" + i + "}")).get();
-    }
+    producer.send(new ProducerRecord<>("orders", "cust-42", "{\"seq\":1}")).get();
+    producer.send(new ProducerRecord<>("orders", "cust-42", "{\"seq\":2}")).get();
+    producer.send(new ProducerRecord<>("orders", "cust-42", "{\"seq\":3}")).get();
 
     List<ConsumerRecord<String, String>> records = probe.records("orders", 3, Duration.ofSeconds(10));
 
@@ -348,9 +348,7 @@ exactly the same shape as `service-bus`/`sqs`'s DLQ assertion, but the dead-lett
 ```java
 @Test
 public void Should_route_the_poison_record_to_the_DLT_When_processing_fails() throws Exception {
-    try (KafkaProducer<String, String> producer = newProducer()) {
-        producer.send(new ProducerRecord<>("orders", "bad", "{ not valid order json }")).get();
-    }
+    producer.send(new ProducerRecord<>("orders", "bad", "{ not valid order json }")).get();
 
     // The SUT consumer fails to deserialize/process; its error handler (Spring Kafka
     // DeadLetterPublishingRecoverer / @RetryableTopic, or a manual catch → producer.send) republishes
@@ -413,10 +411,9 @@ public class FulfilmentConsumerTest extends KafkaTestBase {
     @Test
     public void Should_produce_ShipmentReady_When_a_valid_OrderPaid_is_consumed() throws Exception {
         UUID orderId = UUID.randomUUID();
-        try (KafkaProducer<String, String> producer = newProducer()) {
-            producer.send(new ProducerRecord<>("orders", orderId.toString(),
-                    Json.write(new OrderPaid(orderId)))).get();
-        }
+        producer.send(new ProducerRecord<>("orders", orderId.toString(),
+                Json.write(new OrderPaid(orderId)))).get();
+
 
         // The SUT consumer subscribes to "orders" and produces onto "shipments".
         List<ConsumerRecord<String, String>> ready = probe.records("shipments", 1, Duration.ofSeconds(10));

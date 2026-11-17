@@ -81,6 +81,7 @@ is no `Config.json` equivalent — you declare them through the SDK).
 import { LocalstackContainer, type StartedLocalStackContainer } from "@testcontainers/localstack";
 import {
   SQSClient, CreateQueueCommand, GetQueueAttributesCommand, PurgeQueueCommand,
+  ReceiveMessageCommand, ChangeMessageVisibilityCommand, DeleteMessageCommand,
 } from "@aws-sdk/client-sqs";
 
 export interface Broker {
@@ -89,6 +90,9 @@ export interface Broker {
   ordersUrl: string;
   ordersDlqUrl: string;
   purge: (queueUrl: string) => Promise<void>;
+  queueArn: (queueUrl: string) => Promise<string>;
+  receiveWithoutDelete: (queueUrl: string, times: number) => Promise<void>;
+  drain: (queueUrl: string) => Promise<string[]>;
   stop: () => Promise<void>;
 }
 
@@ -119,8 +123,40 @@ export async function startSqsBroker(): Promise<Broker> {
     },
   }))).QueueUrl!;
 
+  const queueArn = async (queueUrl: string): Promise<string> =>
+    (await sqs.send(new GetQueueAttributesCommand({
+      QueueUrl: queueUrl, AttributeNames: ["QueueArn"],
+    }))).Attributes!.QueueArn!;
+
+  const receiveWithoutDelete = async (queueUrl: string, times: number): Promise<void> => {
+    for (let attempt = 0; attempt < times; attempt++) {
+      const poll = await sqs.send(new ReceiveMessageCommand({
+        QueueUrl: queueUrl, WaitTimeSeconds: 5, MaxNumberOfMessages: 1,
+      }));
+      for (const m of poll.Messages ?? []) {
+        await sqs.send(new ChangeMessageVisibilityCommand({
+          QueueUrl: queueUrl, ReceiptHandle: m.ReceiptHandle, VisibilityTimeout: 0,
+        }));
+      }
+    }
+  };
+
+  const drain = async (queueUrl: string): Promise<string[]> => {
+    const drained: string[] = [];
+    for (;;) {
+      const page = await sqs.send(new ReceiveMessageCommand({
+        QueueUrl: queueUrl, WaitTimeSeconds: 2, MaxNumberOfMessages: 10,
+      }));
+      if (!page.Messages?.length) return drained;
+      for (const m of page.Messages) {
+        drained.push(m.Body!);
+        await sqs.send(new DeleteMessageCommand({ QueueUrl: queueUrl, ReceiptHandle: m.ReceiptHandle }));
+      }
+    }
+  };
+
   return {
-    sqs, endpoint, ordersUrl, ordersDlqUrl,
+    sqs, endpoint, ordersUrl, ordersDlqUrl, queueArn, receiveWithoutDelete, drain,
     purge: async (queueUrl) => { await sqs.send(new PurgeQueueCommand({ QueueUrl: queueUrl })); },
     stop: async () => { sqs.destroy(); await container.stop(); },
   };
@@ -290,16 +326,7 @@ it("redrives to the DLQ when maxReceiveCount is exceeded", async () => {
 
   // Receive-without-delete maxReceiveCount+1 times, resetting visibility to 0 each time to force fast
   // redelivery. The bounded long-poll is the condition-wait; no setTimeout anywhere.
-  for (let attempt = 0; attempt < 4; attempt++) { // 4 = maxReceiveCount(3) + 1 to trigger the move
-    const poll = await broker.sqs.send(new ReceiveMessageCommand({
-      QueueUrl: broker.ordersUrl, WaitTimeSeconds: 5, MaxNumberOfMessages: 1,
-    }));
-    if (poll.Messages?.length) {
-      await broker.sqs.send(new ChangeMessageVisibilityCommand({
-        QueueUrl: broker.ordersUrl, ReceiptHandle: poll.Messages[0].ReceiptHandle, VisibilityTimeout: 0,
-      }));
-    }
-  }
+  await broker.receiveWithoutDelete(broker.ordersUrl, 4); // 4 = maxReceiveCount(3) + 1 to trigger the move
 
   // Assert on the DLQ — long-poll the condition (the message lands), not a sleep.
   const dead = await broker.sqs.send(new ReceiveMessageCommand({
@@ -316,7 +343,7 @@ it("redrives to the DLQ when maxReceiveCount is exceeded", async () => {
 
 > When the **SUT consumer** owns the failing/deleting, you don't drive the receive loop yourself — you seed the
 > poison message, let the consumer fail it `maxReceiveCount` times, and `expect.poll` the DLQ for the moved
-> message. The manual loop above is for when the *test* is exercising the redrive wiring directly.
+> message. The fixture's `receiveWithoutDelete` is for when the *test* is exercising the redrive wiring directly.
 
 ## Standard vs FIFO queues
 
@@ -351,7 +378,6 @@ envelope.
 
 ```typescript
 import { SNSClient, CreateTopicCommand, SubscribeCommand, PublishCommand } from "@aws-sdk/client-sns";
-import { GetQueueAttributesCommand } from "@aws-sdk/client-sqs";
 
 it("fans out to both queues when an order event is published", async () => {
   const sns = new SNSClient({
@@ -360,14 +386,14 @@ it("fans out to both queues when an order event is published", async () => {
   });
 
   const topicArn = (await sns.send(new CreateTopicCommand({ Name: "order-events" }))).TopicArn!;
-  for (const queueUrl of [fulfilmentUrl, auditUrl]) {
-    const arn = (await broker.sqs.send(new GetQueueAttributesCommand({
-      QueueUrl: queueUrl, AttributeNames: ["QueueArn"],
-    }))).Attributes!.QueueArn;
-    await sns.send(new SubscribeCommand({
-      TopicArn: topicArn, Protocol: "sqs", Endpoint: arn, Attributes: { RawMessageDelivery: "true" },
-    }));
-  }
+  await sns.send(new SubscribeCommand({
+    TopicArn: topicArn, Protocol: "sqs", Endpoint: await broker.queueArn(fulfilmentUrl),
+    Attributes: { RawMessageDelivery: "true" },
+  }));
+  await sns.send(new SubscribeCommand({
+    TopicArn: topicArn, Protocol: "sqs", Endpoint: await broker.queueArn(auditUrl),
+    Attributes: { RawMessageDelivery: "true" },
+  }));
 
   await sns.send(new PublishCommand({ TopicArn: topicArn, Message: JSON.stringify({ orderId: crypto.randomUUID() }) }));
 
@@ -386,21 +412,12 @@ it("fans out to both queues when an order event is published", async () => {
 
 ## Receiving a batch / draining
 
-To assert "exactly N messages were produced", drain in a loop with `WaitTimeSeconds` and count — the bounded
-long-poll stops it hanging when fewer than N arrive. SQS returns **at most 10** per receive, so loop:
+To assert "exactly N messages were produced", drain with `WaitTimeSeconds` and count — the bounded
+long-poll stops it hanging when fewer than N arrive. SQS returns **at most 10** per receive, so the fixture's
+`drain` loops until a bounded receive comes back empty; the test only counts:
 
 ```typescript
-const drained: string[] = [];
-for (;;) {
-  const page = await broker.sqs.send(new ReceiveMessageCommand({
-    QueueUrl: broker.ordersUrl, WaitTimeSeconds: 2, MaxNumberOfMessages: 10,
-  }));
-  if (!page.Messages?.length) break; // bounded wait returned empty → drained
-  for (const m of page.Messages) {
-    drained.push(m.Body!);
-    await broker.sqs.send(new DeleteMessageCommand({ QueueUrl: broker.ordersUrl, ReceiptHandle: m.ReceiptHandle }));
-  }
-}
+const drained = await broker.drain(broker.ordersUrl);
 expect(drained).toHaveLength(3); // SUT produced exactly 3
 ```
 

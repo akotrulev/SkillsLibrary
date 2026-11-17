@@ -85,9 +85,17 @@ import { GET_USER, CREATE_USER, CreateUserInput } from '../operations/user';
 import { User } from '../schemas/user';
 
 export class UserGraphQLClient extends GraphQLBaseClient {
-  constructor(authenticated: boolean) {
+  static authenticated(): UserGraphQLClient {
+    return new UserGraphQLClient({ authorization: `Bearer ${process.env.GRAPHQL_TOKEN!}` });
+  }
+
+  static anonymous(): UserGraphQLClient {
+    return new UserGraphQLClient({});
+  }
+
+  private constructor(authHeaders: Record<string, string>) {
     super();
-    if (authenticated) this.headers['authorization'] = `Bearer ${process.env.GRAPHQL_TOKEN!}`;
+    Object.assign(this.headers, authHeaders);
   }
 
   getUser(id: string): Promise<GraphQLResponse<{ user: User | null }>> {
@@ -102,8 +110,10 @@ export class UserGraphQLClient extends GraphQLBaseClient {
 
 ### 3. Schema — `tests/schemas/user.ts`
 
-The `data` schema models the **operation's selection set** (only the fields the query asked for). A shared
-`GraphQLErrorSchema` validates the envelope's `errors[]`.
+The `data` schema models the **operation's selection set** (only the fields the query asked for) and is
+`.strict()`: the server returns exactly the selected fields, so any other field is drift and fails the parse. A
+shared `GraphQLErrorSchema` validates the envelope's `errors[]`; its `extensions` stays open (`.passthrough()`)
+because the GraphQL spec leaves that map's content to the server, which is not a loosened contract.
 
 ```typescript
 // tests/schemas/user.ts
@@ -114,11 +124,11 @@ export const UserSchema = z.object({
   email: z.string().email(),
   firstName: z.string(),
   lastName: z.string(),
-});
+}).strict();
 export type User = z.infer<typeof UserSchema>;
 
 // data for the GetUser selection set — `user` is nullable (not-found returns null + an errors[] entry)
-export const GetUserDataSchema = z.object({ user: UserSchema.nullable() });
+export const GetUserDataSchema = z.object({ user: UserSchema.nullable() }).strict();
 
 // the GraphQL error envelope — reused across every spec
 export const GraphQLErrorSchema = z.object({
@@ -142,7 +152,7 @@ import { z } from 'zod';
 
 describe('query GetUser', () => {
   it('returns the user when it exists', async () => {
-    const res = await new UserGraphQLClient(true).getUser('1');
+    const res = await UserGraphQLClient.authenticated().getUser('1');
 
     expect(res.status).toBe(200);              // GraphQL answers 200 even when wrong — assert, but it's not the gate
     expect(res.errors).toBeUndefined();        // THE gate for a happy path: no errors envelope
@@ -151,7 +161,7 @@ describe('query GetUser', () => {
   });
 
   it('returns a NOT_FOUND error (still HTTP 200) for an unknown id', async () => {
-    const res = await new UserGraphQLClient(true).getUser('999999');
+    const res = await UserGraphQLClient.authenticated().getUser('999999');
 
     expect(res.status).toBe(200);              // NOT a 404 — GraphQL keeps the 200
     const [err] = GraphQLErrorsSchema.parse(res.errors);   // assert on the ENVELOPE
@@ -160,20 +170,16 @@ describe('query GetUser', () => {
     expect(res.data?.user).toBeNull();         // data is present; the failing field is null
   });
 
-  it('returns an UNAUTHENTICATED error when the token is missing', async () => {
-    const res = await new UserGraphQLClient(false).getUser('1');
+  it('returns an UNAUTHENTICATED error (still HTTP 200) when the token is missing', async () => {
+    const res = await UserGraphQLClient.anonymous().getUser('1');
 
-    // Two valid server designs: a 200 with an errors[] code, OR a transport 401. Assert the contract you have.
-    if (res.status === 200) {
-      expect(GraphQLErrorsSchema.parse(res.errors)[0].extensions?.code).toBe('UNAUTHENTICATED');
-    } else {
-      expect(res.status).toBe(401);
-    }
+    expect(res.status).toBe(200);
+    expect(GraphQLErrorsSchema.parse(res.errors)[0].extensions?.code).toBe('UNAUTHENTICATED');
   });
 });
 ```
 
 > The unauthenticated test shows the **one place a GraphQL response legitimately varies its HTTP status** —
 > auth middleware may reject at the transport (401) before any resolver runs, or the schema may surface
-> `UNAUTHENTICATED` in `errors[]` with a 200. This is the *only* conditional you'll see in these specs; pin it
-> to your server's actual contract and delete the branch you don't use.
+> `UNAUTHENTICATED` in `errors[]` with a 200. Pin the test to your server's actual contract: where the transport
+> rejects, the test asserts `expect(res.status).toBe(401)` instead. Never branch on the status in the test.

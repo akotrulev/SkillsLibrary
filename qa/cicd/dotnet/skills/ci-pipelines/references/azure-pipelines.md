@@ -337,6 +337,7 @@ jobs:
 - `playwright-artifacts-<n>` is published **on failure only** (`condition: failed()`): the screenshot, trace and video of each failed test plus any deliberate recording. A green run leaves the folder empty.
 - The quarantine lane is a second, non-gating job in this template — the same steps without `UiShards` and `strategy`, running `--filter "TestCategory=Flaky"` with `continueOnError: true` on its test step, per `qa/reporting/dotnet/skills/flaky-test-quarantine`.
 - **Running in the pinned image** instead of installing browsers — what visual baselines need (`qa/dotnet/skills/visual-regression`): give the job `container: mcr.microsoft.com/playwright/dotnet:v1.63.0-noble` and drop the install line; the image carries the .NET 10 SDK and the browsers. The tag must equal the Playwright version, and there is no `-jammy` .NET image since 1.60. `AzureCLI@2` runs inside the container, which has no Azure CLI, so a container job tests only pages that need no fetched credentials. The visual job is not a container job: it is the `docker run` step in `qa/dotnet/skills/visual-regression/references/playwright-snapshots.md` §8.
+- **Running the suite's own image** (`docker build` + `docker run` of its `Dockerfile`, report on a mounted folder): the *Container lane* in this skill's `SKILL.md`. Map secrets into the script step's `env:` (a secret variable is not exported on its own) and pass them as `-e`; the `docker run` step gates like any test step.
 
 ### Optional: caching Playwright browsers
 

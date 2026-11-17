@@ -172,10 +172,10 @@ jobs:
 
 To drive the scan from an NUnit test (assert programmatically, attach to Allure, gate on parsed counts),
 invoke the image as a one-shot container and parse the JSON report. **Async all the way** (no
-`.Result`/`.Wait()`) — this is the .NET re-expression of the TS `child_process` helper:
+`.Result`/`.Wait()`) — this is the .NET re-expression of the TS `child_process` runner:
 
 ```csharp
-// Support/ZapBaseline.cs — the Docker-port helper: one-shot container + JSON parse (no SDK exists)
+// Support/ZapBaseline.cs — the Docker-port runner: one-shot container + JSON parse (no SDK exists)
 using System.Diagnostics;
 using System.Text.Json;
 

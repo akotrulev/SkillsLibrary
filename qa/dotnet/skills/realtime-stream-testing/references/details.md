@@ -63,7 +63,7 @@ public static class AwaitFrame
 ```
 
 - The deadline lives **inside** the `CancellationTokenSource`; the read returns the moment a frame is queued.
-- This helper is the one place a `catch` sits in the skill: it turns the deadline into a `TimeoutException`
+- This wait condition is the one place a `catch` sits in the skill: it turns the deadline into a `TimeoutException`
   carrying what did arrive. The filter catches only the deadline's own cancellation; a channel completed with
   an error throws `ChannelClosedException`, which passes through with the probe's failure inside it.
 

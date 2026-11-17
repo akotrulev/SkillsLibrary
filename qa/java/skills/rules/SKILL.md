@@ -10,12 +10,13 @@ Plugins cannot ship Claude Code rules, so this skill copies them into the projec
 
 | File (beside this SKILL.md) | Loads when the session touches |
 |---|---|
-| `qa-java.md`: simplicity, lifecycle, isolation, assertions, waits, secrets, reporting, flakes, comments | test-module folders (`apitests`, `ui-tests`, `e2e`, …), role folders under test sources (`tests`, `pages`, `windows`, `clients`, `steps`, `builders`, …), `pom/` and `windows/` under `src/main`, `src/gatling` |
-| `qa-java-api.md`: clients, DTOs, status and error assertions | `apitests` / `api-tests`, `clients/` and `models/` under test sources, `*Client` / `*Dto` test files |
-| `qa-java-ui.md`: locators, page objects, drivers, waits, Appium | `uitests` / `ui-tests` / `mobile-tests` / `e2e`, `pages/` `screens/` `components/` `flows/` under test sources, `*Page` / `*Screen` test files, `pom/` |
-| `desktop-tests.md`: window objects, `accessibility id` locators, window switching, Appium 3 desktop session | `desktop-tests` module folders, `windows/` and `support/` under test sources, `*Window` / `*Dialog` test files, `DesktopDriverFactory` |
-| `qa-java-bdd.md`: feature files, glue, hooks | `*.feature`, `steps/` `stepdefs/` `glue/` `hooks/`, `*Steps` / `*Hooks` |
-| `qa-java-data.md`: builders, seeders, probes, Testcontainers | `builders/` `mothers/` `db/` `probes/` `seeders/`, `*Builder` / `*Mother` / `*Probe` / `*Seeder` under test sources |
+| `qa-java.md`: simplicity, roles, lifecycle, isolation, assertions, test-body shape, waits, secrets, reporting, flakes, comments | test-module folders (`apitests`, `ui-tests`, `e2e`, …), role folders under test sources (`tests`, `pages`, `windows`, `clients`, `steps`, `builders`, …), `pom/` `windows/` `action/` `pojo/` `poco/` `factory/` under `src/main` or test sources, `src/gatling` |
+| `qa-java-api.md`: clients, DTOs, strict deserialization, status and error assertions | `apitests` / `api-tests`, `clients/` `models/` `action/` `pojo/` `poco/` under test sources, `action/` `pojo/` `poco/` under `src/main`, `*Client` / `*Dto` / `*Action` / `*Pojo` / `*Poco` test files |
+| `qa-java-ui.md`: locators, drivers, waits, sign-in, Appium | `uitests` / `ui-tests` / `mobile-tests` / `e2e`, `pages/` `screens/` `components/` `flows/` under test sources, `*Page` / `*Screen` test files, `pom/` |
+| `qa-java-page-objects.md`: pages, region and control components, flows, locator exposure, method shape | the `qa-java-ui.md` and `desktop-tests.md` paths together (`pages/` `screens/` `windows/` `components/` `flows/`, `*Page` / `*Screen` / `*Window` / `*Dialog`, `pom/`) |
+| `desktop-tests.md`: `accessibility id` locators, window switching, Appium 3 desktop session | `desktop-tests` module folders, `windows/` and `support/` under test sources, `*Window` / `*Dialog` test files, `DesktopDriverFactory` |
+| `qa-java-bdd.md`: feature files, glue, steps on exposed controls, one binding per field, hooks | `*.feature`, `steps/` `stepdefs/` `glue/` `hooks/`, `*Steps` / `*Hooks` |
+| `qa-java-data.md`: reference data, pre-clean, keep on failure, builders, seeders, probes, Testcontainers | `builders/` `mothers/` `db/` `probes/` `seeders/`, `*Builder` / `*Mother` / `*Probe` / `*Seeder` under test sources, `factory/` under `src/main` or `src/test` |
 | `qa-java-perf.md`: Gatling | `src/gatling/`, `*Simulation.java` |
 | `qa-java-suite.md`: TestNG, Allure, test-module builds | `testng*.xml`, `allure` / `junit-platform` / `cucumber` properties, `categories.json`, test-module build files |
 | `qa-java-ci.md`: test pipelines | test, Allure and perf workflows, `azure-pipelines*.yml`, `.gitlab-ci.yml` |
@@ -33,7 +34,7 @@ Where a step needs the user's answer or agreement and nobody is there to give it
 ## Procedure
 
 1. **Find the project root**: `git rev-parse --show-toplevel`, or the working directory when it is not a git repo.
-2. **Check the source**: all nine rule files exist in `${CLAUDE_SKILL_DIR}`. If one is missing, stop and say so; never write a rule from memory.
+2. **Check the source**: all ten rule files exist in `${CLAUDE_SKILL_DIR}`. If one is missing, stop and say so; never write a rule from memory.
 3. **Copy each file** that is missing from the target: `mkdir -p <root>/.claude/rules/qa-java` and `cp` it byte for byte.
 4. **For each file already present**, `cmp` it with the source.
    - Identical: up to date.
@@ -41,7 +42,7 @@ Where a step needs the user's answer or agreement and nobody is there to give it
 5. **Fit the paths to where this project's suites live.** The defaults follow the library's layouts; Java test code shares its extension with production code, so they stay narrow on purpose. Find the real locations:
    - Test modules: `git grep -l -e org.testng -e io.rest-assured -e com.microsoft.playwright -e io.appium -e io.cucumber -e io.gatling -- '*build.gradle*' '*pom.xml'`. A module directory none of the `qa-java.md` globs covers gets `"<module>/**/*.java"` there and its build file in `qa-java-suite.md`. When the whole repository is a test-automation project (no production code), propose `"**/*.java"` for `qa-java.md`.
    - API: `git grep -l -e 'extends BaseApiClient' -e 'io.restassured' -e APIRequestContext -- '*.java'`, for `qa-java-api.md`.
-   - UI: `git grep -l -e 'com.microsoft.playwright.Page;' -e 'org.openqa.selenium.WebDriver;' -e 'io.appium.java_client' -- '*.java'`, for `qa-java-ui.md`.
+   - UI: `git grep -l -e 'com.microsoft.playwright.Page;' -e 'org.openqa.selenium.WebDriver;' -e 'io.appium.java_client' -- '*.java'`, for `qa-java-ui.md` and `qa-java-page-objects.md`.
    - BDD: `git ls-files '*.feature'` and `git grep -l io.cucumber.java -- '*.java'`, for `qa-java-bdd.md`.
    - Data: `git grep -l -e NamedParameterJdbcTemplate -e org.testcontainers -e 'class .*Builder' -- '*.java'` within the test modules, for `qa-java-data.md`.
    - Perf: `git grep -l io.gatling.javaapi -- '*.java'`, for `qa-java-perf.md`.

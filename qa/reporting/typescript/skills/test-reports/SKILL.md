@@ -84,7 +84,6 @@ What `allure-playwright` maps from the runner, with no code:
 In `wdio.conf.ts`:
 
 ```ts
-
 export const config: WebdriverIO.Config = {
   reporters: [
     'spec',
@@ -126,7 +125,6 @@ it('Should_RefundOneLine_When_PartialRefundIsIssued', async () => {
 
 - `issue(url, name)` and `tms(url, name)` take the **URL first**.
 - Severity is **test** severity: `'blocker'`, `'critical'`, `'normal'`, `'minor'` or `'trivial'`. `'blocker'` = "ship is blocked if this fails"; `'normal'` = "regression on a non-critical flow".
-- `allure-js-commons/sync` exists for synchronous code; its `step()` must not return a promise. Tests here are async, so use the default import.
 
 ## Attachments (mandatory on failure path)
 
@@ -143,14 +141,10 @@ it('Should_RefundOneLine_When_PartialRefundIsIssued', async () => {
 import * as allure from 'allure-js-commons';
 import { expect, it } from 'vitest';
 
-async function attachResponse(response: ApiResponse): Promise<void> {
-  await allure.attachment('response.json', response.bodyText, { contentType: 'application/json' });
-}
-
 it('Should_Return422_When_EmailIsInvalid', async () => {
   await allure.feature('Sign-up');
   const response = await usersClient.signUp({ email: 'not-an-email' });
-  await attachResponse(response);
+  await allure.attachment('response.json', response.bodyText, { contentType: 'application/json' });
 
   expect(response.status).toBe(422);
 });
@@ -183,7 +177,7 @@ Every test sends one W3C `traceparent` trace id on all its requests (`api-client
 `references/trace-context.md`; UI: `ui-test-author/playwright`'s `references/trace-correlation.md`). On
 failure the result gets a `telemetry` attachment (`text/uri-list`): the trace id, a Grafana Explore link to
 the trace in Tempo and one to its log lines in Loki. Grafana's base URL comes from `GRAFANA_URL`; unset, no
-link is written and the test is unaffected. The helper, the failure hook, the Explore URL format and the
+link is written and the test is unaffected. The link builder, the failure hook, the Explore URL format and the
 procedure for triaging a failed run: [`references/trace-links.md`](references/trace-links.md).
 
 ## Steps
@@ -198,7 +192,7 @@ await allure.step('Create the order', async () => {
 
 ## Report CLI
 
-One pin: `allure-commandline@2.46.1`. In CI it is installed with `npm i -g allure-commandline@2.46.1` on a runner with a Java runtime, then:
+In CI: `npm i -g allure-commandline@2.46.1` on a runner with a Java runtime, then:
 
 ```bash
 allure generate allure-results -o allure-report --clean
@@ -206,9 +200,9 @@ allure generate allure-results -o allure-report --clean
 
 A shard matrix copies every shard's `allure-results/` into one folder before `generate`; new files are added to the existing ones.
 
-## CI integration
+**One self-contained file**, for a build artifact or an attachment: `allure generate --single-file allure-results -o allure-report --clean` writes only `allure-report/index.html`, which opens from disk with no server (checked 2026-11-17 on 2.46.1). It has no `history/` folder, so a job that keeps trends generates the folder form too. Every install of the CLI, on a runner or in an image, is `allure-commandline@2.46.1` with a Java runtime.
 
-Pattern is identical regardless of CI:
+## CI integration
 
 1. Run tests → `allure-results/` written.
 2. Upload `allure-results/` as an artifact, **always** (even on failure).
@@ -255,8 +249,6 @@ The same five steps; the publish jobs are in `qa/cicd/typescript/skills/ci-pipel
 
 Trend graphs require a `history/` folder inside `allure-results/` populated from the previous run. The smoke test is "does the trend chart in the published report show > 1 bar".
 
-Keep last 20–30 runs.
-
 ## Categories for triage — `categories.json`
 
 Place at the project root and copy it into `allure-results/` before `allure generate` runs:
@@ -278,7 +270,6 @@ Place at the project root and copy it into `allure-results/` before `allure gene
 - Every test calls `allure.feature(…)` + `allure.story(…)` + `allure.severity(…)`.
 - API tests attach `response.bodyText` **before** assertions on failure paths.
 - The Playwright evidence modes are the config asset's and are explained by `evidence-capture`; this skill never sets `trace`, `video` or `screenshot`.
-- One Allure CLI pin, `allure-commandline@2.46.1`, equal to `qa/cicd/ci-conventions`.
 - `allure-results/` uploaded as a CI artifact on **every** run, even on test failure.
 - History preserved across runs (last 20–30 retained).
 - Report published from `main` to a stable URL; PR builds publish to a PR-scoped URL or skip publish.
@@ -289,7 +280,7 @@ Place at the project root and copy it into `allure-results/` before `allure gene
 
 - No "always pass" wrappers around the test step — no `continue-on-error` / `continueOnError` / `|| true`. The test step fails the build; the upload and publish steps run anyway (`if: always()` / `condition: succeededOrFailed()` / `when: always`).
 - No `import { allure } from 'allure-playwright'` — deprecated for removal in 3.13.0.
-- No un-awaited `allure.*` call, and no `void` helper that calls one.
+- No un-awaited `allure.*` call, and no `void` function that calls one.
 - No committing `allure-results/` to Git — it's an artifact.
 - No `allure.feature('misc')` catch-all bucket.
 - No `allure.description` that paraphrases the test name — describe behavior or link the spec.

@@ -79,6 +79,28 @@ dotnet test "$project" --list-tests -- NUnit.DisplayName=FullName \
   uploads that folder on failure (14 days) and `UiTests/bin/<cfg>/net10.0/allure-results/` on every run. What
   the files are and how to read them is `qa/dotnet/skills/evidence-capture`.
 
+## Container lane
+
+A suite that ships a `Dockerfile` (the *Container* section of `qa/dotnet/skills/ui-project-setup` or
+`qa/dotnet/skills/api-project-setup`) runs on any of the three hosts as two steps on the checked-out commit:
+
+```bash
+docker build -f UiTests/Dockerfile -t ui-tests:"$COMMIT_SHA" .
+docker run --rm --init --ipc=host -e BASE_URL -e E2E_USER -e E2E_PASSWORD \
+  -v "$PWD/allure-results:/src/UiTests/bin/Release/net10.0/allure-results" \
+  -v "$PWD/artifacts:/src/UiTests/bin/Release/net10.0/playwright-artifacts" ui-tests:"$COMMIT_SHA"
+```
+
+- The `docker run` step is the gating test step: it returns `dotnet test`'s exit code, so it carries no
+  `continue-on-error` / `continueOnError` / `allow_failure` / `|| true`. The `allure-results/` and
+  `artifacts/` uploads run anyway, as after any test step.
+- Secrets map from the platform's secret store into the step's environment and pass as `-e NAME`, never
+  `--build-arg`.
+- `$COMMIT_SHA` is the host's commit variable (`${{ github.sha }}`, `$(Build.SourceVersion)`, `$CI_COMMIT_SHA`).
+  GitHub-hosted and Microsoft-hosted Ubuntu runners have a Docker daemon. A GitLab Docker-executor job needs
+  the `docker:dind` service of `references/gitlab-ci.md`, and a `-v` source must sit under `$CI_PROJECT_DIR`,
+  the job directory dind shares; `$PWD/…` from the project root does.
+
 ## Cross-references
 
 Each `references/<tool>.md` carries its own cross-references to sibling skills (DB verification,

@@ -43,7 +43,7 @@ Wires TypeScript tests to a **hosted device/browser grid** — BrowserStack, Sau
 | **LambdaTest** | `wss://cdp.lambdatest.com/playwright` (SDK `lambdatest-setup`) | `mobile-hub.lambdatest.com/wd/hub` | `LT:Options` | LambdaTest Tunnel (`LT`) |
 | **AWS Device Farm** | signed TestGrid Selenium URL (not a Playwright ws endpoint) | managed run (project ARN + device-pool ARN) or `remoteDriverEndpoint` | none — ARN/upload model | VPC/endpoint config, not a CLI tunnel |
 
-**Decision rule.** *Mostly web on a broad browser/OS matrix? Any of BrowserStack / Sauce / LambdaTest — pick on price/plan.* *Real-device mobile depth or app-management?* BrowserStack and Sauce are strongest; LambdaTest is the cheapest broad option. *Already deep in AWS and need private-VPC devices?* Device Farm — but it's an **ARN/upload paradigm, not a caps-on-a-hub grid**, so the wiring differs most there (see § AWS Device Farm). Don't over-engineer multi-vendor abstraction; wire one vendor cleanly behind the `gridCaps` helper and add a second only when a real need appears.
+**Decision rule.** *Mostly web on a broad browser/OS matrix? Any of BrowserStack / Sauce / LambdaTest — pick on price/plan.* *Real-device mobile depth or app-management?* BrowserStack and Sauce are strongest; LambdaTest is the cheapest broad option. *Already deep in AWS and need private-VPC devices?* Device Farm — but it's an **ARN/upload paradigm, not a caps-on-a-hub grid**, so the wiring differs most there (see § AWS Device Farm). Don't over-engineer multi-vendor abstraction; wire one vendor cleanly behind the `gridCaps` capability builder and add a second only when a real need appears.
 
 > **The one gotcha that bites everyone (Playwright + BrowserStack).** BrowserStack's Playwright **direct-connect still uses LEGACY FLAT caps** (`browser`, `os`, `os_version`, `browserstack.username`, `browserstack.accessKey`, …) — **not** the W3C `bstack:options` nesting used by Selenium/Appium. The nested block is for the `browserstack.yml` SDK and for Appium. Don't mix them. Sauce has **no public Playwright `connect` endpoint at all** — it's `saucectl`-driven, the biggest cross-vendor divergence.
 
@@ -79,7 +79,7 @@ These sections live in `references/details.md` — **read it when the task touch
 - `total CI shards × workers-per-shard ≤ plan session cap`. Sharding mechanics live in `qa/cicd/typescript/skills/ci-pipelines/*` — cross-link, don't duplicate.
 
 ### Secrets
-- Username + access key via **env vars only** (`required(...)` helper). Never a literal, never in `wdio.conf.ts`/`browserstack.yml`/`.sauce/config.yml` committed to the repo.
+- Username + access key via **env vars only** (the `required(...)` env loader). Never a literal, never in `wdio.conf.ts`/`browserstack.yml`/`.sauce/config.yml` committed to the repo.
 - In CI inject via the secret store; for cloud (Device Farm) auth prefer **OIDC** over a long-lived key.
 - Never log a credential or persist it into an artifact/HAR.
 

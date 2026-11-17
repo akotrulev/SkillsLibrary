@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Allure.NUnit.Attributes;
 using Example.UiTests.Pages;
 using Example.UiTests.Support;
@@ -28,7 +27,7 @@ public class WebMcpTests : BaseTest
     [Test]
     public async Task Should_DeclareAnObjectSchema_When_AddToCartIsRegistered()
     {
-        var tool = await RegisteredToolAsync(AddToCart);
+        var tool = await _productPage.RegisteredToolAsync(AddToCart, TimeoutMs);
 
         Assert.That(tool.GetProperty("inputSchema").GetProperty("type").GetString(), Is.EqualTo("object"), $"{AddToCart} inputSchema in {tool}");
     }
@@ -36,7 +35,7 @@ public class WebMcpTests : BaseTest
     [Test]
     public async Task Should_MarkAddToCartConsequential_When_AddToCartIsRegistered()
     {
-        var tool = await RegisteredToolAsync(AddToCart);
+        var tool = await _productPage.RegisteredToolAsync(AddToCart, TimeoutMs);
 
         Assert.That(tool.GetProperty("annotations").GetProperty("consequentialHint").GetBoolean(), Is.True, $"{AddToCart} annotations in {tool}");
     }
@@ -44,7 +43,7 @@ public class WebMcpTests : BaseTest
     [Test]
     public async Task Should_UpdateCartBadge_When_AddToCartIsCalledWithValidInput()
     {
-        await CallAddToCartAsync(2);
+        await _productPage.CallToolAsync(AddToCart, new { sku = Sku, quantity = 2 }, TimeoutMs);
 
         await Expect(_productPage.CartBadge, $"cart badge after {AddToCart}").ToHaveTextAsync("2");
     }
@@ -52,7 +51,7 @@ public class WebMcpTests : BaseTest
     [Test]
     public async Task Should_ReturnIsError_When_QuantityIsNegative()
     {
-        var result = await CallAddToCartAsync(-1);
+        var result = await _productPage.CallToolAsync(AddToCart, new { sku = Sku, quantity = -1 }, TimeoutMs);
 
         Assert.That(result.GetProperty("isError").GetBoolean(), Is.True, $"{AddToCart} result for quantity -1: {result}");
     }
@@ -60,29 +59,11 @@ public class WebMcpTests : BaseTest
     [Test]
     public async Task Should_DropAddToCart_When_UserLeavesTheProductPage()
     {
-        await RegisteredToolAsync(AddToCart);
+        await _productPage.RegisteredToolAsync(AddToCart, TimeoutMs);
         await _loginPage.GoToAsync();
 
-        var tools = await _productPage.SettledToolsAsync(AddToCart, present: false, TimeoutMs);
+        var names = await _productPage.ToolNamesAfterRemovalAsync(AddToCart, TimeoutMs);
 
-        Assert.That(Names(tools), Does.Not.Contain(AddToCart), "tools after leaving the product page");
+        Assert.That(names, Does.Not.Contain(AddToCart), "tools after leaving the product page");
     }
-
-    private async Task<JsonElement> RegisteredToolAsync(string name)
-    {
-        var tools = await _productPage.SettledToolsAsync(name, present: true, TimeoutMs);
-        var tool = tools.EnumerateArray().FirstOrDefault(candidate => candidate.GetProperty("name").GetString() == name);
-        return tool.ValueKind == JsonValueKind.Object
-            ? tool
-            : throw new AssertionException($"WebMCP tool {name} not registered within {TimeoutMs} ms; tools: {string.Join(", ", Names(tools))}");
-    }
-
-    private async Task<JsonElement> CallAddToCartAsync(int quantity)
-    {
-        await RegisteredToolAsync(AddToCart);
-        return await _productPage.CallToolAsync(AddToCart, new { sku = Sku, quantity }, TimeoutMs);
-    }
-
-    private static string?[] Names(JsonElement tools) =>
-        tools.EnumerateArray().Select(tool => tool.GetProperty("name").GetString()).ToArray();
 }

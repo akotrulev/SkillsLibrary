@@ -59,7 +59,7 @@ npx percy exec -- dotnet test UiTests -c Release --filter TestCategory=visual
   `Percy.Snapshot`, logs "Could not take DOM snapshot", and returns `null` (`Percy.cs`, v1.0.4). The status
   check is the only gate.
 - `percy exec` exports `PERCY_BUILD_URL` (and `PERCY_BUILD_ID`) to the command it runs (`@percy/cli` 1.32.11,
-  `cli-exec/src/exec.js`); §4's helper links it into Allure.
+  `cli-exec/src/exec.js`); §4's `PercySnapshots` links it into Allure.
 - The `visual` category is the same as the comparer lane's (`references/playwright-snapshots.md` §5, §8):
   visual tests run nightly, not in the PR gate.
 
@@ -87,7 +87,7 @@ merge over it; the binding sends them to the agent unchanged.
 
 ## 4. The core pattern
 
-`Percy.Snapshot(IPage, …)` is a **static** method that takes the page, so a small helper holds the page —
+`Percy.Snapshot(IPage, …)` is a **static** method that takes the page, so a small `PercySnapshots` class holds the page —
 the test never passes `Page` around — and adds the Percy build link to the test's Allure result:
 
 ```csharp
@@ -158,7 +158,7 @@ public class PricingPercyTests : BaseTest
   flow, never from a route handler or an event handler.
 - `AllureApi.AddLink(name, url)` adds to the **running test** only; outside a test (a `[OneTimeTearDown]`) it
   does nothing, which is why the link is added here, during the test.
-- One helper per test, built in the class's own `[SetUp]`, where the page `BaseTest` opened already exists.
+- One `PercySnapshots` per test, built in the class's own `[SetUp]`, where the page `BaseTest` opened already exists.
   Nothing to close: there is no Percy session per test.
 - **The test has no assertion, and says so** in `[Description("No assertion: …")]` — the NUnit form of the
   TS lane's `no-assertion` annotation (plan D50). The description reaches the TRX and the Allure result.
@@ -210,7 +210,7 @@ grants it: approving or rejecting a build stays with a person in Percy's review 
 - **Running the visual category without `percy exec` and expecting coverage.** Every snapshot is a no-op.
 - **A Percy test without the `[Description("No assertion: …")]`.** It reads as a forgotten assertion.
 - **An Allure link added in `[OneTimeTearDown]`.** No test is running there, so nothing is recorded.
-  *Fix:* add it while the test runs, as the helper does.
+  *Fix:* add it while the test runs, as `PercySnapshots` does.
 - **Committing baseline PNGs beside Percy.** *Fix:* Percy keeps the baselines; delete them.
 - **Logging or committing `PERCY_TOKEN`.** It is a write credential.
 - **A `Version=` on the `PackageReference`, a floating `1.*`, or an unpinned `@percy/cli`.** *Fix:* the exact
@@ -218,7 +218,7 @@ grants it: approving or rejecting a build stays with a person in Percy's review 
 
 ## Rules
 
-- Derive from `BaseTest`; build the helper in the class's `[SetUp]`; reach the state through page objects.
+- Derive from `BaseTest`; build `PercySnapshots` in the class's `[SetUp]`; reach the state through page objects.
 - Stabilize on the page object's condition and the frozen clock; never a sleep.
 - Run under `percy exec`; `PERCY_TOKEN` comes from the secret store only.
 - Hide dynamic regions with `percyCSS`, narrow with `scope`, built from test ids.

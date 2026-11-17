@@ -346,6 +346,7 @@ jobs:
 - Blob names already carry the shard number, so `merge-multiple: true` collapses the per-shard artifacts into one folder without clashes.
 - `--grep-invert @flaky` keeps quarantined tests off the gate. They run in a separate, non-gating job (`pnpm exec playwright test --grep @flaky` with `continue-on-error: true`), per `qa/reporting/typescript/skills/flaky-test-quarantine` — a separate job, because each run cleans `test-results/` at its start.
 - **Running in the pinned image** instead of installing browsers: give the job `container: { image: mcr.microsoft.com/playwright:v1.64.0-noble, options: --user 1001 }` and drop the install step. The tag must equal the `@playwright/test` version. Visual baselines are only compared inside that image (`qa/typescript/skills/visual-regression`).
+- **Running the suite as a built image** (the checkout `COPY`'d into the pinned Playwright image, the report on mounted volumes): `qa/typescript/skills/ui-project-setup` § Container. The job runs its `docker build` and `docker run` lines as two `run:` steps on `ubuntu-latest`, with the secrets in the step's `env:`, and uploads `allure-results/` and `test-results/` with `if: always()`. The run step's exit code is the container's.
 - On a UI-only repo you can stop here and skip Allure entirely — the merged HTML report with traces is a complete deliverable. Keep the `allure-results-ui-*` upload when the org standardizes on Allure across all suites.
 
 ### Allure publish with history — `.github/workflows/_allure-publish.yml`

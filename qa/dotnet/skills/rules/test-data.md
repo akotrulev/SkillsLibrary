@@ -4,9 +4,9 @@ paths:
   - "**/*{ApiTests,UiTests,AppiumTests,MobileTests,E2ETests,IntegrationTests,AcceptanceTests,BddTests,Bdd.Tests,TestCore}/**/*{Builder,Mother}.cs"
 ---
 
-<!-- qa-dotnet rules v1 (2026-11-03): test data. Installed by /qa-dotnet:rules; edit the paths above to where this project keeps its builders and data files. -->
+<!-- qa-dotnet rules v2 (2026-11-17): test data. Installed by /qa-dotnet:rules; edit the paths above to where this project keeps its builders and data files. -->
 
-# Test data standards (builders, data-driven rows)
+# Test data standards (builders, rows, environment)
 
 Severity tags as in the core rules. The codebase wins where it consistently does otherwise.
 
@@ -25,3 +25,10 @@ Severity tags as in the core rules. The codebase wins where it consistently does
 - CSV or JSON in git; Excel only for a sheet a non-technical owner maintains. *minor*
 - Money is integer cents or `decimal`, never `double`. *major*
 - No secret or real personal data in a committed data file; synthetic only. *blocker*
+
+## Environment data
+
+- A test creates what it changes, unique per test, registered for teardown. *major*
+- Reference data: a search or filter test may read curated environment data, named in the test or feature, never modified; it asserts a non-empty result before asserting on its rows. *blocker for a missing guard*
+- Pre-clean: setup or a `Given … does not exist` step may also delete a leftover, via the API or a seeder, not a long UI sequence. *minor*
+- Keep on failure: teardown may keep a failed test's data and log its ids, deleting on a pass; names are then unique per run. The check is the teardown registry's legal branch. *major*

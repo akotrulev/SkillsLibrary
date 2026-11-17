@@ -152,18 +152,24 @@ carries the close code. Drain into the harness queue, await on a condition. `bas
 booted on a real port.
 
 ```ts
-import { describe, expect, it, onTestFinished, vi } from 'vitest';
+import { describe, expect, test as base, vi } from 'vitest';
 import { baseWsUrl } from './app-fixture';
 import { WsHarness } from './ws-harness';
 
-function connect(path: string): WsHarness {
-  const ws = new WsHarness(`${baseWsUrl()}${path}`);
-  onTestFinished(() => ws.close());
-  return ws;
-}
+const it = base.extend<{ connect: (path: string) => WsHarness }>({
+  connect: async ({}, use) => {
+    const opened: WsHarness[] = [];
+    await use((path) => {
+      const ws = new WsHarness(`${baseWsUrl()}${path}`);
+      opened.push(ws);
+      return ws;
+    });
+    opened.forEach((ws) => ws.close());
+  },
+});
 
 describe('chat websocket', () => {
-  it('Should_BroadcastMessage_When_ClientSays', async () => {
+  it('Should_BroadcastMessage_When_ClientSays', async ({ connect }) => {
     const ws = connect('/ws/chat');
     await ws.opened;
 
@@ -172,7 +178,7 @@ describe('chat websocket', () => {
     expect(JSON.parse(await ws.waitForNextMessage())).toMatchObject({ text: 'hello' });
   });
 
-  it('Should_EmitThreeTicks_When_TickerCountIsThree', async () => {
+  it('Should_EmitThreeTicks_When_TickerCountIsThree', async ({ connect }) => {
     const ws = connect('/ws/ticker?count=3');
     await ws.opened;
 
@@ -181,7 +187,7 @@ describe('chat websocket', () => {
     expect(ticks).toHaveLength(3);
   });
 
-  it('Should_CloseWithCode1000_When_ClientClosesCleanly', async () => {
+  it('Should_CloseWithCode1000_When_ClientClosesCleanly', async ({ connect }) => {
     const ws = connect('/ws/echo');
     await ws.opened;
 
@@ -192,7 +198,7 @@ describe('chat websocket', () => {
 });
 ```
 
-- `connect` registers the close with `onTestFinished`, so a failed assertion never leaks a socket; the close
+- The `connect` fixture closes every socket it opened in its teardown, so a failed assertion never leaks a socket; the close
   test calls `close()` itself because the close **is** its action — the second close is a no-op.
 - The harness uses the **`ws`** lib so it runs on any Node line unchanged. On Node 22 and 24 the global
   `WebSocket` works too; a project detected on Node 20 (EOL — flag it) has no global, so keep `ws`.
@@ -205,33 +211,59 @@ raced against a timeout, and the handler is registered **before** the action.
 
 ```ts
 import { io, type Socket } from 'socket.io-client';
-import { expect, it, onTestFinished } from 'vitest';
-import { baseUrl } from './app-fixture';
 
-function nextEvent<T>(socket: Socket, event: string, timeoutMs = 5000): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(`no '${event}' event within ${timeoutMs}ms`)), timeoutMs);
-    socket.once(event, (payload: T) => {
-      clearTimeout(timer);
-      resolve(payload);
+export class SocketIoHarness {
+  private readonly socket: Socket;
+
+  constructor(url: string) {
+    this.socket = io(url, { transports: ['websocket'] });
+  }
+
+  nextEvent<T>(event: string, timeoutMs = 5000): Promise<T> {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error(`no '${event}' event within ${timeoutMs}ms`)), timeoutMs);
+      this.socket.once(event, (payload: T) => {
+        clearTimeout(timer);
+        resolve(payload);
+      });
     });
-  });
+  }
+
+  emit(event: string, payload: unknown): void {
+    this.socket.emit(event, payload);
+  }
+
+  close(): void {
+    this.socket.close();
+  }
 }
+```
 
-it('Should_DeliverMessageToRoom_When_ClientSendsToGroup', async () => {
-  const socket = io(baseUrl(), { transports: ['websocket'] });
-  onTestFinished(() => socket.close());
-  await nextEvent(socket, 'connect');
-  const received = nextEvent<string>(socket, 'receiveMessage');
+```ts
+import { expect, test as base } from 'vitest';
+import { baseUrl } from './app-fixture';
+import { SocketIoHarness } from './socketio-harness';
 
-  socket.emit('sendToGroup', { room: 'general', text: 'hi' });
+const it = base.extend<{ chat: SocketIoHarness }>({
+  chat: async ({}, use) => {
+    const chat = new SocketIoHarness(baseUrl());
+    await chat.nextEvent('connect');
+    await use(chat);
+    chat.close();
+  },
+});
+
+it('Should_DeliverMessageToRoom_When_ClientSendsToGroup', async ({ chat }) => {
+  const received = chat.nextEvent<string>('receiveMessage');
+
+  chat.emit('sendToGroup', { room: 'general', text: 'hi' });
 
   expect(await received).toContain('hi');
 });
 ```
 
 socket.io reconnects natively (`io(url, { reconnection: true })`); assert reconnect behaviour by stopping the
-server and awaiting `nextEvent(socket.io, 'reconnect')` — never a sleep to "let it reconnect".
+server and awaiting the manager's `reconnect` event (`socket.io.once('reconnect', …)`) — never a sleep to "let it reconnect".
 
 ## Protocol-client 3 — SSE (native `EventSource` / the `eventsource` package)
 

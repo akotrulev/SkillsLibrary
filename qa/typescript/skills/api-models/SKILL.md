@@ -9,7 +9,7 @@ Generator skill. Scaffolds a single DTO file in the TypeScript `apitests/` packa
 
 ## When to use
 
-- A new endpoint needs request/response types for the matching supertest/axios client.
+- A new endpoint needs request/response types for the matching `{resource}Client`.
 - An existing type needs new fields after an API change.
 - A response envelope (pagination, wrapper) is needed.
 
@@ -30,9 +30,9 @@ apitests/src/models/
 │   │   ├── {resource}.dto.ts
 │   │   ├── {resource}-in.dto.ts
 │   │   └── {resource}-mod.dto.ts
-│   └── common/                ← shared within the API group
+│   └── shared/                ← shared within the API group
 │       └── {name}.dto.ts
-└── common/                    ← shared across API groups
+└── shared/                    ← shared across API groups
     └── {name}.dto.ts
 ```
 
@@ -90,7 +90,7 @@ export interface {Resource}ListDto {
 }
 ```
 
-### Derivation helpers
+### Derived types
 
 When an InDto is "the response shape minus server-managed fields", derive it with `Omit` to avoid drift:
 
@@ -108,6 +108,29 @@ export type UserModDto = Partial<UserInDto>;
 
 Use derivations when the relationship is genuinely "subset of fields, same names". When the wire shape diverges (e.g. server returns nested objects but PATCH takes ids), write the type explicitly.
 
+### Response schema — strict
+
+Where the suite validates at runtime (`{resource}.schema.ts`, the type from `z.infer`, as `api-test-author/writer` and `api-client-writer` expect), the response schema is the contract: every object schema in it is **strict**, so a field the API sends that the schema does not declare fails the parse and the drift is reported instead of ignored.
+
+```ts
+import { z } from "zod";
+
+export const {Name}Schema = z
+  .object({
+    id: z.number(),
+    {json_key}: z.string(),
+    {nested}: z.object({ {json_key}: z.string() }).strict(),
+  })
+  .strict();
+
+export type {Name}Dto = z.infer<typeof {Name}Schema>;
+```
+
+- `.strict()` works on Zod 3 and Zod 4; Zod 4 also offers `z.strictObject({...})`. Use the form the project already writes, and check the `zod` major in `package.json` before reaching for a 4-only API.
+- Nested objects are strict too: `.strict()` on the outer object does not reach into a nested `z.object`.
+- Request schemas (`InDto`, `ModDto`) need not be strict: the test builds them.
+- This is the same rule as "never loosen a schema": a new field in a response is a contract change, so it is added to the schema, never absorbed by `.passthrough()` (Zod 4: `.loose()`, `z.looseObject`). A map whose keys the contract leaves open is a `z.record(...)`, not a loosened object.
+
 ## Conventions
 
 ### Naming
@@ -118,8 +141,8 @@ Use derivations when the relationship is genuinely "subset of fields, same names
 ### Folder & imports
 
 - DTOs live in `apitests/src/models/{api}/{resource}/`.
-- Shared within an API group → `models/{api}/common/`.
-- Shared across API groups → `models/common/`.
+- Shared within an API group → `models/{api}/shared/`.
+- Shared across API groups → `models/shared/`.
 - Use `import type { ... }` for type-only imports — keeps the runtime bundle empty.
 - One exported DTO per file. Re-export from an `index.ts` per resource if it improves ergonomics.
 

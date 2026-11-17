@@ -80,13 +80,21 @@ const proto = grpc.loadPackageDefinition(pkgDef) as unknown as ProtoGrpcType;
 
 export class UserGrpcClient {
   private readonly client: UserServiceClient;
-  private readonly md = new grpc.Metadata();
 
-  constructor(authenticated: boolean) {
+  static authenticated(): UserGrpcClient {
+    const md = new grpc.Metadata();
+    md.set('authorization', `Bearer ${process.env.GRPC_TOKEN!}`);
+    return new UserGrpcClient(md);
+  }
+
+  static anonymous(): UserGrpcClient {
+    return new UserGrpcClient(new grpc.Metadata());
+  }
+
+  private constructor(private readonly md: grpc.Metadata) {
     // target from Testcontainers / env — never hardcoded. insecure creds only for a local test broker.
     this.client = new proto.user.v1.UserService(
       process.env.GRPC_TARGET!, grpc.credentials.createInsecure());
-    if (authenticated) this.md.set('authorization', `Bearer ${process.env.GRPC_TOKEN!}`);
   }
 
   getUser(id: string): Promise<GrpcCallResult<User__Output>> {
@@ -103,7 +111,21 @@ export class UserGrpcClient {
     return this.client.listUsers({ pageSize }, this.md);
   }
 
-  raw(): UserServiceClient { return this.client; }   // exposed for the client-/bidi-streaming specs
+  async listAllUsers(pageSize: number): Promise<User__Output[]> {
+    const received: User__Output[] = [];
+    for await (const u of this.listUsers(pageSize)) received.push(u as User__Output);
+    return received;
+  }
+
+  importUsers(emails: readonly string[]): Promise<ImportSummary__Output> {
+    return new Promise((resolve, reject) => {
+      const call = this.client.importUsers(this.md, (err, res) => (err ? reject(err) : resolve(res!)));
+      for (const email of emails) call.write({ email });
+      call.end();
+    });
+  }
+
+  raw(): UserServiceClient { return this.client; }   // exposed for the bidi-streaming and deadline specs
   close(): void { this.client.close(); }
 }
 ```
@@ -119,7 +141,7 @@ import { status } from '@grpc/grpc-js';
 import { UserGrpcClient } from '../clients/UserGrpcClient';
 
 describe('UserService unary RPCs', () => {
-  const authed = new UserGrpcClient(true);
+  const authed = UserGrpcClient.authenticated();
   afterAll(() => authed.close());
 
   it('GetUser returns the user with an OK status when it exists', async () => {
@@ -144,7 +166,7 @@ describe('UserService unary RPCs', () => {
   });
 
   it('GetUser returns UNAUTHENTICATED when the bearer is missing', async () => {
-    const anon = new UserGrpcClient(false);             // no bearer metadata
+    const anon = UserGrpcClient.anonymous();
     const res = await anon.getUser('1');
     anon.close();
 

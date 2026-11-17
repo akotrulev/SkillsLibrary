@@ -80,7 +80,8 @@ Run the second command on a Mac, the third on Windows. **Never an unpinned `appi
 ├── <Product>.sln · global.json · Directory.Build.props · Directory.Packages.props
 ├── TestCore/                           # shared library, as in mobile-project-setup
 └── DesktopTests/
-    ├── Windows/                        # BaseWindow, window objects, scoped rows
+    ├── Windows/                        # BaseWindow, window objects
+    ├── Components/                     # region components (rows); Controls/ holds native controls
     ├── Support/
     │   ├── Env.cs                      # the one required-variable reader
     │   ├── AppiumDriverFactory.cs      # Appium lane: MacDriver / WindowsDriver from env

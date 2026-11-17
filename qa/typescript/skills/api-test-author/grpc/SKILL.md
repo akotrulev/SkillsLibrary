@@ -140,17 +140,12 @@ it('CreateUser persists and the change is readable', async () => {
 
 A server-streaming RPC pushes a *sequence* of messages and then ends. `@grpc/grpc-js` returns a
 `ClientReadableStream`, which is a Node `Readable` and therefore **async-iterable** — `for await (const m of call)`
-completes on the stream's `end` (or the deadline trips), **never a `setTimeout`**. Drain into a buffer, then
-assert size + order + values. Same drain-then-assert discipline as `qa-typescript:realtime-stream-testing`.
+completes on the stream's `end` (or the deadline trips), **never a `setTimeout`**. The client drains it into a
+buffer (`listAllUsers`); the test asserts size + order + values. Same drain-then-assert discipline as `qa-typescript:realtime-stream-testing`.
 
 ```typescript
-import type { User__Output } from '../proto/gen/user/v1/User';
-
 it('ListUsers streams all users in order', async () => {
-  const call = authed.listUsers(50);
-
-  const received: User__Output[] = [];
-  for await (const u of call) received.push(u as User__Output);   // drains until 'end' — bounded, no sleep
+  const received = await authed.listAllUsers(50);
 
   expect(received).toHaveLength(12);
   expect(received.map(u => u.id)).toEqual(
@@ -165,19 +160,13 @@ it('ListUsers streams all users in order', async () => {
 
 ## Client- and bidi-streaming — write the request stream, await the response
 
-For **client-streaming**, `write` N requests, `end()`, and resolve the single response from the callback. For
+For **client-streaming**, the client's `importUsers` writes N requests, calls `end()`, and resolves the single
+response from the callback. For
 **bidi**, write while `for await`-ing the read side. No sleeps — the callback / `end` event is the bound.
 
 ```typescript
-import type { ImportSummary__Output } from '../proto/gen/user/v1/ImportSummary';
-
 it('ImportUsers aggregates all sent requests', async () => {
-  const summary = await new Promise<ImportSummary__Output>((resolve, reject) => {
-    const call = authed.raw().importUsers((err, res) => (err ? reject(err) : resolve(res!)));
-    call.write({ email: 'a@example.com' });
-    call.write({ email: 'b@example.com' });
-    call.end();                                          // bounded by the server completing the call
-  });
+  const summary = await authed.importUsers(['a@example.com', 'b@example.com']);
 
   expect(summary.imported).toBe(2);
 });
@@ -265,7 +254,7 @@ differ.
 
 ## Rules
 
-The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `api-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md`, `api-tests.md` and `test-data.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Cross-references
 

@@ -19,7 +19,8 @@ Default driver is **Playwright** (auto-waiting, trace viewer, fastest to stand u
 ## When NOT to use
 
 - The solution already exists → author into it with the `qa-ui-dotnet` skills.
-- API / mobile / performance scaffolding → use the matching `*-project-setup-dotnet` skill.
+- API / mobile / performance scaffolding → use the matching `qa/dotnet/skills/<discipline>-project-setup` skill.
+- A Java or TypeScript UI suite → `qa/java/skills/ui-project-setup` / `qa/typescript/skills/ui-project-setup`.
 
 ## Tooling & versions
 
@@ -72,6 +73,8 @@ pwsh --version
     ├── AuthSetup.cs                    # root namespace — signed-in state, once per run
     ├── Support/BaseTest.cs             # the one lifecycle: BASE_URL, evidence on failure
     ├── Pages/                          # page objects — intent, not selectors
+    ├── Components/                     # region components
+    │   └── Controls/                   # design-system widgets: Dropdown, Combobox, DatePicker, DataGrid
     ├── Tests/                          # grouped by feature
     ├── Dockerfile                      # per-project, independently runnable
     └── README.md
@@ -87,7 +90,7 @@ git init
 dotnet new globaljson --sdk-version 10.0.100 --roll-forward latestFeature
 dotnet new sln -n <Product>
 dotnet new classlib -o TestCore -f net10.0
-mkdir -p UiTests/Support UiTests/Pages UiTests/Tests
+mkdir -p UiTests/Support UiTests/Pages UiTests/Components/Controls UiTests/Tests
 ```
 
 Then copy the writer's assets from `qa/dotnet/skills/ui-test-author/playwright/assets/`:
@@ -98,6 +101,7 @@ Then copy the writer's assets from `qa/dotnet/skills/ui-test-author/playwright/a
 | `UiTests.csproj`, `ui.runsettings`, `AuthSetup.cs` | `UiTests/` |
 | `BaseTest.cs` | `UiTests/Support/` |
 | `LoginPage.cs`, `HomePage.cs` | `UiTests/Pages/` |
+| `Components/Controls/*.cs` | `UiTests/Components/Controls/` (keep the controls the app's design system has) |
 | `LoginTests.cs` | `UiTests/Tests/` |
 
 Rename the root namespace `Example.UiTests` to `<Product>.UiTests` in every `.cs` file, then:
@@ -142,13 +146,16 @@ ENTRYPOINT ["dotnet", "test", "UiTests/UiTests.csproj", "-c", "Release", "--no-b
 
 ```bash
 docker build -f UiTests/Dockerfile -t ui-tests .
-docker run --rm --ipc=host -e BASE_URL -e E2E_USER -e E2E_PASSWORD \
-  -v "$PWD/artifacts:/src/UiTests/bin/Release/net10.0/playwright-artifacts" ui-tests
+docker run --rm --init --ipc=host -e BASE_URL -e E2E_USER -e E2E_PASSWORD \
+  -v "$PWD/artifacts:/src/UiTests/bin/Release/net10.0/playwright-artifacts" \
+  -v "$PWD/allure-results:/src/UiTests/bin/Release/net10.0/allure-results" ui-tests
 ```
 
+- The image is built from the working tree (`COPY`), never by cloning the repository inside it, so a pull-request build tests the pull request. The exec-form `ENTRYPOINT` makes `dotnet test` the container's command, and `docker run` returns its exit code: no shell wrapper, no `|| true`.
+- Credentials arrive only as `-e` at run time; nothing secret is `COPY`d, `ARG`ed or `ENV`ed into the image. The failure evidence and `allure-results/` land in the mounted host folders, where the report is generated (`qa/reporting/dotnet/skills/test-reports`).
 - The image already holds the browsers for 1.63.0, so there is no install step; bump the tag whenever the package version moves, or the run fails with "Executable doesn't exist".
-- `--ipc=host` keeps Chromium from running out of shared memory. The image runs as root, which is fine for the team's own app; use `--user pwuser` when the tests visit untrusted sites.
-- `.dockerignore` excludes `**/bin` and `**/obj`, so the host's build output never enters the image.
+- `--ipc=host` keeps Chromium from running out of shared memory; `--init` reaps the browser processes and forwards signals. The image runs as root, which is fine for the team's own app; use `--user pwuser` when the tests visit untrusted sites.
+- `.dockerignore` excludes `**/bin`, `**/obj` and `.env*`, so neither the host's build output nor a local secrets file enters the image.
 
 ## Run
 
@@ -167,10 +174,11 @@ dotnet test --filter "TestCategory=smoke"
 
 ## Conventions (the shell only)
 
-The standards the shell must meet are the qa-dotnet rule files, not a list here: `automation.md`, `web-ui.md` and `suite-config.md`. Tell the user to install them with the shell (`/qa-dotnet:rules` copies them into `.claude/rules/qa-dotnet/`); until then read the plugin's copies in `qa/dotnet/skills/rules/`. Where they and this skill's recipes disagree, the rule files win.
+The standards the shell must meet are the qa-dotnet rule files, not a list here: `automation.md`, `page-objects.md`, `web-ui.md` and `suite-config.md`. Tell the user to install them with the shell (`/qa-dotnet:rules` copies them into `.claude/rules/qa-dotnet/`); until then read the plugin's copies in `qa/dotnet/skills/rules/`. Where they and this skill's recipes disagree, the rule files win.
 
 - **One base fixture** (`Support/BaseTest.cs`) owns the context options and failure evidence; launch settings live in `ui.runsettings`.
 - **Auth**: `BASE_URL`, `E2E_USER`, `E2E_PASSWORD` from the environment; the signed-in state file is written under `bin/` at run time.
+- **Config precedence**: `ui.runsettings` holds the committed, non-secret launch defaults and a `-- Playwright.<key>=` argument overrides one for a run. `BASE_URL` and the credentials have no committed value: `BaseTest.RequiredEnv` reads them from the environment and fails naming the missing variable.
 
 Page-object architecture, selector strategy (`data-testid`-first), and test bodies are owned by the `qa-ui-dotnet` skills (`page-object-design`, `page-objects-from-url`, `ui-test-author/*`). Defer to them.
 
@@ -180,7 +188,7 @@ Flat solution + shared `TestCore` + CPM make this purely additive. To add a sibl
 
 1. Install the sibling plugin and run its scaffold **inside this repo**, skipping `global.json`, `Directory.Build.props`, `Directory.Packages.props`, the `.sln`, and `TestCore` (already present).
 2. Add only its project, `dotnet sln add ApiTests`, `dotnet add ApiTests reference TestCore`, then its packages (which append `<PackageVersion>` to the shared table). The sibling keeps its **own** configuration and `Dockerfile` — nothing to merge.
-3. Promote shared config/auth helpers up into `TestCore`; keep `BaseTest` in `UiTests` and the RestClient factory in `ApiTests`.
+3. Promote shared config and the token provider up into `TestCore`; keep `BaseTest` in `UiTests` and the RestClient factory in `ApiTests`.
 4. `dotnet test` runs both projects; `dotnet test UiTests` runs one. Add `.slnf` filters per discipline for focused load / CI sharding. Mobile (`AppiumTests`) and performance (`PerfTests`, NBomber console) fold in the same way.
 
 ## Setup checklist

@@ -66,13 +66,13 @@ pixel-level diffing is `visual-regression`'s job and pairs with this skill, it d
 | Bootstrap 5 | `$grid-breakpoints` | sm 576 · md 768 · lg 992 · xl 1200 · xxl 1400 |
 | Bespoke CSS | the tokens file / one `breakpoints.css` | whatever it says — read it |
 
-## Page objects and the `Layout` helper
+## Page objects and the `Layout` probe
 
-`Breakpoints`, the `AppShell` and `ProductsPage` page objects and the `Layout` helper are in
+`Breakpoints`, the `AppShell` and `ProductsPage` page objects and the `Layout` probe are in
 [`references/page-objects-and-layout.md`](references/page-objects-and-layout.md). Page objects expose variant
 intent (`appShell.nav(NavVariant.HAMBURGER)` → `getByTestId("Nav.Hamburger")`), never boxes. `Layout` **measures
 and returns numbers** — `columnCount(cards)`, `horizontalOverflow()`, `leftEdgeSpread(...)`,
-`overlapDepth(a, b)` — plus `resizeTo(width)` for live-resize tests. The test asserts; a helper never does.
+`overlapDepth(a, b)` — plus `resizeTo(width)` for live-resize tests. The test asserts; a probe never does.
 
 ## Boundary rows — the core pattern
 

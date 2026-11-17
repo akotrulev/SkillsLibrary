@@ -21,7 +21,7 @@ Eliminates repeated inline test data literals in Java 21 test projects (Gradle K
 - TypeScript test data → `qa/typescript/skills/test-data-builder`
 - Production-code builders → the `backend/java` dev stack's generator, if installed
 - Test data for performance scenarios (volume) → `qa/java/skills/load-testing`
-- One-off fixture used by a single test → inline is fine; only extract on duplication
+- An object with fewer than four fields → construct it in the test's setup; a builder starts at four fields, at first use
 
 ## Builder vs ObjectMother
 
@@ -224,7 +224,7 @@ TestOrder order = Orders.paid()
     .build();
 ```
 
-- For incremental list building, expose a helper like `addLine(...)` via a custom static method on the builder, or build the list outside and pass it in.
+- For incremental list building, expose a method like `addLine(...)` via a custom static method on the builder, or build the list outside and pass it in.
 - Use `List.of(...)` / `List.copyOf(...)` — never expose internal `ArrayList` references.
 
 ## Persistence-aware builders
@@ -241,6 +241,49 @@ OrderDto created = ordersClient.create(toDto(order), 201);
 
 Don't build "an order in the DB" inside the builder — that couples the builder to a particular persistence path and hides the API call dependency. Persistence is the test's job; the builder is shape.
 
+To vary one field of a record that already exists (an update test per changed field), copy it into a builder: `seeded.toBuilder().status("PAID").build()` with Lombok's `toBuilder = true`, or a mother method `Orders.from(seeded)` where the builder is hand-written.
+
+## Data a test uses: the default and three sanctioned patterns
+
+The default: a test creates what it changes, with a value unique per test (`"ORD-" + UUID.randomUUID()`), registers it, and the class's `@AfterMethod(alwaysRun = true)` deletes it. Besides that (`qa-java-data.md`):
+
+| Pattern | When | How |
+|---|---|---|
+| **Read-only reference data** | a search or filter test needs a realistic population it would be slow to seed | curated records the environment already holds, named in the test as constants (`ReferenceDeals.SPRING_PORTFOLIO`), never modified. The test asserts the result is not empty before it asserts on the rows. |
+| **Pre-clean** | a record must carry a fixed value (a unique email, a promotion code) and a crashed run may have left it | `@BeforeMethod`, or a `Given … does not exist` step, deletes every match through the API or a seeder (`promotionSeeder.deleteAllNamed(code)`), never a long UI sequence; teardown still deletes what the test creates. |
+| **Keep on failure** | a failed test's data is worth investigating | teardown deletes on a pass and logs the kept ids on a failure (`ITestResult.isSuccess()` in TestNG, `scenario.isFailed()` in Cucumber). Names are unique per run, so a kept record never collides with the next run. The check is the teardown registry's legal branch, never a test-body branch. |
+
+A builder serves all three: its defaults carry the unique id, and the pre-clean and the reference constants live on the seeder or a reference-data class, never in the builder.
+
+## Query parameters — a typed builder
+
+A list or search endpoint's query parameters are a request model with one fluent method per documented parameter, never positional strings (`search("active", null, 20)`) or an untyped `Map` in the test:
+
+```java
+package com.example.apitests.models.user.users;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
+
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public record UserQuery(
+    @JsonProperty("status") String status,
+    @JsonProperty("page") Integer page,
+    @JsonProperty("page_size") Integer pageSize,
+    @JsonProperty("sort") String sort
+) { }
+```
+
+```java
+List<UserDto> users = userClient.search(UserQuery.builder().status("active").pageSize(20).build(), HttpStatus.SC_OK);
+```
+
+- It sits beside the DTOs (`models/{api}/{resource}/`), one component per parameter the spec documents, boxed so an unset one is left out (`NON_NULL`).
+- The client turns it into query parameters in one place (`spec().queryParams(toQueryParams(query))`, the base client converting it with the suite's `ObjectMapper`); the test never sees the map.
+- Without Lombok, the same record gets a hand-written builder with the same fluent methods.
+
 ## Rules
 
 The standards a builder must meet are the qa-java rule files, not a list here: `qa-java-data.md` and `qa-java.md` (core). Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
@@ -254,7 +297,7 @@ The standards a builder must meet are the qa-java rule files, not a list here: `
 ## Generation steps
 
 1. Grep the test tree for repeated literal patterns (`new Order(`, `new User(`, repeated map/list builders for request bodies).
-2. Per aggregate, list the fields, the sensible defaults, and the variant-producing helpers (`pending`/`paid`/`cancelled` etc.).
+2. Per aggregate, list the fields, the sensible defaults, and the variant-producing methods (`pending`/`paid`/`cancelled` etc.).
 3. Generate the record + `@Builder` under `src/test/java/.../builders/` following the template.
 4. Add a `final` ObjectMother class under `mothers/` with the canonical variants.
 5. Replace inline literals in 2–3 representative tests so the pattern is set; leave the rest as a follow-up sweep.
@@ -265,7 +308,7 @@ The standards a builder must meet are the qa-java rule files, not a list here: `
 - .NET test data → `qa/dotnet/skills/test-data-builder`
 - TypeScript test data → `qa/typescript/skills/test-data-builder`
 - API tests where these feed into request bodies → `qa/java/skills/api-test-author/writer`
-- UI tests where they back form-fill helpers → `qa/java/skills/ui-test-author/playwright` / `qa/java/skills/ui-test-author/selenium` / `qa/java/skills/ui-test-author/appium`
+- UI tests where they back form-fill page objects → `qa/java/skills/ui-test-author/playwright` / `qa/java/skills/ui-test-author/selenium` / `qa/java/skills/ui-test-author/appium`
 - Test reviewers (verify builders used, not literals) → `qa/java/skills/api-test-author/review` / `qa/java/skills/ui-test-author/review`
 - Test strategy / pyramid → `qa/manual/test-strategy`
 - Production-code builders → the `backend/java` dev stack's generator, if installed

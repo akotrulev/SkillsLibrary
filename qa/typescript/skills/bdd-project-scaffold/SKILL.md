@@ -104,6 +104,7 @@ const isCI = !!process.env.CI;
 const testDir = defineBddConfig({
   features: 'features/**/*.feature',
   steps: 'steps/**/*.ts',
+  tags: 'not @not-automated',
 });
 
 export default defineConfig({
@@ -128,6 +129,9 @@ export default defineConfig({
 ```
 
 - `testDir` is the **generated** dir `bddgen` writes, never `features/`.
+- `tags: 'not @not-automated'` keeps a scenario written ahead of its automation out of the run; it also carries
+  a ticket tag. Use the suite's own excluded tag when it has one. A step with an empty body is never the
+  placeholder: it passes doing nothing.
 - The evidence settings are the writer's failure defaults: trace and video `retain-on-failure`, a full-page
   screenshot `only-on-failure`. They work with `retries: 0` (`qa/cicd/ci-conventions`); `on-first-retry` records
   nothing without a retry. What each mode keeps and how a failed scenario's trace is read is
@@ -142,7 +146,8 @@ export default defineConfig({
 ### `steps/fixtures.ts` — page objects as fixtures (NO World)
 
 Page objects come from the existing page-object project and are exposed as fixtures; every step destructures
-the ones it needs. This is the playwright-bdd analogue of a World/DI container — there is no World here.
+the ones it needs. The steps are the intent layer, so a page object they use may expose named elements and
+controls for a step to act on (`bdd.md`). This is the playwright-bdd analogue of a World/DI container — there is no World here.
 
 ```typescript
 import { test as base, createBdd } from 'playwright-bdd';
@@ -216,6 +221,7 @@ export const config: WebdriverIO.Config = {
   services: ['appium'],
   cucumberOpts: {
     import: ['./steps/**/*.ts', './support/**/*.ts'],
+    tags: 'not @not-automated',
     timeout: 60_000,
   },
   reporters: [['allure', { outputDir: 'allure-results', disableWebdriverScreenshotsReporting: true }]],
@@ -229,7 +235,7 @@ export const config: WebdriverIO.Config = {
 };
 ```
 
-`@wdio/appium-service` manages the Appium server, so no `appium` process runs by hand. `requiredEnv` is the helper in `ui-test-author/appium/assets/env.ts`, and that skill explains the capability block and the id-prefix setting.
+`@wdio/appium-service` manages the Appium server, so no `appium` process runs by hand. `tags` keeps scenarios tagged `@not-automated` (each with a ticket) out of the run, as on the web. `requiredEnv` is the env loader in `ui-test-author/appium/assets/env.ts`, and that skill explains the capability block and the id-prefix setting.
 
 ### `support/world.ts` — custom World (the state container)
 
@@ -290,7 +296,7 @@ Feature: BDD rig smoke
 
 ## Rules
 
-The standards this skill's output must meet are the qa-typescript rule files, not a list here: `bdd.md` and `qa-typescript.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `bdd.md`, `qa-typescript.md`, `test-data.md` for seeding fixtures and, for the page objects the steps call, `page-objects.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Handoffs
 

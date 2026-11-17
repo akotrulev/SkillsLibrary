@@ -5,13 +5,13 @@ description: Use when writing or reviewing safe verification SQL in TypeScript t
 
 # QA — DB Testing Query Author (TypeScript / Node 24)
 
-Guardrails for the **SQL string itself** when a Node 24 + TypeScript Vitest integration test reaches into the database to verify behaviour. The pool, seeder, and probe scaffolding live in `qa/typescript/skills/db-testing/connection`; this skill owns *what the SQL is allowed to look like* — `$1` placeholder binding only, explicit column lists, safe `LIKE`, type-correct parsing (especially `BIGINT` → `number`), exists / not-exists / count helpers, a `waitFor` poller that re-runs the same safe query, and a hard refusal list for destructive verbs outside cleanup.
+Guardrails for the **SQL string itself** when a Node 24 + TypeScript Vitest integration test reaches into the database to verify behaviour. The pool, seeder, and probe scaffolding live in `qa/typescript/skills/db-testing/connection`; this skill owns *what the SQL is allowed to look like* — `$1` placeholder binding only, explicit column lists, safe `LIKE`, type-correct parsing (especially `BIGINT` → `number`), exists / not-exists / count probes, a probe wait condition that re-runs the same safe query, and a hard refusal list for destructive verbs outside cleanup.
 
 ## When to use
 
 - A test is about to embed a SQL string (`pool.query(...)`, `knex.raw(...)`, `prisma.$queryRaw`) and you need it reviewed or generated.
 - An existing probe / seeder uses template-literal interpolation, `SELECT *`, or unbounded `DELETE` and needs a rewrite.
-- A test needs an "assert exactly one row matches these columns" or "assert no row matches" helper.
+- A test needs an "assert exactly one row matches these columns" or "assert no row matches" probe.
 - An async flow needs a wait-for-eventual-consistency poll that re-runs the verification query.
 
 ## When NOT to use
@@ -37,8 +37,8 @@ Guardrails for the **SQL string itself** when a Node 24 + TypeScript Vitest inte
 | "No row matches" | `SELECT EXISTS (...)` → read `rows[0].exists` (boolean) | Cheaper than `COUNT(*)`; short-circuits. |
 | "How many rows match" | `SELECT COUNT(*)` → `Number(rows[0].count)` | `pg` returns `bigint` as **string**; convert with `Number(...)`. |
 | Joins / windowing get ugly in raw SQL | Knex `.select(cols).from(...).where({...})` | Builder keeps values bound by construction. |
-| "Wait until row appears" | `waitFor(probe, predicate, opts)` (below) | Re-runs the same parameterized query; never `setTimeout` as the assertion. |
-| Free-text contains | `LIKE $1` with a pattern escaped in TS (`% _ \`) + `ESCAPE '\'` | Treat user input as data; see helper below. |
+| "Wait until row appears" | the probe's wait condition (below) | Re-runs the same parameterized query; never `setTimeout` as the assertion. |
+| Free-text contains | `LIKE $1` with a pattern escaped in TS (`% _ \`) + `ESCAPE '\'` | Treat user input as data; see `escapeLike` below. |
 | `IN (...)` of N values | `WHERE col = ANY($1)` (pass a JS array) | Never interpolate the list. |
 | Soft-delete check | Explicit `WHERE deleted_at IS NULL` | Don't rely on a view abstraction in tests. |
 
@@ -100,32 +100,28 @@ Rules baked in:
 - `BIGINT` comes back as a **string** from `pg`; convert with `Number(...)` (or keep `BigInt` if the value can exceed 2^53). Never compare a string `'15000'` to a number `15000`.
 - The probe returns a typed projection, not `Record<string, unknown>`.
 
-## Exists / not-exists helpers
+## Exists / not-exists probes
 
 ```ts
-// tests/integration/dbclients/dbAssertions.ts
-import type { Pool } from 'pg';
+// tests/integration/dbclients/dbProbe.ts
+import { getPool } from './poolFactory.js';
 
-export async function exists(
-  pool: Pool,
-  table: string,        // literal, owned by test code — never runtime input
-  whereClause: string,  // e.g. 'order_id = $1 AND status = $2'
-  params: unknown[],
-): Promise<boolean> {
-  const result = await pool.query<{ exists: boolean }>(
-    `SELECT EXISTS (SELECT 1 FROM ${table} WHERE ${whereClause}) AS exists`,
-    params,
-  );
-  return result.rows[0].exists;
-}
+export const dbProbe = {
+  async exists(
+    table: string,        // literal, owned by test code — never runtime input
+    whereClause: string,  // e.g. 'order_id = $1 AND status = $2'
+    params: unknown[],
+  ): Promise<boolean> {
+    const result = await getPool().query<{ exists: boolean }>(
+      `SELECT EXISTS (SELECT 1 FROM ${table} WHERE ${whereClause}) AS exists`,
+      params,
+    );
+    return result.rows[0].exists;
+  },
+};
 
 // Usage
-const paid = await exists(
-  getPool(),
-  'orders',
-  'id = $1 AND status = $2',
-  [orderId, 'PAID'],
-);
+const paid = await dbProbe.exists('orders', 'id = $1 AND status = $2', [orderId, 'PAID']);
 expect(paid, 'expected a PAID row for the seeded order').toBe(true);
 ```
 
@@ -209,27 +205,23 @@ Rules:
 
 ## Wait-for-eventual-consistency poller
 
-Reuse the `waitFor` helper from `qa/typescript/skills/db-testing/connection` — the poller re-runs the **same** safe probe; it never builds SQL itself.
+Use the probe's named wait condition (`waitForRefund`, `qa/typescript/skills/db-testing/connection`) — it re-runs the **same** safe query; it never builds SQL itself.
 
 ```ts
-const refund = await waitFor(
-  () => ordersDbProbe.getRefundFor(orderId),
-  (r) => r.amountMinor === 15_000,
-  { timeoutMs: 5_000, intervalMs: 100 },
-);
+const refund = await ordersDbProbe.waitForRefund(orderId, { timeout: 5_000, interval: 100 });
 expect(refund.currency).toBe('EUR');
 ```
 
-`setTimeout` is forbidden as the assertion wait — it's only the inter-poll backoff inside `waitFor`. Never `await new Promise((r) => setTimeout(r, 5000))` before an assertion.
+`setTimeout` is forbidden as the assertion wait — it's only the inter-poll backoff inside `vi.waitFor`. Never `await new Promise((r) => setTimeout(r, 5000))` before an assertion.
 
 ## Refusal patterns — destructive verbs
 
-If a generated or reviewed query contains any of the following **outside** a designated cleanup helper, refuse and require an explicit cleanup path:
+If a generated or reviewed query contains any of the following **outside** a designated cleanup hook, refuse and require an explicit cleanup path:
 
 | Verb | Refused when | Allowed only in |
 |---|---|---|
 | `DROP TABLE` / `DROP SCHEMA` | Ever, in a test body | Never. Migrations own schema. |
-| `TRUNCATE` | Inside an `it(...)` body | `beforeEach` / `afterEach` cleanup helpers in `qa/typescript/skills/db-testing/connection`. |
+| `TRUNCATE` | Inside an `it(...)` body | `beforeEach` / `afterEach` cleanup hooks in `qa/typescript/skills/db-testing/connection`. |
 | `DELETE` without `WHERE` | Anywhere | Never. `TRUNCATE` is the right primitive. |
 | `UPDATE` without `WHERE` | Anywhere | Never. |
 | `ALTER TABLE` | Test body | Migration only. |
@@ -241,11 +233,11 @@ The reviewer should produce the standard finding table (from `CLAUDE.md`) and ma
 - **Template-literal interpolation of values**: `` pool.query(`SELECT id FROM orders WHERE id = '${orderId}'`) `` — even with a UUID, this trains the wrong habit and breaks (and injects) the moment the value is a string. Use `$1`.
 - **`SELECT *` in an assertion**: hides which columns the test depends on; every schema change touches every test.
 - **`BIGINT` compared as if it were a number**: `expect(Number(count)).toBe(3)` is right; `expect(count).toBe(3)` silently fails against `'3'`.
-- **`DELETE FROM orders` in a test**: no `WHERE`, no cleanup helper. Truncate explicit tables in `beforeEach`.
+- **`DELETE FROM orders` in a test**: no `WHERE`, no cleanup hook. Truncate explicit tables in `beforeEach`.
 - **Hidden Prisma/ORM lazy relation in an assertion**: reading `order.customer.name` off a fetched entity issues a second query the author can't see. Probe with explicit SQL.
-- **`await new Promise(r => setTimeout(r, 5000))` before the assertion**: not deterministic; use `waitFor`.
+- **`await new Promise(r => setTimeout(r, 5000))` before the assertion**: not deterministic; use the probe's wait condition.
 - **`IN (...)` built by `values.map(v => `'${v}'`).join(',')`**: classic injection vector even in tests. Use `= ANY($1)` with a JS array.
-- **`whereClause` / `table` built from runtime input** in the `exists` helper: only literal strings owned by the test code may flow into the SQL shape.
+- **`whereClause` / `table` built from runtime input** in the `exists` probe: only literal strings owned by the test code may flow into the SQL shape.
 - **Logging the SQL with bound values**: leaks PII / secrets into structured logs. Log the probe *name* and IDs you already trust.
 - **`bare knex('orders')` or `.select('*')`**: projects everything; name the columns.
 - **`any` in a probe return type**: defeats the typed-projection guarantee; use a typed row.
@@ -281,12 +273,7 @@ describe('cancellation writes refund', () => {
 it('failed payment does not create an order', async () => {
   await sut.attemptPayment(failingCardToken);
 
-  const created = await exists(
-    getPool(),
-    'orders',
-    'customer_id = $1',
-    [customerId],
-  );
+  const created = await dbProbe.exists('orders', 'customer_id = $1', [customerId]);
   expect(created).toBe(false);
 });
 ```
@@ -294,11 +281,7 @@ it('failed payment does not create an order', async () => {
 ### Example 3 — poll until projection catches up
 
 ```ts
-const refund = await waitFor(
-  () => ordersDbProbe.getRefundFor(order.id),
-  (r) => r.amountMinor === 15_000,
-  { timeoutMs: 5_000, intervalMs: 100 },
-);
+const refund = await ordersDbProbe.waitForRefund(order.id, { timeout: 5_000, interval: 100 });
 expect(refund.currency).toBe('EUR');
 ```
 
@@ -339,7 +322,7 @@ expect(order!.customer.name).toBe('Alice');   // extra query, surprise
 - `SELECT EXISTS (...)` for boolean checks; `COUNT(*)` read via `Number(rows[0].count)` (string → number).
 - `LIKE` patterns built in TS with `escapeLike` before binding, with `ESCAPE '\'`.
 - `BIGINT` → `Number(...)` (or `BigInt`) explicitly; `timestamptz` → `Date`, asserted via ISO/epoch — no string-vs-number or by-reference `Date` comparisons.
-- No `setTimeout` as an assertion wait — use `waitFor` with the same probe.
+- No `setTimeout` as an assertion wait — use the probe's named wait condition.
 - No destructive verbs outside designated cleanup; refuse with the reviewer finding table.
 - Probes are read-only modules using the shared `getPool()`; never `new pg.Client(...)` per test.
 - Strict TS; ESM with explicit `.js` extensions; ESLint `no-floating-promises` on.

@@ -227,6 +227,7 @@ merge-reports:
 - `merge-reports` produces `playwright-report/` — the merged HTML report — even on red (`when: always`).
 - `--grep-invert @flaky` keeps quarantined tests off the gate. They run in a separate `e2e-quarantine` job (`--grep @flaky`, `allow_failure: true`), per `qa/reporting/typescript/skills/flaky-test-quarantine` — a separate job, because each run cleans `test-results/` at its start.
 - On a UI-only repo you can stop here and skip Allure entirely — the merged HTML report with traces is a complete deliverable.
+- **Running the suite as a built image** (the checkout `COPY`'d into the pinned Playwright image, the report on mounted volumes): `qa/typescript/skills/ui-project-setup` § Container. The job runs its `docker build` and `docker run` lines in `script:` from a `docker:27` image with the `docker:dind` service and `DOCKER_*` variables shown under Testcontainers, with `artifacts: when: always` on `allure-results/` and `test-results/`. The job's exit code is the container's.
 
 ### Allure publish with history — `publish` stage (GitLab Pages)
 

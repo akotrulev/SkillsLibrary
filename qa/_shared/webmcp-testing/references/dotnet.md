@@ -43,19 +43,20 @@ Chromium-only, like the runsettings; Firefox's prototype exposes a different ent
 
 The writer's rule holds — a test class calls no raw `Page` method — so the scripts live in the page object,
 `ProductPage` (namespace `Example.UiTests.Pages`), beside its URL and its `CartBadge` locator. The test
-class keeps only the assertion-side helpers.
+class holds tests, setup and fields only: every body is a page-object call and its assertion.
 
 | Member | What it does |
 |---|---|
-| `ProductPage.SettledToolsAsync(name, present, timeoutMs)` | `SettledToolsJs` lists this frame's tools (`tool.window === window`), parses string schemas, and resolves once `name` is present (or absent), re-checking on every `toolchange` event, or when the timeout passes. Returns a `JsonElement` array of `{ name, inputSchema, annotations }` |
-| `ProductPage.CallToolAsync(name, input, timeoutMs)` | `CallToolJs`: `executeTool` with the object input, retried as a JSON string on `Failed to parse input`, raced against the timeout; returns the parsed result |
-| `WebMcpTests.RegisteredToolAsync(name)` | The tool's `JsonElement`, or an `AssertionException` naming the tools that were listed |
-| `WebMcpTests.CallAddToCartAsync(quantity)` | Waits for the tool to register, then calls it |
+| `ProductPage.RegisteredToolAsync(name, timeoutMs)` | `RegisteredToolJs` lists this frame's tools (`tool.window === window`), re-checking on every `toolchange` event, and resolves with `{ name, inputSchema, annotations }` (a string schema parsed) once `name` is listed. When the timeout passes first it rejects with an error naming the tools that were listed, which reaches .NET as a `PlaywrightException` |
+| `ProductPage.ToolNamesAfterRemovalAsync(name, timeoutMs)` | `ToolNamesAfterRemovalJs` resolves with this frame's tool names once `name` is gone, or with the names still listed when the timeout passes, so the test's assertion reports them |
+| `ProductPage.CallToolAsync(name, input, timeoutMs)` | Waits for the tool to register, then `CallToolJs`: `executeTool` with the object input, retried as a JSON string on `Failed to parse input`, raced against the timeout; returns the parsed result |
+
+Registration and removal are two methods with two scripts, not one method with a `present` flag.
 
 Why an event-driven wait: .NET Playwright has no `expect.poll`, and `WaitForFunctionAsync` does not await
 an async predicate — a `Promise` is truthy, so it would return at once. `EvaluateAsync` itself has no
-timeout, so every helper carries `TimeoutMs` into the script. The anonymous argument objects keep their
-lower-case property names (`name`, `present`, `timeout`), which is what the scripts destructure.
+timeout, so every method carries `TimeoutMs` into its script. The anonymous argument objects keep their
+lower-case property names (`name`, `input`, `timeout`), which is what the scripts destructure.
 
 ## 3. Annotations on this route
 
@@ -90,7 +91,7 @@ built on it until 1.64.
 When `Microsoft.Playwright.NUnit` 1.64 is on NuGet (plan 003 §2.5): from 1.64,
 `await Page.Webmcp.ToolsAsync(new() { Timeout = 10_000 })` and
 `await Page.Webmcp.CallToolAsync("add_to_cart", new Dictionary<string, object> { ["sku"] = "sku-123", ["quantity"] = 2 }, new() { Timeout = 10_000 })`
-replace `CallToolJs` and the listing half of `SettledToolsJs` inside `ProductPage`; `Frame.Webmcp` covers
+replace `CallToolJs` and the listing half of the two wait scripts inside `ProductPage`; `Frame.Webmcp` covers
 child frames. The
 launch flag still lives in `webmcp.runsettings` and the suite keeps its own run. Keep the event-driven wait
 for registration and removal, and move the annotation assertion to the normalized `consequential` key.

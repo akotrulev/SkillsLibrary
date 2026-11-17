@@ -31,7 +31,7 @@ Turns a discovered element inventory into a **Java Appium page object** — a `B
 
 ## Conventions (owned by `ui-test-author/appium`)
 
-Before writing, **load `qa/java/skills/ui-test-author/appium/SKILL.md`** and apply its page-object rules. The non-negotiables it defines:
+Before writing, **load `qa/java/skills/ui-test-author/appium/SKILL.md`** and apply its page-object rules; the object model is the rule file `qa-java-page-objects.md`. The non-negotiables:
 
 - Extend `BaseAppiumPage`; constructor passes `driver` to `super(driver)` — never call `driver.findElement(...)` directly. Pages take the driver, never a test context.
 - All element access goes through the inherited finders, in ladder order: `byTestId` (`AppiumBy.accessibilityId` on iOS, `AppiumBy.id` on Android) → native query (`byIosPredicate` · `byIosClassChain` · `byAndroidUiAutomator`, the last secondary because Google is deprecating `UiSelector`) → `byXPath`. An XPath rung is a temporary scaffold, not a destination — when `mobile-screen-explorer` later reports a stronger locator for that element, downgrade to it and drop its row from `missing-testids.md`. The code carries no marker.
@@ -40,7 +40,10 @@ Before writing, **load `qa/java/skills/ui-test-author/appium/SKILL.md`** and app
 - **Every page object has a `verifyPageLoaded()`** asserting the landmark is visible (the only assertion allowed inside a page object)
 - No `PageFactory`/`@FindBy`/`@AndroidFindBy`, no raw `RemoteWebElement`
 - No `Thread.sleep` — the base class's `WebDriverWait` handles timing
-- Package `pom.mobile`; file `src/main/java/pom/mobile/<Screen>Page.java`; multi-step flows in a sub-package, repeating rows as scoped components that do not extend `BaseAppiumPage` (a row key, re-resolved on every call; see `ui-test-author/appium`)
+- Package `pom.mobile`; file `src/main/java/pom/mobile/<Screen>Page.java`; multi-step screens in a sub-package.
+- **Repeating rows and cards are region components**: a row key, re-resolved on every call, picked by its content, never by index (`OrderRow` in the assets). They do not extend `BaseAppiumPage`.
+- **Native controls are control components at first use** (a picker wheel, a date picker, a segmented control, a bottom sheet): a class in `components.controls` that takes the control's container id and exposes intent with domain types (`select(LocalDate)`, `choose(String option)`). A control whose operation differs per platform is one class per platform, built by the per-platform page (`page-object-design`'s multi-platform strategy), never a `switch` on the platform.
+- Methods are one user action each, named for the action (`signIn`), never the outcome; no boolean parameter selecting behaviour.
 
 ## Template
 
@@ -93,8 +96,8 @@ The compilable reference is `qa/java/skills/ui-test-author/appium/assets/`.
 ## Procedure
 
 1. **Check for an existing page object.** Glob the project for `**/pom/mobile/**/<Screen>Page.java` (and `**/pages/**`). Exists → this is an **update** (step 4). Missing and the project has no `pom/mobile/` at all → load `qa/java/skills/page-object-design` first to lay down the base class + structure.
-2. **Map every element to a constant + finder** using its locator-ladder rung. Test-id elements use `byTestId`; fallbacks use the matching finder, and each gets a row in `missing-testids.md`.
-3. **Write the class** per the conventions above: constants block, constructor, `verifyPageLoaded()` on the landmark, one intent-named action per user action (returning `void` or the destination `*Page`), one query method per datum a test reads. Stub any destination page that doesn't exist yet.
+2. **Classify, then map.** Group the inventory first: repeating rows and cards become region components, native controls become control components (reuse the project's class when one exists), and their elements move into them. Map each remaining element to a constant + finder using its locator-ladder rung. Test-id elements use `byTestId`; fallbacks use the matching finder, and each gets a row in `missing-testids.md`.
+3. **Write the class** per the conventions above: constants block, constructor, `verifyPageLoaded()` on the landmark, one intent-named action per user action (returning `void` or the destination `*Page`), one query method per datum a test reads, and a method returning each component (`row(orderNumber)`). Stub any destination page that doesn't exist yet.
 4. **Update mode — diff before writing:**
    - New element on screen, not in class → add constant + accessor/action
    - Constant in class, element gone from screen → flag and **ask** before deleting (may belong to a state you didn't reach)
@@ -102,7 +105,7 @@ The compilable reference is `qa/java/skills/ui-test-author/appium/assets/`.
    - Fallback locator where a test id now exists → upgrade to `byTestId`, rename the constant, remove the row from `missing-testids.md`
    - Never reorder/rename existing public methods tests already call without flagging it
 5. **Verify:** `./gradlew compileTestJava` (or the project equivalent) → compiles clean. Confirm `verifyPageLoaded()`'s landmark matches what `mobile-screen-explorer` reported for this screen.
-6. **Report:** class created/updated (diff summary), counts (test-id-backed / fallback / ⚠ XPath), destination stubs created, open questions.
+6. **Report:** class created/updated (diff summary), components created or reused, counts (test-id-backed / fallback / ⚠ XPath), destination stubs created, open questions.
 
 ## Rules
 

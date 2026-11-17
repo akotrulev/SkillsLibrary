@@ -62,7 +62,8 @@ Confirm at most 2–3.
 3. Create `reqnroll.json`.
 4. Create `Support/`: the DI registration (`[ScenarioDependencies]`), `ScenarioState`, and `BrowserHooks`
    (`references/hooks.md`) — the browser per scenario, failure evidence, teardown.
-5. Create the empty `Features/` folder and one throwaway smoke `.feature` to prove the rig parses and runs.
+5. Create the empty `Features/` folder and one throwaway smoke `.feature` to prove the rig parses and runs;
+   run it with the `not-automated` filter below.
 6. `dotnet build` (the source generator must produce code-behind) and run the smoke scenario with `BASE_URL`
    set.
 7. Report files created and hand off to `feature-file-writer` (features) + `gherkin-step-code` (steps).
@@ -153,7 +154,8 @@ public static class TestDependencies
 ```
 
 The method is static and returns `IServiceCollection`; scoped means one instance per scenario. `[Binding]`
-classes are registered by Reqnroll — never add them here.
+classes are registered by Reqnroll — never add them here. The API seeder the pre-clean `Given … does not exist`
+steps call (`gherkin-step-code`) is registered here too, scoped.
 
 ### `Support/ScenarioState.cs` — shared per-scenario state (web)
 
@@ -181,7 +183,9 @@ public sealed class ScenarioState
 ```
 
 The hook opens the page and builds the page objects once per scenario; steps reach them through the state,
-never `new` them. No assertions, no logic — just state.
+never `new` them. No assertions, no logic — just state. In a BDD suite the step definition is the intent layer,
+so a page object the steps use may expose its named controls and elements (`state.Deals.DealType`) and a step may
+act on one; a page method exists only for a sequence of interactions (`bdd.md`).
 
 ### `Support/BrowserHooks.cs` — per-scenario lifecycle and failure evidence
 
@@ -198,6 +202,17 @@ The code is in [`references/hooks.md`](references/hooks.md). Its contract, fixed
 > The widely-cited Reqnroll+Playwright blog example **leaks the browser** (no teardown) and keeps no evidence.
 > The hook closes the driver and the browser on the way out with `using` / `await using`, even when an evidence
 > step throws.
+
+### Features ahead of their automation
+
+A scenario written before its steps exist carries the suite's skip tag (`@not-automated` when it has none) and a
+ticket, never an empty binding. Reqnroll turns tags into NUnit categories, so every run excludes it:
+
+```bash
+dotnet test Bdd.Tests --filter "TestCategory!=not-automated"
+```
+
+CI uses the same filter. Removing the tag is part of the task that binds the steps.
 
 ### Mobile variant (`ScenarioState` + hook)
 

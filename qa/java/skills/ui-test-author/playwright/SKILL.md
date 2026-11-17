@@ -40,8 +40,9 @@ ui-tests/
 ├── build.gradle.kts         settings.gradle.kts     testng.xml
 └── src/test/java/com/example/uitests/
     ├── support/   BaseTest.java (the one lifecycle), AuthSetup.java when signed-in classes exist
-    ├── pages/     LoginPage.java, HomePage.java, components shared by several pages
-    └── tests/     LoginTest.java — one test class per feature
+    ├── pages/     LoginPage.java, HomePage.java, OrdersPage.java; region components beside their page
+    ├── components/controls/   DatePicker, Dropdown, Combobox, DataGrid, GridRow — one per design-system widget
+    └── tests/     LoginTest.java, OrdersTest.java — one test class per feature
 ```
 
 The assets are flat; each `.java` file goes under `src/test/java` at its package path, and the three build
@@ -49,7 +50,7 @@ files go at the project root.
 
 ## When to use
 
-- A new test class, page object, component object, or the `BaseTest` itself.
+- A new test class, page object, region or control component, or the `BaseTest` itself.
 - A new or rewritten `build.gradle.kts`, `testng.xml`, browser install task or signed-in state.
 - Scoping or fixing locators, replacing one-shot reads with web-first assertions.
 - Running a class per device, viewport, colour scheme, locale or time.
@@ -58,6 +59,7 @@ files go at the project root.
 
 - Native mobile apps → `qa/java/skills/ui-test-author/appium`
 - Selenium → `qa/java/skills/ui-test-author/selenium`
+- A new project from zero (Gradle wrapper, `Env`, fat jar, container) → `qa/java/skills/ui-project-setup`
 - Reviewing Playwright code → `qa/java/skills/ui-test-author/review`
 - Designing the page-object hierarchy → `qa/java/skills/page-object-design`
 - Extracting page objects and test ids from a live URL → `qa/java/skills/page-objects-from-url`
@@ -82,6 +84,7 @@ files go at the project root.
 |---|---|
 | [`references/lifecycle.md`](references/lifecycle.md) | Why instance fields plus `parallel="classes"`, the hook order, the hooks, environment, failure evidence, signed-in state, API seeding, install / codegen / show-trace / headed commands |
 | [`references/locators.md`](references/locators.md) | The ladder, `getBy*`, `filter` / `and` / `or`, chaining from a component root, `parent.locator(child)` and the 1.64 `within()` line, `visible()`, frames, strictness, `describe()`, `addLocatorHandler`, the test-id attribute, agent-facing locators |
+| [`references/components.md`](references/components.md) | The control catalogue: DatePicker, Dropdown, Combobox, DataGrid + GridRow, Pagination, Modal, Toast, Tabs, FileUpload — each one's root, intent methods and Playwright API; picking a row by content; a date without a branch |
 | [`references/assertions.md`](references/assertions.md) | The web-first set (accessible name, role, `containsClass`, URL, aria snapshots), one expected condition, the one-shot-read ban, timeouts, `waitForCondition`, subject naming without a message parameter, HTTP responses |
 | [`references/emulation-and-mobile-web.md`](references/emulation-and-mobile-web.md) | Explicit device options, touch, viewport, media features, locale and geolocation, `page.clock()`, offline, and why emulation is not a device |
 | [`references/trace-correlation.md`](references/trace-correlation.md) | One `traceparent` trace id per test on app-origin requests only (a scoped context route, never `extraHTTPHeaders`), and the failure link to the backend trace |
@@ -92,12 +95,14 @@ files go at the project root.
 | [`assets/LoginPage.java`](assets/LoginPage.java) | A page with intent methods and a `SignInForm` component; the error scoped with `parent.locator(child)` |
 | [`assets/HomePage.java`](assets/HomePage.java) | The landing page the journeys assert on |
 | [`assets/LoginTest.java`](assets/LoginTest.java) | Tests with `Should_X_When_Y` names, groups, and pages built per test |
+| [`assets/DatePicker.java`](assets/DatePicker.java), [`Dropdown.java`](assets/Dropdown.java), [`Combobox.java`](assets/Combobox.java), [`DataGrid.java`](assets/DataGrid.java), [`GridRow.java`](assets/GridRow.java) | Control components in `components.controls`: a root `Locator`, intent methods, assertion targets only as described locators |
+| [`assets/OrdersPage.java`](assets/OrdersPage.java), [`assets/OrdersTest.java`](assets/OrdersTest.java) | A page composing a `DataGrid` and a `DatePicker`; a test that seeds its order through the API in `@BeforeMethod`, deletes it in `@AfterMethod`, and keeps the body to the action and its outcome |
 
 Start from the assets: copy them, rename, and keep their shape.
 
 ## Rules
 
-The standards this skill's output must meet are the qa-java rule files, not a list here: `qa-java.md` (core) and `qa-java-ui.md`. Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the qa-java rule files, not a list here: `qa-java.md` (core), `qa-java-ui.md` and `qa-java-page-objects.md`. Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Conventions
 
@@ -111,19 +116,20 @@ The standards this skill's output must meet are the qa-java rule files, not a li
 
 - The ladder: `getByTestId` → `getByRole` → `getByLabel` → `getByPlaceholder` → `getByText` → `getByAltText` / `getByTitle` → CSS. Test ids are PascalCase dot-separated (`Login.Submit`, `OrderRow.Title`), the format `fe-react` and `fe-blazor` generate; a row is picked by its content.
 - `visible()` (1.63) instead of `:visible`; `frameLocator` / `contentFrame()` for iframes; `addLocatorHandler` for overlays that may appear; `describe()` on every locator a test asserts on, because Java's `assertThat(locator)` has no message parameter.
-- Locators are `private final Locator` fields built in the constructor; tests reach them through accessors (`error()`). A page takes `(Page page)`; a component takes its root `Locator`, as `SignInForm` does. The page owns its URL in `goTo()`. Pages are built in the test class, never as fields of `BaseTest`.
+- Locators are `private final Locator` fields built in the constructor; a test reaches one only as an assertion target (`error()`), never to act on it. A page takes `(Page page)`; a component takes its root `Locator`, as `SignInForm` does. A design-system widget is a control component at first use (`references/components.md`), held as a field and exposed as intent (`ordersPage.placedOn().select(date)`). The page owns its URL in `goTo()`. Pages are built in the test class, never as fields of `BaseTest`.
 
 ### Tests and waiting
 
 - One test class per feature; `@Test(groups = {"login", "smoke"})`, `@Feature("Login")` on the class where the project uses Allure. One long journey is one test with Allure `@Step` labels.
 - Web-first assertions only (`references/assertions.md`); `Locator` has no `getText()`. A longer wait is a longer assertion timeout (`new LocatorAssertions.IsVisibleOptions().setTimeout(...)`; there is no `AssertOptions`), or `page.waitForCondition(...)` for a non-DOM condition.
 - Navigate, then assert a landmark. `waitForURL` or `assertThat(page).hasURL(...)` replace `waitForNavigation`.
+- The app's own busy signal (loading bar, snackbar) is a named wait on the page or shell component (`waitUntilLoadingBarGone()`, a `waitFor(setState(HIDDEN))` inside), called by the action that triggers it, never by the test.
 - `page.waitForResponse(predicate, action)` returns **`Response`**: start the wait and the action in one call, match on URL and method, then assert the status. API responses assert the exact status with the body: `assertThat(created.status()).as(created.text()).isEqualTo(201)`.
 
 ### Auth and data
 
 - Sign in once per suite run per role (`AuthSetup`, `references/lifecycle.md` §6), save the storage state under `build/.auth/`, and point signed-in classes at it in `contextOptions()`.
-- Records a test needs are created through `page.request()` in the class's `@BeforeMethod` and deleted in its `@AfterMethod(alwaysRun = true)`; builders from `qa/java/skills/test-data-builder`.
+- Records a test needs are created through `page.request()` in the class's `@BeforeMethod` and deleted in its `@AfterMethod(alwaysRun = true)`; builders from `qa/java/skills/test-data-builder`. Read-only reference data, pre-clean and keep-on-failure: `references/lifecycle.md` §7.
 
 ### Build
 
@@ -136,14 +142,18 @@ The build is `assets/build.gradle.kts`: the pins above, Allure on allure-java 3,
    oracle table (generation checks §1) before any code.
 3. If the project has no `BaseTest`, add `assets/BaseTest.java`, `testng.xml` and the build files. If it has
    one with static Playwright fields or `parallel="methods"`, migrate it to the asset's shape first.
-4. For each screen, write or extend `pages/<Name>Page.java` from `assets/LoginPage.java`: one
-   `private final Locator` per element on the highest ladder rung, components for reused regions, `goTo()`,
-   intent methods, `describe()` on asserted locators. Add a `missing-testids.md` row for every fallback.
-5. Write `tests/<Feature>Test.java` from `assets/LoginTest.java`: extends `BaseTest`, pages built in a
-   `@BeforeMethod`, one `@Test` per scenario with a `Should_X_When_Y` name and groups.
-6. For signed-in classes, add `AuthSetup` and override `contextOptions()`; for devices, override it with the
+4. List the design-system widgets the screen uses. Reuse the project's control in `components/controls/`
+   for each, or add one from the matching asset or `references/components.md` before writing the page.
+5. For each screen, write or extend `pages/<Name>Page.java` from `assets/LoginPage.java` or
+   `assets/OrdersPage.java`: one `private final Locator` per element on the highest ladder rung, controls
+   and region components as fields, `goTo()`, intent methods, `describe()` on asserted locators. Add a
+   `missing-testids.md` row for every fallback.
+6. Write `tests/<Feature>Test.java` from `assets/LoginTest.java` or `assets/OrdersTest.java`: extends
+   `BaseTest`; pages built, data seeded and the screen reached in `@BeforeMethod(alwaysRun = true)`; one
+   `@Test` per scenario with a `Should_X_When_Y` name and groups, its body only the action and outcome.
+7. For signed-in classes, add `AuthSetup` and override `contextOptions()`; for devices, override it with the
    device's options.
-7. Run the hallucination gate (generation checks §2) and report every `MISSING` test id. Run `./gradlew installPlaywrightBrowsers test` (0 failures) and debug with `HEADED=1` or
+8. Run the hallucination gate (generation checks §2) and report every `MISSING` test id. Run `./gradlew installPlaywrightBrowsers test` (0 failures) and debug with `HEADED=1` or
    `PWDEBUG=1`.
 
 ## Handoffs

@@ -133,7 +133,7 @@ public final class RealDeviceDriverFactory {
 
 On App Automate the device is real by default. `deviceName` and `osVersion` pick it; `gpsLocation` (`"lat,long"`), `networkProfile`, `language`/`locale`/`timezone`, `deviceOrientation` and `enableBiometric` (sensor instrumentation for biometric prompts) are the real-device-only features, set at session start. The app reference is a `bs://…` id or a `custom_id`. The id-prefix setting is for a React Native or Compose app; a Views app whose ids carry the package leaves it off (`ui-test-author/appium`).
 
-Then drive the **dynamic** device features in the test through a small helper. Each is a `browserstack_executor` command (biometric / network) or a standard Appium location call (GPS) — and each must be **awaited on the app's reaction**, never followed by a sleep.
+Then drive the **dynamic** device features in the test through a small `DeviceFeatures` fixture. Each is a `browserstack_executor` command (biometric / network) or a standard Appium location call (GPS) — and each must be **awaited on the app's reaction**, never followed by a sleep.
 
 ```java
 package support.farm;
@@ -170,7 +170,8 @@ public final class DeviceFeatures {
 }
 ```
 
-Biometric and network are `browserstack_executor` commands; GPS is a `mobile:` command with one intent method per platform (Android `mobile: setGeolocation`, iOS `mobile: setSimulatedLocation`). `org.openqa.selenium.html5.Location` and `LocationContext` were removed in Selenium 4.35 and java-client 10 dropped its own location APIs, and in java-client 11 the driver is not a `RemoteWebDriver`, so the helpers take `JavascriptExecutor`. Each call is **awaited on the app's reaction**, never followed by a sleep.
+Biometric and network are `browserstack_executor` commands; GPS is a `mobile:` command with one intent method per platform (Android `mobile: setGeolocation`, iOS `mobile: setSimulatedLocation`). `org.openqa.selenium.html5.Location` and `LocationContext` were removed in Selenium 4.35 and java-client 10 dropped its own location APIs, and in java-client 11 the driver is not a `RemoteWebDriver`, so the fixture's methods take `JavascriptExecutor`.
+ Each call is **awaited on the app's reaction**, never followed by a sleep.
 
 > **The full real-device feature set** (App Automate): `gpsLocation` + mid-session `setLocation`; `networkProfile` (presets like `2g-gprs-good`, `4g-lte-advanced-good`, or a custom bandwidth/latency/loss profile) + mid-session `updateNetworkProfile`; **biometric** via `enableBiometric` (sensor instrumentation injects a mock into the app) + `performBiometric`; `appium:autoGrantPermissions`; `language`/`locale`/`timezone`; `deviceOrientation`; plus camera-image injection, OTP/SIM workflows, and file upload-to-device for richer flows. **iOS** uses `XCUITestOptions` with the same `bstack:options` block (biometric = Touch/Face ID injection). Set static features as caps; flip dynamic ones mid-session.
 

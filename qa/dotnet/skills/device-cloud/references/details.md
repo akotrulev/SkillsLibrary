@@ -124,7 +124,7 @@ public sealed class RealDeviceDriverFactory(BrowserStackCredentials credentials)
 }
 ```
 
-The `gpsLocation`, `networkProfile`, `language`, `locale` and `timezone` values above are the example's, not defaults to copy; read them from the same configuration as the device list when a test needs another. Then drive the **dynamic** features in the test through a small helper; each is awaited on the app's reaction, never followed by a sleep:
+The `gpsLocation`, `networkProfile`, `language`, `locale` and `timezone` values above are the example's, not defaults to copy; read them from the same configuration as the device list when a test needs another. Then drive the **dynamic** features in the test through a small client; each is awaited on the app's reaction, never followed by a sleep:
 
 ```csharp
 using OpenQA.Selenium;
@@ -134,9 +134,13 @@ namespace AppiumTests.Support.Farm;
 
 public static class DeviceFeatures
 {
-    public static void RespondToBiometric(AppiumDriver driver, bool match) =>
+    public static void ApproveBiometric(AppiumDriver driver) =>
         ((IJavaScriptExecutor)driver).ExecuteScript(
-            $"browserstack_executor: {{\"action\":\"performBiometric\",\"arguments\":{{\"match\":\"{(match ? "true" : "false")}\"}}}}");
+            "browserstack_executor: {\"action\":\"performBiometric\",\"arguments\":{\"match\":\"true\"}}");
+
+    public static void RejectBiometric(AppiumDriver driver) =>
+        ((IJavaScriptExecutor)driver).ExecuteScript(
+            "browserstack_executor: {\"action\":\"performBiometric\",\"arguments\":{\"match\":\"false\"}}");
 
     public static void SwitchNetworkProfile(AppiumDriver driver, string profile) =>
         ((IJavaScriptExecutor)driver).ExecuteScript(
@@ -175,7 +179,7 @@ public class BiometricLoginTests
         var login = new LoginPage(_driver);
         login.TapBiometricSignIn();
 
-        DeviceFeatures.RespondToBiometric(_driver, match: true);
+        DeviceFeatures.ApproveBiometric(_driver);
 
         Assert.That(login.AwaitDashboard().IsLoaded(), Is.True, $"dashboard after an approved biometric on {device}");
     }

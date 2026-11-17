@@ -7,7 +7,7 @@ which owns the browser, the context, the page and the failure evidence. A sample
 `[TearDown]`; NUnit runs a derived `[SetUp]` after `BaseTest.StartTracing` and a derived `[TearDown]` before
 `BaseTest.KeepEvidenceOnFailure`, so the page is open in both.
 
-`BaseTest`'s protected helpers name and attach a recording exactly like the failure evidence (plan D42):
+`BaseTest`'s protected evidence methods name and attach a recording exactly like the failure evidence (plan D42):
 
 | Member | Returns / does |
 |---|---|
@@ -50,7 +50,7 @@ D31): a crashed page fails the teardown, and the trace is already on disk.
 
 ### 1.3 A screenshot at a chosen point
 
-An `Evidence` helper sits beside the page objects and is built in the test class's own `[SetUp]`. The test
+An `Evidence` recorder sits beside the page objects and is built in the test class's own `[SetUp]`. The test
 calls it; it never calls `Page`.
 
 ```csharp
@@ -72,6 +72,8 @@ public sealed class Evidence(IPage page)
         });
         AllureApi.AddAttachment(name, "image/png", png, ".png");
     }
+
+    public Task ChapterAsync(string title) => page.Screencast.ShowChapterAsync(title);
 }
 ```
 
@@ -139,6 +141,7 @@ public class CheckoutReceiptTests : BaseTest
 {
     private string _receipt = null!;
     private CheckoutPage _checkout = null!;
+    private Evidence _evidence = null!;
 
     [SetUp]
     public async Task StartReceipt()
@@ -148,13 +151,14 @@ public class CheckoutReceiptTests : BaseTest
         await Page.Screencast.StartAsync(new() { Path = _receipt });
         await Page.Screencast.ShowActionsAsync(new() { Position = AnnotatePosition.TopRight });
         _checkout = new CheckoutPage(Page);
+        _evidence = new Evidence(Page);
     }
 
     [Test]
     public async Task Should_ConfirmOrder_When_CartHasOneItem()
     {
         await _checkout.OpenAsync();
-        await ChapterAsync("Pay");
+        await _evidence.ChapterAsync("Pay");
         await _checkout.PayWithSavedCardAsync();
 
         await Expect(_checkout.Confirmation, "confirmation after paying").ToHaveTextAsync("Order confirmed");
@@ -166,8 +170,6 @@ public class CheckoutReceiptTests : BaseTest
         await Page.Screencast.StopAsync();
         Attach("receipt", "video/webm", _receipt);
     }
-
-    private Task ChapterAsync(string title) => Page.Screencast.ShowChapterAsync(title);
 }
 ```
 
@@ -270,7 +272,7 @@ public class OrdersNetworkTests : BaseTest
 |---|---|
 | `TestContext.AddTestAttachment(path, description)` | NUnit's own: the file goes into the TRX and the IDE's test result. A file path only |
 | `AllureApi.AddAttachment(name, type, path)` | A file on disk — every recording above, through `BaseTest.Attach` |
-| `AllureApi.AddAttachment(name, type, byte[] content, ".png")` | Bytes with an extension — the `Evidence` helper. Without the extension the download loses its suffix |
+| `AllureApi.AddAttachment(name, type, byte[] content, ".png")` | Bytes with an extension — the `Evidence` recorder. Without the extension the download loses its suffix |
 | `AllureApi.AddAttachment(path, name)` | A file whose type Allure infers from the extension |
 | `AllureApi.AddScreenDiff(expected, actual, diff)` | Three PNG files shown as Allure's image-diff widget — produced by `qa/dotnet/skills/visual-regression` |
 
@@ -287,7 +289,7 @@ public class OrdersNetworkTests : BaseTest
 The Node runner writes `error-context.md` (the error plus an AI-mode aria snapshot) on every failure. .NET
 does not. The nearest .NET evidence is the screenshot, the trace with `AriaSnapshots = true` read through
 `trace snapshot`, or an explicit capture: `AriaSnapshotAsync(new() { Mode = AriaSnapshotMode.Ai })` [1.59] on
-a locator, attached as `text/plain` bytes from a helper. Adding it to every failure is a `BaseTest` change.
+a locator, attached as `text/plain` bytes from the `Evidence` recorder. Adding it to every failure is a `BaseTest` change.
 
 ## 8. Viewing and reading evidence
 

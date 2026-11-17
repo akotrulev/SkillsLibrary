@@ -31,12 +31,15 @@ Turns a discovered element inventory into a **Java Appium window object**: a `Ba
 
 ## Conventions
 
-The standards an emitted object must meet are the qa-java rule files `desktop-tests.md` and `qa-java.md` (the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/`). The codegen specifics:
+The standards an emitted object must meet are the qa-java rule files `qa-java-page-objects.md`, `desktop-tests.md` and `qa-java.md` (the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/`). The codegen specifics:
 
-- Element access goes through `BaseWindow`'s finders, in ladder order: `byTestId` (`AppiumBy.accessibilityId`, the same on both platforms) → `within(container)` for rows → a label or native query as a named fallback → XPath last.
+- Element access goes through `BaseWindow`'s finders, in ladder order: `byTestId` (`AppiumBy.accessibilityId`, the same on both platforms) → a find inside the container for rows → a label or native query as a named fallback → XPath last.
 - Each id is a `private static final String {ELEMENT}_ID` constant (a fallback is `{ELEMENT}_FALLBACK`); a window exposes intent and queries, never a `WebElement`.
 - Navigation actions return the destination window object; same-window actions return `void`.
-- Package `windows`, file `windows/<Window>.java`. Repeating rows are scoped components that do not extend `BaseWindow`.
+- Package `windows`, file `windows/<Window>.java`.
+- **Repeating rows are region components**: a row key, re-resolved from its container on every call, picked by its content, never by position. They do not extend `BaseWindow`.
+- **Native controls are control components at first use** (a date picker, a combo box, an outline or data grid, a tab view, a toolbar segmented control): a class in `components.controls` that takes the control's container id and exposes intent with domain types (`select(LocalDate)`, `choose(String item)`). Two platforms' markups are two classes, never a branch.
+- One user action per method, named for the action, never the outcome; no boolean parameter selecting behaviour.
 - Per-platform ids (only where one object serves both apps) live in a locator map keyed by platform: one accessor per element, and no action branches on the platform.
 - No `PageFactory`, `@FindBy`, `@AndroidFindBy` or `@iOSXCUITFindBy`, and no raw `RemoteWebElement`.
 
@@ -118,43 +121,60 @@ public final class LibraryWindow extends BaseWindow {
         byTestId(SEARCH_ID).sendKeys(text);
     }
 
-    public AlbumRow albumAt(int position) {
-        return new AlbumRow(byTestId(ALBUM_TABLE_ID), position);
+    public AlbumRow album(String title) {
+        return new AlbumRow(driver, ALBUM_TABLE_ID, title);
     }
 }
 ```
 
-The scoped row is re-resolved from its container on each call, because a Windows `AutomationId` repeats across rows and is unique among siblings only:
+The row is picked by its title and re-resolved from its container on each call, because a Windows `AutomationId` repeats across rows and is unique among siblings only:
 
 ```java
 package com.example.desktoptests.windows;
 
 import io.appium.java_client.AppiumBy;
+import io.appium.java_client.AppiumDriver;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public final class AlbumRow {
     private static final String ROW_ID = "Library.Row";
     private static final String TITLE_ID = "Library.Row.Title";
+    private static final String ARTIST_ID = "Library.Row.Artist";
 
-    private final WebElement table;
-    private final int position;
+    private final AppiumDriver driver;
+    private final String tableId;
+    private final String title;
 
-    AlbumRow(WebElement table, int position) {
-        this.table = table;
-        this.position = position;
+    AlbumRow(AppiumDriver driver, String tableId, String title) {
+        this.driver = driver;
+        this.tableId = tableId;
+        this.title = title;
+    }
+
+    public String artist() {
+        return row().findElement(AppiumBy.accessibilityId(ARTIST_ID)).getText();
+    }
+
+    public void open() {
+        row().click();
     }
 
     private WebElement row() {
-        return table.findElements(AppiumBy.accessibilityId(ROW_ID)).get(position);
-    }
-
-    public String titleText() {
-        return row().findElement(AppiumBy.accessibilityId(TITLE_ID)).getText();
+        return new WebDriverWait(driver, BaseWindow.TIMEOUT)
+                .ignoring(StaleElementReferenceException.class)
+                .withMessage("No " + ROW_ID + " titled " + title + " in " + tableId)
+                .until(d -> d.findElement(AppiumBy.accessibilityId(tableId))
+                        .findElements(AppiumBy.accessibilityId(ROW_ID)).stream()
+                        .filter(row -> title.equals(row.findElement(AppiumBy.accessibilityId(TITLE_ID)).getText()))
+                        .findFirst()
+                        .orElse(null));
     }
 }
 ```
 
-On macOS a row that combines its children (`.accessibilityElement(children: .combine)`) exposes only the row id: read the row's own `label` or `value` and drop the child accessor. A fresh `WebElement` is found on every call, so a table that redraws never leaves a stale reference.
+On macOS a row that combines its children (`.accessibilityElement(children: .combine)`) exposes only the row id: match the key on the row's own `label` or `value` and drop the child accessors. A fresh `WebElement` is found on every call, so a table that redraws never leaves a stale reference.
 
 A fallback (no id yet): name the constant `*_FALLBACK`, use a label or native query before XPath, and add the row to `missing-testids.md`. The Windows form below uses `AppiumBy.name`, which reads the UIA `Name`; on Mac2 `name` is the `identifier`, so a macOS label fallback is a `predicate string` on `label`, sent as `driver.findElement("predicate string", …)` because `AppiumBy.iOSNsPredicateString` sends the prefixed name Mac2 does not accept:
 
@@ -179,7 +199,7 @@ driver.findElement(AppiumBy.name(EXPORT_BUTTON_FALLBACK));
 ## Procedure
 
 1. **Check for an existing object.** Glob `**/windows/<Window>.java`. Exists → **update** (step 4). The project has no `windows/` and no `BaseWindow` → run `qa/java/skills/desktop-project-setup` first.
-2. **Map each element to a constant and finder** by its rung. Test-id elements use `byTestId`; fallbacks are `*_FALLBACK` with a `missing-testids.md` row. Each repeating group becomes a scoped component addressed inside its container.
+2. **Classify, then map.** Each repeating group becomes a region component addressed inside its container, and each native control a control component (reuse the project's class when one exists); their elements move into them. Map each remaining element to a constant and finder by its rung: test-id elements use `byTestId`; fallbacks are `*_FALLBACK` with a `missing-testids.md` row.
 3. **Write the class** per the conventions: constants, constructor, `verifyWindowLoaded()` on the landmark, one intent-named action per user action, one query method per datum a test reads. Stub any destination window that does not exist.
 4. **Update mode, diff before writing:**
    - New element, not in the class → add constant and finder or action.
@@ -188,7 +208,7 @@ driver.findElement(AppiumBy.name(EXPORT_BUTTON_FALLBACK));
    - A fallback where an id now exists → upgrade to `byTestId`, rename, remove the row from `missing-testids.md`.
    - Never reorder or rename public methods tests already call without flagging it.
 5. **Verify:** `./gradlew compileTestJava` clean. Confirm the landmark matches what the explorer reported.
-6. **Report:** class created or updated (diff summary), counts (id-backed / fallback / ⚠ XPath), destination stubs, open questions.
+6. **Report:** class created or updated (diff summary), components created or reused, counts (id-backed / fallback / ⚠ XPath), destination stubs, open questions.
 
 ## Rules
 

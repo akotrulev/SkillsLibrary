@@ -16,7 +16,7 @@ import { ToxiProxyContainer, type StartedToxiProxyContainer } from '@testcontain
 import { ChaosProxy } from './ChaosProxy.js';
 
 export interface ChaosFixture {
-  chaos: ChaosProxy;            // the intent-named toxic helper; app points at chaos.host():chaos.port()
+  chaos: ChaosProxy;            // the intent-named fault injector; app points at chaos.host():chaos.port()
   stop: () => Promise<void>;
 }
 
@@ -50,9 +50,9 @@ export async function startChaos(): Promise<ChaosFixture> {
 > broker bootstrap pointed at the proxy), **not** the dependency directly. That redirection *is* the chaos setup —
 > if the app bypasses the proxy, no toxic can reach it.
 
-## The toxic helper — `tests/support/chaos/ChaosProxy.ts`
+## The fault injector — `tests/support/chaos/ChaosProxy.ts`
 
-One helper owns the proxy handle and exposes **intent-named** fault operations and a **lifecycle** primitive, so
+One object owns the proxy handle and exposes **intent-named** fault operations and a **lifecycle** primitive, so
 tests read `chaos.injectLatency(...)`, `chaos.cutConnection()`, `chaos.healed()` — never raw `proxy.addToxic({...})`
 scattered across `it(...)` blocks. Each injected toxic is named so it can be removed.
 
@@ -113,6 +113,33 @@ export class ChaosProxy {
   ): Promise<void> {
     await this.proxy.addToxic({ name, type, stream, toxicity, attributes } as never);
     this.injected.push(name);
+  }
+}
+```
+
+## The call driver — `tests/support/chaos/OrderTraffic.ts`
+
+A test that needs the same call made N times (to trip a breaker, or to sample a probabilistic fault) asks this
+object for it, so the test body stays linear: no loop and no counter in the `it(...)`.
+
+```ts
+// tests/support/chaos/OrderTraffic.ts
+import type { OrderService } from '../../../src/orderService.js';
+
+type OrderResult = Awaited<ReturnType<OrderService['placeOrderWithRetry']>>;
+
+/** Repeats one order call against the app wired to the proxy; the test asserts on what comes back. */
+export class OrderTraffic {
+  constructor(private readonly app: OrderService) {}
+
+  async placeSafely(sku: string, times: number): Promise<void> {
+    for (let i = 0; i < times; i++) await this.app.placeOrderSafely(sku);
+  }
+
+  async placeWithRetry(sku: string, times: number): Promise<OrderResult[]> {
+    const results: OrderResult[] = [];
+    for (let i = 0; i < times; i++) results.push(await this.app.placeOrderWithRetry(sku));
+    return results;
   }
 }
 ```

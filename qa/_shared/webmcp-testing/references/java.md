@@ -29,18 +29,20 @@ prototype exposes a different entry point.
 
 The writer's rule holds — a test class calls no raw `page` method — so the scripts live in the page object,
 [`assets/ProductPage.java`](../assets/ProductPage.java) (package `com.example.uitests.pages`), beside its URL
-and its `Cart.Badge` locator. The test class keeps only the assertion-side helpers.
+and its `Cart.Badge` locator. The test class holds tests, setup and fields only: every body is a page-object
+call and its assertion.
 
 | Member | What it does |
 |---|---|
-| `ProductPage.settledTools(name, present, timeoutMs)` | `SETTLED_TOOLS_JS` lists this frame's tools (`tool.window === window`), parses string schemas, and resolves once `name` is present (or absent), re-checking on every `toolchange` event, or when the timeout passes. Returns `List<Map<?, ?>>` of `{ name, inputSchema, annotations }` |
-| `ProductPage.callTool(name, input, timeoutMs)` | `CALL_TOOL_JS`: `executeTool` with the object input, retried as a JSON string on `Failed to parse input`, raced against the timeout; returns the parsed result |
-| `WebMcpTest.registeredTool(name)` | The tool's map, or an `AssertionError` naming the tools that were listed |
-| `WebMcpTest.callAddToCart(quantity)` | Waits for the tool to register, then calls it |
+| `ProductPage.registeredTool(name, timeoutMs)` | `REGISTERED_TOOL_JS` lists this frame's tools (`tool.window === window`), re-checking on every `toolchange` event, and resolves with `{ name, inputSchema, annotations }` (a string schema parsed) once `name` is listed. When the timeout passes first it rejects with an error naming the tools that were listed, which reaches Java as a `PlaywrightException`. Returns `Map<?, ?>` |
+| `ProductPage.toolNamesAfterRemoval(name, timeoutMs)` | `TOOL_NAMES_AFTER_REMOVAL_JS` resolves with this frame's tool names once `name` is gone, or with the names still listed when the timeout passes, so the test's assertion reports them. Returns `List<String>` |
+| `ProductPage.callTool(name, input, timeoutMs)` | Waits for the tool to register, then `CALL_TOOL_JS`: `executeTool` with the object input, retried as a JSON string on `Failed to parse input`, raced against the timeout; returns the parsed result |
+
+Registration and removal are two methods with two scripts, not one method with a `present` flag.
 
 Why an event-driven wait: Java has no `expect.poll`, and `page.waitForFunction` does not await an async
 predicate — a `Promise` is truthy, so it would return at once. `page.evaluate` itself has no timeout, so
-every helper carries `TIMEOUT_MS` into the script.
+every method carries `TIMEOUT_MS` into its script.
 
 `page.evaluate` maps a JS object to `Map<String, Object>` and an array to `List<Object>`. The tests assert
 with AssertJ through `asInstanceOf(InstanceOfAssertFactories.MAP)`, so a missing or non-object value fails
@@ -63,7 +65,7 @@ tests assert an `isError` result (checklist C13). A throw that the test expects 
 
 ## 5. Frames
 
-The helpers filter `tool.window === window`, so they report the frame they run in. For a child frame, find
+The scripts filter `tool.window === window`, so they report the frame they run in. For a child frame, find
 it in `page.frames()` and give that frame's page object the same script through `frame.evaluate(…)`; the
 iframe needs `allow="tools"`.
 
@@ -82,7 +84,7 @@ iframe needs `allow="tools"`.
 When `com.microsoft.playwright:playwright` 1.64 is on Maven Central (plan 003 §2.5): from 1.64,
 `page.webmcp().tools(new WebMCP.ToolsOptions().setTimeout(10_000))` and
 `page.webmcp().callTool("add_to_cart", Map.of("sku", "sku-123", "quantity", 2), new WebMCP.CallToolOptions().setTimeout(10_000))`
-replace `CALL_TOOL_JS` and the listing half of `SETTLED_TOOLS_JS` inside `ProductPage`; `frame.webmcp()`
+replace `CALL_TOOL_JS` and the listing half of the two wait scripts inside `ProductPage`; `frame.webmcp()`
 covers child frames.
 Keep the event-driven wait for registration and removal — Java still has no polling assertion — and move
 the annotation assertion to the normalized `consequential` key.

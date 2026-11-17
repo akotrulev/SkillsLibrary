@@ -48,7 +48,8 @@ Confirm at most 2–3.
 1. Read 2–3 existing files (the `build.gradle.kts`, an existing page object, `BaseTest`) to match the package, runner, and conventions.
 2. Add the Cucumber packages to the test source set via the **BOM** (one pinned version), plus the JUnit Platform suite + launcher and `cucumber-picocontainer`. Set `tasks.test { useJUnitPlatform() }`.
 3. Create the runner: a JUnit 5 `@Suite` class (`RunCucumberTest`) that **selects** the features, and `src/test/resources/junit-platform.properties` carrying glue, plugins and the tag filter. **One discovery mechanism**: the `@SelectClasspathResource("features")` selector — never also `cucumber.features`, which makes the engine ignore every discovery selector.
-4. Create `support/` : the per-scenario `TestContext` (holds the Playwright `Page` / Selenium `WebDriver` + lazily-built page objects), and the lifecycle `Hooks` class (`@Before`/`@After` that own the browser/driver and the failure evidence — **with teardown**). PicoContainer is zero-config — adding the dependency is the whole wiring step.
+4. Create `support/` : the per-scenario `TestContext` (holds the Playwright `Page` / Selenium `WebDriver` + the page objects built from it)
+, and the lifecycle `Hooks` class (`@Before`/`@After` that own the browser/driver and the failure evidence — **with teardown**). PicoContainer is zero-config — adding the dependency is the whole wiring step.
 5. Create the empty `src/test/resources/features/` folder and one throwaway smoke `.feature` to prove the rig parses and runs.
 6. `./gradlew test` (the engine must discover the feature and bind the smoke step) and run the smoke scenario.
 7. Report files created and hand off to `feature-file-writer` (features) + `gherkin-step-code` (steps).
@@ -139,7 +140,7 @@ deprecated). The suite only **selects** the features; every engine setting lives
 ```properties
 cucumber.glue=com.example.steps,com.example.support
 cucumber.plugin=pretty, html:build/cucumber-report.html, json:build/cucumber.json, io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm
-cucumber.filter.tags=not @wip
+cucumber.filter.tags=not @not-automated
 cucumber.execution.parallel.enabled=false
 ```
 
@@ -148,7 +149,10 @@ cucumber.execution.parallel.enabled=false
   mechanisms. The selector is the one.
 - Reports land under `build/`, the Gradle output folder, next to `build/allure-results/` and
   `build/playwright-artifacts/`; never `target/`.
-- Filter at runtime with `./gradlew test -Dcucumber.filter.tags="@smoke and not @wip"`.
+- `@not-automated` keeps a feature written ahead of its automation out of the run; it carries a ticket tag and has
+  no bindings yet, never empty ones. Where the suite already has such a tag (`@wip`, `@manual`), filter on that
+  one instead of adding a second.
+- Filter at runtime with `./gradlew test -Dcucumber.filter.tags="@smoke and not @not-automated"`.
 - Drop `io.qameta.allure.cucumber7jvm.AllureCucumber7Jvm` from `cucumber.plugin` when the project does not report
   through Allure; `qa-reporting-java` owns that wiring.
 - Scenarios run sequentially. Each one creates and closes its own `Playwright` on its thread, so turning on
@@ -177,15 +181,15 @@ public class TestContext {
 
     public void setPage(Page page) {
         this.page = page;
+        this.loginPage = new LoginPage(page);
+        this.homePage = new HomePage(page);
     }
 
     public LoginPage login() {
-        if (loginPage == null) loginPage = new LoginPage(page);
         return loginPage;
     }
 
     public HomePage home() {
-        if (homePage == null) homePage = new HomePage(page);
         return homePage;
     }
 
@@ -196,10 +200,14 @@ public class TestContext {
 ```
 
 One graph per scenario: PicoContainer builds it fresh and disposes it after. It holds the `Page` and the
-lazily-built page objects so every step class shares the same `Page` — just state, no assertions. Cucumber does
+page objects built with it, so
+ every step class shares the same `Page` — just state, no assertions. Cucumber does
 **not** support step-class inheritance, so shared state flows through this object, constructor-injected into
 every glue class. The page objects are the UI suite's own (`ui-test-author/playwright` assets): their constructor
-takes the `Page`, never `TestContext`.
+takes the `Page`, never `TestContext`. In a BDD suite the steps are the intent layer, so a page object may also
+expose named elements and controls for a step to act on (`filterPage.dealType().selectOption(option)`); a page
+method is kept for a sequence of interactions. An API seeder the steps use for a pre-clean `Given … does not
+exist` (`gherkin-step-code`) is built here too, from the suite's HTTP client.
 
 ### `support/Hooks.java` — per-scenario lifecycle and failure evidence (web, with teardown)
 
@@ -220,12 +228,14 @@ scenario. The hook owns the Playwright lifecycle and keeps the failure evidence 
   Each kept file is attached with `Allure.attachment(name, type, stream, AttachmentOptions.withFileExtension(ext))`;
   the trace as `application/vnd.allure.playwright-trace`.
 - **The one catch** is `keepScreenshot`'s: a narrow `PlaywrightException` catch, logged with a message template,
-  in a private helper (plan D29) — a crashed page cannot be photographed, and its trace and video must still be
+  in a private method of the hooks class (plan D29) — a crashed page cannot be photographed, and its trace and video must still be
   kept. No other catch, and none in the hook bodies.
 
-The class — `requiredEnv`, `openBrowser`, `closeBrowser(Scenario)` and the private `keep*` helpers mirroring
+The class — `requiredEnv`, `openBrowser`, `closeBrowser(Scenario)` and the private `keep*` methods mirroring
 `BaseTest`'s — is in [`references/hooks.md`](references/hooks.md), with the Scenario Outline and parallel notes.
 `<Feature>` is the feature file's name: Cucumber-JVM's `Scenario` exposes the file's URI, not the `Feature:` title.
+Data a scenario created is deleted by a cleanup `@After` hook at the default order, which can keep it when the
+scenario failed (`references/hooks.md` § Data cleanup hook).
 
 ### Smoke feature — `src/test/resources/features/smoke.feature`
 
@@ -252,7 +262,8 @@ Page objects extend the existing `BaseAppiumPage` and take the **driver**, never
 
 ## Rules
 
-The standards a BDD project must meet are the qa-java rule files, not a list here: `qa-java-bdd.md`, `qa-java-suite.md` (the build and the Cucumber BOM) and `qa-java.md` (core). Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's templates disagree, the rule files win. PicoContainer is zero-config: the BOM-pinned `cucumber-picocontainer` dependency is the entire wiring, and the BDD layer reuses the existing UI project's page objects rather than re-declaring them.
+The standards a BDD project must meet are the qa-java rule files, not a list here: `qa-java-bdd.md`, `qa-java-suite.md` (the build and the Cucumber BOM), `qa-java-page-objects.md` (the reused page objects) and `qa-java.md` (core).
+ Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's templates disagree, the rule files win. PicoContainer is zero-config: the BOM-pinned `cucumber-picocontainer` dependency is the entire wiring, and the BDD layer reuses the existing UI project's page objects rather than re-declaring them.
 
 ## Handoffs
 

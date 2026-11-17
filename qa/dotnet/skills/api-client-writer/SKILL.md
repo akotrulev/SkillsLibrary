@@ -30,7 +30,7 @@ Clients are organized by API group. **No Public/Management subfolders, no `P`/`M
 ```
 ApiTests/Clients/
 ├── BaseApiClient.cs
-├── AuthHelper.cs
+├── CachedTokenProvider.cs        ← token provider (qa-dotnet:test-login-tokens)
 ├── AuthConfigClient.cs           ← root, no auth required
 └── {Api}/
     └── {Resource}Client.cs       ← one file per resource
@@ -221,7 +221,7 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 - Constructor takes `string jwt`.
 - Always calls `base(ConfigurationLoader.GetTestEnvironment().ApiUri)`.
 - Always calls `SetDefaultHeader("Authorization", $"Bearer {jwt}")` — pass `string.Empty` for unauthenticated calls.
-- Never call `AuthHelper.GetToken()` inside the client — the test obtains the token and passes it in.
+- Never call the token provider (`Tokens.TestUser.GetAccessTokenAsync()`) inside the client — the test obtains the token and passes it in.
 - Never hardcode a URI string or credentials.
 
 ### Path constants
@@ -239,7 +239,7 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 - Build a `RestRequest` and call inherited `Execute(request)`.
 - Use `AddUrlSegment` for path params, `AddQueryParameter` for query strings, `AddJsonBody` for bodies.
 - Body parameters are strongly-typed DTOs (e.g. `{Resource}InDto body`), not `object`.
-- Deserialization uses inherited `Deserialize<T>(response)` — never `JsonSerializer.Deserialize` directly.
+- Deserialization uses inherited `Deserialize<T>(response)` — never `JsonSerializer.Deserialize` directly. Its options set `UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow` (.NET 8+), so a response field the DTO does not declare fails the parse (`api-models` § Strict deserialization).
 
 ### Method naming
 
@@ -263,10 +263,10 @@ When the test plan includes **malformed JSON** scenarios:
 public RestResponse CreateRaw(string rawJson) => PostRaw(PostPath, rawJson);
 ```
 
-When the test plan includes **extra/missing property** scenarios, add an `object` overload for `Dictionary<string, object?>` bodies from `JsonBodyHelper`:
+When the test plan includes **extra/missing property** scenarios, add an `object` overload for `Dictionary<string, object?>` bodies from a `RequestBodyBuilder`:
 
 ```csharp
-// Accepts a pre-built body (e.g. from JsonBodyHelper) for body manipulation tests.
+// Accepts a pre-built body (e.g. from RequestBodyBuilder) for body manipulation tests.
 public RestResponse Create(object body) =>
     Execute(new RestRequest(PostPath, Method.Post).AddJsonBody(body));
 ```

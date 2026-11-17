@@ -6,9 +6,9 @@ export type Credentials = {
 };
 
 export class SignInForm {
-  readonly email: Locator;
-  readonly password: Locator;
-  readonly submit: Locator;
+  private readonly email: Locator;
+  private readonly password: Locator;
+  private readonly submit: Locator;
 
   constructor(root: Locator) {
     this.email = root.getByTestId('Login.Email');
@@ -24,8 +24,8 @@ export class SignInForm {
 }
 
 export class LoginPage {
-  readonly signInForm: SignInForm;
   readonly error: Locator;
+  private readonly signInForm: SignInForm;
 
   constructor(private readonly page: Page) {
     const form = page.getByTestId('Login.Form').describe('Sign-in form');

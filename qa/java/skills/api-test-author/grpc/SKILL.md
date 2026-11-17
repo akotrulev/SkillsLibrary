@@ -109,7 +109,7 @@ import io.grpc.protobuf.StatusProto;
 
 @Test
 public void createUserWhenDuplicateEmailReturnsErrorInfoReason() {
-    UserGrpcAction action = new UserGrpcAction(channel, true);
+    UserGrpcAction action = UserGrpcAction.authenticated(channel);
 
     GrpcCallResult<com.example.user.v1.User> result = action.createUser(
         "george.bluth@example.com", "George", "Bluth");           // already exists
@@ -137,7 +137,7 @@ failure can't mask a test failure).
 ```java
 @Test
 public void createUserWhenValidPersistsAndIsReadable() {
-    UserGrpcAction action = new UserGrpcAction(channel, true);
+    UserGrpcAction action = UserGrpcAction.authenticated(channel);
 
     GrpcCallResult<User> created = action.createUser("neo@example.com", "Thomas", "Anderson");
     assertThat(created.isOk()).isTrue();
@@ -164,7 +164,7 @@ import java.util.concurrent.TimeUnit;
 
 @Test
 public void listUsersStreamsAllUsersInOrder() {
-    UserGrpcAction action = new UserGrpcAction(channel, true);
+    UserGrpcAction action = UserGrpcAction.authenticated(channel);
 
     // Deadline bounds the wait — the stream ends on onCompleted, or DEADLINE_EXCEEDED trips deterministically.
     Iterator<User> stream = action.listUsers(/* pageSize */ 50);
@@ -197,7 +197,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 @Test
 public void importUsersAggregatesAllSentRequests() throws InterruptedException {
-    UserGrpcAction action = new UserGrpcAction(channel, true);
+    UserGrpcAction action = UserGrpcAction.authenticated(channel);
 
     CountDownLatch done = new CountDownLatch(1);
     AtomicReference<ImportSummary> summary = new AtomicReference<>();
@@ -234,7 +234,7 @@ as `DEADLINE_EXCEEDED`.
 ```java
 @Test
 public void slowCallExceedingDeadlineReturnsDeadlineExceeded() {
-    UserGrpcAction action = new UserGrpcAction(channel, true);
+    UserGrpcAction action = UserGrpcAction.authenticated(channel);
 
     GrpcCallResult<User> result = action.getUserWithDeadline("slow-1", /* millis */ 100);
 
@@ -262,7 +262,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import utility.SystemPropertyUtil;
+import config.Env;
 import java.util.concurrent.TimeUnit;
 
 public abstract class BaseGrpcTest {
@@ -271,7 +271,7 @@ public abstract class BaseGrpcTest {
     @BeforeClass
     public void openChannel() {
         // host:port from Testcontainers / env — never hardcoded. usePlaintext only for local test brokers.
-        channel = NettyChannelBuilder.forTarget(SystemPropertyUtil.getGrpcTarget())
+        channel = NettyChannelBuilder.forTarget(Env.required("GRPC_TARGET"))
             .usePlaintext()
             .build();
     }
@@ -306,7 +306,7 @@ public abstract class BaseGrpcTest {
 - **Trusting a write RPC's echoed payload as proof of persistence.** *Fix:* round-trip a read RPC and assert state.
 - **Re-using one channel per test method (or never shutting it down).** *Fix:* one `ManagedChannel` per suite in
   `@BeforeClass`, `shutdownNow().awaitTermination(...)` in `@AfterClass(alwaysRun = true)`.
-- **Hardcoding the target / committing the token.** *Fix:* `SystemPropertyUtil` / env, read lazily, never logged;
+- **Hardcoding the target / committing the token.** *Fix:* `Env`, read lazily, never logged;
   bearer via `qa-java:test-login-tokens`. Reaching for this skill for **load** → `qa-java:load-testing`; for
   a **Protobuf contract** → `qa-java:api-contract-testing`.
 
@@ -343,7 +343,7 @@ differ.
   `withDeadlineAfter`. **No `Thread.sleep`, no unbounded `await()`.** Deep stream-lifecycle assertions →
   `qa-java:realtime-stream-testing`.
 - **One `ManagedChannel` per suite** (`@BeforeClass` open, `@AfterClass(alwaysRun=true)` shutdown); service stood
-  up via Testcontainers. **Target + token via `SystemPropertyUtil`/env**, lazy, never logged. TestNG +
+  up via Testcontainers. **Target + token via `Env`**, lazy, never logged. TestNG +
   grpc-java + AssertJ.
 
 ## Cross-references

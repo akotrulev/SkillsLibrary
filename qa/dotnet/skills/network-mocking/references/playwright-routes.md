@@ -3,7 +3,7 @@
 Intercepts, mocks, holds, asserts and shapes HTTP traffic in Playwright for .NET with NUnit. Every sample
 derives from `Example.UiTests.Support.BaseTest` (`qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs`),
 which owns the browser, a context and page per test, and the failure evidence. Route handlers and traffic
-reads live in two helpers, `MockApi` and `Traffic`, built in the class's own `[SetUp]`; a test calls intent
+reads live in two objects, the `MockApi` route stub and the `Traffic` probe, built in the class's own `[SetUp]`; a test calls intent
 methods, never `Page.RouteAsync(...)`. Every wait is a request or response predicate or a page object's
 completion signal. Async all the way: every Playwright call is awaited, never `.Result` or `.Wait()`.
 
@@ -50,7 +50,7 @@ completion signal. Async all the way: every Playwright call is awaited, never `.
 | Deterministic third party | `Page.RouteFromHARAsync(har, new() { Url = …, NotFound = HarNotFound.Abort })` | Update deliberately (§7) |
 | Offline | `Context.SetOfflineAsync(true)` | Cross-browser |
 
-## 1. The helpers
+## 1. The route stub and the traffic probe
 
 `MockApi` owns every route; `Traffic` reads what the page sent. Both wrap the `IPage` `BaseTest` opened and
 own no lifecycle — the context, and with it every route, is closed after each test.
@@ -166,7 +166,7 @@ public sealed class Traffic(IPage page)
 - **`PostDataJSON()` is a method** returning `JsonElement?` — not a property. `JsonBody` deserializes it into
   the record, and a body that is not JSON fails with the method, the URL and the raw post data in the message.
 - **`ProjectPaths.Root`** is the project folder, written into the test assembly at build time — the same
-  helper `qa/dotnet/skills/visual-regression`'s `references/playwright-snapshots.md` §1 adds for baselines.
+  config value `qa/dotnet/skills/visual-regression`'s `references/playwright-snapshots.md` §1 adds for baselines.
   `dotnet test` runs from `bin/<cfg>/net10.0/`, so a relative fixture path would read a copy and a HAR update
   would write into `bin/`:
 
@@ -192,7 +192,7 @@ public sealed class Traffic(IPage page)
           .Value!;
   }
   ```
-- The payload records sit next to the helpers; a payload with four or more fields gets a builder
+- The payload records sit next to `MockApi` and `Traffic`; a payload with four or more fields gets a builder
   (`qa/dotnet/skills/test-data-builder`).
 
 ## 2. Mocking a response
@@ -210,7 +210,7 @@ public class OrdersNetworkTests : BaseTest
     private OrdersPage _ordersPage = null!;
 
     [SetUp]
-    public void CreateHelpers()
+    public void CreateMockApiAndPage()
     {
         _mockApi = new MockApi(Page);
         _ordersPage = new OrdersPage(Page);
@@ -476,7 +476,7 @@ public async Task Should_ShowOrders_When_HeldRequestIsReleased()
 1. Confirm the **traffic**, the **intent** and the **scope**.
 2. Add one intent-named method per scenario to `MockApi`; read requests through `Traffic` or a page-object
    method that wraps `RunAndWaitForRequestAsync` / `RunAndWaitForResponseAsync`.
-3. Build both helpers and the page objects in the test class's `[SetUp]`.
+3. Build `MockApi`, `Traffic` and the page objects in the test class's `[SetUp]`.
 4. For a third party, replay a committed HAR with `HarNotFound.Abort`; update it with `HAR_UPDATE=1`, locally.
 5. For loading and offline states, hold the request or go offline — never a sleep.
 6. Read a failure's trace (`qa/dotnet/skills/evidence-capture`, "Reading a failure"): its network view shows

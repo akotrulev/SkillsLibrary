@@ -62,7 +62,7 @@ private async Task CorrelateTracesAsync()
 ```
 
 `ActivityTraceId` and `ActivitySpanId` (`System.Diagnostics`) produce lowercase hex of the W3C lengths. In
-`KeepEvidenceOnFailure`, inside its `if (failed)` branch, attach the links with the helper from
+`KeepEvidenceOnFailure`, inside its `if (failed)` branch, attach the links with the `TelemetryLinks` class from
 `test-reports`:
 
 ```csharp

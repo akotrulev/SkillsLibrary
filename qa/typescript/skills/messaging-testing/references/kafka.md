@@ -67,7 +67,7 @@ assumption SQS and Service Bus baked in:
 ```
 test/
 ├── fixtures/
-│   └── kafkaBroker.ts      ← boots Kafka, creates topics, returns the client + a startCollector helper
+│   └── kafkaBroker.ts      ← boots Kafka, creates topics, returns the client + a startCollector probe
 └── orderPublishing.test.ts
 ```
 
@@ -299,9 +299,14 @@ it("keeps per-key ordering when records share a key", async () => {
 
   const producer = broker.kafka.producer();
   await producer.connect();
-  for (let i = 1; i <= 3; i++) {
-    await producer.send({ topic: "orders", messages: [{ key: "cust-42", value: JSON.stringify({ seq: i }) }] });
-  }
+  await producer.send({
+    topic: "orders",
+    messages: [
+      { key: "cust-42", value: JSON.stringify({ seq: 1 }) },
+      { key: "cust-42", value: JSON.stringify({ seq: 2 }) },
+      { key: "cust-42", value: JSON.stringify({ seq: 3 }) },
+    ],
+  });
   await producer.disconnect();
 
   await expect.poll(() => collector.records.length, { timeout: 10_000 }).toBeGreaterThanOrEqual(3);

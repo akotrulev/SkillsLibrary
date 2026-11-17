@@ -233,7 +233,7 @@ public async Task Should_produce_a_thumbnail_blob_When_an_image_is_uploaded()
 
     // 3. Wait on the SIDE-EFFECT, not on a clock. Poll the HEAD of the derived blob until it exists (or time out).
     var thumb = await WaitFor.Async(
-        probe:     async ct => await TryGetPropertiesAsync("thumbnails/cat.png", ct),
+        probe:     ct => new BlobProbe(Container).TryGetPropertiesAsync("thumbnails/cat.png", ct),
         predicate: p  => p.ContentLength > 0,
         timeout:   TimeSpan.FromSeconds(10),
         interval:  TimeSpan.FromMilliseconds(200));
@@ -242,14 +242,17 @@ public async Task Should_produce_a_thumbnail_blob_When_an_image_is_uploaded()
 }
 
 // HEAD-or-null probe: returns the properties if the blob exists, null otherwise (so the poll keeps waiting).
-private async Task<BlobProperties?> TryGetPropertiesAsync(string name, CancellationToken ct)
+public sealed class BlobProbe(BlobContainerClient container)
 {
-    try { return (await Container.GetBlobClient(name).GetPropertiesAsync(cancellationToken: ct)).Value; }
-    catch (RequestFailedException e) when (e.Status == 404) { return null; }
+    public async Task<BlobProperties?> TryGetPropertiesAsync(string name, CancellationToken ct)
+    {
+        try { return (await container.GetBlobClient(name).GetPropertiesAsync(cancellationToken: ct)).Value; }
+        catch (RequestFailedException e) when (e.Status == 404) { return null; }
+    }
 }
 ```
 
-The `WaitFor.Async` helper is the same bounded poll as `qa-dotnet:db-connection`, ``service-bus`` Service Bus, and
+The `WaitFor.Async` wait condition is the same bounded poll as `qa-dotnet:db-connection`, ``service-bus`` Service Bus, and
 ``s3`` S3 — included so the node is self-contained:
 
 ```csharp
@@ -268,15 +271,15 @@ public static class WaitFor
         {
             var value = await probe(cts.Token);
             if (value is not null && predicate(value)) return value;
-            await Task.Delay(interval, cts.Token);   // poll cadence INSIDE the helper, not an assertion sleep
+            await Task.Delay(interval, cts.Token);   // poll cadence INSIDE the wait condition, not an assertion sleep
         }
         throw new TimeoutException($"Side-effect did not satisfy the predicate within {timeout}.");
     }
 }
 ```
 
-> `Task.Delay` appears **only** as the poll cadence *inside* the bounded helper — never as a bare
-> `await Task.Delay(5000)` standing in for "the worker probably finished by now". The helper returns the
+> `Task.Delay` appears **only** as the poll cadence *inside* the bounded wait condition — never as a bare
+> `await Task.Delay(5000)` standing in for "the worker probably finished by now". The wait condition returns the
 > instant the condition holds and *fails* if it never does; a bare sleep races the worker.
 
 ## Large-blob upload (block staging) — `BlockBlobClient`
@@ -293,22 +296,32 @@ public async Task Should_upload_a_large_blob_in_blocks_When_staging_and_committi
     var bytes = LargePayloads.OfSize(12 * 1024 * 1024);   // 12 MB → multiple blocks
     var blockBlob = Container.GetBlockBlobClient("backups/db-2026-06.dump");
 
-    var blockIds = new List<string>();
-    const int blockSize = 4 * 1024 * 1024;                // 4 MB blocks
-    for (var offset = 0; offset < bytes.Length; offset += blockSize)
-    {
-        var id = Convert.ToBase64String(Guid.NewGuid().ToByteArray());   // block IDs must be equal-length base64
-        var len = Math.Min(blockSize, bytes.Length - offset);
-        using var chunk = new MemoryStream(bytes, offset, len);
-        await blockBlob.StageBlockAsync(id, chunk);
-        blockIds.Add(id);
-    }
-    await blockBlob.CommitBlockListAsync(blockIds,
-        new CommitBlockListOptions { HttpHeaders = new BlobHttpHeaders { ContentType = "application/octet-stream" } });
+    await new BlockBlobSeeder(blockBlob).StageAndCommitAsync(bytes, blockSize: 4 * 1024 * 1024);
 
     var props = (await blockBlob.GetPropertiesAsync()).Value;
     Assert.That(props.ContentLength, Is.EqualTo(bytes.Length));   // assembled blob is the full size
     // NB: don't assert ContentHash == MD5(bytes) on a staged blob — it isn't auto-computed for block commits.
+}
+```
+
+The seeder stages numbered blocks, then commits them; block IDs must be equal-length base64:
+
+```csharp
+public sealed class BlockBlobSeeder(BlockBlobClient blob)
+{
+    public async Task StageAndCommitAsync(byte[] bytes, int blockSize)
+    {
+        var blockIds = new List<string>();
+        for (var offset = 0; offset < bytes.Length; offset += blockSize)
+        {
+            var id = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+            using var chunk = new MemoryStream(bytes, offset, Math.Min(blockSize, bytes.Length - offset));
+            await blob.StageBlockAsync(id, chunk);
+            blockIds.Add(id);
+        }
+        await blob.CommitBlockListAsync(blockIds,
+            new CommitBlockListOptions { HttpHeaders = new BlobHttpHeaders { ContentType = "application/octet-stream" } });
+    }
 }
 ```
 
@@ -535,7 +548,7 @@ public static class Invoices
 
 - **Eventual consistency = wait on a condition, never a sleep.** `WaitFor.Async` polling a HEAD/DB probe for
   processed/derived blobs; poll the queue for blob events. **No bare `Task.Delay` / `Thread.Sleep`** as an
-  assertion wait — `Task.Delay` only as the poll cadence inside the bounded helper.
+  assertion wait — `Task.Delay` only as the poll cadence inside the bounded wait condition.
 - The SUT's storage gateway is **constructor-injected** with the `BlobServiceClient` / `BlobContainerClient` +
   container name — never a static client or a connection string read inside a `[Test]`.
 - **Azurite is built from the well-known connection string** the module surfaces (no force-path-style gotcha —
@@ -569,7 +582,7 @@ public static class Invoices
   `BlobServiceClient.fromConnectionString`, `BlockBlobClient.uploadData`/`download`/`exists`/`getProperties`,
   `stageBlock`/`commitBlockList`, `generateSasUrl`, `expect.poll` for the side-effect wait,
   `@testcontainers/azurite`).
-- `qa-dotnet:db-connection` — the `WaitFor.Async` poll helper and the seeder/probe split reused for the
+- `qa-dotnet:db-connection` — the `WaitFor.Async` wait condition and the seeder/probe split reused for the
   processed-blob side-effect assertions; the **eventual-consistency lineage** this skill leans on.
 - `qa-dotnet:messaging-testing` — Azure-native messaging, the natural downstream for the Event
   Grid → Storage Queue bridge (the Azure parallel to `s3`'s S3 → SQS).

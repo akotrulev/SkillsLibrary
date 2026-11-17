@@ -198,6 +198,7 @@ jobs:
 - Blob names already carry the shard number, so copying every shard's zip into one folder does not clash.
 - `--grep-invert @flaky` keeps quarantined tests off the gate. They run in a separate, non-gating job (`npx playwright test --grep @flaky` with `continueOnError: true`), per `qa/reporting/typescript/skills/flaky-test-quarantine` — a separate job, because each run cleans `test-results/` at its start.
 - **Running in the pinned image** instead of installing browsers: add `container: mcr.microsoft.com/playwright:v1.64.0-noble` to the `E2E` job and drop the install step. The tag must equal the `@playwright/test` version, and visual baselines are only compared inside it (`qa/typescript/skills/visual-regression`).
+- **Running the suite as a built image** (the checkout `COPY`'d into the pinned Playwright image, the report on mounted volumes): `qa/typescript/skills/ui-project-setup` § Container. The job runs its `docker build` and `docker run` lines as two `script:` steps on `ubuntu-latest`, mapping the secrets into the step's `env:`, and publishes `allure-results/` and `test-results/` with `condition: succeededOrFailed()`. The run step's exit code is the container's.
 
 ### Vitest API/integration — `pipelines/templates/api-tests.yml`
 

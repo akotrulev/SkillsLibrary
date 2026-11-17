@@ -24,11 +24,11 @@ This skill encodes the conventions that distinguish "Accelerator code" from gene
 
 ```
 Accelerator/
-├── TestCore/                  # shared abstractions, helpers, base classes
+├── TestCore/                  # shared abstractions, base classes
 │   ├── Configuration/         # env config, BrowserStack creds, run options
 │   ├── Reporting/             # Allure attachments, step decorators
 │   ├── Screens/               # JSON loader, screen base class
-│   └── Waits/                 # explicit wait helpers
+│   └── Waits/                 # explicit wait conditions
 ├── ApiTests/                  # RestSharp-based API tests
 │   ├── Clients/               # typed API clients (one per service)
 │   ├── Builders/              # test data builders
@@ -121,7 +121,7 @@ Rules:
 - **Actions run on an `ILocator`**, never on the page-level selector API; anything a test asserts is returned as
   an `ILocator` so the assertion is web-first.
 - **Method names describe user intent**, not mechanics. `SignInAsync`, not `ClickSignInButton`.
-- **One page object per screen.** Composite flows live in test code or in flow helpers, not in page objects.
+- **One page object per screen.** Composite flows live in a `<Something>Flow` class, not in page objects or test code.
 - **No assertions inside page objects.** They expose state; tests assert.
 - **Locators in JSON are `data-testid`-first for web**, PascalCase dot-separated (`Login.Submit`) — the format
   the dev team's `fe-*` agents generate.
@@ -222,7 +222,7 @@ public sealed class UserBuilder
 
 - **Never** use `Thread.Sleep`, `Task.Delay`, or `await page.WaitForTimeoutAsync(...)` in test code
 - Use Playwright's auto-waiting (`ClickAsync`, `FillAsync`, `Expect(...).ToBeVisibleAsync()`)
-- For Appium, use the helpers in `TestCore.Waits` — `WaitUntilVisible`, `WaitUntilStable`
+- For Appium, use the wait conditions in `TestCore.Waits` — `WaitUntilVisible`, `WaitUntilStable`
 - If you need a wait that doesn't exist, add it to `TestCore.Waits`, don't inline it
 
 ### Allure reporting

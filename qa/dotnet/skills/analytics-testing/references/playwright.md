@@ -6,7 +6,7 @@ WebKit: a `navigator.sendBeacon` to `/g/collect` is caught by a context route as
 the beacon body, request waits resolve for routed requests, `SetExtraHTTPHeadersAsync` delivers `Sec-GPC: 1` to
 the server, and gtag's `arguments` entries in the `dataLayer` read back by index.
 
-## 1. The helpers
+## 1. The probes
 
 ```csharp
 using System.Collections.Concurrent;
@@ -163,7 +163,7 @@ public class ConsentGatingTests : BaseTest
     private ConsentBanner _consentBanner = null!;
 
     [SetUp]
-    public async Task CreateHelpers()
+    public async Task StartCaptureAndCreatePages()
     {
         _tracker = new Tracker(Page);
         await _tracker.CaptureAsync();
@@ -320,7 +320,7 @@ public class GlobalPrivacyControlTests : BaseTest
     private ConsentBanner _consentBanner = null!;
 
     [SetUp]
-    public async Task CreateHelpers()
+    public async Task StartCaptureWithPrivacySignal()
     {
         _tracker = new Tracker(Page);
         await _tracker.CaptureAsync();

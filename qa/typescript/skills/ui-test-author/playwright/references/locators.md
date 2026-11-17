@@ -22,6 +22,9 @@ Pick the first rung the element supports. Never skip a rung because the lower on
 **Test ids are PascalCase dot-separated and static** — `Login.Submit`, `OrderRow`, `OrderRow.Title` — which
 is what `fe-react` and `fe-blazor` generate. A repeated row shares one static id (`OrderRow`); the row is
 picked by its content (§3), never by an id that embeds a database key, an index or a state value.
+Where the app already renders ids with the row index in them (`cell-value-status-3`), the grid control matches
+them by pattern inside the row it found by content (`row.getByTestId(/^cell-value-status-\d+$/)`) and records the
+ids in `missing-testids.md`; the index never reaches a method signature or a test.
 
 **A fallback carries no marker in the code.** When an element has no test id, use the next rung and add a
 row to `missing-testids.md` (page, element, suggested id, fallback locator in use). That report is the
@@ -62,16 +65,22 @@ await row.getByRole('button', { name: 'Cancel' }).click();
 ## 4. Chaining from a component root
 
 A component object takes its root `Locator` and builds every child from it, so the same component works
-wherever it is mounted. `assets/LoginPage.ts` does this with `SignInForm`.
+wherever it is mounted. `assets/LoginPage.ts` does this with `SignInForm`, `assets/DataGrid.ts` with
+`GridRow`. A locator an action uses stays `private`; the one a test asserts on is `readonly` and described.
+The control catalogue is [`components.md`](components.md).
 
 ```typescript
 export class OrderRow {
   readonly title: Locator;
-  readonly cancel: Locator;
+  private readonly cancelButton: Locator;
 
-  constructor(readonly root: Locator) {
-    this.title = root.getByTestId('OrderRow.Title');
-    this.cancel = root.getByRole('button', { name: 'Cancel' });
+  constructor(root: Locator) {
+    this.title = root.getByTestId('OrderRow.Title').describe('Order title');
+    this.cancelButton = root.getByRole('button', { name: 'Cancel' });
+  }
+
+  async cancel(): Promise<void> {
+    await this.cancelButton.click();
   }
 }
 ```

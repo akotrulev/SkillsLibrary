@@ -63,8 +63,24 @@ score it with classic IR metrics — no LLM, no cost, no flake. This is `qa-java
 results.
 
 ```java
+// src/test/java/rag/RetrievalMetrics.java — classic IR metrics over a ranked list of chunk-ids
+public final class RetrievalMetrics {
+    public static double recallAtK(List<String> retrieved, List<String> relevant, int k) {
+        var top = Set.copyOf(retrieved.subList(0, Math.min(k, retrieved.size())));
+        return relevant.isEmpty() ? 1.0
+                : (double) relevant.stream().filter(top::contains).count() / relevant.size();
+    }
+    public static double reciprocalRank(List<String> retrieved, List<String> relevant) {
+        for (int i = 0; i < retrieved.size(); i++) if (relevant.contains(retrieved.get(i))) return 1.0 / (i + 1);
+        return 0.0;
+    }
+}
+
 // src/test/java/rag/RetrievalTest.java — retrieval is a ranking problem; measure rank against labeled relevant ids
+import static rag.RetrievalMetrics.*;
+
 public class RetrievalTest {
+
     private static final int K = 5;
 
     @DataProvider(name = "goldens")
@@ -73,20 +89,11 @@ public class RetrievalTest {
                 .map(g -> new Object[]{ g }).toArray(Object[][]::new);
     }
 
-    private static double recallAtK(List<String> retrieved, List<String> relevant, int k) {
-        var top = Set.copyOf(retrieved.subList(0, Math.min(k, retrieved.size())));
-        return relevant.isEmpty() ? 1.0
-                : (double) relevant.stream().filter(top::contains).count() / relevant.size();
-    }
-    private static double reciprocalRank(List<String> retrieved, List<String> relevant) {
-        for (int i = 0; i < retrieved.size(); i++) if (relevant.contains(retrieved.get(i))) return 1.0 / (i + 1);
-        return 0.0;
-    }
-
     @Test(dataProvider = "goldens")
     public void retrievalFindsTheRelevantChunks(GoldenCase g) {
         List<String> ranked = retriever.retrieve(g.query(), K);                       // ranked chunk-ids
-        assertThat(recallAtK(ranked, g.relevantChunkIds(), K)).isGreaterThanOrEqualTo(0.8);  // recall@5 ≥ 0.8
+        assertThat(recallAtK(ranked,
+ g.relevantChunkIds(), K)).isGreaterThanOrEqualTo(0.8);  // recall@5 ≥ 0.8
         assertThat(reciprocalRank(ranked, g.relevantChunkIds())).isGreaterThanOrEqualTo(0.5); // first relevant in top-2
     }
 }

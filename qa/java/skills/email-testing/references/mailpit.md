@@ -1,6 +1,6 @@
 # QA — Email Testing with Mailpit (Java)
 
-Scaffolds a typed Mailpit HTTP-API client (Java 21 `HttpClient` + Jackson) and TestNG / JUnit helpers that poll for a specific message with Awaitility, extract HTML / text / links / OTPs, and download attachments — each test isolated by its own recipient, never by wiping the shared inbox. Wires Mailpit into Spring Boot via `@DynamicPropertySource` so the SUT writes to the container.
+Scaffolds a typed Mailpit HTTP-API client (Java 21 `HttpClient` + Jackson) and TestNG / JUnit probes that poll for a specific message with Awaitility, extract HTML / text / links / OTPs, and download attachments — each test isolated by its own recipient, never by wiping the shared inbox. Wires Mailpit into Spring Boot via `@DynamicPropertySource` so the SUT writes to the container.
 
 ## When to use
 
@@ -45,7 +45,7 @@ dependencies {
 }
 ```
 
-### Mailpit container — `support/MailpitSupport.java`
+### Mailpit container — `support/MailpitFixture.java`
 
 ```java
 package com.flexinvest.support;
@@ -53,7 +53,7 @@ package com.flexinvest.support;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
-public final class MailpitSupport {
+public final class MailpitFixture {
 
     public static final GenericContainer<?> MAILPIT =
         new GenericContainer<>("axllent/mailpit:v1.20.5")
@@ -73,7 +73,7 @@ public final class MailpitSupport {
     public static String smtpHost() { return MAILPIT.getHost(); }
     public static int    smtpPort() { return MAILPIT.getMappedPort(1025); }
 
-    private MailpitSupport() {}
+    private MailpitFixture() {}
 }
 ```
 
@@ -82,8 +82,8 @@ public final class MailpitSupport {
 ```java
 @DynamicPropertySource
 static void mailpitProps(DynamicPropertyRegistry registry) {
-    registry.add("spring.mail.host", MailpitSupport::smtpHost);
-    registry.add("spring.mail.port", () -> String.valueOf(MailpitSupport.smtpPort()));
+    registry.add("spring.mail.host", MailpitFixture::smtpHost);
+    registry.add("spring.mail.port", () -> String.valueOf(MailpitFixture.smtpPort()));
     registry.add("spring.mail.properties.mail.smtp.auth", () -> "false");
     registry.add("spring.mail.properties.mail.smtp.starttls.enable", () -> "false");
 }
@@ -227,7 +227,7 @@ public final class EmailExtractors {
 ```java
 public class SignupEmailIT extends IntegrationTestBase {
 
-    private final MailpitClient mail = new MailpitClient(MailpitSupport.apiBaseUrl());
+    private final MailpitClient mail = new MailpitClient(MailpitFixture.apiBaseUrl());
 
     @Autowired private TestRestTemplate http;
 
@@ -254,7 +254,7 @@ public class SignupEmailIT extends IntegrationTestBase {
 ## Rules
 
 ### Inbox isolation
-- One Mailpit per JVM (`static final` in `MailpitSupport`), shared by every test class.
+- One Mailpit per JVM (`static final` in `MailpitFixture`), shared by every test class.
 - **Unique recipient per test** (`UUID.randomUUID()`) is the isolation; the search filters on it. There is **no
   global wipe** — `DELETE /api/v1/messages` in a `@BeforeMethod` deletes the mail another class running in
   parallel is still waiting for.
@@ -294,7 +294,7 @@ public class SignupEmailIT extends IntegrationTestBase {
 1. Read `src/test/java/.../support` for existing base classes and conventions.
 2. Confirm Mailpit deployment (Testcontainers vs compose).
 3. Generate:
-   - `support/MailpitSupport.java`
+   - `support/MailpitFixture.java`
    - `support/email/MailpitClient.java`
    - `support/email/EmailExtractors.java`
    - `{Flow}EmailIT.java`

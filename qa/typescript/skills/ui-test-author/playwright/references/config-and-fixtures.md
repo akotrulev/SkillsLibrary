@@ -44,8 +44,41 @@ A fixture is set up when a test asks for it by name and torn down after `use()` 
 
 `assets/fixtures.ts` holds the page-object fixtures, `testUser` (credentials from `E2E_USER` /
 `E2E_PASSWORD`, failing fast when unset) and `seededUser`: it creates a user through the API, asserts the
-exact `201` with the body as evidence, yields it, and deletes it in teardown with an exact `204`. A
-teardown that fails fails the test loudly; nothing catches it.
+exact `201` with the body as evidence, yields it, and deletes it in teardown with an exact `204`.
+`seededOrder` does the same for an order, and `orders.spec.ts` names it in `beforeEach` beside `ordersPage`, so
+the order exists before the page opens. A teardown that fails fails the test loudly; nothing catches it.
+
+Three more data patterns sit beside create-and-teardown (the rule file `test-data.md`):
+
+- **Reference data.** A search or filter test may read curated records already in the environment. It names
+  them in the test, never changes them, and asserts the result is not empty before asserting on its rows
+  (`components.md` §4). No fixture seeds them.
+- **Pre-clean.** A fixture whose record has a fixed natural key (an email an import file names) deletes any
+  leftover before it creates: `await customerSeeder.deleteByEmail(email)`, through the API, never the UI. The
+  seeder deletes every match, so a clean environment is zero deletions, not a branch. Teardown still runs.
+- **Keep on failure.** A suite that keeps what a failed test created, for investigation, registers deletions
+  with one teardown registry fixture instead of deleting in each fixture. Names must then be unique per run
+  (the `randomUUID()` the seeding fixtures already use), so leftovers never collide.
+
+```typescript
+type Removal = { readonly label: string; readonly remove: () => Promise<void> };
+
+export const test = base.extend<{ cleanup: { register(removal: Removal): void } }>({
+  cleanup: async ({}, use, testInfo) => {
+    const removals: Removal[] = [];
+    await use({ register: (removal) => { removals.push(removal); } });
+    if (testInfo.status !== testInfo.expectedStatus) {
+      testInfo.annotations.push(...removals.map(({ label }) => ({ type: 'kept after failure', description: label })));
+      return;
+    }
+    for (const removal of removals.reverse()) await removal.remove();
+  },
+});
+```
+
+A seeding fixture then calls `cleanup.register(...)` after its create, with a label naming the record and its
+delete call, and has no teardown of its own. The pass/fail check is the teardown registry's one legal branch; the kept ids
+appear as annotations in the report.
 
 ```typescript
 export const test = base.extend<{ dismissConsent: void }>({

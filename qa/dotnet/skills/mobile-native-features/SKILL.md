@@ -33,11 +33,11 @@ Appium tests for the **OS-level capabilities** a mobile app touches but a page-o
 
 ## Stack
 
-- .NET 10; the pins (`Appium.WebDriver` 9.0.0, `Selenium.Support`, NUnit 4.6.1, `Allure.NUnit` 2.15.0) are the **Versions** table of `qa/dotnet/skills/ui-test-author/appium/SKILL.md`. This skill adds no package; Appium.WebDriver 8.x is the supported lane and every helper below exists there
-- **NUnit** assertions with a subject (`Assert.That(actual, Is.EqualTo(expected), subject)`); failure evidence is `BaseMobileTest`, and this skill adds no second hook
-- Helpers live in `AppiumTests/Support/Native/`
+- .NET 10; the pins (`Appium.WebDriver` 9.0.0, `Selenium.Support`, NUnit 4.6.1, `Allure.NUnit` 2.15.0) are the **Versions** table of `qa/dotnet/skills/ui-test-author/appium/SKILL.md`. This skill adds no package; Appium.WebDriver 8.x is the supported lane and every call below exists there
+- Failure evidence is `BaseMobileTest`; this skill adds no second hook
+- `NativeFeatures` lives in `AppiumTests/Support/Native/`
 - Appium 3 removed the old `/appium/*` routes and Appium.WebDriver 8.0 removed `ToggleWifi`, `ToggleData`, `ToggleAirplaneMode` and `SetConnectionType`. Network state is `mobile: setConnectivity` (`wifi`, `data`, `airplaneMode`); there is no client method to call
-- `AppiumDriver` has `BackgroundApp`, `ActivateApp`, `TerminateApp`, `PushFile`, `FingerPrint(int)` and `Orientation`. `GetAppState`, the clipboard methods and `OpenNotifications()` sit on `AndroidDriver` / `IOSDriver`, which is why the helper below uses the `mobile:` form for the clipboard and a `switch` for the state
+- `AppiumDriver` has `BackgroundApp`, `ActivateApp`, `TerminateApp`, `PushFile`, `FingerPrint(int)` and `Orientation`. `GetAppState`, the clipboard methods and `OpenNotifications()` sit on `AndroidDriver` / `IOSDriver`, which is why `NativeFeatures` uses the `mobile:` form for the clipboard and a `switch` for the state
 
 ## When to use
 
@@ -54,9 +54,9 @@ Appium tests for the **OS-level capabilities** a mobile app touches but a page-o
 - The requests an app makes → `qa/dotnet/skills/network-mocking/*`
 - Token auth → `qa/dotnet/skills/test-login-tokens`
 
-## The helper
+## The OS-surface client
 
-`NativeFeatures` owns every OS-surface call, including the ones that touch OS UI, so no test holds a raw `FindElement` or a wait. A test reads: *drive the OS surface, assert the effect on a page object.* The identifier is a package on Android and a bundle id on iOS, so one private method picks the key.
+`NativeFeatures` owns every OS-surface call, including the ones that touch OS UI, so no test holds a raw `FindElement` or a wait. A test reads: *drive the OS surface, assert the effect on a page object.* The identifier is a package on Android and a bundle id on iOS; `IsIos` picks the key.
 
 ```csharp
 using System.Text;
@@ -87,8 +87,11 @@ public sealed class NativeFeatures(AppiumDriver driver)
 
     public void RejectFingerprint() => ApproveFingerprint(UnenrolledFingerprintId);
 
-    public void SendIosBiometric(string type, bool match) =>
-        driver.ExecuteScript("mobile: sendBiometricMatch", new Dictionary<string, object> { ["type"] = type, ["match"] = match });
+    public void ApproveIosBiometric(string type) =>
+        driver.ExecuteScript("mobile: sendBiometricMatch", new Dictionary<string, object> { ["type"] = type, ["match"] = true });
+
+    public void RejectIosBiometric(string type) =>
+        driver.ExecuteScript("mobile: sendBiometricMatch", new Dictionary<string, object> { ["type"] = type, ["match"] = false });
 
     public void BackgroundFor(TimeSpan duration) => driver.BackgroundApp(duration);
 
@@ -146,7 +149,7 @@ public sealed class NativeFeatures(AppiumDriver driver)
 }
 ```
 
-The clipboard travels as **base64** in both directions: a raw string is not a valid payload.
+The clipboard travels as **base64** both ways; a raw string is not a valid payload.
 
 ## 1. Deep and universal links — test the routing (idea 2)
 
@@ -218,9 +221,9 @@ public void Should_ShowPinFallback_When_FingerprintIsRejected()
 }
 ```
 
-On an iOS simulator, call `mobile: enrollBiometric` with `isEnabled` true once, then `SendIosBiometric("faceId", true)` or `false`. No capability enrolls biometrics.
+On an iOS simulator, call `mobile: enrollBiometric` with `isEnabled` true once, then `ApproveIosBiometric("faceId")` or `RejectIosBiometric("faceId")`. No capability enrolls biometrics.
 
-A real device cannot take an injected read locally; BrowserStack and Sauce instrument the sensor, which `device-cloud` owns. Write the approve and reject assertions here and run them on the farm's injected biometric there.
+A real device takes no local injection; the farm's sensor instrumentation is `device-cloud`'s.
 
 ## Deep-dive reference
 

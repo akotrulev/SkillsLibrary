@@ -76,7 +76,7 @@ Rules that follow:
 ## Waits
 
 - **No fixed sleeps**: no `Thread.Sleep`, `browser.pause`, `time.sleep`, `Task.Delay` as a wait. Wait on a condition: element displayed, enabled, a value changed, a window handle count changed.
-- A wait lives in the base window object's helpers, with a timeout budget and a failure message naming the element and the window. A test never inlines a poll.
+- A wait is a named wait condition on the base window object, with a timeout budget and a failure message naming the element and the window. A test never inlines a poll.
 - **Native desktop animations and window opens are slow.** Wait for the landmark of the destination window, never a duration.
 - `delayBeforeClick` and `delayAfterClick` (WinCore) are driver tuning for one legacy control, never a replacement for a wait.
 

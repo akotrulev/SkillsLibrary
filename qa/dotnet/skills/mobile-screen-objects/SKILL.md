@@ -32,10 +32,11 @@ Turns a discovered element inventory into a **C# Appium page object** — a `Bas
 
 ## Conventions (owned by `ui-test-author/appium`)
 
-Before writing, **load `qa/dotnet/skills/ui-test-author/appium/SKILL.md`**; it and the qa-dotnet rule files `mobile-ui.md` and `automation.md` set every convention (base class, finders, locator ladder, `private const string` locators, `VerifyPageLoaded()`, private elements, no sleeps). Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does); the rule files win any disagreement. What this skill adds:
+Before writing, **load `qa/dotnet/skills/ui-test-author/appium/SKILL.md`**; it and the qa-dotnet rule files `mobile-ui.md`, `page-objects.md` and `automation.md` set every convention (base class, finders, locator ladder, `private const string` locators, `VerifyPageLoaded()`, private elements, no sleeps). Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does); the rule files win any disagreement. What this skill adds:
 
 - An XPath rung is a temporary scaffold, not a destination: when `mobile-screen-explorer` later reports a stronger locator for that element, downgrade to it and drop the fallback row from `missing-testids.md`.
-- Namespace `AppiumTests.Pages`; file `AppiumTests/Pages/<Screen>Page.cs`; multi-step flows in a sub-namespace, repeating rows as components scoped to a parent `AppiumElement`.
+- Namespace `AppiumTests.Pages`; file `AppiumTests/Pages/<Screen>Page.cs`; multi-step journeys as screens in a sub-namespace.
+- Repeating rows and cards are region components that hold a row key and re-resolve (`OrderRow.cs`); native controls (a picker, a switch, a segmented control, a date wheel) are control components in `AppiumTests/Components/Controls/` holding their root id, written at first use. Neither extends `BaseAppiumPage`, and neither exposes an `AppiumElement`.
 
 ## Template
 
@@ -50,8 +51,8 @@ private const string PasswordRevealXPathFallback = "//*[@class='…ImageButton']
 ## Procedure
 
 1. **Check for an existing page object.** Glob the project for `**/Pages/**/<Screen>Page.cs` (and `**/Pom/**`). Exists → this is an **update** (step 4). Missing and the project has no `Pages/` at all → load `qa/dotnet/skills/page-object-design` first to lay down the base class + structure.
-2. **Map every element to a constant + finder** using its locator-ladder rung. Test-id elements use `ByTestId`; fallbacks use the matching finder and have a row in `missing-testids.md`.
-3. **Write the class** per the conventions above: constants block, constructor, `VerifyPageLoaded()` on the landmark, one intent-named action per user action (returning `void` or the destination `*Page`), one query method per datum a test reads. Stub any destination page that doesn't exist yet.
+2. **Classify, then map.** First group the inventory: each repeating group becomes a region component keyed by a visible value, each native control a control component (reuse one from `Components/Controls/` when it exists). Map every remaining element to a constant + finder by its locator-ladder rung. Test-id elements use `ByTestId`; fallbacks use the matching finder and have a row in `missing-testids.md`.
+3. **Write the class** per the conventions above: constants block, constructor, `VerifyPageLoaded()` on the landmark, one intent-named action per user action (returning `void` or the destination `*Page`; no flag parameter, no platform `if`), one query method per datum a test reads, returning a value. The screen hands out components (`Row(orderNumber)`) and exposes controls as properties. Stub any destination page that doesn't exist yet.
 4. **Update mode — diff before writing:**
    - New element on screen, not in class → add constant + accessor/action
    - Constant in class, element gone from screen → flag and **ask** before deleting (may belong to a state you didn't reach)
@@ -59,7 +60,7 @@ private const string PasswordRevealXPathFallback = "//*[@class='…ImageButton']
    - Fallback locator where a test id now exists → upgrade to `ByTestId`, remove the row from `missing-testids.md`
    - Never reorder/rename existing public methods tests already call without flagging it
 5. **Verify:** `dotnet build` (or the project equivalent) → compiles clean. Confirm `VerifyPageLoaded()`'s landmark matches what `mobile-screen-explorer` reported for this screen.
-6. **Report:** class created/updated (diff summary), counts (accessibility-id-backed / fallback / ⚠ XPath), destination stubs created, open questions.
+6. **Report:** class created/updated (diff summary), components reused or created, counts (accessibility-id-backed / fallback / ⚠ XPath), destination stubs created, open questions.
 
 ## Rules
 

@@ -88,7 +88,7 @@ A match is a candidate unless the retention bar names the contract it guards.
 - Tests whose only purpose is keeping a test-only export, global or wrapper alive
 - Production code whose only callers are tests
 - House-rule breaks that make the test untrustworthy: an `OR` in an assertion, a swallowed error, a
-  `try`/`catch` in the body, a fixed sleep, conditional logic driving assertions, an unrelated second behaviour
+  `try`/`catch` in the body, a fixed sleep, an `if`, ternary or loop in the body, an unrelated second behaviour
 - Expected values derived from the code under test — the expectation is computed by calling the production
   function, its helper or its mapper (`expected = PriceCalculator.Total(order)`), so the test passes whatever
   the code does. The expected value is a literal, a builder default or an independent oracle

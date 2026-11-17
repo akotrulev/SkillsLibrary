@@ -21,12 +21,12 @@ Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin qua
 
 ## The checklist is the rule file
 
-Every check, and the severity it reports, lives in one place: the qa-java rule files `qa-java-bdd.md` (feature files, glue, hooks) and `qa-java.md` (core), plus `qa-java-ui.md` when page objects are in scope.
+Every check, and the severity it reports, lives in one place: the qa-java rule files `qa-java-bdd.md` (feature files, glue, hooks) and `qa-java.md` (core), plus `qa-java-ui.md` and `qa-java-page-objects.md` when page objects are in scope, and `qa-java-data.md` when steps seed, pre-clean or read reference data.
 
 1. **The project's copies first**: `.claude/rules/qa-java/` at the project root. The team may have edited them, and its edits win.
 2. **Otherwise the plugin's copies**: `qa/java/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/qa-java:rules` installs them.
 
-Read each file whose `paths:` match a file under review, in full, before the first finding. Never review from memory of the rules, and never add a check the files do not contain; propose it as a rule change instead.
+Read each of these files that applies, in full, before the first finding. Never review from memory of the rules, and never add a check the files do not contain; propose it as a rule change instead.
 
 **Version policy.** Detect the Cucumber BOM and the JUnit Platform engine first; the rule files' "the codebase wins" line applies.
 
@@ -44,14 +44,15 @@ Read each file whose `paths:` match a file under review, in full, before the fir
 |----------|--------------------------------|-----------------------------------------|----------------------------------------|
 | major    | Login.feature:12               | Imperative step "click #submit"         | Raise to "When I sign in…"; move mechanic to LoginPage |
 | major    | AuthenticationSteps.java:20    | new LoginPage(page) inside step         | Inject TestContext; reach page via context |
-| minor    | CartSteps.java:8               | Two near-duplicate add-item steps       | Parameterize: "I add {int} items"      |
+| major    | FilterSteps.java:14            | "I select {string} for {string} filter" maps a field name to a control | One binding per filter: "I select {string} for Deal Type filter" |
+| blocker  | DealSteps.java:31              | Step body is empty: the scenario passes doing nothing | Implement it, or tag the scenario `@not-automated` with a ticket and remove the binding |
 ```
 
 After the table, add an **Overall** paragraph (2–3 sentences) and a **Traceability** line (TC-IDs/ACs covered vs. gaps ⚠️).
 
 ## Severity
 
-The severity is the tag on the rule, never a new judgment. An undefined or ambiguous step that fails the run is a **blocker**: the build is broken. End with one line: `Rules: project .claude/rules/qa-java/ | plugin copy (not installed)`.
+The severity is the tag on the rule, never a new judgment. An undefined or ambiguous step that fails the run is a **blocker**: the build is broken, and so is a binding with an empty body, which passes without doing anything. A step that makes one interaction on an element or control its page object exposes (`filterPage.dealType().selectOption(option)`) is the BDD intent layer, not a finding; a locator, wait or branch in the step still is. A `Then` that checks every row asserts the column is not empty first (`qa-java-data.md`). End with one line: `Rules: project .claude/rules/qa-java/ | plugin copy (not installed)`.
 
 ## Examples
 

@@ -89,11 +89,15 @@ public sealed class UserGrpcAction : GrpcAction
     private readonly UserService.UserServiceClient _client;
     private readonly Metadata _headers;
 
-    public UserGrpcAction(GrpcChannel channel, bool authenticated)
+    private UserGrpcAction(GrpcChannel channel, Metadata headers)
     {
         _client = new UserService.UserServiceClient(channel);
-        _headers = authenticated ? Bearer(Env.GrpcToken) : new Metadata();
+        _headers = headers;
     }
+
+    public static UserGrpcAction Authenticated(GrpcChannel channel) => new(channel, Bearer(Env.GrpcToken));
+
+    public static UserGrpcAction Anonymous(GrpcChannel channel) => new(channel, new Metadata());
 
     public Task<GrpcCallResult<User>> GetUserAsync(string id) =>
         CallAsync(async () => await _client.GetUserAsync(
@@ -103,9 +107,15 @@ public sealed class UserGrpcAction : GrpcAction
         CallAsync(async () => await _client.CreateUserAsync(
             new CreateUserRequest { Email = email, FirstName = first, LastName = last }, headers: _headers));
 
-    // Server-streaming: hand the call back; the test drains ResponseStream (see streaming section).
-    public AsyncServerStreamingCall<User> ListUsers(int pageSize) =>
-        _client.ListUsers(new ListUsersRequest { PageSize = pageSize }, headers: _headers);
+    public async Task<List<User>> ListAllUsersAsync(int pageSize)
+    {
+        using AsyncServerStreamingCall<User> call =
+            _client.ListUsers(new ListUsersRequest { PageSize = pageSize }, headers: _headers);
+        var received = new List<User>();
+        await foreach (User user in call.ResponseStream.ReadAllAsync())
+            received.Add(user);
+        return received;
+    }
 
     public UserService.UserServiceClient Client => _client;   // exposed for the streaming tests
 }
@@ -131,7 +141,7 @@ public class UserGrpcTests : BaseGrpcTest        // owns the GrpcChannel lifecyc
     [Test]
     public async Task GetUser_WhenExists_ReturnsUserWithOkStatus()
     {
-        var action = new UserGrpcAction(Channel, authenticated: true);
+        var action = UserGrpcAction.Authenticated(Channel);
 
         GrpcCallResult<User> result = await action.GetUserAsync("1");
 
@@ -142,7 +152,7 @@ public class UserGrpcTests : BaseGrpcTest        // owns the GrpcChannel lifecyc
     [Test]
     public async Task GetUser_WhenUnknownId_ReturnsNotFound()
     {
-        var action = new UserGrpcAction(Channel, authenticated: true);
+        var action = UserGrpcAction.Authenticated(Channel);
 
         GrpcCallResult<User> result = await action.GetUserAsync("999999");
 
@@ -154,7 +164,7 @@ public class UserGrpcTests : BaseGrpcTest        // owns the GrpcChannel lifecyc
     [Test]
     public async Task CreateUser_WhenEmailBlank_ReturnsInvalidArgument()
     {
-        var action = new UserGrpcAction(Channel, authenticated: true);
+        var action = UserGrpcAction.Authenticated(Channel);
 
         GrpcCallResult<User> result = await action.CreateUserAsync("", "A", "B");
 
@@ -164,7 +174,7 @@ public class UserGrpcTests : BaseGrpcTest        // owns the GrpcChannel lifecyc
     [Test]
     public async Task GetUser_WhenNoBearer_ReturnsUnauthenticated()
     {
-        var action = new UserGrpcAction(Channel, authenticated: false);   // no bearer metadata
+        var action = UserGrpcAction.Anonymous(Channel);   // no bearer metadata
 
         GrpcCallResult<User> result = await action.GetUserAsync("1");
 

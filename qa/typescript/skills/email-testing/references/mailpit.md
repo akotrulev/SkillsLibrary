@@ -1,6 +1,6 @@
 # QA — Email Testing with Mailpit (TypeScript)
 
-Scaffolds a typed Mailpit HTTP-API client and Vitest / Playwright helpers that poll for a specific message (by recipient + subject), extract HTML / text body / links / OTPs, download attachments. Tests share one Mailpit and isolate by **recipient**: every test sends to its own unique
+Scaffolds a typed Mailpit HTTP-API client and Vitest / Playwright fixtures that poll for a specific message (by recipient + subject), extract HTML / text body / links / OTPs, download attachments. Tests share one Mailpit and isolate by **recipient**: every test sends to its own unique
 address and searches for it, so nothing is ever wiped.
 
 ## When to use
@@ -261,7 +261,7 @@ it('Should_AttachPdfInvoice_When_InvoiceIsEmailed', async () => {
 
 ### Waiting
 - Always poll with a budget (`waitFor`). Default 15s.
-- No `setTimeout`-only waits in tests. Use the helper, which respects deadlines.
+- No `setTimeout`-only waits in tests. Use the client's `waitFor`, which respects deadlines.
 - Mailpit ships a WebSocket; prefer polling unless you have a reproducer polling can't handle.
 
 ### Search queries

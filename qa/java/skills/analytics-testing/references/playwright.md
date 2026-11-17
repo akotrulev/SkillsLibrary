@@ -7,7 +7,7 @@ the beacon body, request waits resolve for routed requests, `setExtraHTTPHeaders
 server, and gtag's `arguments` entries in the `dataLayer` read back by index. JSON goes through Gson, which
 Playwright for Java already depends on.
 
-## 1. The helpers
+## 1. The probes and fixtures
 
 ```java
 package com.example.uitests.support;
@@ -220,7 +220,7 @@ public class ConsentGatingTest extends BaseTest {
     private ConsentBanner consentBanner;
 
     @BeforeMethod(alwaysRun = true)
-    public void createHelpers() {
+    public void createProbesAndPages() {
         tracker = new Tracker(page);
         tracker.capture();
         dataLayer = new DataLayer(page);
@@ -368,7 +368,7 @@ public class GlobalPrivacyControlTest extends BaseTest {
     private ConsentBanner consentBanner;
 
     @BeforeMethod(alwaysRun = true)
-    public void createHelpers() {
+    public void createProbesAndPages() {
         tracker = new Tracker(page);
         tracker.capture();
         new PrivacySignals(page).sendGlobalPrivacyControl();

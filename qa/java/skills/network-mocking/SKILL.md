@@ -36,7 +36,7 @@ and Chromium-only. The proxy is for when there is no `Page` at all.
   browser, a context and page per test, and the failure evidence. A class changes the context only through
   `contextOptions()` (`setServiceWorkers`, `setRecordHarPath`, `setOffline`) and never adds its own
   `Playwright.create()`, browser or failure hook.
-- Route, CDP and proxy calls live in a helper with intent names (`MockApi`, `Traffic`, `CdpControls`,
+- Route, CDP and proxy calls live in a fixture or probe with intent names (`MockApi`, `Traffic`, `CdpControls`,
   `ProxyControls`) built in the class's own `@BeforeMethod`; a test never calls `page.route(...)` or
   `client.send(...)`.
 - **No `Thread.sleep` in a route handler, ever.** Java runs route handlers on the thread that is inside a

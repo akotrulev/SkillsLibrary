@@ -5,27 +5,47 @@ namespace Example.UiTests.Pages;
 
 public sealed class ProductPage
 {
-    private const string SettledToolsJs = """
-        ({ name, present, timeout }) => new Promise(resolve => {
+    private const string RegisteredToolJs = """
+        ({ name, timeout }) => new Promise((resolve, reject) => {
           const modelContext = document.modelContext;
           if (!modelContext) {
             throw new Error('document.modelContext is missing: run with webmcp.runsettings (--enable-features=WebMCP)');
           }
-          const listTools = async () => (await modelContext.getTools())
-            .filter(tool => tool.window === window)
-            .map(tool => ({
-              name: tool.name,
-              inputSchema: typeof tool.inputSchema === 'string' ? JSON.parse(tool.inputSchema) : tool.inputSchema,
-              annotations: tool.annotations,
-            }));
+          const listTools = async () => (await modelContext.getTools()).filter(tool => tool.window === window);
           const settle = async () => {
-            const tools = await listTools();
-            if (tools.some(tool => tool.name === name) === present) {
-              resolve(tools);
+            const tool = (await listTools()).find(candidate => candidate.name === name);
+            if (tool) {
+              resolve({
+                name: tool.name,
+                inputSchema: typeof tool.inputSchema === 'string' ? JSON.parse(tool.inputSchema) : tool.inputSchema,
+                annotations: tool.annotations,
+              });
             }
           };
           modelContext.addEventListener('toolchange', settle);
-          setTimeout(async () => resolve(await listTools()), timeout);
+          setTimeout(async () => reject(new Error(
+            `WebMCP tool "${name}" not registered within ${timeout} ms; tools: ${(await listTools()).map(tool => tool.name).join(', ')}`)), timeout);
+          settle();
+        })
+        """;
+
+    private const string ToolNamesAfterRemovalJs = """
+        ({ name, timeout }) => new Promise(resolve => {
+          const modelContext = document.modelContext;
+          if (!modelContext) {
+            throw new Error('document.modelContext is missing: run with webmcp.runsettings (--enable-features=WebMCP)');
+          }
+          const toolNames = async () => (await modelContext.getTools())
+            .filter(tool => tool.window === window)
+            .map(tool => tool.name);
+          const settle = async () => {
+            const names = await toolNames();
+            if (!names.includes(name)) {
+              resolve(names);
+            }
+          };
+          modelContext.addEventListener('toolchange', settle);
+          setTimeout(async () => resolve(await toolNames()), timeout);
           settle();
         })
         """;
@@ -67,9 +87,15 @@ public sealed class ProductPage
 
     public async Task GoToAsync(string sku) => await _page.GotoAsync($"/products/{sku}");
 
-    public async Task<JsonElement> SettledToolsAsync(string name, bool present, int timeoutMs) =>
-        await _page.EvaluateAsync<JsonElement>(SettledToolsJs, new { name, present, timeout = timeoutMs });
+    public async Task<JsonElement> RegisteredToolAsync(string name, int timeoutMs) =>
+        await _page.EvaluateAsync<JsonElement>(RegisteredToolJs, new { name, timeout = timeoutMs });
 
-    public async Task<JsonElement> CallToolAsync(string name, object input, int timeoutMs) =>
-        await _page.EvaluateAsync<JsonElement>(CallToolJs, new { name, input, timeout = timeoutMs });
+    public async Task<string[]> ToolNamesAfterRemovalAsync(string name, int timeoutMs) =>
+        await _page.EvaluateAsync<string[]>(ToolNamesAfterRemovalJs, new { name, timeout = timeoutMs });
+
+    public async Task<JsonElement> CallToolAsync(string name, object input, int timeoutMs)
+    {
+        await RegisteredToolAsync(name, timeoutMs);
+        return await _page.EvaluateAsync<JsonElement>(CallToolJs, new { name, input, timeout = timeoutMs });
+    }
 }

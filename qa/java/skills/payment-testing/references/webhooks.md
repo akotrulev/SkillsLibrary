@@ -125,12 +125,19 @@ public class StripeWebhookTest extends BaseTest {
     private CheckoutClient checkout;
     private WebhookSigner signer;
     private final WebhookClient webhooks = new WebhookClient();
+    private OrderDto order;
+    private String payload;
 
-    @BeforeMethod
-    public void connectToSandbox() {
+    @BeforeMethod(alwaysRun = true)
+    public void payOrderInSandbox() throws StripeException {
         stripe = StripeSandbox.fromEnvironment();
-        checkout = new CheckoutClient(AuthHelper.getToken(TestUsers.SHOPPER));
+        checkout = new CheckoutClient(TokenProvider.getToken(TestUsers.SHOPPER));
         signer = new WebhookSigner(Config.required("STRIPE_WEBHOOK_SECRET"));
+        order = checkout.createOrder(Orders.twoMugsIn("EUR"), HttpStatus.SC_CREATED);
+        PaymentDto payment = checkout.pay(order.id(), new PayOrderDto(TestCards.VISA), IdempotencyKey.next(), HttpStatus.SC_OK);
+        stripe.track(payment.paymentIntentId());
+        payload = new StripeEventBuilder().ofType("payment_intent.succeeded")
+                .about(stripe.paymentIntent(payment.paymentIntentId())).build();
     }
 
     @AfterMethod(alwaysRun = true)
@@ -140,9 +147,6 @@ public class StripeWebhookTest extends BaseTest {
 
     @Test
     public void Should_CreateOneShipment_When_SameEventIsDeliveredTwice() throws Exception {
-        OrderDto order = checkout.createOrder(Orders.twoMugsIn("EUR"), HttpStatus.SC_CREATED);
-        String payload = new StripeEventBuilder().ofType("payment_intent.succeeded").about(paidIntentOf(order)).build();
-
         Response first = webhooks.deliver(payload, signer.headerFor(payload));
         Response duplicate = webhooks.deliver(payload, signer.headerFor(payload));
 
@@ -155,8 +159,6 @@ public class StripeWebhookTest extends BaseTest {
 
     @Test
     public void Should_Return400AndShipNothing_When_SignatureUsesWrongSecret() throws Exception {
-        OrderDto order = checkout.createOrder(Orders.twoMugsIn("EUR"), HttpStatus.SC_CREATED);
-        String payload = new StripeEventBuilder().ofType("payment_intent.succeeded").about(paidIntentOf(order)).build();
         WebhookSigner forger = new WebhookSigner("whsec_not_the_endpoint_secret");
 
         Response response = webhooks.deliver(payload, forger.headerFor(payload));
@@ -169,18 +171,9 @@ public class StripeWebhookTest extends BaseTest {
 
     @Test
     public void Should_Return400_When_SignatureIsOlderThanTolerance() throws Exception {
-        OrderDto order = checkout.createOrder(Orders.twoMugsIn("EUR"), HttpStatus.SC_CREATED);
-        String payload = new StripeEventBuilder().ofType("payment_intent.succeeded").about(paidIntentOf(order)).build();
-
         Response response = webhooks.deliver(payload, signer.headerFor(payload, Instant.now().minus(Duration.ofMinutes(10))));
 
         Assert.assertEquals(response.getStatusCode(), HttpStatus.SC_BAD_REQUEST, response.asString());
-    }
-
-    private PaymentIntent paidIntentOf(OrderDto order) throws StripeException {
-        PaymentDto payment = checkout.pay(order.id(), new PayOrderDto(TestCards.VISA), IdempotencyKey.next(), HttpStatus.SC_OK);
-        stripe.track(payment.paymentIntentId());
-        return stripe.paymentIntent(payment.paymentIntentId());
     }
 }
 ```

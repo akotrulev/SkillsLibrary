@@ -5,7 +5,7 @@ description: Use when scaffolding a TypeScript Appium 3 (WebdriverIO) page objec
 
 # QA — Appium TypeScript Page Object & Test Generator
 
-Scaffolds WebdriverIO + Appium page objects and Mocha mobile UI tests in TypeScript strict mode, mirroring the Java and .NET siblings. A thin `BasePage` with accessibility-id-first helpers, scoped components that re-resolve lazily, typed navigation, and one session per worker. The compilable reference is `assets/`.
+Scaffolds WebdriverIO + Appium page objects and Mocha mobile UI tests in TypeScript strict mode, mirroring the Java and .NET siblings. A thin `BasePage` with accessibility-id-first finders, components that re-resolve lazily, typed navigation, and one session per worker. The compilable reference is `assets/`.
 
 > WebdriverIO with `@wdio/appium-service` is the TypeScript client for Appium: it starts the Appium server, takes the capabilities, and exposes `browser`, `$` and `$$` over the WebDriver protocol.
 
@@ -53,11 +53,12 @@ Scaffolds WebdriverIO + Appium page objects and Mocha mobile UI tests in TypeScr
 |---|---|
 | `wdio.conf.ts` | Mocha, the `appium` service, capabilities per `PLATFORM` from env, the evidence hooks |
 | `BaseTest.ts` | `beforeTest` / `afterTest`: a recording started per test, and on failure a screenshot, page source, device log and the recording; see `qa/typescript/skills/evidence-capture/references/appium.md` |
-| `BasePage.ts` | `byTestId` and the other ladder helpers, `testIdSelector`, `isElementVisible`, the abstract `verifyPageLoaded` |
+| `BasePage.ts` | `byTestId` and the other ladder finders, `testIdSelector` (the platform finder, the one legal platform branch), the abstract `verifyPageLoaded` |
 | `LoginPage.ts`, `OrdersPage.ts` | Screens; `signIn` returns the destination |
-| `OrderRow.ts` | A scoped component: a row key, re-resolved on every call |
-| `orders.spec.ts` | One test |
-| `package.json`, `tsconfig.json`, `env.ts` | Exact pins, strict config, the one `requiredEnv` helper |
+| `OrderRow.ts` | A row component: a row key, its root re-resolved on every call through a wait condition with a timeout message |
+| `OrderSeeder.ts` | The seeder: creates an order through the API and deletes what it created (its own teardown registry) |
+| `orders.spec.ts` | One test: seeding and reaching the screen in `beforeEach`, deletion in `afterEach`, a linear body |
+| `package.json`, `tsconfig.json`, `env.ts` | Exact pins, strict config, the one `requiredEnv` env loader |
 
 ## Locator ladder
 
@@ -76,15 +77,18 @@ A React Native `testID` is the iOS `accessibilityIdentifier` (the element's `nam
 - A working XPath proves the node exists, not that it is the final locator. Downgrade it as soon as the source exposes a stronger rung. Each XPath row goes into `missing-testids.md` (page, element, fallback in use); the code carries no marker, and the constant's name says it is a fallback (`PASSWORD_REVEAL_XPATH_FALLBACK`).
 - Discover and verify ids on the live app through `mobile-screen-explorer`, and emit classes through `mobile-screen-objects`.
 
-## Scoped components
+## Components
 
 WDIO 10's `$` is strict: it throws `StrictSelectorError` when a selector matches more than one element, **at every step of a chain** (`$(a).$(b)`). A repeating row therefore cannot be found with a bare child selector.
 
 1. A component holds a **row key**, never an element. The row is found again on every call, so a recycled list cell cannot go stale.
 2. Find the row by a visible key inside it, with **element-scoped finds first**: `$$('~OrderRow').findSeries(...)` enumerates the rows and `row.$('~OrderRow.Number')` reads the key within each (see `assets/OrderRow.ts`). The ids are static; no index, no data in the locator.
 3. Only when the platform can do the whole job in one query, scope there: an iOS class chain ``-ios class chain:**/XCUIElementTypeCell[`name == "OrderRow"`]/**/XCUIElementTypeStaticText[`name == "OrderRow.Title"`]``. Mind the `UiSelector` caveat above on Android.
-4. Components do **not** extend `BasePage`. They use `$` and `$$` through a small set of scoped finds, and have no `verifyPageLoaded`; the host page owns the landmark.
-5. `$(selector, { strict: false })` opts one call out, and `strictSelectors: false` the whole config. Treat both as a smell: a selector that matches twice is a locator bug. Fix it by narrowing the selector or scoping it to a container.
+4. Components do **not** extend `BasePage`. They use `$` and `$$` through a small set of scoped finds, expose intent methods and value queries (text, a boolean, a count) but never an element, and have no `verifyPageLoaded`; the host page owns the landmark.
+5. A row that may not be rendered yet is waited for with `browser.waitUntil` and a `timeoutMsg` naming the row, never found once and checked with `if (!row) throw`.
+   To check every row of a result, the page exposes a query returning one column's values (`orderStatuses(): Promise<string[]>`, a `map` over `$$`); the test asserts it is not empty, then asserts the whole array in one `expect`, never `[0]` standing for the result set.
+6. A native control (a picker, a switch, a segmented control) gets its own component at first use, built from its root's test id: `DatePicker.select(date)` hides the wheel or calendar gestures.
+7. `$(selector, { strict: false })` opts one call out, and `strictSelectors: false` the whole config. Treat both as a smell: a selector that matches twice is a locator bug. Fix it by narrowing the selector or scoping it to a container.
 
 ## Gestures
 
@@ -94,10 +98,10 @@ WDIO 10's `$` is strict: it throws `StrictSelectorError` when a selector matches
 | Scroll an element into view | `await $('~Orders.Footer').scrollIntoView()` |
 | Swipe | `await browser.swipe({ direction: 'left', scrollableElement: $('~Gallery.Carousel') })` |
 | Long press, drag, pinch, zoom | `longPress()`, `dragAndDrop()`, `pinch()`, `zoom()` |
-| A path no helper covers | `browser.action('pointer', { parameters: { pointerType: 'touch' } }).move({ x, y }).down().up().perform()` |
+| A path no command covers | `browser.action('pointer', { parameters: { pointerType: 'touch' } }).move({ x, y }).down().up().perform()` |
 | A driver gesture | `await browser.execute('mobile: swipeGesture', { elementId, direction: 'left', percent: 0.75 })` on Android; `mobile: swipe` on iOS |
 
-`touchAction`, on `browser` and on an element, is removed in WDIO 10 and the Appium 3 server dropped the `touch/*` routes. The helpers take a `scrollableElement` or a direction; coordinates are device-specific, so compute any target from `element.getRect()`. On iOS coordinates are in points, not screenshot pixels.
+`touchAction`, on `browser` and on an element, is removed in WDIO 10 and the Appium 3 server dropped the `touch/*` routes. The gesture commands take a `scrollableElement` or a direction; coordinates are device-specific, so compute any target from `element.getRect()`. On iOS coordinates are in points, not screenshot pixels.
 
 ## WebView
 
@@ -128,14 +132,14 @@ Other removed endpoints have `mobile:` replacements: `mobile: backgroundApp`, `m
 
 ## Rules
 
-The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `mobile-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md`, `page-objects.md`, `mobile-tests.md` and `test-data.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 
 1. Confirm the screen, platforms, landmark, elements with rungs, actions and destinations.
 2. For each element with no test id, record it in `missing-testids.md`; do not silently fall back to XPath.
-3. Write `src/pages/mobile/<Screen>Page.ts`: constants, private accessors, `verifyPageLoaded`, intent actions, and a scoped component for each repeating group.
-4. Stub missing destination pages; write the spec with one `it` per scenario.
+3. Write `src/pages/mobile/<Screen>Page.ts`: constants, private accessors, `verifyPageLoaded`, intent actions, a component for each repeating group, and a control component for each native control, reusing one from `components/controls/` when it exists.
+4. Stub missing destination pages; write the spec with one `it` per scenario. Data the test reads is created in `beforeEach` by a seeder and deleted in `afterEach`; reaching the screen happens in `beforeEach`; the body is the action and its assertion.
 5. Run `npx wdio run wdio.conf.ts` and expect zero failures. If the service fails to start, run `appium driver list --installed`. A server run by hand answers `curl -s http://127.0.0.1:4723/status`.
 
 A visible element missing from the page source is usually an accessibility, app-state, active-app (a system alert) or native-versus-WebView problem; fix that before the locator. For doctor failures and driver questions the Appium docs tools (`mcp__appium-mcp__appium_documentation_query`, `mcp__appium-mcp__appium_skills`, on when `APPIUM_MCP_DOCS_ENABLED=true`) answer from the official docs.

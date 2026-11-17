@@ -7,7 +7,7 @@ Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 Pin the locale at the Playwright level **and** tell the app which language to load (a `?lng=` query, a cookie,
 or a `localStorage` seed — match your app). `lng` is an **option fixture** — the catalog and app language a
 project sets — beside Playwright's own `locale` (the BCP-47 tag) and `timezoneId`. The fixture also freezes
-"now" before the page loads, and exposes the page objects and the measuring helper the specs use.
+"now" before the page loads, and exposes the page objects and the `TextAudit` probe the specs use.
 
 ```typescript
 import type { Locator, Page } from '@playwright/test';
@@ -65,7 +65,7 @@ export class OrderPage {
 }
 
 export class CheckoutPage {
-  readonly submit: Locator;
+  private readonly submit: Locator;
   readonly confirmation: Locator;
 
   constructor(private readonly page: Page) {
@@ -80,6 +80,10 @@ export class CheckoutPage {
   async pay(): Promise<void> {
     await this.submit.click();
   }
+
+  async submitOverflowPx(): Promise<number> {
+    return this.submit.evaluate((element) => element.scrollWidth - element.clientWidth);
+  }
 }
 
 export class TextAudit {
@@ -88,10 +92,6 @@ export class TextAudit {
   async visibleTexts(): Promise<string[]> {
     const texts = await this.page.getByText(/\S/).allInnerTexts();
     return texts.map((text) => text.trim());
-  }
-
-  async overflowPx(locator: Locator): Promise<number> {
-    return locator.evaluate((element) => element.scrollWidth - element.clientWidth);
   }
 
   async leftEdgeRatio(locator: Locator): Promise<number> {
@@ -233,10 +233,10 @@ test('Should_ShowNoUnwrappedText_When_CheckoutRendersInPseudoLocale', { tag: '@p
   await expect.poll(async () => (await textAudit.visibleTexts()).filter((text) => !isWrapped(text))).toEqual([]);
 });
 
-test('Should_NotClipSubmitLabel_When_TextExpandsByFortyPercent', { tag: '@pseudo' }, async ({ checkoutPage, textAudit }) => {
+test('Should_NotClipSubmitLabel_When_TextExpandsByFortyPercent', { tag: '@pseudo' }, async ({ checkoutPage }) => {
   await checkoutPage.goto();
 
-  await expect.poll(() => textAudit.overflowPx(checkoutPage.submit)).toBeLessThanOrEqual(1);
+  await expect.poll(() => checkoutPage.submitOverflowPx()).toBeLessThanOrEqual(1);
 });
 ```
 
@@ -251,15 +251,11 @@ reports how many pixels the label overflows (`scrollWidth - clientWidth`), never
 
 No browser, no app — just compare the JSON catalogs. This is the highest-value, cheapest, most deterministic
 i18n test. Run it in Vitest and gate the build on it. `flatten` turns the nested catalog into dot-path → value,
-so the comparison is order-independent.
+so the comparison is order-independent. It and `placeholders` belong to the catalog module, beside `t`, so the
+spec file holds only tests and constants:
 
 ```typescript
-import { describe, expect, it } from 'vitest';
-import ar from '../../src/locales/ar/common.json';
-import de from '../../src/locales/de/common.json';
-import en from '../../src/locales/en/common.json';
-
-function flatten(catalog: Record<string, unknown>, prefix = ''): Record<string, string> {
+export function flatten(catalog: Record<string, unknown>, prefix = ''): Record<string, string> {
   return Object.entries(catalog).reduce<Record<string, string>>((flat, [key, value]) => {
     const path = prefix ? `${prefix}.${key}` : key;
     return value !== null && typeof value === 'object'
@@ -268,7 +264,18 @@ function flatten(catalog: Record<string, unknown>, prefix = ''): Record<string, 
   }, {});
 }
 
-const placeholders = (text: string) => (text.match(/\{\{.*?\}\}/g) ?? []).sort().join();
+export const placeholders = (text: string) => (text.match(/\{\{.*?\}\}/g) ?? []).sort().join();
+```
+
+`tests/i18n/catalog.ts` (additions).
+
+```typescript
+import { describe, expect, it } from 'vitest';
+import ar from '../../src/locales/ar/common.json';
+import de from '../../src/locales/de/common.json';
+import en from '../../src/locales/en/common.json';
+import { flatten, placeholders } from '../i18n/catalog';
+
 const source = flatten(en);
 const targets = Object.entries({ de: flatten(de), ar: flatten(ar) });
 

@@ -197,17 +197,14 @@ namespace Example.UiTests.Tests;
 
 public class CoverageI18nTests
 {
-    private static readonly ResourceManager Resources = new("MyApp.Resources.Common", typeof(MyApp.Marker).Assembly);
-    private static readonly Regex Placeholder = new(@"\{\d+}");
-
     private static IEnumerable<string> Targets() => ["de", "ar"];
 
     [TestCaseSource(nameof(Targets))]
     public void Should_HaveNoMissingKeys_When_ComparedToTheSource(string culture)
     {
-        var target = Keys(culture);
+        var target = ResxCatalog.Keys(culture);
 
-        var missing = Keys("en").Keys.Where(key => !target.ContainsKey(key)).Order().ToList();
+        var missing = ResxCatalog.Keys("en").Keys.Where(key => !target.ContainsKey(key)).Order().ToList();
 
         Assert.That(missing, Is.Empty, $"{culture} is missing: {string.Join(", ", missing)}");
     }
@@ -215,7 +212,7 @@ public class CoverageI18nTests
     [TestCaseSource(nameof(Targets))]
     public void Should_HaveNoEmptyValues_When_Translated(string culture)
     {
-        var empty = Keys(culture).Where(entry => string.IsNullOrWhiteSpace(entry.Value)).Select(entry => entry.Key).Order().ToList();
+        var empty = ResxCatalog.Keys(culture).Where(entry => string.IsNullOrWhiteSpace(entry.Value)).Select(entry => entry.Key).Order().ToList();
 
         Assert.That(empty, Is.Empty, $"{culture} has empty entries: {string.Join(", ", empty)}");
     }
@@ -223,9 +220,9 @@ public class CoverageI18nTests
     [TestCaseSource(nameof(Targets))]
     public void Should_HaveNoOrphanKeys_When_ComparedToTheSource(string culture)
     {
-        var source = Keys("en");
+        var source = ResxCatalog.Keys("en");
 
-        var orphans = Keys(culture).Keys.Where(key => !source.ContainsKey(key)).Order().ToList();
+        var orphans = ResxCatalog.Keys(culture).Keys.Where(key => !source.ContainsKey(key)).Order().ToList();
 
         Assert.That(orphans, Is.Empty, $"{culture} has orphan keys: {string.Join(", ", orphans)}");
     }
@@ -233,18 +230,24 @@ public class CoverageI18nTests
     [TestCaseSource(nameof(Targets))]
     public void Should_KeepPlaceholdersIdentical_When_Translated(string culture)
     {
-        var source = Keys("en");
-        var target = Keys(culture);
+        var source = ResxCatalog.Keys("en");
+        var target = ResxCatalog.Keys(culture);
 
         var drifted = source.Keys
-            .Where(key => target.ContainsKey(key) && !Placeholders(source[key]).SequenceEqual(Placeholders(target[key])))
+            .Where(key => target.ContainsKey(key) && !ResxCatalog.Placeholders(source[key]).SequenceEqual(ResxCatalog.Placeholders(target[key])))
             .Order()
             .ToList();
 
         Assert.That(drifted, Is.Empty, $"{culture} placeholder mismatch: {string.Join(", ", drifted)}");
     }
+}
 
-    private static Dictionary<string, string> Keys(string culture)
+public static class ResxCatalog
+{
+    private static readonly ResourceManager Resources = new("MyApp.Resources.Common", typeof(MyApp.Marker).Assembly);
+    private static readonly Regex Placeholder = new(@"\{\d+}");
+
+    public static Dictionary<string, string> Keys(string culture)
     {
         var info = culture == "en" ? CultureInfo.InvariantCulture : CultureInfo.GetCultureInfo(culture);
         var set = Resources.GetResourceSet(info, createIfNotExists: true, tryParents: false)
@@ -252,7 +255,7 @@ public class CoverageI18nTests
         return set.Cast<DictionaryEntry>().ToDictionary(entry => (string)entry.Key, entry => (string?)entry.Value ?? string.Empty);
     }
 
-    private static List<string> Placeholders(string text) => Placeholder.Matches(text).Select(match => match.Value).Order().ToList();
+    public static List<string> Placeholders(string text) => Placeholder.Matches(text).Select(match => match.Value).Order().ToList();
 }
 ```
 

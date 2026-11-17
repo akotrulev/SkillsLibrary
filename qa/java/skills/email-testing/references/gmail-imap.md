@@ -1,6 +1,6 @@
 # QA — Email Testing against a Real Mailbox over IMAP (Java)
 
-Scaffolds a thin, intent-revealing wrapper over Jakarta Mail (`Store` / `Folder` / `SearchTerm` over `imaps`) plus TestNG helpers that **poll a real provider mailbox** (Gmail / Outlook / any IMAP server) for a specific message — by recipient alias + subject + received-date bound — walk the `MimeMultipart` for HTML / text body / attachments, extract links / OTP codes, and clean up by flagging the message `\Seen` / `\Deleted` rather than wiping an inbox.
+Scaffolds a thin, intent-revealing wrapper over Jakarta Mail (`Store` / `Folder` / `SearchTerm` over `imaps`) plus TestNG probes that **poll a real provider mailbox** (Gmail / Outlook / any IMAP server) for a specific message — by recipient alias + subject + received-date bound — walk the `MimeMultipart` for HTML / text body / attachments, extract links / OTP codes, and clean up by flagging the message `\Seen` / `\Deleted` rather than wiping an inbox.
 
 This is the sibling for flows that must exercise the **genuine provider inbox** — real MX, real spam/routing, real provider quirks — not an SMTP sink or a test-SaaS server. Two consequences shape the whole skill:
 

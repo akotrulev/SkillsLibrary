@@ -87,7 +87,7 @@ public sealed record ImapOptions(
 
 ### Intent-revealing wrapper — `IntegrationTests/Email/Mailbox.cs`
 
-Tests never drive `SearchAsync` / `GetMessageAsync` directly. They call `AwaitSignupEmailAsync`, `AwaitEmailAsync`, `MarkProcessedAsync`. Connection lifecycle (connect once, poll INBOX, disconnect on teardown) lives here — tests never leak an IMAP connection.
+Tests never drive `SearchAsync` / `GetMessageAsync` directly. They call `AwaitSignupEmailAsync`, `AwaitEmailAsync`, `MarkSeenAsync`, `DeleteAsync`. Connection lifecycle (connect once, poll INBOX, disconnect on teardown) lives here — tests never leak an IMAP connection.
 
 ```csharp
 using MailKit;
@@ -152,17 +152,13 @@ public sealed class Mailbox : IAsyncDisposable
         => AwaitEmailAsync(sentTo, "Welcome", since, ct: ct);
 
     /// <summary>Cleanup is per-message, not a wipe: flag Seen, or Deleted + expunge.</summary>
-    public async Task MarkProcessedAsync(UniqueId uid, bool delete = false, CancellationToken ct = default)
+    public Task MarkSeenAsync(UniqueId uid, CancellationToken ct = default) =>
+        _client.Inbox.AddFlagsAsync(uid, MessageFlags.Seen, true, ct);
+
+    public async Task DeleteAsync(UniqueId uid, CancellationToken ct = default)
     {
-        if (delete)
-        {
-            await _client.Inbox.AddFlagsAsync(uid, MessageFlags.Deleted, true, ct);
-            await _client.Inbox.ExpungeAsync(new[] { uid }, ct);
-        }
-        else
-        {
-            await _client.Inbox.AddFlagsAsync(uid, MessageFlags.Seen, true, ct);
-        }
+        await _client.Inbox.AddFlagsAsync(uid, MessageFlags.Deleted, true, ct);
+        await _client.Inbox.ExpungeAsync(new[] { uid }, ct);
     }
 
     public async ValueTask DisposeAsync()
@@ -266,7 +262,7 @@ public async Task Should_SendWelcomeEmailWithActivationLink_When_UserSignsUp()
     Uri activation = EmailExtractors.ExtractLink(found.Message, "/activate?token=");
 
     Assert.That(activation.Query, Does.Contain("token="));
-    await Mail.MarkProcessedAsync(found.Uid, delete: true);
+    await Mail.DeleteAsync(found.Uid);
 }
 ```
 
@@ -291,7 +287,7 @@ public async Task Should_LogIn_When_ResetOtpEntered()
     });
 
     Assert.That(verify.StatusCode, Is.EqualTo(System.Net.HttpStatusCode.OK));
-    await Mail.MarkProcessedAsync(found.Uid, delete: true);
+    await Mail.DeleteAsync(found.Uid);
 }
 ```
 
@@ -316,7 +312,7 @@ public async Task Should_AttachPdfInvoice_When_InvoiceEmailed()
         Assert.That(pdf.FileName, Does.StartWith("invoice-"));
         Assert.That(bytes[..4], Is.EqualTo(new byte[] { 0x25, 0x50, 0x44, 0x46 })); // %PDF magic
     });
-    await Mail.MarkProcessedAsync(found.Uid, delete: true);
+    await Mail.DeleteAsync(found.Uid);
 }
 ```
 

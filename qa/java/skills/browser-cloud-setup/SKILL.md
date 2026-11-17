@@ -44,7 +44,7 @@ Wires Java tests to a **hosted device/browser grid** — BrowserStack, Sauce Lab
 | **LambdaTest** | `wss://cdp.lambdatest.com/playwright` | `mobile-hub.lambdatest.com/wd/hub` | `LT:Options` | LambdaTest Tunnel (`LT`) |
 | **AWS Device Farm** | signed TestGrid Selenium URL (not a Playwright ws endpoint) | managed run (project ARN + device-pool ARN) or `remoteDriverEndpoint` | none — ARN/upload model | VPC/endpoint config, not a CLI tunnel |
 
-**Decision rule.** *Mostly web on a broad browser/OS matrix? Any of BrowserStack / Sauce / LambdaTest — pick on price/plan.* *Real-device mobile depth or app-management?* BrowserStack and Sauce are strongest; LambdaTest is the cheapest broad option. *Already deep in AWS and need private-VPC devices?* Device Farm — but it's an **ARN/upload paradigm, not a caps-on-a-hub grid**, so the wiring differs most there (see § AWS Device Farm). Don't over-engineer multi-vendor abstraction; wire one vendor cleanly behind the grid helper and add a second only when a real need appears.
+**Decision rule.** *Mostly web on a broad browser/OS matrix? Any of BrowserStack / Sauce / LambdaTest — pick on price/plan.* *Real-device mobile depth or app-management?* BrowserStack and Sauce are strongest; LambdaTest is the cheapest broad option. *Already deep in AWS and need private-VPC devices?* Device Farm — but it's an **ARN/upload paradigm, not a caps-on-a-hub grid**, so the wiring differs most there (see § AWS Device Farm). Don't over-engineer multi-vendor abstraction; wire one vendor cleanly behind the driver factory and add a second only when a real need appears.
 
 > **The one gotcha that bites everyone (Playwright + BrowserStack).** BrowserStack's Playwright **direct-connect still uses LEGACY FLAT caps** (`browser`, `os`, `os_version`, `browserstack.username`, `browserstack.accessKey`, …) — **not** the W3C `bstack:options` nesting used by Appium. The nested block is for Appium and the SDK. Don't mix them. Sauce has **no public Playwright `connect` endpoint at all** — it's `saucectl`-driven, the biggest cross-vendor divergence.
 
@@ -105,7 +105,7 @@ that needs it.
 - `total CI shards × thread-count ≤ plan session cap`. Sharding mechanics live in `qa/cicd/java/skills/ci-pipelines/*` — cross-link, don't duplicate.
 
 ### Secrets
-- Username + access key via **env vars only** (`required(...)` helper). Never a literal, never in a committed config file.
+- Username + access key via **env vars only** (`required(...)` on the suite's config class). Never a literal, never in a committed config file.
 - In CI inject via the secret store; for cloud (Device Farm) auth prefer **OIDC** over a long-lived key.
 - Never log a credential or persist it into an artifact/HAR.
 

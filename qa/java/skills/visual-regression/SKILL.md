@@ -62,7 +62,7 @@ diffs across many browsers stay noisy, or a page whose *content* changes must ke
   page object navigates (`ui-test-author/playwright/references/emulation-and-mobile-web.md` §4, §6).
   Dynamic regions masked or hidden. No `Thread.sleep`, no `waitForTimeout`.
 - **Reach the state through page objects.** The test calls page-object intent methods and the visual
-  helper; it never calls `page` itself.
+  probe; it never calls `page` itself.
 - **Visual tests run in the nightly lane**, never on every PR (`qa/cicd/ci-conventions`): they carry
   `groups = "visual"`, the gate `test` task excludes that group, and a `visualTest` Gradle task runs it on
   the schedule.

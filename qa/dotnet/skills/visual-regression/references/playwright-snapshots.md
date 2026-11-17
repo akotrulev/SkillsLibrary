@@ -71,7 +71,7 @@ public static class ProjectPaths
 - `dotnet test` runs from `bin/<cfg>/net10.0/`, so a relative baseline path would read and write copies under
   `bin/`, and an update would never reach the repository. The `AssemblyMetadata` item records the project's
   folder when the project builds; `ProjectPaths.Root` reads it back. `qa/dotnet/skills/network-mocking`
-  resolves its committed HAR files through the same helper.
+  resolves its committed HAR files through the same `ProjectPaths`.
 - The path is the build machine's. Build and run on the same filesystem — the commands in §7 and §8 do both
   inside the container.
 
@@ -116,9 +116,9 @@ waits for the ready state first. Spellings as in `qa/dotnet/skills/evidence-capt
   (§5). The clock is frozen with `Page.Clock.SetFixedTimeAsync(...)` in the class's `[SetUp]`, before the page
   object navigates (`ui-test-author/playwright/references/emulation-and-mobile-web.md` §4, §6).
 
-## 4. The helper — `Support/VisualCheck.cs`
+## 4. The visual check — `Support/VisualCheck.cs`
 
-One helper captures, compares, keeps and attaches. The test builds it in its own `[SetUp]` with `BaseTest`'s
+One `VisualCheck` captures, compares, keeps and attaches. The test builds it in its own `[SetUp]` with `BaseTest`'s
 evidence paths, calls `CompareAsync`, and asserts on the result.
 
 ```csharp
@@ -203,7 +203,7 @@ public sealed record VisualDiff(string Subject, bool SameSize, double DifferentP
 - **`UPDATE_BASELINES=1`** writes every capture as its baseline before comparing, so the run passes and the
   new PNGs show in `git diff`. It is set only by §7's command — never in CI (`qa/cicd/ci-conventions`).
 - The comparer's API is synchronous (file I/O and pixel loops); only the screenshot and the PNG write are
-  awaited. The `if`s live in the helper; the test stays a straight line.
+  awaited. The `if`s live in `VisualCheck`; the test stays a straight line.
 
 ## 5. The page object and the test
 
@@ -295,7 +295,7 @@ public class PricingVisualTests : BaseTest
   (`ui-test-author/playwright/references/lifecycle.md` §4, §7).
 - The class's `[SetUp]` runs after `BaseTest.StartTracing`, so the page exists; the clock is frozen before
   the page object navigates, so the app's first `Date.now()` already reads the fixed instant.
-- `Artifact(...)` and `EvidenceName()` are `BaseTest`'s protected helpers (plan D42); they name the files
+- `Artifact(...)` and `EvidenceName()` are `BaseTest`'s protected evidence methods (plan D42); they name the files
   exactly as the failure evidence is named.
 - One logical assertion: the difference is within the allowance. The message is the `VisualDiff` record
   (subject, same size, percentage), and the three images are already in Allure.
@@ -412,7 +412,7 @@ container job, so the credential fetch stays on the runner, where the cloud CLI 
 
 `Page.PdfAsync()` embeds a creation date and a document ID, so its bytes never equal a baseline, and a byte
 comparison is no visual check. Assert the document's text with a PDF library in the suite that owns the
-document, or screenshot the HTML the PDF is printed from — with this reference's helper.
+document, or screenshot the HTML the PDF is printed from — with this reference's `VisualCheck`.
 
 ## Anti-patterns
 
@@ -430,7 +430,7 @@ document, or screenshot the HTML the PDF is printed from — with this reference
 - **A `ContextOptions()` override that returns `new()`, or a hard-coded `BaseURL`.** *Fix:* amend
   `base.ContextOptions()`; `BASE_URL` reaches it through `BaseTest`.
 - **`Playwright.CreateAsync()` or a second browser in a visual class.** *Fix:* derive from `BaseTest`.
-- **A `try`/`finally` or a re-attaching `[TearDown]` in the test class.** *Fix:* the helper attaches;
+- **A `try`/`finally` or a re-attaching `[TearDown]` in the test class.** *Fix:* `VisualCheck` attaches;
   `BaseTest` keeps the failure evidence.
 - **A direct `SixLabors.ImageSharp` package reference.** *Fix:* reach it through the comparer (§1).
 - **Visual tests in the PR gate.** *Fix:* `[Category("visual")]` and the nightly job.

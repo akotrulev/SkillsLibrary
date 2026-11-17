@@ -85,7 +85,7 @@ public class CheckoutFlagTests
         var checkout = new CheckoutService(flags);               // constructor injection — the client is a dependency
 
         var result = await checkout.StartCheckoutAsync("sku-1");
-        result.Flow.Should().Be(expectedFlow, "flag {0} routes to its contracted flow", enabled ? "on" : "off");
+        result.Flow.Should().Be(expectedFlow, "new-checkout={0} routes to its contracted flow", enabled);
     }
 }
 ```
@@ -101,13 +101,15 @@ The rule lives in the fixture; the test varies the **context** and asserts three
 and **the fallthrough/default** (the case targeting bugs hide in).
 
 ```csharp
+private static readonly Func<EvaluationContext, string> BetaTierOnly =
+    ctx => ctx.TryGetValue("tier", out var tier) && tier.AsString == "beta" ? "on" : "off";
+
 [Test]
 public async Task Should_ServeTheNewCheckout_When_TheUserIsBetaTierOnly()
 {
     var flags = await new FlagFixture("checkout")
         .WithRule("new-checkout",
-            new Dictionary<string, bool> { ["on"] = true, ["off"] = false }, "off",
-            ctx => ctx.TryGetValue("tier", out var tier) && tier.AsString == "beta" ? "on" : "off")
+            new Dictionary<string, bool> { ["on"] = true, ["off"] = false }, "off", BetaTierOnly)
         .ClientAsync();
 
     var betaUser   = EvaluationContext.Builder().SetTargetingKey("user-1").Set("tier", "beta").Build();

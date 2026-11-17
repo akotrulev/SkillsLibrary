@@ -1,6 +1,6 @@
 # QA — Email & SMS Testing with Mailosaur (Java)
 
-Scaffolds a thin, intent-revealing wrapper over the official `com.mailosaur:mailosaur-java` SDK plus TestNG helpers that **await** a specific message in a per-test `{uuid}@{serverId}.mailosaur.net` inbox, extract HTML / text body / links / OTP codes, download attachments, and verify SMS. Mailosaur is a **hosted** service: the SUT sends real email through its real provider to a Mailosaur inbox address, and `messages().get(...)` blocks until the message arrives or the timeout fires — that built-in wait is the sanctioned wait, so there is **no `Thread.sleep`** poll loop anywhere in this skill.
+Scaffolds a thin, intent-revealing wrapper over the official `com.mailosaur:mailosaur-java` SDK plus TestNG probes that **await** a specific message in a per-test `{uuid}@{serverId}.mailosaur.net` inbox, extract HTML / text body / links / OTP codes, download attachments, and verify SMS. Mailosaur is a **hosted** service: the SUT sends real email through its real provider to a Mailosaur inbox address, and `messages().get(...)` blocks until the message arrives or the timeout fires — that built-in wait is the sanctioned wait, so there is **no `Thread.sleep`** poll loop anywhere in this skill.
 
 ## When to use
 

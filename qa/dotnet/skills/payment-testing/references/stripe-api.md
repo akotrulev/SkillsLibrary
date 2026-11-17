@@ -12,7 +12,7 @@ on 2026-11-14. SDK surface checked in the `Stripe.net` 53.1.0 source (`StripeCli
 | `RestSharp` | 112.1.0 | The lane's pin (`api-project-setup`); clients come from `api-client-writer` |
 | Stripe CLI | 1.55.11 | `stripe listen` / `stripe trigger` — see `webhooks.md` |
 
-## 1. The guard and the sandbox helper
+## 1. The guard and the sandbox client
 
 `ApiTests/Support/StripeSandbox.cs`. The only place that holds the key, refuses a live one, reads provider state
 and owns cleanup.

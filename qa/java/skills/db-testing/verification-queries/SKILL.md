@@ -5,13 +5,13 @@ description: Use when writing or reviewing safe verification SQL in Java tests (
 
 # QA — DB Testing Query Author (Java 21 + Spring Boot 3)
 
-Guardrails for the **SQL string itself** when a Java 21 TestNG integration test reaches into the database to verify behaviour. Connection wiring, seeder, and probe scaffolding live in `qa/java/skills/db-testing/connection`; this skill owns *what the SQL is allowed to look like* — named parameter binding only, explicit column lists, safe `LIKE`, type-correct parsing, exists / not-exists / count helpers, an Awaitility-based poller that re-runs the safe query, and a hard refusal list for destructive verbs outside cleanup.
+Guardrails for the **SQL string itself** when a Java 21 TestNG integration test reaches into the database to verify behaviour. Connection wiring, seeder, and probe scaffolding live in `qa/java/skills/db-testing/connection`; this skill owns *what the SQL is allowed to look like* — named parameter binding only, explicit column lists, safe `LIKE`, type-correct parsing, exists / not-exists / count assertions, an Awaitility-based poller that re-runs the safe query, and a hard refusal list for destructive verbs outside cleanup.
 
 ## When to use
 
 - A test is about to embed a SQL string (`NamedParameterJdbcTemplate.query(...)`, `DSLContext.fetch(...)`, raw `JdbcTemplate.queryForObject`) and you need it reviewed or generated.
 - An existing probe / seeder uses string concatenation, `SELECT *`, or unbounded `DELETE` and needs a rewrite.
-- A test needs an "assert exactly one row matches these columns" or "assert no row matches" helper.
+- A test needs an "assert exactly one row matches these columns" or "assert no row matches" custom assertion.
 - An async flow needs an Awaitility wait that re-runs the verification query until the projection catches up.
 
 ## When NOT to use
@@ -97,7 +97,7 @@ Rules baked in:
 - `UUID` stays a `UUID` end-to-end (`rs.getObject("id", UUID.class)`); never `.toString()` it into SQL.
 - Probe returns a `record`, not the production entity.
 
-## Exists / not-exists helpers
+## Exists / not-exists assertions
 
 ```java
 public final class DbAssertions {
@@ -245,12 +245,12 @@ Caller passes the **same** safe probe method — the poller never builds SQL its
 
 ## Refusal patterns — destructive verbs
 
-If a generated or reviewed query contains any of the following **outside** a designated cleanup helper, refuse and require an explicit cleanup path:
+If a generated or reviewed query contains any of the following **outside** the designated teardown registry, refuse and require an explicit cleanup path:
 
 | Verb | Refused when | Allowed only in |
 |---|---|---|
 | `DROP TABLE` / `DROP SCHEMA` | Ever, in a test body | Never. Flyway owns schema. |
-| `TRUNCATE` | Inside a `@Test` method | `@AfterMethod` cleanup helpers in `qa/java/skills/db-testing/connection`. |
+| `TRUNCATE` | Inside a `@Test` method | The `@AfterMethod` teardown registry in `qa/java/skills/db-testing/connection`. |
 | `DELETE` without `WHERE` | Anywhere | Never. `TRUNCATE` is the right primitive. |
 | `UPDATE` without `WHERE` | Anywhere | Never. |
 | `ALTER TABLE` | Test body | Flyway migration only. |

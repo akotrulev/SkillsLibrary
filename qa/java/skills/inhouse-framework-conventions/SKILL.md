@@ -29,12 +29,12 @@ accelerator/
 ├── settings.gradle.kts        # includes the modules below
 ├── build.gradle.kts           # shared plugins, Java 21 toolchain, version catalog
 ├── gradle/libs.versions.toml  # centralized dependency versions
-├── test-core/                 # shared abstractions, helpers, base classes
+├── test-core/                 # shared abstractions, base classes, wait conditions
 │   └── src/main/java/com/accelerator/core/
 │       ├── config/            # env config, BrowserStack creds, run options
-│       ├── reporting/         # Allure attachments, step helpers
+│       ├── reporting/         # Allure attachments and steps
 │       ├── screens/           # JSON loader, screen base class
-│       └── waits/             # explicit wait helpers
+│       └── waits/             # explicit wait conditions
 ├── api-tests/                 # RestAssured-based API tests
 │   └── src/test/java/com/accelerator/api/
 │       ├── clients/           # typed API clients (one per service)
@@ -121,7 +121,7 @@ Rules:
 - **Actions run on a `Locator`**, never on the page-level selector API; anything a test asserts is returned as a
   `Locator` so the assertion is web-first.
 - **Method names describe user intent**, not mechanics. `signIn`, not `clickSignInButton`.
-- **One page object per screen.** Composite flows live in test code or in flow helpers, not in page objects.
+- **One page object per screen.** Composite flows live in `<Name>Flow` classes, not in page objects or test code.
 - **No assertions inside page objects.** They expose state; tests assert.
 - **Locators in JSON are `data-testid`-first for web** — `data-testid` is the standing contract with the dev team.
 
@@ -221,7 +221,7 @@ public final class UserBuilder {
 
 - **Never** use `Thread.sleep(...)` in test code
 - Use Playwright's auto-waiting (`click`, `fill`, `assertThat(...).isVisible()`)
-- For Appium, use the helpers in `test-core` `waits` package — `waitUntilVisible`, `waitUntilStable` (backed by `WebDriverWait` / `Awaitility`, never fixed sleeps)
+- For Appium, use the wait conditions in the `test-core` `waits` package — `waitUntilVisible`, `waitUntilStable` (backed by `WebDriverWait` / `Awaitility`, never fixed sleeps)
 - If you need a wait that doesn't exist, add it to `test-core` `waits`, don't inline it
 
 ### Allure reporting
@@ -241,7 +241,8 @@ public final class UserBuilder {
 
 ### Configuration & environments
 
-- All config lives in `application.yml` + per-env overrides (`application-staging.yml`) loaded by the `config` helper in `test-core`
+- All config lives in `application.yml` + per-env overrides (`application-staging.yml`) loaded by the `config` package in `test-core`
+
 - BrowserStack creds, base URLs, and feature flags come from env vars
 - Never commit `.env` files; commit `.env.example` only
 

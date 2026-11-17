@@ -5,7 +5,7 @@ description: Use when turning Gherkin .feature files into playwright-bdd/Cucumbe
 
 # BDD Step Bindings + POM Implementation (TypeScript)
 
-One registered skill, two frameworks — a TypeScript project uses exactly one per platform. Parses `.feature` files (and the **Step Catalog** from `feature-file-writer`) into step definitions, **split by domain**, with parameterized Cucumber-Expression steps, and **implements each step by calling existing page-object intent methods**. The BDD project, lifecycle, and state-sharing layer already exist (from `bdd-project-scaffold`).
+One registered skill, two frameworks — a TypeScript project uses exactly one per platform. Parses `.feature` files (and the **Step Catalog** from `feature-file-writer`) into step definitions, **split by domain**, with parameterized Cucumber-Expression steps, and **implements each step through existing page objects**: an intent method for a sequence, or one action on an element or control the page object exposes. The BDD project, lifecycle, and state-sharing layer already exist (from `bdd-project-scaffold`).
 
 Identify the project's framework (web vs mobile; check `package.json`, `playwright.config.ts` vs `wdio.conf.ts`; ask one question if ambiguous), then **read the matching `references/<framework>.md` end-to-end before writing any step code** — it carries the full model, templates (fixtures vs World), patterns, and hard rules. This file only routes and holds the rules shared by both frameworks.
 
@@ -27,22 +27,31 @@ Identify the project's framework (web vs mobile; check `package.json`, `playwrig
 
 ## Layout (both frameworks)
 
-- One binding file per domain (`steps/authentication.steps.ts`, `steps/cart.steps.ts`); a step shared by many features goes in `steps/common.steps.ts`. Each canonical Step-Catalog row becomes exactly one step definition.
+- One binding file per domain (`steps/authentication.steps.ts`, `steps/cart.steps.ts`); a step shared by many features stays in the file of the domain it acts on, never a `common.steps.ts` bucket. Each canonical Step-Catalog row becomes exactly one step definition.
 - Custom parameter types via `defineParameterType` (CucumberJS) or the playwright-bdd parameter-type API.
 - The page or driver is created by the scaffold (fixture setup / `Before` hook); the Cleanup handoff from `feature-file-writer` is fixture teardown (web) or an `After` hook (mobile), which the scaffold places.
 - A step that needs a page object or method that does not exist: build it first via `page-object-design` / `page-objects-from-url` / `mobile-screen-objects` (or hand to `qa-ui-typescript` / `qa-mobile-typescript`).
 
+## Step shape (both frameworks)
+
+- **The step is the intent layer.** A step calls one page-object intent method (`loginPage.signIn(user)`), or acts on an element or control the page object exposes by name (`filterPage.dealType.selectOption(option)`, `filterPage.search.click()`). A page method exists only for a sequence of interactions. The step never builds a locator, a selector or a wait, never branches, and is one interaction or one assertion.
+- **One binding per field, filter or column**, named after it and calling that one control: `I select {string} for Deal Type filter`, `I select {string} for Status filter`. Never `I select {string} for {string} filter`: mapping the field name to a control is a lookup, which is a branch.
+- **No empty body.** A binding that does nothing passes, which is worse than undefined. A scenario written ahead of its automation carries the suite's excluded tag (`@not-automated` when it has none) and a ticket, and the runner's tag expression (`not @not-automated`) keeps it out of the run.
+- **Pre-clean is a precondition step.** `Given the customer {string} does not exist` removes a leftover record through an API seeder before the scenario, so a crashed run cannot poison the next one; teardown still removes what the scenario creates (`test-data.md`).
+
+Both references show each style and the pre-clean step in their framework.
+
 ## Rules
 
-The standards this skill's output must meet are the qa-typescript rule files, not a list here: `bdd.md` and `qa-typescript.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `bdd.md`, `qa-typescript.md`, `test-data.md` for seeding and pre-clean steps, and, for the page objects the steps call, `page-objects.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Procedure
 
 1. Pick the framework (web → `references/playwright-bdd.md`, mobile → `references/cucumberjs-appium.md`) and **read that reference end-to-end**.
 2. Read the `.feature` files + Step Catalog + Cleanup handoff and the available page objects.
-3. For each distinct catalog step, write **one** step definition in the right domain file; reuse for repeats.
+3. For each distinct catalog step, write **one** step definition in the right domain file; reuse for repeats. A step that names a field, filter or column gets its own binding for that field.
 4. Pick the keyword (`Given`/`When`/`Then`) from the catalog; use Cucumber-Expression params matching the catalog's `{...}` placeholders and `Examples` columns.
-5. Implement each body with page-object calls only; put assertions in `Then` with the framework's `expect`.
+5. Implement each body through page objects only (an intent method, or one action on an exposed element or control); put assertions in `Then` with the framework's `expect`. No body is left empty: a step not yet automatable means the scenario is tagged out instead.
 6. For any missing page object/method, build it before binding the step.
 7. Ensure the Cleanup is implemented as teardown/`After` (scaffold layer), not as steps.
 8. Run the toolchain (web: `npx bddgen && npx playwright test`; mobile: `npx wdio run`): every step bound (no undefined/ambiguous), the smoke scenario green.

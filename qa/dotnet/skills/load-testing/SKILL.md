@@ -34,7 +34,7 @@ PerfTests/
 ├── PerfTests.csproj            ← <OutputType>Exe</OutputType>
 ├── Program.cs                  ← entry point — picks scenario from args
 ├── Env.cs                      ← BASE_URL / TOKEN resolution
-├── Fixtures.cs                 ← seed / cleanup helpers
+├── OrderSeeder.cs              ← seed / cleanup
 └── Scenarios/
     ├── OrdersSmoke.cs
     ├── OrdersAverage.cs
@@ -170,11 +170,11 @@ return Scenario.Create("checkout", async ctx =>
 
 Per-step latencies appear in the HTML report — diagnose where the time goes.
 
-## Seeded fixtures
+## Seeded data
 
 ```csharp
-// PerfTests/Fixtures.cs
-public static class Fixtures
+// PerfTests/OrderSeeder.cs
+public static class OrderSeeder
 {
     public static async Task<List<string>> SeedOrders(int count)
     {
@@ -199,14 +199,14 @@ public static class Fixtures
 Call from `Program.cs` around the `Run()`:
 
 ```csharp
-var ids = await Fixtures.SeedOrders(50);
+var ids = await OrderSeeder.SeedOrders(50);
 try
 {
     NBomberRunner.RegisterScenarios(OrdersAverage.Build(ids)).Run();
 }
 finally
 {
-    await Fixtures.CleanUp(ids);
+    await OrderSeeder.CleanUp(ids);
 }
 ```
 
@@ -334,7 +334,7 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 - Per-step latency via `Step.Run` when a scenario has several HTTP hops; a single-call scenario does without it.
 - Pair the post-run stats check with runtime `.WithThresholds` for fail-fast and report annotations.
 - `ctx.ScenarioInfo.InstanceNumber` + `ctx.InvocationNumber` for per-iteration uniqueness without shared state.
-- Production clients consumed through DI live in `Fixtures.cs`, not constructed inline in scenarios. `Env.*` loads settings from environment variables.
+- Production clients consumed through DI live in `OrderSeeder.cs`, not constructed inline in scenarios. `Env.*` loads settings from environment variables.
 - A failing `Step.Run` restarts the whole iteration by default; set `.WithRestartIterationOnFail(false)` when failed iterations must be counted and the run continue.
 - `.WithoutWarmUp()` only for fast local iteration; reports under `WithReportFolder(...)`, published as a CI artifact.
 
@@ -342,7 +342,7 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 
 1. Confirm tool (NBomber chosen over k6 because team prefers C#), workload model, SLO targets, target environment. (See `_shared`.)
 2. Create `PerfTests/PerfTests.csproj` as `<OutputType>Exe</OutputType>`; add `NBomber` + `NBomber.Http` pinned.
-3. Author `Env.cs` (env-var loader), `Fixtures.cs` (seed + cleanup via the production client), `Scenarios/<Name>.cs`.
+3. Author `Env.cs` (env-var loader), `OrderSeeder.cs` (seed + cleanup via the production client), `Scenarios/<Name>.cs`.
 4. Wire `Program.cs` to pick a scenario by CLI arg, run NBomberRunner, then exit non-zero on threshold breach.
 5. Add CI step (smoke on PR; full on release). Publish `PerfTests/perf-reports/` as a CI artifact.
 6. Run locally; review per-step latencies; confirm the test fails when an SLO is breached.

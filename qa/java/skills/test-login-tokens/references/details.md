@@ -257,7 +257,7 @@ protected Browser.NewContextOptions contextOptions() {
 Niche: input-constrained clients. The Java SDK has no device helper, so use bare `HttpClient`. Start the flow,
 surface the `verification_uri_complete` for approval, then **poll `/oauth/token` at the server-dictated
 `interval`** — `authorization_pending` means keep waiting, `slow_down` means add 5 seconds to the interval (RFC
-8628). The sleep in this helper is that protocol cadence, the one sanctioned interval in this skill; the
+8628). The sleep in this provider is that protocol cadence, the one sanctioned interval in this skill; the
 deadline is the device code's `expires_in`. The `client_id` is a Device-Code-enabled public application.
 
 ```java

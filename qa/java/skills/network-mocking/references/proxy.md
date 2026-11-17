@@ -23,7 +23,7 @@ the same in-process, with no CA and no extra port.
 | `org.seleniumhq.selenium:selenium-java` | 4.51.0 | The client under test (Maven Central, 2026-10-11) |
 | `org.testng:testng` / `org.assertj:assertj-core` | 7.12.0 / 3.27.7 | As in the Playwright lane |
 
-Helpers live in `src/test/java/<pkg>/support/proxy/`. A recorded HAR lands in
+The fixture lives in `src/test/java/<pkg>/support/proxy/`. A recorded HAR lands in
 `build/playwright-artifacts/<Class>.<method>.har` — the folder the Java CI references already upload on
 failure, so a proxy run's evidence travels with the rest.
 
@@ -60,7 +60,7 @@ failure, so a proxy run's evidence travels with the rest.
 | Wait for the network to settle | `waitForQuiescence(quietMs, timeoutMs, TimeUnit.MILLISECONDS)` | Returns `false` on timeout |
 | Stop | `stop()` | In `@AfterMethod(alwaysRun = true)` |
 
-## 1. The helper — `support/proxy/ProxyControls.java`
+## 1. The fixture — `support/proxy/ProxyControls.java`
 
 ```java
 package com.example.uitests.support.proxy;
@@ -198,7 +198,7 @@ public abstract class ProxyTest {
   traffic around the proxy.
 - `BASE_URL` is read by the page objects, exactly as in the Playwright lane.
 - **Appium:** set the device's Wi-Fi proxy (or the Appium proxy capabilities) to the proxy's host and port and
-  install the CA in the device trust store; the helpers apply unchanged. The Appium driver lifecycle belongs to
+  install the CA in the device trust store; the fixture applies unchanged. The Appium driver lifecycle belongs to
   `qa/java/skills/ui-test-author/appium`.
 
 ## 3. Assert a request fired — method and payload

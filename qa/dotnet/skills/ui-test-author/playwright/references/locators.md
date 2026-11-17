@@ -23,6 +23,9 @@ Pick the first rung the element supports. Never skip a rung because the lower on
 **Test ids are PascalCase dot-separated and static** — `Login.Submit`, `OrderRow`, `OrderRow.Title` — which
 is what `fe-react` and `fe-blazor` generate. A repeated row shares one static id (`OrderRow`); the row is
 picked by its content (§3), never by an id that embeds a database key, an index or a state value.
+Where the app's ids embed the row index anyway (`cell-value-status-3`), the grid control resolves the index
+from the row's content inside `Row(key)` and builds the id from it; the test never passes an index
+([`components.md`](components.md)).
 
 **A fallback carries no marker in the code.** When an element has no test id, use the next rung and add a
 row to `missing-testids.md` (page, element, suggested id, fallback locator in use). That report is the
@@ -60,34 +63,41 @@ comment on the locator.
 is an `OR` assertion. An overlay that may or may not appear is handled with `AddLocatorHandlerAsync` (§8).
 
 ```csharp
-var row = page.GetByTestId("OrderRow").Filter(new() { HasText = orderNumber });
-await row.GetByRole(AriaRole.Button, new() { Name = "Cancel" }).ClickAsync();
+var row = new OrderRow(page.GetByTestId("OrderRow").Filter(new() { HasText = orderNumber }));
+await row.CancelAsync();
 ```
+
+The filter lives in the page object that hands out the row (`OrdersPage.Row(orderNumber)`), never in a test.
 
 ## 4. Chaining from a component root
 
 A component object takes its root `ILocator` and builds every child from it, so the same component works
-wherever it is mounted. `assets/LoginPage.cs` does this with `SignInForm`.
+wherever it is mounted. `assets/LoginPage.cs` does this with `SignInForm`, and the controls in
+`assets/Components/Controls/` do it for design-system widgets (`components.md`).
 
 ```csharp
 public sealed class OrderRow
 {
+    private readonly ILocator _cancel;
+
     public OrderRow(ILocator root)
     {
-        Title = root.GetByTestId("OrderRow.Title");
-        Cancel = root.GetByRole(AriaRole.Button, new() { Name = "Cancel" });
+        Title = root.GetByTestId("OrderRow.Title").Describe("Order title");
+        _cancel = root.GetByRole(AriaRole.Button, new() { Name = "Cancel" });
     }
 
     public ILocator Title { get; }
 
-    public ILocator Cancel { get; }
+    public async Task CancelAsync() => await _cancel.ClickAsync();
 }
 ```
 
-Locators are built once, in the constructor, as `private readonly ILocator` fields or get-only properties
-for the ones tests assert on. An expression-bodied property (`ILocator Error => _page.GetByRole(...)`) is
-not slower and does not "re-query the DOM" — a locator is lazy and queries nothing until an action or an
-assertion — but it rebuilds the locator on every access and spreads the definitions across the class.
+Locators are built once, in the constructor. Everything an action uses is a `private readonly ILocator`
+field; a described get-only property exists only for a locator a test asserts on and no action uses
+(`Title`). A test calls `CancelAsync()`, never `ClickAsync()` on an exposed locator. An expression-bodied
+property (`ILocator Error => _page.GetByRole(...)`) is not slower and does not "re-query the DOM" — a
+locator is lazy and queries nothing until an action or an assertion — but it rebuilds the locator on every
+access and spreads the definitions across the class.
 
 ## 5. One locator inside another: `parent.Locator(child)`
 
@@ -155,6 +165,11 @@ no longer taught). **In .NET it is a property**, not a method: `page.GetByTestId
 await Page.AddLocatorHandlerAsync(Page.GetByTestId("Consent.Banner"),
     banner => banner.GetByRole(AriaRole.Button, new() { Name = "Accept" }).ClickAsync());
 ```
+
+**The app's own busy signal** (a loading bar, a snackbar that covers the next control) that auto-waiting
+cannot see is a named wait condition on the shell component or the base page, such as
+`WaitUntilLoadedAsync()` over `_loadingBar.WaitForAsync(new() { State = WaitForSelectorState.Hidden })`.
+The action that triggers the load calls it before returning; a test never does.
 
 ## 9. Naming locators: `Describe()` [1.53]
 

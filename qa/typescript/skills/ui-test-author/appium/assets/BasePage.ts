@@ -6,9 +6,6 @@ export function testIdSelector(id: string): string {
 }
 
 export abstract class BasePage {
-  private static readonly TIMEOUT_MS = 10_000;
-  private static readonly NOT_DISPLAYED = 'element not displayed within the timeout';
-
   protected byTestId(id: string): ChainablePromiseElement {
     return $(testIdSelector(id));
   }
@@ -31,19 +28,6 @@ export abstract class BasePage {
 
   protected byXPath(xpath: string): ChainablePromiseElement {
     return $(xpath);
-  }
-
-  protected async isElementVisible(element: ChainablePromiseElement): Promise<boolean> {
-    try {
-      await browser.waitUntil(() => element.isDisplayed(), {
-        timeout: BasePage.TIMEOUT_MS,
-        timeoutMsg: BasePage.NOT_DISPLAYED,
-      });
-      return true;
-    } catch (error) {
-      if (error instanceof Error && error.message === BasePage.NOT_DISPLAYED) return false;
-      throw error;
-    }
   }
 
   abstract verifyPageLoaded(): Promise<void>;

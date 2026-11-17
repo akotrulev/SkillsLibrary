@@ -411,6 +411,28 @@ jobs:
           retention-days: 30
 ```
 
+### Container lane — `.github/workflows/_container-tests.yml`
+
+The suite as an image built from the checked-out commit, writing its single-file Allure report to a mounted folder. The Dockerfile, `run-tests.sh` and the jar are [`fat-jar-and-container.md`](fat-jar-and-container.md).
+
+```yaml
+jobs:
+  container-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: docker build -t api-tests .
+      - name: Run the suite
+        env:
+          API_URL: ${{ vars.API_URL }}
+        run: docker run --rm --user "$(id -u):$(id -g)" -e API_URL -v "$PWD/reports:/reports" api-tests
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with: { name: api-tests-report, path: reports/, retention-days: 14 }
+```
+
+The run step is gating; only the upload is `if: always()`.
+
 ## Rules
 
 ### Triggers

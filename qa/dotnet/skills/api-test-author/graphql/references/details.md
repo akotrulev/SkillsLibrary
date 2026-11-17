@@ -207,27 +207,34 @@ public class UserGraphQLTests : BaseApiTest
     [Test]
     [AllureFeature("Users")]
     [AllureStory("Query user — unauthenticated")]
-    public async Task GetUser_WhenNoToken_ReturnsUnauthenticated()
+    public async Task GetUser_WhenNoToken_ReturnsUnauthenticatedError()
     {
         UserGraphQLClient userClient = new(string.Empty);
 
         GraphQLResponse<GetUserData> response = await userClient.GetUserAsync("1");
 
-        // Two valid server designs: a 200 with an errors[] code, OR a transport 401. Assert the contract you have.
-        if (response.Status == HttpStatusCode.OK)
+        Assert.Multiple(() =>
         {
+            Assert.That(response.Status, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(response.Errors![0].Extensions!.Code, Is.EqualTo("UNAUTHENTICATED"));
-        }
-        else
-        {
-            Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Unauthorized));
-        }
+        });
+    }
+
+    [Test]
+    [AllureFeature("Users")]
+    [AllureStory("Query user — unauthenticated")]
+    public async Task GetUser_WhenNoToken_Returns401()
+    {
+        UserGraphQLClient userClient = new(string.Empty);
+
+        GraphQLResponse<GetUserData> response = await userClient.GetUserAsync("1");
+
+        Assert.That(response.Status, Is.EqualTo(HttpStatusCode.Unauthorized));
     }
 }
 ```
 
-> The unauthenticated test shows the **one place a GraphQL response legitimately varies its HTTP status** — auth
-> middleware may reject at the transport (401) before any resolver runs, or the schema may surface
-> `UNAUTHENTICATED` in `errors[]` with a 200. This is the *only* conditional you'll see in these fixtures; pin it
-> to your server's actual contract and delete the branch you don't use. (CLAUDE.md bans conditionals that *drive
-> assertions* across cases; this single contract-pinning branch is the documented exception, not a loop.)
+> The two unauthenticated tests show the **one place a GraphQL response legitimately varies its HTTP status** —
+> auth middleware may reject at the transport (401) before any resolver runs, or the schema may surface
+> `UNAUTHENTICATED` in `errors[]` with a 200. Keep the test that matches your server's actual contract and
+> delete the other; never merge them into one test with a branch.

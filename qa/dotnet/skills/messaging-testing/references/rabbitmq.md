@@ -26,7 +26,7 @@ producers publish to an **exchange** with a **routing key**, and **bindings** ro
 > no synchronous return you can assert on the next line. The message is in flight; the consumer runs on its
 > own schedule; the side-effect lands "soon". So the core discipline is: **wait on a condition** for the
 > message (or its effect) to appear, with a bounded timeout — **never `Task.Delay` / `Thread.Sleep`**. This
-> is the exact lineage of `qa-dotnet:db-connection`'s `WaitForAsync` poll helper and
+> is the exact lineage of `qa-dotnet:db-connection`'s `WaitForAsync` wait condition and
 > `references/service-bus.md`'s condition-wait. RabbitMQ's pull primitive,
 > `BasicGetAsync(queue, autoAck)`, returns a message **or `null` immediately** — so the bounded **poll loop**
 > around it (get until a message appears, or a deadline passes) *is* the condition-wait; a fixed sleep is not.
@@ -194,6 +194,11 @@ public sealed class RabbitProbe
         }
         return null;   // nothing arrived in the window → a failed produce, asserted by the caller
     }
+
+    public async Task DrainAsync(string queue)
+    {
+        while (await GetAsync(queue, TimeSpan.FromMilliseconds(300)) is not null) { }
+    }
 }
 ```
 
@@ -284,7 +289,7 @@ public async Task Should_write_a_shipment_row_When_an_OrderPaid_message_is_consu
 }
 ```
 
-The `WaitFor.Async` helper is the same bounded poll as `qa-dotnet:db-connection` — included here so the
+The `WaitFor.Async` wait condition is the same bounded poll as `qa-dotnet:db-connection` — included here so the
 node is self-contained:
 
 ```csharp
@@ -303,15 +308,15 @@ public static class WaitFor
         {
             var value = await probe(cts.Token);
             if (value is not null && predicate(value)) return value;
-            await Task.Delay(interval, cts.Token);   // poll cadence INSIDE the helper, not an assertion sleep
+            await Task.Delay(interval, cts.Token);   // poll cadence INSIDE the wait condition, not an assertion sleep
         }
         throw new TimeoutException($"Side-effect did not satisfy the predicate within {timeout}.");
     }
 }
 ```
 
-> `Task.Delay` appears **only** as the poll cadence *inside* the bounded helper — never as a bare
-> `await Task.Delay(5000)` standing in for "the message probably arrived by now". The difference: the helper
+> `Task.Delay` appears **only** as the poll cadence *inside* the bounded wait condition — never as a bare
+> `await Task.Delay(5000)` standing in for "the message probably arrived by now". The difference: the wait condition
 > returns the instant the condition holds and *fails* if it never does; a bare sleep races the broker.
 
 ## Manual ack / nack / reject — message settlement
@@ -461,8 +466,8 @@ public class FulfilmentConsumerTests : RabbitMqFixture
         _probe = new RabbitProbe(ConnectionString);
         var factory = new ConnectionFactory { Uri = new Uri(ConnectionString) };
         _conn = await factory.CreateConnectionAsync();
-        await DrainAsync("orders.q");                 // independent tests — start from empty
-        await DrainAsync("shipments.q");
+        await _probe.DrainAsync("orders.q");          // independent tests — start from empty
+        await _probe.DrainAsync("shipments.q");
     }
 
     [TearDown]
@@ -485,10 +490,6 @@ public class FulfilmentConsumerTests : RabbitMqFixture
         Assert.That(shipment!.OrderId, Is.EqualTo(orderId));   // correlation preserved
     }
 
-    private async Task DrainAsync(string queue)
-    {
-        while (await _probe.GetAsync(queue, TimeSpan.FromMilliseconds(300)) is not null) { }
-    }
 }
 ```
 
@@ -515,7 +516,7 @@ public static class Orders
 
 - **Eventual consistency = wait on a condition, never a sleep.** The `RabbitProbe` bounded `BasicGetAsync`
   poll for the receive side; `WaitFor.Async` for consumer side-effects. **No bare `Task.Delay` /
-  `Thread.Sleep`** as an assertion wait — `Task.Delay` only as the poll cadence inside the bounded helper.
+  `Thread.Sleep`** as an assertion wait — `Task.Delay` only as the poll cadence inside the bounded wait condition.
 - **Declare the topology before publishing.** Exchanges, queues, and bindings in `[OneTimeSetUp]` (or a probe
   queue in `[SetUp]`) — RabbitMQ routes at publish time and drops messages with no matching bound queue.
 - The SUT's publisher/consumer is **constructor-injected** with the `IConnection` / connection string —
@@ -554,7 +555,7 @@ public static class Orders
   RabbitMQ's ack + DLX). Same condition-wait discipline, different broker.
 - `references/kafka.md` (`kafka`, the immediately prior sibling) — **the `rabbitmq`-vs-`kafka` boundary**:
   Kafka log + offsets + app-level DLT vs RabbitMQ queue + manual ack + broker-native DLX.
-- `qa-dotnet:db-connection` — the `WaitFor.Async` poll helper and the seeder/probe split reused for
+- `qa-dotnet:db-connection` — the `WaitFor.Async` wait condition and the seeder/probe split reused for
   the consumer side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
 - `qa-dotnet:test-login-tokens` — when authing to a shared cloud broker with credentials from env; the
   secrets-from-env discipline.

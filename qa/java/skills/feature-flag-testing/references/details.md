@@ -83,14 +83,14 @@ public class CheckoutFlagTest {
     @DataProvider(name = "newCheckoutFlagStates")
     public Object[][] newCheckoutFlagStates() {
         return new Object[][] {
-            // flagState | expectedFlow      — BOTH sides, every run (idea #2)
-            { true,        "express-checkout" },
-            { false,       "classic-checkout" },
+            // label | flagState | expectedFlow      — BOTH sides, every run (idea #2)
+            { "on",    true,        "express-checkout" },
+            { "off",   false,       "classic-checkout" },
         };
     }
 
     @Test(dataProvider = "newCheckoutFlagStates")
-    public void shouldRouteToTheFlowContractedForEachFlagState(boolean enabled, String expectedFlow) {
+    public void shouldRouteToTheFlowContractedForEachFlagState(String state, boolean enabled, String expectedFlow) {
         Client flags = new FlagFixture("checkout")
                 .withBooleanFlag("new-checkout", enabled)        // PINNED — not fetched (idea #1)
                 .client();
@@ -98,7 +98,8 @@ public class CheckoutFlagTest {
         CheckoutService checkout = new CheckoutService(flags);   // constructor injection — the client is a dependency
 
         assertThat(checkout.startCheckout("sku-1").flow())
-                .as("flag %s routes to its contracted flow", enabled ? "on" : "off")
+                .as("flag %s routes to its contracted flow", state)
+
                 .isEqualTo(expectedFlow);
     }
 }

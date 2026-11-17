@@ -26,9 +26,9 @@ export const auth0Secrets = {
   m2mClientSecret: () => required('AUTH0_M2M_CLIENT_SECRET'),
   ropgClientId: () => required('AUTH0_ROPG_CLIENT_ID'),
   ropgClientSecret: () => process.env.AUTH0_ROPG_CLIENT_SECRET,
-  testUser: () => ({
-    username: required('AUTH0_TEST_USERNAME'),
-    password: required('AUTH0_TEST_PASSWORD'),
+  testUser: (envPrefix: string) => ({
+    username: required(`${envPrefix}_USERNAME`),
+    password: required(`${envPrefix}_PASSWORD`),
   }),
 };
 ```
@@ -81,6 +81,13 @@ export class M2MTokenProvider extends CachedTokenProvider {
 }
 
 export class TestUserTokenProvider extends CachedTokenProvider {
+  constructor(
+    private readonly envPrefix: string,
+    nowMs?: () => number,
+  ) {
+    super(nowMs);
+  }
+
   private readonly client = new AuthenticationClient({
     domain: auth0Config.domain,
     clientId: auth0Secrets.ropgClientId(),
@@ -88,7 +95,7 @@ export class TestUserTokenProvider extends CachedTokenProvider {
   });
 
   protected async fetchToken() {
-    const { username, password } = auth0Secrets.testUser();
+    const { username, password } = auth0Secrets.testUser(this.envPrefix);
     const { data } = await this.client.oauth.passwordGrant({
       username,
       password,
@@ -103,37 +110,32 @@ export class TestUserTokenProvider extends CachedTokenProvider {
 
 ### Shared, suite-wide singletons — `tests/integration/auth/tokens.ts`
 
-One token per suite/worker, **not per test**. Export ready-made singletons so specs never construct a provider or fetch directly.
+One token per suite/worker, **not per test**. Export ready-made singletons so specs never construct a provider or fetch directly: one for the M2M grant and **one per seeded test user, named for that user**, each reading its own `<prefix>_USERNAME` / `<prefix>_PASSWORD` pair. A spec picks the user by importing that provider; there is no lookup from a role name to a token.
 
 ```ts
 import { M2MTokenProvider, TestUserTokenProvider } from './token-provider';
 
 export const m2mTokens = new M2MTokenProvider();
-export const testUserTokens = new TestUserTokenProvider();
+export const testUserTokens = new TestUserTokenProvider('AUTH0_TEST');
+export const adminTokens = new TestUserTokenProvider('AUTH0_TEST_ADMIN');
 ```
+
+A suite needing more users (two peers for a BOLA matrix, a read-only role) adds one line each: `aliceTokens`, `bobTokens`.
 
 ### Stash into an API client — `Authorization: Bearer`
 
-The token reaches a protected endpoint as a header. The provider is injected (constructor injection), so a unit test can pass a fake.
+The token reaches a protected endpoint as a header. The spec fetches it from the provider of the user it acts as and passes the string to the client factory; the client never fetches a token (`api-tests.md`), and `''` builds an anonymous client.
 
 ```ts
-import { m2mTokens } from './auth/tokens';
-import type { CachedTokenProvider } from './auth/token-provider';
+import { createOrderClient } from '../clients/orders/orderClient.js';
+import { adminTokens, testUserTokens } from '../auth/tokens.js';
 
-export class OrdersClient {
-  constructor(
-    private readonly baseUrl: string,
-    private readonly tokens: Pick<CachedTokenProvider, 'getAccessToken'> = m2mTokens,
-  ) {}
-
-  async getOrder(id: string): Promise<Response> {
-    const token = await this.tokens.getAccessToken();
-    return fetch(`${this.baseUrl}/orders/${id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-  }
-}
+const asCustomer = createOrderClient(await testUserTokens.getAccessToken());
+const asAdmin = createOrderClient(await adminTokens.getAccessToken());
+const anonymous = createOrderClient('');
 ```
+
+The client factory (`api-client-writer`) puts the token in `Authorization: Bearer <token>` and omits the header when it is empty. The cache makes calling `getAccessToken()` in every test cheap: the grant runs once per worker.
 
 ### Seed Playwright auth state from a token — a setup project
 

@@ -259,7 +259,7 @@ suites:
 
 ### Mobile — Appium java-client on a grid
 
-For mobile the change is also one place — the **driver construction**. Build a `UiAutomator2Options` (Android) / `XCUITestOptions` (iOS), attach the vendor block via `setCapability`, and point a `new AndroidDriver(new URL(hubUrl), options)` at the vendor hub. The page objects from `qa/java/skills/ui-test-author/appium` run unchanged. In java-client 11 an `AndroidDriver` is a `WebDriver` and a `JavascriptExecutor` but **not** a `RemoteWebDriver`, so helpers take `JavascriptExecutor` or `WebDriver`, never `RemoteWebDriver`. Appium uses the W3C nested `bstack:options` block (not the flat Playwright caps); `debug` turns on visual logs, `local` routes through the tunnel, and the app is the uploaded `bs://…` id, never a local path.
+For mobile the change is also one place — the **driver construction**. Build a `UiAutomator2Options` (Android) / `XCUITestOptions` (iOS), attach the vendor block via `setCapability`, and point a `new AndroidDriver(new URL(hubUrl), options)` at the vendor hub. The page objects from `qa/java/skills/ui-test-author/appium` run unchanged. In java-client 11 an `AndroidDriver` is a `WebDriver` and a `JavascriptExecutor` but **not** a `RemoteWebDriver`, so probes and fixtures take `JavascriptExecutor` or `WebDriver`, never `RemoteWebDriver`. Appium uses the W3C nested `bstack:options` block (not the flat Playwright caps); `debug` turns on visual logs, `local` routes through the tunnel, and the app is the uploaded `bs://…` id, never a local path.
 
 ```java
 package com.example.uitests.support.grid;

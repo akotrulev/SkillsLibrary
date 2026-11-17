@@ -7,16 +7,15 @@ paths:
   - "**/playwright.config.ts"
 ---
 
-<!-- qa-typescript rules v1 (2026-11-03): web UI tests. Installed by /qa-typescript:rules; edit the paths above to where this project keeps its Playwright or Selenium suite. -->
+<!-- qa-typescript rules v2 (2026-11-17): web UI tests. Installed by /qa-typescript:rules; edit the paths above to where this project keeps its Playwright or Selenium suite. -->
 
 # Web UI test standards (Playwright Test; Selenium / WebdriverIO where used)
 
-Severity tags as in the core rules. The codebase wins where it consistently does otherwise.
+Severity tags as in the core rules. The codebase wins where it consistently does otherwise. Page, component and flow objects: `page-objects.md`.
 
 - Locator ladder: test id, role, label, placeholder, text, alt/title, CSS; XPath last. Test ids are static PascalCase dot ids (`Login.Submit`). *major; minor for the id format*
 - A fallback carries no code marker; it gets a `missing-testids.md` row. Never invent a test id the DOM lacks. *minor*
 - Scope a locator that matches many; `nth()`/`first()` only where order is the behaviour; `exact: true` on ambiguous names; `visible()` over `:visible`. Never assert on an `or()` locator. *major; minor for the last two*
-- Page objects hold `readonly` locator fields, name user intent, own their URL in `goto()`, and hold no assertions (an `expectLoaded()` landmark excepted) or business logic. *blocker for an assertion, else major*
 - Specs get pages from fixtures and never call raw `page.*`. No `BasePage` until three pages share real behaviour. *major*
 - Web-first assertions only; no one-shot read compared later (`textContent()`, `isVisible()`, `page.url()`), no `expect.poll` where a locator assertion works. *major*
 - No `networkidle`, `force: true`, `waitForNavigation`, redundant `waitFor()` before an action, or hand-rolled retry loop; `toPass` is bounded. Start `waitForResponse` before the action, await it after. *major*

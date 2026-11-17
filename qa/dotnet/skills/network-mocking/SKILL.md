@@ -36,7 +36,7 @@ and Chromium-only. The proxy is for when there is no `IPage` at all.
   context and page per test, and the failure evidence. A class changes the context only by amending
   `base.ContextOptions()` (`ServiceWorkers`, `Offline`) — never `new()`, which drops `BaseURL` and the video
   folder — and never adds `Playwright.CreateAsync()`, a browser or a failure hook.
-- Route, CDP and proxy calls live in a helper with intent names (`MockApi`, `Traffic`, `CdpControls`,
+- Route, CDP and proxy calls live in role-named objects with intent methods (`MockApi`, `Traffic`, `CdpControls`,
   `ProxyControls`) built in the class's own `[SetUp]`; a test never calls `Page.RouteAsync(...)` or
   `SendAsync(...)`, and reaches pages through page objects.
 - **No `Task.Delay` in a route handler as a "slow response", and never `Thread.Sleep`.** Hold the request

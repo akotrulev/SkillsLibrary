@@ -382,6 +382,7 @@ jobs:
 - The quarantine lane is a second, non-gating job in this workflow — the same steps without the `plan` job and the matrix, running `--filter "TestCategory=Flaky"` with `continue-on-error: true`, per `qa/reporting/dotnet/skills/flaky-test-quarantine`.
 - **Selenium** suites drop the install step; `ubuntu-latest` ships Chrome and its driver.
 - **Running in the pinned image** instead of installing browsers — what visual baselines need (`qa/dotnet/skills/visual-regression`): give the job `container: { image: mcr.microsoft.com/playwright/dotnet:v1.63.0-noble, options: --user 1001 }` and drop the install step; the image carries the .NET 10 SDK and the browsers. The tag must equal the Playwright version, and there is no `-jammy` .NET image since 1.60. `azure/login` needs the Azure CLI, which the image does not carry, so a container job tests only pages that need no fetched credentials. The visual job is not a container job: it is the `docker run` step in `qa/dotnet/skills/visual-regression/references/playwright-snapshots.md` §8.
+- **Running the suite's own image** (`docker build` + `docker run` of its `Dockerfile`, report on a mounted folder): the *Container lane* in this skill's `SKILL.md`. Map the secrets into the step's `env:` and pass them as `-e`; the `docker run` step gates like any test step.
 
 ### Optional: caching Playwright browsers
 

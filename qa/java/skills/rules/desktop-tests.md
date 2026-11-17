@@ -7,14 +7,14 @@ paths:
   - "**/src/{test,integrationTest}/java/**/DesktopDriverFactory.java"
 ---
 
-<!-- qa-java rules v1 (2026-11-15): desktop tests. Installed by /qa-java:rules; edit the paths above to where this project keeps its TestNG + Appium desktop suite. -->
+<!-- qa-java rules v2 (2026-11-17): desktop tests. Installed by /qa-java:rules; edit the paths above to where this project keeps its TestNG + Appium desktop suite. -->
 
 # Java desktop test standards (TestNG + java-client 11 + Appium 3, native macOS and Windows)
 
-Severity tags as in the core rules. The codebase wins where it consistently does otherwise. Electron and Tauri apps are out of scope.
+Severity tags as in the core rules. The codebase wins where it consistently does otherwise. Electron and Tauri apps are out of scope. Window objects, their components and what they expose follow `qa-java-page-objects.md`.
 
-- Window objects take the driver and nothing else; a window exposes intent and queries, never a `WebElement`. Ids are `private static final String` constants. *major*
-- `verifyWindowLoaded()` asserts one landmark container id; it is the only assertion in a window object. No business logic or API calls there. *blocker for other assertions, else major*
+- Window objects take the driver and nothing else. Ids are `private static final String` constants. *major*
+- `verifyWindowLoaded()` asserts one landmark container id. *major*
 - Locator ladder: the test id as `AppiumBy.accessibilityId` (the XCTest `identifier` on macOS, the `AutomationId` on Windows), then a native query, then XPath as a named `*_FALLBACK` with a `missing-testids.md` row. A locator on `label`, `title` or `Name` is a label locator and a fallback. *major*
 - Never WinCore's `id` strategy (`AppiumBy.id`: the `RuntimeId`, new every run). *blocker*
 - Mac2's native strategies are `predicate string` and `class chain`: send them with `driver.findElement("predicate string", …)`, never `AppiumBy.iOSNsPredicateString` or `iOSClassChain` (they send the `-ios` names). *major*

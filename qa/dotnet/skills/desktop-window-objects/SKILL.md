@@ -33,12 +33,12 @@ Turns a discovered element inventory into a **C# window object**: a `BaseWindow`
 
 ## Conventions
 
-The standards an emitted object must meet are the qa-dotnet rule files `desktop-tests.md` and `automation.md` (the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/`). The codegen specifics:
+The standards an emitted object must meet are the qa-dotnet rule files `desktop-tests.md`, `page-objects.md` and `automation.md` (the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/`). The codegen specifics:
 
 - Element access goes through `BaseWindow`'s finders, in ladder order: `ByTestId` (Appium `MobileBy.AccessibilityId`; FlaUI `ByAutomationId`) → a finder scoped to a container for rows → a named label or native fallback → XPath last.
 - Each id is a `private const string {Element}Id`; a fallback is `{Element}Fallback`. Elements are private; a window exposes intent methods and queries, never an `AppiumElement` or `AutomationElement`.
 - A navigation action returns the destination's window object; a same-window action returns `void`.
-- Namespace `DesktopTests.Windows`, file `DesktopTests/Windows/<Window>.cs`. Repeating rows are scoped components that do not extend `BaseWindow`.
+- Namespace `DesktopTests.Windows`, file `DesktopTests/Windows/<Window>.cs`. Repeating rows are region components keyed by a visible value and re-resolved inside their container; native controls (a combo box, a date picker, a tab view, a table) are control components in `DesktopTests/Components/Controls/`, written at first use. Neither extends `BaseWindow`.
 - Per-platform ids (only where one object serves both apps) live in a locator map keyed by `PLATFORM`: one accessor per element, and no action branches on the platform.
 
 ## Template: Appium lane
@@ -100,11 +100,11 @@ public sealed class LibraryWindow : BaseWindow
 
     public void SearchFor(string text) => ByTestId(SearchFieldId).SendKeys(text);
 
-    public AlbumRow AlbumAt(int position) => new(Driver, ByTestId(AlbumTableId), position);
+    public AlbumRow Album(string title) => new(Driver, ByTestId(AlbumTableId), title);
 }
 ```
 
-The scoped row is re-resolved from its container on each call, because an `AutomationId` repeats across rows and is unique among siblings only:
+The row is picked by its content, never by position, and re-resolved from its container on each call, because an `AutomationId` repeats across rows and is unique among siblings only:
 
 ```csharp
 using OpenQA.Selenium.Appium;
@@ -116,28 +116,31 @@ public sealed class AlbumRow
     private const string RowId = "Library.Row";
     private const string TitleId = "Library.Row.Title";
 
+    private const string ArtistId = "Library.Row.Artist";
+
     private readonly AppiumDriver _driver;
     private readonly AppiumElement _table;
-    private readonly int _position;
+    private readonly string _title;
 
-    internal AlbumRow(AppiumDriver driver, AppiumElement table, int position)
+    internal AlbumRow(AppiumDriver driver, AppiumElement table, string title)
     {
         _driver = driver;
         _table = table;
-        _position = position;
+        _title = title;
     }
 
-    public string Title() => Row().FindElement(BaseWindow.TestId(TitleId)).Text;
+    public string Artist() => Row().FindElement(BaseWindow.TestId(ArtistId)).Text;
 
     public void Open() => Row().Click();
 
     private AppiumElement Row() =>
-        BaseWindow.Wait(_driver, $"No {RowId} at position {_position}").Until(_ =>
-            _table.FindElements(BaseWindow.TestId(RowId)).ElementAtOrDefault(_position))!;
+        BaseWindow.Wait(_driver, $"No {RowId} shows {_title}").Until(_ =>
+            _table.FindElements(BaseWindow.TestId(RowId))
+                .FirstOrDefault(row => row.FindElement(BaseWindow.TestId(TitleId)).Text == _title))!;
 }
 ```
 
-On macOS a row that combines its children (`.accessibilityElement(children: .combine)`) exposes only the row id: read the row's own `Text` and drop the child accessor.
+On macOS a row that combines its children (`.accessibilityElement(children: .combine)`) exposes only the row id: match the key against the row's own `Text` and drop the child accessors.
 
 A fallback (no id yet): name the constant `*Fallback`, prefer a native query to XPath and add the `missing-testids.md` row. On Windows `By.Name` reads the UIA `Name`; on Mac2 `name` is the `identifier`, so a macOS label fallback is a `predicate string` on `label` (see the explorer for how to send it):
 
@@ -196,14 +199,14 @@ public sealed class LibraryWindow : BaseWindow
 }
 ```
 
-- A FlaUI row is a scoped component taking its container `AutomationElement` and the position: `container.FindAllDescendants(cf => cf.ByAutomationId(RowId))[position]`, re-resolved on each call.
+- A FlaUI row is a region component taking its container `AutomationElement` and a row key: `container.FindAllDescendants(cf => cf.ByAutomationId(RowId)).FirstOrDefault(row => row.FindFirstDescendant(cf => cf.ByAutomationId(TitleId))?.Name == title)` inside `Retry.WhileNull`, re-resolved on each call, never an index.
 - `Retry.WhileNull` is the wait; the options (`throwOnTimeout`, `timeoutMessage`) are from the FlaUI wiki and were not compiled here. Never `Thread.Sleep` and never `Wait.UntilInputIsProcessed` as a stand-in for a condition.
 - Search from the window or a container, never from `automation.GetDesktop()`.
 - `ByName` (a label locator) is the fallback rung, with a `missing-testids.md` row.
 
 ## Multi-window and dialogs
 
-- **A window object is bound to one window.** The action that opens another window returns the destination's object, and its constructor or `VerifyWindowLoaded()` switches to it. Switching is a helper in `BaseWindow`, never inline in a test.
+- **A window object is bound to one window.** The action that opens another window returns the destination's object, and its constructor or `VerifyWindowLoaded()` switches to it. Switching is a method on `BaseWindow`, never inline in a test.
 - **Mac2:** find the window with `Driver.ExecuteScript("macos: listWindows")` (driver 4.5.0 and later) and match on `title`. **WinCore:** `Driver.WindowHandles` omits untitled windows, so use `Driver.ExecuteScript("windows: getWindows")` and match on `title` or `className`, then `Driver.SwitchTo().Window(handle)`.
 - **FlaUI:** a window is its own `Window`: `app.GetAllTopLevelWindows(automation)` and match `Title`, or `window.ModalWindows` for a dialog opened from it. A message box or file dialog is another window, not a descendant.
 - A dialog that must appear is asserted by waiting on its landmark, with a message naming the dialog; the action that confirms or cancels returns the parent window's object.
@@ -217,8 +220,8 @@ public sealed class LibraryWindow : BaseWindow
 ## Procedure
 
 1. **Check for an existing object.** Glob `**/Windows/<Window>.cs`. Exists → **update** (step 4). No `DesktopTests/Windows/` → run `qa/dotnet/skills/desktop-project-setup` first.
-2. **Map each element to a constant and finder** by its rung. Test-id elements use `ByTestId`; fallbacks are `*Fallback` with a `missing-testids.md` row. Each repeating group becomes a scoped component addressed inside its container.
-3. **Write the class**: constants, constructor, `VerifyWindowLoaded()` on the landmark, one intent-named action per user action, one query method per datum a test reads. Stub any destination window that does not exist.
+2. **Map each element to a constant and finder** by its rung. Test-id elements use `ByTestId`; fallbacks are `*Fallback` with a `missing-testids.md` row. Each repeating group becomes a region component keyed by a visible value inside its container; each native control a control component (reuse the one in `Components/Controls/` when it exists).
+3. **Write the class**: constants, constructor, `VerifyWindowLoaded()` on the landmark, one intent-named action per user action (no flag parameter, no platform `if`), one query method per datum a test reads, returning a value. Stub any destination window that does not exist.
 4. **Update mode, diff before writing:**
    - New element, not in the class → add constant and accessor or action.
    - Constant in the class, element gone → flag and **ask** before deleting (it may belong to a state not reached).

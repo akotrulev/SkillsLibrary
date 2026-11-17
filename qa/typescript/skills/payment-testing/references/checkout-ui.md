@@ -11,8 +11,8 @@ holds a **second** iframe with the issuer's (here: Stripe's test) page. Playwrig
 
 The iframe selectors and the challenge's button names are **Stripe's markup, not a contract**. The values below
 were observed with Stripe.js v3 and the Payment Element; before you pin them, run `npx playwright codegen` against
-your checkout, take the challenge once, and copy what the inspector shows. They live in one page object so a
-Stripe change is a one-file fix.
+your checkout, take the challenge once, and copy what the inspector shows. They live in two control components
+(`StripePaymentElement`, `StripeChallenge`) in one file, so a Stripe change is a one-file fix.
 
 | Frame | Observed selector | Anchored on |
 |---|---|---|
@@ -44,14 +44,30 @@ export class StripeChallenge {
   }
 }
 
+export class StripePaymentElement {
+  private readonly cardFrame: FrameLocator;
+
+  constructor(root: Locator) {
+    this.cardFrame = root.frameLocator("iframe[title='Secure payment input frame']");
+  }
+
+  async enterCard(cardNumber: string): Promise<void> {
+    await this.cardFrame.getByRole('textbox', { name: 'Card number' }).fill(cardNumber);
+    await this.cardFrame.getByRole('textbox', { name: 'Expiration date' }).fill('12 / 34');
+    await this.cardFrame.getByRole('textbox', { name: 'Security code' }).fill('123');
+  }
+}
+
 export class CheckoutPage {
   readonly challenge: StripeChallenge;
   readonly confirmation: Locator;
   readonly paymentError: Locator;
-  private readonly cardFrame: FrameLocator;
+  private readonly paymentElement: StripePaymentElement;
+  private readonly pay: Locator;
 
   constructor(private readonly page: Page) {
-    this.cardFrame = page.getByTestId('Checkout.PaymentElement').frameLocator("iframe[title='Secure payment input frame']");
+    this.paymentElement = new StripePaymentElement(page.getByTestId('Checkout.PaymentElement'));
+    this.pay = page.getByTestId('Checkout.Pay');
     this.challenge = new StripeChallenge(page);
     this.confirmation = page.getByTestId('Checkout.Confirmation');
     this.paymentError = page.getByTestId('Checkout.PaymentError');
@@ -66,10 +82,8 @@ export class CheckoutPage {
   }
 
   async payWithCard(cardNumber: string): Promise<void> {
-    await this.cardFrame.getByRole('textbox', { name: 'Card number' }).fill(cardNumber);
-    await this.cardFrame.getByRole('textbox', { name: 'Expiration date' }).fill('12 / 34');
-    await this.cardFrame.getByRole('textbox', { name: 'Security code' }).fill('123');
-    await this.page.getByTestId('Checkout.Pay').click();
+    await this.paymentElement.enterCard(cardNumber);
+    await this.pay.click();
   }
 }
 
@@ -82,7 +96,7 @@ export const testCardNumbers = {
 ```
 
 The UI types card numbers (`stripe-api.md` §2); API specs never use them. Country and postal-code fields appear
-in the Payment Element for some locales: fill them in `payWithCard` when your recording shows them.
+in the Payment Element for some locales: fill them in `StripePaymentElement.enterCard` when your recording shows them.
 
 ## 3. Fixtures — the order and its PaymentIntent
 

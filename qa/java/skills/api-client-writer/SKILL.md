@@ -18,6 +18,7 @@ Generator skill. Scaffolds a single `{Resource}Client.java` file in the Java API
 - Writing the test fixture / `@Test` methods — use `qa/java/skills/api-test-author/writer`.
 - Reviewing an existing client for convention drift — use `qa/java/skills/api-test-author/review`.
 - Authoring DTOs the client returns — use `qa/java/skills/api-models` first.
+- A new API test project from zero (build, `Env`, `BaseApiClient`) — use `qa/java/skills/api-project-setup`.
 - Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa/_shared/api-spec-assets` (`qa-<stack>:api-spec-assets`): it replaces the stored spec asset in place and derives from `git diff` exactly which client methods changed. Come back here for those methods only.
 - .NET stack (RestSharp) — use `qa/dotnet/skills/api-client-writer`.
 - TypeScript stack (`fetch` + Zod) — use `qa/typescript/skills/api-client-writer`.
@@ -31,7 +32,7 @@ Clients are organized by API group. **One client per resource**; user-facing and
 src/test/java/com/{org}/apitests/
 ├── clients/
 │   ├── BaseApiClient.java
-│   ├── AuthHelper.java
+│   ├── TokenProvider.java
 │   ├── AuthConfigClient.java         ← root, no auth required
 │   └── {api}/
 │       └── {Resource}Client.java     ← one file per resource
@@ -243,7 +244,7 @@ The standards this skill's output must meet are the qa-java rule files, not a li
 - Constructor takes a single `String jwt`.
 - Always calls `super(ConfigurationLoader.getTestEnvironment().apiUri(), jwt)` — `BaseApiClient` is responsible for building the `RequestSpecification` with base URI and Authorization header.
 - Pass `""` (empty string) for unauthenticated clients (`AuthConfigClient`) — `BaseApiClient` must skip the header when blank.
-- Never call `AuthHelper.getToken(...)` inside the client — the test fetches the token and passes it in.
+- Never call `TokenProvider.getToken(...)` inside the client — the test fetches the token and passes it in.
 - Never hardcode a URI string or credentials.
 
 ### Path constants
@@ -263,6 +264,7 @@ The standards this skill's output must meet are the qa-java rule files, not a li
 - Body parameters are strongly-typed DTOs (e.g. `{Resource}InDto body`), not `Object`.
 - One-line comment on the raw method only; not repeated on the typed overload.
 - Deserialization uses inherited `deserialize(response, Class<T>)` and `deserializeList(response, Class<T>)` — never call `objectMapper.readValue` directly.
+- `BaseApiClient` holds the suite's one `ObjectMapper`: `JavaTimeModule` registered and `DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES` enabled (`JsonMapper.builder().enable(...)`), so a response field the DTO does not declare fails the parse with its path. Never disable it, and never put `@JsonIgnoreProperties(ignoreUnknown = true)` on a DTO (`api-models` § Strict deserialization).
 
 ### Method naming
 
@@ -294,7 +296,7 @@ public Response createRaw(String rawJson) {
 When the test plan includes **extra/missing property** scenarios:
 
 ```java
-// Accepts a pre-built body (e.g. a Map from JsonBodyHelper) for body manipulation tests.
+// Accepts a pre-built body (e.g. a Map from RequestBodyBuilder) for body manipulation tests.
 public Response create(Map<String, Object> body) {
     return execute(spec()
         .contentType("application/json")

@@ -5,13 +5,13 @@ description: Use when writing or reviewing safe verification SQL in .NET tests (
 
 # QA — DB Testing Query Author (.NET 8)
 
-Guardrails for the **SQL string itself** when a .NET 8 integration test reaches into the database to verify behaviour. The connection, seeder, and probe scaffolding live in `qa/dotnet/skills/db-testing/connection`; this skill owns *what the SQL is allowed to look like* — parameter-only binding, explicit column lists, safe `LIKE`, type-correct parsing, exists / not-exists / count helpers, a poller that re-runs the same safe query, and a hard refusal list for destructive verbs outside cleanup.
+Guardrails for the **SQL string itself** when a .NET 8 integration test reaches into the database to verify behaviour. The connection, seeder, and probe scaffolding live in `qa/dotnet/skills/db-testing/connection`; this skill owns *what the SQL is allowed to look like* — parameter-only binding, explicit column lists, safe `LIKE`, type-correct parsing, exists / not-exists / count assertions, a poller that re-runs the same safe query, and a hard refusal list for destructive verbs outside cleanup.
 
 ## When to use
 
 - A test is about to embed a SQL string (Dapper `QuerySingleAsync<>` / `ExecuteAsync` / raw `DbCommand`) and you need it reviewed or generated.
 - An existing probe / seeder uses string interpolation, `SELECT *`, or unbounded `DELETE` and needs a rewrite.
-- A test needs an "assert exactly one row matches these columns" or "assert no row matches" helper.
+- A test needs an "assert exactly one row matches these columns" or "assert no row matches" assertion.
 - An async flow needs a wait-for-eventual-consistency poll that re-runs the verification query.
 
 ## When NOT to use
@@ -37,7 +37,7 @@ Guardrails for the **SQL string itself** when a .NET 8 integration test reaches 
 | "No row matches" | `ExecuteScalarAsync<bool>` over `EXISTS (...)` | Cheaper than `COUNT(*)`; short-circuits. |
 | "How many rows match" | `ExecuteScalarAsync<long>` over `SELECT COUNT(*)` | Always `long` (Postgres `bigint`); never `int`. |
 | "Wait until row appears" | `WaitForRowAsync` poller (below) | Re-runs the same parameterized query; never `Task.Delay` as the assertion. |
-| Free-text contains | `LIKE @pattern ESCAPE '\'` + manual escape of `% _ \` | Treat user input as data; see helper below. |
+| Free-text contains | `LIKE @pattern ESCAPE '\'` + manual escape of `% _ \` | Treat user input as data; see `EscapeLike` below. |
 | `IN (...)` of N values | `WHERE col = ANY(@ids)` (Postgres) / table-valued parameter (SQL Server) | Never interpolate the list. |
 | Soft-delete check | Explicit `WHERE deleted_at IS NULL` | Don't rely on a view abstraction in tests. |
 
@@ -45,7 +45,7 @@ Guardrails for the **SQL string itself** when a .NET 8 integration test reaches 
 
 - **Runtime**: .NET 8, NUnit 4.x
 - **Clients**: Dapper (default), `Npgsql` / `Microsoft.Data.SqlClient` for raw `DbCommand` when Dapper is overkill
-- **Connection**: shared `DbConnectionFactory` from `qa/dotnet/skills/db-testing/connection` — never `new NpgsqlConnection(...)` in the query helper
+- **Connection**: shared `DbConnectionFactory` from `qa/dotnet/skills/db-testing/connection` — never `new NpgsqlConnection(...)` in the probe
 - **Logging**: `Microsoft.Extensions.Logging` with structured templates — log the query *name*, not the query text with parameter values
 
 ## Parameterized read — the only allowed shape
@@ -92,7 +92,7 @@ Rules baked in:
 - `Guid` stays a `Guid` end-to-end; never `.ToString()` it into SQL.
 - `CommandDefinition` carries the `CancellationToken` — async all the way.
 
-## Exists / not-exists helpers
+## Exists / not-exists assertions
 
 ```csharp
 public static class DbAssertions
@@ -210,12 +210,12 @@ Caller passes the **same** safe probe method — the poller never builds SQL its
 
 ## Refusal patterns — destructive verbs
 
-If a generated or reviewed query contains any of the following **outside** a designated cleanup helper, refuse and require an explicit cleanup path:
+If a generated or reviewed query contains any of the following **outside** the teardown registry, refuse and require an explicit cleanup path:
 
 | Verb | Refused when | Allowed only in |
 |---|---|---|
 | `DROP TABLE` / `DROP SCHEMA` | Ever, in a test body | Never. Migrations own schema. |
-| `TRUNCATE` | Inside a `[Test]` method | `[TearDown]` / `[OneTimeTearDown]` cleanup helpers; or Respawn from `qa/dotnet/skills/db-testing/connection`. |
+| `TRUNCATE` | Inside a `[Test]` method | `[TearDown]` / `[OneTimeTearDown]` teardown registry; or Respawn from `qa/dotnet/skills/db-testing/connection`. |
 | `DELETE` without `WHERE` | Anywhere | Never. `TRUNCATE` is the right primitive. |
 | `UPDATE` without `WHERE` | Anywhere | Never. |
 | `ALTER TABLE` | Test body | Migration only. |

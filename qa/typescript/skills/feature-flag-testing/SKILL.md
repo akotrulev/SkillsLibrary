@@ -63,7 +63,7 @@ Vitest.
 - **LaunchDarkly OpenFeature provider** — `@launchdarkly/openfeature-node-server` — bridges the two: prod code
   stays on OpenFeature, `TestData` pins what the LD provider sees (the provider accepts `LDOptions`, so the
   TestData factory threads straight through)
-- Layout: `tests/flags/` (the flag tests), `tests/support/flags/` (the `FlagFixture` helper)
+- Layout: `tests/flags/` (the flag tests), `tests/support/flags/` (the `FlagFixture`)
 
 ```jsonc
 // package.json (devDependencies excerpt)

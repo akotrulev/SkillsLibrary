@@ -8,7 +8,7 @@ Invoke `promptfoo eval` as a subprocess, emit `results.json`, parse it, assert i
 no `.Result`/`.Wait()`:
 
 ```csharp
-// Tests/Support/Promptfoo.cs — the CLI-port helper: subprocess + JSON parse (no NuGet exists)
+// Tests/Support/Promptfoo.cs — the CLI runner: subprocess + JSON parse (no NuGet exists)
 using System.Diagnostics;
 using System.Text.Json;
 
@@ -93,7 +93,7 @@ the abstraction that lets you swap Anthropic / Azure OpenAI / a local model behi
 way.** Construct via DI (constructor injection — global rule); shown inline for brevity.
 
 ```csharp
-// Tests/Support/Llm.cs — thin helpers; the API key comes from env, never hardcoded
+// Tests/Support/Llm.cs — the LLM client; the API key comes from env, never hardcoded
 using Microsoft.Extensions.AI;
 using System.Text.Json;
 

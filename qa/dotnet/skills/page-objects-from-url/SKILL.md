@@ -75,7 +75,7 @@ Confirm before extracting. **Ask, don't guess**:
 ### 1. Check for an existing POM
 
 - Glob the target project for `**/Pages/**/*.cs` (and `**/Pom/**/*.cs`) and grep for the page's URL or name.
-- **Exists** → an **update**: diff extracted elements against its current locators (step 5).
+- **Exists** → an **update**: diff extracted elements against its current locators (step 6).
 - **Doesn't exist** → a **create**: with no `Pages/` structure at all, load `qa/dotnet/skills/page-object-design/SKILL.md` first.
 
 ### 2. Reach the page
@@ -133,7 +133,24 @@ Merge the passes by text/role/position: every interactable is now **test-id-back
 - Dynamic states → reveal, **re-snapshot** (old refs are stale), extract, and record which interaction reveals what: `browser_click`; `browser_hover` (hover menus, tooltips); `browser_press_key` (`Escape`, `ArrowDown` on a combobox, `Tab` to focus-only controls); `browser_tabs` for a link that opens a tab; `browser_navigate_back` to return.
 - `browser_generate_locator` `{ target: "e12" }` per interactable → the canonical locator (translate it to C# if it comes back in JavaScript form). It is the fallback for an element without a test id, and a cross-check for one with it.
 
-### 4. Report missing test ids
+### 4. Classify into controls and components
+
+Before any field is generated, map the harvest (Pass A roles, Pass B tags and types) onto components:
+
+| Signal | Becomes |
+|---|---|
+| native `select` | `Dropdown` |
+| `combobox` with a `listbox` popup | `Combobox` |
+| `grid`, or a table whose rows carry actions | `DataGrid` + `GridRow`, rows keyed by content |
+| `dialog` / `alertdialog` | `Modal` |
+| `tablist` | `Tabs` |
+| `input[type=date]`, a picker wrapper or calendar `grid` | `DatePicker` |
+| `navigation` of page buttons · `status` after an action · `input[type=file]` | `Pagination` · `Toast` · `FileUpload` |
+| a repeated container sharing one static test id (cards, rows) | a region component |
+
+Glob the project's `Components/Controls/` and `Components/` first and reuse a match; a missing control is written from `qa/dotnet/skills/ui-test-author/playwright/references/components.md`. The page gets one property per control or region; only the elements left over become page fields. List each as a **component candidate**: element, classification, existing class or new one.
+
+### 5. Report missing test ids
 
 Write (or update) `missing-testids.md` **at the test project root** — one file for the suite, one section per page, regenerated section-wise on each run:
 
@@ -156,7 +173,7 @@ the page objects carry no marker.
 - Every row names the page, the element and the fallback in use. A fallback that is raw CSS/XPath gets ⚠ — escalate those.
 - Non-interactable assertion targets (headings, icons, static text) go in an "assertion targets" subsection, only when they lack both a test id and a unique role/text handle.
 
-### 5. Build or update the POM
+### 6. Build or update the POM
 
 Apply the page-object rules from `qa/dotnet/skills/ui-test-author/playwright` (constructor takes `IPage`,
 `private readonly ILocator` fields built in the constructor, get-only `ILocator` properties for assertion
@@ -178,35 +195,16 @@ changes the runsettings — and the MCP registration — never per locator.
 - Fallback where a test id now exists → upgrade to `GetByTestId` and remove the row from `missing-testids.md`
 - Never reorder/rename public methods tests already call without flagging it
 
-### 6. Verify and hand off
+### 7. Verify and hand off
 
 - `dotnet build` (or project equivalent) → must compile clean.
 - A smoke test for the page exists → run it; a new POM → verify the load landmark against one more live snapshot.
-- Report: elements extracted (counts: test-id-backed / fallback / ⚠ CSS), POM created or updated (diff summary), `missing-testids.md` path, open questions.
+- Report: elements extracted (counts: test-id-backed / fallback / ⚠ CSS), component candidates (reused / new), POM created or updated (diff summary), `missing-testids.md` path, open questions.
 - Close the session (`browser_close`). A screenshot, trace or video of the session is captured per `qa/dotnet/skills/evidence-capture/references/playwright.md` §9.
 
 ## The `playwright-cli` route
 
-Use it when MCP is not connected, or when a long extraction — a big page, many states — would flood the
-context: the CLI writes snapshots to `.playwright-cli/page-*.yml` and you `Read` only what you need. Run it
-through `Bash`; install with `npm i -g @playwright/cli@latest` (it needs Node, not the .NET project). Same
-procedure, same rules; only the calls change:
-
-| Step | MCP tool | `playwright-cli` |
-|---|---|---|
-| Open, navigate, back | `browser_navigate`, `browser_navigate_back` | `open <url>`, `goto <url>`, `go-back` |
-| Snapshot | `browser_snapshot` | `snapshot [target] --filename=<f> --depth=<n>` |
-| Find one element | `browser_find` | `find <text>` (`--regex`) |
-| Test-id harvest | `browser_evaluate` | `eval "<function>"`; one element: `eval "el => el.getAttribute('data-testid')" e7` |
-| Canonical locator | `browser_generate_locator` | `--raw generate-locator e5` (JavaScript syntax — translate it) |
-| Click, fill, hover, key | `browser_click`, `browser_fill_form`, `browser_hover`, `browser_press_key` | `click e3`, `fill e4 "<text>"`, `hover e3`, `press Escape` |
-| Tabs, dialogs | `browser_tabs`, `browser_handle_dialog` | `tab-list`, `tab-new [url]`, `tab-select <i>`; `dialog-accept`, `dialog-dismiss` |
-| Save / load auth | `browser_storage_state`, `browser_set_storage_state` | `state-save <f>`, `state-load <f>` |
-| Screenshot, trace, video | `browser_take_screenshot`, `browser_start_tracing`…, `browser_start_video`… | `screenshot --filename=<f> --full-page`, `tracing-start`/`tracing-stop`, `video-start <f>`/`video-stop` |
-
-The CLI has no tool allowlist, so hold its rules by hand: never `run-code` or `webmcp-call`, and `close`
-the session at the end (a headless one closes itself after an hour). On an attribute other than
-`data-testid`, check `generate-locator`'s first output against the harvest before trusting it.
+When MCP is not connected, or a long extraction would flood the context, run the same procedure through `playwright-cli`: the call-by-call mapping and the rules it does not enforce are in [`references/playwright-cli.md`](references/playwright-cli.md).
 
 ## Rules
 

@@ -250,6 +250,6 @@ A hybrid app exposes more than one context. `BaseAppiumPage.InWebView` (in the b
 public void AcceptCookies() => InWebView(() => ByCss("#cookie-accept").Click());
 ```
 
-- The helper and `ByCss` live in the base page, so a page never calls `Driver.FindElement(By.CssSelector(...))`.
+- `InWebView` and `ByCss` live in the base page, so a page never calls `Driver.FindElement(By.CssSelector(...))`.
 - `Driver.Contexts` is not populated at once: the WebView is created asynchronously, hence the wait.
 - UiAutomator2's `mobile: getContexts` lists each WebView with its pages' titles and URLs, for an app with more than one.

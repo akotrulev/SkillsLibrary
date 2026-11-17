@@ -332,7 +332,7 @@ The builder supplies the unchanging defaults; the row drives only what **varies*
 
 ## Rules
 
-The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win. The anti-patterns above are this skill's know-how for loading rows: each carries its fix.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `test-data.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win. The anti-patterns above are this skill's know-how for loading rows: each carries its fix.
 
 ## Cross-references
 

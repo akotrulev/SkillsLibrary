@@ -76,7 +76,7 @@ public class MonthlyPostingTest extends IntegrationTestBase {
 
 **ShedLock — the lock can make a run silently do nothing.** With `@EnableSchedulerLock` in its default `PROXY_METHOD` mode the lock is applied even when the method is called directly, and a held lock makes the call a **no-op that returns without error**. After a successful run the lock stays held until `lockAtLeastFor` elapses, and a row left by a previous test or run holds it too. So:
 
-- Release the job's lock before each run with a cleanup helper that performs I/O and binds the name (`DELETE FROM shedlock WHERE name = :name`, in a `ShedLockProbe` under `db-testing/connection`) — in `@BeforeMethod`, and **between the two runs of an idempotency case**.
+- Release the job's lock before each run with a teardown method that performs I/O and binds the name (`DELETE FROM shedlock WHERE name = :name`, in a `ShedLockProbe` under `db-testing/connection`) — in `@BeforeMethod`, and **between the two runs of an idempotency case**.
 - Assert that each run **executed**. An idempotency case whose second run was skipped by the lock passes for the wrong reason. Assert a positive signal per run: a run-record row, or the job's declared "already posted" outcome — not only "no second charge".
 - `lockAtLeastFor` is measured by the lock provider's clock (JVM or DB time), not the application `Clock` bean, so moving the test clock forward does not release a lock.
 
@@ -84,14 +84,14 @@ public class MonthlyPostingTest extends IntegrationTestBase {
 
 The test is the in-process one with `postingJob.post()` replaced by `adminClient.runJob("monthly-posting", new RunJobDto("2026-03"), HttpStatus.SC_ACCEPTED)`; the poll and the assertion are unchanged.
 
-`adminClient` is a typed `{Resource}Client` over the test-only trigger (`api-client-writer`). For a Kubernetes `CronJob`, `CronJobRunner.runNow(cronJob, namespace)` in `references/helpers.md` runs `kubectl create job --from=cronjob/…` and waits; a failure fails loudly with the command's output and is never caught.
+`adminClient` is a typed `{Resource}Client` over the test-only trigger (`api-client-writer`). For a Kubernetes `CronJob`, `CronJobRunner.runNow(cronJob, namespace)` in `references/clock-race-cronjob.md` runs `kubectl create job --from=cronjob/…` and waits; a failure fails loudly with the command's output and is never caught.
 
 
 Register the returned job name and delete it in `@AfterMethod(alwaysRun = true)`.
 
 #### Clock boundary
 
-The application injects a `java.time.Clock` bean and never calls `Instant.now()`, `LocalDateTime.now()` or `System.currentTimeMillis()` directly. **In-process**, add a movable clock (`MutableClock`, in `references/helpers.md`) as a `@Primary` bean through a `@TestConfiguration`, the way `feature-flag-testing` swaps its provider, and seed relative to the controlled "now":
+The application injects a `java.time.Clock` bean and never calls `Instant.now()`, `LocalDateTime.now()` or `System.currentTimeMillis()` directly. **In-process**, add a movable clock (`MutableClock`, in `references/clock-race-cronjob.md`) as a `@Primary` bean through a `@TestConfiguration`, the way `feature-flag-testing` swaps its provider, and seed relative to the controlled "now":
 
 
 `IntegrationTestBase` carries `@Import(ControlledClockConfig.class)`, autowires the `MutableClock`, and resets it in `@BeforeMethod` (the cached context otherwise keeps it moved). One row per instant, one expected value each; the `Z` or offset carries the timezone:
@@ -127,7 +127,7 @@ DST change and month end: the same pattern, instants either side of the transiti
 
 #### Concurrent requests
 
-Release N requests together behind a start gate (`Race.startTogether`, in `references/helpers.md`: a ready latch, a start latch, futures), wait for all to settle, assert the **invariant**, never which request won. Repetition comes from TestNG's `invocationCount`.
+Release N requests together behind a start gate (`Race.startTogether`, in `references/clock-race-cronjob.md`: a ready latch, a start latch, futures), wait for all to settle, assert the **invariant**, never which request won. Repetition comes from TestNG's `invocationCount`.
 
 
 - `invocationCount = 20` runs the method 20 times, and `@BeforeMethod` / `@AfterMethod` run around every invocation, so seed inside the test or in `@BeforeMethod` and each repetition starts clean. Leave `successPercentage` at its default 100: lowering it hides the race.
@@ -147,8 +147,8 @@ public void Should_ReturnCreditsUsedTo6Not4_When_TheCancellationEventIsDelivered
     Booking booking = bookings.seedCancelled(Bookings.valid().creditsUsed(8).credits(2).build());
     String body = Json.write(CancellationEvents.of(booking));
 
-    sendToCreditsQueue(body, booking.id());
-    sendToCreditsQueue(body, booking.id());
+    creditsQueue.send(body, booking.id());
+    creditsQueue.send(body, booking.id());
 
     DbWaits.waitForRow("processed-" + booking.id(), () -> inboxProbe.processedCount(booking.id()),
         count -> count == 2L, CREDITS_BUDGET, Duration.ofMillis(200));
@@ -156,14 +156,17 @@ public void Should_ReturnCreditsUsedTo6Not4_When_TheCancellationEventIsDelivered
         .as("credits used for member %s", booking.memberId()).isEqualTo(6L);
 }
 
-private void sendToCreditsQueue(String body, UUID businessId) {
-    sqs.sendMessage(request -> request.queueUrl(creditsUrl).messageBody(body)
-        .messageGroupId(businessId.toString())
-        .messageDeduplicationId(UUID.randomUUID().toString()));
+public record CreditsQueueSeeder(SqsClient sqs, String queueUrl) {
+    public void send(String body, UUID businessId) {
+        sqs.sendMessage(request -> request.queueUrl(queueUrl).messageBody(body)
+            .messageGroupId(businessId.toString())
+            .messageDeduplicationId(UUID.randomUUID().toString()));
+    }
 }
 ```
 
-- **Message** — publish through the project's `messaging-testing` reference (its producer / seed helper), with a **new broker message id and the same business id**. Broker deduplication swallows an identical publish before the consumer sees it — SQS FIFO (`messageDeduplicationId`, `ContentBasedDeduplication`), Service Bus duplicate detection, Kafka's idempotent producer — and such a test proves nothing about the consumer's idempotency. Vary the dedup id (or use a standard queue) so two deliveries reach the consumer.
+
+- **Message** — publish through the project's `messaging-testing` reference (its producer / seeder), with a **new broker message id and the same business id**. Broker deduplication swallows an identical publish before the consumer sees it — SQS FIFO (`messageDeduplicationId`, `ContentBasedDeduplication`), Service Bus duplicate detection, Kafka's idempotent producer — and such a test proves nothing about the consumer's idempotency. Vary the dedup id (or use a standard queue) so two deliveries reach the consumer.
 - **Wait on a positive signal, never a sleep:** an inbox / processed-messages row per delivery through `DbWaits.waitForRow`, then assert the effect count. SQS queue-depth attributes are approximate, so they are not the signal.
 - **Webhook** — replay the request with the same delivery id through the typed client twice; assert one effect and, if the contract says so, the same response both times.
 - **Idempotency key** — resend the request with the same `Idempotency-Key`; assert one resource and the contracted response.
@@ -200,8 +203,8 @@ A `db-testing/verification-queries` query asserting the invariant's statement (`
 ## Handoffs
 
 - A missing job trigger, clock seam or test endpoint → `be-java`, as a product change.
-- Broker producer / seeding helpers, DLQ → `qa/java/skills/messaging-testing`.
-- Verification queries, the poller and the cleanup helper → `qa/java/skills/db-testing/verification-queries`, `…/db-testing/connection`.
+- Broker producers / seeders, DLQ → `qa/java/skills/messaging-testing`.
+- Verification queries, the poller and the teardown registry → `qa/java/skills/db-testing/verification-queries`, `…/db-testing/connection`.
 - A retry or recovery after a fault → `qa/java/skills/failure-injection-testing`.
 - Typed clients for the trigger or clock endpoint → `qa/java/skills/api-client-writer`.
 - The plain tests → `qa/java/skills/api-test-author/writer`; review → `…/api-test-author/review`.

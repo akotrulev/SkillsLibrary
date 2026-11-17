@@ -12,7 +12,7 @@ example, and reads the outcome at three layers: the SUT's API response, the SUT'
 own object.
 
 **Sandbox only.** Every suite takes its key from the environment or the secret store and refuses to start when
-the key is not a test-mode key (`sk_live_` / `rk_live_`). The refusal lives in the `StripeSandbox` helper, never in
+the key is not a test-mode key (`sk_live_` / `rk_live_`). The refusal lives in the `StripeSandbox` client, never in
 a test body. Read the reference for the layer you are writing before any code.
 
 ## References

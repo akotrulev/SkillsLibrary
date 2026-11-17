@@ -21,7 +21,7 @@ Eliminates repeated inline test data literals in TypeScript test projects (Vites
 - Java test data → `qa/java/skills/test-data-builder`
 - Production-code builders → the `backend/node` dev stack's generator, if installed
 - Test data for performance scenarios (volume) → `qa/typescript/skills/load-testing`
-- One-off fixture used by a single test → inline is fine; only extract on duplication
+- An object with fewer than four fields → construct it in the test's setup; a builder starts at four fields, at first use
 
 ## Factory function vs class builder vs ObjectMother
 
@@ -260,16 +260,57 @@ const created = await ordersClient.createTyped(order, 201);
 
 Don't build "an order in the DB" inside the factory — that couples the factory to a particular persistence path and hides the API call dependency. Persistence is the test's job; the factory is shape.
 
+## Data the test did not create: three sanctioned patterns
+
+The default is the one above: the test builds a value unique to it, persists it through a client or seeder, and registers it for teardown. The rule file `test-data.md` sanctions three more. None of them changes the builder, which stays pure and deterministic.
+
+- **Read-only reference data.** A search or filter test may read curated records that already exist in the environment. Name them where the test reads them, as constants in a mother (`tests/mothers/reference.ts`: `ReferenceDeals.januaryShipped = { tradeDate: '2026-01-15', dealType: 'Swap' }`) or in the feature's `Examples`, and never write to them. The test asserts that at least one row came back before it asserts on the rows: "every row has X" over an empty result proves nothing.
+- **Pre-clean.** A precondition removes a leftover record before the test, in addition to teardown, so a crashed run cannot poison the next one. It is a seeder method, `customerSeeder.deleteByEmail(email)`, which searches and deletes every match, so a clean environment is zero deletions rather than a branch. Call it from the hook, fixture or `Given … does not exist` step that needs it; never drive the UI to clean up.
+- **Keep on failure.** The teardown registry deletes when the test passed and logs the kept ids when it failed (`ui-test-author/playwright`, `references/config-and-fixtures.md` §2). The identifying field then has to be unique per run, so the fixture overrides it at the call site, ``anOrder({ title: `QA order ${randomUUID()}` })``, and the builder default stays deterministic.
+
+## Typed query-parameter builder
+
+A search endpoint with several documented parameters gets a builder too: one fluent method per parameter, building the suite's typed parameter object. The client turns that object into the query string; a test never passes positional strings or an untyped `Record<string, string>`.
+
+```ts
+export type OrderSearchParams = {
+  readonly status?: OrderStatus;
+  readonly customerId?: string;
+  readonly placedFrom?: string;
+  readonly page?: number;
+  readonly pageSize?: number;
+};
+
+export class OrderSearchParamsBuilder {
+  private params: OrderSearchParams = {};
+
+  status(status: OrderStatus)       { this.params = { ...this.params, status }; return this; }
+  customerId(customerId: string)    { this.params = { ...this.params, customerId }; return this; }
+  placedFrom(isoDate: string)       { this.params = { ...this.params, placedFrom: isoDate }; return this; }
+  page(page: number)                { this.params = { ...this.params, page }; return this; }
+  pageSize(pageSize: number)        { this.params = { ...this.params, pageSize }; return this; }
+
+  build(): OrderSearchParams        { return this.params; }
+}
+```
+
+```ts
+const params = new OrderSearchParamsBuilder().status('Shipped').pageSize(25).build();
+const result = await ordersClient.searchTyped(params, 200);
+```
+
+The method names are the documented parameter names, so the builder doubles as the list of what the endpoint accepts. A parameter the API adds is one more method and one more optional field.
+
 ## Rules
 
 Factories live under `tests/builders/`, ObjectMothers under `tests/mothers/`, one factory per aggregate.
 
-The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `test-data.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 
 1. Grep the test tree for repeated literal patterns (`{ id: …, customerId: …, status: … }`, request body literals in API tests).
-2. Per aggregate, list the fields, the sensible defaults, and the variant-producing helpers (`pending`/`paid`/`cancelled` etc.).
+2. Per aggregate, list the fields, the sensible defaults, and the variant-producing methods (`pending`/`paid`/`cancelled` etc.).
 3. Generate the factory under `tests/builders/<noun>.ts` following the template.
 4. Add an ObjectMother under `tests/mothers/<noun>.ts` with the canonical variants.
 5. Replace inline literals in 2–3 representative tests so the pattern is set; leave the rest as a follow-up sweep.
@@ -281,7 +322,7 @@ The standards this skill's output must meet are the qa-typescript rule files, no
 - .NET test data → `qa/dotnet/skills/test-data-builder`
 - Java test data → `qa/java/skills/test-data-builder`
 - API tests where these feed into request bodies → `qa/typescript/skills/api-test-author/writer`
-- UI tests where they back form-fill helpers → `qa/typescript/skills/ui-test-author/playwright` / `qa/typescript/skills/ui-test-author/selenium` / `qa/typescript/skills/ui-test-author/appium`
+- UI tests where they back form-fill page-object methods → `qa/typescript/skills/ui-test-author/playwright` / `qa/typescript/skills/ui-test-author/selenium` / `qa/typescript/skills/ui-test-author/appium`
 - Test reviewers (verify factories used, not literals) → `qa/typescript/skills/api-test-author/review` / `qa/typescript/skills/ui-test-author/review`
 - Test strategy / pyramid → `qa/manual/test-strategy`
 - Production-code builders → the `backend/node` dev stack's generator, if installed

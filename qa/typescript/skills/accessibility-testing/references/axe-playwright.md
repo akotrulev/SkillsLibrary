@@ -192,7 +192,7 @@ the contrast with Percy's and Applitools' keys.
 - **Tags or excludes repeated per spec.** They drift. *Fix:* the fixture.
 - **`if (results.incomplete.length) console.warn(...)`.** A condition in a test, and silent in CI. *Fix:* the
   fixture attaches the incompletes on every scan.
-- **An un-awaited `allure.attachment` in a sync helper**, or `import { allure } from 'allure-playwright'`.
+- **An un-awaited `allure.attachment` in a sync function**, or `import { allure } from 'allure-playwright'`.
   *Fix:* awaited `testInfo.attach`.
 - **`new AxeBuilder({ page })` or `new SignupPage(page)` in a spec.** *Fix:* the fixtures.
 - **A whole-page scan for one new component.** Legacy debt drowns the regression. *Fix:* `scanWithin`.

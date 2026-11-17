@@ -27,7 +27,7 @@ public abstract class BaseChaosTest {
 
     protected static PostgreSQLContainer<?> dependency;       // the dependency under fault (example)
     protected static ToxiproxyContainer toxiproxy;
-    protected ChaosProxy chaos;                               // the intent-named toxic helper
+    protected ChaosProxy chaos;                               // the intent-named toxic fixture
 
     @BeforeClass(alwaysRun = true)
     public void startInfrastructure() throws IOException {
@@ -61,9 +61,9 @@ public abstract class BaseChaosTest {
 > bootstrap server pointed at the proxy), **not** the dependency directly. That redirection *is* the chaos setup —
 > if the app bypasses the proxy, no toxic can reach it.
 
-## The toxic helper — `support/chaos/ChaosProxy.java`
+## The toxic fixture — `support/chaos/ChaosProxy.java`
 
-One helper owns the proxy handle and exposes **intent-named** fault operations and a **lifecycle** primitive, so
+One fixture owns the proxy handle and exposes **intent-named** fault operations and a **lifecycle** primitive, so
 tests read `chaos.injectLatency(...)`, `chaos.cutConnection()`, `chaos.healed()` — never raw
 `proxy.toxics().timeout(...)` scattered across `@Test` methods. Each injected toxic is named so it can be removed.
 

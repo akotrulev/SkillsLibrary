@@ -84,7 +84,7 @@ npx appium driver doctor mac2
 ├── .gitignore
 ├── README.md
 ├── src/windows/
-│   ├── BaseWindow.ts           # waits and the test-id helper
+│   ├── BaseWindow.ts           # waits and the test-id finder
 │   ├── LibraryWindow.ts        # the landing window the smoke verifies
 │   └── AlbumRow.ts             # scoped component
 └── test/specs/

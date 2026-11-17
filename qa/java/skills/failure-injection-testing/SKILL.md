@@ -57,7 +57,7 @@ happy-path skill in this library: the REST/gRPC authors assert *the dependency a
   `ToxicDirection`
 - **resilience4j** (`io.github.resilience4j:resilience4j-circuitbreaker` / `-retry` / `-timelimiter`) — the
   resilience patterns under test; assert their state/metrics (or assert your own retry/circuit code's effects)
-- Layout: `src/test/java/<dep>/` (the fault tests), `src/test/java/support/chaos/` (the `ChaosProxy` helper +
+- Layout: `src/test/java/<dep>/` (the fault tests), `src/test/java/support/chaos/` (the `ChaosProxy` fixture +
   `BaseChaosTest` container lifecycle)
 
 ```kotlin
@@ -85,7 +85,7 @@ dependencies {
 
 ## Deep-dive reference
 
-These sections live in `references/details.md` — **read it when the task touches them**: **The mechanism — proxy BETWEEN app and dependency (idea #2)**; **The toxic helper — `support/chaos/ChaosProxy.java`**.
+These sections live in `references/details.md` — **read it when the task touches them**: **The mechanism — proxy BETWEEN app and dependency (idea #2)**; **The toxic fixture — `support/chaos/ChaosProxy.java`**.
 
 ## Inject-a-fault, assert-degradation (idea #1)
 
@@ -135,25 +135,20 @@ drain-then-assert lifecycle in `qa-java:realtime-stream-testing`.
 public void shouldDegradeUnderConnectionDropThenRecoverWhenHealed() throws Exception {
     OrderService app = OrderService.connectedTo(chaos.host(), chaos.port());
 
-    // 1. steady state — no toxic, the call works.
     assertThat(app.placeOrder("sku-1").isSuccess()).isTrue();
 
-    // 2. inject — drop the connection.
     chaos.cutConnection(0);
 
-    // 3. assert degraded — the app serves its fallback, it does not throw an unhandled error.
     assertThat(app.placeOrder("sku-1").isFallback()).as("degrades while the connection is cut").isTrue();
 
-    // 4. remove — the dependency is healed.
     chaos.healed();
 
-    // 5. assert recovery — calls succeed again (await the breaker's half-open window, never Thread.sleep).
     Awaitility.await().atMost(Duration.ofSeconds(10)).pollInterval(Duration.ofMillis(200))
         .untilAsserted(() -> assertThat(app.placeOrder("sku-1").isSuccess()).isTrue());
 }
 ```
 
-> Step 5 uses **Awaitility** (a bounded condition-poll), *not* `Thread.sleep` — the recovery window (e.g.
+> The recovery step uses **Awaitility** (a bounded condition-poll), *not* `Thread.sleep` — the recovery window (e.g.
 > resilience4j's `waitDurationInOpenState`) is a real condition to await, not a guessed delay.
 
 ## Assert the resilience PATTERN — circuit breaker via resilience4j (idea #4)
@@ -179,21 +174,41 @@ public class CircuitBreakerChaosTest extends BaseChaosTest {
         OrderService app = OrderService.connectedTo(chaos.host(), chaos.port());
         CircuitBreaker breaker = app.breaker();
 
-        assertThat(breaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);   // steady
+        assertThat(breaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);
 
-        chaos.injectTimeout(0);                                 // every call to the dependency now hangs+drops
-        for (int i = 0; i < 10; i++) app.placeOrderSafely("sku-1");  // drive enough calls past the threshold
+        chaos.injectTimeout(0);
+        new OrderLoad(app, "sku-1").placeSafely(10);
 
-        // The PATTERN: the breaker opened — later calls short-circuit WITHOUT hitting the dependency.
         assertThat(breaker.getState()).isEqualTo(CircuitBreaker.State.OPEN);
 
-        chaos.healed();                                        // dependency recovers
-        // OPEN → HALF_OPEN → CLOSED once the wait window elapses and a probe succeeds.
+        chaos.healed();
         Awaitility.await().atMost(Duration.ofSeconds(15))
             .untilAsserted(() -> {
                 app.placeOrderSafely("sku-1");                 // a probe call in HALF_OPEN
                 assertThat(breaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);
             });
+    }
+}
+```
+
+`OrderLoad` is a test-side load driver, not application API: it calls the real `OrderService` method the given number of times and returns the outcomes, so the test body stays linear.
+
+```java
+public final class OrderLoad {
+    private final OrderService app;
+    private final String sku;
+
+    public OrderLoad(OrderService app, String sku) {
+        this.app = app;
+        this.sku = sku;
+    }
+
+    public List<OrderResult> placeSafely(int times) {
+        return IntStream.range(0, times).mapToObj(call -> app.placeOrderSafely(sku)).toList();
+    }
+
+    public List<OrderResult> placeWithRetry(int times) {
+        return IntStream.range(0, times).mapToObj(call -> app.placeOrderWithRetry(sku)).toList();
     }
 }
 ```
@@ -250,14 +265,12 @@ Assert the app's retries smooth over the failing fraction so the user-visible ou
 ```java
 @Test
 public void shouldTolerateAnIntermittentlyResettingDependency() throws Exception {
-    chaos.withToxicity(chaos.cutConnection(0), 0.3f);       // reset the connection only 30% of the time
+    chaos.withToxicity(chaos.cutConnection(0), 0.3f);
     OrderService app = OrderService.connectedTo(chaos.host(), chaos.port());
 
-    // 20 calls; with retry-with-backoff the user-visible success rate should be ~100% despite a 30% fault rate.
-    long succeeded = java.util.stream.IntStream.range(0, 20)
-        .filter(i -> app.placeOrderWithRetry("sku-1").isSuccess()).count();
+    List<OrderResult> results = new OrderLoad(app, "sku-1").placeWithRetry(20);
 
-    assertThat(succeeded).as("retries absorb an intermittent fault").isEqualTo(20);
+    assertThat(results).as("retries absorb a 30% connection-reset rate").hasSize(20).allMatch(OrderResult::isSuccess);
 }
 ```
 

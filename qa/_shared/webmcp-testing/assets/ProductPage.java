@@ -7,27 +7,46 @@ import java.util.List;
 import java.util.Map;
 
 public final class ProductPage {
-    private static final String SETTLED_TOOLS_JS = """
-            ({ name, present, timeout }) => new Promise(resolve => {
+    private static final String REGISTERED_TOOL_JS = """
+            ({ name, timeout }) => new Promise((resolve, reject) => {
               const modelContext = document.modelContext;
               if (!modelContext) {
                 throw new Error('document.modelContext is missing: launch Chromium with --enable-features=WebMCP');
               }
-              const listTools = async () => (await modelContext.getTools())
-                .filter(tool => tool.window === window)
-                .map(tool => ({
-                  name: tool.name,
-                  inputSchema: typeof tool.inputSchema === 'string' ? JSON.parse(tool.inputSchema) : tool.inputSchema,
-                  annotations: tool.annotations,
-                }));
+              const listTools = async () => (await modelContext.getTools()).filter(tool => tool.window === window);
               const settle = async () => {
-                const tools = await listTools();
-                if (tools.some(tool => tool.name === name) === present) {
-                  resolve(tools);
+                const tool = (await listTools()).find(candidate => candidate.name === name);
+                if (tool) {
+                  resolve({
+                    name: tool.name,
+                    inputSchema: typeof tool.inputSchema === 'string' ? JSON.parse(tool.inputSchema) : tool.inputSchema,
+                    annotations: tool.annotations,
+                  });
                 }
               };
               modelContext.addEventListener('toolchange', settle);
-              setTimeout(async () => resolve(await listTools()), timeout);
+              setTimeout(async () => reject(new Error(
+                `WebMCP tool "${name}" not registered within ${timeout} ms; tools: ${(await listTools()).map(tool => tool.name).join(', ')}`)), timeout);
+              settle();
+            })
+            """;
+    private static final String TOOL_NAMES_AFTER_REMOVAL_JS = """
+            ({ name, timeout }) => new Promise(resolve => {
+              const modelContext = document.modelContext;
+              if (!modelContext) {
+                throw new Error('document.modelContext is missing: launch Chromium with --enable-features=WebMCP');
+              }
+              const toolNames = async () => (await modelContext.getTools())
+                .filter(tool => tool.window === window)
+                .map(tool => tool.name);
+              const settle = async () => {
+                const names = await toolNames();
+                if (!names.includes(name)) {
+                  resolve(names);
+                }
+              };
+              modelContext.addEventListener('toolchange', settle);
+              setTimeout(async () => resolve(await toolNames()), timeout);
               settle();
             })
             """;
@@ -72,12 +91,17 @@ public final class ProductPage {
         return cartBadge;
     }
 
-    public List<Map<?, ?>> settledTools(String name, boolean present, int timeoutMs) {
-        List<?> tools = (List<?>) page.evaluate(SETTLED_TOOLS_JS, Map.of("name", name, "present", present, "timeout", timeoutMs));
-        return tools.stream().<Map<?, ?>>map(tool -> (Map<?, ?>) tool).toList();
+    public Map<?, ?> registeredTool(String name, int timeoutMs) {
+        return (Map<?, ?>) page.evaluate(REGISTERED_TOOL_JS, Map.of("name", name, "timeout", timeoutMs));
+    }
+
+    public List<String> toolNamesAfterRemoval(String name, int timeoutMs) {
+        List<?> names = (List<?>) page.evaluate(TOOL_NAMES_AFTER_REMOVAL_JS, Map.of("name", name, "timeout", timeoutMs));
+        return names.stream().map(String::valueOf).toList();
     }
 
     public Object callTool(String name, Map<String, Object> input, int timeoutMs) {
+        registeredTool(name, timeoutMs);
         return page.evaluate(CALL_TOOL_JS, Map.of("name", name, "input", input, "timeout", timeoutMs));
     }
 }

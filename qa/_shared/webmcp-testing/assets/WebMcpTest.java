@@ -38,7 +38,7 @@ public class WebMcpTest extends BaseTest {
 
     @Test(groups = {"webmcp", "regression"})
     public void Should_DeclareAnObjectSchema_When_AddToCartIsRegistered() {
-        Map<?, ?> tool = registeredTool(ADD_TO_CART);
+        Map<?, ?> tool = productPage.registeredTool(ADD_TO_CART, TIMEOUT_MS);
 
         Assertions.assertThat(tool.get("inputSchema"))
                 .as("%s inputSchema", ADD_TO_CART)
@@ -49,7 +49,7 @@ public class WebMcpTest extends BaseTest {
 
     @Test(groups = {"webmcp", "regression"})
     public void Should_MarkAddToCartConsequential_When_AddToCartIsRegistered() {
-        Map<?, ?> tool = registeredTool(ADD_TO_CART);
+        Map<?, ?> tool = productPage.registeredTool(ADD_TO_CART, TIMEOUT_MS);
 
         Assertions.assertThat(tool.get("annotations"))
                 .as("%s annotations", ADD_TO_CART)
@@ -59,14 +59,14 @@ public class WebMcpTest extends BaseTest {
 
     @Test(groups = {"webmcp", "regression"})
     public void Should_UpdateCartBadge_When_AddToCartIsCalledWithValidInput() {
-        callAddToCart(2);
+        productPage.callTool(ADD_TO_CART, Map.of("sku", SKU, "quantity", 2), TIMEOUT_MS);
 
         assertThat(productPage.cartBadge()).hasText("2");
     }
 
     @Test(groups = {"webmcp", "regression"})
     public void Should_ReturnIsError_When_QuantityIsNegative() {
-        Object result = callAddToCart(-1);
+        Object result = productPage.callTool(ADD_TO_CART, Map.of("sku", SKU, "quantity", -1), TIMEOUT_MS);
 
         Assertions.assertThat(result)
                 .as("%s result for quantity -1", ADD_TO_CART)
@@ -76,29 +76,11 @@ public class WebMcpTest extends BaseTest {
 
     @Test(groups = {"webmcp", "regression"})
     public void Should_DropAddToCart_When_UserLeavesTheProductPage() {
-        registeredTool(ADD_TO_CART);
+        productPage.registeredTool(ADD_TO_CART, TIMEOUT_MS);
         loginPage.goTo();
 
-        Assertions.assertThat(names(productPage.settledTools(ADD_TO_CART, false, TIMEOUT_MS)))
+        Assertions.assertThat(productPage.toolNamesAfterRemoval(ADD_TO_CART, TIMEOUT_MS))
                 .as("tools after leaving the product page")
                 .doesNotContain(ADD_TO_CART);
-    }
-
-    private Map<?, ?> registeredTool(String name) {
-        List<Map<?, ?>> tools = productPage.settledTools(name, true, TIMEOUT_MS);
-        return tools.stream()
-                .filter(tool -> name.equals(tool.get("name")))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError(
-                        "WebMCP tool " + name + " not registered within " + TIMEOUT_MS + " ms; tools: " + names(tools)));
-    }
-
-    private Object callAddToCart(int quantity) {
-        registeredTool(ADD_TO_CART);
-        return productPage.callTool(ADD_TO_CART, Map.of("sku", SKU, "quantity", quantity), TIMEOUT_MS);
-    }
-
-    private static List<Object> names(List<Map<?, ?>> tools) {
-        return tools.stream().<Object>map(tool -> tool.get("name")).toList();
     }
 }

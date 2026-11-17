@@ -11,7 +11,7 @@ Wires Java 21 TestNG tests to talk to a **real** database — seed fixtures via 
 
 - A test must verify a row was written, an FK held, a trigger fired, or a soft-delete column was set.
 - Test setup needs to seed reference data (currencies, countries, plan tiers) that production reads.
-- Async write flows need a "wait until the projection catches up" helper.
+- Async write flows need a "wait until the projection catches up" wait condition.
 - Test suite leaks data between tests and needs a deterministic cleanup strategy.
 
 ## When NOT to use

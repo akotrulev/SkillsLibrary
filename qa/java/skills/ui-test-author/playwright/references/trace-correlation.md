@@ -65,8 +65,8 @@ private static String randomHex(int bytes) {
 }
 ```
 
-In `closeContext(ITestResult result)`, inside its first `if (failed)` branch, attach the links with the
-helper from `test-reports`:
+In `closeContext(ITestResult result)`, inside its first `if (failed)` branch, attach the links with
+`TelemetryLinks` from `test-reports`:
 
 ```java
 TelemetryLinks.uriList(traceId).ifPresent(links ->

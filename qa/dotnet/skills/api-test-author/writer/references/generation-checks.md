@@ -16,6 +16,8 @@ For every scenario, before writing code, fill one row:
 |---|---|---|---|---|
 | Create order with two lines | `201`; body echoes both lines, `status` `Pending` · the confirmation banner shows the order number | `GET /orders/{id}` returns both lines and the total | no second order for the idempotency key; the cart is not left half-cleared | one `OrderPlaced` event; one confirmation email to the buyer |
 | Create order, empty cart | `400`, `ProblemDetails` `errors.lines` · the form error under the cart | no order row for the customer | no event, no email | none |
+| Delete order | `204` | `GET /orders/{id}` returns `404` | no other order of the customer removed | one `OrderDeleted` event |
+| Search orders by status (reference data) | `200`; the result is not empty, then every item's `status` equals the filter; the requested page size comes back | n/a: read-only, nothing written | no item of another status; no record modified | none |
 
 - **Response / UI-state** — the status and the fields (API), or what the user sees: text, enabled state, URL,
   focus (UI).

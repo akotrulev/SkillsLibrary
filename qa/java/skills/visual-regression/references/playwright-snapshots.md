@@ -26,7 +26,7 @@ The comparator, checked on Maven Central on 2026-10-11:
 
 It is a recommendation, not a Playwright fact (plan D9): Playwright names no comparator. It is small and
 stable, but unmaintained since 2021 — if a project's dependency policy rejects that, the comparison it
-does is ~40 lines over `BufferedImage.getRGB`, and §4's helper is the only file that changes.
+does is ~40 lines over `BufferedImage.getRGB`, and §4's probe is the only file that changes.
 
 Add it beside J1's pins in `build.gradle.kts`, exclude the `visual` group from the gate, and run it from its
 own task:
@@ -105,9 +105,9 @@ object waits for the ready state first.
   `@BeforeMethod`, before the page object navigates (`ui-test-author/playwright/references/emulation-and-mobile-web.md`
   §4, §6).
 
-## 4. The helper — `support/VisualCheck.java`
+## 4. The probe — `support/VisualCheck.java`
 
-One helper captures, compares, keeps and attaches. The test builds it in its own `@BeforeMethod` with the
+One probe captures, compares, keeps and attaches. The test builds it in its own `@BeforeMethod` with the
 evidence name, calls `compare`, and asserts on the result.
 
 ```java
@@ -199,12 +199,12 @@ public final class VisualCheck {
   red rectangle around every differing region; `SIZE_MISMATCH` keeps the actual unmarked.
 - **Allure** gets three plain image attachments — `expected`, `actual`, `diff` — attached **before** the
   test's assertion fails, so the report carries them. The `try` is try-with-resources around a stream in an
-  I/O helper; nothing is caught.
+  I/O probe; nothing is caught.
 - **No baseline is a failure, never a silent pass.** The capture is kept so a reviewer can see what the
   missing baseline would be.
 - **`UPDATE_BASELINES=1`** writes every capture as its baseline before comparing, so the run passes and the
   new PNGs show in `git diff`. It is set only by §7's command — never in CI (`qa/cicd/ci-conventions`).
-- The two `if`s live in the helper; the test stays a straight line.
+- The two `if`s live in the probe; the test stays a straight line.
 
 ## 5. The page object and the test
 
@@ -420,7 +420,7 @@ container job, so the credential fetch stays on the runner, where the cloud CLI 
 
 `page.pdf()` embeds a creation date and a document ID, so its bytes never equal a baseline, and a byte
 comparison is no visual check. Assert the document's text with a PDF library in the suite that owns the
-document, or screenshot the HTML that the PDF is printed from — with this reference's helper.
+document, or screenshot the HTML that the PDF is printed from — with this reference's probe.
 
 ## Anti-patterns
 
@@ -434,7 +434,7 @@ document, or screenshot the HTML that the PDF is printed from — with this refe
 - **Raising the allowed percentage until it passes.** *Fix:* mask the noisy region; keep the tolerance tight.
 - **A second `Playwright.create()` or browser in a visual class.** *Fix:* extend `BaseTest`; override
   `contextOptions()`.
-- **A `try`/`finally` or a re-attaching `@AfterMethod` in the test class.** *Fix:* the helper attaches; `BaseTest`
+- **A `try`/`finally` or a re-attaching `@AfterMethod` in the test class.** *Fix:* the probe attaches; `BaseTest`
   keeps the failure evidence.
 - **Visual tests in the PR gate.** *Fix:* `groups = "visual"`, the nightly `visualTest` task.
 

@@ -193,7 +193,7 @@ Every test sends one W3C `traceparent` trace id on all its requests (`api-client
 `references/trace-context.md`; UI: `ui-test-author/playwright`'s `references/trace-correlation.md`). On
 failure the result gets a `telemetry` attachment (`text/uri-list`): the trace id, a Grafana Explore link to
 the trace in Tempo and one to its log lines in Loki. Grafana's base URL comes from `GRAFANA_URL`; unset, no
-link is written and the test is unaffected. The helper, the failure hook, the Explore URL format and the
+link is written and the test is unaffected. The `TelemetryLinks` builder, the failure hook, the Explore URL format and the
 procedure for triaging a failed run: [`references/trace-links.md`](references/trace-links.md).
 
 ## Steps — `@Step` on page object methods
@@ -221,6 +221,8 @@ One pin: `allure-commandline@2.46.1`. In Gradle, `allure.version` above; in CI,
 ```bash
 allure generate allure-results -o allure-report --clean
 ```
+
+One self-contained `index.html` for an artifact or an attachment: add `--single-file` ([`references/single-file-report.md`](references/single-file-report.md)).
 
 A shard matrix copies every shard's `build/allure-results/` into one folder before `generate`; new files are
 added to the existing ones.
@@ -319,8 +321,5 @@ The standards this skill's output must meet are the qa-java rule files, not a li
 - .NET Allure → `qa/reporting/dotnet/skills/test-reports`
 - TypeScript Allure → `qa/reporting/typescript/skills/test-reports`
 - Flaky detection and quarantine → `qa/reporting/java/skills/flaky-test-quarantine`
-- API test generation → `qa/java/skills/api-test-author/writer`
 - UI test generation → `qa/java/skills/ui-test-author/playwright` / `qa/java/skills/ui-test-author/selenium` / `qa/java/skills/ui-test-author/appium`
-- Test strategy → `qa/manual/test-strategy`
-- Quality metrics dashboards → `qa/manual/quality-metrics`
 - CI pipeline syntax → `qa/cicd/java/skills/ci-pipelines` (its `references/<ci>.md`) or `devops/<ci>`

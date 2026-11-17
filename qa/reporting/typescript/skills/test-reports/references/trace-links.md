@@ -30,9 +30,9 @@ pane holds a data source uid, its queries and a time range:
   range in Explore.
 
 When a Grafana version rejects the generated pane, open a trace in that Grafana's Explore, copy the URL, and
-compare the decoded `panes` JSON with the helper's.
+compare the decoded `panes` JSON with the link builder's.
 
-## The helper
+## The link builder
 
 ```ts
 // src/support/telemetryLinks.ts

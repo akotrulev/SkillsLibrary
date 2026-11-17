@@ -82,13 +82,13 @@ export const HEIGHT = 720;
 
 `breakpoints.ts` is the one place widths live, mirroring the app's source.
 
-## The fixtures — page objects and a measuring helper
+## The fixtures — page objects and a measuring probe
 
 `responsive.fixtures.ts` extends the writer's fixtures with two page objects and `Layout` — the full file is
 [`references/fixtures.md`](references/fixtures.md). Page objects expose variant intent
 (`appShell.nav('Hamburger')` → `getByTestId('Nav.Hamburger')`), never boxes. `Layout` **measures and returns
 numbers** — `columnCount(cards)`, `horizontalOverflow()`, `leftEdgeSpread([...])`, `overlapDepth(a, b)` —
-plus `resizeTo(width)` for live-resize specs. The test asserts; a helper never does, so the report shows the
+plus `resizeTo(width)` for live-resize specs. The test asserts; the probe never does, so the report shows the
 measured value. Test ids are the PascalCase ids `fe-react`'s responsive-design skill generates
 (`Nav.Desktop` / `Nav.Hamburger`).
 
@@ -213,8 +213,8 @@ waits for the collapsed state before the resize back, so the test never grows a 
   bugs. *Fix:* `test.use({ viewport })` per row `describe`; `resizeTo` only in live-resize specs.
 - **Asserting absolute coordinates** (`expect(box.x).toBe(312)`). Breaks on any content, font, or scrollbar
   change. *Fix:* relative geometry — edge spread, overlap depth, column count — with a 1px tolerance.
-- **Asserting inside a geometry helper** (`for (const x of xs) expect(…)`, `expect(separated).toBe(true)`).
-  The failure loses the measurements and runs assertions in a loop. *Fix:* the helper returns a number; the
+- **Asserting inside a geometry probe** (`for (const x of xs) expect(…)`, `expect(separated).toBe(true)`).
+  The failure loses the measurements and runs assertions in a loop. *Fix:* the probe returns a number; the
   test asserts it, so the report shows the measured value.
 - **Asserting only one side of a variant swap.** The hamburger being visible doesn't prove the desktop nav is
   gone — both can render (duplicate DOM bugs). *Fix:* assert visible **and** the counterpart hidden.
@@ -233,7 +233,7 @@ waits for the collapsed state before the resize back, so the test never grows a 
 - **Every breakpoint gets a bp−1 / bp boundary row** (fresh load at each); representative widths are additive.
 - **Rows carry the expectation** (`shown`/`hidden`, `columns`); a test body never branches on the width.
 - **Assertions are structural**: variant swap (both sides), relative geometry with tolerance, overflow `0`.
-  Helpers measure, tests assert. Never absolute coordinates; never pixel diffs (that's `visual-regression`).
+  Probes measure, tests assert. Never absolute coordinates; never pixel diffs (that's `visual-regression`).
 - **No horizontal overflow at any tested width** — the cheapest, highest-value responsive assertion; one test
   per row.
 - **Live-resize specs exist for resize-reachable surfaces**, resize in both directions, and use web-first

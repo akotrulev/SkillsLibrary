@@ -75,7 +75,7 @@ failing delete fails the test loudly with every status as evidence.
 
 ```ts
 import { test as base, expect } from '@playwright/test';
-import { authHelper, TestUsers } from '../src/clients/authHelper.js';
+import { adminTokens, testUserTokens } from '../src/auth/tokens.js';
 import { createUserClient, type UserClient } from '../src/clients/user/userClient.js';
 
 type ApiFixtures = {
@@ -89,7 +89,7 @@ export const test = base.extend<ApiFixtures>({
   userClient: async ({ playwright, baseURL }, use) => {
     const ctx = await playwright.request.newContext({
       baseURL,
-      extraHTTPHeaders: { Authorization: `Bearer ${await authHelper.getToken(TestUsers.STANDARD)}` },
+      extraHTTPHeaders: { Authorization: `Bearer ${await testUserTokens.getAccessToken()}` },
     });
     await use(createUserClient(ctx));
     await ctx.dispose();
@@ -97,7 +97,7 @@ export const test = base.extend<ApiFixtures>({
   adminClient: async ({ playwright, baseURL }, use) => {
     const ctx = await playwright.request.newContext({
       baseURL,
-      extraHTTPHeaders: { Authorization: `Bearer ${await authHelper.getToken(TestUsers.ADMIN)}` },
+      extraHTTPHeaders: { Authorization: `Bearer ${await adminTokens.getAccessToken()}` },
     });
     await use(createUserClient(ctx));
     await ctx.dispose();
@@ -209,7 +209,7 @@ calls of a failed test (`qa/typescript/skills/evidence-capture`).
 
 ## Rules
 
-The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `api-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md`, `api-tests.md` and `test-data.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 

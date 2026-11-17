@@ -180,7 +180,7 @@ the image as a one-shot container and parse the JSON report. This is the **CLI/D
 `.NET`/`Java` siblings mirror with `Process`/`ProcessBuilder`:
 
 ```ts
-// support/passive-scan.ts — the Docker-port helper: one-shot container + JSON parse (no SDK exists)
+// support/passive-scan.ts — the Docker-port client: one-shot container + JSON parse (no SDK exists)
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';

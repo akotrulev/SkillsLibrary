@@ -48,13 +48,13 @@ reach `localhost` or a firewalled host.
 ## Shared rules (both tools)
 
 - The conformance target is **WCAG 2.2 AA**: axe tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`,
-  set once in a shared helper.
+  set once in the shared scan probe.
 - **Every sample extends `com.example.uitests.support.BaseTest`**, which owns Playwright, the browser, the
   context, the page and the failure evidence. A class changes the launch only through `launchOptions()` and
   the context only through `contextOptions()`; it never adds its own `Playwright.create()` or failure hook.
 - Scan per state, not per page — open menus, dialogs and validation errors are where violations hide.
 - Gate on new violations; known debt sits in a ticketed allow-list that only shrinks.
-- Scans ride on page objects and one helper built in the class's own `@BeforeMethod`; a test never builds an
+- Scans ride on page objects and one scan probe built in the class's own `@BeforeMethod`; a test never builds an
   `AxeBuilder` or calls `page`.
 - Evidence is an attachment, never a `println`: `Allure.attachment(name, type, stream,
   AttachmentOptions.withFileExtension(ext))` (allure-java 3.0), made before the assertion runs.

@@ -1,6 +1,6 @@
-# Helpers for `time-and-concurrency-testing`
+# CronJob runner, controlled clock and race gate for `time-and-concurrency-testing`
 
-Copy into `Tests/Support/Time/`; each helper performs I/O or holds test state, so its failures are the contract and are never caught.
+Copy into `Tests/Support/Time/`; each class performs I/O or holds test state, so its failures are the contract and are never caught.
 
 ## CronJobRunner
 

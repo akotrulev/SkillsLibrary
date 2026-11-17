@@ -132,9 +132,13 @@ public sealed class BrowserHooks(ScenarioState state, FeatureContext feature, Sc
   the way out whatever happened, without a `try`/`finally`.
 - **It runs after every other `[AfterScenario]`.** Reqnroll runs hooks of one kind in ascending `Order`
   (default 10000), so the data cleanup hooks `gherkin-step-code` adds still have an open page when they run.
+- **Data cleanup is its own hook** at the default order, deleting what the scenario registered. A suite that keeps
+  a failed scenario's data for investigation reads `scenario.TestError` there, deletes on a pass and logs the kept
+  ids on a failure; that check is the teardown registry's legal branch, and it needs names unique per run
+  (`test-data.md`).
 - **The evidence name** is `<Feature>.<Scenario>` — the `Feature:` and `Scenario:` titles — with every character
   outside `[A-Za-z0-9._-]` replaced by `_`: `Sign in.Wrong password` → `Sign_in.Wrong_password.{zip,png,webm}`.
-  The hook writes its own sanitizer because `BaseTest`'s protected helpers are not reachable from a binding.
+  The hook writes its own sanitizer because `BaseTest`'s protected evidence methods are not reachable from a binding.
   Scenario Outline rows share one title, so two failing rows of one outline overwrite each other's files on
   disk; NUnit and Allure keep each row's result.
 - **Each kept file is attached twice**, like `BaseTest`'s: `TestContext.AddTestAttachment` (the TRX and the IDE)

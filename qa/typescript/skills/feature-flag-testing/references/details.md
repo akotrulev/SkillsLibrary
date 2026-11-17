@@ -217,11 +217,11 @@ The rule lives in the fixture; the test varies the **context** and asserts three
 and **the fallthrough/default** (the case targeting bugs hide in).
 
 ```typescript
+const betaTierOnly = (ctx: EvaluationContext) => (ctx.tier === 'beta' ? 'on' : 'off');
+
 it('should serve the new checkout only to beta-tier users', async () => {
   const flags = await new FlagFixture('checkout')
-    .withRule('new-checkout', { on: true, off: false }, 'off', (ctx) =>
-      ctx.tier === 'beta' ? 'on' : 'off',
-    )
+    .withRule('new-checkout', { on: true, off: false }, 'off', betaTierOnly)
     .client();
 
   const betaUser   = { targetingKey: 'user-1', tier: 'beta' };

@@ -118,7 +118,7 @@ public sealed class TestUserTokenProvider(Func<DateTimeOffset>? now = null) : Ca
 }
 ```
 
-The `try`/`finally` releases the semaphore inside a helper; no test carries one. Setting `Realm` makes the
+The `try`/`finally` releases the semaphore inside the token provider; no test carries one. Setting `Realm` makes the
 request the `password-realm` grant.
 
 ### Suite-wide providers — `Tests/Support/Auth/Tokens.cs`

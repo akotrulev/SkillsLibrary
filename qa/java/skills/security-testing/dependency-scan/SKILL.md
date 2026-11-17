@@ -211,39 +211,40 @@ assertion independent of the Gradle gate — e.g. a custom threshold, or to surf
 report — parse the JSON report (TestNG + AssertJ, mirroring `passive-scan`'s parsed-report gate):
 
 ```java
-// src/test/java/security/DependencyVulnerabilityTest.java
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.testng.annotations.Test;
-import java.nio.file.*;
-import java.util.*;
-import static org.assertj.core.api.Assertions.assertThat;
+// src/test/java/security/DependencyCheckReport.java — a probe over the report
+public record DependencyCheckReport(JsonNode root) {
+    public static DependencyCheckReport read(Path path) throws IOException {
+        return new DependencyCheckReport(new ObjectMapper().readTree(Files.readString(path)));
+    }
 
-public class DependencyVulnerabilityTest {
-
-    @Test
-    public void Should_have_no_high_severity_cves_When_dependencies_scanned() throws Exception {
-        // Assumes ./gradlew dependencyCheckAnalyze ran first (CI step) and wrote the JSON report.
-        Path report = Path.of("build", "reports", "dependency-check-report.json");
-        JsonNode root = new ObjectMapper().readTree(Files.readString(report));
-
-        List<String> high = new ArrayList<>();
+    public List<String> findingsAtOrAbove(double minimumCvss) {
+        List<String> findings = new ArrayList<>();
         for (JsonNode dep : root.path("dependencies")) {
             for (JsonNode vuln : dep.path("vulnerabilities")) {
                 double cvss = vuln.path("cvssv3").path("baseScore").asDouble(
                         vuln.path("cvssv2").path("score").asDouble(0.0));
-                if (cvss >= 7.0) {
-                    high.add(vuln.path("name").asText() + " in " + dep.path("fileName").asText());
-                }
+                if (cvss >= minimumCvss) findings.add(vuln.path("name").asText() + " in " + dep.path("fileName").asText());
             }
         }
-        assertThat(high).as("High+ CVEs (CVSS >= 7.0) in the dependency tree").isEmpty();
+        return findings;
+    }
+}
+
+// src/test/java/security/DependencyVulnerabilityTest.java
+public class DependencyVulnerabilityTest {
+    @Test
+    public void Should_have_no_high_severity_cves_When_dependencies_scanned() throws IOException {
+        DependencyCheckReport report = DependencyCheckReport.read(Path.of("build", "reports", "dependency-check-report.json"));
+
+        assertThat(report.findingsAtOrAbove(7.0)).as("High+ CVEs (CVSS >= 7.0) in the dependency tree").isEmpty();
     }
 }
 ```
 
+
 The `.NET`/TS siblings parse their own tool's JSON (`dotnet list package --vulnerable --format json` /
-`npm audit --json`) the same way. One logical assertion; test name `Should_X_When_Y`.
+`npm audit --json`) the same way.
+
 
 ## CI wiring — the gate, the NVD cache, the remediation complement
 

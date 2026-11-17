@@ -74,13 +74,14 @@ A booted emulator/simulator (or a connected device) and a running `appium` serve
 │   ├── GlobalUsings.cs
 │   └── TestCore.csproj
 └── AppiumTests/                        # this discipline's project
-    ├── Pages/                          # screen objects, components, sub-flows
+    ├── Pages/                          # screen objects and flows
+    ├── Components/                     # region components; Controls/ holds native controls
     ├── Support/
     │   ├── AppiumDriverFactory.cs      # builds AndroidDriver/IOSDriver from env
     │   ├── BaseMobileTest.cs           # driver per fixture + failure evidence
     │   ├── Env.cs                      # the one required-variable reader
     │   ├── GestureExtensions.cs
-    │   ├── Native/                     # permissions, deep links, push helpers
+    │   ├── Native/                     # NativeFeatures: permissions, deep links, push
     │   └── Farm/                       # only when a device cloud is used
     ├── Tests/
     ├── allureConfig.json               # per-project config
@@ -128,7 +129,7 @@ PLATFORM=ios DEVICE_NAME="iPhone 15" PLATFORM_VERSION=17.4 APP_PATH=/abs/App.app
 
 ## Conventions (the shell only)
 
-The standards the shell must meet are the qa-dotnet rule files, not a list here: `automation.md`, `mobile-ui.md` and `suite-config.md`. Tell the user to install them with the shell (`/qa-dotnet:rules` copies them into `.claude/rules/qa-dotnet/`); until then read the plugin's copies in `qa/dotnet/skills/rules/`. Where they and this skill's recipes disagree, the rule files win.
+The standards the shell must meet are the qa-dotnet rule files, not a list here: `automation.md`, `page-objects.md`, `mobile-ui.md` and `suite-config.md`. Tell the user to install them with the shell (`/qa-dotnet:rules` copies them into `.claude/rules/qa-dotnet/`); until then read the plugin's copies in `qa/dotnet/skills/rules/`. Where they and this skill's recipes disagree, the rule files win.
 
 - New waits are added to `BaseAppiumPage.Wait`, never inlined; the driver lives in `AppiumDriverFactory` + `BaseMobileTest`.
 
@@ -140,7 +141,7 @@ Flat solution + shared `TestCore` + CPM make this purely additive. To add a sibl
 
 1. Install the sibling plugin and run its scaffold **inside this repo**, skipping `global.json`, `Directory.Build.props`, `Directory.Packages.props`, the `.sln`, and `TestCore` (already present).
 2. Add only its project (`dotnet new nunit -o ApiTests`, `dotnet sln add ApiTests`, `dotnet add ApiTests reference TestCore`) + its packages (which append `<PackageVersion>` to the shared table). The sibling keeps its **own** config files — nothing to merge.
-3. Promote shared config/auth/Allure helpers up into `TestCore`; keep `AppiumDriverFactory` in `AppiumTests` and the RestClient factory in `ApiTests`.
+3. Promote shared config, the token provider and Allure setup up into `TestCore`; keep `AppiumDriverFactory` in `AppiumTests` and the RestClient factory in `ApiTests`.
 4. `dotnet test` runs all projects; run one by its path (`dotnet test AppiumTests`). Add `.slnf` filters per discipline. Web-UI (`UiTests`) and performance (`PerfTests`, NBomber) fold in the same way.
 
 ## Setup checklist

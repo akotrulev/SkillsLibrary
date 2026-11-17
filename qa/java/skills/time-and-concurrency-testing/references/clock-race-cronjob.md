@@ -1,6 +1,6 @@
-# Helpers for `time-and-concurrency-testing`
+# Clock, race gate and CronJob runner for `time-and-concurrency-testing`
 
-Copy into `src/test/java/support/time/`; each is a helper that performs I/O or holds test state, so its `throws` clauses are the contract.
+Copy into `src/test/java/support/time/`; each performs I/O or holds test state, so its `throws` clauses are the contract.
 
 ## CronJobRunner
 

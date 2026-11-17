@@ -282,7 +282,7 @@ the inbox. Snapshotting the rendered email is `email-testing/references/html-sna
 ## Rules
 
 The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md`,
-`api-tests.md` and, for the pipeline job, `ci-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or
+`api-tests.md`, `test-data.md` and, for the pipeline job, `ci-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or
 the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does).
 Where they and this skill's recipes disagree, the rule files win.
 

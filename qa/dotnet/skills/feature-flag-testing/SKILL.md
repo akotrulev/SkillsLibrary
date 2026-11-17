@@ -61,7 +61,7 @@ section order; the SDK surface is the `OpenFeature` NuGet + `LaunchDarkly.Server
   `LaunchDarkly.Sdk.Server.Integrations.TestData` fixture is the deterministic data source
 - **LaunchDarkly OpenFeature provider** — `LaunchDarkly.OpenFeature.ServerProvider` — bridges the two: prod code
   stays on OpenFeature, `TestData` pins what the LD provider sees
-- Layout: `Tests/Flags/` (the flag tests), `Tests/Support/Flags/` (the `FlagFixture` helper)
+- Layout: `Tests/Flags/` (the flag tests), `Tests/Support/Flags/` (the `FlagFixture` fixture)
 
 ```xml
 <!-- Tests.csproj (excerpt) -->

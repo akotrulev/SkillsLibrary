@@ -31,12 +31,12 @@ Reviews TypeScript API test code against the patterns enforced by `qa/typescript
 
 ## The checklist is the rule files
 
-Every check, and the severity it reports, lives in one place: the qa-typescript rule files `qa-typescript.md` (core) and `api-tests.md`, plus `ci-tests.md` when a pipeline file is in the diff.
+Every check, and the severity it reports, lives in one place: the qa-typescript rule files `qa-typescript.md` (core), `api-tests.md` and `test-data.md`, plus `ci-tests.md` when a pipeline file is in the diff.
 
 1. **The project's copies first**: `.claude/rules/qa-typescript/` at the project root. The team may have edited them, and its edits win.
 2. **Otherwise the plugin's copies**: `qa/typescript/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/qa-typescript:rules` installs them.
 
-Read `qa-typescript.md` and `api-tests.md` in full before the first finding. A rule loaded on its own by the session is not enough: a review needs every file that applies, not just the ones the session happened to open. Never review from memory of the rules, and never add a check the files do not contain; propose it as a rule change instead.
+Read `qa-typescript.md`, `api-tests.md` and `test-data.md` in full before the first finding. A rule loaded on its own by the session is not enough: a review needs every file that applies, not just the ones the session happened to open. Never review from memory of the rules, and never add a check the files do not contain; propose it as a rule change instead.
 
 ## Version policy
 
@@ -61,7 +61,7 @@ Read `references/good-signals.md` when grading a suite that looks clean: it list
 |----------|---------------------------------------------------|-------------------------------------------------------------|------------------------------------------------------------------------|
 | blocker  | src/specs/user/users/getUser.spec.ts:42           | `expect(client.getAllTyped(200)).resolves...` not awaited   | Add `await` — unawaited `.resolves` chains pass on failures            |
 | major    | src/clients/user/userClient.ts:60                 | Raw `getById` runs `Schema.parse` and returns the DTO       | Return `ApiResponse`; parsing belongs in the `…Typed` method           |
-| major    | src/specs/user/users/getUser.spec.ts:18           | Auth chosen via `new UserClient(true)` flag                 | Build via `createUserClient(await authHelper.getToken(...))`           |
+| major    | src/specs/user/users/getUser.spec.ts:18           | Auth chosen via `new UserClient(true)` flag                 | Build via `createUserClient(await testUserTokens.getAccessToken())`        |
 | minor    | src/specs/user/users/getUser.spec.ts:10           | All `it(...)` flat, no `describe`                            | Wrap in `describe('GET /api/users', () => { ... })`                    |
 | nit      | src/specs/user/users/getUser.spec.ts:14           | Test title `'test 1'`                                       | Rename to behavior: `'returns the first page of users'`                |
 ```

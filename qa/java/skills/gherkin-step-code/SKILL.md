@@ -5,7 +5,7 @@ description: Use when turning Gherkin .feature files into Cucumber-JVM steps in 
 
 # Cucumber-JVM Step Bindings + POM Implementation (Java 21)
 
-Parses `.feature` files (and the **Step Catalog** from `feature-file-writer`) into Cucumber-JVM glue classes, **split by domain**, with parameterized Cucumber-Expression steps, and **implements each step by calling existing page-object intent methods**. Assertions live in `Then` steps; page objects only act and expose locators. The Cucumber project, DI (PicoContainer), hooks, and `TestContext` already exist (from `bdd-project-scaffold`).
+Parses `.feature` files (and the **Step Catalog** from `feature-file-writer`) into Cucumber-JVM glue classes, **split by domain**, with parameterized Cucumber-Expression steps, and **implements each step through existing page objects**: an intent method, or one interaction with an element or control the page exposes. Assertions live in `Then` steps; page objects only act and expose locators. The Cucumber project, DI (PicoContainer), hooks, and `TestContext` already exist (from `bdd-project-scaffold`).
 
 ## Stack
 
@@ -39,13 +39,17 @@ Confirm at most 2–3.
 
 ## Rules
 
-The standards this skill's output must meet are the qa-java rule files, not a list here: `qa-java-bdd.md` and `qa-java.md` (core). Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the qa-java rule files, not a list here: `qa-java-bdd.md`, `qa-java-page-objects.md` (the page objects steps call) and `qa-java.md` (core). Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 How the bindings are built:
 
 - Each canonical Step-Catalog row becomes exactly one step method; a step shared by many features goes in a `CommonSteps` glue class.
+- The step is the intent layer. It calls a page method when the step is a sequence of interactions (`signIn`), and acts directly on an element or control the page exposes when it is one (`filterPage.dealType().selectOption(option)`). Either way, no locator, wait or branch in the step.
+- One binding per field, filter or column, named for it and calling that one control (`I select {string} for Deal Type filter`). A generic `I select {string} for {string} filter` needs a lookup from a name to a control, which is a branch: write one binding per field instead.
+- No binding with an empty body: it passes without doing anything. A scenario written ahead of its automation carries the suite's skip tag (`@not-automated` when it has none) and a ticket, and gets no binding until it is automated.
+- A `Given … does not exist` precondition pre-cleans a leftover through an API seeder on `TestContext`, never a UI sequence; the scenario's `@After` hook still deletes what it created.
 - Cucumber Expressions map cleanly to the catalog's params (`{string}`, `{int}`, `{word}`, `{double}`); enums and custom types come from a `@ParameterType` method in a glue class. Regex only for anchors or alternation.
-- Every glue class takes `TestContext`, the per-scenario object PicoContainer builds, in its constructor. `TestContext` builds the page objects lazily from its `Page` and hands them to the steps; the page objects are the same classes the TestNG suite uses (`new LoginPage(page)`, `ui-test-author/playwright`), so the BDD layer reuses them unchanged.
+- Every glue class takes `TestContext`, the per-scenario object PicoContainer builds, in its constructor. `TestContext` builds the page objects when its `Page` is set and hands them to the steps; the page objects are the same classes the TestNG suite uses (`new LoginPage(page)`, `ui-test-author/playwright`), so the BDD layer reuses them unchanged.
 - `Then` asserts with web-first `assertThat(...)` on a locator the page object exposes.
 - The `feature-file-writer` Cleanup handoff becomes an `@After` hook in the support layer; the scaffold owns hook placement.
 - A step that needs a page object or method that does not exist stops here: build it with `page-object-design` / `page-objects-from-url`, or hand it to `qa-ui-java` / `qa-mobile-java`.
@@ -103,6 +107,57 @@ PicoContainer constructor-injects the per-scenario `TestContext`. `LoginPage`, `
 `ui-test-author/playwright`'s asset classes; `context.registeredCustomer()` reads `E2E_USER` / `E2E_PASSWORD`
 lazily, so no step reads the environment itself.
 
+### Filter steps — `steps/DealSearchSteps.java`: one binding per field
+
+```java
+package com.example.steps;
+
+import com.example.support.TestContext;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class DealSearchSteps {
+    private final TestContext context;
+
+    public DealSearchSteps(TestContext context) {
+        this.context = context;
+    }
+
+    @Given("the deal {string} does not exist")
+    public void theDealDoesNotExist(String dealName) {
+        context.dealSeeder().deleteAllNamed(dealName);
+    }
+
+    @When("I select {string} for Deal Type filter")
+    public void iSelectForDealTypeFilter(String option) {
+        context.dealFilters().dealType().selectOption(option);
+    }
+
+    @When("I select {string} for Region filter")
+    public void iSelectForRegionFilter(String option) {
+        context.dealFilters().region().choose(option);
+    }
+
+    @When("I search deals")
+    public void iSearchDeals() {
+        context.dealFilters().search();
+    }
+
+    @Then("every listed deal has Deal Type {string}")
+    public void everyListedDealHasDealType(String dealType) {
+        assertThat(context.dealResults().columnValues("Deal Type"))
+                .as("Deal Type of every listed deal")
+                .isNotEmpty()
+                .allSatisfy(value -> assertThat(value).isEqualTo(dealType));
+    }
+}
+```
+
+`dealType()` returns the `<select>`'s `Locator`, so the step makes its one interaction on the element itself; `region()` returns a `Combobox` control (`ui-test-author/playwright/references/components.md`), whose `choose` is the interaction; `search()` is a page method because it clicks and then waits for the app's loading bar. `dealSeeder()` is an API seeder that takes the suite's HTTP client and deletes every deal with that name, so a crashed run cannot poison the next one. `dealResults()` is the results `DataGrid`; the `Then` asserts the column is not empty before asserting on every value.
+
 ### Custom parameter type — `support/ParameterTypes.java`
 
 ```java
@@ -125,9 +180,14 @@ A Cucumber Expression can now use `{daysAgo}`, e.g. "Given the order was placed 
 ### Data table step — typed via Cucumber's transformer
 
 ```java
+@DataTableType
+public CatalogItem catalogItem(java.util.Map<String, String> row) {
+    return new CatalogItem(row.get("sku"), Integer.parseInt(row.get("qty")));
+}
+
 @Given("the catalog contains")
-public void theCatalogContains(java.util.List<java.util.Map<String, String>> rows) {
-    rows.forEach(r -> context.catalog().add(r.get("sku"), Integer.parseInt(r.get("qty"))));
+public void theCatalogContains(java.util.List<CatalogItem> items) {
+    context.catalog().addAll(items);
 }
 ```
 
@@ -147,7 +207,7 @@ public void iSignInWith(String email, String password) {
 1. Read the `.feature` files + Step Catalog + Cleanup handoff and the available page objects.
 2. For each distinct catalog step, write **one** step method in the right domain glue class; reuse for repeats.
 3. Pick the binding annotation (`@Given`/`@When`/`@Then`) from the catalog; use Cucumber-Expression params matching the catalog's `{...}` placeholders and `Examples` columns.
-4. Implement each body with page-object calls only; put assertions in `Then` with web-first `assertThat`.
+4. Implement each body with one or two page-object calls (an intent method, or one interaction on an exposed element or control); put assertions in `Then` with web-first `assertThat`, or AssertJ over a column's values.
 5. For any missing page object/method, build it (`page-object-design`/`page-objects-from-url`) before binding the step.
 6. Ensure the Cleanup is implemented as the `@After` hook (scaffold layer), not as steps.
 7. `./gradlew test`, then run the features: every step bound (no undefined/ambiguous), the smoke scenario green.

@@ -64,7 +64,7 @@ sample extends `com.example.uitests.support.BaseTest`.
   load, never after a `Thread.sleep` and never straight after the click.
 - **Consent tests start clean**: `BaseTest` opens a fresh context per test; a consent test class never loads a
   saved storage state that holds a consent cookie.
-- Route, `dataLayer` and privacy-signal calls live in helpers with intent names (`Tracker`, `DataLayer`,
+- Route, `dataLayer` and privacy-signal calls live in probes and fixtures with intent names (`Tracker`, `DataLayer`,
   `PrivacySignals`) built in the class's `@BeforeMethod`; a test never calls `page.route` or `page.evaluate`.
 - Expected payloads are records from the tracking plan; one with four or more fields gets a builder
   (`test-data-builder`).

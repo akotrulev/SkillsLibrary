@@ -46,7 +46,7 @@ Two axes of privilege escalation, both covered by the matrix:
 > **403 vs 404 — pin the project's leak policy.** Returning `403 Forbidden` for someone else's object
 > *confirms the object exists* (an enumeration/info leak). Many threat models prefer `404 Not Found` for
 > cross-tenant access so existence isn't disclosed. **Decide the policy per project and assert it
-> explicitly** — don't accept "either 4xx". The helper below takes the expected status so the policy is
+> explicitly** — don't accept "either 4xx". The `AccessControlAsserts` assertion below takes the expected status so the policy is
 > codified, not assumed.
 
 ## The matrix model — the core of the skill
@@ -119,7 +119,7 @@ public static class InvoiceFixtures
 }
 ```
 
-### The deny helper — codify the policy
+### The deny assertion — codify the policy
 
 ```csharp
 // Tests/Security/AccessControl/AccessControlAsserts.cs
@@ -192,40 +192,32 @@ public class InvoiceBolaTests // API1:2023 BOLA — invoice object-level authori
     // The matrix of cross-user / privilege rows. 404 here = this project hides existence cross-tenant.
     private static IEnumerable<TestCaseData> CrossUserRows()
     {
-        yield return new TestCaseData(Actor.Alice, nameof(Verb.Get),    "bob",   HttpStatusCode.NotFound);
-        yield return new TestCaseData(Actor.Alice, nameof(Verb.Put),    "bob",   HttpStatusCode.NotFound);
-        yield return new TestCaseData(Actor.Alice, nameof(Verb.Delete), "bob",   HttpStatusCode.NotFound);
-        yield return new TestCaseData(Actor.Bob,   nameof(Verb.Get),    "alice", HttpStatusCode.NotFound);
-        yield return new TestCaseData(Actor.Anon,  nameof(Verb.Get),    "alice", HttpStatusCode.Unauthorized);
+        yield return Row(Actor.Alice, "GET bob",    c => c.GetByIdRaw(_bob.Id),                 HttpStatusCode.NotFound);
+        yield return Row(Actor.Alice, "PUT bob",    c => c.UpdateRaw(_bob.Id, new InvoiceInDto(Amount: 1, Currency: "EUR")),
+                         HttpStatusCode.NotFound);
+        yield return Row(Actor.Alice, "DELETE bob", c => c.DeleteRaw(_bob.Id),                  HttpStatusCode.NotFound);
+        yield return Row(Actor.Bob,   "GET alice",  c => c.GetByIdRaw(_alice.Id),               HttpStatusCode.NotFound);
+        yield return Row(Actor.Anon,  "GET alice",  c => c.GetByIdRaw(_alice.Id),               HttpStatusCode.Unauthorized);
     }
 
-    private enum Verb { Get, Put, Delete }
+    private static TestCaseData Row(Actor caller, string call, Func<InvoiceClient, RestResponse> send, HttpStatusCode expected) =>
+        new(caller, call, send, expected);
 
     [TestCaseSource(nameof(CrossUserRows))]
     public async Task Should_Deny_When_CallerActsOnOthersInvoice(
-        Actor caller, string verb, string targetName, HttpStatusCode expected)
+        Actor caller, string call, Func<InvoiceClient, RestResponse> send, HttpStatusCode expected)
     {
-        string token = await caller.Token();
-        string id = targetName == "alice" ? _alice.Id : _bob.Id;
-        InvoiceClient client = new InvoiceClient(token);
+        InvoiceClient client = new InvoiceClient(await caller.Token());
 
-        RestResponse response = verb switch
-        {
-            nameof(Verb.Get)    => client.GetByIdRaw(id),
-            nameof(Verb.Put)    => client.UpdateRaw(id, new InvoiceInDto(Amount: 1, Currency: "EUR")),
-            _                   => client.DeleteRaw(id),
-        };
-
-        ExpectDenied(response, expected);
+        ExpectDenied(send(client), expected);
     }
 }
 ```
 
 The `GetByIdRaw`/`UpdateRaw`/`DeleteRaw` variants return the `RestResponse` *without* asserting `200` (that's
 what the client's typed `(args, HttpStatusCode expected)` overloads do) — access-control tests assert the
-**status themselves**, so use the raw overloads (see `qa/dotnet/skills/api-client-writer`). The `switch`
-expression selects the verb's call from the parameterized row; it drives no assertions, so it stays within
-the "no conditional logic in tests" rule.
+**status themselves**, so use the raw overloads (see `qa/dotnet/skills/api-client-writer`). Each row carries
+its call, so the test body has no branch; the lambdas read `_alice` / `_bob` when the test runs, after the seed.
 
 ## BFLA — function-level (vertical privilege escalation)
 

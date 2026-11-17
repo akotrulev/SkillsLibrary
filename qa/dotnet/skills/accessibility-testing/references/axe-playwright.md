@@ -68,7 +68,7 @@ with `ToHaveAccessibleNameAsync`, `ToHaveAccessibleDescriptionAsync`, `ToHaveAcc
 `qa/dotnet/skills/ui-test-author/playwright/references/assertions.md` §1–§2. A form gets both: an axe scan per
 state, and a native assertion for the error message the story specifies (§5).
 
-## 4. The shared helper — `Support/A11yScan.cs`
+## 4. The scan probe — `Support/A11yScan.cs`
 
 The conformance target is **WCAG 2.2 AA**, set once. Every scan attaches its violations and its incompletes
 **before** the test asserts, so a failure carries the evidence and incompletes are visible on every run.
@@ -283,10 +283,10 @@ needed — the contrast with Percy's and Applitools' keys.
 - **`Task.Delay` or `WaitForTimeoutAsync` before a scan.** *Fix:* the page object waits for the state.
 - **One scan per page, ignoring interactive states.** *Fix:* one scan per meaningful state.
 - **Tags that stop at WCAG 2.1 AA.** *Fix:* `wcag22aa` in `Options()`.
-- **Tags or exclusions repeated per test.** They drift. *Fix:* the helper.
+- **Tags or exclusions repeated per test.** They drift. *Fix:* the `A11yScan` probe.
 - **`if (result.Incomplete.Length > 0) TestContext.Out.WriteLine(…)`.** A condition in a test, and silent in
-  CI. *Fix:* the helper attaches the incompletes on every scan.
-- **`Page.GotoAsync` or `RunAxe` in a test.** *Fix:* the page objects and the helper.
+  CI. *Fix:* the probe attaches the incompletes on every scan.
+- **`Page.GotoAsync` or `RunAxe` in a test.** *Fix:* the page objects and the probe.
 - **`Assert.That(result.Violations.Length == 0, Is.True)`.** The boolean drops the evidence. *Fix:* the rule
   ids `Is.Empty`, with a message.
 - **A whole-page scan for one new component.** Legacy debt drowns the regression. *Fix:* `ScanAsync(locator)`.
@@ -297,7 +297,7 @@ needed — the contrast with Percy's and Applitools' keys.
 ## Rules
 
 - `Deque.AxeCore.Playwright` 4.13.0, pinned in `Directory.Packages.props`.
-- WCAG 2.2 AA tags, exclusions and false positives live in one helper, built in the class's `[SetUp]`.
+- WCAG 2.2 AA tags, exclusions and false positives live in one probe, built in the class's `[SetUp]`.
 - One logical assertion per test: the violation ids `Is.Empty` with a message naming the subject, or a named
   subset.
 - Stabilize through the page object before a scan; scan once per meaningful state.

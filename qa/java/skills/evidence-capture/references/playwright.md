@@ -41,7 +41,7 @@ on failure, before the trace stops and the context closes, and attaches it. Its 
 
 ### 1.3 A screenshot at a chosen point
 
-An `Evidence` helper sits beside the page objects and is built in the test class's own `@BeforeMethod`. The
+An `Evidence` object sits beside the page objects and is built in the test class's own `@BeforeMethod`. The
 test calls it; it never calls `page`.
 
 ```java
@@ -127,45 +127,91 @@ A receipt starts in the class's `@BeforeMethod` and stops in its `@AfterMethod`,
 screencast and a failing `@AfterMethod` would skip the rest of the class:
 
 ```java
-package com.example.uitests.tests;
+package com.example.uitests.support;
 
-import com.example.uitests.pages.CheckoutPage;
-import com.example.uitests.support.BaseTest;
+import com.microsoft.playwright.Page;
 import com.microsoft.playwright.PlaywrightException;
 import com.microsoft.playwright.Screencast;
 import com.microsoft.playwright.options.AnnotatePosition;
 import io.qameta.allure.Allure;
 import io.qameta.allure.AttachmentOptions;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+public final class Receipt {
+    private static final System.Logger LOG = System.getLogger(Receipt.class.getName());
+
+    private final Page page;
+    private final Path path;
+
+    public Receipt(Page page, Path path) {
+        this.page = page;
+        this.path = path;
+    }
+
+    public void start() {
+        page.screencast().start(new Screencast.StartOptions().setPath(path));
+        page.screencast().showActions(new Screencast.ShowActionsOptions().setPosition(AnnotatePosition.TOP_RIGHT));
+    }
+
+    public void chapter(String title) {
+        page.screencast().showChapter(title);
+    }
+
+    public void keep() throws IOException {
+        if (stopped()) {
+            try (InputStream content = Files.newInputStream(path)) {
+                Allure.attachment("receipt", "video/webm", content, AttachmentOptions.withFileExtension("webm"));
+            }
+        }
+    }
+
+    private boolean stopped() {
+        try {
+            page.screencast().stop();
+            return true;
+        } catch (PlaywrightException e) {
+            LOG.log(System.Logger.Level.WARNING, "Receipt not saved to {0}: {1}", path, e.getMessage());
+            return false;
+        }
+    }
+}
+```
+
+```java
+package com.example.uitests.tests;
+
+import com.example.uitests.pages.CheckoutPage;
+import com.example.uitests.support.BaseTest;
+import com.example.uitests.support.Receipt;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 public class CheckoutReceiptTest extends BaseTest {
-    private static final System.Logger LOG = System.getLogger(CheckoutReceiptTest.class.getName());
-
-    private Path receipt;
+    private Receipt receipt;
     private CheckoutPage checkoutPage;
 
     @BeforeMethod(alwaysRun = true)
     public void startReceipt(Method method) {
-        receipt = Path.of("build", "playwright-artifacts", getClass().getSimpleName() + "." + method.getName() + ".receipt.webm");
-        page.screencast().start(new Screencast.StartOptions().setPath(receipt));
-        page.screencast().showActions(new Screencast.ShowActionsOptions().setPosition(AnnotatePosition.TOP_RIGHT));
+        receipt = new Receipt(page, Path.of("build", "playwright-artifacts", getClass().getSimpleName() + "." + method.getName() + ".receipt.webm"));
+        receipt.start();
         checkoutPage = new CheckoutPage(page);
     }
 
     @Test
     public void Should_ConfirmOrder_When_CartHasOneItem() {
         checkoutPage.open();
-        chapter("Pay");
+        receipt.chapter("Pay");
         checkoutPage.payWithSavedCard();
 
         assertThat(checkoutPage.confirmation()).hasText("Order confirmed");
@@ -173,30 +219,12 @@ public class CheckoutReceiptTest extends BaseTest {
 
     @AfterMethod(alwaysRun = true)
     public void keepReceipt() throws IOException {
-        if (screencastStopped()) {
-            try (InputStream content = Files.newInputStream(receipt)) {
-                Allure.attachment("receipt", "video/webm", content, AttachmentOptions.withFileExtension("webm"));
-            }
-        }
-    }
-
-    private boolean screencastStopped() {
-        try {
-            page.screencast().stop();
-            return true;
-        } catch (PlaywrightException e) {
-            LOG.log(System.Logger.Level.WARNING, "Receipt not saved to {0}: {1}", receipt, e.getMessage());
-            return false;
-        }
-    }
-
-    private void chapter(String title) {
-        page.screencast().showChapter(title);
+        receipt.keep();
     }
 }
 ```
 
-The catch sits in a helper that turns one named exception into a boolean and logs it, never in the hook
+The catch sits in `Receipt`'s private `stopped()`, which turns one named exception into a boolean and logs it, never in the hook
 body — the same rule the writer applies to `BaseTest.keepScreenshot`. The receipt is kept for a passing and
 a failing test alike; it sits beside the failure evidence, so CI
 uploads it with a failed run's artifacts and Allure carries it on every run.
@@ -307,7 +335,7 @@ The Node runner writes `error-context.md` (the error plus an AI-mode aria snapsh
 does not. The nearest Java evidence is the screenshot, the trace with `setAriaSnapshots(true)` read through
 `trace snapshot`, or an explicit capture:
 `page.ariaSnapshot(new Page.AriaSnapshotOptions().setMode(AriaSnapshotMode.AI))` [1.59], attached as
-`text/plain` from a helper. Adding it to every failure is a `BaseTest` change, under the D29 catch.
+`text/plain` from an evidence object like `Evidence`. Adding it to every failure is a `BaseTest` change, under the D29 catch.
 
 ## 8. Viewing and reading evidence
 

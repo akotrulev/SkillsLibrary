@@ -18,7 +18,7 @@ testImplementation("com.stripe:stripe-java:34.1.0")
 testImplementation("org.awaitility:awaitility:4.2.2")
 ```
 
-## 1. The guard and the sandbox helper
+## 1. The guard and the sandbox client
 
 `support/StripeSandbox.java`. The only place that holds the key, refuses a live one, reads provider state and owns
 cleanup.
@@ -204,7 +204,7 @@ mug costs EUR 34.00 / JPY 500.
 package com.example.apitests.tests.checkout.payments;
 
 import com.example.apitests.base.BaseTest;
-import com.example.apitests.clients.AuthHelper;
+import com.example.apitests.clients.TokenProvider;
 import com.example.apitests.clients.checkout.CheckoutClient;
 import com.example.apitests.models.checkout.OrderDto;
 import com.example.apitests.models.checkout.PayOrderDto;
@@ -233,7 +233,7 @@ public class PayOrderTest extends BaseTest {
     @BeforeMethod
     public void connectToSandbox() {
         stripe = StripeSandbox.fromEnvironment();
-        checkout = new CheckoutClient(AuthHelper.getToken(TestUsers.SHOPPER));
+        checkout = new CheckoutClient(TokenProvider.getToken(TestUsers.SHOPPER));
     }
 
     @AfterMethod(alwaysRun = true)
@@ -378,7 +378,7 @@ public void Should_RecordSecondPaidInvoice_When_MonthlySubscriptionRenews() thro
     Instant start = Instant.parse("2026-01-01T09:00:00Z");
     TestClock clock = stripe.startClock(start, "monthly renewal");
     Customer customer = stripe.customerOnClock(clock.getId(), TestCards.VISA);
-    SubscriptionClient subscriptions = new SubscriptionClient(AuthHelper.getToken(TestUsers.SHOPPER));
+    SubscriptionClient subscriptions = new SubscriptionClient(TokenProvider.getToken(TestUsers.SHOPPER));
     SubscriptionDto subscription = subscriptions.subscribe(new SubscribeDto(customer.getId(), Plans.MONTHLY_PRICE_ID), HttpStatus.SC_CREATED);
 
     stripe.advanceClock(clock.getId(), start.atZone(ZoneOffset.UTC).plusMonths(1).plusHours(2).toInstant());

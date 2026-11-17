@@ -5,7 +5,7 @@ description: Use when creating or updating a WebdriverIO Appium page object from
 
 # QA — Appium Page Object Builder (TypeScript)
 
-Turns a discovered element inventory into a **WebdriverIO page object** — a `BasePage` subclass under `src/pages/mobile/`. It consumes the element table + locator-ladder rungs from `qa/typescript/skills/mobile-screen-explorer` (or an inventory the user supplies directly) and emits/updates one screen class. This skill owns **codegen and the create/update diff** — the page-object *conventions* (base class, selector helpers, `verifyPageLoaded`, naming, return types, waits) are owned by `qa/typescript/skills/ui-test-author/appium`; load it and follow it rather than re-deriving the rules here.
+Turns a discovered element inventory into a **WebdriverIO page object** — a `BasePage` subclass under `src/pages/mobile/`. It consumes the element table + locator-ladder rungs from `qa/typescript/skills/mobile-screen-explorer` (or an inventory the user supplies directly) and emits/updates one screen class. This skill owns **codegen and the create/update diff** — the page-object *conventions* (base class, ladder finders, `verifyPageLoaded`, components, naming, return types, waits) are owned by `qa/typescript/skills/ui-test-author/appium`; load it and follow it rather than re-deriving the rules here.
 
 ## When to use
 
@@ -32,12 +32,14 @@ Turns a discovered element inventory into a **WebdriverIO page object** — a `B
 
 ## Conventions
 
-The standards an emitted screen object must meet are the qa-typescript rule files `mobile-tests.md` and `qa-typescript.md`: the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). `ui-test-author/appium` carries the `BasePage` and the scoped-component recipe. The codegen specifics:
+The standards an emitted screen object must meet are the qa-typescript rule files `page-objects.md`, `mobile-tests.md` and `qa-typescript.md`: the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). `ui-test-author/appium` carries the `BasePage` and the component recipe. The codegen specifics:
 
-- Element access goes through the inherited selector helpers, in ladder order: `byTestId` (iOS `~`, Android `id=`) → native query (`byIosPredicate` · `byIosClassChain` · `byAndroidUiAutomator`, the last secondary because Google is deprecating `UiSelector`) → `byXPath`. An XPath rung is a temporary scaffold: when `mobile-screen-explorer` later reports a stronger locator, downgrade to it and drop its row from `missing-testids.md`.
-- Each locator id is a `private static readonly {ELEMENT}_ID` constant (a fallback is `{ELEMENT}_XPATH_FALLBACK`); elements are `private get` accessors calling the matching helper.
+- Element access goes through the inherited ladder finders, in ladder order: `byTestId` (iOS `~`, Android `id=`) → native query (`byIosPredicate` · `byIosClassChain` · `byAndroidUiAutomator`, the last secondary because Google is deprecating `UiSelector`) → `byXPath`. An XPath rung is a temporary scaffold: when `mobile-screen-explorer` later reports a stronger locator, downgrade to it and drop its row from `missing-testids.md`.
+- Each locator id is a `private static readonly {ELEMENT}_ID` constant (a fallback is `{ELEMENT}_XPATH_FALLBACK`); elements are `private get` accessors calling the matching finder. A screen exposes intent actions and value queries (text, a boolean, a count), never an element.
 - Navigation actions return `Promise<{Destination}Page>` (`return new {Destination}Page()`); same-screen actions return `Promise<void>`.
-- Folder `src/pages/mobile/`, file `src/pages/mobile/<Screen>Page.ts`; multi-step flows in a sub-folder, repeating rows as scoped components that do not extend `BasePage`.
+- Folder `src/pages/mobile/`, file `src/pages/mobile/<Screen>Page.ts`; multi-step screens in a sub-folder.
+- A repeating row or card is a region component holding its row key and re-resolving its root through a wait condition (`assets/OrderRow.ts` in `ui-test-author/appium`). A native control (date or time picker, switch, segmented control, dropdown sheet) is a control component in `src/components/controls/` at first use, taking its root test id and exposing intent (`deliveryDate.select(date)`). Where the platforms render it differently (an iOS wheel, an Android calendar) that is two classes, never a branch inside one. Neither kind extends `BasePage`.
+- Every method is one user action, top to bottom: no boolean parameter that picks behaviour, no "if it is displayed", no platform branch outside the finder. Names state the action (`signIn`), never the outcome.
 
 ## Template
 
@@ -80,7 +82,7 @@ private get passwordReveal() { return this.byXPath(LoginPage.PASSWORD_REVEAL_XPA
 ## Procedure
 
 1. **Check for an existing page object.** Glob the project for `**/pages/mobile/**/<Screen>Page.ts` (and `**/pages/**`). Exists → this is an **update** (step 4). Missing and the project has no `pages/mobile/` at all → load `qa/typescript/skills/page-object-design` first to lay down the base class + structure.
-2. **Map every element to a constant + selector helper** using its locator-ladder rung. Test-id elements use `byTestId`; fallbacks use the matching helper and are named `*_FALLBACK`, with a row in `missing-testids.md`. Each repeating group becomes a scoped component.
+2. **Map every element to a constant + ladder finder** using its locator-ladder rung. Test-id elements use `byTestId`; fallbacks use the matching finder and are named `*_FALLBACK`, with a row in `missing-testids.md`. Each repeating group becomes a region component; each native control becomes a control component, reusing the project's class in `src/components/controls/` when one exists.
 3. **Write the class** per the conventions above: constants block, `private get` accessors, `verifyPageLoaded()` on the landmark, one intent-named `async` action per user action (returning `Promise<void>` or the destination `*Page`), one query method per datum a test reads. Stub any destination page that doesn't exist yet.
 4. **Update mode — diff before writing:**
    - New element on screen, not in class → add constant + accessor/action
@@ -89,7 +91,7 @@ private get passwordReveal() { return this.byXPath(LoginPage.PASSWORD_REVEAL_XPA
    - Fallback locator where a test id now exists → upgrade to `byTestId`, rename the constant, remove the row from `missing-testids.md`
    - Never reorder/rename existing public methods tests already call without flagging it
 5. **Verify:** `npx tsc --noEmit` (or the project equivalent) → type-checks clean. Confirm `verifyPageLoaded()`'s landmark matches what `mobile-screen-explorer` reported for this screen.
-6. **Report:** class created/updated (diff summary), counts (accessibility-id-backed / fallback / ⚠ XPath), destination stubs created, open questions.
+6. **Report:** class created/updated (diff summary), counts (accessibility-id-backed / fallback / ⚠ XPath), components reused or created, destination stubs created, open questions.
 
 ## Rules
 

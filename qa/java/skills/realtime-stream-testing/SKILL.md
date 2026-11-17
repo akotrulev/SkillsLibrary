@@ -61,7 +61,7 @@ synchronous return you can assert on the next line:
   **real port** so the WS upgrade works (an in-memory mock servlet can't upgrade)
 - Browser surface: Playwright for Java at the pin in the **Versions** table of
   `qa/java/skills/ui-test-author/playwright/SKILL.md` (this skill pins nothing; `routeWebSocket` needs ≥ 1.48).
-  Browser classes **extend J1's `BaseTest`** and reach the page through page objects and one `MockStreams` helper
+  Browser classes **extend J1's `BaseTest`** and reach the page through page objects and one `MockStreams` fixture
 - The SUT's stream client is **constructor-injected** with its URL / an `OkHttpClient` — never a hard-coded
   URL read inside an `@Test`. Test-side clients: `WebSocketProbe`, `SseProbe` (`references/details.md`)
 
@@ -109,12 +109,12 @@ raw WebSocket (OkHttp)**; **Protocol-client 2 — STOMP-over-WebSocket (Spring)*
 (OkHttp-SSE / `WebClient`)**; **Browser page objects and `MockStreams`**; **Disciplines & gotchas** (lifecycle,
 reconnect, fragmentation, socket auth, heartbeat, the real-port rule) — every real-time test applies them.
 
-## The browser helpers
+## The browser page objects and fixture
 
 Browser tests extend `BaseTest` and build these in their own `@BeforeMethod` (`references/details.md` §
 Browser page objects and `MockStreams`):
 
-| Helper | Gives the test |
+| Call | Gives the test |
 |---|---|
 | `dashboardPage.openWatchingPrices()` | navigates and returns the Playwright `WebSocket` it armed **before** navigating |
 | `dashboardPage.acmePrice()` / `statusPage.alert()` / `statusPage.notifications()` | the locators the stream drives |

@@ -58,8 +58,8 @@ happy-path skill in this library: the REST/gRPC authors assert *the dependency a
 - **cockatiel** — the resilience patterns under test (`circuitBreaker`, `retry`, `timeout`, `fallback`,
   `CircuitState`); assert their state/metrics (or assert your own retry/circuit code's effects). `opossum` is an
   alternative circuit-breaker lib if the project already uses it
-- Layout: `tests/chaos/` (the fault tests), `tests/support/chaos/` (the `ChaosProxy` helper + `startChaos` container
-  lifecycle)
+- Layout: `tests/chaos/` (the fault tests), `tests/support/chaos/` (the `ChaosProxy` fault injector, the
+  `OrderTraffic` call driver and the `startChaos` container lifecycle)
 
 ```jsonc
 // package.json (devDependencies excerpt)
@@ -84,7 +84,7 @@ happy-path skill in this library: the REST/gRPC authors assert *the dependency a
 
 ## Deep-dive reference
 
-These sections live in `references/details.md` — **read it when the task touches them**: **The mechanism — proxy BETWEEN app and dependency (idea #2)**; **The toxic helper — `tests/support/chaos/ChaosProxy.ts`**.
+These sections live in `references/details.md` — **read it when the task touches them**: **The mechanism — proxy BETWEEN app and dependency (idea #2)**; **The fault injector — `tests/support/chaos/ChaosProxy.ts`**; **The call driver — `tests/support/chaos/OrderTraffic.ts`**.
 
 ## Inject-a-fault, assert-degradation (idea #1)
 
@@ -166,6 +166,7 @@ the unit under test; Toxiproxy just supplies the sustained failure that should t
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { CircuitState } from 'cockatiel';
 import { startChaos, type ChaosFixture } from '../support/chaos/startChaos.js';
+import { OrderTraffic } from '../support/chaos/OrderTraffic.js';
 import { OrderService } from '../../src/orderService.js';
 
 describe('circuit breaker under sustained failure', () => {
@@ -181,7 +182,7 @@ describe('circuit breaker under sustained failure', () => {
     expect(breaker.state).toBe(CircuitState.Closed);   // steady
 
     await chaos.injectTimeout(0);                       // every call to the dependency now hangs+drops
-    for (let i = 0; i < 10; i++) await app.placeOrderSafely('sku-1');  // drive calls past the threshold
+    await new OrderTraffic(app).placeSafely('sku-1', 10);
 
     // The PATTERN: the breaker opened — later calls short-circuit WITHOUT hitting the dependency.
     expect(breaker.state).toBe(CircuitState.Open);
@@ -254,13 +255,9 @@ it('tolerates an intermittently resetting dependency', async () => {
   await chaos.cutConnection(0, 0.3);                    // reset the connection only 30% of the time
   const app = OrderService.connectedTo(chaos.host(), chaos.port());
 
-  // 20 calls; with retry-with-backoff the user-visible success rate should be ~100% despite a 30% fault rate.
-  let succeeded = 0;
-  for (let i = 0; i < 20; i++) {
-    if ((await app.placeOrderWithRetry('sku-1')).isSuccess) succeeded++;
-  }
+  const results = await new OrderTraffic(app).placeWithRetry('sku-1', 20);
 
-  expect(succeeded, 'retries absorb an intermittent fault').toBe(20);
+  expect(results.filter((r) => !r.isSuccess), 'retries absorb an intermittent fault').toEqual([]);
 
   await chaos.healed();
 });

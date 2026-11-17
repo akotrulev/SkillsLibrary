@@ -75,12 +75,13 @@ npx appium driver doctor xcuitest
 ├── tsconfig.json               # assets/tsconfig.json
 ├── wdio.conf.ts                # assets/wdio.conf.ts: Mocha, appium service, allure reporter
 ├── BaseTest.ts                 # assets/BaseTest.ts: the evidence hooks
-├── env.ts                      # assets/env.ts: the one requiredEnv helper
+├── env.ts                      # assets/env.ts: the env loader, requiredEnv
+├── OrderSeeder.ts              # assets/OrderSeeder.ts: the example spec's seeder
 ├── .gitignore
 ├── .env.example
 ├── README.md
 ├── src/pages/mobile/
-│   ├── BasePage.ts             # waits and the test-id helpers
+│   ├── BasePage.ts             # waits and the test-id finders
 │   ├── LoginPage.ts            # the landing screen the smoke verifies
 │   ├── OrdersPage.ts
 │   └── OrderRow.ts             # scoped component
@@ -89,17 +90,17 @@ npx appium driver doctor xcuitest
     └── orders.spec.ts
 ```
 
-The assets are one flat set. Copy the ten files, then make the three edits that the folders need:
+The assets are one flat set. Copy the eleven files, then make the three edits that the folders need:
 
 1. `wdio.conf.ts`: `specs: ['./test/specs/*.spec.ts']`.
-2. `orders.spec.ts` (and `smoke.spec.ts` below): import `requiredEnv` from `../../env.js` and the pages from `../../src/pages/mobile/<Page>.js`.
+2. `orders.spec.ts` (and `smoke.spec.ts` below): import `requiredEnv` from `../../env.js`, `OrderSeeder` from `../../OrderSeeder.js` and the pages from `../../src/pages/mobile/<Page>.js`.
 3. `tsconfig.json`: `"include": ["*.ts", "src/**/*.ts", "test/**/*.ts"]`.
 
-The page files import each other with `./`, so they stay together. `LoginPage`, `OrdersPage`, `OrderRow` and `orders.spec.ts` are the worked example: replace them with the app's own screens, or delete them and keep the bases. Commit `package-lock.json`.
+The page files import each other with `./`, so they stay together. `LoginPage`, `OrdersPage`, `OrderRow`, `OrderSeeder` and `orders.spec.ts` are the worked example: replace them with the app's own screens, or delete them and keep the bases. Commit `package-lock.json`.
 
 ## Capabilities and configuration
 
-**One mechanism:** environment variables, read by `wdio.conf.ts` through `requiredEnv`, which throws naming the missing variable. `PLATFORM` picks the capability set. There are no per-platform config files, no `wdio.android.conf.ts` / `wdio.ios.conf.ts` pair and no CLI flags for the device, and a test never branches on platform: the page's selector helper does.
+**One mechanism:** environment variables, read by `wdio.conf.ts` through `requiredEnv`, which throws naming the missing variable. `PLATFORM` picks the capability set. There are no per-platform config files, no `wdio.android.conf.ts` / `wdio.ios.conf.ts` pair and no CLI flags for the device, and a test never branches on platform: the page's locator finder does.
 
 | Variable | Used for |
 |---|---|
@@ -108,7 +109,7 @@ The page files import each other with `./`, so they stay together. `LoginPage`, 
 | `APP_PATH` | Absolute path to the `.apk`, `.app` or `.ipa` |
 | `PLATFORM_VERSION` | iOS only: the simulator or device OS version |
 | `E2E_USER`, `E2E_PASSWORD` | The test account the example flow signs in with |
-| `E2E_ORDER_NUMBER`, `E2E_ORDER_TITLE` | The seeded data the example spec asserts |
+| `API_BASE_URL`, `API_TOKEN` | The API the example spec's `OrderSeeder` creates and deletes its order through |
 | `DEVICE_FARM` | Set on a device cloud: skips the local screen recording |
 
 `.env.example`, committed, with no real values:
@@ -120,8 +121,8 @@ APP_PATH=/absolute/path/to/app.apk
 PLATFORM_VERSION=
 E2E_USER=
 E2E_PASSWORD=
-E2E_ORDER_NUMBER=
-E2E_ORDER_TITLE=
+API_BASE_URL=
+API_TOKEN=
 ```
 
 Load a local copy with `set -a; source .env; set +a`; CI injects the same names from its secret store. Credentials and the app path never go into source or `wdio.conf.ts`.
@@ -176,7 +177,7 @@ The exit gate for the project: it typechecks, `appium driver doctor` is clean fo
 
 ## Conventions (the shell only)
 
-- **No `browser.pause`.** Waits are `browser.waitUntil` or the `waitFor*` element commands, inside the page's helpers; add a new wait there, never inline.
+- **No `browser.pause`.** Waits are `browser.waitUntil` or the `waitFor*` element commands, inside the page object's methods; add a new wait there, never inline.
 - **`maxInstances: 1`** and one session per worker: one emulator serves one spec file at a time. Raise it only with more devices or a cloud grid.
 - **Screen objects expose intent, not selectors**; the test id first; the only assertion inside one is `verifyPageLoaded()`.
 - **Session lifecycle** belongs to the WDIO runner and the `beforeTest` / `afterTest` hooks in `BaseTest.ts`; a spec never creates a session.

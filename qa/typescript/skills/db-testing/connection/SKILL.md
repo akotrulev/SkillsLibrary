@@ -11,7 +11,7 @@ Wires Node 24 + TypeScript Vitest tests to talk to a **real** database — seed 
 
 - A test must verify a row was written, an FK held, a trigger fired, or a soft-delete column was set.
 - Test setup needs to seed reference data (currencies, countries, plan tiers) that production reads.
-- Async write flows need a "wait until the projection catches up" helper.
+- Async write flows need a "wait until the projection catches up" wait condition.
 - Test suite leaks data between tests and needs a deterministic cleanup strategy.
 
 ## When NOT to use
@@ -130,6 +130,7 @@ A **probe** is a small read-only module. One function per assertion. Each functi
 
 ```ts
 // tests/integration/dbclients/ordersDbProbe.ts
+import { vi } from 'vitest';
 import { getPool } from './poolFactory.js';
 
 export type RefundRow = {
@@ -165,6 +166,14 @@ export const ordersDbProbe = {
       refundedAt: row.refunded_at,
     };
   },
+
+  waitForRefund(orderId: string, opts: { timeout: number; interval: number }): Promise<RefundRow> {
+    return vi.waitFor(async () => {
+      const refund = await ordersDbProbe.getRefundFor(orderId);
+      if (refund === null) throw new Error(`No refund for order ${orderId} yet`);
+      return refund;
+    }, opts);
+  },
 };
 ```
 
@@ -177,29 +186,11 @@ Probe rules:
 
 ## Waiting for eventual consistency
 
-Async write flows (CDC, outbox → projection, queue consumer) don't surface the new row instantly. Use a deterministic poll, **not** `setTimeout`.
+Async write flows (CDC, outbox → projection, queue consumer) don't surface the new row instantly. The probe owns a **named wait condition** (`waitForRefund` above) that re-runs its own query through `vi.waitFor`, **not** `setTimeout`:
 
 ```ts
-export async function waitFor<T>(
-  probe: () => Promise<T | null>,
-  predicate: (value: T) => boolean,
-  opts: { timeoutMs: number; intervalMs: number },
-): Promise<T> {
-  const deadline = Date.now() + opts.timeoutMs;
-  while (Date.now() < deadline) {
-    const value = await probe();
-    if (value !== null && predicate(value)) return value;
-    await new Promise((r) => setTimeout(r, opts.intervalMs));
-  }
-  throw new Error(`Probe did not satisfy predicate within ${opts.timeoutMs}ms.`);
-}
-
-// Usage
-const refund = await waitFor(
-  () => ordersDbProbe.getRefundFor(orderId),
-  (r) => r.amountMinor === 15_000,
-  { timeoutMs: 5_000, intervalMs: 100 },
-);
+const refund = await ordersDbProbe.waitForRefund(orderId, { timeout: 5_000, interval: 100 });
+expect(refund.amountMinor).toBe(15_000);
 ```
 
 `5_000ms` is a sane default locally; bump in CI if needed. **Never** `await new Promise((r) => setTimeout(r, 5000));` as the assertion.
@@ -250,7 +241,7 @@ Order the deletes by FK dependency.
 - Seeders write; probes read; SUT does the business action. Each module has one job.
 - Probes are read-only and explicitly project columns (no `SELECT *`).
 - Every parameter is bound via `$1, $2, …` (or Knex's `.where({...})` placeholders) — never string-template values.
-- `setTimeout` is forbidden as the assertion wait — use the polling helper with a predicate.
+- `setTimeout` is forbidden as the assertion wait — use the probe's named wait condition.
 - `BIGINT` results from `pg` are strings — convert explicitly; never compare a string `'15000'` to a number `15000`.
 - Default cleanup is `TRUNCATE … CASCADE` per test; transactional rollback only when feasible.
 - Constructor-injection-style modules — accept the pool / connection as an argument or rely on the shared `getPool()` getter; never `new pg.Client(...)` per test.
@@ -278,7 +269,7 @@ Order the deletes by FK dependency.
 1. Confirm engine (Postgres default), schema-source (`node-pg-migrate` / Prisma), and which assertion queries each new test needs.
 2. Add `poolFactory.ts` if not present; call `initPool(...)` in fixture `beforeAll` with the container's connection config.
 3. For each new test set, scaffold an `<aggregate>Seeder.ts` (write) and `<aggregate>DbProbe.ts` (read), reusing factories from `qa/typescript/skills/test-data-builder`.
-4. Add the `waitFor` polling helper if the SUT involves async projections.
+4. Give the probe a named wait condition (`waitFor<Row>`) if the SUT involves async projections.
 5. Pick a cleanup strategy (`TRUNCATE … CASCADE` default); wire `beforeEach`.
 6. Run the project's own test script with the package manager `packageManager` names — every test passes; no leaks between specs.
 7. Run `tsc --noEmit` — strict TS green.

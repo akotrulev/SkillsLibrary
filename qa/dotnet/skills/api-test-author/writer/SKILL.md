@@ -48,7 +48,7 @@ source) and reported `MISSING` instead of guessed.
 
 ## Rules
 
-The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `automation.md` and `api.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `automation.md`, `api.md` and `test-data.md` (reference data, pre-clean, keep on failure). Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Conventions
 
@@ -59,14 +59,21 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 
 ### Assertion templates
 - **Happy path (200):** the typed overload; assert every request field on the response, every server-generated field (`Status`, `CreatedOn`, `UpdatedOn`, …), then `GetById` for the persistence round-trip. A one-field check is only for a trivial read.
-- **400 / 404 / 422:** the raw overload, `AttachBody(response)`, then status → `Deserialize<ProblemDetailsDto>(response)` → tracking fields (`TraceId`, `RequestId`, `Instance`) → `Type`, `Title`, `Status` → the `Errors` dictionary (400) or `ErrorCode` and extension fields (404/422). `TryProblem` is the lenient helper for a documented defect whose body may not parse (a 500).
-- `Deserialize<T>(response)` on `BaseApiTest` is the one place that catches `JsonException`: it rethrows with the property path, the target type and the raw body, so a parse failure reads as contract drift.
+- **400 / 404 / 422:** the raw overload, `AttachBody(response)`, then status → `Deserialize<ProblemDetailsDto>(response)` → tracking fields (`TraceId`, `RequestId`, `Instance`) → `Type`, `Title`, `Status` → the `Errors` dictionary (400) or `ErrorCode` and extension fields (404/422). `TryProblem` is the lenient deserializer for a documented defect whose body may not parse (a 500).
+- `Deserialize<T>(response)` on `BaseApiTest` is the one place that catches `JsonException`: it rethrows with the property path, the target type and the raw body, so a parse failure reads as contract drift. Its options set `UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow`, so an undeclared response field is drift too (`api-models` § Strict deserialization).
 
 ### Test data setup and cleanup
 - `[SetUp]` / `[OneTimeSetUp]` may create data into instance fields; a `[TearDown]` deletes it. Ids created in a test body go into `_createdIds` on the fixture and `[TearDown]` deletes them.
+- **Read-only reference data**: a list, search or filter test may read curated data the environment holds, named by a constant in the fixture and never modified; it asserts the result is not empty before asserting on every item.
+- **Pre-clean**: a test that uses a fixed name first deletes any leftover with that name through the client or seeder in `[SetUp]`; the `[TearDown]` still deletes what the test created.
+- **Keep on failure**: where the suite keeps a failed test's data, `BaseApiTest`'s teardown registry deletes on a pass and logs the kept ids on a failure; names are then unique per run. The rules for all three are in `test-data.md`.
 - A precondition only some tests need is set up inline as their first step, not in `[SetUp]`. Client instances in `[SetUp]` / `[TearDown]` are created inline, not stored.
 - **Trading accounts** are fetched, never created: `new AccountClient(AuthToken).GetAll(HttpStatusCode.OK).First(a => a.AccountType == "Trading")`; no `[TearDown]` for them.
 - **Payment methods** follow tokenize → create: `PaymentMethodClient.Tokenize(accountId, PaysafeTestCards.Build(PaysafeTestCard.VisaUs1, currency), HttpStatusCode.OK)` returns a `TokenizedMethodDto`; pass its `Token` and `Last4` into `MethodInDto` with `Type = "Card"`, `ExpiryMonth` / `ExpiryYear` (`PaysafeTestCards.DefaultExpiryMonth/Year`) and the currency. Never hardcode a card number; use the `PaysafeTestCards` enum in `ApiTests/TestData/PaysafeTestCards.cs`. Delete with `methodClient.Delete(account.Id, method.Id)` in `[TearDown]`; `[OneTimeSetUp]` when the method is read-only across tests, `[SetUp]` when tests mutate or delete it.
+
+### Scenario sets
+- **CRUD resource**: create (round-trip), get, update, delete, 400 / 404 / 422, and 401 per endpoint. A delete is proven by a following raw `GetById` that returns `404`, not by the delete's `204` alone. An update is one test per changed field: clone the seeded body (`{Resource}InDtoBuilder.From(seeded)`), change that one field, then assert it changed and the other fields kept their values. A full update (PUT) compares the whole fetched object with the expected one when the DTO is a `record` (value equality); a class DTO compares field by field.
+- **Read-only / search endpoint** (beside the CRUD set, over reference data): the list returns the requested page size; a filter holds on every returned item (`Is.Not.Empty`, then `Is.All` over the projected field, never `items[0]` or a loop); get-by-id of a listed item matches the list item. Query parameters come from a typed builder (`qa/dotnet/skills/test-data-builder` § Query-parameter builder). Templates: `references/details.md` § Read-only / search scenario set.
 
 ### Deserialization
 - Positive tests get the DTO from the typed overload; negative or structural tests use `Deserialize<T>(response)`.
@@ -77,7 +84,7 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 0. Establish the **source of truth** (see *Source of truth & input modes*). From an **OpenAPI/Swagger spec**, derive resources, endpoints, body shapes, and the scenario set per endpoint — skip the interactive questions the spec already answers. From a **test-case document**, map one test method per TC-ID and tag it for traceability. Only fall back to steps 1–3 for verbal scenarios.
 1. Ask: **new fixture** or **adding methods to an existing fixture**?
 2. Ask: which client/resource to use.
-3. Ask: which scenario(s) to cover (happy path, unauthorized, not found, validation error, etc.).
+3. Ask: which scenario(s) to cover (happy path, unauthorized, not found, validation error, etc.), from the CRUD set or the read-only / search set (*Scenario sets*).
 4. Write the scenario × oracle table (`references/generation-checks.md` §1) — no test code before it exists.
 5. Read the canonical example `ApiTests/Tests/RecurringDepositTests.cs` to confirm the expected style for both templates before generating.
 6. If the DTO doesn't exist yet, use the `qa/dotnet/skills/api-models` skill to generate it. If the test asserts a `ProblemDetails` extension field that's missing from `ProblemDetailsDto` (e.g. a new `{entity}Id`), add it via `qa/dotnet/skills/api-models` rather than reading from `Errors`.

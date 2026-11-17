@@ -74,10 +74,12 @@ network. **Never `setTimeout` for readiness** — use a
 ```typescript
 // test/fixtures/serviceBusBroker.ts
 import { GenericContainer, Network, Wait, type StartedTestContainer } from "testcontainers";
+import { ServiceBusClient } from "@azure/service-bus";
 import path from "node:path";
 
 export interface Broker {
   connectionString: string;
+  drain: (queue: string) => Promise<void>;
   stop: () => Promise<void>;
 }
 
@@ -110,11 +112,23 @@ export async function startServiceBusBroker(): Promise<Broker> {
 
   const host = emulator.getHost();
   const port = emulator.getMappedPort(5672);
+  // Emulator connection string — surfaced for injection, never logged.
+  const connectionString =
+    `Endpoint=sb://${host}:${port};SharedAccessKeyName=RootManageSharedAccessKey;` +
+    `SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;`;
+
+  const drain = async (queue: string): Promise<void> => {
+    const client = new ServiceBusClient(connectionString);
+    const receiver = client.createReceiver(queue, { receiveMode: "receiveAndDelete" });
+    let batch = await receiver.receiveMessages(10, { maxWaitTimeInMs: 500 });
+    while (batch.length > 0) batch = await receiver.receiveMessages(10, { maxWaitTimeInMs: 500 });
+    await receiver.close();
+    await client.close();
+  };
+
   return {
-    // Emulator connection string — surfaced for injection, never logged.
-    connectionString:
-      `Endpoint=sb://${host}:${port};SharedAccessKeyName=RootManageSharedAccessKey;` +
-      `SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;`,
+    connectionString,
+    drain,
     stop: async () => {
       await emulator.stop();
       await sql.stop();
@@ -383,8 +397,8 @@ describe("fulfilment consumer", () => {
 
   beforeEach(async () => {
     client = new ServiceBusClient(broker.connectionString);
-    await drain(client, "orders");    // independent tests — start from empty
-    await drain(client, "shipments");
+    await broker.drain("orders");    // independent tests — start from empty
+    await broker.drain("shipments");
   });
   afterEach(async () => { await client.close(); });
 
@@ -405,13 +419,6 @@ describe("fulfilment consumer", () => {
     expect(ready.correlationId).toBe(orderId); // correlation preserved
   });
 });
-
-async function drain(client: ServiceBusClient, queue: string): Promise<void> {
-  const receiver = client.createReceiver(queue, { receiveMode: "receiveAndDelete" });
-  let batch = await receiver.receiveMessages(10, { maxWaitTimeInMs: 500 });
-  while (batch.length > 0) batch = await receiver.receiveMessages(10, { maxWaitTimeInMs: 500 });
-  await receiver.close();
-}
 ```
 
 Lifecycle for this test:

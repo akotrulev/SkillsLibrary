@@ -49,4 +49,4 @@ if (p95 > 300)           Environment.Exit(1);   // p95 latency SLO
 if (fail > 0.005)        Environment.Exit(1);   // error-rate SLO
 ```
 
-Wrap in a small helper and call from `Program.cs`. Non-zero exit fails the pipeline step. Prefer the post-run check for the build gate because it's explicit and unit-testable; use runtime thresholds for fail-fast and report annotations.
+Wrap in a small `SloGate` class and call it from `Program.cs`. Non-zero exit fails the pipeline step. Prefer the post-run check for the build gate because it's explicit and unit-testable; use runtime thresholds for fail-fast and report annotations.

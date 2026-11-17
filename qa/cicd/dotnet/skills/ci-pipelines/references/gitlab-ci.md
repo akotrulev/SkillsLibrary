@@ -250,6 +250,7 @@ ui-tests:
 - `BASE_URL`, `E2E_USER` and `E2E_PASSWORD` come through OIDC: `BaseTest` throws without `BASE_URL`, and the root-namespace `AuthSetup` signs in once per shard before any fixture runs. The image ships no AWS CLI, as for the other jobs.
 - **One `artifacts:` block per job**, so the failure evidence rides with the Allure results under one `expire_in`. `playwright-artifacts/` is empty on a green run — `BaseTest` writes it on failure only — so the 14-day bucket stays small. There is no Playwright "trace config" in .NET to tune; the keep-on-failure behaviour is `BaseTest`'s code.
 - The quarantine lane is a second job with the same script minus the shard lines, running `--filter "TestCategory=Flaky"` with `allow_failure: true` and no `parallel:` — the one non-gating exception (`qa/reporting/dotnet/skills/flaky-test-quarantine`).
+- **Running the suite's own image** (`docker build` + `docker run` of its `Dockerfile`, report on a mounted folder): the *Container lane* in this skill's `SKILL.md`, in a `docker:27-cli` job on the `docker:27-dind` service shown above, with every `-v` source under `$CI_PROJECT_DIR`. The job gates like any test job: no `allow_failure`.
 
 ### Allure publish with history — `publish` stage (GitLab Pages)
 

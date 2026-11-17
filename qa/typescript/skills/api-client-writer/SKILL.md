@@ -31,10 +31,11 @@ Clients are organized by API group. **One module per resource**; user-facing and
 src/
 ├── clients/
 │   ├── baseClient.ts                 ← shared fetch wrapper, auth, logging
-│   ├── authHelper.ts
 │   ├── authConfigClient.ts           ← root, unauthenticated
 │   └── {api}/
 │       └── {resource}Client.ts       ← one file per resource
+├── auth/
+│   └── tokens.ts                     ← per-user token providers (test-login-tokens)
 ├── config/
 │   └── environment.ts
 └── models/
@@ -232,8 +233,8 @@ async function getAll(page: number, perPage: number): Promise<ApiResponse> {
 
 - Accepts a single `jwt: string`; pass `''` for unauthenticated clients (`authConfigClient`) — `baseClient` must skip the Authorization header when empty.
 - Resolves `apiUri` from `getTestEnvironment()` exactly once on construction.
-- Delegates HTTP to `createBaseClient({ baseUrl, authToken })` and uses only the returned `execute(...)` helper.
-- Never calls `authHelper.getToken(...)` inside the client — tests fetch the token and pass it in.
+- Delegates HTTP to `createBaseClient({ baseUrl, authToken })` and uses only the returned `execute(...)` function.
+- Never fetches a token inside the client — the spec calls the user's provider (`await testUserTokens.getAccessToken()`, from `test-login-tokens`) and passes the result in.
 - Never reads env vars directly; always go through the config loader.
 - Never mutates global state (no monkey-patching `fetch`, no global headers).
 
@@ -251,7 +252,8 @@ async function getAll(page: number, perPage: number): Promise<ApiResponse> {
 - Endpoints with no body get only the raw method.
 - The typed method calls the raw method — never duplicate request building.
 - Bodies are strongly-typed (`ResourceInDto`, `ResourceModDto`), not `unknown` / `Record<string, any>`.
-- Use Zod's `parse(response.bodyJson)` in typed methods — never `JSON.parse` directly; `baseClient` already parses JSON into `bodyJson: unknown`.
+- Use Zod's `parse(response.bodyJson)` in typed methods — never `JSON.parse` directly; `baseClient` already parses JSON into `bodyJson: unknown`. The response schemas are `.strict()` (`api-models`), so a field the contract does not declare fails the typed call; never loosen a schema to make a call pass.
+- A search endpoint takes the suite's typed parameter object (`OrderSearchParams`, built by `test-data-builder`'s query-parameter builder) and turns it into the query string with `URLSearchParams` — never positional strings or an untyped map.
 - One-line comment on the raw method only; not repeated on the typed overload.
 
 ### Method naming
@@ -286,7 +288,7 @@ async function createRaw(rawJson: string): Promise<ApiResponse> {
 When the test plan includes **extra/missing property** scenarios:
 
 ```ts
-// Accepts a pre-built body (e.g. from jsonBodyHelper) for body manipulation tests.
+// Accepts a pre-built body (e.g. from a `RequestBodyBuilder`) for body manipulation tests.
 async function createUnchecked(body: Record<string, unknown>): Promise<ApiResponse> {
   return execute({ method: 'POST', path: POST_PATH, jsonBody: body });
 }

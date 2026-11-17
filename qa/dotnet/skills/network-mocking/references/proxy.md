@@ -7,7 +7,7 @@ network: point the client at it, then **read** what it sent, **assert** on it, a
 status, a dropped connection). Cross-browser and cross-client by construction; the cost is **TLS
 interception** — the client must trust the proxy's root certificate.
 
-The proxy and every capture and fault rule live in one `ProxyControls` helper with intent names, built in the
+The proxy and every capture and fault rule live in one `ProxyControls` object with intent names, built in the
 class's `[SetUp]` and stopped in its `[TearDown]` — never `proxy.BeforeRequest += …` in a test. Every wait is
 a client-visible signal; there is no `Thread.Sleep` and no `Task.Delay` in this file.
 
@@ -69,7 +69,7 @@ below was read from the `Titanium.Web.Proxy` sources at the 7.0.22 release commi
 | Trust in the client | `CertificateManager.RootCertificate` | Pin it in the client; never install it in the OS store from a test |
 | Stop | `BeforeRequest -= …`, `await StopAsync()`, `Dispose()` | In `[TearDown]` |
 
-## 1. The helper — `Support/Proxy/ProxyControls.cs`
+## 1. The proxy controls — `Support/Proxy/ProxyControls.cs`
 
 ```csharp
 using System.Collections.Concurrent;
@@ -166,7 +166,7 @@ public sealed class ProxyControls : IAsyncDisposable
 - **Headers are a lookup**: a name can repeat, and the lookup is case-insensitive, so
   `request.Headers["x-tenant"]` is the sequence of values (empty when absent).
 - **The traffic log is scrubbed** of `Authorization` and `Cookie` before it is written; bodies are left out.
-- The one `if` and the fault lookup live in the helper; tests stay straight lines.
+- The one `if` and the fault lookup live in `ProxyControls`; tests stay straight lines.
 
 ## 2. Point the client at the proxy
 
@@ -205,7 +205,7 @@ public static class ProxiedClients
   test browser; it is what lets the proxy's per-run certificates through without touching the OS store.
 - **`HttpClient`** pins the proxy's root through `IssuedByProxy` (§1).
 - **Appium** sets the device's proxy (Wi-Fi proxy or the driver's proxy capability) and installs the
-  certificate from `CertificateManager.RootCertificate` on the device or emulator; the helper is unchanged.
+  certificate from `CertificateManager.RootCertificate` on the device or emulator; `ProxyControls` is unchanged.
 
 ## 3. The page object, the hooks and the tests
 

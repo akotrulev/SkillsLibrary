@@ -20,7 +20,7 @@ a test body, never a module-level `let proxy`. Every wait is a client-visible si
 - `mockttp` — `getLocal`, `generateCACertificate`, `forGet` / `forPost` / `forUnmatchedRequest`,
   `thenPassThrough` / `thenJson` / `thenCloseConnection` / `thenTimeout`, `MockedEndpoint.getSeenRequests()`.
 - `selenium-webdriver`, WebdriverIO (Appium) or a plain HTTP client as the client under test.
-- Helpers under `tests/support/proxy/`.
+- `ProxyControls`, the fixtures and the page objects under `tests/support/proxy/`.
 
 ## When to use
 

@@ -44,7 +44,7 @@ Two axes of privilege escalation, both covered by the matrix:
 > **403 vs 404 — pin the project's leak policy.** Returning `403 Forbidden` for someone else's object
 > *confirms the object exists* (an enumeration/info leak). Many threat models prefer `404 Not Found` for
 > cross-tenant access so existence isn't disclosed. **Decide the policy per project and assert it
-> explicitly** — don't accept "either 4xx". The helper below takes the expected status so the policy is
+> explicitly** — don't accept "either 4xx". The deny assertion below takes the expected status so the policy is
 > codified, not assumed.
 
 ## The matrix model — the core of the skill
@@ -58,26 +58,28 @@ independent, named test.
 
 ```ts
 // src/security/access-control/actors.ts
-import { getUserToken, getM2MToken } from "../../auth/auth0TestTokens"; // qa/.../test-login-tokens
+import { adminTokens, aliceTokens, bobTokens } from "../../auth/tokens";
 
 /** A test actor = a seeded identity + a lazily-cached bearer token for it. */
 export interface Actor {
   readonly name: string;
-  /** Resolve a Bearer token for this actor (cached for its lifetime by the auth0 helper). */
+  /** Resolve a Bearer token for this actor (cached for its lifetime by the token provider). */
   token(): Promise<string>;
 }
 
 // Credentials come from env, read lazily — never inline (CLAUDE.md: no secrets in code).
-export const ALICE: Actor = { name: "alice", token: () => getUserToken("ALICE") };
-export const BOB:   Actor = { name: "bob",   token: () => getUserToken("BOB") };
-export const ADMIN: Actor = { name: "admin", token: () => getUserToken("ADMIN") };
+export const ALICE: Actor = { name: "alice", token: () => aliceTokens.getAccessToken() };
+export const BOB:   Actor = { name: "bob",   token: () => bobTokens.getAccessToken() };
+export const ADMIN: Actor = { name: "admin", token: () => adminTokens.getAccessToken() };
 export const ANON:  Actor = { name: "anonymous", token: async () => "" }; // no Authorization header
 ```
+
+`aliceTokens`, `bobTokens` and `adminTokens` are one cached provider per seeded user, each a line in the `tokens.ts` that `qa/typescript/skills/test-login-tokens` generates.
 
 ### Seed data each actor owns (builders, not inline literals)
 
 ```ts
-// src/security/access-control/fixtures.ts
+// src/security/access-control/invoiceSeeder.ts
 import { invoicesClient } from "../../clients/billing/invoicesClient";
 import { ALICE, BOB } from "./actors";
 
@@ -87,17 +89,19 @@ export interface OwnedResource { ownerName: string; id: string; }
  * Create one invoice owned by each peer user, returning their ids. Run once in beforeAll; torn down in
  * afterAll. Each test reads these — no test mutates another's fixture (CLAUDE.md: tests are independent).
  */
-export async function seedInvoices(): Promise<{ alice: OwnedResource; bob: OwnedResource }> {
-  const alice = await invoicesClient.create(await ALICE.token(), { amount: 100, currency: "EUR" });
-  const bob   = await invoicesClient.create(await BOB.token(),   { amount: 200, currency: "EUR" });
-  return {
-    alice: { ownerName: ALICE.name, id: alice.id },
-    bob:   { ownerName: BOB.name,   id: bob.id },
-  };
-}
+export const invoiceSeeder = {
+  async onePerPeer(): Promise<{ alice: OwnedResource; bob: OwnedResource }> {
+    const alice = await invoicesClient.create(await ALICE.token(), { amount: 100, currency: "EUR" });
+    const bob   = await invoicesClient.create(await BOB.token(),   { amount: 200, currency: "EUR" });
+    return {
+      alice: { ownerName: ALICE.name, id: alice.id },
+      bob:   { ownerName: BOB.name,   id: bob.id },
+    };
+  },
+};
 ```
 
-### The deny helper — codify the policy
+### The deny assertion — codify the policy
 
 ```ts
 // src/security/access-control/assertDenied.ts
@@ -123,13 +127,13 @@ export function expectDenied(res: ApiResponse<unknown>, expectedStatus: 401 | 40
 import { beforeAll, afterAll, describe, it } from "vitest";
 import { invoicesClient } from "../../clients/billing/invoicesClient";
 import { ALICE, BOB, ANON } from "./actors";
-import { seedInvoices, type OwnedResource } from "./fixtures";
+import { invoiceSeeder, type OwnedResource } from "./invoiceSeeder";
 import { expectDenied } from "./assertDenied";
 
 describe("API1:2023 BOLA — invoice object-level authorization (WSTG-ATHZ-04)", () => {
   let alice: OwnedResource;
   let bob: OwnedResource;
-  beforeAll(async () => { ({ alice, bob } = await seedInvoices()); });
+  beforeAll(async () => { ({ alice, bob } = await invoiceSeeder.onePerPeer()); });
   afterAll(async () => {
     await invoicesClient.delete(await ALICE.token(), alice.id);
     await invoicesClient.delete(await BOB.token(), bob.id);
@@ -142,22 +146,20 @@ describe("API1:2023 BOLA — invoice object-level authorization (WSTG-ATHZ-04)",
   });
 
   // The matrix of cross-user / privilege rows. 404 here = this project hides existence cross-tenant.
+  const get = (t: string, id: string) => invoicesClient.getRaw(t, id);
+  const put = (t: string, id: string) => invoicesClient.updateRaw(t, id, { amount: 1 });
+  const del = (t: string, id: string) => invoicesClient.deleteRaw(t, id);
+
   it.each([
-    { caller: ALICE, target: () => bob,   action: "GET",    expected: 404 as const },
-    { caller: ALICE, target: () => bob,   action: "PUT",    expected: 404 as const },
-    { caller: ALICE, target: () => bob,   action: "DELETE", expected: 404 as const },
-    { caller: BOB,   target: () => alice, action: "GET",    expected: 404 as const },
-    { caller: ANON,  target: () => alice, action: "GET",    expected: 401 as const },
+    { caller: ALICE, target: () => bob,   action: "GET",    send: get, expected: 404 as const },
+    { caller: ALICE, target: () => bob,   action: "PUT",    send: put, expected: 404 as const },
+    { caller: ALICE, target: () => bob,   action: "DELETE", send: del, expected: 404 as const },
+    { caller: BOB,   target: () => alice, action: "GET",    send: get, expected: 404 as const },
+    { caller: ANON,  target: () => alice, action: "GET",    send: get, expected: 401 as const },
   ])(
     "Should_deny_$expected_When_$caller.name_does_$action_on_others_invoice",
-    async ({ caller, target, action, expected }) => {
-      const token = await caller.token();
-      const id = target().id;
-      const res =
-        action === "GET"    ? await invoicesClient.getRaw(token, id) :
-        action === "PUT"    ? await invoicesClient.updateRaw(token, id, { amount: 1 }) :
-                              await invoicesClient.deleteRaw(token, id);
-      expectDenied(res, expected);
+    async ({ caller, target, send, expected }) => {
+      expectDenied(await send(await caller.token(), target().id), expected);
     },
   );
 });

@@ -29,8 +29,8 @@ Load `qa/_shared/performance` for workload models, open-loop vs closed-loop guid
 ```
 tests/perf/
 ├── lib/
-│   ├── auth.js                 ← token fetch / refresh helper
-│   ├── fixtures.js             ← setup() / teardown() shared helpers
+│   ├── auth.js                 ← token provider: fetch / refresh
+│   ├── fixtures.js             ← setup() / teardown() shared by the scripts
 │   └── env.js                  ← BASE_URL / TOKEN resolution
 ├── orders-smoke.js             ← smoke
 ├── orders-average.js           ← average load

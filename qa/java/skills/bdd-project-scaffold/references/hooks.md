@@ -138,6 +138,28 @@ public class Hooks {
 - A `Playwright` per scenario, created and closed on the scenario's thread, is the simplest shape that keeps
   Playwright's thread rule — including if `cucumber.execution.parallel.enabled` is turned on later.
 
+## Data cleanup hook
+
+Data a scenario created is registered on `TestContext` as it is created and removed by its own `@After` hook at
+the default order, which runs before the order-0 browser hook. Where the suite keeps what a failed scenario left
+for investigation (`qa-java-data.md`), the hook deletes on a pass and logs the kept ids on a failure; names are
+unique per run, so a kept record never collides with the next run. The `isFailed()` check is the teardown
+registry's legal branch, never a step's:
+
+```java
+@After
+public void deleteCreatedDeals(Scenario scenario) {
+    if (scenario.isFailed()) {
+        LOG.log(System.Logger.Level.WARNING, "Kept deals {0} from failed {1}", context.createdDeals(), scenario.getName());
+    } else {
+        context.dealSeeder().deleteAll(context.createdDeals());
+    }
+}
+```
+
+A pre-clean (`Given the deal "Spring Promo" does not exist`) is a step, not a hook: it runs before the scenario
+acts, through the same API seeder, and the cleanup hook still deletes what the scenario creates.
+
 ## Mobile hook
 
 `@Before("@mobile")` / `@After("@mobile")` for a scenario tagged `@mobile`, next to the web `Hooks`. It sits beside the project's existing `AppiumDriverFactory` (`qa/java/skills/ui-test-author/appium/assets/`), keeps the same R7 evidence as `BaseMobileTest` under `build/appium-artifacts/`, and names files the same way as the web hook (`evidenceName`). The recording (`startRecordingScreen` per scenario, kept only on failure) is added the way `BaseMobileTest` does it; `qa/java/skills/evidence-capture/references/appium.md` § 4 has the limits.

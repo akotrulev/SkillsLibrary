@@ -36,7 +36,8 @@ Messaging tests assert one of two things about an **async** flow:
 ```
 src/test/java/.../messaging/
 ├── ServiceBusTestBase.java     ← boots the emulator (+MS SQL), exposes the connection string
-├── ServiceBusProbe.java        ← test-side receive/peek helpers (read messages + DLQ)
+├── ServiceBusProbe.java        ← test-side receive/peek probe (read messages + DLQ)
+├── ServiceBusSeeder.java       ← test-side sender (seeds input messages)
 └── OrderPublishingTest.java
 src/test/resources/
 └── Config.json                 ← declares the namespace + queues/topics the tests use
@@ -89,6 +90,8 @@ public abstract class ServiceBusTestBase {
 
     // Intent, not the container handle. Secrets (the emulator string) are surfaced, never logged.
     protected String connectionString;
+    protected ServiceBusProbe probe;
+    protected ServiceBusSeeder seeder;
 
     @BeforeClass(alwaysRun = true)
     public void startBroker() {
@@ -100,6 +103,8 @@ public abstract class ServiceBusTestBase {
                 .withMsSqlServerContainer(mssql);                           // the required store
         emulator.start();
         connectionString = emulator.getConnectionString();
+        probe = new ServiceBusProbe(connectionString);
+        seeder = new ServiceBusSeeder(connectionString);
     }
 
     @AfterClass(alwaysRun = true)
@@ -139,6 +144,96 @@ public abstract class ServiceBusTestBase {
 > determinism; a shared cloud namespace makes tests order-dependent unless each uses a unique
 > queue/subscription.
 
+## The test-side reader and sender — `ServiceBusProbe`, `ServiceBusSeeder`
+
+The probe reads with **receive-and-delete** (a test only wants to see what is there) and the seeder sends.
+Each opens its client per call in try-with-resources, so no test body holds a `try`.
+
+```java
+import com.azure.messaging.servicebus.*;
+import com.azure.messaging.servicebus.models.ServiceBusReceiveMode;
+import com.azure.messaging.servicebus.models.SubQueue;
+
+
+import java.time.Duration;
+
+public final class ServiceBusProbe {
+
+    private final ServiceBusClientBuilder builder;
+
+    public ServiceBusProbe(String connectionString) {
+        this.builder = new ServiceBusClientBuilder().connectionString(connectionString);
+    }
+
+    /** One message from `queue` within `timeout`, deleted on read; null when nothing arrived in the window. */
+    public ServiceBusReceivedMessage receive(String queue, Duration timeout) {
+        try (ServiceBusReceiverClient receiver = builder.receiver()
+                .receiveMode(ServiceBusReceiveMode.RECEIVE_AND_DELETE).queueName(queue).buildClient()) {
+            return first(receiver, timeout);
+        }
+    }
+
+    public ServiceBusReceivedMessage receiveFromSubscription(String topic, String subscription, Duration timeout) {
+        try (ServiceBusReceiverClient receiver = builder.receiver()
+                .receiveMode(ServiceBusReceiveMode.RECEIVE_AND_DELETE)
+                .topicName(topic).subscriptionName(subscription).buildClient()) {
+            return first(receiver, timeout);
+        }
+    }
+
+    public ServiceBusReceivedMessage receiveDeadLetter(String queue, Duration timeout) {
+        try (ServiceBusReceiverClient receiver = builder.receiver()
+                .receiveMode(ServiceBusReceiveMode.RECEIVE_AND_DELETE)
+                .queueName(queue).subQueue(SubQueue.DEAD_LETTER).buildClient()) {
+            return first(receiver, timeout);
+        }
+    }
+
+    public long count(String queue, int maxMessages, Duration timeout) {
+        try (ServiceBusReceiverClient receiver = builder.receiver()
+                .receiveMode(ServiceBusReceiveMode.RECEIVE_AND_DELETE).queueName(queue).buildClient()) {
+            return receiver.receiveMessages(maxMessages, timeout).stream().count();
+        }
+    }
+
+    public void drain(String queue) {
+        try (ServiceBusReceiverClient receiver = builder.receiver()
+                .receiveMode(ServiceBusReceiveMode.RECEIVE_AND_DELETE).queueName(queue).buildClient()) {
+            while (!receiver.receiveMessages(10, Duration.ofMillis(500)).stream().toList().isEmpty()) { }
+        }
+    }
+
+    private static ServiceBusReceivedMessage first(ServiceBusReceiverClient receiver, Duration timeout) {
+        return receiver.receiveMessages(1, timeout).stream().findFirst().orElse(null);
+    }
+}
+```
+
+```java
+import com.azure.messaging.servicebus.*;
+
+public final class ServiceBusSeeder {
+
+    private final ServiceBusClientBuilder builder;
+
+    public ServiceBusSeeder(String connectionString) {
+        this.builder = new ServiceBusClientBuilder().connectionString(connectionString);
+    }
+
+    public void sendToQueue(String queue, ServiceBusMessage message) {
+        try (ServiceBusSenderClient sender = builder.sender().queueName(queue).buildClient()) {
+            sender.sendMessage(message);
+        }
+    }
+
+    public void sendToTopic(String topic, ServiceBusMessage message) {
+        try (ServiceBusSenderClient sender = builder.sender().topicName(topic).buildClient()) {
+            sender.sendMessage(message);
+        }
+    }
+}
+```
+
 ## Core pattern 1 — producer-assert (the SUT produced message X)
 
 The SUT publishes; the test **drains the queue with a bounded receive** and asserts the message body and
@@ -165,20 +260,12 @@ public class OrderPublishingTest extends ServiceBusTestBase {
 
         sut.submit(order);                                        // SUT produces the message
 
-        // Read-and-delete on the TEST side: we only want to see what was produced, no settlement needed.
-        try (ServiceBusReceiverClient receiver = builder.receiver()
-                .receiveMode(ServiceBusReceiveMode.RECEIVE_AND_DELETE)
-                .queueName("orders").buildClient()) {
+        // Read-and-delete on the TEST side; the bounded long-poll is the condition-wait, never a Thread.sleep.
+        ServiceBusReceivedMessage message = probe.receive("orders", Duration.ofSeconds(10));
 
-            // Bounded long-poll = the condition-wait. Never a fixed Thread.sleep before receiving.
-            ServiceBusReceivedMessage message = receiver
-                    .receiveMessages(1, Duration.ofSeconds(10))
-                    .stream().findFirst().orElse(null);
-
-            assertThat(message).as("a message published to 'orders' within the wait window").isNotNull();
-            OrderPlaced placed = message.getBody().toObject(OrderPlaced.class);
-            assertThat(placed.orderId()).isEqualTo(order.id());   // one logical assertion: the published fact
-        }
+        assertThat(message).as("a message published to 'orders' within the wait window").isNotNull();
+        OrderPlaced placed = message.getBody().toObject(OrderPlaced.class);
+        assertThat(placed.orderId()).isEqualTo(order.id());       // one logical assertion: the published fact
     }
 
     @Test
@@ -187,19 +274,14 @@ public class OrderPublishingTest extends ServiceBusTestBase {
 
         sut.submit(order);
 
-        try (ServiceBusReceiverClient receiver = builder.receiver()
-                .receiveMode(ServiceBusReceiveMode.RECEIVE_AND_DELETE)
-                .queueName("orders").buildClient()) {
-            ServiceBusReceivedMessage message = receiver
-                    .receiveMessages(1, Duration.ofSeconds(10)).stream().findFirst().orElse(null);
+        ServiceBusReceivedMessage message = probe.receive("orders", Duration.ofSeconds(10));
 
-            assertThat(message).isNotNull();
-            assertThat(message).satisfies(m -> {                  // one behaviour: the message envelope
-                assertThat(m.getSubject()).isEqualTo("OrderPlaced");
-                assertThat(m.getCorrelationId()).isEqualTo(order.id().toString());
-                assertThat(m.getContentType()).isEqualTo("application/json");
-            });
-        }
+        assertThat(message).isNotNull();
+        assertThat(message).satisfies(m -> {                      // one behaviour: the message envelope
+            assertThat(m.getSubject()).isEqualTo("OrderPlaced");
+            assertThat(m.getCorrelationId()).isEqualTo(order.id().toString());
+            assertThat(m.getContentType()).isEqualTo("application/json");
+        });
     }
 }
 ```
@@ -218,12 +300,10 @@ public void Should_write_a_shipment_row_When_an_OrderPaid_message_is_consumed() 
     UUID orderId = UUID.randomUUID();
 
     // 1. Seed the input message onto the queue the consumer listens to.
-    try (ServiceBusSenderClient sender = builder.sender().queueName("orders").buildClient()) {
-        sender.sendMessage(new ServiceBusMessage(BinaryData.fromObject(new OrderPaid(orderId)))
-                .setSubject("OrderPaid")
-                .setContentType("application/json")
-                .setCorrelationId(orderId.toString()));
-    }
+    seeder.sendToQueue("orders", new ServiceBusMessage(BinaryData.fromObject(new OrderPaid(orderId)))
+            .setSubject("OrderPaid")
+            .setContentType("application/json")
+            .setCorrelationId(orderId.toString()));
 
     // 2. The SUT (a ServiceBusProcessorClient consumer) is already running and picks it up.
 
@@ -277,24 +357,14 @@ explicitly dead-lettered it, or it exceeded `MaxDeliveryCount`). Receive from th
 ```java
 @Test
 public void Should_dead_letter_the_message_When_the_order_payload_is_invalid() {
-    try (ServiceBusSenderClient sender = builder.sender().queueName("orders").buildClient()) {
-        sender.sendMessage(new ServiceBusMessage(BinaryData.fromString("{ not valid order json }"))
-                .setSubject("OrderPaid").setContentType("application/json"));
-    }
+    seeder.sendToQueue("orders", new ServiceBusMessage(BinaryData.fromString("{ not valid order json }"))
+            .setSubject("OrderPaid").setContentType("application/json"));
 
-    // The consumer (SUT) rejects it and dead-letters it. Assert on the DLQ.
-    try (ServiceBusReceiverClient dlq = builder.receiver()
-            .queueName("orders")
-            .subQueue(SubQueue.DEAD_LETTER)
-            .buildClient()) {
+    // The consumer (SUT) rejects it and dead-letters it. Bounded long-poll the DLQ, not a sleep.
+    ServiceBusReceivedMessage dead = probe.receiveDeadLetter("orders", Duration.ofSeconds(10));
 
-        // Bounded long-poll the DLQ — wait on the condition (a message lands), not a sleep.
-        ServiceBusReceivedMessage dead = dlq
-                .receiveMessages(1, Duration.ofSeconds(10)).stream().findFirst().orElse(null);
-
-        assertThat(dead).as("the poison message in the dead-letter queue").isNotNull();
-        assertThat(dead.getDeadLetterReason()).isEqualTo("ValidationFailed");   // the documented reason
-    }
+    assertThat(dead).as("the poison message in the dead-letter queue").isNotNull();
+    assertThat(dead.getDeadLetterReason()).isEqualTo("ValidationFailed");   // the documented reason
 }
 ```
 
@@ -310,29 +380,19 @@ the routing, not just the publish.
 ```java
 @Test
 public void Should_fan_out_to_fulfilment_and_audit_When_an_order_event_is_published() {
-    try (ServiceBusSenderClient sender = builder.sender().topicName("order-events").buildClient()) {
-        ServiceBusMessage msg = new ServiceBusMessage(BinaryData.fromObject(new OrderPlaced(UUID.randomUUID())))
-                .setSubject("OrderPlaced");
-        msg.getApplicationProperties().put("region", "EU");    // a SQL filter on the subscription can match this
-        sender.sendMessage(msg);
-    }
+    ServiceBusMessage msg = new ServiceBusMessage(BinaryData.fromObject(new OrderPlaced(UUID.randomUUID())))
+            .setSubject("OrderPlaced");
+    msg.getApplicationProperties().put("region", "EU");    // a SQL filter on the subscription can match this
+    seeder.sendToTopic("order-events", msg);
 
     // Each subscription gets its own copy — read from both.
-    try (ServiceBusReceiverClient fulfilment = builder.receiver()
-                 .topicName("order-events").subscriptionName("fulfilment")
-                 .receiveMode(ServiceBusReceiveMode.RECEIVE_AND_DELETE).buildClient();
-         ServiceBusReceiverClient audit = builder.receiver()
-                 .topicName("order-events").subscriptionName("audit")
-                 .receiveMode(ServiceBusReceiveMode.RECEIVE_AND_DELETE).buildClient()) {
+    ServiceBusReceivedMessage toFulfilment =
+            probe.receiveFromSubscription("order-events", "fulfilment", Duration.ofSeconds(10));
+    ServiceBusReceivedMessage toAudit =
+            probe.receiveFromSubscription("order-events", "audit", Duration.ofSeconds(10));
 
-        ServiceBusReceivedMessage toFulfilment = fulfilment
-                .receiveMessages(1, Duration.ofSeconds(10)).stream().findFirst().orElse(null);
-        ServiceBusReceivedMessage toAudit = audit
-                .receiveMessages(1, Duration.ofSeconds(10)).stream().findFirst().orElse(null);
-
-        assertThat(toFulfilment).as("fulfilment subscription copy").isNotNull();   // one behaviour: fan-out
-        assertThat(toAudit).as("audit subscription copy").isNotNull();
-    }
+    assertThat(toFulfilment).as("fulfilment subscription copy").isNotNull();   // one behaviour: fan-out
+    assertThat(toAudit).as("audit subscription copy").isNotNull();
 }
 ```
 
@@ -342,11 +402,8 @@ To assert "exactly N messages were produced", drain with `receiveMessages(maxMes
 count — the bounded wait stops it hanging when fewer than N arrive:
 
 ```java
-try (ServiceBusReceiverClient receiver = builder.receiver()
-        .receiveMode(ServiceBusReceiveMode.RECEIVE_AND_DELETE).queueName("orders").buildClient()) {
-    long count = receiver.receiveMessages(10, Duration.ofSeconds(5)).stream().count();
-    assertThat(count).isEqualTo(3);                            // SUT produced exactly 3
-}
+long count = probe.count("orders", 10, Duration.ofSeconds(5));
+assertThat(count).isEqualTo(3);                                // SUT produced exactly 3
 ```
 
 ## Anti-patterns
@@ -377,42 +434,27 @@ try (ServiceBusReceiverClient receiver = builder.receiver()
 ```java
 public class FulfilmentConsumerTest extends ServiceBusTestBase {
 
-    private ServiceBusClientBuilder builder;
-
     @BeforeMethod(alwaysRun = true)
-    public void setUp() {
-        builder = new ServiceBusClientBuilder().connectionString(connectionString);
-        drain("orders");                                       // independent tests — start from empty
-        drain("shipments");
+    public void drainQueues() {
+        probe.drain("orders");                                 // independent tests — start from empty
+        probe.drain("shipments");
     }
 
     @Test
     public void Should_publish_ShipmentReady_When_a_valid_OrderPaid_is_consumed() {
         UUID orderId = UUID.randomUUID();
-        try (ServiceBusSenderClient sender = builder.sender().queueName("orders").buildClient()) {
-            sender.sendMessage(new ServiceBusMessage(BinaryData.fromObject(new OrderPaid(orderId)))
-                    .setSubject("OrderPaid").setContentType("application/json")
-                    .setCorrelationId(orderId.toString()));
-        }
+        seeder.sendToQueue("orders", new ServiceBusMessage(BinaryData.fromObject(new OrderPaid(orderId)))
+                .setSubject("OrderPaid").setContentType("application/json")
+                .setCorrelationId(orderId.toString()));
 
         // The SUT consumer processes "orders" and republishes onto "shipments".
-        try (ServiceBusReceiverClient shipments = builder.receiver()
-                .receiveMode(ServiceBusReceiveMode.RECEIVE_AND_DELETE).queueName("shipments").buildClient()) {
-            ServiceBusReceivedMessage ready = shipments
-                    .receiveMessages(1, Duration.ofSeconds(10)).stream().findFirst().orElse(null);
+        ServiceBusReceivedMessage ready = probe.receive("shipments", Duration.ofSeconds(10));
 
-            assertThat(ready).as("consumer republished a ShipmentReady message").isNotNull();
-            assertThat(ready.getCorrelationId()).isEqualTo(orderId.toString());   // correlation preserved
-        }
-    }
-
-    private void drain(String queue) {
-        try (ServiceBusReceiverClient receiver = builder.receiver()
-                .receiveMode(ServiceBusReceiveMode.RECEIVE_AND_DELETE).queueName(queue).buildClient()) {
-            while (!receiver.receiveMessages(10, Duration.ofMillis(500)).stream().toList().isEmpty()) { }
-        }
+        assertThat(ready).as("consumer republished a ShipmentReady message").isNotNull();
+        assertThat(ready.getCorrelationId()).isEqualTo(orderId.toString());   // correlation preserved
     }
 }
+
 ```
 
 Lifecycle for this test:

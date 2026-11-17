@@ -21,7 +21,7 @@ Eliminates repeated inline test data literals in .NET 8 test projects (NUnit pri
 - TypeScript test data → `qa/typescript/skills/test-data-builder`
 - Production-code builders → the `backend/dotnet` dev stack's generator, if installed
 - Test data for performance scenarios (volume) → `qa/dotnet/skills/load-testing`
-- One-off fixture used by a single test → inline is fine; only extract on duplication
+- An object with fewer than four fields → construct it in the test's setup; a builder starts at four fields, at first use
 
 ## Builder vs ObjectMother
 
@@ -210,6 +210,52 @@ var created = await ordersClient.CreateAsync(order);
 
 Don't build "an order in the DB" inside the builder — that couples the builder to a particular persistence path and hides the API call dependency. Persistence is the test's job; the builder is shape.
 
+## Query-parameter builder
+
+A list or search endpoint with documented query parameters gets a builder too: one fluent method per documented parameter, returning the suite's typed parameter record, which the client turns into the query string. Never positional strings (`ListAsync("Pending", 5, null)`) or an untyped `Dictionary<string, string>`.
+
+```csharp
+namespace OrdersApp.Tests.Builders;
+
+public sealed record OrderQuery(int Page, int PageSize, string? Status, DateOnly? PlacedFrom, string? Sort);
+
+public sealed class OrderQueryBuilder
+{
+    private int _page = 1;
+    private int _pageSize = 20;
+    private string? _status;
+    private DateOnly? _placedFrom;
+    private string? _sort;
+
+    public OrderQueryBuilder OnPage(int page)          { _page = page; return this; }
+    public OrderQueryBuilder WithPageSize(int size)    { _pageSize = size; return this; }
+    public OrderQueryBuilder WithStatus(string status) { _status = status; return this; }
+    public OrderQueryBuilder PlacedFrom(DateOnly date) { _placedFrom = date; return this; }
+    public OrderQueryBuilder SortedBy(string field)    { _sort = field; return this; }
+
+    public OrderQuery Build() => new(_page, _pageSize, _status, _placedFrom, _sort);
+}
+```
+
+```csharp
+OrderQuery query = new OrderQueryBuilder().WithStatus("Pending").WithPageSize(5).Build();
+OrderPageDto orders = await orderClient.ListAsync(query, HttpStatusCode.OK);
+```
+
+The defaults are the API's documented defaults; a parameter the API does not document gets no method.
+
+## Data the test does not create
+
+Create-and-teardown stays the default: the test builds what it changes with a value unique per test and registers it for teardown. Three patterns sit beside it (rules: `test-data.md`):
+
+| Pattern | What the suite holds | Guard |
+|---|---|---|
+| **Read-only reference data** | a constant naming the curated record or value the environment already holds (`ReferenceDeals.SyndicatedDealType`), used by search and filter tests only, never modified | the test asserts the result is not empty before asserting on every row (`Is.All`); a missing guard is a blocker |
+| **Pre-clean** | a seeder method that removes a leftover by its name (`dealSeeder.DeleteAllTitledAsync(title)`), called in `[SetUp]` or a `Given … does not exist` step before the test creates it | teardown still deletes what the test created |
+| **Keep on failure** | the teardown registry deletes on a pass and logs the kept ids on a failure | names unique per run (`$"Deal {runId}-{Guid.NewGuid():N}"`), so leftovers never collide |
+
+The builder stays pure in all three: a pre-clean or a seed goes through a seeder or client, never `Build()`.
+
 ## Rules
 
 The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `test-data.md` (and `automation.md` for the tests that use the builders). Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
@@ -217,7 +263,7 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 ## Generation steps
 
 1. Grep the test tree for repeated literal patterns (`new Order(`, `new User(`, anonymous object literals in request bodies).
-2. Per aggregate, list the fields, the sensible defaults, and the variant-producing helpers (`Pending`/`Paid`/`Cancelled` etc.).
+2. Per aggregate, list the fields, the sensible defaults, and the variant-producing methods (`Pending`/`Paid`/`Cancelled` etc.).
 3. Generate the builder under `tests/<project>/Builders/` following the template.
 4. Add an ObjectMother under `tests/<project>/Mothers/` with the canonical variants.
 5. Replace inline literals in 2–3 representative tests so the pattern is set; leave the rest as a follow-up sweep.
@@ -228,7 +274,7 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 - Java test data → `qa/java/skills/test-data-builder`
 - TypeScript test data → `qa/typescript/skills/test-data-builder`
 - API tests where these feed into request bodies → `qa/dotnet/skills/api-test-author/writer`
-- UI tests where they back form-fill helpers → `qa/dotnet/skills/ui-test-author/playwright` / `qa/dotnet/skills/ui-test-author/selenium` / `qa/dotnet/skills/ui-test-author/appium`
+- UI tests where they back page-object form fills → `qa/dotnet/skills/ui-test-author/playwright` / `qa/dotnet/skills/ui-test-author/selenium` / `qa/dotnet/skills/ui-test-author/appium`
 - Test reviewers (verify builders used, not literals) → `qa/dotnet/skills/api-test-author/review` / `qa/dotnet/skills/ui-test-author/review`
 - Test strategy / pyramid → `qa/manual/test-strategy`
 - Production-code builders → the `backend/dotnet` dev stack's generator, if installed

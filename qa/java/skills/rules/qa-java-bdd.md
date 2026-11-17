@@ -5,28 +5,29 @@ paths:
   - "**/src/{test,integrationTest}/java/**/*{Steps,Hooks}.java"
 ---
 
-<!-- qa-java rules v1 (2026-11-03): BDD. Installed by /qa-java:rules; edit the paths above to where this project keeps its feature files and step definitions. -->
+<!-- qa-java rules v2 (2026-11-17): BDD. Installed by /qa-java:rules; edit the paths above to where this project keeps its feature files and step definitions. -->
 
 # Gherkin and Cucumber-JVM standards
 
-Severity tags as in the core qa-java rules: **blocker**, **major**, **minor**, **nit**. The codebase wins where it consistently does otherwise.
+Severity tags as in the core qa-java rules; the codebase wins where it consistently does otherwise.
 
 ## Feature files
 
 - Steps are declarative: no `click`, CSS or URL unless the mechanic is what is tested. One `When` per scenario; no conjunction steps. *major*
 - `Background` holds only preconditions every scenario needs, never a `When`, `Then` or data. *major*
 - Variants are a `Scenario Outline` with `Examples`, valid and invalid in separate tables (invalid tagged `@negative`). *minor*
-- Steps reuse one catalog: no near-duplicate differing by a literal, one verb per concept. *minor*
+- One phrasing per concept. A feature ahead of its automation is skip-tagged (`@not-automated` if none). *minor*
 - Tags carry priority, tier, type and `@AC-<n>`; every source case maps to a scenario. *minor*
 - No `#` comments and no commented-out scenarios; explanation goes in the `Feature:` block, a skip is a tag with a ticket. *minor*
 
 ## Step definitions and hooks
 
-- One glue class per domain, each catalog step bound once, Cucumber Expressions over regex. *minor*
+- One glue class per domain, each step bound once, Cucumber Expressions over regex. *minor*
+- One binding per field, filter or column, named for it (`I select {string} for Deal Type filter`), never one taking a field name. *major; blocker for an empty body*
 - State reaches a step through the constructor-injected `TestContext` (PicoContainer): no static state, `ThreadLocal`, string-keyed bag, step-class inheritance or `new LoginPage(page)` in a step. *major*
-- A step is one or two page-object calls: no locator, `findElement` or wait. Missing page objects are built first, never inlined. *major*
+- A step is one or two page-object calls: no locator, `findElement`, wait or branch. It may act on an element or control the page exposes (`filterPage.dealType().selectOption(option)`); page methods are for sequences. Missing page objects come first. *major*
 - Page objects take the `Page` or driver, never `TestContext`, and are the UI suite's own classes. *major*
 - `Given` / `When` act; only `Then` asserts. *major*
-- Browser and driver lifecycle live in `@Before` / `@After` hooks with teardown, never in a step constructor; cleanup is an `@After` hook, never steps. *major; blocker for a leaked browser or driver*
+- Browser and driver lifecycle live in `@Before` / `@After` hooks, never a step constructor; teardown is an `@After` hook, never steps (a pre-clean `Given` is fine). *major; blocker for a leaked browser or driver*
 - The runner is the JUnit Platform `@Suite` engine, not `@RunWith(Cucumber.class)`. *major*
 - No inline comments in steps or hooks. *minor*

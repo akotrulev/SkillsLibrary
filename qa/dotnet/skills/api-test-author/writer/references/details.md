@@ -9,7 +9,6 @@ Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 ```csharp
 using System.Net;
 using ApiTests.Clients;
-using ApiTests.Helpers;
 using ApiTests.Models.{Api}.{Resource}Models;
 using Allure.Net.Commons;
 using Allure.NUnit.Attributes;
@@ -245,16 +244,55 @@ public class {Resource}Tests : BaseApiTest
     [AllureFeature("{Feature}")]
     [AllureStory("{Story}")]
     [AllureSeverity(SeverityLevel.normal)]
-    public void Delete{Resource}_WhenAuthenticated_ReturnsNoContent()
+    public void Delete{Resource}_WhenAuthenticated_RemovesIt()
     {
         {Resource}Client {resource}Client = new {Resource}Client(AuthToken);
 
-        RestResponse response = {resource}Client.Remove(testResource.Id);
+        RestResponse deleted = {resource}Client.Remove(testResource.Id);
+        RestResponse fetched = {resource}Client.GetById(testResource.Id);
 
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
+        Assert.Multiple(() =>
+        {
+            Assert.That(deleted.StatusCode, Is.EqualTo(HttpStatusCode.NoContent), deleted.Content);
+            Assert.That(fetched.StatusCode, Is.EqualTo(HttpStatusCode.NotFound), fetched.Content);
+        });
     }
 }
 ```
+
+The delete is proven by the following `GetById` returning `404`; a `204` alone only says the server accepted the
+call.
+
+### Update — one test per changed field
+
+The update body is a clone of the seeded body with one field changed: the request builder's `From(...)` copies
+the seeded body, one `With{Field}` changes it. The test asserts the changed field and that the others kept their
+seeded values. A second changed field is a second test.
+
+```csharp
+[Test]
+[AllureFeature("{Feature}")]
+[AllureStory("Update {resource}")]
+[AllureSeverity(SeverityLevel.normal)]
+public void Should_ChangeOnly{Field}_When_{Field}IsUpdated()
+{
+    {Resource}Client {resource}Client = new {Resource}Client(AuthToken);
+    {Resource}InDto body = new {Resource}InDtoBuilder().From(_seededBody).With{Field}({newValue}).Build();
+
+    {resource}Client.Update(_seeded.Id, body, HttpStatusCode.OK);
+    {Resource}Dto fetched = {resource}Client.GetById(_seeded.Id, HttpStatusCode.OK);
+
+    Assert.Multiple(() =>
+    {
+        Assert.That(fetched.{Field}, Is.EqualTo(body.{Field}));
+        Assert.That(fetched.{OtherField}, Is.EqualTo(_seeded.{OtherField}));
+    });
+}
+```
+
+A full update (PUT) whose response DTO is a `record` compares the whole object, because a record has value
+equality: `Assert.That(fetched, Is.EqualTo(expected))`, with `expected` built from the request. A class DTO
+compares field by field inside `Assert.Multiple`.
 
 ### Account setup — fetch existing Trading account
 
@@ -292,7 +330,7 @@ public void SetUpAccount()
 
 ### Payment method setup (tokenize → create)
 
-Creating a usable payment method for a test is a **two-step flow**: call `Tokenize` with the card details, then `Create` passing the returned token plus echoed card metadata into `MethodInDto`. Card numbers come from the `PaysafeTestCards` enum + `Build` helper in `ApiTests/TestData/PaysafeTestCards.cs` — never hardcode a card number.
+Creating a usable payment method for a test is a **two-step flow**: call `Tokenize` with the card details, then `Create` passing the returned token plus echoed card metadata into `MethodInDto`. Card numbers come from the `PaysafeTestCard` enum + the `PaysafeTestCards.Build` builder in `ApiTests/TestData/PaysafeTestCards.cs` — never hardcode a card number.
 
 #### Shared payment method — `[OneTimeSetUp]`
 
@@ -443,3 +481,68 @@ public void Get{Resource}s_FirstPage_ReturnsPaginatedResults()
     });
 }
 ```
+
+### Read-only / search scenario set
+
+Beside the CRUD set, a list or search endpoint gets three tests over **reference data**: curated records the
+environment holds, named by a constant and never modified (`test-data.md`). Query parameters come from the typed
+builder (`qa/dotnet/skills/test-data-builder` § Query-parameter builder).
+
+```csharp
+[TestFixture]
+[AllureFeature("{Feature}")]
+public class {Resource}SearchTests : BaseApiTest
+{
+    private const string ReferenceStatus = "{CuratedStatus}";
+
+    [Test]
+    [AllureStory("Search {resource}s")]
+    [AllureSeverity(SeverityLevel.normal)]
+    public void Should_ReturnRequestedPageSize_When_PageSizeIsGiven()
+    {
+        {Resource}Client {resource}Client = new {Resource}Client(AuthToken);
+        {Resource}Query query = new {Resource}QueryBuilder().WithPageSize(5).Build();
+
+        {Resource}ListDto page = {resource}Client.Search(query, HttpStatusCode.OK);
+
+        Assert.That(page.Data, Has.Count.EqualTo(5), "the reference data holds more than five {resource}s");
+    }
+
+    [Test]
+    [AllureStory("Search {resource}s")]
+    [AllureSeverity(SeverityLevel.normal)]
+    public void Should_ReturnOnlyMatchingItems_When_FilteredByStatus()
+    {
+        {Resource}Client {resource}Client = new {Resource}Client(AuthToken);
+        {Resource}Query query = new {Resource}QueryBuilder().WithStatus(ReferenceStatus).Build();
+
+        {Resource}ListDto page = {resource}Client.Search(query, HttpStatusCode.OK);
+        List<string> statuses = page.Data.Select(item => item.Status).ToList();
+
+        Assert.That(statuses, Is.Not.Empty, $"no {resource} has status {ReferenceStatus}: the reference data is missing");
+        Assert.That(statuses, Is.All.EqualTo(ReferenceStatus));
+    }
+
+    [Test]
+    [AllureStory("Get {resource} by id")]
+    [AllureSeverity(SeverityLevel.normal)]
+    public void Should_MatchTheListItem_When_FetchedById()
+    {
+        {Resource}Client {resource}Client = new {Resource}Client(AuthToken);
+        {Resource}ListDto page = {resource}Client.Search(new {Resource}QueryBuilder().WithStatus(ReferenceStatus).Build(), HttpStatusCode.OK);
+        Assert.That(page.Data, Is.Not.Empty, $"no {resource} has status {ReferenceStatus}: the reference data is missing");
+        {Resource}Dto listed = page.Data.First();
+
+        {Resource}Dto fetched = {resource}Client.GetById(listed.Id, HttpStatusCode.OK);
+
+        Assert.That(fetched, Is.EqualTo(listed));
+    }
+}
+```
+
+- The non-empty guard comes first: `Is.All` over an empty list passes and proves nothing. Never `items[0]`
+  standing for the result set, never a loop over the items.
+- `listed` is one sample whose detail is fetched, not a stand-in for the set. `Is.EqualTo` on the whole object
+  needs a `record` DTO; with a class DTO, or when the list returns a summary shape, compare the shared fields in
+  `Assert.Multiple`.
+- Nothing here creates data, so there is no `[TearDown]`.

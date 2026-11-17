@@ -119,7 +119,8 @@ public abstract class BasePlaywrightApiTest : PlaywrightTest
 
 `Deserialize<T>(IAPIResponse)` (System.Text.Json over `await response.TextAsync()`) and
 `AttachBody(IAPIResponse)` (Allure attachment for error tests) live here too — same roles as in `BaseApiTest`
-of the RestSharp sibling.
+of the RestSharp sibling. `Deserialize<T>` reads with `UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow`, so a response
+field the DTO does not declare fails the parse (`api-models` § Strict deserialization).
 
 ## Fixture template
 
@@ -150,7 +151,7 @@ context (`Page.APIRequest` shares the page's cookies).
 | 403 forbidden | **raw** on a wrong-role context | single status assertion |
 | 400 / 404 / 422 | **raw** | `AttachBody` → status → `Deserialize<ProblemDetailsDto>` → the strict `ProblemDetails` template from the generator sibling |
 | Malformed JSON / extra-missing property | **raw** via `CreateRawAsync(string)` overload | status assert only — add these overloads following `api-client-writer` when the plan requires them |
-| Eventually-consistent state | **raw/typed** inside a polling helper | poll on the condition with a timeout — never `Thread.Sleep` / `Task.Delay` loops without a condition |
+| Eventually-consistent state | **raw/typed** inside a probe's wait condition | poll on the condition with a timeout — never `Thread.Sleep` / `Task.Delay` loops without a condition |
 
 ## Rules
 

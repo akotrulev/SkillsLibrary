@@ -2,9 +2,9 @@
 
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
-## The toxic helper — `Support/Chaos/ChaosProxy.cs`
+## The fault injector — `Support/Chaos/ChaosProxy.cs`
 
-One helper owns the proxy handle and exposes **intent-named** fault operations and a **heal** for the lifecycle, so
+One fault injector owns the proxy handle and exposes **intent-named** fault operations and a **heal** for the lifecycle, so
 tests read `Chaos.InjectLatency(...)`, `Chaos.CutConnection()`, `Chaos.Healed()` — never raw `proxy.Add(new
 TimeoutToxic { ... })` scattered across `[Test]` methods. Each injected toxic is named so it can be removed.
 
@@ -93,7 +93,7 @@ public abstract class BaseChaosTest
 
     protected static PostgreSqlContainer Dependency = null!;   // the dependency under fault (example)
     protected static ToxiproxyContainer Toxiproxy = null!;
-    protected ChaosProxy Chaos = null!;                        // the intent-named toxic helper
+    protected ChaosProxy Chaos = null!;                        // the intent-named fault injector
 
     [OneTimeSetUp]
     public async Task StartInfrastructure()

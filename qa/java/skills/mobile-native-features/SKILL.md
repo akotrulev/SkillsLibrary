@@ -33,10 +33,10 @@ Appium tests for the **OS-level capabilities** a mobile app touches but a page-o
 
 ## Stack
 
-- Java 21, Gradle (Kotlin DSL); the pins (`io.appium:java-client` 11.0.0, `selenium-support` ≥ 4.50, TestNG, AssertJ, `allure-testng` 3.0.0) are the **Versions** table of `qa/java/skills/ui-test-author/appium/SKILL.md`. This skill adds no dependency; java-client 10.x is the supported lane and every helper below exists there
+- Java 21, Gradle (Kotlin DSL); the pins (`io.appium:java-client` 11.0.0, `selenium-support` ≥ 4.50, TestNG, AssertJ, `allure-testng` 3.0.0) are the **Versions** table of `qa/java/skills/ui-test-author/appium/SKILL.md`. This skill adds no dependency; java-client 10.x is the supported lane and every call below exists there
 - **AssertJ** for every assertion outside Appium; failure evidence is `BaseMobileTest`, and this skill adds no second hook
 - `WebDriverWait` and `ExpectedConditions` need `selenium-support`, which java-client 11 no longer pulls in
-- Helpers live in `src/test/java/.../support/nativefeatures/` (the package is `support.nativefeatures`; `native` is a reserved word, so `support/native/` cannot be a package)
+- The fixture lives in `src/test/java/.../support/nativefeatures/` (the package is `support.nativefeatures`; `native` is a reserved word, so `support/native/` cannot be a package)
 
 Appium 3 removed the old `/appium/*` routes; java-client 11's driver methods call only `mobile:` extensions, and geolocation is one of them.
 
@@ -56,7 +56,7 @@ Appium 3 removed the old `/appium/*` routes; java-client 11's driver methods cal
 - Token auth → `qa/java/skills/test-login-tokens`
 - TypeScript / .NET → `qa/{typescript,dotnet}/skills/mobile-native-features`
 
-## The helper
+## The fixture
 
 `NativeFeatures` owns every OS-surface call, including the ones that touch OS UI, so no test holds a raw `findElement` or a wait. A test reads: *drive the OS surface, assert the effect on a page object.* The identifier is a package on Android and a bundle id on iOS, so one private method picks the key.
 
@@ -102,8 +102,12 @@ public final class NativeFeatures {
         approveFingerprint(UNENROLLED_FINGERPRINT_ID);
     }
 
-    public void sendIosBiometric(String type, boolean match) {
-        driver.executeScript("mobile: sendBiometricMatch", Map.of("type", type, "match", match));
+    public void approveIosBiometric(String type) {
+        driver.executeScript("mobile: sendBiometricMatch", Map.of("type", type, "match", true));
+    }
+
+    public void rejectIosBiometric(String type) {
+        driver.executeScript("mobile: sendBiometricMatch", Map.of("type", type, "match", false));
     }
 
     public void backgroundFor(Duration duration) {
@@ -235,7 +239,8 @@ public void Should_ShowPinFallback_When_FingerprintIsRejected() {
 }
 ```
 
-On an iOS simulator, call `mobile: enrollBiometric` with `isEnabled` true once, then `sendIosBiometric("faceId", true)` or `false`. No capability enrolls biometrics.
+On an iOS simulator, call `mobile: enrollBiometric` with `isEnabled` true once, then `approveIosBiometric("faceId")` or `rejectIosBiometric("faceId")`.
+ No capability enrolls biometrics.
 
 A real device cannot take an injected read locally; BrowserStack and Sauce instrument the sensor, which `device-cloud` owns. Write the approve and reject assertions here and run them on the farm's injected biometric there.
 

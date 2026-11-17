@@ -29,12 +29,12 @@ Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin qua
 
 ## The checklist is the rule files
 
-Every check, and the severity it reports, lives in one place: the qa-typescript rule files `bdd.md` (feature files and step definitions) and `qa-typescript.md` (core, for the TypeScript step and support code). Each `bdd.md` rule names which framework it binds: apply the web (playwright-bdd) or mobile (CucumberJS + WebdriverIO) rule the project uses.
+Every check, and the severity it reports, lives in one place: the qa-typescript rule files `bdd.md` (feature files and step definitions) and `qa-typescript.md` (core, for the TypeScript step and support code), plus `page-objects.md` when the diff holds the page objects the steps call, and `test-data.md` when it holds seeding fixtures or pre-clean steps. In a BDD suite the step is the intent layer: a step acting on an element or control the page object exposes by name (`filterPage.dealType.selectOption(option)`) is correct, not a finding. Each `bdd.md` rule names which framework it binds: apply the web (playwright-bdd) or mobile (CucumberJS + WebdriverIO) rule the project uses.
 
 1. **The project's copies first**: `.claude/rules/qa-typescript/` at the project root. The team may have edited them, and its edits win.
 2. **Otherwise the plugin's copies**: `qa/typescript/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/qa-typescript:rules` installs them.
 
-Read both files in full before the first finding; a rule loaded on its own by the session is not enough. Never review from memory of the rules, and never add a check the files do not contain; propose it as a rule change instead. The rule files' "the codebase wins" line applies.
+Read every file that applies in full before the first finding; a rule loaded on its own by the session is not enough. Never review from memory of the rules, and never add a check the files do not contain; propose it as a rule change instead. The rule files' "the codebase wins" line applies.
 
 ## Output format
 
@@ -44,6 +44,8 @@ Read both files in full before the first finding; a rule loaded on its own by th
 | major    | login.feature:12               | Imperative step "tap #submit"           | Raise to "When I sign in…"; move mechanic to LoginScreen |
 | major    | authentication.steps.ts:20     | Arrow-function CucumberJS step          | Use `function (this: CustomWorld)`; reach page via this |
 | major    | authentication.steps.ts:8      | new LoginPage(page) inside step (web)   | Register a fixture in steps/fixtures.ts; destructure it |
+| blocker  | deals.steps.ts:31              | Step body is empty; it passes doing nothing | Implement it, or tag the scenario `@not-automated` with a ticket |
+| major    | filters.steps.ts:12            | `I select {string} for {string} filter` maps the field name to a control | One binding per filter: `I select {string} for Deal Type filter` |
 | minor    | cart.steps.ts:8                | Two near-duplicate add-item steps       | Parameterize: "I add {int} items"      |
 ```
 

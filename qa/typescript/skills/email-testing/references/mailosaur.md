@@ -1,6 +1,6 @@
 # QA — Email & SMS Testing with Mailosaur (TypeScript)
 
-Scaffolds a thin, intent-revealing wrapper over the official `mailosaur` npm SDK plus Vitest / Playwright helpers that **await** a specific message in a per-test `{uuid}@{serverId}.mailosaur.net` inbox, extract HTML / text body / links / OTP codes, download attachments, and verify SMS. Mailosaur is a **hosted** service: the SUT sends real email through its real provider to a Mailosaur inbox address, and the SDK's `messages.get(...)` blocks until the message arrives or the timeout fires — that built-in wait is the sanctioned wait, so there is **no manual `setTimeout` / `waitForTimeout` poll loop** anywhere in this skill.
+Scaffolds a thin, intent-revealing wrapper over the official `mailosaur` npm SDK plus Vitest / Playwright fixtures that **await** a specific message in a per-test `{uuid}@{serverId}.mailosaur.net` inbox, extract HTML / text body / links / OTP codes, download attachments, and verify SMS. Mailosaur is a **hosted** service: the SUT sends real email through its real provider to a Mailosaur inbox address, and the SDK's `messages.get(...)` blocks until the message arrives or the timeout fires — that built-in wait is the sanctioned wait, so there is **no manual `setTimeout` / `waitForTimeout` poll loop** anywhere in this skill.
 
 ## When to use
 
@@ -174,16 +174,57 @@ describe('signup', () => {
 });
 ```
 
+### Page object — `tests/e2e/pages/ResetPasswordPage.ts`
+
+```ts
+import type { Locator, Page } from '@playwright/test';
+
+export class ResetPasswordPage {
+  private readonly email: Locator;
+  private readonly sendCode: Locator;
+  private readonly code: Locator;
+  private readonly newPassword: Locator;
+  private readonly reset: Locator;
+  readonly confirmation: Locator;
+
+  constructor(private readonly page: Page) {
+    this.email = page.getByLabel('Email');
+    this.sendCode = page.getByRole('button', { name: 'Send code' });
+    this.code = page.getByLabel('Code');
+    this.newPassword = page.getByLabel('New password');
+    this.reset = page.getByRole('button', { name: 'Reset' });
+    this.confirmation = page.getByText('Password updated').describe('Password updated confirmation');
+  }
+
+  async goto(): Promise<void> {
+    await this.page.goto('/auth/reset');
+  }
+
+  async requestCode(email: string): Promise<void> {
+    await this.email.fill(email);
+    await this.sendCode.click();
+  }
+
+  async resetPassword(code: string, newPassword: string): Promise<void> {
+    await this.code.fill(code);
+    await this.newPassword.fill(newPassword);
+    await this.reset.click();
+  }
+}
+```
+
 ### Playwright fixture — `tests/e2e/fixtures/mailbox.ts`
 
 ```ts
 import { test as base } from '@playwright/test';
 import { Mailbox } from '../../integration/email/mailbox';
 import { newRecipient } from '../../integration/email/mailosaur.config';
+import { ResetPasswordPage } from '../pages/ResetPasswordPage';
 
-export const test = base.extend<{ mailbox: Mailbox; recipient: string }>({
+export const test = base.extend<{ mailbox: Mailbox; recipient: string; resetPasswordPage: ResetPasswordPage }>({
   mailbox: async ({}, use) => use(new Mailbox()),
   recipient: async ({}, use) => use(newRecipient('e2e')),
+  resetPasswordPage: async ({ page }, use) => use(new ResetPasswordPage(page)),
 });
 export { expect } from '@playwright/test';
 ```
@@ -192,18 +233,14 @@ export { expect } from '@playwright/test';
 import { test, expect } from './fixtures/mailbox';
 import { extractOtp } from '../integration/email/extractors';
 
-test('reset password via emailed OTP', async ({ page, mailbox, recipient }) => {
-  await page.goto('/auth/reset');
-  await page.getByLabel('Email').fill(recipient);
-  await page.getByRole('button', { name: 'Send code' }).click();
+test('reset password via emailed OTP', async ({ resetPasswordPage, mailbox, recipient }) => {
+  await resetPasswordPage.goto();
+  await resetPasswordPage.requestCode(recipient);
 
   const message = await mailbox.awaitEmail(recipient, { subject: 'Reset code' });
-  const otp = extractOtp(message);
+  await resetPasswordPage.resetPassword(extractOtp(message), 'Brand-N3w!');
 
-  await page.getByLabel('Code').fill(otp);
-  await page.getByLabel('New password').fill('Brand-N3w!');
-  await page.getByRole('button', { name: 'Reset' }).click();
-  await expect(page.getByText('Password updated')).toBeVisible();
+  await expect(resetPasswordPage.confirmation).toBeVisible();
 });
 ```
 

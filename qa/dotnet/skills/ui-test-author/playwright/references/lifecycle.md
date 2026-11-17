@@ -208,6 +208,20 @@ The status is asserted exactly, with the body as the message. Never `Assert.That
 `Expect(response).ToBeOKAsync()` — both accept any 2xx and print nothing useful. Never seed in
 `[OneTimeSetUp]`: no `Page` exists there, and a record shared by a fixture's tests couples them.
 
+Three patterns sit beside create-and-teardown; the rules are the `test-data.md` rule file:
+
+- **Read-only reference data.** A search or filter test may read curated data the environment already holds,
+  named in the test and never modified. It proves rows came back before asserting on them
+  (`Expect(grid.DataRows).Not.ToHaveCountAsync(0)`, then `Is.All` on the column; `components.md`
+  § Asserting on every row), because an "every row" check over no rows passes and proves nothing.
+- **Pre-clean.** When a test uses a fixed name, its `[SetUp]` first deletes any leftover with that name
+  through the API or the suite's seeder, so a crashed run does not poison the next one; the `[TearDown]` still
+  deletes what the test created. Never a long UI sequence for it.
+- **Keep on failure.** A suite may keep what a failed test created for investigation: the teardown registry on
+  `BaseTest` deletes on a pass and logs the kept ids on a failure, reading
+  `TestContext.CurrentContext.Result.Outcome.Status`. That check is infrastructure, never in a test class's own
+  `[TearDown]`, and it needs names unique per run so leftovers never collide.
+
 ## 9. Commands
 
 `playwright.ps1` appears under the project's `bin/` after the first build; the path carries the TFM.

@@ -14,9 +14,9 @@ Runs TypeScript + WebdriverIO Appium tests against a **managed real-device cloud
 - Node 24, TypeScript `strict: true`; the WebdriverIO and Appium pins are the **Versions** table of `qa/typescript/skills/ui-test-author/appium`
 - **The farm runs through `wdio.conf.ts`**, never a standalone `remote()` session: the page objects use WDIO's global `$`, which only a runner binds. A farm is a second config that imports the local one and overrides the connection and the capabilities.
 - **Mocha**; the matrix is a **capabilities array**, one session per device, so a failure names its device
-- App upload: global `fetch` + `FormData` + `Blob` (built into Node 22 and 24)
+- App upload: global `fetch`, `FormData`, `Blob`
 - Remote-run: `@aws-sdk/client-device-farm` (`DeviceFarmClient`)
-- Waits: `browser.waitUntil(...)`, and a bounded poll for AWS; never `browser.pause`
+- Waits: `browser.waitUntil(...)`, a bounded poll for AWS; never `browser.pause`
 - Farm code under `test/support/farm/`; credentials from env only (`BROWSERSTACK_USERNAME`, `BROWSERSTACK_ACCESS_KEY`; AWS through its default credential chain or OIDC)
 - **Native desktop apps (macOS, Windows) are not on a device cloud:** they run on owned hardware, self-hosted; see `qa/_shared/desktop-testing`
 
@@ -117,7 +117,7 @@ import { config as localConfig } from './wdio.conf.js';
 import { afterTest as recordEvidence } from './BaseTest.js';
 import { requiredEnv } from './env.js';
 import { DEVICE_MATRIX, type TargetDevice } from './test/support/farm/device-matrix.js';
-import { markSessionStatus } from './test/support/farm/device-features.js';
+import { FarmDevice } from './test/support/farm/FarmDevice.js';
 
 function realDeviceCapabilities(device: TargetDevice) {
   return {
@@ -156,36 +156,42 @@ export const config: WebdriverIO.Config = {
   capabilities: DEVICE_MATRIX.map(realDeviceCapabilities),
   afterTest: async (...args: Parameters<typeof recordEvidence>) => {
     await recordEvidence(...args);
-    await markSessionStatus(args[2].passed);
+    await new FarmDevice().markSessionStatus(args[2].passed);
   },
 };
 ```
 
 Set `DEVICE_FARM=1` for these runs: `BaseTest.ts` then skips the local recording, because the vendor already records the session. An iOS entry uses `XCUITest` with the same block.
 
-The dynamic features are helpers; each is awaited on the app's reaction, never followed by a pause.
+The dynamic features are `FarmDevice` methods; each is awaited on the app's reaction, never followed by a pause.
 
 ```typescript
 import { browser } from '@wdio/globals';
 
-function executor(action: string, args: Record<string, unknown>): string {
-  return `browserstack_executor: ${JSON.stringify({ action, arguments: args })}`;
-}
+export class FarmDevice {
+  async approveBiometric(): Promise<void> {
+    await browser.execute(this.executor('performBiometric', { match: true }));
+  }
 
-export async function respondToBiometric(match: boolean): Promise<void> {
-  await browser.execute(executor('performBiometric', { match }));
-}
+  async rejectBiometric(): Promise<void> {
+    await browser.execute(this.executor('performBiometric', { match: false }));
+  }
 
-export async function switchNetworkProfile(networkProfile: string): Promise<void> {
-  await browser.execute(executor('updateNetworkProfile', { networkProfile }));
-}
+  async switchNetworkProfile(networkProfile: string): Promise<void> {
+    await browser.execute(this.executor('updateNetworkProfile', { networkProfile }));
+  }
 
-export async function setLocation(latitude: number, longitude: number): Promise<void> {
-  await browser.setGeoLocation({ latitude, longitude, altitude: 0 });
-}
+  async setLocation(latitude: number, longitude: number): Promise<void> {
+    await browser.setGeoLocation({ latitude, longitude, altitude: 0 });
+  }
 
-export async function markSessionStatus(passed: boolean): Promise<void> {
-  await browser.execute(executor('setSessionStatus', { status: passed ? 'passed' : 'failed', reason: 'Set by the suite' }));
+  async markSessionStatus(passed: boolean): Promise<void> {
+    await browser.execute(this.executor('setSessionStatus', { status: passed ? 'passed' : 'failed', reason: 'Set by the suite' }));
+  }
+
+  private executor(action: string, args: Record<string, unknown>): string {
+    return `browserstack_executor: ${JSON.stringify({ action, arguments: args })}`;
+  }
 }
 ```
 
@@ -196,19 +202,18 @@ Sauce uses `sauce:options` and `executeScript('sauce:job-result=passed')`; Lambd
 The spec is an ordinary Mocha spec from `ui-test-author/appium`; only the config wires the farm.
 
 ```typescript
-import { expect } from '@wdio/globals';
 import { LoginPage } from './LoginPage.js';
-import { respondToBiometric } from './test/support/farm/device-features.js';
+import { FarmDevice } from './test/support/farm/FarmDevice.js';
 
 describe('Biometric login', () => {
   it('Should_ReachDashboard_When_BiometricIsApproved', async () => {
     const login = new LoginPage();
     await login.tapBiometricSignIn();
 
-    await respondToBiometric(true);
+    await new FarmDevice().approveBiometric();
 
     const dashboard = await login.awaitDashboard();
-    await expect(dashboard.root()).toBeDisplayed({ message: 'Dashboard after an approved biometric' });
+    await dashboard.verifyPageLoaded();
   });
 });
 ```
@@ -270,7 +275,7 @@ export function browserStackCreds(): BrowserStackCreds {
 ## Generation steps
 
 1. Confirm the paradigm, the platform and the vendor's Appium version.
-2. Live session: `farm-credentials.ts`, `uploadApp`, `device-matrix.ts`, `device-features.ts`, the farm config. Remote run: `DeviceFarmRunner`.
+2. Live session: `farm-credentials.ts`, `uploadApp`, `device-matrix.ts`, `FarmDevice.ts`, the farm config. Remote run: `DeviceFarmRunner`.
 3. Map the device count onto `maxInstances` per `browser-cloud-setup`, run **one** device first, and confirm the dashboard shows the right build tags.
 
 ## Cross-references

@@ -73,11 +73,13 @@ Put a step in `Background:` **only when every scenario in the feature genuinely 
 
 ### 5. Reusable step catalog (dedupe)
 
-Maintain one **step catalog** across the whole suite. Before writing a new step, check the catalog for an existing step that differs only in a literal — if so, **parameterize the existing step** instead of adding a near-duplicate. Phrasing rules:
+Maintain one **step catalog** across the whole suite. Before writing a new step, check the catalog for an existing step that differs only in a **value** — if so, **parameterize the existing step** instead of adding a near-duplicate. Phrasing rules:
 
 - Pick **one** canonical verb per concept (`sign in`, not a mix of "log in"/"authenticate"/"sign on").
 - Parameters as quoted strings or numbers so they map to Cucumber-Expression `{string}`/`{int}` downstream: `Given I am signed in as "{role}"`, `When I add {int} items to the cart`.
 - Use ubiquitous domain language from the test basis, not the implementation's identifiers.
+- **Parameterize the value, never the field.** Each field, filter or column gets its own step, named after it (`When I select "Oncology" for the Deal Type filter`), so it binds to one named control. No generic step that takes the field name (`When I select "Oncology" for the "Deal Type" filter`).
+- **Data the scenario reads but never changes** (search, filter) is curated reference data named in the step (`Given the deal "Acme licensing 2024" exists`). A leftover record is removed by a precondition step (`Given the deal "Acme" does not exist`).
 - Avoid conjunction steps (`When I do X and Y`) — split into two steps, or use the `*` bullet keyword for list-like consecutive steps.
 
 ### 6. Tags
@@ -143,12 +145,14 @@ Feature: Login
 
 - Imperative UI steps (`click`, `type`, CSS selectors) in `.feature` files — push into step definitions/page objects.
 - A `Background` step that doesn't apply to every scenario in the feature.
-- Near-duplicate steps differing only by a literal — parameterize instead.
+- Near-duplicate steps differing only by a value — parameterize instead.
+- A generic step that takes the field, filter or column name as a parameter — one step per field.
+- A feature written ahead of its automation with no skip tag — tag it `@not-automated` (or the suite's existing skip tag) and name the ticket in the `Feature:` description.
 - A `Scenario Outline` whose rows assert *different* behaviors — split into named scenarios.
 - Conjunction steps (`When I X and Y`).
 - Mixed valid/invalid rows in one `Examples` table.
 - Assertions or test data in a `Background`.
-- Cleanup expressed as Gherkin steps — it belongs in an `After` hook.
+- Cleanup expressed as Gherkin steps — it belongs in an `After` hook. A pre-clean precondition (`Given … does not exist`) is not cleanup.
 - Lost traceability — a scenario with no `@AC-<n>` when the suite mapped one.
 
 ## Handoffs

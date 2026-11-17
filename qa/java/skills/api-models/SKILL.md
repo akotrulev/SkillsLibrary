@@ -30,9 +30,9 @@ apitests/src/test/java/com/{org}/apitests/models/
 ├── {api}/
 │   ├── {resource}/
 │   │   └── {Resource}Dto.java
-│   └── common/                ← DTOs shared across clients in the same API group
+│   └── shared/                ← DTOs shared across clients in the same API group
 │       └── {Name}Dto.java
-└── common/                    ← DTOs shared across API groups
+└── shared/                    ← DTOs shared across API groups
     └── {Name}Dto.java
 ```
 
@@ -126,8 +126,8 @@ The standards this skill's output must meet are the qa-java rule files, not a li
 ### Folder & package
 
 - DTOs live in `apitests/src/test/java/.../models/{api}/{resource}/` — same source set as the clients and tests that use them. Package: `com.{org}.apitests.models.{api}.{resource}`.
-- Shared within an API group → `models/{api}/common/`.
-- Shared across API groups → `models/common/`.
+- Shared within an API group → `models/{api}/shared/`.
+- Shared across API groups → `models/shared/`.
 - One DTO per file; record name matches file name.
 
 ### Properties
@@ -146,11 +146,18 @@ The standards this skill's output must meet are the qa-java rule files, not a li
   | array of T       | `List<T>`          | use `List.of()` for empty |
   | nested object    | another record DTO |       |
 
+### Strict deserialization
+
+- The response DTO is the contract: it declares every field the response carries, including fields no test asserts.
+- The suite's one `ObjectMapper` (on `BaseApiClient`, `api-client-writer`) keeps `DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES` enabled. Jackson's default is on; Spring's mapper builder and many copied snippets turn it off, so the base client enables it explicitly.
+- An undeclared field then fails the parse naming its path, which is the signal to update the DTO (through `api-spec-assets` when the spec moved), never to loosen the mapper.
+- No `@JsonIgnoreProperties(ignoreUnknown = true)` on a response DTO.
+
 ## Generation steps
 
 0. If an **OpenAPI/Swagger spec** is supplied, derive the answers to steps 1–3 from it (API group from the path/tags, resource from the schema name, properties + types from the schema definition) — do not ask.
 1. Ask: which **API group**? (User / Assessment / Legal / Reference / Auth)
 2. Ask: resource name and DTO kind (`Dto`, `InDto`, `ModDto`, nested, wrapper).
-3. Ask which properties are needed, or inspect a sample API response.
+3. Inspect the schema or a sample API response and declare every property it carries; the strict mapper fails on any it omits.
 4. Generate at `apitests/src/test/java/com/{org}/apitests/models/{api}/{resource}/{Name}Dto.java`.
 5. Run `./gradlew :apitests:compileTestJava` — expect 0 errors.

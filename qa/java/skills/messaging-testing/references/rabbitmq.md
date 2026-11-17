@@ -191,7 +191,13 @@ public final class RabbitProbe {
         }
         return null;   // nothing arrived in the window → a failed produce, asserted by the caller
     }
+
+    /** Empties `queue` so a test starts from nothing: pulls until a short window passes with no message. */
+    public void drain(String queue) throws Exception {
+        while (get(queue, Duration.ofMillis(300)) != null) { }
+    }
 }
+
 ```
 
 > The `Thread.sleep(100)` is the **poll cadence between pulls inside a bounded loop** — never a bare
@@ -251,7 +257,8 @@ public class OrderPublishingTest extends RabbitMqTestBase {
 Here the SUT is a **consumer** (a `DeliverCallback` loop or a Spring `@RabbitListener`). The test **publishes
 an input message**, lets the consumer run, and waits for the observable side-effect (a DB row, another
 message) — eventually consistent, so use **Awaitility** to poll a probe on a condition. This reuses
-`qa-java:db-connection`'s discipline verbatim.
+`qa-java:db-connection`'s discipline verbatim. `channel` is the test class's own, opened in `@BeforeMethod`
+and closed in `@AfterMethod` (as in the Examples), so the test body holds no `try`.
 
 ```java
 import static org.awaitility.Awaitility.await;
@@ -261,11 +268,9 @@ public void Should_write_a_shipment_row_When_an_OrderPaid_message_is_consumed() 
     UUID orderId = UUID.randomUUID();
 
     // 1. Publish the input message to the exchange the consumer's queue is bound to.
-    try (Channel channel = conn.createChannel()) {
-        AMQP.BasicProperties props = new AMQP.BasicProperties.Builder()
-                .contentType("application/json").correlationId(orderId.toString()).build();
-        channel.basicPublish("orders", "order.paid", props, Json.write(new OrderPaid(orderId)));
-    }
+    AMQP.BasicProperties props = new AMQP.BasicProperties.Builder()
+            .contentType("application/json").correlationId(orderId.toString()).build();
+    channel.basicPublish("orders", "order.paid", props, Json.write(new OrderPaid(orderId)));
 
     // 2. The SUT consumer is already running and picks it up.
 
@@ -326,11 +331,9 @@ message through the DLX to `orders.dlq`. Read **that** queue:
 ```java
 @Test
 public void Should_dead_letter_the_message_When_the_order_payload_is_invalid() throws Exception {
-    try (Channel channel = conn.createChannel()) {
-        AMQP.BasicProperties props = new AMQP.BasicProperties.Builder().contentType("application/json").build();
-        channel.basicPublish("orders", "order.paid", props,
-                "{ not valid order json }".getBytes(StandardCharsets.UTF_8));
-    }
+    AMQP.BasicProperties props = new AMQP.BasicProperties.Builder().contentType("application/json").build();
+    channel.basicPublish("orders", "order.paid", props,
+            "{ not valid order json }".getBytes(StandardCharsets.UTF_8));
 
     // The consumer (SUT) rejects it with requeue=false → it routes through orders.dlx to orders.dlq.
     // Bounded basicGet poll the DLQ — wait on the condition (a message lands), not a sleep.
@@ -354,9 +357,7 @@ with routing key K reached the queues bound for K, and didn't reach the ones tha
 @Test
 public void Should_route_only_eu_orders_to_the_eu_queue_When_publishing_by_region() throws Exception {
     // Topic exchange "orders"; eu.q bound with "order.eu.*", us.q bound with "order.us.*" (in base-class setup).
-    try (Channel channel = conn.createChannel()) {
-        channel.basicPublish("orders", "order.eu.placed", null, Json.write(new OrderPlaced(UUID.randomUUID())));
-    }
+    channel.basicPublish("orders", "order.eu.placed", null, Json.write(new OrderPlaced(UUID.randomUUID())));
 
     byte[] toEu = probe.get("orders.eu.q", Duration.ofSeconds(10));
     byte[] toUs = probe.get("orders.us.q", Duration.ofSeconds(2));   // short window — expect nothing
@@ -415,12 +416,14 @@ the DLQ.**
 public class FulfilmentConsumerTest extends RabbitMqTestBase {
 
     private Connection conn;
+    private Channel channel;
 
     @BeforeMethod(alwaysRun = true)
     public void setUp() throws Exception {
         conn = newConnection();
-        drain("orders.q");                 // independent tests — start from empty
-        drain("shipments.q");
+        channel = conn.createChannel();
+        probe.drain("orders.q");           // independent tests — start from empty
+        probe.drain("shipments.q");
     }
 
     @AfterMethod(alwaysRun = true)
@@ -429,11 +432,9 @@ public class FulfilmentConsumerTest extends RabbitMqTestBase {
     @Test
     public void Should_publish_ShipmentReady_When_a_valid_OrderPaid_is_consumed() throws Exception {
         UUID orderId = UUID.randomUUID();
-        try (Channel channel = conn.createChannel()) {
-            AMQP.BasicProperties props = new AMQP.BasicProperties.Builder()
-                    .contentType("application/json").correlationId(orderId.toString()).build();
-            channel.basicPublish("orders", "order.paid", props, Json.write(new OrderPaid(orderId)));
-        }
+        AMQP.BasicProperties props = new AMQP.BasicProperties.Builder()
+                .contentType("application/json").correlationId(orderId.toString()).build();
+        channel.basicPublish("orders", "order.paid", props, Json.write(new OrderPaid(orderId)));
 
         // The SUT consumer processes "orders.q" and publishes onto the "shipments" exchange → "shipments.q".
         byte[] ready = probe.get("shipments.q", Duration.ofSeconds(10));
@@ -441,10 +442,6 @@ public class FulfilmentConsumerTest extends RabbitMqTestBase {
         assertThat(ready).as("consumer did not publish a ShipmentReady message").isNotNull();
         ShipmentReady shipment = Json.parse(ready, ShipmentReady.class);
         assertThat(shipment.orderId()).isEqualTo(orderId);   // correlation preserved
-    }
-
-    private void drain(String queue) throws Exception {
-        while (probe.get(queue, Duration.ofMillis(300)) != null) { }
     }
 }
 ```

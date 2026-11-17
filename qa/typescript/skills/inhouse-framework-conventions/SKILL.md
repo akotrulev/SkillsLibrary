@@ -29,12 +29,12 @@ accelerator/
 ├── package.json               # workspaces: packages/*
 ├── tsconfig.base.json         # strict: true, shared compiler options
 ├── packages/
-│   ├── test-core/             # shared abstractions, helpers, base classes
+│   ├── test-core/             # shared abstractions and base classes
 │   │   └── src/
 │   │       ├── config/        # env config, BrowserStack creds, run options
-│   │       ├── reporting/     # Allure attachments, step helpers
+│   │       ├── reporting/     # Allure attachments and steps
 │   │       ├── screens/       # JSON loader, screen/page base class
-│   │       └── waits/         # explicit wait helpers
+│   │       └── waits/         # explicit wait conditions
 │   ├── api-tests/             # Vitest + fetch + Zod API tests
 │   │   └── src/
 │   │       ├── clients/       # typed API clients (one per service)
@@ -133,7 +133,7 @@ export const test = base.extend<{ loginPage: LoginPage }>({
 Rules:
 - **No literal selectors in page methods.** Always go through `this.selector("key")`.
 - **Method names describe user intent**, not mechanics. `signIn`, not `clickSignInButton`.
-- **One page object per screen.** Composite flows live in test code or in flow helpers, not in page objects.
+- **One page object per screen.** Composite flows live in a `<Name>Flow` class or a fixture, not in page objects.
 - **No assertions inside page objects.** They expose state; tests assert.
 - **Locators in JSON are `data-testid`-first for web** — `data-testid` is the standing contract with the dev team.
 
@@ -198,7 +198,7 @@ export const aValidUser = (): UserBuilder => new UserBuilder();
 
 - **Never** use `page.waitForTimeout(...)`, `browser.pause(...)`, or `setTimeout`-based sleeps in test code
 - Use Playwright's auto-waiting (`locator.click()`, `locator.fill()`, `expect(locator).toBeVisible()`)
-- For WebdriverIO/Appium, use the helpers in `test-core` `waits` — `waitUntilVisible`, `waitUntilStable` (backed by `waitUntil`, never fixed pauses)
+- For WebdriverIO/Appium, use the wait conditions in `test-core` `waits` — `waitUntilVisible`, `waitUntilStable` (backed by `waitUntil`, never fixed pauses)
 - If you need a wait that doesn't exist, add it to `test-core` `waits`, don't inline it
 
 ### Allure reporting
@@ -216,7 +216,7 @@ export const aValidUser = (): UserBuilder => new UserBuilder();
 
 ### Configuration & environments
 
-- All config lives in env-specific files loaded by the `config` helper in `test-core` (`.env`, `.env.staging`), parsed/validated at startup
+- All config lives in env-specific files loaded by the `config` loader in `test-core` (`.env`, `.env.staging`), parsed/validated at startup
 - BrowserStack creds, base URLs, and feature flags come from env vars
 - Never commit `.env` files; commit `.env.example` only
 
@@ -244,7 +244,7 @@ When rate-limited on one model, switch to another (Opus → Sonnet → Haiku) �
 - [ ] One logical assertion per test
 - [ ] Page object methods describe intent, not mechanics
 - [ ] Builders provide valid defaults
-- [ ] No conditional logic in tests (`if`, `for` driving assertions) — use parameterized tests
+- [ ] No `if`, `else`, `switch`, ternary, loop or `try` in a test body — use parameterized tests
 - [ ] No `any`; everything typed under `strict`
 - [ ] Tests are independent and order-agnostic
 

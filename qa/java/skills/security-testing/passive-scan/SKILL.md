@@ -173,10 +173,10 @@ jobs:
 
 To drive the scan from a TestNG test (assert programmatically, attach to Allure, gate on parsed counts),
 invoke the image as a one-shot container and parse the JSON report with Jackson. This is the Java
-re-expression of the TS `child_process` helper:
+re-expression of the TS `child_process` client:
 
 ```java
-// support/ZapBaseline.java — the Docker-port helper: one-shot container + JSON parse (no SDK exists)
+// support/ZapBaseline.java — the Docker-port client: one-shot container + JSON parse (no SDK exists)
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.file.*;

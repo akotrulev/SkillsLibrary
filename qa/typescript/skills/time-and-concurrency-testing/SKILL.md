@@ -14,7 +14,7 @@ Automates the case forms `qa/manual/test-case-writer` writes under **Temporal** 
 
 ## When NOT to use
 
-- Waiting for an async effect (`within <budget>, <observable>`) — use the suite's poller: `waitFor` in `qa/typescript/skills/db-testing/connection`, or `vi.waitFor` / `expect.poll`, with the case's budget as its timeout.
+- Waiting for an async effect (`within <budget>, <observable>`) — use the probe's named wait condition (`qa/typescript/skills/db-testing/connection`), or `vi.waitFor` / `expect.poll`, with the case's budget as its timeout.
 - Broker setup, topics, consumers, DLQ → `qa/typescript/skills/messaging-testing`.
 - A dependency fault or a retry after a fault → `qa/typescript/skills/failure-injection-testing`.
 - Flag state → `qa/typescript/skills/feature-flag-testing`.
@@ -48,11 +48,11 @@ Pick the first that matches the product.
 import { SchedulerRegistry } from '@nestjs/schedule';
 
 it('should charge the accrued credits when the monthly posting runs', async () => {
-  const member = await seedMemberWithAccrual({ accruedMinor: 600 });
+  const member = await memberSeeder.withAccrual({ accruedMinor: 600 });
 
   await host.app.get(SchedulerRegistry).getCronJob('monthly-posting').fireOnTick();
 
-  const charge = await waitFor(() => ledgerProbe.chargeFor(member.id), (c) => c.amountMinor === 600, postingBudget);
+  const charge = await ledgerProbe.waitForCharge(member.id, postingBudget);
   expect(charge.amountMinor, `charge for member ${member.id}`).toBe(600);
 });
 ```
@@ -66,16 +66,16 @@ it('should charge the accrued credits when the monthly posting runs', async () =
 
 ```ts
 it('should charge the accrued credits when the monthly posting runs', async () => {
-  const member = await seedMemberWithAccrual({ accruedMinor: 600 });
+  const member = await memberSeeder.withAccrual({ accruedMinor: 600 });
 
   await adminClient.runJobTyped('monthly-posting', { month: '2026-03' });
 
-  const charge = await waitFor(() => ledgerProbe.chargeFor(member.id), (c) => c.amountMinor === 600, postingBudget);
+  const charge = await ledgerProbe.waitForCharge(member.id, postingBudget);
   expect(charge.amountMinor, `charge for member ${member.id}`).toBe(600);
 });
 ```
 
-`adminClient` is a typed `{resource}Client` over the test-only trigger (`api-client-writer`). For a Kubernetes `CronJob`, a helper that performs I/O runs it; its failure propagates with stderr and is never caught:
+`adminClient` is a typed `{resource}Client` over the test-only trigger (`api-client-writer`). For a Kubernetes `CronJob`, a runner performs the I/O; its failure propagates with stderr and is never caught:
 
 ```ts
 import { execFile } from 'node:child_process';
@@ -83,11 +83,13 @@ import { promisify } from 'node:util';
 
 const run = promisify(execFile);
 
-export async function runCronJobNow(cronJob: string, namespace: string): Promise<string> {
-  const job = `${cronJob}-test-${crypto.randomUUID().slice(0, 8)}`;
-  await run('kubectl', ['create', 'job', job, `--from=cronjob/${cronJob}`, '-n', namespace]);
-  await run('kubectl', ['wait', '--for=condition=complete', `job/${job}`, '--timeout=120s', '-n', namespace]);
-  return job;
+export class CronJobRunner {
+  async runNow(cronJob: string, namespace: string): Promise<string> {
+    const job = `${cronJob}-test-${crypto.randomUUID().slice(0, 8)}`;
+    await run('kubectl', ['create', 'job', job, `--from=cronjob/${cronJob}`, '-n', namespace]);
+    await run('kubectl', ['wait', '--for=condition=complete', `job/${job}`, '--timeout=120s', '-n', namespace]);
+    return job;
+  }
 }
 ```
 
@@ -126,7 +128,7 @@ it.each([
   { cancelAt: '2026-03-15T09:59:59Z', creditsBack: 2 },
   { cancelAt: '2026-03-15T10:00:01Z', creditsBack: 0 },
 ])('should return $creditsBack credits when cancelling at $cancelAt, 24 h before start', async ({ cancelAt, creditsBack }) => {
-  const booking = await seedBooking({ sessionStart, credits: 2 });
+  const booking = await bookingSeeder.booking({ sessionStart, credits: 2 });
   clock.set(new Date(cancelAt));
 
   const response = await bookingClient.cancel(booking.id);
@@ -147,21 +149,25 @@ DST change and month end are the same pattern with instants either side of the t
 Release N requests together behind a start barrier, wait for all to settle, assert the **invariant**, never which request won. Repetition comes from the runner's `repeats` option.
 
 ```ts
-export async function startTogether<T>(count: number, act: (index: number) => Promise<T>): Promise<T[]> {
-  const barrier = Promise.withResolvers<void>();
-  const calls = Array.from({ length: count }, async (_, index) => {
-    await barrier.promise;
-    return act(index);
-  });
-  barrier.resolve();
-  return Promise.all(calls);
+export class RaceStarter {
+  async startTogether<T>(count: number, act: (index: number) => Promise<T>): Promise<T[]> {
+    const barrier = Promise.withResolvers<void>();
+    const calls = Array.from({ length: count }, async (_, index) => {
+      await barrier.promise;
+      return act(index);
+    });
+    barrier.resolve();
+    return Promise.all(calls);
+  }
 }
 
-test('should confirm exactly one booking when two members take the last seat', { repeats: 19 }, async () => {
-  const session = await seedSession({ capacity: 1 });
-  const tokens = await seedMemberTokens(2);
+const race = new RaceStarter();
 
-  const responses = await startTogether(2, (i) => bookingClient(tokens[i]).book(session.id));
+test('should confirm exactly one booking when two members take the last seat', { repeats: 19 }, async () => {
+  const session = await bookingSeeder.session({ capacity: 1 });
+  const tokens = [await aliceTokens.getAccessToken(), await bobTokens.getAccessToken()];
+
+  const responses = await race.startTogether(2, (i) => bookingClient(tokens[i]).book(session.id));
 
   expect(responses.filter((r) => r.status === 201), `confirmed of ${responses.length} for session ${session.id}`).toHaveLength(1);
   expect(await bookingDbProbe.confirmedCount(session.id), `confirmed rows for session ${session.id}`).toBe(1);
@@ -180,7 +186,7 @@ The effect must happen once. Each form delivers the **same business id** a secon
 
 ```ts
 it('should return credits used to 6, not 4, when the cancellation event is delivered twice', async () => {
-  const booking = await seedCancelledBooking({ creditsUsed: 8, creditsBack: 2 });
+  const booking = await bookingSeeder.cancelledBooking({ creditsUsed: 8, creditsBack: 2 });
   const event = cancellationEvent(booking);
 
   await producer.publish(event, { dedupId: crypto.randomUUID() });
@@ -191,7 +197,7 @@ it('should return credits used to 6, not 4, when the cancellation event is deliv
 });
 ```
 
-- **Message** — publish through the project's `messaging-testing` reference (its producer / seed helper), with a **new broker message id and the same business id**. Broker deduplication swallows an identical publish before the consumer sees it — SQS FIFO (`MessageDeduplicationId`, `ContentBasedDeduplication`), Service Bus duplicate detection, Kafka's idempotent producer, a BullMQ repeated `jobId` — and such a test proves nothing about the consumer's idempotency. Vary the dedup id (or use a standard queue) so two deliveries reach the consumer.
+- **Message** — publish through the project's `messaging-testing` reference (its producer / seeder), with a **new broker message id and the same business id**. Broker deduplication swallows an identical publish before the consumer sees it — SQS FIFO (`MessageDeduplicationId`, `ContentBasedDeduplication`), Service Bus duplicate detection, Kafka's idempotent producer, a BullMQ repeated `jobId` — and such a test proves nothing about the consumer's idempotency. Vary the dedup id (or use a standard queue) so two deliveries reach the consumer.
 - **Wait on a positive signal, never a sleep:** the queue drained (depth and in-flight zero), or an inbox / processed-messages row per delivery, then assert the effect count.
 - **Webhook** — replay the request with the same delivery id through the typed client twice; assert one effect and, if the contract says so, the same response both times.
 - **Idempotency key** — resend the request with the same `Idempotency-Key`; assert one resource and the contracted response.
@@ -209,7 +215,7 @@ A `db-testing/verification-queries` query asserting the invariant's statement (`
 - **Reading `new Date()` inside the assertion** or seeding "tomorrow" from the test process while the server's clock decides the boundary.
 - **A boundary test with no controlled clock and no stated skew margin.**
 - **Asserting which request won**, or `expect([201, 409]).toContain(status)`.
-- **A `for` loop firing the race or driving assertions** — use `repeats` and `startTogether`; parameterize with `it.each`.
+- **A `for` loop firing the race or driving assertions** — use `repeats` and `RaceStarter.startTogether`; parameterize with `it.each`.
 - **A race with no barrier** (`await a(); await b();` is sequential, not concurrent).
 - **A duplicate test that broker deduplication defeats.**
 - **A fixed sleep before asserting "still one".**
@@ -231,7 +237,7 @@ A `db-testing/verification-queries` query asserting the invariant's statement (`
 ## Handoffs
 
 - A missing job trigger, clock seam or test endpoint → `be-node`, as a product change.
-- Broker producer / seeding helpers, DLQ → `qa/typescript/skills/messaging-testing`.
+- Broker producers / seeders, DLQ → `qa/typescript/skills/messaging-testing`.
 - Verification queries and the poller → `qa/typescript/skills/db-testing/verification-queries`, `…/db-testing/connection`.
 - A retry or recovery after a fault → `qa/typescript/skills/failure-injection-testing`.
 - Typed clients for the trigger or clock endpoint → `qa/typescript/skills/api-client-writer`.

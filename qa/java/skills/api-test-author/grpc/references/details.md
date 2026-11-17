@@ -99,19 +99,25 @@ package action;
 import com.example.user.v1.*;
 import io.grpc.Channel;
 import io.grpc.ClientInterceptors;
-import utility.SystemPropertyUtil;
+import config.Env;
 
 public class UserGrpcAction extends GrpcAction {
     private final UserServiceGrpc.UserServiceBlockingStub blocking;
     private final UserServiceGrpc.UserServiceStub async;   // for client-/bidi-streaming
 
-    public UserGrpcAction(Channel channel, boolean authenticated) {
-        Channel ch = authenticated
-            ? ClientInterceptors.intercept(channel, bearer(SystemPropertyUtil.getGrpcToken()))
-            : channel;
-        this.blocking = UserServiceGrpc.newBlockingStub(ch);
-        this.async    = UserServiceGrpc.newStub(ch);
+    public static UserGrpcAction authenticated(Channel channel) {
+        return new UserGrpcAction(ClientInterceptors.intercept(channel, bearer(Env.required("GRPC_TOKEN"))));
     }
+
+    public static UserGrpcAction anonymous(Channel channel) {
+        return new UserGrpcAction(channel);
+    }
+
+    private UserGrpcAction(Channel channel) {
+        this.blocking = UserServiceGrpc.newBlockingStub(channel);
+        this.async    = UserServiceGrpc.newStub(channel);
+    }
+
 
     public GrpcCallResult<User> getUser(String id) {
         return call(() -> blocking.getUser(GetUserRequest.newBuilder().setId(id).build()));
@@ -152,7 +158,7 @@ public class UserGrpcTest extends BaseGrpcTest {
 
     @Test
     public void getUserWhenExistsReturnsUserWithOkStatus() {
-        UserGrpcAction action = new UserGrpcAction(channel, true);
+        UserGrpcAction action = UserGrpcAction.authenticated(channel);
 
         GrpcCallResult<User> result = action.getUser("1");
 
@@ -162,7 +168,7 @@ public class UserGrpcTest extends BaseGrpcTest {
 
     @Test
     public void getUserWhenUnknownIdReturnsNotFound() {
-        UserGrpcAction action = new UserGrpcAction(channel, true);
+        UserGrpcAction action = UserGrpcAction.authenticated(channel);
 
         GrpcCallResult<User> result = action.getUser("999999");
 
@@ -173,7 +179,7 @@ public class UserGrpcTest extends BaseGrpcTest {
 
     @Test
     public void createUserWhenEmailBlankReturnsInvalidArgument() {
-        UserGrpcAction action = new UserGrpcAction(channel, true);
+        UserGrpcAction action = UserGrpcAction.authenticated(channel);
 
         GrpcCallResult<User> result = action.createUser("", "A", "B");
 
@@ -182,7 +188,7 @@ public class UserGrpcTest extends BaseGrpcTest {
 
     @Test
     public void getUserWhenNoBearerReturnsUnauthenticated() {
-        UserGrpcAction action = new UserGrpcAction(channel, false);   // no bearer metadata
+        UserGrpcAction action = UserGrpcAction.anonymous(channel);
 
         GrpcCallResult<User> result = action.getUser("1");
 

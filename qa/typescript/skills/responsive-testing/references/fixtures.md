@@ -1,9 +1,9 @@
-# Responsive fixtures — page objects and the `Layout` measuring helper (TypeScript / Playwright 1.64)
+# Responsive fixtures — page objects and the `Layout` measuring probe (TypeScript / Playwright 1.64)
 
 `responsive.fixtures.ts` extends the writer's `fixtures.ts`
 (`qa/typescript/skills/ui-test-author/playwright/assets/fixtures.ts`). Page objects expose variant intent
 (`appShell.nav('Hamburger')`), never boxes. Geometry lives in `Layout`: it **measures and returns numbers**,
-and the test asserts — no `expect` and no loop of assertions inside a helper, so a failure reports the measured
+and the test asserts — no `expect` and no loop of assertions inside the probe, so a failure reports the measured
 value. Test ids follow the frontend rule (PascalCase, dot-separated): the ids `fe-react`'s responsive-design
 skill generates (`Nav.Desktop` / `Nav.Hamburger`).
 
@@ -26,7 +26,7 @@ export class AppShell {
   }
 
   nav(variant: NavVariant): Locator {
-    return this.page.getByTestId(`Nav.${variant}`);
+    return this.page.getByTestId(`Nav.${variant}`).describe(`${variant} nav`);
   }
 }
 
@@ -36,9 +36,9 @@ export class ProductsPage {
   readonly results: Locator;
 
   constructor(private readonly page: Page) {
-    this.cards = page.getByTestId('ProductGrid.Card');
-    this.filters = page.getByTestId('Products.Filters');
-    this.results = page.getByTestId('Products.Results');
+    this.cards = page.getByTestId('ProductGrid.Card').describe('Product cards');
+    this.filters = page.getByTestId('Products.Filters').describe('Product filters');
+    this.results = page.getByTestId('Products.Results').describe('Product results');
   }
 
   async open(): Promise<void> {

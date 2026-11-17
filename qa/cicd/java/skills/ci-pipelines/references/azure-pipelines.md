@@ -349,6 +349,31 @@ jobs:
           artifact: gatling-report
 ```
 
+### Container lane — `pipelines/templates/container-tests.yml`
+
+The suite as an image built from the checked-out commit, writing its single-file Allure report to a mounted folder. The Dockerfile, `run-tests.sh` and the jar are [`fat-jar-and-container.md`](fat-jar-and-container.md).
+
+```yaml
+jobs:
+  - job: container_tests
+    pool: { vmImage: ubuntu-latest }
+    steps:
+      - checkout: self
+      - script: docker build -t api-tests .
+        displayName: Build the test image
+      - script: docker run --rm --user "$(id -u):$(id -g)" -e API_URL -v "$(Build.SourcesDirectory)/reports:/reports" api-tests
+        displayName: Run the suite
+        env:
+          API_URL: $(apiUrl)
+      - task: PublishPipelineArtifact@1
+        condition: always()
+        inputs:
+          targetPath: reports
+          artifact: api-tests-report
+```
+
+The run step is gating; only the publish is `condition: always()`.
+
 ## Rules
 
 ### Triggers

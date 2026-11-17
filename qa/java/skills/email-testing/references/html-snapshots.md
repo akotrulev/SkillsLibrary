@@ -114,7 +114,7 @@ public final class EmailScrubbers {
 ```java
 public class WelcomeEmailSnapshotIT extends IntegrationTestBase {
 
-    private final MailpitClient mail = new MailpitClient(MailpitSupport.apiBaseUrl());
+    private final MailpitClient mail = new MailpitClient(MailpitFixture.apiBaseUrl());
 
     @Autowired private TestRestTemplate http;
 

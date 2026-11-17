@@ -250,7 +250,7 @@ public async Task Should_write_a_shipment_row_When_an_OrderPaid_message_is_consu
 }
 ```
 
-The `WaitFor.Async` helper is the same bounded poll as `qa-dotnet:db-connection` and ``service-bus`` Service Bus —
+The `WaitFor.Async` wait condition is the same bounded poll as `qa-dotnet:db-connection` and ``service-bus`` Service Bus —
 included so the node is self-contained:
 
 ```csharp
@@ -269,15 +269,15 @@ public static class WaitFor
         {
             var value = await probe(cts.Token);
             if (value is not null && predicate(value)) return value;
-            await Task.Delay(interval, cts.Token);   // poll cadence INSIDE the helper, not an assertion sleep
+            await Task.Delay(interval, cts.Token);   // poll cadence INSIDE the wait condition, not an assertion sleep
         }
         throw new TimeoutException($"Side-effect did not satisfy the predicate within {timeout}.");
     }
 }
 ```
 
-> `Task.Delay` appears **only** as the poll cadence *inside* the bounded helper — never as a bare
-> `await Task.Delay(5000)` standing in for "the message probably arrived by now". The difference: the helper
+> `Task.Delay` appears **only** as the poll cadence *inside* the bounded wait condition — never as a bare
+> `await Task.Delay(5000)` standing in for "the message probably arrived by now". The difference: the wait condition
 > returns the instant the condition holds and *fails* if it never does; a bare sleep races the broker.
 
 ## Visibility timeout — received-but-not-deleted → redelivery (the peek-lock analogue)
@@ -331,17 +331,7 @@ public async Task Should_redrive_to_the_dlq_When_max_receive_count_is_exceeded()
 {
     await Sqs.SendMessageAsync(OrdersUrl, """{ not valid order json }""");
 
-    // Receive-without-delete maxReceiveCount+1 times, resetting visibility to 0 each time to force fast
-    // redelivery. The bounded long-poll is the condition-wait; no Task.Delay anywhere.
-    for (var attempt = 0; attempt < 4; attempt++)   // 4 = maxReceiveCount(3) + 1 to trigger the move
-    {
-        var poll = await Sqs.ReceiveMessageAsync(new ReceiveMessageRequest
-        {
-            QueueUrl = OrdersUrl, WaitTimeSeconds = 5, MaxNumberOfMessages = 1,
-        });
-        if (poll.Messages.Count > 0)
-            await Sqs.ChangeMessageVisibilityAsync(OrdersUrl, poll.Messages[0].ReceiptHandle, 0);
-    }
+    await new SqsProbe(Sqs).ReceiveWithoutDeleteAsync(OrdersUrl, times: 4);   // 4 = maxReceiveCount(3) + 1 to trigger the move
 
     // Assert on the DLQ — long-poll the condition (the message lands), not a sleep.
     var dead = await Sqs.ReceiveMessageAsync(new ReceiveMessageRequest
@@ -352,6 +342,44 @@ public async Task Should_redrive_to_the_dlq_When_max_receive_count_is_exceeded()
     Assert.That(dead.Messages, Is.Not.Empty, "expected the poison message in the dead-letter queue");
     Assert.That(dead.Messages[0].Body, Does.Contain("not valid order json"));   // the original payload
     await Sqs.DeleteMessageAsync(OrdersDlqUrl, dead.Messages[0].ReceiptHandle);
+}
+```
+
+The probe receives without deleting, resetting visibility to 0 each time to force fast redelivery. The bounded
+long-poll is the condition-wait; no `Task.Delay` anywhere:
+
+```csharp
+public sealed class SqsProbe(IAmazonSQS sqs)
+{
+    public async Task ReceiveWithoutDeleteAsync(string queueUrl, int times)
+    {
+        for (var attempt = 0; attempt < times; attempt++)
+        {
+            var poll = await sqs.ReceiveMessageAsync(new ReceiveMessageRequest
+            {
+                QueueUrl = queueUrl, WaitTimeSeconds = 5, MaxNumberOfMessages = 1,
+            });
+            if (poll.Messages.Count > 0)
+                await sqs.ChangeMessageVisibilityAsync(queueUrl, poll.Messages[0].ReceiptHandle, 0);
+        }
+    }
+
+    public async Task<List<Message>> DrainAsync(string queueUrl)
+    {
+        var drained = new List<Message>();
+        while (true)
+        {
+            var page = await sqs.ReceiveMessageAsync(new ReceiveMessageRequest
+            {
+                QueueUrl = queueUrl, WaitTimeSeconds = 2, MaxNumberOfMessages = 10,
+            });
+            if (page.Messages.Count == 0) break;       // bounded wait returned empty → drained
+            drained.AddRange(page.Messages);
+            foreach (var m in page.Messages)
+                await sqs.DeleteMessageAsync(queueUrl, m.ReceiptHandle);
+        }
+        return drained;
+    }
 }
 ```
 
@@ -412,16 +440,9 @@ public async Task Should_fan_out_to_both_queues_When_an_order_event_is_published
         new AmazonSimpleNotificationServiceConfig { ServiceURL = _endpoint, AuthenticationRegion = "us-east-1" });
 
     var topicArn = (await sns.CreateTopicAsync("order-events")).TopicArn;
-    foreach (var queueUrl in new[] { _fulfilmentUrl, _auditUrl })
-    {
-        var arn = (await Sqs.GetQueueAttributesAsync(
-            new GetQueueAttributesRequest { QueueUrl = queueUrl, AttributeNames = ["QueueArn"] })).QueueARN;
-        await sns.SubscribeAsync(new SubscribeRequest
-        {
-            TopicArn = topicArn, Protocol = "sqs", Endpoint = arn,
-            Attributes = new Dictionary<string, string> { ["RawMessageDelivery"] = "true" },
-        });
-    }
+    var subscriptions = new TopicSubscriptions(sns, Sqs);
+    await subscriptions.SubscribeRawAsync(topicArn, _fulfilmentUrl);
+    await subscriptions.SubscribeRawAsync(topicArn, _auditUrl);
 
     await sns.PublishAsync(topicArn, JsonSerializer.Serialize(new OrderPlaced(Guid.NewGuid())));
 
@@ -439,24 +460,30 @@ public async Task Should_fan_out_to_both_queues_When_an_order_event_is_published
 }
 ```
 
+```csharp
+public sealed class TopicSubscriptions(IAmazonSimpleNotificationService sns, IAmazonSQS sqs)
+{
+    public async Task SubscribeRawAsync(string topicArn, string queueUrl)
+    {
+        var arn = (await sqs.GetQueueAttributesAsync(
+            new GetQueueAttributesRequest { QueueUrl = queueUrl, AttributeNames = ["QueueArn"] })).QueueARN;
+        await sns.SubscribeAsync(new SubscribeRequest
+        {
+            TopicArn = topicArn, Protocol = "sqs", Endpoint = arn,
+            Attributes = new Dictionary<string, string> { ["RawMessageDelivery"] = "true" },
+        });
+    }
+}
+```
+
 ## Receiving a batch / draining
 
 To assert "exactly N messages were produced", drain in a loop with `WaitTimeSeconds` and count — the bounded
-long-poll stops it hanging when fewer than N arrive. SQS returns **at most 10** per receive, so loop:
+long-poll stops it hanging when fewer than N arrive. SQS returns **at most 10** per receive, so
+`SqsProbe.DrainAsync` (above) loops:
 
 ```csharp
-var drained = new List<Message>();
-while (true)
-{
-    var page = await Sqs.ReceiveMessageAsync(new ReceiveMessageRequest
-    {
-        QueueUrl = OrdersUrl, WaitTimeSeconds = 2, MaxNumberOfMessages = 10,
-    });
-    if (page.Messages.Count == 0) break;       // bounded wait returned empty → drained
-    drained.AddRange(page.Messages);
-    foreach (var m in page.Messages)
-        await Sqs.DeleteMessageAsync(OrdersUrl, m.ReceiptHandle);
-}
+var drained = await new SqsProbe(Sqs).DrainAsync(OrdersUrl);
 Assert.That(drained, Has.Count.EqualTo(3));    // SUT produced exactly 3
 ```
 
@@ -551,7 +578,7 @@ public static class Orders
 - **Eventual consistency = wait on a condition, never a sleep.** `ReceiveMessageAsync` with `WaitTimeSeconds`
   for the receive side (bounded long-poll, max 20s); `WaitFor.Async` for consumer side-effects. **No bare
   `Task.Delay` / `Thread.Sleep`** as an assertion wait — `Task.Delay` only as the poll cadence inside the
-  bounded helper. Never short-poll (`WaitTimeSeconds = 0`) in a test.
+  bounded wait condition. Never short-poll (`WaitTimeSeconds = 0`) in a test.
 - The SUT's publisher/consumer is **constructor-injected** with the `IAmazonSQS` client / queue URL — never a
   static client or an endpoint read inside a `[Test]`.
 - **Delete (ack) every message you've finished processing** with its `ReceiptHandle`, or `PurgeQueueAsync` in
@@ -581,7 +608,7 @@ public static class Orders
   Bus on the emulator; **the `service-bus`-vs-`sqs` boundary**: Service Bus peek-lock + DLQ *sub-queue* vs SQS
   visibility-timeout + redrive-policy *DLQ queue* — same condition-wait discipline, different settlement.
   Kafka (`kafka`, offset-based) and RabbitMQ (`rabbitmq`, AMQP exchanges) close the family.
-- `qa-dotnet:db-connection` — the `WaitFor.Async` poll helper and the seeder/probe split reused for
+- `qa-dotnet:db-connection` — the `WaitFor.Async` wait condition and the seeder/probe split reused for
   the consumer side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
 - `qa-dotnet:test-login-tokens` — when running against a cloud test account; the default-credential-chain
   + secrets-from-env discipline.

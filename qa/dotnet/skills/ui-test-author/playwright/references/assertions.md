@@ -2,7 +2,7 @@
 
 Web-first assertions retry until they pass or the assertion timeout (5 s by default) runs out. They are the
 only way a UI test checks page state. Inside a `BaseTest` subclass, `Expect(...)` is an inherited method of
-`PlaywrightTest`; anywhere else (a `[SetUpFixture]`, a helper) add
+`PlaywrightTest`; anywhere else (a `[SetUpFixture]`, a custom assertion class) add
 `using static Microsoft.Playwright.Assertions;`. The version in brackets is where an API first shipped.
 
 ## 1. The web-first set

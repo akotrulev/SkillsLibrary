@@ -185,18 +185,44 @@ test. Gate the build on it.
 ```java
 package i18n;
 
-import org.testng.annotations.*;
-
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.*;
 
+public final class TranslationBundle {
+    private static final Pattern PLACEHOLDER = Pattern.compile("\\{\\w+}");
+
+    private TranslationBundle() {}
+
+    public static Properties load(String tag) throws IOException {
+        Properties properties = new Properties();
+        try (InputStream in = TranslationBundle.class.getResourceAsStream("/i18n/common_" + tag + ".properties")) {
+            properties.load(new InputStreamReader(Objects.requireNonNull(in, "common_" + tag), StandardCharsets.UTF_8));
+        }
+        return properties;
+    }
+
+    public static List<String> placeholders(String value) {
+        return PLACEHOLDER.matcher(value).results().map(MatchResult::group).sorted().toList();
+    }
+}
+```
+
+```java
+package i18n;
+
+import org.testng.annotations.*;
+
+import java.util.*;
+
+import static i18n.TranslationBundle.load;
+import static i18n.TranslationBundle.placeholders;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class CoverageI18nTest {
-    private static final Pattern PLACEHOLDER = Pattern.compile("\\{\\w+}");
 
     @DataProvider
     public static Object[][] targets() {
@@ -234,19 +260,8 @@ public class CoverageI18nTest {
                 .filteredOn(target::containsKey)
                 .allMatch(key -> placeholders(source.getProperty(key)).equals(placeholders(target.getProperty(key))));
     }
-
-    private static Properties load(String tag) throws Exception {
-        Properties properties = new Properties();
-        try (InputStream in = CoverageI18nTest.class.getResourceAsStream("/i18n/common_" + tag + ".properties")) {
-            properties.load(new InputStreamReader(Objects.requireNonNull(in, "common_" + tag), StandardCharsets.UTF_8));
-        }
-        return properties;
-    }
-
-    private static List<String> placeholders(String value) {
-        return PLACEHOLDER.matcher(value).results().map(MatchResult::group).sorted().toList();
-    }
 }
+
 ```
 
 AssertJ's `allMatch` / `noneMatch` failure lists the offending elements, so the report names every missing,

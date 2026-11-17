@@ -208,8 +208,8 @@ code paths with diverging rules — that is the finding.
 | File | Holds |
 |---|---|
 | [`references/typescript.md`](references/typescript.md) | Native `page.webmcp` on 1.64: the flag per file or per project, Firefox prefs, schema validation, CDP observation |
-| [`references/java.md`](references/java.md) | The 1.63 `evaluate` helpers, the `launchOptions()` override, the from-1.64 native form |
-| [`references/dotnet.md`](references/dotnet.md) | The 1.63 `EvaluateAsync` helpers, `webmcp.runsettings` and the second run, the from-1.64 native form |
+| [`references/java.md`](references/java.md) | The 1.63 `evaluate` scripts, the `launchOptions()` override, the from-1.64 native form |
+| [`references/dotnet.md`](references/dotnet.md) | The 1.63 `EvaluateAsync` scripts, `webmcp.runsettings` and the second run, the from-1.64 native form |
 | [`assets/webmcp.spec.ts`](assets/webmcp.spec.ts), [`assets/ProductPage.ts`](assets/ProductPage.ts) | Five tests on the TS writer's fixtures; the page object owns the URL, the badge and `page.webmcp` |
 | [`assets/WebMcpTest.java`](assets/WebMcpTest.java), [`assets/ProductPage.java`](assets/ProductPage.java) | The same five on the Java writer's `BaseTest`; the page object owns the `evaluate` scripts |
 | [`assets/WebMcpTests.cs`](assets/WebMcpTests.cs), [`assets/ProductPage.cs`](assets/ProductPage.cs), [`assets/webmcp.runsettings`](assets/webmcp.runsettings) | The same five on the .NET writer's `BaseTest`, run with their own settings |

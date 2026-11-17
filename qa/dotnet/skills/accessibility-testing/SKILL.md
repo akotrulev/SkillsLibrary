@@ -54,7 +54,7 @@ reach `localhost` or a firewalled host.
   be called. Assert the intended contract with `ToHaveAccessibleNameAsync`, `ToHaveAccessibleDescriptionAsync`,
   `ToHaveAccessibleErrorMessageAsync`, `ToHaveRoleAsync` and `ToMatchAriaSnapshotAsync` from
   `qa/dotnet/skills/ui-test-author/playwright/references/assertions.md` §1–§2.
-- **The conformance target is WCAG 2.2 AA**, set once in a helper: `wcag2a`, `wcag2aa`, `wcag21a`,
+- **The conformance target is WCAG 2.2 AA**, set once in the `A11yScan` probe: `wcag2a`, `wcag2aa`, `wcag21a`,
   `wcag21aa`, `wcag22aa`.
 - **Scan per state, not per page** — an open menu, a modal and a form showing errors are different DOMs.
   The page object drives the state and waits on a condition; never `Task.Delay` or `WaitForTimeoutAsync`.

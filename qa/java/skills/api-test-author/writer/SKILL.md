@@ -39,24 +39,25 @@ This skill writes **only the test classes**. If a DTO or client a test needs is 
 - .NET API tests → `qa/dotnet/skills/api-test-author/writer`
 - DTO-only scaffolding → `qa/java/skills/api-models`
 - Client-only scaffolding → `qa/java/skills/api-client-writer`
+- A new project from zero → `qa/java/skills/api-project-setup`
 - Reviewing existing tests → `qa/java/skills/api-test-author/review`
 
 ## Inputs needed
 
 1. **Source of truth** — one of: an OpenAPI/Swagger spec, a formal test-case document (TC-IDs), or a verbal scenario list. When a spec or test-case document is provided, derive resources, endpoints, body shapes, and scenarios from it — do not re-ask.
 2. **Resource(s) and endpoints in scope** — method, path, auth requirements
-3. **Auth model** — which test user / token each scenario needs (token fetched via `AuthHelper`, passed to the client constructor)
-4. **Scenarios** — happy path, 401/403, 404, 400 validation, boundary/edge
+3. **Auth model** — which test user / token each scenario needs (token fetched via `TokenProvider`, passed to the client constructor)
+4. **Scenarios** — happy path, 401/403, 404, 400 validation, boundary/edge; for a list or search endpoint, the read-only set below
 
 ## Test class template
 
-Tests live at `apitests/src/test/java/com/{org}/apitests/tests/{api}/{resource}/`, one class per operation, extending `BaseTest` (registers `JavaTimeModule`, Allure listener, loads configuration).
+Tests live at `apitests/src/test/java/com/{org}/apitests/tests/{api}/{resource}/`, one class per operation, extending `BaseTest` (registers `JavaTimeModule`, Allure listener, loads configuration). The client's mapper fails on an unknown property (`api-client-writer`), so a field the API added and the DTO lacks fails the test instead of passing unseen.
 
 ```java
 package com.{org}.apitests.tests.user.users;
 
 import com.{org}.apitests.base.BaseTest;
-import com.{org}.apitests.clients.AuthHelper;
+import com.{org}.apitests.clients.TokenProvider;
 import com.{org}.apitests.clients.user.UserClient;
 import com.{org}.apitests.models.user.users.UserDto;
 import io.restassured.response.Response;
@@ -75,8 +76,8 @@ public class GetUserTest extends BaseTest {
 
     @BeforeClass
     public void setUpClients() {
-        // AuthHelper caches tokens per test user — fetching here is cheap and per-class.
-        userClient = new UserClient(AuthHelper.getToken(TestUsers.STANDARD));
+        // TokenProvider caches one token per test user, so fetching here is cheap and per-class.
+        userClient = new UserClient(TokenProvider.getToken(TestUsers.STANDARD));
         anonymousClient = new UserClient("");
     }
 
@@ -122,7 +123,7 @@ public class PostUserTest extends BaseTest {
 
     @BeforeClass
     public void setUpClients() {
-        userClient = new UserClient(AuthHelper.getToken(TestUsers.ADMIN));
+        userClient = new UserClient(TokenProvider.getToken(TestUsers.ADMIN));
     }
 
     @AfterMethod(alwaysRun = true)
@@ -158,6 +159,46 @@ public class PostUserTest extends BaseTest {
 }
 ```
 
+### Setup and cleanup conventions
+
+- **Create what the test changes.** A record a test creates, updates or deletes is created per test with a unique value (a UUID in the name), registered in a list, and removed in `@AfterMethod(alwaysRun = true)`; the loop in that teardown is infrastructure, not a test body.
+- **Read-only reference data.** A list or search test may read curated records the environment already holds. Name them in the test (a constant, or the case's description), never change them, and assert the result is not empty before asserting on its items: an "every item has X" check over an empty list proves nothing.
+- **Pre-clean.** A record that must carry a fixed value (a unique email, a promotion code) may be left behind by a crashed run. `@BeforeMethod` removes it first through the API (a seeder or client call that deletes every match), and teardown still deletes what the test creates.
+- **Keep on failure.** Where the suite keeps what a failed test left, the teardown takes `ITestResult`, deletes when `result.isSuccess()` and logs the kept ids otherwise. Names unique per run keep leftovers from colliding. That check is the teardown registry's legal branch (`qa-java-data.md`).
+
+### Read-only / search scenario set
+
+Beside the CRUD set, a list or search endpoint gets these, each against reference data or records seeded in setup. Query parameters come from a typed query builder (`test-data-builder` § Query parameters), never positional strings:
+
+```java
+@Test(description = "TC-USER-020")
+public void Should_ReturnRequestedPageSize_When_PageSizeIsGiven() {
+    List<UserDto> users = userClient.search(UserQuery.builder().pageSize(5).build(), HttpStatus.SC_OK);
+
+    assertThat(users).as("users on a page of 5").hasSize(5);
+}
+
+@Test(description = "TC-USER-021")
+public void Should_ReturnOnlyActiveUsers_When_FilteredByActiveStatus() {
+    List<UserDto> users = userClient.search(UserQuery.builder().status("active").build(), HttpStatus.SC_OK);
+
+    assertThat(users)
+            .as("users filtered by status=active")
+            .isNotEmpty()
+            .allSatisfy(user -> assertThat(user.status()).isEqualTo("active"));
+}
+```
+
+- The list returns the requested page size (the environment holds at least that many matching records).
+- A filter holds on every returned item, after the not-empty guard (AssertJ `allSatisfy` / `allMatch`).
+- Get-by-id matches the item the list returned (`TC-USER-003` above).
+
+### CRUD additions
+
+- **A delete is proven by a read**: `remove(id)` asserts `204`, then the raw `getById(id)` asserts `404`. A `204` alone proves only that the endpoint answered.
+- **An update is one test per changed field**: clone the seeded body into its builder (`Users.from(seededBody).email(newEmail).build()`, `test-data-builder`), change that one field, and assert it changed and the others did not.
+- **A full update compares the whole object** where the DTO is a record (value equality): `assertThat(userClient.getById(id, HttpStatus.SC_OK)).isEqualTo(updated)`, not a field-by-field subset.
+
 ## Scenario → pattern matrix
 
 | Scenario | Client overload | Assertion pattern |
@@ -184,14 +225,14 @@ The standards this skill's output must meet are the qa-java rule files, not a li
 ## Layout
 
 - Tests go in `apitests/src/test/java/com/{org}/apitests/tests/{api}/{resource}/`; package follows folder.
-- One class per operation: `{Operation}{Resource}Test` (`GetUserTest`, `PostUserTest`), extending `BaseTest`. Clients are built in `@BeforeClass` with tokens from `AuthHelper`.
+- One class per operation: `{Operation}{Resource}Test` (`GetUserTest`, `PostUserTest`), extending `BaseTest`. Clients are built in `@BeforeClass` with tokens from `TokenProvider`.
 - Error bodies are read in the test with `response.as(ErrorDto.class)`; happy-path DTOs come from the typed overload.
 - Request bodies with four or more fields come from `qa/java/skills/test-data-builder`; rows that differ only in data use `qa/java/skills/data-driven-testing`.
 - When automating from a test-case document, the TC-ID goes in `@Test(description = "TC-…")` so Allure traces test → case.
 
 ## Generation steps
 
-1. Determine the **source of truth**: OpenAPI/Swagger spec, test-case document, or verbal scenarios. From a spec, derive the scenario set per endpoint (happy, 401, 404, 400 validation, boundary). From a test-case document, map one test method per TC-ID.
+1. Determine the **source of truth**: OpenAPI/Swagger spec, test-case document, or verbal scenarios. From a spec, derive the scenario set per endpoint (happy, 401, 404, 400 validation, boundary; for a list or search endpoint, the read-only set; for a delete or update, the CRUD additions). From a test-case document, map one test method per TC-ID.
 2. Write the scenario × oracle table (`references/generation-checks.md` §1) — no test code before it exists.
 3. For each resource in scope, verify the record DTOs (`models/{api}/{resource}/`) and the `{Resource}Client` exist. Create missing ones via `qa/java/skills/api-models` then `qa/java/skills/api-client-writer` before writing any test.
 4. Author one test class per operation, picking patterns from the scenario matrix. Body-manipulation cases (malformed JSON, extra/missing property) require the optional raw/`Map` client overloads — add them via `api-client-writer`.

@@ -52,9 +52,16 @@ A scenario that needs several `When`s usually hides multiple behaviors — split
 ## Reusable, parameterized steps
 
 - One canonical verb per concept. Agree it once and never synonym-drift (`sign in` ≠ "log in" ≠ "authenticate" — pick one).
-- Parameterize literals so one step definition serves many concrete steps. Quote strings, leave numbers bare, so they map to Cucumber-Expression `{string}` / `{int}` downstream.
+- Parameterize values so one step definition serves many concrete steps. Quote strings, leave numbers bare, so they map to Cucumber-Expression `{string}` / `{int}` downstream.
 - Prefer domain/ubiquitous language over implementation identifiers (`the premium plan`, not `plan_id=3`).
+- Parameterize the value, never the field: each field, filter or column has its own step named after it (`I select "Oncology" for the Deal Type filter`). A generic step taking the field name hides which control it drives and cannot be bound to one.
 - Keep steps composable and small; a good step catalog has far fewer steps than scenarios.
+
+## Data and skip tags
+
+- A scenario that only reads (search, filter) names the curated reference data it relies on; it never modifies it.
+- A scenario that creates data may open with a pre-clean precondition (`Given the deal "Acme" does not exist`). Teardown stays in a hook, never in steps.
+- A feature written ahead of its automation carries a tag that keeps it out of the run (`@not-automated`, or the suite's existing one) and a ticket.
 
 ## Conjunction steps (anti-pattern)
 
@@ -75,7 +82,7 @@ If you find yourself writing `And` inside a single logical action, it's a conjun
 - [ ] No conjunction steps.
 - [ ] Shared-by-all preconditions are in `Background`; partial ones are not.
 - [ ] Data-driven variants use `Scenario Outline` + `Examples`, one behavior per outline.
-- [ ] Steps reuse the catalog; new steps are parameterized, not near-duplicates.
+- [ ] Steps reuse the catalog; new steps parameterize the value, one step per field, filter or column.
 - [ ] Tags carry priority, tier, type, and AC traceability.
 - [ ] The feature reads top-to-bottom as documentation without needing the code.
 

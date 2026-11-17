@@ -26,7 +26,7 @@ The playwright.dev Java pages already list 1.64 options that the 1.63 binding do
 
 | Concern | Owner |
 |---|---|
-| The failure-evidence defaults (trace, video, screenshot on failure) | `qa/java/skills/ui-test-author/playwright/assets/BaseTest.java` — its `closeContext` hook and private `keep*` helpers, explained in that skill's `references/lifecycle.md` §5. This skill explains them and never adds a second hook for the same evidence |
+| The failure-evidence defaults (trace, video, screenshot on failure) | `qa/java/skills/ui-test-author/playwright/assets/BaseTest.java` — its `closeContext` hook and private `keep*` methods, explained in that skill's `references/lifecycle.md` §5. This skill explains them and never adds a second hook for the same evidence |
 | The Appium failure evidence (screenshot, page source, device log, recording) | `qa/java/skills/ui-test-author/appium/assets/BaseMobileTest.java`, explained in `references/appium.md` |
 | Capture options, deliberate recordings, exploratory capture, reading a trace, PII | **this skill** |
 | The Cucumber scenario hook that keeps the same evidence for `qa-bdd-java` | `qa/java/skills/bdd-project-scaffold` (its `Hooks` class) |
@@ -56,7 +56,7 @@ The playwright.dev Java pages already list 1.64 options that the 1.63 binding do
 | Kind | Who starts it | API | Lands in |
 |---|---|---|---|
 | **Failure evidence** | `BaseTest`, on every test | `context.tracing().start(...)`, `setRecordVideoDir`, `page.screenshot(...)` on failure | `build/playwright-artifacts/<Class>.<method>.{png,zip,webm}`, each also attached to Allure |
-| **Deliberate recording** | the test class's own `@BeforeMethod` / `@AfterMethod`, on purpose | `page.screencast()` [1.59], `tracing().startHar(...)` [1.60], a screenshot helper | `build/playwright-artifacts/<Class>.<method>.<kind>.<ext>`, attached to Allure |
+| **Deliberate recording** | the test class's own `@BeforeMethod` / `@AfterMethod`, on purpose | `page.screencast()` [1.59], `tracing().startHar(...)` [1.60], an `Evidence` screenshot | `build/playwright-artifacts/<Class>.<method>.<kind>.<ext>`, attached to Allure |
 | **Exploratory capture** | an agent, live | Playwright MCP capture tools, or `playwright-cli` | `evidence/<YYYY-MM-DD>-<topic>/` (explicit filenames); `.playwright-mcp/` for auto-named MCP output |
 
 Java has no test runner that manages evidence: there are no trace or video *modes*, no `error-context.md`
@@ -89,7 +89,7 @@ retries.
 - **The one catch** is `keepScreenshot`'s narrow `PlaywrightException` catch, logged with a message
   template, so a crashed page still keeps its trace and video. Any capture that runs from a hook and
   touches a page that may have crashed follows the same pattern (plan D29): the catch sits in a private
-  helper, never in the hook body or a test. A failing `@AfterMethod` would otherwise skip every remaining
+  method of the capturing object, never in the hook body or a test. A failing `@AfterMethod` would otherwise skip every remaining
   test in the class under TestNG's default `configfailurepolicy=skip`.
 - **Changing a default means editing `BaseTest`, in one place** — for example adding
   `setAriaSnapshots(true)` [1.63] to the trace's `StartOptions` so the viewer's **Display Aria** mode has
@@ -111,18 +111,18 @@ retries.
 
 A deliberate recording runs in the **test class's own `@BeforeMethod` / `@AfterMethod(alwaysRun = true)`**.
 TestNG runs those inside `BaseTest`'s hooks, so the page is open in both. The test body never calls `page`
-directly; it calls a page object or the class's helper. Code for each is in `references/playwright.md`.
+directly; it calls a page object or an evidence object (`Evidence`, `Receipt`). Code for each is in `references/playwright.md`.
 
 - **Receipt video** — `page.screencast().start(...)` [1.59] records exactly the span you choose, with action
   annotations (`AnnotatePosition.TOP_RIGHT` — an enum; the 1.59 release-note samples pass a `"top-right"`
   string, which does not compile in Java), chapter cards and overlays. **Stop it before the page closes**:
   the recording is lost when the page closes first (Playwright issue #41608). The class's `@AfterMethod`
-  runs before `BaseTest.closeContext`, so `stop()` belongs there, through a helper that holds the D29
+  runs before `BaseTest.closeContext`, so `stop()` belongs there, through the `Receipt` object that holds the D29
   catch. A receipt is kept whether the test passed or failed.
 - **Network log** — `page.context().tracing().startHar(path, options)` [1.60] in `@BeforeMethod`,
   `stopHar()` in `@AfterMethod`, then attach. `setRecordHarPath` in `contextOptions()` also works, but it
   writes on `context.close()` and its path is fixed per class.
-- **One screenshot at a point in the flow** — an `Evidence` helper built with the page objects, whose
+- **One screenshot at a point in the flow** — an `Evidence` object built with the page objects, whose
   `screenshot(name)` attaches `page.screenshot(...)` with `setFullPage(true)`, `ScreenshotAnimations.DISABLED`,
   `ScreenshotCaret.HIDE` and `ScreenshotScale.CSS`.
 - **Every attachment uses the allure-java 3.0 API** —
@@ -198,7 +198,8 @@ in the browser without uploading it; Allure also opens the attached trace in the
   uploaded or referenced.
 - Deliberate recordings run in the test class's own hooks, write next to the failure evidence with a
   `.<kind>` suffix, and are attached with `Allure.attachment(..., AttachmentOptions.withFileExtension(ext))`.
-- A screencast is stopped before its page closes, through a helper with a narrow, logged
+- A screencast is stopped before its page closes, through an object with a narrow, logged
+
   `PlaywrightException` catch.
 - `AnnotatePosition` and every other option value is the binding's enum, never a string.
 - No 1.64-only option on the 1.63 binding.

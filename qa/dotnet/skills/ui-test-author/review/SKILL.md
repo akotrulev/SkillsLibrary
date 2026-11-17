@@ -42,12 +42,12 @@ The severity is the tag on the rule broken. End with one line: `Rules: project .
 
 ## The checklist is the rule file
 
-Every check, and the severity it reports, lives in one place: the qa-dotnet rule files `automation.md` (core, including page objects and comments), `web-ui.md` (Playwright, Selenium), `mobile-ui.md` (Appium), and `suite-config.md` for a `.runsettings`, `.csproj` or `appsettings*.json` under review.
+Every check, and the severity it reports, lives in one place: the qa-dotnet rule files `automation.md` (core, including roles and comments), `page-objects.md` (pages, components, flows), `web-ui.md` (Playwright, Selenium), `mobile-ui.md` (Appium), and `suite-config.md` for a `.runsettings`, `.csproj` or `appsettings*.json` under review.
 
 1. **The project's copies first**: `.claude/rules/qa-dotnet/` at the project root. The team may have edited them, and its edits win.
 2. **Otherwise the plugin's copies**: `qa/dotnet/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/qa-dotnet:rules` installs them.
 
-Read `automation.md` and the stack's file, plus each other file whose `paths:` match a file under review, in full before the first finding. A rule loaded on its own by the session is not enough: a review needs every file that applies. Never review from memory of the rules, and never add a check the files do not contain; propose it as a rule change instead. The mechanics behind the Playwright rules are in `qa/dotnet/skills/ui-test-author/playwright` (`references/lifecycle.md`, `locators.md`, `assertions.md`).
+Read `automation.md`, `page-objects.md` and the stack's file, plus each other file whose `paths:` match a file under review, in full before the first finding. A rule loaded on its own by the session is not enough: a review needs every file that applies. Never review from memory of the rules, and never add a check the files do not contain; propose it as a rule change instead. The mechanics behind the Playwright rules are in `qa/dotnet/skills/ui-test-author/playwright` (`references/lifecycle.md`, `locators.md`, `assertions.md`).
 
 ## Version policy
 

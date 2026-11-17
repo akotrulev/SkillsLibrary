@@ -52,7 +52,7 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.specification.RequestSpecification;
 import pojo.GraphQLResponse;
-import utility.SystemPropertyUtil;
+import config.Env;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,7 +60,7 @@ import java.util.Map;
 import static io.restassured.RestAssured.given;
 
 public abstract class GraphQLAction {
-    private static final String ENDPOINT = SystemPropertyUtil.getGraphQLEndpoint();   // e.g. https://api.example.com/graphql
+    private static final String ENDPOINT = Env.required("GRAPHQL_ENDPOINT");   // e.g. https://api.example.com/graphql
     protected final Map<String, String> headers = new HashMap<>();
 
     protected <T> GraphQLResponse<T> execute(String query, Map<String, Object> variables, TypeRef<GraphQLResponse<T>> typeRef) {
@@ -96,17 +96,23 @@ import pojo.CreateUserData;
 import pojo.CreateUserInput;
 import pojo.GetUserData;
 import pojo.GraphQLResponse;
-import utility.SystemPropertyUtil;
+import config.Env;
 
 import java.util.Map;
 
 public class UserGraphQLAction extends GraphQLAction {
 
-    public UserGraphQLAction(boolean isAuthenticated) {
-        if (isAuthenticated) {
-            headers.put("authorization", "Bearer " + SystemPropertyUtil.getGraphQLToken());
-        }
+    public static UserGraphQLAction authenticated() {
+        UserGraphQLAction action = new UserGraphQLAction();
+        action.headers.put("authorization", "Bearer " + Env.required("GRAPHQL_TOKEN"));
+        return action;
     }
+
+    public static UserGraphQLAction anonymous() {
+        return new UserGraphQLAction();
+    }
+
+    private UserGraphQLAction() {}
 
     public GraphQLResponse<GetUserData> getUser(String id) {
         return execute(UserOperations.GET_USER, Map.of("id", id), new TypeRef<>() {});
@@ -121,7 +127,10 @@ public class UserGraphQLAction extends GraphQLAction {
 ### 3. POJO — `src/main/java/pojo/`
 
 Lombok data classes. The `*Data` POJO models the **selection set**; the error envelope is shared. Use
-`@JsonProperty` where a JSON name differs from the Java field.
+`@JsonProperty` where a JSON name differs from the Java field. A `*Data` POJO carries no
+`@JsonIgnoreProperties`: the suite's mapper fails on an unknown property (`api-models`), and the selection set
+names every field the response may hold. Only the three envelope types below ignore unknowns, because the
+GraphQL spec lets a server add top-level and `extensions` keys the test does not select.
 
 ```java
 package pojo;
@@ -210,7 +219,7 @@ public class UserGraphQLTest extends BaseTest {
 
     @Test
     public void getUserWhenExistsReturnsUserWithoutErrors() {
-        UserGraphQLAction userAction = new UserGraphQLAction(true);
+        UserGraphQLAction userAction = UserGraphQLAction.authenticated();
 
         GraphQLResponse<GetUserData> response = userAction.getUser("1");
 
@@ -222,7 +231,7 @@ public class UserGraphQLTest extends BaseTest {
 
     @Test
     public void getUserWhenUnknownIdReturnsNotFoundErrorWithHttp200() {
-        UserGraphQLAction userAction = new UserGraphQLAction(true);
+        UserGraphQLAction userAction = UserGraphQLAction.authenticated();
 
         GraphQLResponse<GetUserData> response = userAction.getUser("999999");
 
@@ -234,23 +243,27 @@ public class UserGraphQLTest extends BaseTest {
     }
 
     @Test
-    public void getUserWhenNoTokenReturnsUnauthenticated() {
-        UserGraphQLAction userAction = new UserGraphQLAction(false);
+    public void getUserWhenNoTokenReturnsUnauthenticatedError() {
+        UserGraphQLAction userAction = UserGraphQLAction.anonymous();
 
         GraphQLResponse<GetUserData> response = userAction.getUser("1");
 
-        // Two valid server designs: a 200 with an errors[] code, OR a transport 401. Assert the contract you have.
-        if (response.getStatus() == HttpStatus.SC_OK) {
-            assertThat(response.getErrors().get(0).getExtensions().getCode()).isEqualTo("UNAUTHENTICATED");
-        } else {
-            assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_UNAUTHORIZED);
-        }
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_OK);
+        assertThat(response.getErrors().get(0).getExtensions().getCode()).isEqualTo("UNAUTHENTICATED");
+    }
+
+    @Test
+    public void getUserWhenNoTokenReturnsHttp401() {
+        UserGraphQLAction userAction = UserGraphQLAction.anonymous();
+
+        GraphQLResponse<GetUserData> response = userAction.getUser("1");
+
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.SC_UNAUTHORIZED);
     }
 }
 ```
 
-> The unauthenticated test shows the **one place a GraphQL response legitimately varies its HTTP status** — auth
+> The unauthenticated tests show the **one place a GraphQL response legitimately varies its HTTP status** — auth
 > middleware may reject at the transport (401) before any resolver runs, or the schema may surface
-> `UNAUTHENTICATED` in `errors[]` with a 200. This is the *only* conditional you'll see in these tests; pin it to
-> your server's actual contract and delete the branch you don't use. (CLAUDE.md bans conditionals that *drive
-> assertions* across cases; this single contract-pinning branch is the documented exception, not a loop.)
+> `UNAUTHENTICATED` in `errors[]` with a 200. Keep the test that matches your server's actual contract and delete
+> the other; never one test with a branch over both.

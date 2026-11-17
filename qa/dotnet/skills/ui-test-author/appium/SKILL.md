@@ -50,13 +50,14 @@ Scaffolds Appium page objects and NUnit mobile UI tests in C#, mirroring the Jav
 | File | Holds |
 |---|---|
 | `Directory.Packages.props`, `AppiumTests.csproj`, `mobile.runsettings` | Exact pins, `net10.0`, one NUnit worker |
-| `Env.cs` | The one `Required(name)` helper and `AppiumUrl` |
+| `Env.cs` | The env reader: `Required(name)` and `AppiumUrl` |
 | `AppiumDriverFactory.cs` | One `AppiumDriver` from env (`PLATFORM`, `DEVICE_NAME`, `APP_PATH`, `PLATFORM_VERSION`, `APPIUM_URL`); the Android options set `appium:settings[disableIdLocatorAutocompletion]` |
 | `BaseMobileTest.cs` | Driver per fixture, the recording per test and, on failure, a screenshot, page source, device log and the recording; see `qa/dotnet/skills/evidence-capture/references/appium.md` |
 | `BaseAppiumPage.cs` | `TestId` and the other ladder finders, `IsTestIdVisible`, the abstract `VerifyPageLoaded` |
 | `LoginPage.cs`, `OrdersPage.cs`, `page_template.cs` | Screens; `SignIn` returns the destination; the template is the shape to copy |
 | `OrderRow.cs` | A scoped component: a row key, re-resolved on every call |
-| `OrdersTests.cs` | One test |
+| `OrderSeeder.cs` | A role-named seeder: creates an order through the app's API (`API_URL`, `API_TOKEN`) and deletes it |
+| `OrdersTests.cs` | One linear test: the order seeded and the screen reached in `[SetUp]`, the order deleted in `[TearDown]` |
 | `GestureExtensions.cs` | `ScrollGesture`, `LongPress`, `Swipe`, `Tap` |
 
 Platform selection is one mechanism: the `PLATFORM` variable read by the factory. A run is `PLATFORM=android dotnet test`; there is no `appsettings.<platform>.json` and no `--filter "Platform=…"`.
@@ -85,6 +86,8 @@ A repeating row cannot be found with a bare child locator, and a held element go
 3. Only when the platform can do the whole job in one query, scope there: an iOS class chain ``**/XCUIElementTypeCell[`name == "OrderRow"`]/**/XCUIElementTypeStaticText[`name == "OrderRow.Title"`]``. Mind the `UiSelector` caveat on Android.
 4. Components do **not** extend `BaseAppiumPage`. They use a small set of scoped finds and have no `VerifyPageLoaded`; the host page owns the landmark.
 5. An Android XPath from an element starts with `.` (`.//x`); a bare `//x` can escape the element's scope.
+6. A native control (picker, switch, segmented control) is a control component in `Components/Controls/` holding its root id, with intent methods (`Select(string option)`). Where its operation differs per platform (an iOS picker wheel takes `SendKeys`, an Android spinner opens and taps the option), that is two classes used by per-platform screens, never an `if` inside one.
+7. To assert on every row, the screen or list component exposes a query returning one field's values (`Statuses()` → `IReadOnlyList<string>`); the test asserts `Is.Not.Empty`, then `Is.All.EqualTo(...)`. Never `rows[0]` for the result set, never a loop over rows in a test, never an index passed by the test.
 
 ## Gestures, WebView, app state
 
@@ -92,17 +95,17 @@ Code for each is in [`references/details.md`](references/details.md) — read it
 
 - **Gestures.** Prefer a driver `mobile:` command (Android `clickGesture`, `longClickGesture`, `doubleClickGesture`, `dragGesture`, `swipeGesture`, `scrollGesture`; iOS `tap`, `touchAndHold`, `doubleTap`, `swipe`, `scroll`); fall back to W3C `PointerInputDevice` and `ActionSequence`. `GestureExtensions` holds both. A gesture sits in a page method named for its intent, never in a test; coordinates come from `AppiumElement.Rect`, never a literal.
 - `mobile: scrollGesture` scrolls **by a percent** and returns whether more content remains; it does not stop at an element. To reach one, repeat it on a bounded wait, or use iOS `mobile: scrollToElement`.
-- **WebView.** Wait for the `WEBVIEW*` context, switch, act, and switch back in a `finally` of a page helper. If the element is missing from the native page source, check the context before the locator. Android WebViews need a Chromedriver that matches the WebView: start the **server** with `--allow-insecure=uiautomator2:chromedriver_autodownload`, or point `appium:chromedriverExecutableDir` at a folder of drivers. There is no `chromedriverAutodownload` capability.
+- **WebView.** Wait for the `WEBVIEW*` context, switch, act, and switch back in the `finally` of `BaseAppiumPage.InWebView`. If the element is missing from the native page source, check the context before the locator. Android WebViews need a Chromedriver that matches the WebView: start the **server** with `--allow-insecure=uiautomator2:chromedriver_autodownload`, or point `appium:chromedriverExecutableDir` at a folder of drivers. There is no `chromedriverAutodownload` capability.
 - **App state.** `ResetApp`, `CloseApp` and `LaunchApp` are gone with the removed `/appium/app/*` routes. In order: a fresh driver per fixture (`appium:noReset` false); `mobile: clearApp` on an emulator or simulator; `TerminateApp` then `ActivateApp` for a cold start.
 
 ## Rules
 
-The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `automation.md` and `mobile-ui.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `automation.md`, `page-objects.md` and `mobile-ui.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Conventions
 
 - On iOS `id`, `name` and `accessibility id` are synonyms over the element's `name`. `IsTestIdVisible` returns `false` when the element is not displayed within the timeout and lets anything else through.
-- Flows live in a sub-namespace; repeating items are components scoped to a parent `AppiumElement`.
+- Multi-step journeys are screens in a sub-namespace, each returning the next; a setup that crosses screens is a `<Something>Flow` class taking its screens in the constructor. Repeating rows and native controls (a picker, a segmented control, a date wheel) are components that hold a row key or a root id and re-resolve on every call.
 - Tests extend `BaseMobileTest`, which provides `Driver`, and are tagged with `[Category]`. `Assert.Multiple` only for several fields after one action. Different Android and iOS copy is two platform-scoped expectations, never an `OR`.
 - `BaseAppiumPage.Wait` builds a 10 s `WebDriverWait`.
 - What `BaseMobileTest` keeps on failure, and where: `qa/dotnet/skills/evidence-capture/references/appium.md`.
@@ -111,8 +114,8 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 
 1. Confirm the screen, platforms, landmark, elements with rungs, actions and destinations.
 2. For each element with no test id, record it in `missing-testids.md`; do not silently fall back to XPath.
-3. Write `AppiumTests/Pages/<Screen>Page.cs` from `assets/page_template.cs`: constants, `VerifyPageLoaded`, intent actions, and a scoped component for each repeating group.
-4. Stub missing destination pages; write the test with one `[Test]` per scenario.
+3. Write `AppiumTests/Pages/<Screen>Page.cs` from `assets/page_template.cs`: constants, `VerifyPageLoaded`, intent actions, queries that return values, and a component for each repeating group or native control (`OrderRow.cs` is the shape).
+4. Stub missing destination pages; write the test from `assets/OrdersTests.cs`: data seeded by a seeder and the screen reached in `[SetUp]`, data deleted in `[TearDown]`, one linear `[Test]` per scenario.
 5. Run `PLATFORM=android dotnet test AppiumTests` and expect zero failures. For a remote session, `curl -s http://127.0.0.1:4723/status` answers and `appium driver list --installed` lists the driver.
 
 A visible element missing from the page source is usually an accessibility, app-state, active-app (a system alert) or native-versus-WebView problem; fix that before the locator. For doctor failures and driver questions the Appium docs tools (`mcp__appium-mcp__appium_documentation_query`, `mcp__appium-mcp__appium_skills`, on when `APPIUM_MCP_DOCS_ENABLED=true`) answer from the official docs.

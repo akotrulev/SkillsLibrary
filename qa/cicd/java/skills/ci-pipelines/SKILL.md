@@ -19,6 +19,8 @@ file shared by every tool in the family.
 | `references/azure-pipelines.md` | Azure DevOps (house default per global rules) — YAML pipelines, environments, service connections |
 | `references/gitlab-ci.md` | Repo lives on GitLab — `.gitlab-ci.yml`, parallel matrix, GitLab Pages for reports |
 
+Any host: [`references/fat-jar-and-container.md`](references/fat-jar-and-container.md) — the suite as one runnable test jar, and a containerized run that writes a single-file Allure report to a mounted volume. Each host reference's container lane points there.
+
 ## Rules
 
 The standards every tool shares are the qa-java rule file `qa-java-ci.md`, not a list here. Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where it and a tool reference disagree, the rule file wins for anything both cover; each reference adds the rules specific to its tool. Cross-stack conventions live in `qa/cicd/ci-conventions`: load it alongside the tool reference.

@@ -135,7 +135,7 @@ Severity = **test** severity, not bug severity. `blocker` = "if this fails, ship
 
 Passing a response body as the third string attaches nothing: Allure looks for a file with that name.
 
-### API tests — base class helper
+### API tests — the base test's attachment
 
 ```csharp
 public abstract class BaseApiTest
@@ -166,7 +166,7 @@ and attaches each with `TestContext.AddTestAttachment` and `AllureApi.AddAttachm
 
 There is no second attacher: no `[TearDown]` that screenshots again, no trace written to `Path.GetTempPath()`
 (CI never uploads it), no `trace.zip` typed `application/zip`. A recording made on purpose (screencast,
-HAR, a screenshot at a point) uses `BaseTest`'s `Attach` helper — `qa/dotnet/skills/evidence-capture`.
+HAR, a screenshot at a point) uses `BaseTest`'s `Attach` method — `qa/dotnet/skills/evidence-capture`.
 
 ### Selenium .NET — screenshot on failure
 
@@ -186,7 +186,7 @@ Every test sends one W3C `traceparent` trace id on all its requests (`api-client
 `references/trace-context.md`; UI: `ui-test-author/playwright`'s `references/trace-correlation.md`). On
 failure the result gets a `telemetry` attachment (`text/uri-list`): the trace id, a Grafana Explore link to
 the trace in Tempo and one to its log lines in Loki. Grafana's base URL comes from `GRAFANA_URL`; unset, no
-link is written and the test is unaffected. The helper, the failure hook, the Explore URL format and the
+link is written and the test is unaffected. The `TelemetryLinks` class, the failure hook, the Explore URL format and the
 procedure for triaging a failed run: [`references/trace-links.md`](references/trace-links.md).
 
 ## Steps — `AllureApi.Step(...)`
@@ -222,6 +222,20 @@ allure open allure-report
 
 The CLI needs a Java runtime. The publish job for each CI — artifact names, the history home, the Pages
 step — is in `qa/cicd/dotnet/skills/ci-pipelines` (`references/<ci>.md`).
+
+### One self-contained HTML file
+
+For a build artifact, an e-mail or a ticket attachment, generate the report as one file that opens from
+disk without `allure open` or a web server:
+
+```bash
+allure generate allure-results --single-file --clean -o allure-report-single
+```
+
+The output is `allure-report-single/index.html` with results and attachments embedded (CLI 2.42.0 made
+plugin assets inline too; the pin is `2.46.1`). Generate it beside the directory report, into its own folder:
+the directory report stays the published one and the home of `history/`. Every trace and video is embedded,
+so the file grows with the failures: attach it from a run, never from a suite that records video on every test.
 
 ## History & trends
 
@@ -275,7 +289,7 @@ known-flaky is `qa/reporting/dotnet/skills/flaky-test-quarantine`'s.
 - No attaching secrets / PII / auth tokens — sanitize before `AddAttachment`.
 - No mixed reporters writing to the same `allure-results/` from parallel test projects without separate output dirs.
 - No 5-MB-per-test logs attached — link to Loki / Azure Log Analytics instead.
-- No `.Wait()` / `.Result` in `[TearDown]` attachment helpers — make tear-down async (`[TearDown] public async Task ...`).
+- No `.Wait()` / `.Result` in `[TearDown]` attachment methods — make tear-down async (`[TearDown] public async Task ...`).
 
 ## Generation steps
 

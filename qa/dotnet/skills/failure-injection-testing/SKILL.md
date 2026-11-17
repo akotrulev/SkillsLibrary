@@ -58,7 +58,7 @@ resilience library (**Polly**), and the runner (NUnit) change.
   `ResetPeerToxic`, `BandwidthToxic`, `LimitDataToxic`, `SlicerToxic`), `ToxicDirection`
 - **Polly** (`Polly` / `Microsoft.Extensions.Http.Resilience`) — the resilience patterns under test; assert their
   effects / circuit state
-- Layout: `Tests/<Dep>/` (the fault tests), `Tests/Support/Chaos/` (the `ChaosProxy` helper + `BaseChaosTest`
+- Layout: `Tests/<Dep>/` (the fault tests), `Tests/Support/Chaos/` (the `ChaosProxy` fault injector + `BaseChaosTest`
   container lifecycle)
 
 ```xml
@@ -82,7 +82,7 @@ resilience library (**Polly**), and the runner (NUnit) change.
 
 ## Deep-dive reference
 
-These sections live in `references/details.md` — **read it when the task touches them**: **The toxic helper — `Support/Chaos/ChaosProxy.cs`**; **The mechanism — proxy BETWEEN app and dependency (idea #2)**.
+These sections live in `references/details.md` — **read it when the task touches them**: **The fault injector — `Support/Chaos/ChaosProxy.cs`**; **The mechanism — proxy BETWEEN app and dependency (idea #2)**.
 
 ## Inject-a-fault, assert-degradation (idea #1)
 
@@ -143,11 +143,11 @@ public async Task ShouldDegradeUnderConnectionDropThenRecoverWhenHealed()
 
     // 5. assert recovery — calls succeed again, polling the breaker's half-open window (no Task.Delay-as-a-wait).
     await Assert.That(async () => (await app.PlaceOrderAsync("sku-1")).IsSuccess)
-        .Within(TimeSpan.FromSeconds(10)).EventuallyBecomesTrue();   // bounded condition-poll helper
+        .Within(TimeSpan.FromSeconds(10)).EventuallyBecomesTrue();   // bounded wait condition
 }
 ```
 
-> Step 5 uses a bounded condition-poll (a small `EventuallyBecomesTrue` retry-until-deadline helper, e.g. backed by
+> Step 5 uses a bounded condition-poll (a small `EventuallyBecomesTrue` retry-until-deadline wait condition, e.g. backed by
 > a Polly wait-and-retry), *not* `Task.Delay` — the recovery window (Polly's break duration) is a real condition to
 > await, not a guessed delay.
 
@@ -230,17 +230,15 @@ public async Task ShouldRejectAndNotPersistATruncatedResponse()
 ## Probabilistic faults — `Toxicity` for flappy dependencies
 
 ```csharp
-[Test]
+[Test, Repeat(20)]
 public async Task ShouldTolerateAnIntermittentlyResettingDependency()
 {
     Chaos.WithToxicity(Chaos.CutConnection(0), 0.3);                // reset the connection only 30% of the time
     var app = OrderService.ConnectedTo(Chaos.Host, Chaos.Port);
 
-    var succeeded = 0;
-    for (var i = 0; i < 20; i++)
-        if ((await app.PlaceOrderWithRetryAsync("sku-1")).IsSuccess) succeeded++;
+    var result = await app.PlaceOrderWithRetryAsync("sku-1");
 
-    succeeded.Should().Be(20, "retries absorb an intermittent fault");
+    result.IsSuccess.Should().BeTrue("retries absorb an intermittent fault");
 }
 ```
 

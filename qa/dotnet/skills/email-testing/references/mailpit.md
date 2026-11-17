@@ -1,6 +1,6 @@
 # QA — Email Testing with Mailpit (.NET)
 
-Scaffolds a typed Mailpit HTTP-API client and NUnit helpers that poll for a specific message (by recipient + subject), extract HTML/text body, links, and attachments, and reset the inbox between tests. Mailpit is the local SMTP sink — point the SUT's `SMTP_HOST`/`SMTP_PORT` at the container, then assert via Mailpit's HTTP API on port 8025.
+Scaffolds a typed Mailpit HTTP-API client and NUnit wait conditions that poll for a specific message (by recipient + subject), extract HTML/text body, links, and attachments, and reset the inbox between tests. Mailpit is the local SMTP sink — point the SUT's `SMTP_HOST`/`SMTP_PORT` at the container, then assert via Mailpit's HTTP API on port 8025.
 
 ## When to use
 
@@ -320,8 +320,8 @@ public async Task GenerateInvoice_SendsPdfAttachment()
 
 ### Waiting
 - Always poll with a budget (`WaitForAsync`). Default 15s — bump only with a comment explaining the SLA.
-- **No `Thread.Sleep`** between send and assert. Use the polling helper, which respects `CancellationToken`.
-- Mailpit also has a WebSocket (`/api/v1/ws`); prefer the polling helper unless you have a flake reproducer that polling can't catch.
+- **No `Thread.Sleep`** between send and assert. Use the client's `WaitForAsync` wait condition, which respects `CancellationToken`.
+- Mailpit also has a WebSocket (`/api/v1/ws`); prefer the `WaitForAsync` wait condition unless you have a flake reproducer that polling can't catch.
 
 ### Search queries
 - Always combine `to:` + `subject:` in the search query. Never fetch all then loop client-side — it breaks under parallel suites.

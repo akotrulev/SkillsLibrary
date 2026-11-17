@@ -68,13 +68,13 @@ public async Task Should_ChargeAccruedCredits_When_MonthlyPostingRuns()
 
 The test is the in-process one with the job call replaced by `adminClient.RunJob("monthly-posting", new RunJobDto("2026-03"), HttpStatusCode.Accepted)`; the poll and the assertion are unchanged.
 
-`adminClient` is a typed `{Resource}Client` over the test-only trigger (`api-client-writer`). For a Kubernetes `CronJob`, `CronJobRunner.RunNowAsync(cronJob, ns, ct)` in `references/helpers.md` runs `kubectl create job --from=cronjob/…` and waits; a failure fails loudly with the command's output and is never caught.
+`adminClient` is a typed `{Resource}Client` over the test-only trigger (`api-client-writer`). For a Kubernetes `CronJob`, `CronJobRunner.RunNowAsync(cronJob, ns, ct)` in `references/cronjob-runner-clock-and-race.md` runs `kubectl create job --from=cronjob/…` and waits; a failure fails loudly with the command's output and is never caught.
 
 Register the returned job name and delete it in `[TearDown]`.
 
 #### Clock boundary
 
-The application injects a `TimeProvider` and never reads `DateTime.UtcNow`, `DateTimeOffset.UtcNow` or `DateTime.Now` directly. **In-process**, replace it in `ConfigureTestServices` with a `FakeTimeProvider`, the way `feature-flag-testing` swaps its provider (`ApiFactory` and the base fixture are in `references/helpers.md`), and seed relative to the controlled "now". One row per instant, one expected value each; the offset carries the timezone:
+The application injects a `TimeProvider` and never reads `DateTime.UtcNow`, `DateTimeOffset.UtcNow` or `DateTime.Now` directly. **In-process**, replace it in `ConfigureTestServices` with a `FakeTimeProvider`, the way `feature-flag-testing` swaps its provider (`ApiFactory` and the base fixture are in `references/cronjob-runner-clock-and-race.md`), and seed relative to the controlled "now". One row per instant, one expected value each; the offset carries the timezone:
 
 ```csharp
 [TestCase("2026-03-15T10:00:00+00:00", 2)]
@@ -106,7 +106,7 @@ public async Task Should_ReturnCredits_When_CancellingAtTheCutOff(string cancelA
 
 #### Concurrent requests
 
-Release N requests together behind a start gate (`Race.StartTogetherAsync`, in `references/helpers.md`: a ready signal, a `TaskCompletionSource` gate, `Task.WhenAll`), wait for all to settle, assert the **invariant**, never which request won. Repetition comes from NUnit's `[Repeat]`.
+Release N requests together behind a start gate (`Race.StartTogetherAsync`, in `references/cronjob-runner-clock-and-race.md`: a ready signal, a `TaskCompletionSource` gate, `Task.WhenAll`), wait for all to settle, assert the **invariant**, never which request won. Repetition comes from NUnit's `[Repeat]`.
 
 - `[Repeat(20)]` runs the method 20 times with `[SetUp]` and `[TearDown]` around each repetition, so seed inside the test or in `[SetUp]` and each run starts clean. It stops at the first failure by default, which is right: a failure on any repetition is a defect, not a flake to retry. `[Repeat]` applies to test methods only, not fixtures.
 - Not `Parallelizable` as the barrier: it runs different tests in parallel on shared fixtures and does not align requests at the same instant. The gate does.
@@ -125,8 +125,8 @@ public async Task Should_ReturnCreditsUsedTo6Not4_When_TheCancellationEventIsDel
     BookingDto booking = await bookings.SeedCancelledAsync(BookingBuilder.Valid().WithCreditsUsed(8).WithCredits(2).Build());
     string body = JsonSerializer.Serialize(CancellationEvents.Of(booking));
 
-    await SendToCreditsQueueAsync(body, booking.Id);
-    await SendToCreditsQueueAsync(body, booking.Id);
+    await creditsQueue.SendAsync(body, booking.Id);
+    await creditsQueue.SendAsync(body, booking.Id);
 
     await DbWaits.WaitForRowAsync(ct => inboxProbe.ProcessedAsync(booking.Id, ct), row => row.Count == 2,
         CreditsBudget, TimeSpan.FromMilliseconds(200), logger);
@@ -134,17 +134,20 @@ public async Task Should_ReturnCreditsUsedTo6Not4_When_TheCancellationEventIsDel
         $"credits used for member {booking.MemberId}");
 }
 
-private Task SendToCreditsQueueAsync(string body, Guid businessId) =>
-    sqs.SendMessageAsync(new SendMessageRequest
-    {
-        QueueUrl = creditsUrl,
-        MessageBody = body,
-        MessageGroupId = businessId.ToString(),
-        MessageDeduplicationId = Guid.NewGuid().ToString(),
-    });
+public sealed class CreditsQueueSeeder(IAmazonSQS sqs, string queueUrl)
+{
+    public Task SendAsync(string body, Guid businessId) =>
+        sqs.SendMessageAsync(new SendMessageRequest
+        {
+            QueueUrl = queueUrl,
+            MessageBody = body,
+            MessageGroupId = businessId.ToString(),
+            MessageDeduplicationId = Guid.NewGuid().ToString(),
+        });
+}
 ```
 
-- **Message** — publish through the project's `messaging-testing` reference (its producer / seed helper), with a **new broker message id and the same business id**. Broker deduplication swallows an identical publish before the consumer sees it — SQS FIFO (`MessageDeduplicationId`, content-based deduplication), Service Bus duplicate detection, Kafka's idempotent producer — and such a test proves nothing about the consumer's idempotency. Vary the dedup id (or use a standard queue) so two deliveries reach the consumer.
+- **Message** — publish through the project's `messaging-testing` reference (its producer / seeder), with a **new broker message id and the same business id**. Broker deduplication swallows an identical publish before the consumer sees it — SQS FIFO (`MessageDeduplicationId`, content-based deduplication), Service Bus duplicate detection, Kafka's idempotent producer — and such a test proves nothing about the consumer's idempotency. Vary the dedup id (or use a standard queue) so two deliveries reach the consumer.
 - **Wait on a positive signal, never a sleep:** an inbox / processed-messages row per delivery through `DbWaits.WaitForRowAsync`, then assert the effect count. SQS queue-depth attributes are approximate, so they are not the signal.
 - **Webhook** — replay the request with the same delivery id through the typed client twice; assert one effect and, if the contract says so, the same response both times.
 - **Idempotency key** — resend the request with the same `Idempotency-Key`; assert one resource and the contracted response.
@@ -181,8 +184,8 @@ A `db-testing/verification-queries` query asserting the invariant's statement (`
 ## Handoffs
 
 - A missing job trigger, `TimeProvider` seam or test endpoint → `be-dotnet`, as a product change.
-- Broker producer / seeding helpers, DLQ → `qa/dotnet/skills/messaging-testing`.
-- Verification queries, the poller and the cleanup helper → `qa/dotnet/skills/db-testing/verification-queries`, `…/db-testing/connection`.
+- Broker producers / seeders, DLQ → `qa/dotnet/skills/messaging-testing`.
+- Verification queries, the poller and the teardown registry → `qa/dotnet/skills/db-testing/verification-queries`, `…/db-testing/connection`.
 - A retry or recovery after a fault → `qa/dotnet/skills/failure-injection-testing`.
 - Typed clients for the trigger or clock endpoint → `qa/dotnet/skills/api-client-writer`.
 - The plain tests → `qa/dotnet/skills/api-test-author/writer`; review → `…/api-test-author/review`.

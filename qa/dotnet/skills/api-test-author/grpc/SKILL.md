@@ -106,7 +106,7 @@ using Grpc.StatusProto;           // RpcException.GetRpcStatus(), Status.GetDeta
 [Test]
 public async Task CreateUser_WhenDuplicateEmail_ReturnsErrorInfoReason()
 {
-    var action = new UserGrpcAction(Channel, authenticated: true);
+    var action = UserGrpcAction.Authenticated(Channel);
 
     GrpcCallResult<User> result = await action.CreateUserAsync(
         "george.bluth@example.com", "George", "Bluth");          // already exists
@@ -135,7 +135,7 @@ can't mask a test failure).
 [Test]
 public async Task CreateUser_WhenValid_PersistsAndIsReadable()
 {
-    var action = new UserGrpcAction(Channel, authenticated: true);
+    var action = UserGrpcAction.Authenticated(Channel);
 
     GrpcCallResult<User> created = await action.CreateUserAsync("neo@example.com", "Thomas", "Anderson");
     Assert.That(created.IsOk, Is.True);
@@ -160,13 +160,9 @@ using Grpc.Core;
 [Test]
 public async Task ListUsers_StreamsAllUsersInOrder()
 {
-    var action = new UserGrpcAction(Channel, authenticated: true);
+    var action = UserGrpcAction.Authenticated(Channel);
 
-    using AsyncServerStreamingCall<User> call = action.ListUsers(pageSize: 50);
-
-    var received = new List<User>();
-    await foreach (User u in call.ResponseStream.ReadAllAsync())   // drains until server completes — bounded, no sleep
-        received.Add(u);
+    List<User> received = await action.ListAllUsersAsync(pageSize: 50);   // drains until server completes — bounded, no sleep
 
     Assert.That(received, Has.Count.EqualTo(12));
     Assert.That(received.Select(u => u.Id),
@@ -187,7 +183,7 @@ For **client-streaming**, write N requests to `RequestStream`, `CompleteAsync()`
 [Test]
 public async Task ImportUsers_AggregatesAllSentRequests()
 {
-    var action = new UserGrpcAction(Channel, authenticated: true);
+    var action = UserGrpcAction.Authenticated(Channel);
 
     using AsyncClientStreamingCall<CreateUserRequest, ImportSummary> call = action.Client.ImportUsers();
 
@@ -215,7 +211,7 @@ deterministically as `DeadlineExceeded`.
 [Test]
 public async Task SlowCall_ExceedingDeadline_ReturnsDeadlineExceeded()
 {
-    var action = new UserGrpcAction(Channel, authenticated: true);
+    var action = UserGrpcAction.Authenticated(Channel);
 
     GrpcCallResult<User> result = await action.GetUserWithDeadlineAsync("slow-1", millis: 100);
 

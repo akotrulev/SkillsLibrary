@@ -2,7 +2,7 @@
 
 The **mobile** path of the TypeScript `gherkin-step-code` family. Binds Gherkin steps to **@cucumber/cucumber** step definitions (`Given`/`When`/`Then`), run under `@wdio/cucumber-framework` against **WebdriverIO + Appium**. State is shared across steps via a **custom `World`** (`this.login`, …) — not fixtures. Assertions use WDIO's `expect`. The World, hooks, and `wdio.conf.ts` already exist from `bdd-project-scaffold`.
 
-> Read the family router `../SKILL.md` first for the shared rules (one file per domain, Cucumber Expressions, thin steps, assertions in `Then`, reuse the catalog, build missing POMs first). This file is the mobile-specific deep dive: the **World** model, end to end.
+> Read the family router `../SKILL.md` first for the shared rules (one file per domain, Cucumber Expressions, the step as the intent layer, one binding per field, assertions in `Then`, reuse the catalog, build missing POMs first). This file is the mobile-specific deep dive: the **World** model, end to end.
 
 ## Stack
 
@@ -59,11 +59,58 @@ Then('I land on the dashboard', async function (this: CustomWorld) {
 });
 
 Then('I see the error {string}', async function (this: CustomWorld, message: string) {
-  await expect(this.login.errorBanner).toHaveText(message);
+  expect(await this.login.errorText()).toBe(message);
 });
 ```
 
-Note: `function` (not arrow), `this: CustomWorld` typed, Cucumber-Expression captures after `this`. WDIO matchers (`toHaveText`, `toBeDisplayed`, `toBeExisting`) auto-retry like Playwright's.
+Note: `function` (not arrow), `this: CustomWorld` typed, Cucumber-Expression captures after `this`. A `Then` asserts on what a query returns (`errorText()`), and the query waits for its element before reading it.
+
+### A step acting on an exposed element — `steps/deals.steps.ts`
+
+Outside BDD a screen object exposes no element. In a BDD suite the step is the intent layer, so a screen object used by steps may expose named elements and controls, and a single interaction needs no screen method; a method stays for a sequence (`signIn`). The screen object still owns every selector.
+
+```typescript
+import { $ } from '@wdio/globals';
+
+export class DealFilterScreen {
+  get counterparty() { return $('~DealFilter.Counterparty'); }
+  get search() { return $('~DealFilter.Search'); }
+}
+```
+
+```typescript
+import { When } from '@cucumber/cucumber';
+import type { CustomWorld } from '../support/world';
+
+When('I enter {string} for Counterparty filter', async function (this: CustomWorld, name: string) {
+  await this.dealFilter.counterparty.setValue(name);
+});
+
+When('I search', async function (this: CustomWorld) {
+  await this.dealFilter.search.click();
+});
+```
+
+Each field has its own binding named after it; a generic `I enter {string} for {string} filter` would look the field up by name inside the step, which is a branch.
+
+### Pre-clean — a `Given … does not exist` step
+
+A precondition removing a leftover record before the scenario, through an API seeder the World exposes, never a UI sequence. The `After` hook still removes what the scenario creates.
+
+```typescript
+import { Given } from '@cucumber/cucumber';
+import type { CustomWorld } from '../support/world';
+
+Given('the customer {string} does not exist', async function (this: CustomWorld, email: string) {
+  await this.customerSeeder.deleteByEmail(email);
+});
+```
+
+`deleteByEmail` searches by the email and deletes every match, so a clean environment is zero deletions, not a branch. `dealFilter` and `customerSeeder` are World getters, added as the next section shows.
+
+### A scenario ahead of its automation
+
+No binding is left with an empty body: it passes doing nothing. The scenario carries the suite's excluded tag and a ticket (`@not-automated @JIRA-1234`), and `cucumberOpts: { tags: 'not @not-automated' }` in `wdio.conf.ts` keeps it out of the run.
 
 ### A screen object the World doesn't yet expose
 
@@ -91,12 +138,13 @@ defineParameterType({
 ### Data tables and doc strings
 
 ```typescript
-When('I add the following items to the cart', async function (this: CustomWorld, table) {
-  for (const row of table.hashes()) {
-    await this.cart.addItem(row.sku, Number(row.qty));
-  }
+When('I add the following items to the cart', async function (this: CustomWorld, table: DataTable) {
+  await this.cart.addItems(table.hashes().map((row) => ({ sku: row.sku, quantity: Number(row.qty) })));
 });
 ```
+
+The table goes to the screen object whole: repeating `addItem` over the rows is `CartPage.addItems`'s job, so the
+step stays one line of intent. `DataTable` is imported from `@cucumber/cucumber`.
 
 ### Cleanup → `After` hook (NOT a step)
 
@@ -122,8 +170,10 @@ After(async function (this: CustomWorld, scenario: ITestCaseHookParameter) {
 - **`function` expressions only** — type `this: CustomWorld`; never arrow functions (they lose the World).
 - **Reach screen objects through `this` (the World), never `new`** them in a step.
 - `async` bodies; `await` every screen-object call; no floating promises.
-- **No `browser.$(...)` / selectors / waits in steps** — promote to the screen object.
-- `Then` asserts with WDIO `expect(...)` (auto-retry); `Given`/`When` never assert; screen objects assert only in `verifyPageLoaded()`.
+- **No `browser.$(...)` / selectors / waits in steps** — promote to the screen object. Acting on an element the screen object exposes by name is the step's job.
+- **One binding per field, filter or column**; no step that takes the field name.
+- **No empty body**; a scenario ahead of its automation is tagged out (`not @not-automated`) with a ticket.
+- `Then` asserts with WDIO `expect(...)` on the value a screen-object query returns; `Given`/`When` never assert; screen objects assert only in `verifyPageLoaded()`.
 - **No `browser.pause(ms)`** — use WDIO's auto-waiting matchers or `browser.waitUntil(condition)` on a condition.
 - **Version-compat:** keep `@cucumber/cucumber` inside the peer range of `@wdio/cucumber-framework`; do not force a newer standalone major.
 - No hardcoded credentials/URLs — env vars / config.
@@ -136,6 +186,7 @@ After(async function (this: CustomWorld, scenario: ITestCaseHookParameter) {
 - Module-level mutable state shared between steps instead of the World — violates "no static mutable state."
 - Launching/quitting the Appium server by hand instead of `@wdio/appium-service`.
 - `browser.$(...)` / selectors / `browser.pause(ms)` in a step body.
+- A generic step taking a field name, or a step with an empty body.
 - Assertions in `Given`/`When`, or inside screen-object actions.
 - A failure screenshot taken and thrown away: it must be attached with `this.attach`.
 - An `@cucumber/cucumber` version outside the `@wdio/cucumber-framework` peer range.

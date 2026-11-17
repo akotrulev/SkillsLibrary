@@ -43,7 +43,7 @@ Wires .NET tests to a **hosted device/browser grid** — BrowserStack, Sauce Lab
 | **LambdaTest** | `wss://cdp.lambdatest.com/playwright` | `mobile-hub.lambdatest.com/wd/hub` | `LT:Options` | LambdaTest Tunnel (`LT`) |
 | **AWS Device Farm** | signed TestGrid Selenium URL (not a Playwright ws endpoint) | managed run (project ARN + device-pool ARN) or `remoteDriverEndpoint` | none — ARN/upload model | VPC/endpoint config, not a CLI tunnel |
 
-**Decision rule.** *Mostly web on a broad browser/OS matrix?* Any of BrowserStack / Sauce / LambdaTest — pick on price/plan. *Real-device mobile depth?* BrowserStack and Sauce are strongest; LambdaTest is the cheapest broad option. *Deep in AWS and need private-VPC devices?* Device Farm — an **ARN/upload paradigm, not caps on a hub**. Wire one vendor cleanly behind the grid helper; add a second only when a real need appears.
+**Decision rule.** *Mostly web on a broad browser/OS matrix?* Any of BrowserStack / Sauce / LambdaTest — pick on price/plan. *Real-device mobile depth?* BrowserStack and Sauce are strongest; LambdaTest is the cheapest broad option. *Deep in AWS and need private-VPC devices?* Device Farm — an **ARN/upload paradigm, not caps on a hub**. Wire one vendor cleanly behind the `GridConnection` driver factory; add a second only when a real need appears.
 
 > **The gotcha that bites everyone (Playwright + BrowserStack).** BrowserStack's Playwright **direct-connect uses LEGACY FLAT caps** (`browser`, `os`, `os_version`, `browserstack.username`, `browserstack.accessKey`, …) — **not** the W3C `bstack:options` nesting Appium uses. Don't mix them. Sauce has **no public Playwright connect endpoint** — it's `saucectl`-driven.
 

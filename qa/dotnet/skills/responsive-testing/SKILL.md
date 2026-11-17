@@ -67,14 +67,14 @@ pixel-level diffing is `visual-regression`'s job and pairs with this skill, it d
 | Tailwind | `tailwind.config` `screens` / v4 `@theme` | sm 640 · md 768 · lg 1024 · xl 1280 · 2xl 1536 |
 | Bespoke CSS | the tokens file / one `breakpoints.css` | whatever it says — read it |
 
-## Page objects and the `Layout` helper
+## Page objects and the `Layout` probe
 
-`Breakpoints`, the `AppShellPage` and `ProductsPage` page objects and the `Layout` helper are in
+`Breakpoints`, the `AppShellPage` and `ProductsPage` page objects and the `Layout` probe are in
 [`references/page-objects-and-layout.md`](references/page-objects-and-layout.md). Page objects expose variant
 intent (`_appShell.Nav(NavVariant.Hamburger)` → `GetByTestId("Nav.Hamburger")`), never boxes. `Layout`
 **measures and returns numbers** — `ColumnCountAsync(cards)`, `HorizontalOverflowAsync()`,
 `LeftEdgeSpreadAsync(...)`, `OverlapDepthAsync(a, b)` — plus `ResizeToAsync(width)` for live-resize tests. The
-test asserts; a helper never does.
+test asserts; a probe never does.
 
 ## Boundary rows — the core pattern
 

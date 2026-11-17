@@ -155,7 +155,7 @@ bump its line. Three honest responses, in order of preference:
 Allure so a failing run names the CVEs without re-scanning (cross-link `qa-dotnet:test-reports`):
 
 ```csharp
-// Support/DependencyScanReport.cs — run the scan, attach JSON + summary to Allure, return the findings
+// Support/DependencyScanReport.cs — run the scan, attach the JSON, read the findings
 using System.Diagnostics;
 using System.Text.Json;
 using Allure.Net.Commons;
@@ -178,13 +178,35 @@ public static class DependencyScanReport
             System.Text.Encoding.UTF8.GetBytes(json));
         return JsonDocument.Parse(json);
     }
+
+    public static List<string> HighSeverityFindings(JsonDocument doc)
+    {
+        var high = new List<string>();
+        foreach (var project in doc.RootElement.GetProperty("projects").EnumerateArray())
+        {
+            if (!project.TryGetProperty("frameworks", out var frameworks)) continue;
+            foreach (var fw in frameworks.EnumerateArray())
+            foreach (var listName in new[] { "topLevelPackages", "transitivePackages" })
+            {
+                if (!fw.TryGetProperty(listName, out var packages)) continue;
+                foreach (var pkg in packages.EnumerateArray())
+                foreach (var vuln in pkg.GetProperty("vulnerabilities").EnumerateArray())
+                {
+                    var severity = vuln.GetProperty("severity").GetString();
+                    if (severity is "High" or "Critical")
+                        high.Add($"{pkg.GetProperty("id").GetString()} ({severity})");
+                }
+            }
+        }
+        return high;
+    }
 }
 ```
 
 - **Allure** — attach the JSON + a readable summary (cross-link `qa-dotnet:test-reports`).
-- **SARIF → GitHub code-scanning** — convert the JSON to SARIF (a converter step) and feed
-  `github/codeql-action/upload-sarif` so each CVE shows inline on the PR. (OWASP Dependency-Check emits
-  SARIF natively if you use it for cross-stack parity.)
+- **SARIF → GitHub code-scanning** — convert the JSON to SARIF and feed
+  `github/codeql-action/upload-sarif` so each CVE shows inline on the PR (OWASP Dependency-Check emits
+  SARIF natively).
 - **CI artifact** — upload the JSON (cross-link `qa-dotnet:ci-pipelines`).
 
 ## Optional parse-and-assert test (the programmatic path)
@@ -203,31 +225,14 @@ public class DependencyVulnerabilityTests
     [Test]
     public async Task Should_have_no_high_severity_cves_When_dependencies_scanned()
     {
-        using var doc = await DependencyScanReport.RunVulnerableScanAsync();   // attaches JSON to Allure
+        using var doc = await DependencyScanReport.RunVulnerableScanAsync();
 
-        var high = new List<string>();
-        foreach (var project in doc.RootElement.GetProperty("projects").EnumerateArray())
-        {
-            if (!project.TryGetProperty("frameworks", out var frameworks)) continue;
-            foreach (var fw in frameworks.EnumerateArray())
-            foreach (var listName in new[] { "topLevelPackages", "transitivePackages" })
-            {
-                if (!fw.TryGetProperty(listName, out var packages)) continue;
-                foreach (var pkg in packages.EnumerateArray())
-                foreach (var vuln in pkg.GetProperty("vulnerabilities").EnumerateArray())
-                {
-                    var severity = vuln.GetProperty("severity").GetString();
-                    if (severity is "High" or "Critical")
-                        high.Add($"{pkg.GetProperty("id").GetString()} ({severity})");
-                }
-            }
-        }
-        Assert.That(high, Is.Empty, "High+ CVEs in the dependency tree");   // one logical assertion = the gate
+        Assert.That(DependencyScanReport.HighSeverityFindings(doc), Is.Empty, "High+ CVEs in the dependency tree");
     }
 }
 ```
 
-The Java/TS siblings parse their own tool's JSON the same way. Test name `Should_X_When_Y`.
+The Java/TS siblings parse their own tool's JSON the same way.
 
 ## CI wiring — the gate, the remediation complement
 

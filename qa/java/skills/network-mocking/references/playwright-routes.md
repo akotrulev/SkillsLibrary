@@ -3,7 +3,7 @@
 Intercepts, mocks, holds, asserts and shapes HTTP traffic in Playwright for Java (sync API) with TestNG.
 Every sample extends `com.example.uitests.support.BaseTest`
 (`qa/java/skills/ui-test-author/playwright/assets/BaseTest.java`), which owns Playwright, the browser, a
-context and page per test, and the failure evidence. Route handlers and traffic reads live in two helpers,
+context and page per test, and the failure evidence. Route handlers and traffic reads live in two objects,
 `MockApi` and `Traffic`, built in the class's own `@BeforeMethod`; a test calls intent methods, never
 `page.route(...)`. Every wait is a request or response predicate or a page object's completion signal.
 
@@ -54,7 +54,7 @@ in its API — so no JSON library is added. Gson reads and writes Java records.
 | Deterministic third party | `page.routeFromHAR(har, new Page.RouteFromHAROptions().setUrl(...).setNotFound(HarNotFound.ABORT))` | Update deliberately (§7) |
 | Offline | `page.context().setOffline(true)` | Cross-browser |
 
-## 1. The helpers
+## 1. The fixture and the probe
 
 `MockApi` owns every route; `Traffic` reads what the page sent. Both wrap the `page` `BaseTest` opened and own
 no lifecycle — the context, and with it every route, is closed after each test.
@@ -193,7 +193,7 @@ public final class Traffic {
 }
 ```
 
-The payloads are records next to the helpers — `record Order(String id, String status, long totalMinor)`,
+The payloads are records next to `MockApi` and `Traffic` — `record Order(String id, String status, long totalMinor)`,
 `record CheckoutRequest(long totalMinor, String currency)` — and a payload with four or more fields gets a
 builder (`qa/java/skills/test-data-builder`).
 
@@ -217,7 +217,7 @@ public class OrdersNetworkTest extends BaseTest {
     private OrdersPage ordersPage;
 
     @BeforeMethod(alwaysRun = true)
-    public void createHelpers() {
+    public void createRoutesAndPages() {
         mockApi = new MockApi(page);
         ordersPage = new OrdersPage(page);
     }
@@ -455,7 +455,7 @@ public void Should_KeepSpinnerVisible_When_OrdersAreStillInFlight() {
 1. Confirm the **traffic**, the **intent** and the **scope**.
 2. Add one intent-named method per scenario to `MockApi`; read requests through `Traffic` or a page-object
    method that wraps `waitForRequest` / `waitForResponse`.
-3. Build both helpers and the page objects in the test class's `@BeforeMethod(alwaysRun = true)`.
+3. Build `MockApi`, `Traffic` and the page objects in the test class's `@BeforeMethod(alwaysRun = true)`.
 4. For a third party, replay a committed HAR with `HarNotFound.ABORT`; update it with `HAR_UPDATE=1`, locally.
 5. For loading and offline states, hold the request or go offline — never a sleep.
 6. Read a failure's trace (`qa/java/skills/evidence-capture`): its Network tab shows which requests were

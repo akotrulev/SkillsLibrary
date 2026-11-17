@@ -161,6 +161,21 @@ Type mappings (`[JsonPropertyName]` on every property, defaults over nullable):
   | array of T       | `List<T>`         | `[]`             |
   | nested object    | another DTO       | `null!`          |
 
+### Strict deserialization
+
+The response DTO is the contract. The suite's `Deserialize<T>` reads with options that disallow unmapped members (System.Text.Json, .NET 8+), so a response field the DTO does not declare throws a `JsonException`, which `Deserialize<T>` rethrows with the path and the body:
+
+```csharp
+private static readonly JsonSerializerOptions StrictJson = new()
+{
+    UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
+};
+```
+
+- A response DTO declares **every** field the API returns, not only the ones a test asserts. A new response field is a DTO change made here; the failing parse is how the suite notices it.
+- Request DTOs (`InDto`, `ModDto`) are only serialized; the setting does not touch them.
+- Never `[JsonExtensionData]` on a response DTO: it collects the unmapped fields the check exists to catch.
+
 ### Usage
 
 - Use object initializer in tests: `new {Name}InDto { Prop = value, ... }`.
@@ -171,6 +186,6 @@ Type mappings (`[JsonPropertyName]` on every property, defaults over nullable):
 0. If an **OpenAPI/Swagger spec** is supplied, derive the answers to steps 1–3 from it (API group from the path/tags, resource from the schema name, properties + types from the schema definition) — do not ask.
 1. Ask: which **API group**? (User / Assessment / Legal / Reference / Auth)
 2. Ask: resource name and DTO kind (`Dto`, `InDto`, `ModDto`, nested, wrapper).
-3. Ask which properties are needed, or inspect a sample API response.
+3. List every property the response returns, from the spec or a sample response; strict deserialization fails on an undeclared one.
 4. Generate at `ApiTests/Models/{Api}/{Resource}Models/{Name}Dto.cs`.
 5. Run `dotnet build ApiTests/ApiTests.csproj` — expect 0 errors.

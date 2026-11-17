@@ -100,7 +100,7 @@ evals/
 ├── graders/faithfulness.txt  ← the llm-rubric grading prompt (a versioned test artifact)
 └── gold/judge-calibration.csv← human-labelled gold set to calibrate the judge
 Tests/
-├── Support/Promptfoo.cs      ← the subprocess + JSON-parse helper (no SDK exists)
+├── Support/Promptfoo.cs      ← the CLI runner: subprocess + JSON parse (no SDK exists)
 ├── Support/Llm.cs            ← Microsoft.Extensions.AI client + in-test judge
 └── EvalTests.cs / SummarizerTests.cs
 ```

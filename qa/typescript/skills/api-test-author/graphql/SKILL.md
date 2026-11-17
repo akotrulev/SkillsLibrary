@@ -107,7 +107,7 @@ object, then query it back.
 
 ```typescript
 it('creates a user and the change is readable', async () => {
-  const client = new UserGraphQLClient(true);
+  const client = UserGraphQLClient.authenticated();
 
   const created = await client.createUser({
     email: 'neo@example.com', firstName: 'Thomas', lastName: 'Anderson',
@@ -122,7 +122,7 @@ it('creates a user and the change is readable', async () => {
 });
 
 it('rejects invalid input with BAD_USER_INPUT (HTTP 200)', async () => {
-  const res = await new UserGraphQLClient(true).createUser({
+  const res = await UserGraphQLClient.authenticated().createUser({
     email: '', firstName: 'A', lastName: 'B',
   });
   const [err] = GraphQLErrorsSchema.parse(res.errors);
@@ -231,7 +231,7 @@ transport contract differs.
 
 ## Rules
 
-The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `api-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md`, `api-tests.md` and `test-data.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Cross-references
 

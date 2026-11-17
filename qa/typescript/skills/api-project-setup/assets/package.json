@@ -1,0 +1,20 @@
+{
+  "name": "api-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "allure-js-commons": "3.13.0",
+    "allure-vitest": "3.13.0",
+    "typescript": "5.9.3",
+    "vitest": "5.1.0",
+    "zod": "4.6.7"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

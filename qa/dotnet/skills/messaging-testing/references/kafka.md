@@ -272,7 +272,7 @@ public async Task Should_write_a_shipment_row_When_an_OrderPaid_record_is_consum
 }
 ```
 
-The `WaitFor.Async` helper is the same bounded poll as `qa-dotnet:db-connection` and `service-bus`/`sqs` — included so
+The `WaitFor.Async` wait condition is the same bounded poll as `qa-dotnet:db-connection` and `service-bus`/`sqs` — included so
 the node is self-contained:
 
 ```csharp
@@ -291,15 +291,15 @@ public static class WaitFor
         {
             var value = await probe(cts.Token);
             if (value is not null && predicate(value)) return value;
-            await Task.Delay(interval, cts.Token);   // poll cadence INSIDE the helper, not an assertion sleep
+            await Task.Delay(interval, cts.Token);   // poll cadence INSIDE the wait condition, not an assertion sleep
         }
         throw new TimeoutException($"Side-effect did not satisfy the predicate within {timeout}.");
     }
 }
 ```
 
-> `Task.Delay` appears **only** as the poll cadence *inside* the bounded helper — never as a bare
-> `await Task.Delay(5000)` standing in for "the record probably arrived by now". The difference: the helper
+> `Task.Delay` appears **only** as the poll cadence *inside* the bounded wait condition — never as a bare
+> `await Task.Delay(5000)` standing in for "the record probably arrived by now". The difference: the wait condition
 > returns the instant the condition holds and *fails* if it never does; a bare sleep races the broker.
 
 ## Offsets, consumer groups & commit semantics
@@ -343,9 +343,11 @@ private record Seq(int Seq);
 public async Task Should_keep_per_key_ordering_When_records_share_a_key()
 {
     using (var producer = NewProducer())
-        for (var i = 1; i <= 3; i++)
-            await producer.ProduceAsync("orders",
-                new Message<string, string> { Key = "cust-42", Value = $$"""{"seq":{{i}}}""" });
+    {
+        await producer.ProduceAsync("orders", new Message<string, string> { Key = "cust-42", Value = """{"seq":1}""" });
+        await producer.ProduceAsync("orders", new Message<string, string> { Key = "cust-42", Value = """{"seq":2}""" });
+        await producer.ProduceAsync("orders", new Message<string, string> { Key = "cust-42", Value = """{"seq":3}""" });
+    }
 
     var records = Probe.Records("orders", count: 3, timeout: TimeSpan.FromSeconds(10));
 
@@ -480,7 +482,7 @@ public static class Orders
 - **Eventual consistency = wait on a condition, never a sleep.** The `KafkaProbe` bounded consume loop
   (`Consume(TimeSpan)`) for the receive side; `WaitFor.Async` for consumer side-effects. **No bare
   `Task.Delay` / `Thread.Sleep`** as an assertion wait — `Task.Delay` only as the poll cadence inside the
-  bounded helper. (`Consume(TimeSpan)` is correctly blocking and bounded — that's the one allowed block.)
+  bounded wait condition. (`Consume(TimeSpan)` is correctly blocking and bounded — that's the one allowed block.)
 - **Every test-side read uses a fresh consumer group + `AutoOffsetReset.Earliest`** so it reads the topic from
   the start (the log isn't drained — `Latest` or a reused group would miss already-produced records).
 - The SUT's producer/consumer is **constructor-injected** with the bootstrap servers / client — never a static
@@ -514,7 +516,7 @@ public static class Orders
 - `references/sqs.md` (`sqs`, the immediately prior sibling) — AWS SQS; **the `kafka`-vs-`sqs` boundary**:
   delete-to-ack + visibility timeout + redrive-policy DLQ vs Kafka commit-offset + re-readable log + app-level
   DLT. Same condition-wait discipline, different broker model.
-- `qa-dotnet:db-connection` — the `WaitFor.Async` poll helper and the seeder/probe split reused for
+- `qa-dotnet:db-connection` — the `WaitFor.Async` wait condition and the seeder/probe split reused for
   the consumer side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
 - `qa-dotnet:test-login-tokens` — when running against a shared cloud cluster with SASL/OAuth creds; the
   secrets-from-env discipline.

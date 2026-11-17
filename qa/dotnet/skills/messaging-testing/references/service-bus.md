@@ -19,7 +19,7 @@ Messaging tests assert one of two things about an **async** flow:
 > no synchronous return you can assert on the next line. The message is in flight; the consumer runs on its
 > own schedule; the side-effect lands "soon". So the core discipline is: **wait on a condition** for the
 > message (or its effect) to appear, with a bounded timeout — **never `Task.Delay` / `Thread.Sleep`**. This
-> is the exact lineage of `qa-dotnet:db-connection`'s `WaitForAsync` poll helper. Service Bus gives you a *better*
+> is the exact lineage of `qa-dotnet:db-connection`'s `WaitForAsync` wait condition. Service Bus gives you a *better*
 > primitive than polling for the receive side: `ReceiveMessageAsync(maxWaitTime)` **long-polls** — it
 > blocks up to a bounded window for a message to arrive, then returns it or `null`. That bounded wait *is*
 > the condition-wait; a fixed sleep is not.
@@ -42,7 +42,7 @@ IntegrationTests/
 ├── Fixtures/
 │   └── ServiceBusFixture.cs        ← boots the emulator (+SQL Edge), exposes the connection string
 ├── Messaging/
-│   ├── ServiceBusProbe.cs          ← test-side receive/peek helpers (read messages + DLQ)
+│   ├── ServiceBusProbe.cs          ← test-side receive/peek probe (read messages + DLQ)
 │   └── WaitFor.cs                  ← bounded condition-wait for consumer side-effects
 ├── Config.json                     ← declares the namespace + queues/topics the tests use
 └── OrderPublishingTests.cs
@@ -235,7 +235,7 @@ public async Task Should_write_a_shipment_row_When_an_OrderPaid_message_is_consu
 }
 ```
 
-The `WaitFor.Async` helper is the same bounded poll as `qa-dotnet:db-connection` — included here so the
+The `WaitFor.Async` wait condition is the same bounded poll as `qa-dotnet:db-connection` — included here so the
 node is self-contained:
 
 ```csharp
@@ -254,15 +254,15 @@ public static class WaitFor
         {
             var value = await probe(cts.Token);
             if (value is not null && predicate(value)) return value;
-            await Task.Delay(interval, cts.Token);   // poll cadence INSIDE the helper, not an assertion sleep
+            await Task.Delay(interval, cts.Token);   // poll cadence INSIDE the wait condition, not an assertion sleep
         }
         throw new TimeoutException($"Side-effect did not satisfy the predicate within {timeout}.");
     }
 }
 ```
 
-> `Task.Delay` appears **only** as the poll cadence *inside* the bounded helper — never as a bare
-> `await Task.Delay(5000)` standing in for "the message probably arrived by now". The difference: the helper
+> `Task.Delay` appears **only** as the poll cadence *inside* the bounded wait condition — never as a bare
+> `await Task.Delay(5000)` standing in for "the message probably arrived by now". The difference: the wait condition
 > returns the instant the condition holds and *fails* if it never does; a bare sleep races the broker.
 
 ## Peek-lock vs receive-and-delete — message settlement
@@ -397,13 +397,15 @@ poison case.**
 public class FulfilmentConsumerTests : ServiceBusFixture
 {
     private ServiceBusClient _client = null!;
+    private ServiceBusProbe _probe = null!;
 
     [SetUp]
     public async Task SetUp()
     {
         _client = new ServiceBusClient(ConnectionString);
-        await DrainAsync("orders");                 // independent tests — start from empty
-        await DrainAsync("shipments");
+        _probe = new ServiceBusProbe(_client);
+        await _probe.DrainAsync("orders");          // independent tests — start from empty
+        await _probe.DrainAsync("shipments");
     }
 
     [TearDown]
@@ -428,9 +430,15 @@ public class FulfilmentConsumerTests : ServiceBusFixture
         Assert.That(ready!.CorrelationId, Is.EqualTo(orderId.ToString()));   // correlation preserved
     }
 
-    private async Task DrainAsync(string queue)
+}
+```
+
+```csharp
+public sealed class ServiceBusProbe(ServiceBusClient client)
+{
+    public async Task DrainAsync(string queue)
     {
-        await using var receiver = _client.CreateReceiver(
+        await using var receiver = client.CreateReceiver(
             queue, new ServiceBusReceiverOptions { ReceiveMode = ServiceBusReceiveMode.ReceiveAndDelete });
         while (await receiver.ReceiveMessageAsync(maxWaitTime: TimeSpan.FromMilliseconds(500)) is not null) { }
     }
@@ -459,7 +467,7 @@ public static class Orders
 
 - **Eventual consistency = wait on a condition, never a sleep.** `ReceiveMessageAsync(maxWaitTime)` for the
   receive side (bounded long-poll); `WaitFor.Async` for consumer side-effects. **No bare `Task.Delay` /
-  `Thread.Sleep`** as an assertion wait — `Task.Delay` only as the poll cadence inside the bounded helper.
+  `Thread.Sleep`** as an assertion wait — `Task.Delay` only as the poll cadence inside the bounded wait condition.
 - The SUT's publisher/consumer is **constructor-injected** with the `ServiceBusClient` / connection string —
   never a static client or a connection string read inside a `[Test]`.
 - **Settle every peek-locked message** (`Complete` / `Abandon` / `DeadLetter`), or use `ReceiveAndDelete`
@@ -487,7 +495,7 @@ public static class Orders
 - `references/sqs.md` (`sqs`, next in family) — AWS SQS/SNS on LocalStack; visibility timeout +
   redrive-policy DLQ — same condition-wait discipline, different broker. Then Kafka (`kafka`, offset-based) and
   RabbitMQ (`rabbitmq`, AMQP exchanges) close the family.
-- `qa-dotnet:db-connection` — the `WaitFor.Async` poll helper and the seeder/probe split reused for
+- `qa-dotnet:db-connection` — the `WaitFor.Async` wait condition and the seeder/probe split reused for
   the consumer side-effect assertions; the **eventual-consistency lineage** this skill leans on hardest.
 - `qa-dotnet:test-login-tokens` — when authing to a cloud test namespace with an Azure AD token
   (`DefaultAzureCredential`) instead of the emulator connection string; secrets-from-env discipline.

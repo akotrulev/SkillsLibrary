@@ -52,7 +52,7 @@ HTTP transport changes; the discipline does not.
 |-------|-------------|----------------|
 | `models/{api}/{resource}/{Resource}Dto.java` (records) | `qa/java/skills/api-models` | Body shapes, `@JsonProperty` mapping |
 | `clients/{api}/{Resource}Client.java` — constructor takes `APIRequestContext` | `qa/java/skills/api-client-writer` conventions, context-based variant | Request building on the context; raw `APIResponse` overload + typed overload (asserts exact status, Jackson-deserializes) |
-| `base/BaseApiTest.java` | **this skill** | `Playwright` + per-identity context lifecycle (`@BeforeClass`/`@AfterClass`), `newContext(token)` helper, config via `ConfigurationLoader` |
+| `base/BaseApiTest.java` | **this skill** | `Playwright` + per-identity context lifecycle (`@BeforeClass`/`@AfterClass`), `newContext(token)` factory method, config via `ConfigurationLoader` |
 | `tests/{api}/{resource}/{Operation}{Resource}Test.java` | **this skill** | Scenario choice, arrange/act/assert, test data, cleanup |
 
 If a DTO or client a test needs is missing, run the owner skill first — never call `ctx.get(...)` inline in a
@@ -132,7 +132,7 @@ package com.{org}.apitests.tests.user.users;
 
 import com.microsoft.playwright.APIResponse;
 import com.{org}.apitests.base.BaseApiTest;
-import com.{org}.apitests.clients.AuthHelper;
+import com.{org}.apitests.clients.TokenProvider;
 import com.{org}.apitests.clients.user.UserClient;
 import com.{org}.apitests.models.user.users.UserDto;
 import org.testng.annotations.BeforeClass;
@@ -149,7 +149,7 @@ public class GetUserTest extends BaseApiTest {
 
     @BeforeClass(alwaysRun = true)
     public void setUpClients() {
-        userClient = new UserClient(newContext(AuthHelper.getToken(TestUsers.STANDARD)));
+        userClient = new UserClient(newContext(TokenProvider.getToken(TestUsers.STANDARD)));
         anonymousClient = new UserClient(newContext(""));
     }
 
@@ -190,7 +190,7 @@ record: one `isEqualTo` compares every field.
 
 Create/update flows keep the RestAssured sibling's cleanup discipline: track created ids, delete them in
 `@AfterMethod(alwaysRun = true)`, error bodies deserialized in the test via the client's
-`problem(APIResponse)` helper (Jackson behind the scenes — never `new ObjectMapper()` in a test).
+`problem(APIResponse)` method (Jackson behind the scenes — never `new ObjectMapper()` in a test).
 
 ## Scenario → pattern matrix
 
@@ -199,7 +199,7 @@ Create/update flows keep the RestAssured sibling's cleanup discipline: track cre
 | 2xx happy path | **typed** (`int expectedStatus`) on the standard/admin context | DTO returned already status-asserted; compare the record with AssertJ (`isEqualTo` / `usingRecursiveComparison()`) |
 | 401 unauthorized | **raw** on the `newContext("")` client | `assertThat(response.status()).as(response.text()).isEqualTo(401)` |
 | 403 forbidden | **raw** on a wrong-role context | `assertThat(response.status()).as(response.text()).isEqualTo(403)` |
-| 404 not found | **raw** | status assert; deserialize the `ProblemDetails`-style body via the client helper and assert the error code |
+| 404 not found | **raw** | status assert; deserialize the `ProblemDetails`-style body via the client's `problem` method and assert the error code |
 | 400 validation | **raw** | status assert + error DTO; assert the field name in the errors map |
 | Malformed JSON / extra-missing property | **raw** via `createRaw(String)` / `Map<String, Object>` overload | status assert only — add these overloads following `api-client-writer` when the plan requires them |
 | Eventually-consistent state | **raw/typed** inside an Awaitility `await().untilAsserted(...)` | poll on the condition, never `Thread.sleep` |
@@ -211,11 +211,12 @@ The standards this skill's output must meet are the qa-java rule files, not a li
 ## Conventions
 
 - Same layout as the RestAssured sibling: one class per operation (`{Operation}{Resource}Test`), package follows folder, TC-ID in `@Test(description = "TC-…")`. If RestAssured is already established in the suite, stay on that sibling.
-- Every class extends `BaseApiTest`; clients are built in `@BeforeClass` from `newContext(token)` with tokens from `AuthHelper`. Never create a `Playwright` or a context inside a test method; `playwright.close()` runs in `@AfterClass(alwaysRun = true)` and every context is disposed.
+- Every class extends `BaseApiTest`; clients are built in `@BeforeClass` from `newContext(token)` with tokens from `TokenProvider`. Never create a `Playwright` or a context inside a test method; `playwright.close()` runs in `@AfterClass(alwaysRun = true)` and every context is disposed.
 - Identities are contexts: one client field per identity (`userClient`, `adminClient`, `anonymousClient`), the identity set with `setExtraHTTPHeaders` at creation. Never a token argument on a call, never a client rebuilt mid-test. Cookie-auth apps share the UI suite's `storageState` file through `APIRequest.NewContextOptions.setStorageStatePath`.
 - The context keeps `failOnStatusCode` at its default `false`, so the test asserts the status itself: `assertThat(response.status()).as(response.text()).isEqualTo(404)`.
 - On 1.63 an `APIRequestContext` has no cookie methods: seed cookies with `setStorageStatePath`, or use `page.request()`, which shares the browser context's cookies (`browserContext.addCookies`). From 1.64: `addCookies` / `cookies` / `clearCookies` on the request context.
-- JSON bodies are DTOs passed with `RequestOptions.create().setData(dto)` inside the client; deserialization lives in the client's typed overloads and error helper.
+- JSON bodies are DTOs passed with `RequestOptions.create().setData(dto)` inside the client; deserialization lives in the client's typed overloads and `problem` method.
+
 
 ## Generation steps
 

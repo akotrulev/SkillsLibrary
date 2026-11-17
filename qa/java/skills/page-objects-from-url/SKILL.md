@@ -51,7 +51,7 @@ claude mcp add --scope user playwright -- npx @playwright/mcp@0.0.85 --caps=test
   (`qa/_shared/webmcp-testing`).
 - Tools take a `target`: a snapshot ref (`e15`) or a CSS/text selector. A ref is valid within one
   snapshot — re-snapshot after any navigation or DOM change.
-- MCP not connected → take the `playwright-cli` route below. Neither available → stop and tell the user
+- MCP not connected → take the `playwright-cli` route ([`references/playwright-cli.md`](references/playwright-cli.md)). Neither available → stop and tell the user
   the command above.
 
 **HTML-file mode**: when the user supplies HTML instead of a URL, skip the browser — parse the markup
@@ -74,7 +74,7 @@ Confirm before extracting. **Ask, don't guess**:
 ### 1. Check for an existing POM
 
 - Glob the target project for `**/pages/**/*.java` (and `**/pom/**/*.java`) and grep for the page's URL or name.
-- **Exists** → an **update**: diff extracted elements against its current locators (step 5).
+- **Exists** → an **update**: diff extracted elements against its current locators (step 6).
 - **Doesn't exist** → a **create**: with no `pages/` structure at all, load `qa/java/skills/page-object-design/SKILL.md` first.
 
 ### 2. Reach the page
@@ -132,7 +132,18 @@ Merge the passes by text/role/position: every interactable is now **test-id-back
 - Dynamic states → reveal, **re-snapshot** (old refs are stale), extract, and record which interaction reveals what: `browser_click`; `browser_hover` (hover menus, tooltips); `browser_press_key` (`Escape`, `ArrowDown` on a combobox, `Tab` to focus-only controls); `browser_tabs` for a link that opens a tab; `browser_navigate_back` to return.
 - `browser_generate_locator` `{ target: "e12" }` per interactable → the canonical locator (translate it to Java if it comes back in JavaScript form). It is the fallback for an element without a test id, and a cross-check for one with it.
 
-### 4. Report missing test ids
+### 4. Classify into controls and components
+
+Before any field is generated, map the merged inventory onto the object model (`qa-java-page-objects.md`):
+
+- **Known controls, by role and markup**: `combobox` with a `listbox` → `Combobox`; native `select` → `Dropdown`; `grid` / `table` with rows → `DataGrid` + `GridRow`; `dialog` → `Modal`; `tablist` → `Tabs`; date inputs (`type=date`, a calendar `dialog` with a `grid`) → `DatePicker`; `navigation` with page buttons → `Pagination`; `status` / `alert` toasts → `Toast`; `input[type=file]` → `FileUpload`.
+- **The project's own controls first**: glob `**/components/controls/*.java` and reuse a class whose markup matches. A missing one comes from `ui-test-author/playwright/references/components.md` and its assets.
+- **Region components**: a form, card or row that repeats on the page, or already exists on another page object.
+- Elements inside a control or component become its fields, not the page's; the page gets one field per control, built from the control's root locator.
+
+Report each as a **component candidate**: kind, class (existing or new), root locator, elements it absorbs.
+
+### 5. Report missing test ids
 
 Write (or update) `missing-testids.md` **at the test project root** — one file for the suite, one section per page, regenerated section-wise on each run:
 
@@ -155,11 +166,11 @@ the page objects carry no marker.
 - Every row names the page, the element and the fallback in use. A fallback that is raw CSS/XPath gets ⚠ — escalate those.
 - Non-interactable assertion targets (headings, icons, static text) go in an "assertion targets" subsection, only when they lack both a test id and a unique role/text handle.
 
-### 5. Build or update the POM
+### 6. Build or update the POM
 
 Apply the page-object rules from `qa/java/skills/ui-test-author/playwright` (constructor takes `Page`,
-`private final Locator` fields, `goTo()`, accessors for assertion targets, intent-named actions, no
-assertions in actions). Locator policy:
+`private final Locator` fields, control and region components from step 4 as fields, `goTo()`, accessors
+for assertion targets, intent-named actions, no assertions in actions). Locator policy:
 
 1. `page.getByTestId("...")` — **the default**; every test-id-backed element uses it
 2. Missing a test id → the best fallback: `getByRole(+name)` → `getByLabel` → `getByPlaceholder` → `getByText(exact)` → CSS (last resort). No comment or marker in the code; the report row covers it
@@ -176,35 +187,12 @@ attribute changes that constant — and the MCP registration — never per locat
 - Fallback where a test id now exists → upgrade to `getByTestId` and remove the row from `missing-testids.md`
 - Never reorder/rename public methods tests already call without flagging it
 
-### 6. Verify and hand off
+### 7. Verify and hand off
 
 - `./gradlew compileTestJava` (or project equivalent) → must compile clean.
 - A smoke test for the page exists → run it; a new POM → verify `expectLoaded()`'s landmark against one more live snapshot.
-- Report: elements extracted (counts: test-id-backed / fallback / ⚠ CSS), POM created or updated (diff summary), `missing-testids.md` path, open questions.
+- Report: elements extracted (counts: test-id-backed / fallback / ⚠ CSS), component candidates (step 4), POM created or updated (diff summary), `missing-testids.md` path, open questions.
 - Close the session (`browser_close`). A screenshot, trace or video of the session is captured per `qa/java/skills/evidence-capture/references/playwright.md` §9.
-
-## The `playwright-cli` route
-
-Use it when MCP is not connected, or when a long extraction — a big page, many states — would flood the
-context: the CLI writes snapshots to `.playwright-cli/page-*.yml` and you `Read` only what you need. Run it
-through `Bash`; install with `npm i -g @playwright/cli@latest` (it needs Node, not the Java project). Same
-procedure, same rules; only the calls change:
-
-| Step | MCP tool | `playwright-cli` |
-|---|---|---|
-| Open, navigate, back | `browser_navigate`, `browser_navigate_back` | `open <url>`, `goto <url>`, `go-back` |
-| Snapshot | `browser_snapshot` | `snapshot [target] --filename=<f> --depth=<n>` |
-| Find one element | `browser_find` | `find <text>` (`--regex`) |
-| Test-id harvest | `browser_evaluate` | `eval "<function>"`; one element: `eval "el => el.getAttribute('data-testid')" e7` |
-| Canonical locator | `browser_generate_locator` | `--raw generate-locator e5` (JavaScript syntax — translate it) |
-| Click, fill, hover, key | `browser_click`, `browser_fill_form`, `browser_hover`, `browser_press_key` | `click e3`, `fill e4 "<text>"`, `hover e3`, `press Escape` |
-| Tabs, dialogs | `browser_tabs`, `browser_handle_dialog` | `tab-list`, `tab-new [url]`, `tab-select <i>`; `dialog-accept`, `dialog-dismiss` |
-| Save / load auth | `browser_storage_state`, `browser_set_storage_state` | `state-save <f>`, `state-load <f>` |
-| Screenshot, trace, video | `browser_take_screenshot`, `browser_start_tracing`…, `browser_start_video`… | `screenshot --filename=<f> --full-page`, `tracing-start`/`tracing-stop`, `video-start <f>`/`video-stop` |
-
-The CLI has no tool allowlist, so hold its rules by hand: never `run-code` or `webmcp-call`, and `close`
-the session at the end (a headless one closes itself after an hour). On an attribute other than
-`data-testid`, check `generate-locator`'s first output against the harvest before trusting it.
 
 ## Rules
 
@@ -222,6 +210,7 @@ the session at the end (a headless one closes itself after an hour). On an attri
 - Building the POM from the snapshot alone (Pass A) — role locators for elements that *have* test ids break the contract
 - A full snapshot to locate one element — `browser_find` it
 - Dumping every DOM node into the page object — extract what a user interacts with or a test asserts on
+- Generating page fields for the parts of a date picker, dropdown or grid — the widget is one control field
 - Guessing what an icon button does from its CSS class name
 - Deleting "stale" fields in update mode without confirming the element isn't state-dependent
 - Writing tests in the same breath — that's `ui-test-author/playwright`'s job, after the POM compiles
@@ -230,6 +219,7 @@ the session at the end (a headless one closes itself after an hour). On an attri
 ## Handoffs
 
 - POM architecture (first page in a bare project, splitting a god page) → `qa/java/skills/page-object-design`
+- The control catalogue (root, intent methods, API per control) → `qa/java/skills/ui-test-author/playwright/references/components.md`
 - Writing/tagging tests against the built POM → `qa/java/skills/ui-test-author/playwright`
 - Formal test cases the tests are written from → `qa/manual/test-case-writer`
 - Reviewing the resulting page object → `qa/java/skills/ui-test-author/review`

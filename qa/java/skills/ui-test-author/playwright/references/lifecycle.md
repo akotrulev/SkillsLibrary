@@ -126,7 +126,7 @@ The 2.x `Allure.addAttachment(...)` does not exist in 3.0. The trace is attached
 
 **The one catch.** `keepScreenshot` catches `PlaywrightException` — a crashed or closed page cannot be
 photographed — logs it with a message template and returns, so the trace and video are still kept. That is
-the CLAUDE.md exception for an I/O helper: one named exception, logged, never blanket. It matters because
+infrastructure, the base test's evidence capture: one named exception, logged, never blanket. It matters because
 TestNG's default `configfailurepolicy` is `skip`: a failing `@AfterMethod` would skip every remaining test
 in the class. There is no catch in a test, in a hook body, or around an assertion.
 
@@ -191,6 +191,30 @@ public void deleteOrder() {
 
 The status is asserted exactly with AssertJ, the body as the description. Never
 `assertThat(response).isOK()`, which accepts any 2xx and prints nothing useful.
+
+Three patterns sit beside create-and-delete (`qa-java-data.md`):
+
+- **Read-only reference data.** A search or filter test may read curated records the environment already
+  holds. The test (or its feature) names them, never changes them, and asserts the result is not empty before
+  asserting on its rows (`components.md` §3): an "every row" check over an empty result proves nothing.
+- **Pre-clean.** A record with a fixed name (a promotion code, a unique email) may be left over by a crashed
+  run. The class's `@BeforeMethod` removes it first through a seeder that deletes every match it finds
+  (`promotionSeeder.deleteAllNamed("SPRING-SALE")`), not through a UI sequence; teardown still deletes it.
+- **Keep on failure.** Teardown deletes what a passing test created and logs what a failed one left, for
+  investigation. Names must be unique per run (the UUID above) so kept records never collide. The pass/fail
+  check is the teardown registry's legal branch, not a test-body branch:
+
+```java
+@AfterMethod(alwaysRun = true)
+public void deleteOrderWhenPassed(ITestResult result) {
+    if (result.isSuccess()) {
+        APIResponse deleted = page.request().delete(orderLocation);
+        assertThat(deleted.status()).as(deleted.text()).isEqualTo(204);
+    } else {
+        LOG.log(System.Logger.Level.WARNING, "Kept order {0} from failed {1}", orderLocation, result.getName());
+    }
+}
+```
 
 ## 8. Commands
 

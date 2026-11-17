@@ -78,9 +78,10 @@ is 0.
 ## 3. The tests in the asset
 
 [`assets/ProductPage.ts`](../assets/ProductPage.ts) is the page object: it owns the URL (`goto(sku)`), the
-`Cart.Badge` locator and the page's tool surface (`webmcp`), so the spec calls no raw `page.` method.
+`Cart.Badge` locator and the page's tool surface, so the spec calls no raw `page.` method. `page.webmcp`
+stays private: the spec calls `toolNames(timeout)`, `tool(name, timeout)` and `callTool(name, input, timeout)`.
 `assets/webmcp.spec.ts` extends the writer's `test` (from `./fixtures`) with one fixture, `productPage`:
-it opens `/products/sku-123`, polls `tools()` until `add_to_cart` is listed, and yields the page object. A
+it opens `/products/sku-123`, polls `toolNames()` until `add_to_cart` is listed, and yields the page object. A
 tool that never registers fails the fixture with the poll's message.
 
 The five tests cover checklist items B7 (object schema), D19 (consequential hint), C11 (valid call → UI
@@ -88,14 +89,14 @@ reflects it), C12/C13 (bad input → `isError`) and A2 (tool gone after leaving 
 fresh context, so the cart starts empty. Registration and removal are always polled:
 
 ```ts
-await expect.poll(() => toolNames(productPage), { timeout, message: 'tools after leaving the product page' })
+await expect.poll(() => productPage.toolNames(timeout), { timeout, message: 'tools after leaving the product page' })
   .not.toContain(addToCart);
 ```
 
 A tool that throws instead of returning `isError` is asserted with the runner's rejection matcher:
 
 ```ts
-await expect(productPage.webmcp.callTool('remove_from_cart', { sku }, { timeout })).rejects.toThrow('the invocation failed');
+await expect(productPage.callTool('remove_from_cart', { sku }, timeout)).rejects.toThrow('the invocation failed');
 ```
 
 Use it only to pin a known C13 defect: an agent cannot read that message, so the fix is an `isError`
@@ -105,14 +106,13 @@ result, and the test then changes to assert it.
 
 The browser checks only that `inputSchema` serializes. Validate it against the meta-schema with Ajv (add
 `ajv` as a dev dependency). The spec cites JSON Schema without a draft; the declarative explainer links
-2020-12, so `Ajv2020` is the default unless the app states another draft. Added to the asset file, beside
-its helpers:
+2020-12, so `Ajv2020` is the default unless the app states another draft. Added to the asset file:
 
 ```ts
 import Ajv2020 from 'ajv/dist/2020';
 
 test('Should_DeclareAValidJsonSchema_When_AddToCartIsRegistered', async ({ productPage }) => {
-  const tool = await listedTool(productPage, addToCart);
+  const tool = await productPage.tool(addToCart, timeout);
   const ajv = new Ajv2020({ strict: true });
 
   expect(ajv.validateSchema(tool?.inputSchema as object), JSON.stringify(ajv.errors)).toBe(true);
@@ -147,7 +147,7 @@ To measure time-to-first-tool or churn, wrap `ModelContext.prototype.registerToo
 so every registration is logged with `performance.now()` before page scripts run, then read the log with
 `page.evaluate` from a fixture. Wrapping `execute` the same way records the calls.
 
-## 8. Third-party helper
+## 8. Third-party matchers
 
 `@swissspidy/playwright-webmcp` (0.2.0, 2026-10-09) adds matchers such as `toHaveTool` and
 `toMatchToolContract`, a recorder and a lint. It is new and unproven: evaluate it before adopting it, and

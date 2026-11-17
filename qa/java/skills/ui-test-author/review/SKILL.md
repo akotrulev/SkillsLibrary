@@ -30,7 +30,7 @@ Reviews Java UI test code (Playwright Java, Selenium Java, Appium Java) against 
 
 ## The checklist is the rule file
 
-Every check, and the severity it reports, lives in one place: the qa-java rule files `qa-java.md` (core) and `qa-java-ui.md`, plus `qa-java-bdd.md` when step definitions are in the diff.
+Every check, and the severity it reports, lives in one place: the qa-java rule files `qa-java.md` (core), `qa-java-ui.md` and `qa-java-page-objects.md`, plus `desktop-tests.md` for desktop window objects and `qa-java-bdd.md` when step definitions are in the diff.
 
 1. **The project's copies first**: `.claude/rules/qa-java/` at the project root. The team may have edited them, and its edits win.
 2. **Otherwise the plugin's copies**: `qa/java/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/qa-java:rules` installs them.
@@ -72,7 +72,7 @@ The severity is the tag on the rule, never a new judgment. End with one line: `R
 ## Procedure
 
 1. Identify the **stack** from imports and file location, and read each file end-to-end before writing findings.
-2. Walk the rule files, core first, then `qa-java-ui.md`; for Playwright, then the mechanics table above.
+2. Walk the rule files, core first, then `qa-java-page-objects.md` and `qa-java-ui.md`; for Playwright, then the mechanics table above.
 3. For each finding: file path + line, issue, one-sentence fix. **Do not rewrite the code**; hand off to the matching generator.
 
 ## Handoffs

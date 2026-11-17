@@ -1,15 +1,16 @@
 ---
 paths:
   - "**/{apitests,api-tests}/**/*.java"
-  - "**/src/{test,integrationTest}/java/**/{clients,models}/**/*.java"
-  - "**/src/{test,integrationTest}/java/**/*{Client,Dto}.java"
+  - "**/src/{test,integrationTest}/java/**/{clients,models,action*,pojo*,poco*}/**/*.java"
+  - "**/src/{test,integrationTest}/java/**/*{Client,Dto,Action,Pojo,Poco}.java"
+  - "**/src/main/java/**/{action*,pojo*,poco*}/**/*.java"
 ---
 
-<!-- qa-java rules v1 (2026-11-03): API tests. Installed by /qa-java:rules; edit the paths above to where this project keeps its API clients, DTOs and API tests. -->
+<!-- qa-java rules v2 (2026-11-17): API tests. Installed by /qa-java:rules; fit the paths above to the project. -->
 
 # Java API test standards (RestAssured / Playwright APIRequestContext)
 
-Severity tags as in the core qa-java rules: **blocker**, **major**, **minor**, **nit**. The codebase wins where it consistently does otherwise.
+Severity tags as in the core qa-java rules; the codebase wins where it consistently does otherwise.
 
 - Every request goes through a typed `{Resource}Client` on the project's base client. No `RestAssured.given()`, `RestAssured.baseURI = …` or raw `APIRequestContext` call in a test; one HTTP stack per suite. *major*
 - Dual overloads: the raw one returns the response, unasserted and undeserialized; the typed one takes the expected status, asserts it, deserializes and delegates to the raw one. Happy paths use the typed overload, negative tests the raw one; never re-assert after a typed call. *major*
@@ -19,5 +20,6 @@ Severity tags as in the core qa-java rules: **blocker**, **major**, **minor**, *
 - A happy path checks more than one field; a create is read back. *major*
 - DTOs are records with `@JsonProperty` on every component, no behaviour; boxed types on `*ModDto`; `BigDecimal` for money; `OffsetDateTime` with `JavaTimeModule` registered once. No Lombok `@Data` DTO. *major*
 - No `Map<String, Object>`, `JsonNode`, `jsonPath().get(...)` or `ObjectMapper` in a test. *major*
-- A deserialization failure attaches the raw body first, then fails naming the JSON path, target type and payload, from one helper; never a skip. *major*
+- The suite's `ObjectMapper` enables `FAIL_ON_UNKNOWN_PROPERTIES`: an undeclared response field fails the parse; no `ignoreUnknown = true`. *major*
+- A deserialization failure attaches the raw body first, then fails naming the JSON path, target type and payload, from one place in the client; never a skip. *major*
 - The HTTP exchange reaches Allure through the client's filter, not hand-attached bodies. *minor*

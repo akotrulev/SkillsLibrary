@@ -3,7 +3,7 @@
 Drives the raw **Chrome DevTools Protocol** from a Playwright for Java test through
 `page.context().newCDPSession(page)`, for the hooks that live **below the routing layer**: real bandwidth and
 latency throttling, HTTP-cache disable, CPU throttling and `Performance` metrics. The session and every
-command and event are wrapped in one `CdpControls` helper with intent names (`throttle`, `disableCache`,
+command and event are wrapped in one `CdpControls` fixture with intent names (`throttle`, `disableCache`,
 `cpuThrottle`, `metrics`, `responsesFor`) — never `client.send("Domain.method", …)` in a test. Every sample
 extends `com.example.uitests.support.BaseTest`; there is no `Thread.sleep` and no `waitForTimeout` in this file.
 
@@ -57,7 +57,7 @@ DevTools' own profiles, encoded in `NetworkPresets` below:
 | Slow 3G | ~50 KB/s (500 kbit/s × 0.8 ÷ 8) | ~50 KB/s | 2000 ms (400 × 5) |
 | Fast 3G | ~180 KB/s (1.6 Mbit/s × 0.9 ÷ 8) | ~84 KB/s (750 kbit/s × 0.9 ÷ 8) | ~562 ms (150 × 3.75) |
 
-## 1. The helper — `support/CdpControls.java`
+## 1. The fixture — `support/CdpControls.java`
 
 ```java
 package com.example.uitests.support;

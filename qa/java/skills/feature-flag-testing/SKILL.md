@@ -63,7 +63,7 @@ the SDK surface changes.
   its `com.launchdarkly.sdk.server.integrations.TestData` fixture is the deterministic data source
 - **LaunchDarkly OpenFeature provider** — `com.launchdarkly:launchdarkly-openfeature-serverprovider` — bridges
   the two: prod code stays on OpenFeature, `TestData` pins what the LD provider sees
-- Layout: `src/test/java/flags/` (the flag tests), `src/test/java/support/flags/` (the `FlagFixture` helper)
+- Layout: `src/test/java/flags/` (the flag tests), `src/test/java/support/flags/` (the `FlagFixture`)
 
 ```kotlin
 // build.gradle.kts (excerpt)

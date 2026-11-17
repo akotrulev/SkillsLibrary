@@ -178,12 +178,16 @@ public class CardCheckoutTest extends BaseTest {
     private CheckoutPage checkout;
     private OrdersApi orders;
     private StripeSandbox stripe;
+    private OrderView order;
 
     @BeforeMethod(alwaysRun = true)
-    public void createHelpers() {
+    public void openCheckoutWithTwoMugs() {
         stripe = StripeSandbox.fromEnvironment();
         checkout = new CheckoutPage(page);
         orders = new OrdersApi(page);
+        checkout.openWithTwoMugs();
+        order = orders.order(checkout.orderId());
+        stripe.track(order.paymentIntentId());
     }
 
     @AfterMethod(alwaysRun = true)
@@ -193,7 +197,6 @@ public class CardCheckoutTest extends BaseTest {
 
     @Test
     public void Should_ConfirmOrderAndCapturePayment_When_ShopperCompletesAuthentication() throws StripeException {
-        OrderView order = openCheckout();
         checkout.payWithCard(TestCardNumbers.AUTHENTICATION_ALWAYS);
 
         checkout.challenge().complete();
@@ -204,7 +207,6 @@ public class CardCheckoutTest extends BaseTest {
 
     @Test
     public void Should_ShowAuthenticationErrorAndLeaveIntentUnpaid_When_ShopperFailsAuthentication() throws StripeException {
-        OrderView order = openCheckout();
         checkout.payWithCard(TestCardNumbers.AUTHENTICATION_ALWAYS);
 
         checkout.challenge().fail();
@@ -228,8 +230,6 @@ public class CardCheckoutTest extends BaseTest {
     @Test(dataProvider = "declinedCards")
     public void Should_ShowDeclineAndKeepOrderUnpaid_When_CardIsDeclined(String cardNumber, String declineCode)
             throws StripeException {
-        OrderView order = openCheckout();
-
         checkout.payWithCard(cardNumber);
 
         assertThat(checkout.paymentError()).isVisible();
@@ -238,14 +238,8 @@ public class CardCheckoutTest extends BaseTest {
         soft.assertEquals(orders.order(order.id()).status(), "AwaitingPayment");
         soft.assertAll();
     }
-
-    private OrderView openCheckout() {
-        checkout.openWithTwoMugs();
-        OrderView order = orders.order(checkout.orderId());
-        stripe.track(order.paymentIntentId());
-        return order;
-    }
 }
+
 ```
 
 - `BaseTest`'s `@AfterMethod` closes the context; TestNG runs the subclass's `@AfterMethod` first, so cleanup

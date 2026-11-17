@@ -22,7 +22,9 @@ Pick the first rung the element supports. Never skip a rung because the lower on
 
 **Test ids are PascalCase dot-separated and static** — `Login.Submit`, `OrderRow`, `OrderRow.Title` — which
 is what `fe-react` and `fe-blazor` generate. A repeated row shares one static id (`OrderRow`); the row is
-picked by its content (§3), never by an id that embeds a database key, an index or a state value.
+picked by its content (§3), never by an id that embeds a database key, an index or a state value. Where the
+app already ships index-embedded ids (`cell-value-status-3`), only the grid control builds them, from the
+index it resolves by content (`components.md` §3); the test never passes an index.
 
 **A fallback carries no marker in the code.** When an element has no test id, use the next rung and add a
 row to `missing-testids.md` (page, element, suggested id, fallback locator in use). That report is the
@@ -66,7 +68,8 @@ row.getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName("Cancel"))
 ## 4. Chaining from a component root
 
 A component object takes its root `Locator` and builds every child from it, so the same component works
-wherever it is mounted. `assets/LoginPage.java` does this with `SignInForm`.
+wherever it is mounted. `assets/LoginPage.java` does this with `SignInForm`; the control components in
+`assets/` and `components.md` do it for design-system widgets.
 
 ```java
 public final class OrderRow {
@@ -74,11 +77,25 @@ public final class OrderRow {
     private final Locator cancel;
 
     public OrderRow(Locator root) {
-        this.title = root.getByTestId("OrderRow.Title");
+        this.title = root.getByTestId("OrderRow.Title").describe("Order title");
         this.cancel = root.getByRole(AriaRole.BUTTON, new Locator.GetByRoleOptions().setName("Cancel"));
+    }
+
+    public void cancel() {
+        cancel.click();
+    }
+
+    public Locator title() {
+        return title;
     }
 }
 ```
+
+A locator an action uses stays private, and the action is an intent method (`cancel()`). A locator may be
+public only as an assertion target: described, returned read-only, and passed by the test to
+`assertThat(row.title()).hasText(...)`. A test never calls `click` or `fill` on it. A Cucumber step is the
+exception: in a BDD suite the step is the intent layer and may act on an element or control the page exposes
+(`qa/java/skills/gherkin-step-code`).
 
 ## 5. One locator inside another: `parent.locator(child)`
 

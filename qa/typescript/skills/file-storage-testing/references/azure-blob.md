@@ -105,7 +105,9 @@ string. Reuse the standard Testcontainers fixture discipline (boot once per suit
 
 ```typescript
 import { AzuriteContainer, StartedAzuriteContainer } from "@testcontainers/azurite";
-import { BlobServiceClient, ContainerClient } from "@azure/storage-blob";
+import {
+  BlobServiceClient, ContainerClient, BlockBlobClient, type BlobGetPropertiesResponse,
+} from "@azure/storage-blob";
 import { randomUUID } from "node:crypto";
 
 export interface BlobFixture {
@@ -113,6 +115,8 @@ export interface BlobFixture {
   container: ContainerClient;
   containerName: string;
   emptyContainer: () => Promise<void>;
+  propertiesOrNull: (name: string) => Promise<BlobGetPropertiesResponse | null>;
+  uploadInBlocks: (name: string, bytes: Buffer, blockSize: number) => Promise<BlockBlobClient>;
   stop: () => Promise<void>;
 }
 
@@ -137,7 +141,35 @@ export async function startBlobFixture(): Promise<BlobFixture> {
     }
   };
 
-  return { service, container, containerName, emptyContainer, stop: async () => { await started.stop(); } };
+  const propertiesOrNull = async (name: string): Promise<BlobGetPropertiesResponse | null> => {
+    try {
+      return await container.getBlobClient(name).getProperties();
+    } catch (e) {
+      if (typeof e === "object" && e !== null && "statusCode" in e && e.statusCode === 404) return null;
+      throw e;
+    }
+  };
+
+  // Stages numbered blocks then commits them into one blob. Block IDs must be equal-length base64 strings.
+  const uploadInBlocks = async (name: string, bytes: Buffer, blockSize: number): Promise<BlockBlobClient> => {
+    const blockBlob = container.getBlockBlobClient(name);
+    const blockIds: string[] = [];
+    for (let offset = 0; offset < bytes.length; offset += blockSize) {
+      const id = Buffer.from(randomUUID()).toString("base64");
+      const chunk = bytes.subarray(offset, Math.min(offset + blockSize, bytes.length));
+      await blockBlob.stageBlock(id, chunk, chunk.length);
+      blockIds.push(id);
+    }
+    await blockBlob.commitBlockList(blockIds, {
+      blobHTTPHeaders: { blobContentType: "application/octet-stream" },
+    });
+    return blockBlob;
+  };
+
+  return {
+    service, container, containerName, emptyContainer, propertiesOrNull, uploadInBlocks,
+    stop: async () => { await started.stop(); },
+  };
 }
 ```
 
@@ -201,8 +233,6 @@ side-effect is eventually consistent, so **seed the input blob, then wait on a c
 This reuses `qa-typescript:db-connection`'s discipline.
 
 ```typescript
-import type { BlobGetPropertiesResponse } from "@azure/storage-blob";
-
 it("should produce a thumbnail blob when an image is uploaded", async () => {
   // 1. Seed the input blob the worker watches.
   await fx.container.getBlockBlobClient("uploads/cat.png").uploadData(sampleImages.png1024, {
@@ -213,7 +243,7 @@ it("should produce a thumbnail blob when an image is uploaded", async () => {
 
   // 3. Wait on the SIDE-EFFECT, not on a clock. expect.poll re-runs until the derived blob exists (or times out).
   await expect
-    .poll(() => propertiesOrNull(fx, "thumbnails/cat.png").then((p) => p?.contentLength ?? 0), {
+    .poll(() => fx.propertiesOrNull("thumbnails/cat.png").then((p) => p?.contentLength ?? 0), {
       timeout: 10_000,
       interval: 200,
     })
@@ -222,16 +252,6 @@ it("should produce a thumbnail blob when an image is uploaded", async () => {
   const thumb = await fx.container.getBlobClient("thumbnails/cat.png").getProperties();
   expect(thumb.contentType).toBe("image/png");   // one logical assertion: the derived blob
 });
-
-// HEAD-or-null probe: resolves to the properties if the blob exists, null otherwise (so expect.poll keeps waiting).
-async function propertiesOrNull(fx: BlobFixture, name: string): Promise<BlobGetPropertiesResponse | null> {
-  try {
-    return await fx.container.getBlobClient(name).getProperties();
-  } catch (e) {
-    if (typeof e === "object" && e !== null && "statusCode" in e && e.statusCode === 404) return null;
-    throw e;
-  }
-}
 ```
 
 > `expect.poll` re-evaluates *until the matcher passes*, then returns; it **fails** if the matcher never passes
@@ -244,25 +264,13 @@ async function propertiesOrNull(fx: BlobFixture, name: string): Promise<BlobGetP
 For large blobs, `BlockBlobClient.uploadData(buffer, { blockSize, concurrency })` already chunks automatically.
 The explicit **block-staging** API (the multipart analogue) stages numbered blocks then commits them into one
 blob — useful when the SUT assembles a blob from parts. The assertion is unchanged: the assembled blob exists
-with the expected size.
+with the expected size. The staging loop lives on the fixture (`uploadInBlocks`), so the test body stays linear.
 
 ```typescript
 it("should upload a large blob in blocks when staging and committing", async () => {
   const bytes = largePayloads.ofSize(12 * 1024 * 1024); // 12 MB → multiple blocks
-  const blockBlob = fx.container.getBlockBlobClient("backups/db-2026-06.dump");
 
-  const blockIds: string[] = [];
-  const blockSize = 4 * 1024 * 1024; // 4 MB blocks
-  for (let offset = 0; offset < bytes.length; offset += blockSize) {
-    // Block IDs must be equal-length base64 strings.
-    const id = Buffer.from(randomUUID()).toString("base64");
-    const chunk = bytes.subarray(offset, Math.min(offset + blockSize, bytes.length));
-    await blockBlob.stageBlock(id, chunk, chunk.length);
-    blockIds.push(id);
-  }
-  await blockBlob.commitBlockList(blockIds, {
-    blobHTTPHeaders: { blobContentType: "application/octet-stream" },
-  });
+  const blockBlob = await fx.uploadInBlocks("backups/db-2026-06.dump", bytes, 4 * 1024 * 1024);
 
   const props = await blockBlob.getProperties();
   expect(props.contentLength).toBe(bytes.length); // assembled blob is the full size
@@ -378,14 +386,13 @@ it.runIf(process.env.REAL_AZURE_ACCOUNT)("should fire a storage queue message wh
   await fx.container.getBlockBlobClient("incoming/order.json").uploadData(Buffer.from("{}"));
 
   // Poll the queue on a CONDITION (the message arriving), not a sleep — Event Grid delivery is eventual.
-  const message = await vi.waitFor(
-    async () => {
-      const { receivedMessageItems } = await queue.receiveMessages({ numberOfMessages: 1 });
-      if (receivedMessageItems.length === 0) throw new Error("no message yet");
-      return receivedMessageItems[0];
-    },
-    { timeout: 30_000, interval: 1000 },
-  );
+  await expect
+    .poll(async () => (await queue.peekMessages({ numberOfMessages: 1 })).peekedMessageItems.length, {
+      timeout: 30_000,
+      interval: 1000,
+    })
+    .toBe(1);
+  const { receivedMessageItems: [message] } = await queue.receiveMessages({ numberOfMessages: 1 });
 
   expect(Buffer.from(message.messageText, "base64").toString()).toContain("incoming/order.json");
   await queue.deleteMessage(message.messageId, message.popReceipt);
@@ -443,7 +450,7 @@ describe("image processing worker", () => {
 
     // Wait on the derived blob (the condition-wait) — the worker runs async.
     await expect
-      .poll(() => propertiesOrNull(fx, "thumbnails/photo.png").then((p) => p?.contentLength ?? 0), {
+      .poll(() => fx.propertiesOrNull("thumbnails/photo.png").then((p) => p?.contentLength ?? 0), {
         timeout: 15_000,
         interval: 250,
       })

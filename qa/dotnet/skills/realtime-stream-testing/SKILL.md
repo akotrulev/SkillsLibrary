@@ -54,7 +54,7 @@ next line.
 - Browser surface: **Microsoft.Playwright.NUnit** at the pins in the **Versions** table of
   `qa/dotnet/skills/ui-test-author/playwright/SKILL.md` (this skill pins nothing; `RouteWebSocketAsync` needs
   ≥ 1.48). Every browser fixture **derives from that skill's `BaseTest`**; tests reach the page through page
-  objects and the `SocketWatch` / `MockStreams` helpers, never raw `Page` calls.
+  objects and the `SocketWatch` probe / `MockStreams` stub, never raw `Page` calls.
 - The SUT's stream client is **constructor-injected** with its URL / `HttpClient`
 
 ## WebSocket vs SSE — what changes in the test
@@ -78,7 +78,7 @@ pass. Two primitives, and nothing else:
 
 ## Deep-dive reference
 
-[`references/details.md`](references/details.md) holds **0. `AwaitFrame`** (the channel reads, the one helper
+[`references/details.md`](references/details.md) holds **0. `AwaitFrame`** (the channel reads, the one wait condition
 with a `catch`) and the protocol-client surfaces — **1. raw WebSocket (`WebSocketProbe`)**, **2. SignalR hub
 (`HubConnection`)**, **3. SSE (`SseProbe`)** — plus **Disciplines & gotchas** (auth on the socket,
 reconnection, heartbeat, fragmentation, the Kestrel port), the project layout and **Examples**. Read it when
@@ -154,7 +154,7 @@ public class LiveFeedBrowserTests : BaseTest
     private NotificationsPage _notifications = null!;
 
     [SetUp]
-    public void CreateHelpers()
+    public void CreateProbesAndPages()
     {
         _sockets = new SocketWatch(Page);
         _streams = new MockStreams(Page);
@@ -295,7 +295,7 @@ public async Task Should_ListEveryPushedNotification_When_TheFeedDeliversThem()
 - **Assert the whole lifecycle** — the 101 upgrade (`ConnectAsync` throwing is the negative assertion), the
   frames, **and** the clean close. "N then close" = take N, *then* assert the close.
 - **Browser SSE is a fixed event set + `204`**; timing, reconnect and `Last-Event-ID` go to a real server.
-- **Browser fixtures derive from `BaseTest`** and reach the page through page objects and helpers built in
+- **Browser fixtures derive from `BaseTest`** and reach the page through page objects, probes and stubs built in
   `[SetUp]`; no `Playwright.CreateAsync()`, no `try`/`catch`/`finally` in a test.
 - **Auth tokens from env, never logged**; async all the way; `Should_X_When_Y` names; PascalCase test ids.
 

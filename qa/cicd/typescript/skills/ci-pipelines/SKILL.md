@@ -25,6 +25,8 @@ The standards this skill's output must meet are the qa-typescript rule files, no
 
 Cross-stack conventions live in `qa/cicd/ci-conventions`: load it alongside the tool reference.
 
+The UI suite's container image (built from the checkout, report on mounted volumes, exit code passed through) is defined once in `qa/typescript/skills/ui-project-setup` § Container; each tool reference carries only the steps that run it.
+
 ## Cross-references
 
 Each `references/<tool>.md` carries its own cross-references to sibling skills (DB verification,

@@ -13,7 +13,7 @@ holds a **second** iframe with the issuer's (here: Stripe's test) page. Playwrig
 
 The iframe selectors and the challenge's button names are **Stripe's markup, not a contract**. The values below
 were observed with Stripe.js v3 and the Payment Element; before you pin them, open your checkout with
-`playwright codegen`, take the challenge once, and copy what the inspector shows. They live in one page object so a
+`playwright codegen`, take the challenge once, and copy what the inspector shows. They live in two control components (`StripePaymentElement`, `StripeChallenge`) so a
 Stripe change is a one-file fix.
 
 | Frame | Observed selector | Anchored on |
@@ -25,17 +25,35 @@ Stripe change is a one-file fix.
 If your recording shows a third level (some flows add an `acsFrame`), add one more `.FrameLocator(...)` in
 `StripeChallenge` and nowhere else.
 
-## 2. Page objects
+## 2. Control components and the page object
 
 ```csharp
+using Microsoft.Playwright;
+
+namespace Example.UiTests.Components.Controls;
+
+public sealed class StripePaymentElement(ILocator root)
+{
+    private readonly IFrameLocator _cardFrame = root.FrameLocator("iframe[title='Secure payment input frame']");
+
+    public async Task FillCardAsync(string cardNumber)
+    {
+        await _cardFrame.GetByRole(AriaRole.Textbox, new() { Name = "Card number" }).FillAsync(cardNumber);
+        await _cardFrame.GetByRole(AriaRole.Textbox, new() { Name = "Expiration date" }).FillAsync("12 / 34");
+        await _cardFrame.GetByRole(AriaRole.Textbox, new() { Name = "Security code" }).FillAsync("123");
+    }
+}
+```
+
+```csharp
+using Example.UiTests.Components.Controls;
 using Microsoft.Playwright;
 
 namespace Example.UiTests.Pages;
 
 public sealed class CheckoutPage(IPage page)
 {
-    private readonly IFrameLocator _cardFrame = page.GetByTestId("Checkout.PaymentElement")
-        .FrameLocator("iframe[title='Secure payment input frame']");
+    private readonly StripePaymentElement _paymentElement = new(page.GetByTestId("Checkout.PaymentElement"));
 
     public StripeChallenge Challenge { get; } = new(page);
 
@@ -49,9 +67,7 @@ public sealed class CheckoutPage(IPage page)
 
     public async Task PayWithCardAsync(string cardNumber)
     {
-        await _cardFrame.GetByRole(AriaRole.Textbox, new() { Name = "Card number" }).FillAsync(cardNumber);
-        await _cardFrame.GetByRole(AriaRole.Textbox, new() { Name = "Expiration date" }).FillAsync("12 / 34");
-        await _cardFrame.GetByRole(AriaRole.Textbox, new() { Name = "Security code" }).FillAsync("123");
+        await _paymentElement.FillCardAsync(cardNumber);
         await page.GetByTestId("Checkout.Pay").ClickAsync();
     }
 }
@@ -79,7 +95,7 @@ public static class TestCardNumbers
 ```
 
 The UI types card numbers (`stripe-api.md` §2); the API suite never uses them. Country and postal-code fields appear in the Payment
-Element for some locales: fill them in `PayWithCardAsync` when your recording shows them.
+Element for some locales: fill them in `StripePaymentElement.FillCardAsync` when your recording shows them.
 
 ## 3. The PaymentIntent behind the page
 
@@ -125,7 +141,7 @@ public class CardCheckoutTests : BaseTest
     private StripeSandbox _stripe = null!;
 
     [SetUp]
-    public void CreateHelpers()
+    public void CreatePagesAndSandbox()
     {
         _stripe = StripeSandbox.FromEnvironment();
         _checkout = new CheckoutPage(Page);

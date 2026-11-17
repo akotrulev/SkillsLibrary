@@ -52,7 +52,7 @@ table above.
 | Kind | Who starts it | API | Lands in |
 |---|---|---|---|
 | **Failure evidence** | `BaseTest`, on every test | `Context.Tracing.StartAsync(...)`, `RecordVideoDir`, `Page.ScreenshotAsync(...)` on failure | `<WorkDirectory>/playwright-artifacts/<Class>.<Test>.{zip,png,webm}`, each attached to the TRX and to Allure |
-| **Deliberate recording** | the test class's own `[SetUp]` / `[TearDown]`, on purpose | `Page.Screencast` [1.59], `Context.Tracing.StartHarAsync(...)` [1.60], a screenshot helper | `<WorkDirectory>/playwright-artifacts/<Class>.<Test>.<kind>.<ext>`, attached the same way |
+| **Deliberate recording** | the test class's own `[SetUp]` / `[TearDown]`, on purpose | `Page.Screencast` [1.59], `Context.Tracing.StartHarAsync(...)` [1.60], the `Evidence` recorder | `<WorkDirectory>/playwright-artifacts/<Class>.<Test>.<kind>.<ext>`, attached the same way |
 | **Exploratory capture** | an agent, live | Playwright MCP capture tools, or `playwright-cli` | `evidence/<YYYY-MM-DD>-<topic>/` (explicit filenames); `.playwright-mcp/` for auto-named MCP output |
 
 `Microsoft.Playwright.NUnit` has no trace or video *modes*, no `error-context.md` and no `test-results/`
@@ -109,8 +109,8 @@ this skill's rules (teardown order, no catch, no upload of raw videos) apply to 
 
 A deliberate recording runs in the **test class's own `[SetUp]` and `[TearDown]`**. NUnit runs a derived
 `[SetUp]` after `BaseTest.StartTracing` and a derived `[TearDown]` before `BaseTest.KeepEvidenceOnFailure`,
-so the page is open in both. The test body never calls `Page` directly; it calls a page object or the class's
-helper. Code for each is in `references/playwright.md`.
+so the page is open in both. The test body never calls `Page` directly; it calls a page object or the `Evidence`
+recorder. Code for each is in `references/playwright.md`.
 
 - **Names and attachments come from `BaseTest`.** Its protected `EvidenceName()`, `Artifact(name, ext)` and
   `Attach(name, type, path)` (plan D42) give a recording the failure evidence's name, folder and double
@@ -124,7 +124,7 @@ helper. Code for each is in `references/playwright.md`.
 - **Network log** — `Context.Tracing.StartHarAsync(path, options)` [1.60] in `[SetUp]`, `StopHarAsync()` in
   `[TearDown]`, then attach. A `RecordHarPath` HAR is written on `Context.CloseAsync()`, after the class's
   teardown, so the class cannot attach it.
-- **One screenshot at a point in the flow** — an `Evidence` helper built with the page objects, whose
+- **One screenshot at a point in the flow** — an `Evidence` recorder built with the page objects, whose
   `ScreenshotAsync(name)` attaches `Page.ScreenshotAsync(...)` with `FullPage`, `ScreenshotAnimations.Disabled`,
   `ScreenshotCaret.Hide` and `ScreenshotScale.Css`.
 - **A recording that fails to stop fails the teardown loudly** — no catch, as in `BaseTest`; NUnit still runs

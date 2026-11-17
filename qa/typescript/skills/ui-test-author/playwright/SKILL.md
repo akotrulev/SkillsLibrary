@@ -37,8 +37,10 @@ e2e/
 ├── tests/
 │   ├── auth.setup.ts
 │   ├── fixtures.ts
-│   ├── pages/          LoginPage.ts, HomePage.ts, components shared by several pages
-│   └── specs/          login.spec.ts — one spec file per feature
+│   ├── pages/          LoginPage.ts, HomePage.ts, OrdersPage.ts, region components beside their page
+│   ├── components/
+│   │   └── controls/   DatePicker.ts, Dropdown.ts, Combobox.ts, DataGrid.ts, GridRow.ts
+│   └── specs/          login.spec.ts, orders.spec.ts — one spec file per feature
 └── playwright/.auth/   signed-in state, git-ignored
 ```
 
@@ -47,7 +49,7 @@ change. The config leaves `testDir` at its default, so it finds the specs either
 
 ## When to use
 
-- A new `*.spec.ts`, page object, component object or fixture.
+- A new `*.spec.ts`, page object, region or control component, or fixture.
 - A new or rewritten `playwright.config.ts`, setup project or signed-in state.
 - Scoping or fixing locators, replacing one-shot reads with web-first assertions.
 - Running the suite per device, viewport, colour scheme, locale or time.
@@ -62,6 +64,7 @@ change. The config leaves `testDir` at its default, so it finds the specs either
 - Screenshots, video, traces and HAR beyond the config defaults → `qa/typescript/skills/evidence-capture`
 - Visual regression, accessibility scans, network mocking → `visual-regression`, `accessibility-testing`,
   `network-mocking`
+- A new project from zero (layout, pins, config loader, container) → `qa/typescript/skills/ui-project-setup`
 
 ## Inputs needed
 
@@ -76,6 +79,7 @@ change. The config leaves `testDir` at its default, so it finds the specs either
 
 | File | Holds |
 |---|---|
+| [`references/components.md`](references/components.md) | The control catalogue: date picker, dropdown, combobox, data grid and row, pagination, modal, toast, tabs, file upload — each one's root, intent methods, assertion targets and Playwright API |
 | [`references/locators.md`](references/locators.md) | The ladder, `getBy*`, `filter` / `and` / `or`, chaining from a component root, `within()` and its neighbours, `visible()`, frames, strictness and positional picks, `describe()`, `addLocatorHandler`, the test-id attribute, agent-facing locators |
 | [`references/assertions.md`](references/assertions.md) | The web-first set (accessible name, description and error, role, classes, value, URL forms, aria snapshots), one expected condition, the one-shot-read ban, `expect.poll` / `toPass` / `expect.soft`, failure messages |
 | [`references/config-and-fixtures.md`](references/config-and-fixtures.md) | The canonical config setting by setting, fixture kinds, the setup project, `webServer`, `TestProject.default`, retries and locks, tags, the CLI, the 1.64 breaking changes, Test Agents |
@@ -83,11 +87,13 @@ change. The config leaves `testDir` at its default, so it finds the specs either
 | [`references/trace-correlation.md`](references/trace-correlation.md) | One `traceparent` trace id per test on app-origin requests only (a scoped context route, never `extraHTTPHeaders`), and the failure link to the backend trace |
 | [`qa/typescript/skills/api-test-author/writer/references/generation-checks.md`](../../api-test-author/writer/references/generation-checks.md) | The scenario × oracle table before any code, and the hallucination gate that reports every test id missing from the app source as `MISSING` |
 | [`assets/playwright.config.ts`](assets/playwright.config.ts) | The canonical config |
-| [`assets/fixtures.ts`](assets/fixtures.ts) | Page-object fixtures, `testUser`, and `seededUser` (API-seeded, deleted in teardown) |
+| [`assets/fixtures.ts`](assets/fixtures.ts) | Page-object fixtures, `testUser`, `seededUser` and `seededOrder` (API-seeded, deleted in teardown) |
 | [`assets/auth.setup.ts`](assets/auth.setup.ts) | The setup project's sign-in, saving the storage state |
-| [`assets/LoginPage.ts`](assets/LoginPage.ts) | A page with intent methods and a `SignInForm` component; the form error scoped with `within()` |
+| [`assets/LoginPage.ts`](assets/LoginPage.ts) | A page with intent methods and a private `SignInForm` region component; the form error, a described assertion target, scoped with `within()` |
 | [`assets/HomePage.ts`](assets/HomePage.ts) | The landing page the journeys assert on |
 | [`assets/login.spec.ts`](assets/login.spec.ts) | Specs with `Should_X_When_Y` names and `{ tag }` |
+| [`assets/DatePicker.ts`](assets/DatePicker.ts), [`Dropdown.ts`](assets/Dropdown.ts), [`Combobox.ts`](assets/Combobox.ts), [`DataGrid.ts`](assets/DataGrid.ts), [`GridRow.ts`](assets/GridRow.ts) | Control components, one per widget, each built from its root |
+| [`assets/OrdersPage.ts`](assets/OrdersPage.ts), [`assets/orders.spec.ts`](assets/orders.spec.ts) | A page composing a date filter, a status dropdown and a grid; specs that reach the filtered grid in `beforeEach` and act on one row picked by its order number |
 
 Start from the assets: copy them, rename, and keep their shape.
 
@@ -101,21 +107,27 @@ start a second one.
 
 ## Rules
 
-The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `ui-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md`, `page-objects.md`, `ui-tests.md` and `test-data.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation steps
 
 1. Detect the installed `@playwright/test` version and the project layout; match them.
 2. Confirm the feature, scenarios, locators, auth, data and devices with the user. Write the scenario ×
    oracle table (generation checks §1) before any code.
-3. For each screen, write or extend `tests/pages/<Name>Page.ts` from `assets/LoginPage.ts`: one
-   `readonly Locator` per element on the highest ladder rung, components for reused regions, `goto()`,
-   intent methods. Add a `missing-testids.md` row for every fallback.
-4. Register each page object, and any seeded record, as a fixture in `tests/fixtures.ts`.
-5. Write `tests/specs/<feature>.spec.ts` from `assets/login.spec.ts`: one `test()` per scenario with a
-   `Should_X_When_Y` name, page objects from fixtures, `{ tag }`, `test.step` for long journeys.
-6. For signed-in flows, make sure the setup project exists and the spec's project depends on it.
-7. Run the hallucination gate (generation checks §2) and report every `MISSING` test id. Run `npx playwright test` (0 failures) and check new locators in `npx playwright test --ui` before
+3. For each design-system widget on the screen (date picker, dropdown, combobox, grid, pagination, modal,
+   toast, tabs, file upload), reuse the project's class in `tests/components/controls/` or write one at
+   first use from `references/components.md` and the control assets.
+4. For each screen, write or extend `tests/pages/<Name>Page.ts` from `assets/LoginPage.ts` and
+   `assets/OrdersPage.ts`: one `private readonly` locator per element on the highest ladder rung, a
+   `readonly` control field per widget, region components for repeating or shared regions, `goto()`,
+   intent methods; a public locator only as a described assertion target. Add a `missing-testids.md` row
+   for every fallback.
+5. Register each page object, and any seeded record, as a fixture in `tests/fixtures.ts`.
+6. Write `tests/specs/<feature>.spec.ts` from `assets/login.spec.ts` and `assets/orders.spec.ts`: one
+   `test()` per scenario with a `Should_X_When_Y` name, page objects from fixtures, reaching the screen in
+   `beforeEach`, a linear body of intent calls and web-first assertions, `{ tag }`.
+7. For signed-in journeys, make sure the setup project exists and the spec's project depends on it.
+8. Run the hallucination gate (generation checks §2) and report every `MISSING` test id. Run `npx playwright test` (0 failures) and check new locators in `npx playwright test --ui` before
    committing.
 
 ## Handoffs

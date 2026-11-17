@@ -40,16 +40,17 @@ UiTests/
 ├── UiTests.csproj        ui.runsettings          (Directory.Packages.props at the solution root)
 ├── AuthSetup.cs          root namespace Example.UiTests — signed-in state, once per run
 ├── Support/BaseTest.cs   the one lifecycle
-├── Pages/                LoginPage.cs, HomePage.cs, components shared by several pages
-└── Tests/                LoginTests.cs — one test class per feature
+├── Pages/                LoginPage.cs, HomePage.cs, OrdersPage.cs; region components beside their page
+├── Components/Controls/  DatePicker.cs, Dropdown.cs, Combobox.cs, DataGrid.cs, GridRow.cs
+└── Tests/                LoginTests.cs, OrdersTests.cs — one test class per feature
 ```
 
-Namespaces follow the folders under one root (`Example.UiTests.Pages`). `AuthSetup` sits in the root
+Namespaces follow the folders under one root (`Example.UiTests.Pages`, `Example.UiTests.Components.Controls`). `AuthSetup` sits in the root
 namespace itself, because NUnit runs a `[SetUpFixture]` only for the namespace it is declared in.
 
 ## When to use
 
-- A new test class, page object, component object, or the `BaseTest` itself.
+- A new test class, page object, region or control component, or the `BaseTest` itself.
 - A new or rewritten `UiTests.csproj`, `Directory.Packages.props`, `.runsettings` or signed-in state.
 - Scoping or fixing locators, replacing one-shot reads with web-first assertions.
 - Running a fixture per device, viewport, colour scheme, locale or time.
@@ -83,6 +84,7 @@ namespace itself, because NUnit runs a `[SetUpFixture]` only for the namespace i
 |---|---|
 | [`references/lifecycle.md`](references/lifecycle.md) | The four base classes, the SetUp/TearDown order, `ParallelScope.Self`, `ContextOptions()`, environment and runsettings keys, failure evidence, `AuthSetup`, API seeding, install / codegen / show-trace / headed commands |
 | [`references/locators.md`](references/locators.md) | The ladder, `GetBy*`, `Filter` / `And` / `Or`, component roots, `parent.Locator(child)` and the 1.64 `Within()` line, `Visible`, frames, strictness, `Describe()`, overlays, the test-id attribute, agent-facing locators |
+| [`references/components.md`](references/components.md) | The control catalogue: DatePicker, Dropdown, Combobox, DataGrid + GridRow, Pagination, Modal, Toast, Tabs, FileUpload — the root each takes, its intent methods, the Playwright API behind them |
 | [`references/assertions.md`](references/assertions.md) | The web-first set (accessible name, role, classes, URL, aria snapshots), one expected condition, no one-shot reads, timeouts, `Expect(locator, "message")`, `Assert.ThrowsAsync`, HTTP responses |
 | [`references/emulation-and-mobile-web.md`](references/emulation-and-mobile-web.md) | `Playwright.Devices[...]`, touch, viewport, media features, locale, geolocation, `Page.Clock`, offline |
 | [`references/blazor.md`](references/blazor.md) | Blazor apps: wait for interactivity on a condition (enabled control or marker attribute, never `NetworkIdle` or polling `Blazor`), assert `#blazor-error-ui` hidden after every journey in a `BlazorTest` base |
@@ -94,18 +96,20 @@ namespace itself, because NUnit runs a `[SetUpFixture]` only for the namespace i
 | [`assets/AuthSetup.cs`](assets/AuthSetup.cs) | The root-namespace `[SetUpFixture]` that saves the signed-in state |
 | [`assets/LoginPage.cs`](assets/LoginPage.cs), [`assets/HomePage.cs`](assets/HomePage.cs) | Intent methods, a `SignInForm` component, the error scoped with `parent.Locator(child)`; the landing page |
 | [`assets/LoginTests.cs`](assets/LoginTests.cs) | `Should_X_When_Y` tests, categories, pages built per test |
+| `assets/Components/Controls/`: [`DatePicker`](assets/Components/Controls/DatePicker.cs), [`Dropdown`](assets/Components/Controls/Dropdown.cs), [`Combobox`](assets/Components/Controls/Combobox.cs), [`DataGrid`](assets/Components/Controls/DataGrid.cs), [`GridRow`](assets/Components/Controls/GridRow.cs) | Control components built from their root, with intent methods |
+| [`assets/OrdersPage.cs`](assets/OrdersPage.cs), [`assets/OrdersTests.cs`](assets/OrdersTests.cs) | A page composing a date filter, a status dropdown and a grid; tests that seed an order through `Page.APIRequest` in `[SetUp]`, delete it in `[TearDown]` and pick its row by content |
 
 Start from the assets: copy them, rename the root namespace, and keep their shape.
 
 ## Rules
 
-The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `automation.md` and `web-ui.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `automation.md`, `page-objects.md`, `web-ui.md` and `test-data.md` for seeded and reference data. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Mechanics the rules rely on
 
 - Launch options live in the `.runsettings` (`BrowserName`, `LaunchOptions`, `ExpectTimeout`, `TestIdAttribute`, the only keys the adapter reads). The browser is per worker, so a suite that needs other launch arguments gets its own `.runsettings` and run. `HEADED=1` runs headed; `BROWSER=firefox` switches the browser.
 - `BaseTest`'s `[TearDown]` closes the context itself (`PageTest` does so only after a pass), then saves the video; evidence lands in `<WorkDirectory>/playwright-artifacts/<Class>.<Test>.{zip,png,webm}`. The video API is `PathAsync()`; the docs' `GetPathAsync()` does not exist.
-- Locators are `private readonly ILocator` fields built in the constructor, with get-only properties for the ones tests assert on (not expression-bodied, so the definitions stay together). A component takes its root `ILocator` and builds its children from it, as `SignInForm` does.
+- Locators are `private readonly ILocator` fields built in the constructor. A get-only, described property is only for a locator a test asserts on and no action uses (`LoginPage.Error`, `HomePage.Greeting`); a test acts through intent methods, never on an exposed locator. A component takes its root `ILocator` and builds its children from it, as `SignInForm` and the controls do.
 - The `Visible` property (1.63) instead of `:visible`; `FrameLocator` / `ContentFrame` for iframes; `AddLocatorHandlerAsync` for overlays that may appear; `Expect(locator, "message")` (1.60) where the record or user matters. `ILocator` has no `.Text`; that is Selenium's `IWebElement`.
 - A slow state raises the matcher's timeout (`ToBeVisibleAsync(new() { Timeout = 15_000 })`) or sets `ExpectTimeout` once in the runsettings.
 - Categories tag the area and the tier (`[Category("login")]`, `[Category("smoke")]`), `[AllureFeature]` on the class; a long journey is one test with `[AllureStep]` methods.
@@ -121,10 +125,13 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
    `ContextOptions()` returns `new()`, a `[SetUpFixture]` outside the root namespace, or inline `Version=`
    under CPM: fix that first.
 4. For each screen, write or extend `Pages/<Name>Page.cs` from `assets/LoginPage.cs`: one locator per element
-   on the highest ladder rung, components for reused regions, `GoToAsync()`, intent methods, `Describe()` on
-   asserted locators. Add a `missing-testids.md` row for every fallback.
-5. Write `Tests/<Feature>Tests.cs` from `assets/LoginTests.cs`: derives from `BaseTest`, pages built in a
-   `[SetUp]`, one `[Test]` per scenario with a `Should_X_When_Y` name and categories.
+   on the highest ladder rung, `GoToAsync()`, intent methods, `Describe()` on asserted locators. Each
+   design-system widget is a control from `Components/Controls/` (`references/components.md`; write the
+   missing one from `assets/Components/Controls/`), exposed as a property (`OrdersPage.PlacedOn`); a repeating
+   or shared region is a region component. Add a `missing-testids.md` row for every fallback.
+5. Write `Tests/<Feature>Tests.cs` from `assets/LoginTests.cs` (`assets/OrdersTests.cs` when it needs data):
+   derives from `BaseTest`; pages built, records seeded and the screen reached in a `[SetUp]`; one linear
+   `[Test]` per scenario with a `Should_X_When_Y` name and categories.
 6. For signed-in fixtures, keep `AuthSetup` in the root namespace and amend `ContextOptions()` with
    `StorageStatePath`; for devices, amend it from `Playwright.Devices[...]`.
 7. Run the hallucination gate (generation checks §2) and report every `MISSING` test id. Build, install the browser with `pwsh bin/Debug/net10.0/playwright.ps1 install chromium`, and run

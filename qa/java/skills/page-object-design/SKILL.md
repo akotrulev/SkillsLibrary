@@ -5,7 +5,7 @@ description: Use when designing the page object structure for a Java UI test pro
 
 # QA — Page Object Architect (Java)
 
-Designs the **shape** of a Page Object Model in a Java UI test project (Gradle Kotlin DSL + TestNG by default): page vs component vs flow, base-class hierarchy, where shared locators and helpers live, and how to split when one page gets too big. Output is an architecture sketch — package tree + class responsibilities + decision rationale — not concrete page code.
+Designs the **shape** of a Page Object Model in a Java UI test project (Gradle Kotlin DSL + TestNG by default): which of the four kinds each piece is (page, region component, control component, flow), the base-class hierarchy, where locators live, and how to split when one page gets too big. Output is an architecture sketch — package tree + class responsibilities + decision rationale — not concrete page code.
 
 ## When to use
 
@@ -33,28 +33,33 @@ Designs the **shape** of a Page Object Model in a Java UI test project (Gradle K
 5. **Team shape** — one team or many
 6. **Runner & build tool** — TestNG (default) or JUnit 5; Gradle (Kotlin DSL preferred) or Maven; Allure or not
 
-7. **Screen map** (mobile, if one exists) — `docs/app-map/screen-map.md` from `qa/java/skills/mobile-app-crawler`. Its **Component candidates** table is counted evidence for the "reused on 2+ screens → component" call below; prefer it over guessing which elements recur.
+7. **Screen map** (mobile, if one exists) — `docs/app-map/screen-map.md` from `qa/java/skills/mobile-app-crawler`. Its **Component candidates** table is counted evidence for the region-component call below; prefer it over guessing which elements recur.
 
 ## Core decisions
 
-### Page vs component vs flow
+### The four kinds
 
-| Concept | What it models | Lifetime | Examples |
+| Kind | Models | Created | Examples |
 |---|---|---|---|
-| **Page** | A discrete screen / route | One per URL or top-level navigation target | `LoginPage`, `CheckoutOverviewPage` |
-| **Component** | A reusable piece appearing inside multiple pages | Scoped to a parent `WebElement` / `Locator` | `ProductCard`, `NavigationMenu`, `Modal`, `Toast` |
-| **Flow** | An end-to-end sequence across pages | None — a class with static methods, or a `@BeforeMethod` helper | `CheckoutFlow.signInAndCheckout(user, cart)` |
+| **Page** (screen, window) | One route / screen / window | Per screen | `LoginPage`, `CheckoutOverviewPage` |
+| **Region component** | An app-specific part of a page with its own root: a form, a card, a nav menu, a row | When it repeats on the page (rows, cards: always) or appears on a second page | `SignInForm`, `ProductCard`, `NavigationMenu`, `OrderRow` |
+| **Control component** | A design-system widget | **At first use** | `DatePicker`, `Dropdown`, `Combobox`, `DataGrid` + `GridRow`, `Pagination`, `Modal`, `Toast`, `Tabs`, `FileUpload` |
+| **Flow** | A sequence across several pages | When a test's setup needs it | `CheckoutFlow` (takes its pages, instance methods) |
 
-Rules of thumb:
+Classifying:
 
-- Has its own URL → page
-- Reused on 2+ pages → component
-- Touches 3+ pages → flow helper, not a class
-- When in doubt → **component**
+- Has its own URL, screen or window → page.
+- Comes from the design system or a UI library, or takes more than one driver call to operate → control component, at first use. Caller count is not the test. The page exposes it as intent: `orders.placedOn().select(date)`.
+- An app-specific region that repeats on the page, or appears on a second page → region component.
+- A sequence across pages that setup needs → a `<Something>Flow` class.
+- Two markups of "the same" widget are two classes: `Dropdown` over a native `<select>`, `Combobox` over a custom listbox. Never one class with a branch.
+- A grid is `DataGrid` whose `row(key)` returns a `GridRow` picked by its content, never by index; `GridRow` exposes cells by column name and the row's actions.
+- A component takes its root in the constructor (Playwright `Locator`, Selenium root `WebElement`, Appium and desktop a row key re-resolved on every call), builds every child from it, and exposes intent with domain-typed arguments (a `LocalDate`, an option's visible text, a row key, a column name). No URL, no assertion, no knowledge of the page it is mounted on.
+- The Playwright control catalogue (root, intent methods, API per control) is [`ui-test-author/playwright/references/components.md`](../ui-test-author/playwright/references/components.md); the Selenium `Dropdown` and row are in [`ui-test-author/selenium`](../ui-test-author/selenium/SKILL.md).
 
 ### Base class hierarchy
 
-**Playwright: the default is no base class.** Pages take `Page`, components take their root `Locator`, and shared behaviour is a component field. Introduce `BasePage` only when a **third** concrete page shares real behaviour (not just the `page` field), and keep it to one level. **Selenium / Appium** use the thin `BasePage` / `BaseAppiumPage` their writer skills define (the driver plus one synchronization helper). An Appium **component** does not extend `BaseAppiumPage`: it holds a row key and re-resolves its root on every call.
+**Playwright: the default is no base class.** Pages take `Page`, components take their root `Locator`, and shared behaviour is a component field. Introduce `BasePage` only when a **third** concrete page shares real behaviour (not just the `page` field), and keep it to one level. **Selenium / Appium** use the thin `BasePage` / `BaseAppiumPage` their writer skills define (the driver plus its wait and finders). **No component extends a page base class**, on any driver: composition over inheritance. An Appium component holds a row key and re-resolves its root on every call.
 
 ```
 <ConcretePage>                     ← Playwright default: no base
@@ -75,7 +80,7 @@ Avoid: `BasePage → FormPage → MultiStepFormPage → CheckoutInformationPage`
 
 Three viable strategies, ordered by cost:
 
-1. **Per-platform pages, shared flow helpers** (cheapest, recommended default) — `pom.web.LoginPage`, `pom.mobile.LoginPage`; one shared `CheckoutFlow.signIn(loginPage, user)` accepting either via a small interface.
+1. **Per-platform pages, one shared flow** (cheapest, recommended default) — `pom.web.LoginPage`, `pom.mobile.LoginPage`; one `CheckoutFlow` that takes either through a small interface in its constructor.
 2. **Per-platform pages + a shared interface** (`LoginScreen`) — useful when both platforms drive the same domain workflow.
 3. **Abstract base + per-platform subclass** — only when the screens are truly the same minus locators.
 
@@ -85,63 +90,23 @@ Avoid `if (platform.equals("iOS")) …` inside a single page object.
 
 - Locators belong **inside the page / component class** as `private static final By` (Selenium), `private static final String {ELEMENT}_ID` (Appium; a fallback is `{ELEMENT}_XPATH_FALLBACK`) or `private final Locator` fields (Playwright Java) — never in tests.
 - A shared `Locators` constants class is an anti-smell. The only exception is brand-wide a11y test ids.
-- **A component takes its parent `Locator`** (`WebElement` on Selenium) in the constructor and builds every child from it, so it works wherever it is mounted. The scoping mechanics — chaining from the root, `parent.locator(child)` (the 1.63 form of the 1.64 `within()`), `filter(setHas)`, strictness, positional picks — are owned by [`ui-test-author/playwright/references/locators.md`](../ui-test-author/playwright/references/locators.md); `assets/LoginPage.java` there is the worked example.
+- **A component takes its root `Locator`** (`WebElement` on Selenium) in the constructor and builds every child from it, so it works wherever it is mounted. A locator an action uses is private; Playwright may expose one only as a described assertion target, and Selenium / Appium expose no element at all (queries return text, a boolean or a count). The scoping mechanics — chaining from the root, `parent.locator(child)` (the 1.63 form of the 1.64 `within()`), `filter(setHas)`, strictness, positional picks — are owned by [`ui-test-author/playwright/references/locators.md`](../ui-test-author/playwright/references/locators.md); `assets/LoginPage.java` there is the worked example. In a BDD suite the step definitions are the intent layer: a page object the steps use may expose named elements and controls for a step to act on (`filterPage.dealType().selectOption(option)`), and keeps a method only for a sequence of interactions (`qa-java-bdd.md`).
 - Every Playwright locator follows one ladder: `getByTestId` → `getByRole` → `getByLabel` → `getByPlaceholder` → `getByText` → `getByAltText` / `getByTitle` → CSS. Selenium puts the test id first too, and Appium picks the rung per platform (iOS `accessibilityId`, Android `id`), then a native query, then XPath. Test ids are PascalCase dot-separated and static (`OrderRow`, `OrderRow.Title`); a fallback is recorded in `missing-testids.md`, never marked in the code.
 - **No `@FindBy`** when the project standard is explicit `findElement`. Don't mix the two.
 
-### Where flow helpers live
+### Parameterized pages and application waits
 
-- **Playwright Java / Selenium Java / Appium Java**: `pom.flows.CheckoutFlow` with public static methods. Returns the resulting page object — never asserts.
-- Test-setup-only flows go in the test class's own `@BeforeMethod` (seeded records) or, for Playwright, `AuthSetup` (the signed-in session) — never a second `BaseTest`.
+- A screen that repeats with a different label is **one page class constructed with that data**: `new SimplePropertyPage(driver, "Suicide Genes")`, the label building its landmark and locators. That is data, not a behaviour flag: the argument changes what the page finds, never which code path runs. A `boolean` or enum that picks behaviour is still two methods or two classes.
+- The app's own busy signal (a loading bar, a snackbar) is a **named wait condition on the base page or shell component** (`waitUntilLoadingBarGone()`), called by the action that triggers it before it returns. The test never calls it.
+
+### Flows
+
+- `flows.CheckoutFlow` is a class that takes its page objects in the constructor and has instance methods (`signInAndCheckout(user, cart)`) returning the resulting page. No static methods, no assertions, no state beyond its pages.
+- Setup that only one test class needs stays in that class's `@BeforeMethod(alwaysRun = true)` (seeded records) or, for Playwright, `AuthSetup` (the signed-in session) — never a second `BaseTest`, and never a private method on the test class that drives the app.
 
 ## Recommended package layouts
 
-### Playwright Java (single web app)
-
-```
-src/test/java/com/{org}/uitests/
-├── support/
-│   ├── BaseTest.java               ← the one lifecycle (ui-test-author/playwright assets)
-│   └── AuthSetup.java              ← signed-in state, once per suite run
-├── pages/
-│   ├── LoginPage.java
-│   ├── catalog/
-│   │   ├── ProductListPage.java
-│   │   └── ProductCard.java        ← component, takes Locator parent
-│   └── checkout/
-│       ├── InformationPage.java
-│       ├── OverviewPage.java
-│       └── CompletePage.java
-├── components/                     ← cross-feature shells
-│   ├── NavigationMenu.java
-│   └── Toast.java
-├── flows/
-│   └── CheckoutFlow.java
-└── tests/
-    └── CheckoutTest.java           ← seeds its data in its own @BeforeMethod
-```
-
-### Selenium Java / Appium Java (multi-platform)
-
-```
-src/test/java/com/{org}/uitests/
-├── BaseTest.java
-├── driver/
-│   ├── DriverFactory.java          ← ThreadLocal<WebDriver>
-│   └── AppiumDriverFactory.java
-├── pom/
-│   ├── BasePage.java
-│   ├── web/
-│   │   ├── LoginPage.java
-│   │   └── …
-│   └── mobile/
-│       ├── BaseAppiumPage.java
-│       ├── LoginPage.java
-│       └── …
-├── components/
-└── flows/
-    └── CheckoutFlow.java
-```
+The Playwright single-app tree and the Selenium / Appium multi-platform tree are in [`references/package-layouts.md`](references/package-layouts.md): `support/` (the one `BaseTest`, `AuthSetup`), `pages/` or `pom/`, `components/` with `controls/`, `flows/`, `tests/`.
 
 ## Splitting heuristics
 
@@ -150,22 +115,29 @@ A page object should split when **any** are true:
 - File > ~250 lines (Java's explicit `findElement` style runs a bit longer than .NET/TS)
 - More than 3 conceptually distinct UI sections (header + form + sidebar + footer)
 - Two team members would name the same element differently because they describe it via different parent UI
-- The same locator string appears identically on another page (component candidate)
+- The same locator string appears identically on another page (region component candidate)
+- A widget from the design system is operated inline with several driver calls (control component, extract now)
 - More than one method modifies state another method needs to inspect (page hiding sub-state — promote to component)
 
 | Smell | Move |
 |---|---|
-| Repeated card across pages | Extract `ProductCard` / `Row` component scoped to a parent `WebElement` |
+| Repeated card or row | A region component scoped to its root (`ProductCard`, `OrderRow`) |
+| Date picker, dropdown, grid driven inline | A control component in `components.controls`, exposed by the page as intent |
+| One widget class with a branch on its markup | Two classes (`Dropdown`, `Combobox`) |
+| Row picked by index | `DataGrid.row(key)` returning a `GridRow` found by its content |
+| A static flow class or a private driving method on a test class | A `<Something>Flow` class with its pages in the constructor |
 | Step-by-step flow (checkout, onboarding) | Sub-package per step under `pom/checkout/` |
 | Persistent shell (nav, footer) | Extract `NavigationMenu` / `SidePanel` exposed as a field on every page that has it |
-| Modal / dialog | Return modal class from the action that opens it; assertion on the modal |
-| Cross-page widget (toast) | A `Toast` component field on each page that shows it, built from the page's root `Locator` |
+| Modal / dialog | A `Modal` control returned from the action that opens it; the test asserts on what it exposes |
+| Cross-page widget (toast) | A `Toast` control field on each page that shows it, built from the page's root `Locator` |
 
 ## Naming conventions
 
 - Pages: `{Feature}Page` — `LoginPage`, `CheckoutOverviewPage`
-- Components: `{Element}` (no `Page` suffix) — `NavigationMenu`, `ProductCard`, `Toast`
-- Flow helpers: `{Verb}{Object}` static methods on `{Feature}Flow` — `CheckoutFlow.signIn(...)`
+- Region components: `{Element}` (no `Page` suffix) — `NavigationMenu`, `ProductCard`, `OrderRow`
+- Control components: the widget's name — `DatePicker`, `Dropdown`, `Combobox`, `DataGrid`, `GridRow`, `Modal`, `Toast`
+- Flows: `{Feature}Flow` with `{verb}{Object}` instance methods — `checkoutFlow.signInAndCheckout(...)`
+- Methods name the action (`signIn`), never the outcome (`successfulLogin`); no class or method named `Helper`, `Util` or `Common`
 - Base classes: `Base{Type}` — `BasePage`, `BaseAppiumPage`, `BaseTest` — at most one of each per stack
 - Packages: lowercase, follow folders (`com.{org}.uitests.pom.checkout`)
 
@@ -180,8 +152,13 @@ A page object should split when **any** are true:
 ## Class responsibilities
 | Class | Type | Owns | Doesn't own |
 |-------|------|------|-------------|
-| LoginPage | page | `goTo()`, the sign-in form component, `signIn()` | assertions, the landing page's locators |
-| ProductCard | component | card-internal locators, `addToCart()` | iterating the product list |
+| LoginPage | page | `goTo()`, the `SignInForm` region, `signIn()` | assertions, the landing page's locators |
+| ProductCard | region component | card-internal locators, `addToCart()` | iterating the product list |
+| DatePicker | control component | `select(LocalDate)`, its calendar locators | which page it sits on |
+| CheckoutFlow | flow | the pages it is given, `signInAndCheckout()` | assertions, static state |
+
+## Control components
+<each design-system widget the app uses, its class, and the pages that expose it>
 
 ## Base hierarchy
 <Playwright: none, unless a third page shares real behaviour — then name the three and what they share>
@@ -199,12 +176,12 @@ A page object should split when **any** are true:
 
 ## Rules
 
-The standards a page-object tree must meet are the qa-java rule files, not a list here: `qa-java-ui.md` and `qa-java.md` (core). Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's design disagree, the rule files win. Two design calls they leave to this skill: a page method returns the next page or visible text, never a DTO (that is API territory), and a flow is a stateless helper, never a class holding mutable state.
+The standards a page-object tree must meet are the qa-java rule files, not a list here: `qa-java-page-objects.md`, `qa-java-ui.md` (or `desktop-tests.md`) and `qa-java.md` (core). Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's design disagree, the rule files win. One design call they leave to this skill: a page method returns the next page or visible text, never a DTO (that is API territory).
 
 ## Procedure
 
 1. Collect inputs (skip questions answerable from the existing package tree).
-2. Map every existing class (or every screen for greenfield) onto **page / component / flow / base**.
+2. Map every existing class (or every screen for greenfield) onto **page / region component / control component / flow / base**. List the design-system widgets the screens use; each becomes a control component now.
 3. Apply splitting heuristics to anything in the wrong bucket.
 4. Decide whether a Playwright `BasePage` is warranted: only when a third page shares real behaviour. Pick the multi-platform strategy if relevant.
 5. Produce the output: package tree, responsibilities table, base hierarchy, migration plan (smallest refactor first).

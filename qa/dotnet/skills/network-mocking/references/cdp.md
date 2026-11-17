@@ -3,7 +3,7 @@
 Drives the raw **Chrome DevTools Protocol** from a Playwright for .NET test through
 `Page.Context.NewCDPSessionAsync(Page)`, for the hooks that live **below the routing layer**: real bandwidth and
 latency throttling, HTTP-cache disable, CPU throttling and `Performance` metrics. The session and every
-command and event are wrapped in one `CdpControls` helper with intent names (`ThrottleAsync`,
+command and event are wrapped in one `CdpControls` object with intent names (`ThrottleAsync`,
 `DisableCacheAsync`, `CpuThrottleAsync`, `MetricsAsync`, `NextResponseAsync`) — never
 `SendAsync("Domain.method", …)` in a test. Every sample derives from `Example.UiTests.Support.BaseTest`; there is
 no `Task.Delay`, `Thread.Sleep` or `WaitForTimeoutAsync` in this file.
@@ -63,7 +63,7 @@ DevTools' own profiles, encoded in `NetworkPreset` below:
 | Slow 3G | ~50 KB/s (500 kbit/s × 0.8 ÷ 8) | ~50 KB/s | 2000 ms (400 × 5) |
 | Fast 3G | ~180 KB/s (1.6 Mbit/s × 0.9 ÷ 8) | ~84 KB/s (750 kbit/s × 0.9 ÷ 8) | ~562 ms (150 × 3.75) |
 
-## 1. The helper — `Support/CdpControls.cs`
+## 1. The CDP controls — `Support/CdpControls.cs`
 
 ```csharp
 using System.Text.Json;
@@ -300,7 +300,7 @@ the page had not finished rendering. The two assertions are one behaviour, "rend
 - No raw throughput numbers per test.
 - No listener registered after the action it should observe.
 - No security-header or TLS audit here — routing covers both, cross-browser.
-- No `ContextOptions()` override returning `new()`, and no `CdpBaseTest` beside `BaseTest` — the helper is
+- No `ContextOptions()` override returning `new()`, and no `CdpBaseTest` beside `BaseTest` — `CdpControls` is
   enough.
 - No CDP where `Page.RouteAsync` expresses the test just as well.
 

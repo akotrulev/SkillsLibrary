@@ -93,7 +93,7 @@ These sections live in `references/details.md` — **read it when the task touch
 - Never log a token. Treat the `access_token` as a secret in flight.
 
 ### Stashing
-- API tests: inject the provider into the client; add `Authorization: Bearer <token>` per request (the cache makes this cheap).
+- API tests: the spec calls the provider of the user it acts as (`await testUserTokens.getAccessToken()`, `m2mTokens`, `adminTokens`) and passes the token to the client factory; the client never fetches one. One provider per seeded user, named for it, never a lookup by role name.
 - UI tests: a token-seeding **setup project** (`*.setup.ts`, the model `qa/typescript/skills/ui-test-author/playwright` teaches in `references/config-and-fixtures.md` §3) mints once, loads the token into its context with `context.setStorageState(...)` [1.59] at the config's `baseURL` origin, checks the app is signed in, and saves `storageState` for the dependent projects. Never `globalSetup` and never a hardcoded URL.
 - A storage state carries cookies and `localStorage`, and IndexedDB only when saved with `indexedDB: true` [1.51]. It **never** carries `sessionStorage` (re-seed it with `context.addInitScript`) or an in-memory token (auth0-spa-js's default cache) — `references/details.md` has the table.
 
@@ -108,7 +108,7 @@ These sections live in `references/details.md` — **read it when the task touch
 
 1. Read `package.json` (Vitest vs Jest; Playwright present?) and existing `tests/` fixtures for house style.
 2. Confirm `auth0` is installed (`npm i -D auth0`) — or decide on bare `fetch` if you'd rather not add it.
-3. Confirm the env vars are wired into the test environment (CI secret store / `.env.test`), **not** committed: `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `AUTH0_M2M_CLIENT_ID/SECRET`, and for ROPG `AUTH0_ROPG_CLIENT_ID`, `AUTH0_TEST_USERNAME/PASSWORD`, `AUTH0_REALM`.
+3. Confirm the env vars are wired into the test environment (CI secret store / `.env.test`), **not** committed: `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `AUTH0_M2M_CLIENT_ID/SECRET`, and for ROPG `AUTH0_ROPG_CLIENT_ID`, `AUTH0_TEST_USERNAME/PASSWORD` (plus `AUTH0_TEST_<USER>_USERNAME/PASSWORD` for each further test user), `AUTH0_REALM`.
 4. Generate `auth0.config.ts`, `token-provider.ts`, `tokens.ts`, plus the consumer wiring (API client header and/or a token-seeding `token.setup.ts` in the Playwright `setup` project).
 5. Run the cache unit test anywhere (offline); run the live token tests with the secrets present.
 

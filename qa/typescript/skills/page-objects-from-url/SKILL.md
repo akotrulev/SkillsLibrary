@@ -12,8 +12,9 @@ missing the attribute are recorded in a `missing-testids.md` report for the deve
 available fallback locator meanwhile; **the report row is the contract, and the code carries no marker**.
 
 Output is a page object per the conventions in `qa/typescript/skills/ui-test-author/playwright`
-(`@playwright/test`, `readonly Locator` fields initialized in the constructor, intent-named `async`
-methods) — this skill owns **extraction and locator policy**, not test authoring.
+(`@playwright/test`, `private readonly` locators initialized in the constructor, control components for
+widgets, intent-named `async` methods) — this skill owns **extraction, classification and locator policy**,
+not test authoring.
 
 ## When to use
 
@@ -50,8 +51,7 @@ claude mcp add --scope user playwright -- npx @playwright/mcp@0.0.85 --caps=test
   (`qa/_shared/webmcp-testing`).
 - Tools take a `target`: a snapshot ref (`e15`) or a CSS/text selector. A ref is valid within one
   snapshot — re-snapshot after any navigation or DOM change.
-- MCP not connected → take the `playwright-cli` route below. Neither available → stop and tell the user
-  the command above.
+- MCP not connected → the `playwright-cli` route below. Neither available → stop and give the command above.
 
 **HTML-file mode**: when the user supplies HTML instead of a URL, skip the browser — parse the markup
 directly (Read + grep). State in the report that dynamic state (menus, modals, post-JS rendering) was not
@@ -73,7 +73,7 @@ Confirm before extracting. **Ask, don't guess**:
 ### 1. Check for an existing POM
 
 - Glob the target project for `**/pages/**/*.ts` (and `**/pom/**/*.ts`) and grep for the page's URL or name.
-- **Exists** → an **update**: diff extracted elements against its current locators (step 5).
+- **Exists** → an **update**: diff extracted elements against its current locators (step 6).
 - **Doesn't exist** → a **create**: with no `pages/` structure at all, load `qa/typescript/skills/page-object-design/SKILL.md` first.
 
 ### 2. Reach the page
@@ -131,7 +131,24 @@ Merge the passes by text/role/position: every interactable is now **test-id-back
 - Dynamic states → reveal, **re-snapshot** (old refs are stale), extract, and record which interaction reveals what: `browser_click`; `browser_hover` (hover menus, tooltips); `browser_press_key` (`Escape`, `ArrowDown` on a combobox, `Tab` to focus-only controls); `browser_tabs` for a link that opens a tab; `browser_navigate_back` to return.
 - `browser_generate_locator` `{ target: "e12" }` per interactable → the canonical locator. It is the fallback for an element without a test id, and a cross-check for one with it.
 
-### 4. Report missing test ids
+### 4. Classify into controls and components
+
+Before any field is generated, map the merged elements onto the object model of `page-objects.md`:
+
+| Harvest signal | Control |
+|---|---|
+| `select` tag | `Dropdown` |
+| role `combobox` with `listbox` / `option` | `Combobox` |
+| `input[type=date]`, a calendar `dialog` of day `gridcell`s | `DatePicker` |
+| role `grid` or `table` with repeated `row`s | `DataGrid` + `GridRow` |
+| role `dialog` / `alertdialog` · `tablist` · `status` live region · `input[type=file]` | `Modal` · `Tabs` · `Toast` · `FileUpload` |
+| a `nav` of page-number buttons | `Pagination` |
+
+- Match each to the project's `components/controls/` classes first; a match makes the page hold a control field, never the widget's inner locators. No class yet → write one at first use from `ui-test-author/playwright/references/components.md`.
+- Containers repeating under one static test id (cards, rows) → a region component.
+- Report **component candidates**: widget, harvest evidence, kind, existing class or "new".
+
+### 5. Report missing test ids
 
 Write (or update) `missing-testids.md` **at the test project root** — one file for the suite, one section per page, regenerated section-wise on each run:
 
@@ -154,11 +171,11 @@ the page objects carry no marker.
 - Every row names the page, the element and the fallback in use. A fallback that is raw CSS/XPath gets ⚠ — escalate those.
 - Non-interactable assertion targets (headings, icons, static text) go in an "assertion targets" subsection, only when they lack both a test id and a unique role/text handle.
 
-### 5. Build or update the POM
+### 6. Build or update the POM
 
 Apply the page-object rules from `qa/typescript/skills/ui-test-author/playwright` (constructor takes
-`Page`, `readonly Locator` fields initialized in the constructor, intent-named `async` actions, no
-assertions in actions). Locator policy:
+`Page`, `private readonly` locators, a control field per classified widget, intent-named `async` actions,
+no assertions). Locator policy:
 
 1. `page.getByTestId('...')` — **the default**; every test-id-backed element uses it
 2. Missing a test id → the best fallback: `getByRole(+name)` → `getByLabel` → `getByPlaceholder` → `getByText(exact)` → CSS (last resort). No comment or marker in the code; the report row covers it
@@ -175,35 +192,18 @@ it there — and in the MCP registration — never per locator.
 - Fallback where a test id now exists → upgrade to `getByTestId` and remove the row from `missing-testids.md`
 - Never reorder/rename public methods tests already call without flagging it
 
-### 6. Verify and hand off
+### 7. Verify and hand off
 
 - `npx tsc --noEmit` (or project equivalent) → must type-check clean.
 - A smoke spec for the page exists → run it (`npx playwright test`); a new POM → verify the load landmark against one more live snapshot.
-- Report: elements extracted (counts: test-id-backed / fallback / ⚠ CSS), POM created or updated (diff summary), `missing-testids.md` path, open questions.
+- Report: elements extracted (counts: test-id-backed / fallback / ⚠ CSS), component candidates, POM created or updated (diff summary), `missing-testids.md` path, open questions.
 - Close the session (`browser_close`). A screenshot, trace or video of the session is captured per `qa/typescript/skills/evidence-capture/references/playwright.md` §9.
 
 ## The `playwright-cli` route
 
-Use it when MCP is not connected, or when a long extraction — a big page, many states — would flood the
-context: the CLI writes snapshots to `.playwright-cli/page-*.yml` and you `Read` only what you need. Run it
-through `Bash`; install with `npm i -g @playwright/cli@latest`, or use `npx playwright cli` (bundled since
-1.62). Same procedure, same rules; only the calls change:
-
-| Step | MCP tool | `playwright-cli` |
-|---|---|---|
-| Open, navigate, back | `browser_navigate`, `browser_navigate_back` | `open <url>`, `goto <url>`, `go-back` |
-| Snapshot | `browser_snapshot` | `snapshot [target] --filename=<f> --depth=<n>` |
-| Find one element | `browser_find` | `find <text>` (`--regex`) |
-| Test-id harvest | `browser_evaluate` | `eval "<function>"`; one element: `eval "el => el.getAttribute('data-testid')" e7` |
-| Canonical locator | `browser_generate_locator` | `--raw generate-locator e5` |
-| Click, fill, hover, key | `browser_click`, `browser_fill_form`, `browser_hover`, `browser_press_key` | `click e3`, `fill e4 "<text>"`, `hover e3`, `press Escape` |
-| Tabs, dialogs | `browser_tabs`, `browser_handle_dialog` | `tab-list`, `tab-new [url]`, `tab-select <i>`; `dialog-accept`, `dialog-dismiss` |
-| Save / load auth | `browser_storage_state`, `browser_set_storage_state` | `state-save <f>`, `state-load <f>` |
-| Screenshot, trace, video | `browser_take_screenshot`, `browser_start_tracing`…, `browser_start_video`… | `screenshot --filename=<f> --full-page`, `tracing-start`/`tracing-stop`, `video-start <f>`/`video-stop` |
-
-The CLI has no tool allowlist, so hold its rules by hand: never `run-code` or `webmcp-call`, and `close`
-the session at the end (a headless one closes itself after an hour). On an attribute other than
-`data-testid`, check `generate-locator`'s first output against the harvest before trusting it.
+When MCP is not connected, or a long extraction would flood the context, run the same procedure through
+`playwright-cli`: the call mapping and its hand-held rules are in
+[`references/playwright-cli-route.md`](references/playwright-cli-route.md).
 
 ## Rules
 
@@ -221,6 +221,7 @@ the session at the end (a headless one closes itself after an hour). On an attri
 - Building the POM from the snapshot alone (Pass A) — role locators for elements that *have* test ids break the contract
 - A full snapshot to locate one element — `browser_find` it
 - Dumping every DOM node into the page object — extract what a user interacts with or a test asserts on
+- A widget's inner locators (`DateInput`, `DayCell`) as page fields — the widget is a control
 - Guessing what an icon button does from its CSS class name
 - Deleting "stale" fields in update mode without confirming the element isn't state-dependent
 - Writing tests in the same breath — that's `ui-test-author/playwright`'s job, after the POM type-checks

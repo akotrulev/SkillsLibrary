@@ -15,7 +15,7 @@ describe('Cart lifecycle', () => {
 
     await cart.verifyPageLoaded();
 
-    await expect(cart.itemCount()).toHaveText('1');
+    expect(await cart.itemCount()).toBe('1');
   });
 
   it('Should_RequireLogin_When_AppIsTerminatedAndRelaunched', async () => {

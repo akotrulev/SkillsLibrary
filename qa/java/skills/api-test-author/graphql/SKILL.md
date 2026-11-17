@@ -55,7 +55,7 @@ envelope, and the assertion lives in that envelope, not in `response.getStatusCo
 - **RestAssured** (`io.rest-assured:rest-assured`) — a GraphQL request is a `POST` of `{ query, variables }`
 - **Jackson** (`jackson-databind` + `jackson-datatype-jsr310`) for (de)serialization
 - **AssertJ** (`assertThat(...)`) for fluent assertions; **Allure TestNG** for reporting
-- `org.apache.http.HttpStatus` for status constants; secrets via `SystemPropertyUtil` / env, never hardcoded
+- `org.apache.http.HttpStatus` for status constants; secrets via `Env` (the suite's config class), never hardcoded
 - Project layout: `src/main/java/operation/`, `src/main/java/action/`, `src/main/java/pojo/`,
   `src/test/java/<resource>/`
 
@@ -108,7 +108,7 @@ test failure).
 ```java
 @Test
 public void createUserWhenValidPersistsAndIsReadable() {
-    UserGraphQLAction userAction = new UserGraphQLAction(true);
+    UserGraphQLAction userAction = UserGraphQLAction.authenticated();
 
     GraphQLResponse<CreateUserData> created =
         userAction.createUser(new CreateUserInput("neo@example.com", "Thomas", "Anderson"));
@@ -123,14 +123,14 @@ public void createUserWhenValidPersistsAndIsReadable() {
 
 @Test
 public void createUserWhenEmailEmptyReturnsBadUserInput() {
-    UserGraphQLAction userAction = new UserGraphQLAction(true);
+    UserGraphQLAction userAction = UserGraphQLAction.authenticated();
 
     GraphQLResponse<CreateUserData> response =
         userAction.createUser(new CreateUserInput("", "A", "B"));
 
     assertThat(response.getErrors()).isNotEmpty();
     assertThat(response.getErrors().get(0).getExtensions().getCode()).isEqualTo("BAD_USER_INPUT");
-    assertThat(response.getData() == null ? null : response.getData().getCreateUser()).isNull();
+    assertThat(response.getData().getCreateUser()).isNull();
 }
 ```
 
@@ -225,7 +225,7 @@ public void persistedQueryRejectsUnregisteredHashThenResolvesOnceRegistered() th
   typed envelope POJO via `response.as(new TypeRef<>(){})`; model the data with a POJO (`qa-java:api-models`).
 - **`Thread.sleep`.** Banned by CLAUDE.md (and RestAssured is synchronous). Reaching for this skill for
   **subscriptions** → `qa-java:realtime-stream-testing`.
-- **Hardcoding the endpoint / committing the token.** *Fix:* `SystemPropertyUtil` / env, read lazily; secrets
+- **Hardcoding the endpoint / committing the token.** *Fix:* `Env`, read lazily; secrets
   via `qa-java:test-login-tokens`.
 
 ## Examples
@@ -251,12 +251,12 @@ the error shape, don't settle for a status" discipline, different envelope.
   failing field's `errors[]` entry by `path`/`extensions.code`.
 - **Operations are parameterized — variables passed in a separate map, never interpolated into the query string.**
 - **Model the typed `data` per operation** (selection set) as a Lombok POJO, plus the shared `GraphQLError`
-  envelope; `@JsonIgnoreProperties(ignoreUnknown = true)` on every POJO. One logical assertion focus per test;
+  envelope; `data` POJOs are strict; envelope types ignore unknowns. One logical assertion focus per test;
   assert specific `extensions.code` + `path`, never a bare `isNotEmpty()`.
 - **A mutation test round-trips a read** to prove persistence; data created in a test is cleaned up in
   `@AfterMethod` (cleanup guarded so it can't mask a failure).
 - **TestNG + RestAssured + Jackson + AssertJ**; `HttpStatus.SC_*` constants, never raw ints. Subscriptions →
-  `qa-java:realtime-stream-testing`. Endpoint + token via `SystemPropertyUtil`/env, lazy, never logged. No
+  `qa-java:realtime-stream-testing`. Endpoint + token via `Env`, lazy, never logged. No
   `Thread.sleep`.
 
 ## Cross-references
@@ -266,7 +266,7 @@ the error shape, don't settle for a status" discipline, different envelope.
 - `qa-dotnet:api-tests-graphql` — the .NET sibling (NUnit + `HttpClient` + `System.Text.Json` records);
   same four ideas, different libs.
 - `qa-java:api-tests` — the **REST sibling** this extends: the Action + POJO + Test layering,
-  `RequestSpecBuilder`, `response.as(...)`, `SystemPropertyUtil`, and the cleanup discipline.
+  `RequestSpecBuilder`, `response.as(...)`, `Env`, and the cleanup discipline.
 - `qa-java:realtime-stream-testing` — **GraphQL subscriptions** (graphql-ws over WebSocket) live here.
 - `qa-java:api-models` — generate the typed `data` POJOs / operation models in isolation.
 - `qa-java:test-login-tokens` — obtain the bearer token for authenticated operations.

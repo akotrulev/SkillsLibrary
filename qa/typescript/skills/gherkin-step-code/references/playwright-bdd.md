@@ -2,7 +2,7 @@
 
 The **web** path of the TypeScript `gherkin-step-code` family. Binds Gherkin steps to **playwright-bdd** step definitions created via `createBdd(test)`, where the `test` object has been extended with page objects as **Playwright fixtures** (the scaffold's `steps/fixtures.ts`). Steps destructure the fixtures they need; assertions use the web-first `expect` from `@playwright/test`. The model, lifecycle, and `fixtures.ts` already exist from `bdd-project-scaffold`.
 
-> Read the family router `../SKILL.md` first for the shared rules (one file per domain, Cucumber Expressions, thin steps, assertions in `Then`, reuse the catalog, build missing POMs first). This file is the web-specific deep dive: the **fixtures** model, end to end.
+> Read the family router `../SKILL.md` first for the shared rules (one file per domain, Cucumber Expressions, the step as the intent layer, one binding per field, assertions in `Then`, reuse the catalog, build missing POMs first). This file is the web-specific deep dive: the **fixtures** model, end to end.
 
 ## Stack
 
@@ -68,6 +68,63 @@ Then('I see the error {string}', async ({ loginPage }, message: string) => {
 writer's `assets/fixtures.ts` does — a step never reads `process.env` itself.
 
 Note the argument order: the **fixture object first**, then the Cucumber-Expression captures (`email`, `password`, `message`) typed explicitly. `{string}` → `string`, `{int}` → `number`, `{float}` → `number`.
+
+### A step acting on an exposed element or control — `steps/deals.steps.ts`
+
+The steps above call intent methods, because signing in is a sequence. A single interaction needs no page method: the page object exposes the element or control by name and the step acts on it. The page object still owns every locator; the step only uses the name.
+
+```typescript
+import type { Locator, Page } from '@playwright/test';
+import { DatePicker } from '../components/controls/DatePicker';
+
+export class DealFilterPage {
+  readonly dealType: Locator;
+  readonly tradeDate: DatePicker;
+  readonly search: Locator;
+
+  constructor(page: Page) {
+    this.dealType = page.getByTestId('DealFilter.DealType').describe('Deal Type filter');
+    this.tradeDate = new DatePicker(page.getByTestId('DealFilter.TradeDate'));
+    this.search = page.getByRole('button', { name: 'Search' }).describe('Search button');
+  }
+}
+```
+
+```typescript
+import { When } from './fixtures';
+
+When('I select {string} for Deal Type filter', async ({ filterPage }, option: string) => {
+  await filterPage.dealType.selectOption(option);
+});
+
+When('I pick {daysAgo} for Trade Date filter', async ({ filterPage }, date: Date) => {
+  await filterPage.tradeDate.select(date);
+});
+
+When('I search', async ({ filterPage }) => {
+  await filterPage.search.click();
+});
+```
+
+`filterPage` is the fixture holding a `DealFilterPage`; `{daysAgo}` is the custom parameter type below. Each field has its own binding named after it. A generic `I select {string} for {string} filter` would map the field name to a control inside the step, which is a branch; the second filter gets a second binding instead.
+
+### Pre-clean — a `Given … does not exist` step
+
+A precondition that removes a leftover record before the scenario, so a crashed earlier run cannot poison this one. It goes through an API seeder fixture, never a UI sequence, and it does not replace teardown: what the scenario creates is still removed after it.
+
+```typescript
+import { Given } from './fixtures';
+
+Given('the customer {string} does not exist', async ({ customerSeeder }, email: string) => {
+  await customerSeeder.deleteByEmail(email);
+});
+```
+
+`deleteByEmail` searches by the email and deletes every match, so a clean environment is zero deletions, not a branch. `customerSeeder` is a fixture in `steps/fixtures.ts` built on the `request` fixture.
+
+### A scenario ahead of its automation
+
+No binding is left with an empty body: it passes doing nothing. The scenario carries the suite's excluded tag and a ticket (`@not-automated @JIRA-1234`), and `defineBddConfig({ …, tags: 'not @not-automated' })` keeps it out of the run.
 
 ### A fixture that needs a different page object
 
@@ -138,7 +195,9 @@ seededOrder: async ({ request }, use) => {
 - **Arrow functions only** — the step argument is the fixture object; never use `function` + `this`. There is no World.
 - **Destructure fixtures, never `new`** a page object inside a step.
 - `async` bodies; `await` every page-object call; no floating promises.
-- **No `page.locator(...)` / CSS / waits in steps** — promote to the page object.
+- **No `page.locator(...)` / CSS / waits in steps** — promote to the page object. Acting on an element or control the page object exposes by name is the step's job.
+- **One binding per field, filter or column**; no step that takes the field name.
+- **No empty body**; a scenario ahead of its automation is tagged out (`not @not-automated`) with a ticket.
 - `Then` asserts with web-first `expect(locator)…` (auto-retry); `Given`/`When` never assert; page objects never assert — they expose `Locator`s.
 - A seeding fixture checks the exact status before it parses a response body.
 - **No `page.waitForTimeout`** — auto-wait + web-first assertions only.
@@ -152,6 +211,7 @@ seededOrder: async ({ request }, use) => {
 - Forgetting to register a needed page object as a fixture (constructing it ad hoc).
 - Running `playwright test` without a prior `bddgen` (stale generated specs).
 - `page.locator(...)` / selectors / `waitForTimeout` in a step body.
+- A generic step taking a field name (`I select {string} for {string} filter`), or a step with an empty body.
 - Assertions in `Given`/`When`, or inside page objects.
 - A fixture that reads `res.json()` before checking `res.status()`.
 - `process.env` read inside a step instead of a credentials fixture.
