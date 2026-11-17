@@ -1,6 +1,6 @@
 ---
 name: story-review
-description: Use when reviewing stories or epics someone else wrote for readiness (one whole feature, clear goal and plan, met-or-not AC, testability). Triggers "review these stories". Not for writing stories (stories).
+description: Use when reviewing stories or epics someone else wrote for readiness (whole feature, goal and plan, met-or-not AC, testability). Triggers "review these stories". Not for writing stories (stories).
 ---
 
 # Backlog Reviewer
@@ -120,4 +120,4 @@ Story and epic ids are quoted as the source backlog writes them; where the backl
 - Ready stories, QA next → `qa/manual/requirements-breakdown`, or `qa/manual/agents/qa-test-case-designer` for the full basis → suite flow
 - Review uncovered a live defect reference → `qa/manual/bug-report-writer`
 
-Only `qa/manual/requirements-breakdown` ships in this plugin; the other `qa/*` peers are invoked separately, never loaded here.
+The `qa/*` peers belong to other plugins (`qa-<stack>`): they are named here and invoked separately, never loaded by this skill.

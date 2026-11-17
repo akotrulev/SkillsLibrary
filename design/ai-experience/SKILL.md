@@ -19,7 +19,7 @@ python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<observa
 
 ## 1. Show the work, while it happens
 
-The single highest-value improvement reported across agent products: **stream tool inputs and outputs inline as they occur**, rather than presenting a finished summary. A user watching a run knows whether it is going well, and can stop it when it is not.
+**Stream tool inputs and outputs inline as they occur**, rather than presenting a finished summary. A user watching a run knows whether it is going well, and can stop it when it is not.
 
 - **A spinner is wrong for anything an agent does.** A multi-second model call gets streamed tokens; a multi-minute agent run gets a **visible timeline of steps** — the tool being called, its input, its result, in order, as they land.
 - **Name the step in the user's language**, not the tool's identifier — "Searching the invoice archive", not `invoice_search(q=...)`. The raw call belongs behind a disclosure for the user who wants it.
@@ -38,7 +38,7 @@ Users must feel they are driving even when the agent is doing the work — and t
 
 ## 3. Approvals carry their context
 
-Approval requests that include the agent's accumulated context produce faster **and more accurate** human decisions than terse approve/deny prompts. A bare "Allow this action?" trains the user to click yes.
+An approval request carries the agent's accumulated context, never a terse approve/deny. A bare "Allow this action?" trains the user to click yes.
 
 - **Show what will happen, to what, and why** — the concrete action, the specific target ("Delete invoice #4821", never "Delete item"), and the reasoning or evidence that led here.
 - **Show what changes and what it costs** — the diff, the recipient, the amount, the irreversibility.
@@ -65,7 +65,7 @@ Users who know they can correct an AI are measurably more willing to engage with
 
 ## 6. Disclose that it is AI
 
-**78%** of consumers say explicit labelling of AI-generated content matters to their trust; **31%** trust a brand *less* when they detect undisclosed AI output. Disclosure is a trust asset, not a disclaimer.
+**86%** of consumers say AI-generated content should be disclosed, and **32%** would trust a brand *less* if its content is AI-generated (Meltwater and YouGov, 2026). Users expect to be told; hiding the AI to dodge that cost is the deception, so disclosure is a requirement, not a disclaimer.
 
 - **Label AI-generated and AI-assisted content** where a reasonable person would otherwise assume a human or a database produced it.
 - **Label consistently and quietly** — one treatment, used everywhere, not a banner on one surface and nothing on another.
@@ -88,23 +88,27 @@ Beyond the three-state region every data surface has (`ux-patterns`, the stack's
 
 ## 8. Earn the feature
 
-The named risk for 2026 is **AI fatigue** — on the user's side as much as the practitioner's — driven by low-value features shipped because the capability existed.
+The named risk for 2026 is **AI fatigue** (Nielsen Norman Group, *State of UX 2026*) — on the user's side as much as the practitioner's — driven by low-value features shipped because the capability existed.
 
 - **An AI feature needs a user job**, stated the way any other feature's is. "Summarize this" is not a job; "so the reviewer can triage fifty of these an hour" is.
 - **Prefer the deterministic path where one exists.** A filter beats a model that guesses a filter — faster, cheaper, explainable, testable.
 - **Latency and cost are UX.** A four-second answer to something a query answers in 40 ms is a downgrade the interface has to justify.
 - **Measure the correction rate.** If users routinely edit or reject the output, the feature is generating work rather than removing it.
 
+**Figures** (§6, §8): reviewed 2026-11; re-check by 2027-11.
+
 ## Review checklist
 
-- **Work is visible while it happens** — streamed tokens or an inline step timeline in the user's language; no bare spinner on an agent run.
-- **Stop is present from the first moment** and preserves partial work.
-- **Nothing irreversible executes without an approval that carries context** — the specific target, the change, the cost, the reasoning.
-- **Uncertainty is expressed** where the user must decide whether to verify; sources are cited and reachable; no manufactured precision.
-- **Every output can be edited, rejected, regenerated, and flagged**, in place.
-- **AI-generated content is labelled** consistently; what the assistant can see is stated at the point of use; no AI wearing a human identity.
-- **All seven AI states** (§7) are designed, including refusal and no-answer.
-- **The feature has a stated user job**, and a deterministic alternative was considered and rejected for a reason.
+Numbered because audit finding ids cite the numbers: new checks are appended, and none is renumbered or removed.
+
+1. **Work is visible while it happens** — streamed tokens or an inline step timeline in the user's language; no bare spinner on an agent run.
+2. **Stop is present from the first moment** and preserves partial work.
+3. **Nothing irreversible executes without an approval that carries context** — the specific target, the change, the cost, the reasoning.
+4. **Uncertainty is expressed** where the user must decide whether to verify; sources are cited and reachable; no manufactured precision.
+5. **Every output can be edited, rejected, regenerated, and flagged**, in place.
+6. **AI-generated content is labelled** consistently; what the assistant can see is stated at the point of use; no AI wearing a human identity.
+7. **All seven AI states** (§7) are designed, including refusal and no-answer.
+8. **The feature has a stated user job**, and a deterministic alternative was considered and rejected for a reason.
 
 ## What NOT to do
 

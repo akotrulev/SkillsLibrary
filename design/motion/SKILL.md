@@ -26,6 +26,10 @@ Owns the **motion catalog**: which of the seven motion categories a surface need
 
 Do **not** use it to decide whether the page should animate at all (`design:visual-identity`), or to write the animation code (the stack's `animation`).
 
+## Native apps
+
+On a mobile or desktop app the product-wide tier (Subtle for an application), the categories as triggers, and the non-negotiables' intent all hold: Reduce Motion renders the static final state, motion never carries meaning alone, loops and listeners are torn down, auto-advance is stoppable, nothing parallaxes text or controls. What does not transfer is the web catalog's technique and numbers — GSAP snippets, `matchMedia`, ScrollTrigger and SplitText, IntersectionObserver, the no-JS fallback. Take native timing from the corpus instead: `search.py "<trigger>" --domain web` (*Duration & Easing*: micro-interactions 150–300 ms, ease-out to enter, ease-in to exit; *Respect Reduced Motion*; *Limited Continuous Motion*: loops only for loaders and live data), `--stack swiftui | jetpack-compose | react-native | winui | wpf`, and `references/pro-rules.md` (*Interaction (App)*: shared, platform-appropriate timing tokens). The mechanics are the stack's `animation` on mobile and its `styling` on macOS and Windows.
+
 ## Query the catalog first
 
 Never specify motion from memory. Every value below comes from the corpus:
@@ -85,15 +89,17 @@ These hold at every tier, and the corpus repeats them across rows because they a
 
 ## Review checklist
 
-- One **intensity tier** applies product-wide; no surface animates at a tier the product didn't choose. Application lane is Subtle.
-- Every preset's **duration and easing came from the corpus row**, not from memory.
-- **`prefers-reduced-motion` renders a static final state** everywhere — no hidden content, no shortened flourish.
-- Only **transform/opacity** animate; no width/height/margin/top/left tweens.
-- Every **loop, listener, timer, ScrollTrigger and SplitText split has a teardown**; SplitText reverts on unmount.
-- Offscreen and background-tab animation is **paused**, not just invisible.
-- Exit/route animation is **≤250ms** and never blocks navigation; sub-300ms waits get no loader.
-- Auto-rotating content has **prev/next + play/pause**, pauses on hover and focus, and stops under reduced motion.
-- **No parallax on body copy or controls**; reveal-hidden content has a no-JS fallback.
+Numbered because audit finding ids cite the numbers: new checks are appended, and none is renumbered or removed (a retired check keeps its number and says *retired*).
+
+1. One **intensity tier** applies product-wide; no surface animates at a tier the product didn't choose. Application lane is Subtle.
+2. Every preset's **duration and easing came from the corpus row**, not from memory.
+3. **`prefers-reduced-motion` renders a static final state** everywhere — no hidden content, no shortened flourish.
+4. Only **transform/opacity** animate; no width/height/margin/top/left tweens.
+5. Every **loop, listener, timer, ScrollTrigger and SplitText split has a teardown**; SplitText reverts on unmount.
+6. Offscreen and background-tab animation is **paused**, not just invisible.
+7. Exit/route animation is **≤250ms** and never blocks navigation; sub-300ms waits get no loader.
+8. Auto-rotating content has **prev/next + play/pause**, pauses on hover and focus, and stops under reduced motion.
+9. **No parallax on body copy or controls**; reveal-hidden content has a no-JS fallback.
 
 ## Related
 

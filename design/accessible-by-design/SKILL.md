@@ -1,6 +1,6 @@
 ---
 name: accessibility
-description: Use when accessibility is a design decision (WCAG 2.2 target size, accessible auth, focus not obscured, RTL layout). Triggers "is this design accessible". Not for markup (accessibility).
+description: Use when accessibility is a design decision (WCAG 2.2 target size, accessible auth, focus not obscured, RTL layout). Triggers "is this design accessible". Not for markup (the stack's accessibility).
 ---
 
 # Accessible by design — the decisions a scan cannot make
@@ -27,13 +27,13 @@ Never accept a generic accessibility result for a specific interaction or WCAG c
 
 ## Why this is not optional any more
 
-The **European Accessibility Act** has been enforceable since **28 June 2025**, with penalties up to €3 million and the possibility of market exclusion. It works through **EN 301 549**, which today carries WCAG 2.1 AA; **V4.1.1, expected during 2026, moves it to WCAG 2.2 AA**. The compliance instruction from every source is the same: build to **2.2 AA now**. Accessibility overlay widgets were explicitly stated by the European Commission not to deliver compliance — an overlay is a finding, not a fix.
+The **European Accessibility Act** (Directive (EU) 2019/882) has applied since **28 June 2025**, with penalties each member state sets and the possibility of market exclusion. It works through **EN 301 549**: the cited version, V3.2.1, carries WCAG 2.1 AA; **V4.1.1, published 2 September 2026, moves it to WCAG 2.2 AA** and becomes the presumption of conformity once cited in the Official Journal, expected December 2026 (NDA Ireland, 2026). The compliance instruction from every source is the same: build to **2.2 AA now**. The European Commission (DG COMM) states that overlay tools cannot substitute for the manual work of making a site accessible and does not endorse them — an overlay is a finding, not a fix.
 
 Target **WCAG 2.2 Level AA** as the floor for every project unless the brief names a higher bar.
 
 ## 1. The WCAG 2.2 criteria that are design decisions
 
-The nine criteria WCAG 2.2 added skew heavily toward cognitive access, low vision, and motor limits — which is exactly why so many of them land here rather than in a stack skill.
+The nine criteria WCAG 2.2 added (W3C, *What's New in WCAG 2.2*) skew heavily toward cognitive access, low vision, and motor limits — which is exactly why so many of them land here rather than in a stack skill.
 
 | Criterion | Level | The design decision | The finding it produces |
 |---|---|---|---|
@@ -81,18 +81,22 @@ Localization mechanics belong to a stack's `languages` skill; the **layout const
 - **No text baked into images** — it cannot be translated, resized, or read aloud.
 - **Pseudo-localization is a design-review step**, not a QA one: run it as soon as there are screens, and it catches truncation, clipping, concatenation, and hardcoded strings before a single real translation exists. Test at least one RTL, one CJK, and one high-expansion European locale.
 
+**Figures** (the legal facts, §1's criteria, 24×24 CSS px): reviewed 2026-11; re-check by 2027-11, or on the Official Journal citation of EN 301 549 V4.1.1.
+
 ## Review checklist
 
-- **All nine WCAG 2.2 criteria** in §1 are decided and written as acceptance criteria; none is deferred to a scan.
-- **Every drag interaction has a documented non-drag path** (2.5.7).
-- **Every pointer target is ≥ 24×24 CSS px or adequately spaced**; touch-primary targets ≥ 44×44; the density decision was checked against this floor, not made independently of it (2.5.8).
-- **Authentication has a path with no cognitive-function test**, and paste / password managers work (3.3.8).
-- **Nothing is asked twice** within one process (3.3.7); **help sits in one consistent place** (3.2.6).
-- **Sticky chrome does not obscure the focused element** at any scroll position (2.4.11).
-- **The focus indicator is a defined token** with stated size and contrast, verified in light *and* dark.
-- **Cognitive load addressed:** predictable structure, chunked long processes with saved drafts, no time limits, user-controllable motion and density, plain language.
-- **Translation survivable:** layouts hold at +50% text, logical properties are the default, no concatenated sentences, no text in images, pseudo-localization run.
-- **Overlay widgets are absent** — or present and filed as a finding.
+Numbered because audit finding ids cite the numbers: new checks are appended, and none is renumbered or removed.
+
+1. **All nine WCAG 2.2 criteria** in §1 are decided and written as acceptance criteria; none is deferred to a scan.
+2. **Every drag interaction has a documented non-drag path** (2.5.7).
+3. **Every pointer target is ≥ 24×24 CSS px or adequately spaced**; touch-primary targets ≥ 44×44; the density decision was checked against this floor, not made independently of it (2.5.8).
+4. **Authentication has a path with no cognitive-function test**, and paste / password managers work (3.3.8).
+5. **Nothing is asked twice** within one process (3.3.7); **help sits in one consistent place** (3.2.6).
+6. **Sticky chrome does not obscure the focused element** at any scroll position (2.4.11).
+7. **The focus indicator is a defined token** with stated size and contrast, verified in light *and* dark.
+8. **Cognitive load addressed:** predictable structure, chunked long processes with saved drafts, no time limits, user-controllable motion and density, plain language.
+9. **Translation survivable:** layouts hold at +50% text, logical properties are the default, no concatenated sentences, no text in images, pseudo-localization run.
+10. **Overlay widgets are absent** — or present and filed as a finding.
 
 ## What NOT to do
 

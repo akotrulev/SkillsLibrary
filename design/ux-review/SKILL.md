@@ -45,7 +45,7 @@ Best practice from the discipline: a heuristic evaluation catches more when **ru
 A review without evidence is an opinion. Before the first heuristic:
 
 1. **Name the primary user tasks** you will walk (from the brief, or from `docs/plans/<NNN>-*/experience-plan.md`'s actors & tasks where the initiative has one).
-2. **Capture each task end to end.** With a running app, drive it through the Playwright MCP and take one screenshot per screen in the task's path, at the desktop and the narrowest supported width. Without one, use the user-supplied screenshots / mockup / Figma frames and say so.
+2. **Capture each task end to end.** With a running app, drive it through the Playwright MCP and take one screenshot per screen in the task's path, at the desktop and the narrowest supported width; a native app is captured the way its stack agent's Review step does (simulator and emulator screenshots on mobile, `screencapture -l <windowid>` on macOS, `winapp ui screenshot` on Windows), on the smallest and largest supported device or window size. Without one, use the user-supplied screenshots / mockup / Figma frames and say so.
 3. **Record what was captured** in the report header — tasks walked, screens seen, widths — so the coverage is legible and a screen you never reached is not silently "passed".
 
 **Where an `experience-plan.md` exists it is the reference, not the build.** Every IA or steps-to-goal finding names the plan decision the build contradicts — the screen id (`S4`), the nav-map row, the journey's step count — and a build that matches a plan decision you would have flagged is a finding *against the plan*, routed to `solution-planner`, not against the build.
@@ -69,40 +69,42 @@ Walk each defined user task against these. Each is a question you answer with a 
 
 Beyond the ten, walk each primary task end to end and measure the *path*:
 
-- **Steps-to-goal.** Count the actions to complete the core task. Flag every step that isn't load-bearing — a screen that only forwards, a confirm that guards nothing, a field that could be defaulted or inferred. The shortest correct path is the target.
-- **Dead ends.** Every screen must offer a forward action *and* a way out. A state the user can enter but not leave (a form with no cancel, a result with no next step, an empty state with no call to action) is a friction at minimum, a blocker if it traps the task.
-- **Back-button safety.** Browser/OS back and in-app back must not lose work, double-submit, or land the user somewhere incoherent. A flow that punishes back is broken even if forward works.
-- **Undo over confirm, where the action is reversible.** A confirmation dialog interrupts *every* use to guard against the *rare* mistake; an undo affordance lets the common case flow and still catches the mistake. Reserve confirmations for the genuinely irreversible (delete-with-no-recovery, send, pay) — and there, confirm **by object name** (defer the confirmation-copy mechanics to `ux-writing` / a stack's `ui-rules`). Flag reversible actions that block behind a modal.
-- **State legibility.** At any point the user should be able to answer "where am I, what just happened, what can I do next" without guessing.
+1. **Steps-to-goal.** Count the actions to complete the core task. Flag every step that isn't load-bearing — a screen that only forwards, a confirm that guards nothing, a field that could be defaulted or inferred. The shortest correct path is the target.
+2. **Dead ends.** Every screen must offer a forward action *and* a way out. A state the user can enter but not leave (a form with no cancel, a result with no next step, an empty state with no call to action) is a friction at minimum, a blocker if it traps the task.
+3. **Back-button safety.** Browser/OS back and in-app back must not lose work, double-submit, or land the user somewhere incoherent. A flow that punishes back is broken even if forward works.
+4. **Undo over confirm, where the action is reversible.** A confirmation dialog interrupts *every* use to guard against the *rare* mistake; an undo affordance lets the common case flow and still catches the mistake. Reserve confirmations for the genuinely irreversible (delete-with-no-recovery, send, pay) — and there, confirm **by object name** (defer the confirmation-copy mechanics to `ux-writing` / a stack's `ui-rules`). Flag reversible actions that block behind a modal.
+5. **State legibility.** At any point the user should be able to answer "where am I, what just happened, what can I do next" without guessing.
 
 ## Responsiveness pass
 
 Perceived speed is part of the experience; the budget is [`design/ux-patterns`](../ux-patterns/SKILL.md) §9, here as review questions:
 
-- **Does every press acknowledge within ~100 ms** — a pressed state, a submit button that disables and shows in-flight — or does the user click twice?
-- **Does a load show a skeleton shaped like the content**, in its region, or a blank / a page-centre spinner?
-- **Does a long load say it is alive** at ~4 s, and does a failure land in the region with a retry rather than blanking the page?
-- **Does anything shift** when content arrives — a header that jumps, a table that pushes the toolbar?
-- **Is optimism used where reversible** (toggle, star, reorder) **and nowhere irreversible** (pay, send, delete)?
-- **Does one region's wait block the page?** Independent regions load independently; the shell renders at once.
+1. **Does every press acknowledge within ~100 ms** — a pressed state, a submit button that disables and shows in-flight — or does the user click twice?
+2. **Does a load show a skeleton shaped like the content**, in its region, or a blank / a page-centre spinner?
+3. **Does a long load say it is alive** at ~4 s, and does a failure land in the region with a retry rather than blanking the page?
+4. **Does anything shift** when content arrives — a header that jumps, a table that pushes the toolbar?
+5. **Is optimism used where reversible** (toggle, star, reorder) **and nowhere irreversible** (pay, send, delete)?
+6. **Does one region's wait block the page?** Independent regions load independently; the shell renders at once.
 
 ## IA sanity
 
-- **Nav depth.** Primary destinations should be reachable shallowly; a task buried three-plus levels deep, or reachable only by a path the user won't guess, is a finding. Prefer breadth the user can scan over depth they must remember.
-- **Label predictability.** A nav label must predict what's behind it — the user should choose correctly on the first try. Vague, clever, or overloaded labels ("More", "Manage", "Tools") that could hold anything are friction. *(The wording discipline is `ux-writing`; whether the label *predicts its destination* is the IA question here.)*
-- **One name, one concept.** The same concept carries one name across nav, headings, breadcrumbs, and buttons; one name never covers two concepts. (Shared with `ux-writing`'s and `ui-rules`' one-name-one-concept rule — this is the navigation-structure face of it.)
-- **You-are-here.** The current location is always indicated (active nav state, breadcrumb, title) so the user has a mental map.
+1. **Nav depth.** Primary destinations should be reachable shallowly; a task buried three-plus levels deep, or reachable only by a path the user won't guess, is a finding. Prefer breadth the user can scan over depth they must remember.
+2. **Label predictability.** A nav label must predict what's behind it — the user should choose correctly on the first try. Vague, clever, or overloaded labels ("More", "Manage", "Tools") that could hold anything are friction. *(The wording discipline is `ux-writing`; whether the label *predicts its destination* is the IA question here.)*
+3. **One name, one concept.** The same concept carries one name across nav, headings, breadcrumbs, and buttons; one name never covers two concepts. (Shared with `ux-writing`'s and `ui-rules`' one-name-one-concept rule — this is the navigation-structure face of it.)
+4. **You-are-here.** The current location is always indicated (active nav state, breadcrumb, title) so the user has a mental map.
 
 ## Review checklist
 
-- **Evidence captured** — tasks walked, screens seen, widths — before any judgement; the report says what was and was not reached.
-- **Two passes**, primary user tasks named, each task walked against **all ten heuristics** — findings, not vibes.
-- **Responsiveness measured** against the §9 budget: press feedback, skeletons, the ~4 s acknowledgement, no layout shift, optimism only where reversible.
-- **Plan referenced** where `experience-plan.md` exists — each IA / steps-to-goal finding names the screen id or nav-map row it contradicts.
-- **Flow measured:** steps-to-goal minimized, no dead ends, back-button safe, **undo preferred over confirm** for reversible actions, state always legible.
-- **IA checked:** nav shallow and scannable, labels predict destinations, one-name-one-concept holds, you-are-here always shown.
-- **Output is a findings table** (severity / location / heuristic / suggested fix) on the **house severity scale** — **no rewrites**, each finding ranked by user-task impact.
-- **Scope respected:** code-level audit left to `ui-code-audit`, a11y *scanning* to `accessibility-testing`, *bug* hunting to `exploratory-charter-writer`, copy *wording* to `ux-writing`, visual *taste* to `visual-identity` — this skill flags the *experience*.
+`/design:audit` sweeps this skill as three sections and numbers each from its own list above, not from this one: D by heuristic number (`D4` is consistency and standards), E by the numbered *Flow-friction review* list, F by the numbered *Responsiveness pass* list. The *IA sanity* list is evidence for section C, which numbers from `ux-patterns`' checklist. All five lists are numbered because audit finding ids cite the numbers: new items are appended, and none is renumbered or removed (a retired item keeps its number and says *retired*).
+
+1. **Evidence captured** — tasks walked, screens seen, widths — before any judgement; the report says what was and was not reached.
+2. **Two passes**, primary user tasks named, each task walked against **all ten heuristics** — findings, not vibes.
+3. **Responsiveness measured** against the §9 budget: press feedback, skeletons, the ~4 s acknowledgement, no layout shift, optimism only where reversible.
+4. **Plan referenced** where `experience-plan.md` exists — each IA / steps-to-goal finding names the screen id or nav-map row it contradicts.
+5. **Flow measured:** steps-to-goal minimized, no dead ends, back-button safe, **undo preferred over confirm** for reversible actions, state always legible.
+6. **IA checked:** nav shallow and scannable, labels predict destinations, one-name-one-concept holds, you-are-here always shown.
+7. **Output is a findings table** (severity / location / heuristic / suggested fix) on the **house severity scale** — **no rewrites**, each finding ranked by user-task impact.
+8. **Scope respected:** code-level audit left to `ui-code-audit`, a11y *scanning* to `accessibility-testing`, *bug* hunting to `exploratory-charter-writer`, copy *wording* to `ux-writing`, visual *taste* to `visual-identity` — this skill flags the *experience*.
 
 ## Related
 

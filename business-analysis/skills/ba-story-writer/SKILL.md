@@ -1,6 +1,6 @@
 ---
 name: stories
-description: Use when turning a scoped requirement or an epic into stories that say what must be built (goal, how we get there, what is included, acceptance criteria as bullets). Triggers "write the stories for X", "add acceptance criteria". Not for scoping (scoping).
+description: Use when turning an epic into stories (goal, plan, what is included, met-or-not acceptance criteria). Triggers "write the stories for X", "add acceptance criteria". Not for scoping (scoping).
 ---
 
 # Story Writer
@@ -26,7 +26,7 @@ A story describes **one feature that must be built**. It says what the goal is, 
 
 1. **The epics** (`epics.md` from `business-analysis:epics`, ideally) and the requirements document they cover
 2. **Who each feature is for**, specifically ("a member with a confirmed account", not "the user")
-3. **The business rules with their numbers** (limits, time windows, thresholds) from `requirements.md` §4, and the constraints in §5
+3. **The business rules with their numbers** (limits, time windows, thresholds) and the quality targets from `requirements.md` §4, and the constraints in §5
 
 ## What makes one story
 
@@ -46,7 +46,7 @@ A story describes **one feature that must be built**. It says what the goal is, 
    - One situation per bullet, with what comes of it: what the person ends up with or is told, and the number where there is one. A bullet that walks through several steps ("registers, gets the email, then logs in") is one bullet per step.
    - A validation names the field, the rule and what happens when it is broken.
    - Every included part has criteria for it working **and** for what happens when it cannot (wrong input, expired, refused, already done).
-   - What applies to the whole feature (security, accessibility, audit, speed) goes in a closing `Across the feature` group.
+   - What applies to the whole feature (security, accessibility, audit, speed) goes in a closing `Across the feature` group. Its number comes from a `requirements.md` §4 quality target, or is `[TBD — <who decides>]`.
    - Numbered `AC1..ACn`, flat within the story, grouped under the part they prove. Plans and tests cite them as `US3 AC7`, so an id is never reused or renumbered; a dropped criterion keeps its id with a line saying why.
    - Not Given / When / Then. Scenarios are written from these bullets by test design.
 6. **A number comes from the requirements, never from you.** Where the requirements give none, write `[TBD — <who decides>]` in its place and raise it as an open question.
@@ -117,4 +117,4 @@ What every story must meet (the `US<n>` id and parent epic, one whole feature wi
 - Tests next → the test plan for the epic first (`qa-test-planner`, `/qa-<stack>:test-plan`: versions, what is tested, harness, scenarios, Definition of Ready and Done), then one test-case suite per story (`qa-test-case-designer`, `/qa-<stack>:test-cases`). Both start from `qa/manual/requirements-breakdown`, which distills the stories' goals, included parts, rules and validations into the test basis
 - Architecture, contracts, task plan → `solution-planner` (`/dev:plan-system`)
 
-Only `qa/manual/requirements-breakdown` ships in this plugin; the other `qa/*` peers and `solution-planner` are invoked separately, never loaded here.
+The `qa/*` peers and `solution-planner` belong to other plugins (`qa-<stack>`, `dev`): they are named here and invoked separately, never loaded by this skill.

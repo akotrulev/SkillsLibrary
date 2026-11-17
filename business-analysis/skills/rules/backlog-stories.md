@@ -3,7 +3,7 @@ paths:
   - "docs/plans/**/stories.md"
 ---
 
-<!-- business-analysis rules v2 (2026-11-13): stories. Installed by /business-analysis:rules; edit to fit this project. -->
+<!-- business-analysis rules v3 (2026-11-17): stories. Installed by /business-analysis:rules; edit to fit this project. -->
 
 # Story standards
 
@@ -25,7 +25,7 @@ For `docs/plans/<NNN>-<initiative>/stories.md`, and the checklist `business-anal
 - Every included part has criteria for it working and for what happens when it cannot (wrong input, expired, refused, already done). A part with no criterion is unproven. *major*
 - Criteria are `AC1..ACn`, flat within the story and grouped under the part they prove; whole-feature ones (security, accessibility, audit, speed) under `Across the feature`. Cited downstream as `US<n> AC<k>`: never reused or renumbered, and a dropped one keeps its id with a line saying why. *major*
 - A validation states field, rule and outcome on violation. No unfalsifiable word ("fast", "secure", "user-friendly", "recently") without a number. *major*
-- A number is a business rule from the requirements. One the requirements do not give is `[TBD — <who decides>]` and an open question, never invented. *blocker*
+- A number is a business rule from the requirements. One the requirements do not give is `[TBD — <who decides>]` and an open question, never invented. An `Across the feature` criterion's number comes from a requirements.md §4 quality target. *blocker*
 - A contradiction between criteria, or between the story and its epic, is a finding, never silently resolved. *blocker*
 - Not included is listed per story, each item with its reason and where it goes. *minor*
 - Dependencies by story id (`Depends on: US<n>`, or none); an undeclared one is a finding. *major*

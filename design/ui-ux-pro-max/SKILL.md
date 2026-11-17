@@ -72,7 +72,7 @@ Extract:
 - **Product type**: SaaS, e-commerce, portfolio, dashboard, entertainment, tool, productivity, hybrid.
 - **Target audience & context**: age group, usage context (commute, leisure, work).
 - **Style keywords**: playful, vibrant, minimal, dark mode, content-first, immersive, …
-- **Stack**: detect it from the project — `package.json` deps (react/next/vue/svelte/nuxt/@angular), `pubspec.yaml` (Flutter), `*.xcodeproj`/`Package.swift` (SwiftUI), `composer.json` (Laravel), `*.csproj` + `.razor` (Blazor — no stack file; use the house [Blazor skills](../../frontend/blazor/)), React Native markers (`app.json` + `react-native`). If nothing is detectable and stack guidance matters, **ask**. Never assume a stack — a hardcoded default silently misroutes every recommendation.
+- **Stack**: detect it from the project — `package.json` deps (react/next/vue/svelte/nuxt/@angular), `pubspec.yaml` (Flutter), `*.xcodeproj`/`Package.swift` (SwiftUI), `composer.json` (Laravel), `build.gradle(.kts)` with Compose (`jetpack-compose`), a `*.csproj` referencing `Microsoft.WindowsAppSDK` (`winui`) or setting `<UseWPF>` (`wpf`), `*.csproj` + `.razor` (Blazor — no stack file; use the house [Blazor skills](../../frontend/blazor/)), React Native markers (`app.json` + `react-native`). If nothing is detectable and stack guidance matters, **ask**. Never assume a stack — a hardcoded default silently misroutes every recommendation.
 
 ## Step 2 — generate the design system (required for new pages/projects)
 
@@ -183,13 +183,15 @@ python3 "design/ui-ux-pro-max/scripts/validate_data.py"
 
 ## Review checklist
 
-- A **stack was detected, not assumed** — or the user was asked.
-- A new page/product started from `--design-system`, not from an unsourced palette.
-- Each query carried **one dominant intent, 2–5 terms**; an off-topic result was retried **once** with an explicit `--domain`/`--stack`.
-- Zero-result searches were **declared as fallbacks**, never presented as corpus data.
-- `--persist` passed `--output-dir` at the project root; `--force` was used only with explicit authorization, after reading the existing `MASTER.md`.
-- Accessibility queries named an **observable outcome**, not a generic "accessibility" term.
-- Corpus facts beat prose defaults; the owning `design/*` skill supplied the judgment on top.
+Numbered because audit finding ids cite the numbers: new checks are appended, and none is renumbered or removed (a retired check keeps its number and says *retired*).
+
+1. A **stack was detected, not assumed** — or the user was asked.
+2. A new page/product started from `--design-system`, not from an unsourced palette.
+3. Each query carried **one dominant intent, 2–5 terms**; an off-topic result was retried **once** with an explicit `--domain`/`--stack`.
+4. Zero-result searches were **declared as fallbacks**, never presented as corpus data.
+5. `--persist` passed `--output-dir` at the project root; `--force` was used only with explicit authorization, after reading the existing `MASTER.md`.
+6. Accessibility queries named an **observable outcome**, not a generic "accessibility" term.
+7. Corpus facts beat prose defaults; the owning `design/*` skill supplied the judgment on top.
 
 ## Related
 
@@ -198,5 +200,5 @@ python3 "design/ui-ux-pro-max/scripts/validate_data.py"
 - [`design:motion`](../motion/SKILL.md) — owns how the `gsap` presets are applied and gated behind `prefers-reduced-motion`.
 - [`design:landing-patterns`](../landing-patterns/SKILL.md) — owns the `landing` section-order and conversion patterns.
 - [`design:app-structure`](../ux-patterns/SKILL.md) · [`design:ux-review`](../ux-review/SKILL.md) — consume `--domain ux` for design and for review.
-- [`design:ui-code-audit`](../ui-code-audit/SKILL.md) — pairs the web interface guidelines with `--stack` and `--domain react` rules.
+- [`design:ui-code-audit`](../ui-code-audit/SKILL.md) — pairs the web interface guidelines with `--stack` and `--domain react` rules; on a native app it judges against `--domain web`, the stack file and `references/pro-rules.md` instead.
 - [`design-auditor`](../agents/design-auditor.md) — the whole-design audit; queries this corpus per section.

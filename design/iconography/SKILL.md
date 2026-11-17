@@ -17,6 +17,10 @@ python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<icon pu
 
 Query it before picking a glyph or deciding an icon's accessibility treatment.
 
+## Native apps
+
+On a mobile or desktop app the family rules (one style default, filled for selected, one weight, one grid), one glyph per meaning, the icon+label policy, decorative-vs-meaningful, and never-state-by-icon-alone all hold. Inline SVG, `currentColor`, `em` sizing, `aria-hidden` and the OG image do not transfer. The library is the platform's symbol set where it has one — SF Symbols on iOS and macOS (the stack's `ui-components`; they scale with Dynamic Type), Segoe Fluent Icons through `FontIcon` / `SymbolIcon` on Windows (`styling`; they inherit the foreground colour and follow High Contrast); Android's examples use the Material `Icons` set, and React Native tab icons take SF Symbols or Material Symbols (`navigation`). The corpus `icons` domain is web-first (Phosphor imports); native facts come from `references/pro-rules.md` *Icons & Visual Elements* (44 pt / 48 dp hit areas, icon sizes as tokens, 3:1 icon contrast), `--domain web` (*Icon Button Labels*, *Decorative Icons*) and the stack's `accessibility` for the label mechanics.
+
 ## When to use
 
 - Picking an icon library for a new app, or reconciling an app that has drifted into several.
@@ -74,16 +78,18 @@ The Open Graph image is the app's thumbnail in every link preview (social, chat,
 - **Safe zone:** keep essential text and logo within the central ~80% — outer edges get cropped by various clients. Assume a rounded-corner mask.
 - **Legibility at thumbnail size:** large type, high contrast, one focal message. Body-copy-sized text vanishes in a feed. Test by shrinking the image to ~200px wide — if the message is gone, it's too busy.
 - **On-brand and consistent:** use the app's tokens/typeface (via `design:tokens` / `brand-import`); a templated per-page OG image (title + logo on a brand field) beats a generic screenshot.
-- **Provide the tags:** `og:image` (+ `og:title`/`og:description`) and `twitter:card` — the emission and per-route wiring is the stack's SEO concern ([`seo-discoverability`](../../frontend/blazor/skills/seo/SKILL.md)); the *image design* is here.
+- **Provide the tags:** `og:image` (+ `og:title`/`og:description`) and `twitter:card` — the emission and per-route wiring is the stack's SEO concern ([`seo`](../../frontend/blazor/skills/seo/SKILL.md)); the *image design* is here.
 
 ## Review checklist
 
-- **One icon family**, one style default (stroke *or* fill), one stroke weight, one grid — no mixed packs or weights.
-- **One library**, chosen deliberately; the component library's own set used when a stack library is in play; no second pack for a single glyph.
-- Icons are **inline SVG** using **`currentColor`** and **`em`/token sizing** — no hardcoded hex, no magic-px, no icon fonts, imported from one place.
-- **Decorative icons hidden** from assistive tech; **meaningful icons carry an accessible name** (mechanics deferred to a stack's `accessibility`).
-- **Icon-only used only where** meaning is universal and space is constrained; primary actions/nav pair icon **with** label; **never state by icon/color alone**; one glyph = one meaning app-wide.
-- **OG image** is 1200×630, essential content in the safe zone, legible at thumbnail size, on-brand; tags emitted by the stack's SEO skill.
+Numbered because audit finding ids cite the numbers: new checks are appended, and none is renumbered or removed (a retired check keeps its number and says *retired*).
+
+1. **One icon family**, one style default (stroke *or* fill), one stroke weight, one grid — no mixed packs or weights.
+2. **One library**, chosen deliberately; the component library's own set used when a stack library is in play; no second pack for a single glyph.
+3. Icons are **inline SVG** using **`currentColor`** and **`em`/token sizing** — no hardcoded hex, no magic-px, no icon fonts, imported from one place.
+4. **Decorative icons hidden** from assistive tech; **meaningful icons carry an accessible name** (mechanics deferred to a stack's `accessibility`).
+5. **Icon-only used only where** meaning is universal and space is constrained; primary actions/nav pair icon **with** label; **never state by icon/color alone**; one glyph = one meaning app-wide.
+6. **OG image** is 1200×630, essential content in the safe zone, legible at thumbnail size, on-brand; tags emitted by the stack's SEO skill.
 
 ## Related
 
@@ -93,5 +99,5 @@ The Open Graph image is the app's thumbnail in every link preview (social, chat,
 - A stack's `component-library` ([Blazor](../../frontend/blazor/skills/component-library/SKILL.md) · [React](../../frontend/react/skills/component-library/SKILL.md)) — its bundled icon set is the preferred family when the library is in play.
 - A stack's `ui-rules` ([Blazor](../../frontend/blazor/skills/ui-rules/SKILL.md) · [React](../../frontend/react/skills/ui-rules/SKILL.md)) — owns the **icon-only-button** decision rule this skill applies.
 - A stack's `accessibility` ([Blazor](../../frontend/blazor/skills/accessibility/SKILL.md) · [React](../../frontend/react/skills/accessibility/SKILL.md)) — owns the accessible-name **mechanics** for meaningful icons.
-- A stack's `seo-discoverability` ([Blazor](../../frontend/blazor/skills/seo/SKILL.md) · [React](../../frontend/react/skills/seo/SKILL.md)) — emits the `og:image` / `twitter:card` tags for the social image designed here.
+- A stack's `seo` ([Blazor](../../frontend/blazor/skills/seo/SKILL.md) · [React](../../frontend/react/skills/seo/SKILL.md)) — emits the `og:image` / `twitter:card` tags for the social image designed here.
 - [`design:corpus`](../ui-ux-pro-max/SKILL.md) — the 105-icon `icons` domain, with semantic role and allowed contexts per glyph.

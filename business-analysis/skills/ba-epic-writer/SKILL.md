@@ -1,6 +1,6 @@
 ---
 name: epics
-description: Use when slicing a scoped requirements document into capability-sized epics (measurable goal, how we get there, the stories included). Triggers "write an epic for X", "slice this into epics". Not for stories with AC (stories).
+description: Use when slicing a requirements document into capability-sized epics (measurable goal, route, stories included). Triggers "write an epic for X", "slice this into epics". Not for stories (stories).
 ---
 
 # Epic Writer

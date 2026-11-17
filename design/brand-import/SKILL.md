@@ -90,14 +90,16 @@ When you need a worked example or a stand-in brand to demonstrate the pipeline, 
 
 ## Review checklist
 
-- Every **stated** brand value is captured as a primitive with print/original values kept as provenance; nothing brand-visible was silently changed.
-- Brand values are **normalized into semantic roles**, not read directly by components; the brand primary is one accent, not five roles at once.
-- The **status set is disjoint** from brand tokens even when the brand offers a matching hue.
-- Gap-filled values are **derived in the brand's voice** (neutrals hold the brand's temperature; status colors sit in its register; the type scale suits its character) — no generic defaults imported.
-- **Dark mode** is a deliberate semantic remap, not an inversion; contrast is **re-verified per theme**.
-- **Contrast failures** on brand pairs are flagged for the owner, not fixed by recoloring the brand.
-- The **fidelity mode is stated**, and gap-fill latitude matches it.
-- The output notes that **composition/signature/hero remain per-brief** (`visual-identity`).
+Numbered because audit finding ids cite the numbers: new checks are appended, and none is renumbered or removed (a retired check keeps its number and says *retired*).
+
+1. Every **stated** brand value is captured as a primitive with print/original values kept as provenance; nothing brand-visible was silently changed.
+2. Brand values are **normalized into semantic roles**, not read directly by components; the brand primary is one accent, not five roles at once.
+3. The **status set is disjoint** from brand tokens even when the brand offers a matching hue.
+4. Gap-filled values are **derived in the brand's voice** (neutrals hold the brand's temperature; status colors sit in its register; the type scale suits its character) — no generic defaults imported.
+5. **Dark mode** is a deliberate semantic remap, not an inversion; contrast is **re-verified per theme**.
+6. **Contrast failures** on brand pairs are flagged for the owner, not fixed by recoloring the brand.
+7. The **fidelity mode is stated**, and gap-fill latitude matches it.
+8. The output notes that **composition/signature/hero remain per-brief** (`visual-identity`).
 
 ## Related
 

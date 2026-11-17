@@ -25,11 +25,11 @@ Without the KB there is nothing to sweep against — the value scales with what 
 
 ## Contract with the KB
 
-Per `business-analysis/skills/ba-project-memory`: **read first** — `INDEX.md`, `interaction-map.md` (don't re-litigate resolved conflicts), `glossary.md`, and every flow/entity/decision file the new feature plausibly touches. **Update after** — findings and resolutions into `interaction-map.md`, plus `active-context.md` + INDEX.
+Per `business-analysis/skills/ba-project-memory`: **read first** — `INDEX.md`, `interaction-map.md` (don't re-litigate resolved conflicts), `glossary.md`, every flow/entity/decision file the new feature plausibly touches, and `events.md`, `shared-data.md` and `invariants.md` where they exist (the pair list is built from them). **Update after** — findings and resolutions into `interaction-map.md`, plus `active-context.md` + INDEX.
 
 ## Procedure
 
-> **Audit form (no new feature).** On the "periodic audit / refresh the model" trigger there is no feature to normalize, so **§1 is skipped** and the pair list (§2) is the KB's own **open surface** rather than a feature × KB cross: unresolved `CONF-` entries, `?` cells in entity grids, `[TBD]`/undeclared hit policies in decision tables, and unverified `#inferred` items. §3 (taxonomy), §4 (boundary condition per finding), and §5 (severity table + recorded resolutions) are unchanged. Pair the refresh procedure in `business-analysis:knowledge-base` first (reconcile drift, prune, re-verify `#inferred`), then sweep that open surface.
+> **Audit form (no new feature).** On the "periodic audit / refresh the model" trigger there is no feature to normalize, so **§1 is skipped** and the pair list (§2) is the KB's own **open surface** rather than a feature × KB cross: unresolved `CONF-` entries, `?` cells in entity grids, `[TBD]`/undeclared hit policies in decision tables, the connection layer's open checks (unconsumed events, orphan reactions, `unhandled`/`?` failures and modes, unenforced invariants, CRUD gaps), and unverified `#inferred` items. §3 (taxonomy), §4 (boundary condition per finding), and §5 (severity table + recorded resolutions) are unchanged. Pair the refresh procedure in `business-analysis:knowledge-base` first (reconcile drift, prune, re-verify `#inferred`), then sweep that open surface.
 
 ### 1. Normalize the new feature
 

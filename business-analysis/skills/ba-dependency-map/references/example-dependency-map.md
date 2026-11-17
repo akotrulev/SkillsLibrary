@@ -83,9 +83,15 @@ What it demonstrates: one trigger, "a member cancels a booking" (EVT-002), reach
 
 ## Joined artifacts
 
-### `entities/accrued-charge.md` — transition grid (ENT-003)
+### `entities/accrued-charge.md` — states and transition grid (ENT-003)
 
-Columns are trigger ids from `events.md`. Cell = target state `(owning feature id)` · `—` = illegal by decision · `?` = unspecified (finding).
+| State | Meaning | Initial? | Terminal? | Source |
+|---|---|---|---|---|
+| Accrued | a shortfall priced, not yet charged | yes | no | `CreditPricingService.cs:55` `#observed` |
+| Posted | charged in the monthly posting | no | ? | `OverageChargeJob.cs:44` `#observed` · [TBD - INV-003] |
+| Removed | returned on cancellation, never charged | no | yes | `BookingCancelledHandler.cs:31` `#observed` |
+
+Accrued is `Initial?` `yes` because RX-004's effect creates the accrual in it (`ENT-003 — → Accrued`). Columns are trigger ids from `events.md`. Cell = target state `(owning feature id)` · `—` = illegal by decision · `?` = unspecified (finding).
 
 | State \ Trigger | EVT-005 (via RX-004) | EVT-006 | EVT-007 |
 |---|---|---|---|

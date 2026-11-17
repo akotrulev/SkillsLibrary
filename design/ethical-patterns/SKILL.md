@@ -7,9 +7,9 @@ description: Use when a flow asks for money, consent, data or permissions, or is
 
 Owns the design of every moment the interface asks the user to **give** something — money, consent, personal data, a device permission, their continued subscription — and the review of those moments for deceptive design. Everything else in `design/` optimizes for the user getting their task done; this one governs the places where the product's interest and the user's diverge, which is exactly where good craft quietly becomes manipulation.
 
-**This is no longer a values conversation.** The EU **Digital Services Act, Article 25** prohibits dark patterns outright — naming three categories of autonomy violation: **deception, manipulation, and distortion or impairment** of the user's ability to make free choices. The US FTC treats them as unfair or deceptive acts under §5; its **September 2025 settlement with Amazon was $2.5 billion**, and the complaint turned on two design decisions: enrolment repeatedly pushed during checkout with the opt-out obscured, and a cancellation flow of **four pages, six clicks, and fifteen options**. GDPR/ePrivacy consent must be a clear, unambiguous, freely given indication, separate from other terms, and free of confusing design.
+**This is no longer a values conversation.** The EU **Digital Services Act, Article 25** (Regulation (EU) 2022/2065) bars online platforms from interfaces that **deceive, manipulate, or otherwise materially distort or impair** the user's ability to make free and informed decisions — the three categories of autonomy violation. The US FTC treats them as unfair or deceptive acts under §5; its **September 2025 settlement with Amazon was $2.5 billion** (FTC, 2025), and the complaint turned on two design decisions: enrolment repeatedly pushed during checkout with the opt-out obscured, and a cancellation flow of **four pages, six clicks, and fifteen options** (FTC complaint, 2023). GDPR/ePrivacy consent must be a clear, unambiguous, freely given indication, separate from other terms, and free of confusing design.
 
-**Why a code-generating library needs this as a house rule, not a nicety:** measurement of LLM-generated e-commerce components found deceptive designs present **by default** — the patterns below are what a model reaches for when asked to "increase conversion" without constraint. An agent that writes UI needs the taxonomy as an explicit prohibition, because the training distribution supplies it as a suggestion.
+**Why a code-generating library needs this as a house rule, not a nicety:** measurement of LLM-generated e-commerce pages found deceptive designs present **by default**, from neutral prompts and with almost no warning (Krauß et al., CHI 2025) — the patterns below are what a model reaches for when asked to "increase conversion" without constraint. An agent that writes UI needs the taxonomy as an explicit prohibition, because the training distribution supplies it as a suggestion.
 
 **Corpus authority.** The facts this skill decides with come from the [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Consent, permission, and pricing flows are still UI, and the corpus's guideline rows carry the interaction and form rules the symmetry rules below are applied on top of:
 
@@ -60,8 +60,8 @@ If a flow fails symmetry, no amount of honest copy rescues it — the structure 
 
 - **State the total where the commitment happens** — the price the user will actually be charged, including fees and shipping, before the button that commits them.
 - **Recurring means saying so in the same breath as the price**: the amount, the interval, the first charge date, and what happens when a trial ends. Then again, before the first charge.
-- **Guest checkout exists.** Forced account creation is measured to cost roughly a third of customers, and it converts a purchase into a data collection.
-- **Ask only for the fields the order needs.** The average checkout carries **~15 fields against the 6–8 actually required** — every extra one is friction the user pays for and the product does not need.
+- **Guest checkout exists.** Forced account creation makes 18% of users drop out (Baymard, 2026), and it converts a purchase into a data collection.
+- **Ask only for the fields the order needs.** The average checkout carries **11.3 form fields against the 8 most sites need** (Baymard, 2024) — every extra one is friction the user pays for and the product does not need.
 - **One flat sequence, no steps within steps** — the most-cited single source of checkout confusion.
 
 ## Permissions and data
@@ -72,17 +72,21 @@ If a flow fails symmetry, no amount of honest copy rescues it — the structure 
 - **A refusal is a legitimate answer.** The feature degrades gracefully, states what is unavailable, and offers the path back if the user changes their mind.
 - **Disclose the use in the flow**, not only in the policy — what is collected, what it is for, who else sees it.
 
+**Figures** (the legal facts and the Money section): reviewed 2026-11; re-check by 2027-11.
+
 ## Review checklist
 
-- **Symmetry holds**: cancel/downgrade/unsubscribe cost no more than subscribe/upgrade/subscribe, and decline is as prominent as accept.
-- **Nothing that costs money, data, or privacy is preselected**; nothing is added to a basket by the system.
-- **Total cost, recurrence, and the first charge date** are visible at the point of commitment.
-- **No pattern from the taxonomy table** is present.
-- **Consent is granular, unbundled, refusable without penalty, and revocable in one place.**
-- **Permissions are primed, asked at the moment of value, minimal, and gracefully refusable.**
-- **Urgency and scarcity signals correspond to something real.**
-- **A refusal is remembered** — no re-ask on the next visit.
-- **Every decline control is a neutral verb** — no shaming, no double negative, no inverted checkbox.
+Numbered because audit finding ids cite the numbers: new checks are appended, and none is renumbered or removed.
+
+1. **Symmetry holds**: cancel/downgrade/unsubscribe cost no more than subscribe/upgrade/subscribe, and decline is as prominent as accept.
+2. **Nothing that costs money, data, or privacy is preselected**; nothing is added to a basket by the system.
+3. **Total cost, recurrence, and the first charge date** are visible at the point of commitment.
+4. **No pattern from the taxonomy table** is present.
+5. **Consent is granular, unbundled, refusable without penalty, and revocable in one place.**
+6. **Permissions are primed, asked at the moment of value, minimal, and gracefully refusable.**
+7. **Urgency and scarcity signals correspond to something real.**
+8. **A refusal is remembered** — no re-ask on the next visit.
+9. **Every decline control is a neutral verb** — no shaming, no double negative, no inverted checkbox.
 
 ## What NOT to do
 

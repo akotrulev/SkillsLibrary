@@ -29,7 +29,7 @@ Per `business-analysis/skills/ba-project-memory`: **read first** (`INDEX.md` + t
 
 ## Procedure
 
-1. **Identify the entity and enumerate its states** from the requirements *and* the existing KB model. States are business-meaningful conditions ("Submitted", "Suspended"), not implementation flags. A new feature inventing a near-synonym of an existing state ("Deactivated" vs "Suspended") is terminology drift → glossary check before adding.
+1. **Identify the entity and enumerate its states** from the requirements *and* the existing KB model. States are business-meaningful conditions ("Submitted", "Suspended"), not implementation flags. A new feature inventing a near-synonym of an existing state ("Deactivated" vs "Suspended") is terminology drift → glossary check before adding. Mark each state **`Initial?`** — `yes` for a state the entity is created in, the target of a `creates <Entity>` or `ENT-nnn — → <State>` effect in `events.md` (from code, the state the create path writes) — and **`Terminal?`** — `yes` when no transition leaves it by decision. What the source does not say is `?`.
 2. **Enumerate the events** — everything any feature does that can move the entity: user actions, system events, timeouts, lifecycle jobs (archival, cleanup, expiry — the classically forgotten writers). Once `events.md` exists, each event is a trigger there and the column header carries its `EVT-` id; grids built earlier keep free-text headers until the map is built or refreshed.
 3. **Fill the grid — every cell.** For each `state × event`: the target state, `—` (illegal by decision), or `?` (unspecified — a finding). Never leave a cell blank.
 4. **Annotate every legal transition with its owning feature** — the feature whose requirements define it, written as an `E<n>`/`AREA-` id with a label per `business-analysis:knowledge-base`. One transition claimed by two features is a **double-fire** finding; a transition no feature owns is an orphan.
@@ -44,7 +44,7 @@ Per `business-analysis/skills/ba-project-memory`: **read first** (`INDEX.md` + t
 | **State interference** | feature B's behavior requires state S; feature A has a transition out of S (or deletes the entity) with no rule for B's in-flight work | state interference |
 | **Orphan transition** | a transition present in the model that no feature's requirements own — who does this? | gap |
 | **Silent `—` assumption** | a new feature's flow implies a transition the grid marks `—` or `?` | contradiction / gap |
-| **Unreachable / dead state** | a state with no inbound transitions, or no outbound ones that isn't terminal by decision | gap |
+| **Unreachable / dead state** | a state no grid cell targets whose `Initial?` is not `yes`, or a state whose row has no legal transition and no `?` whose `Terminal?` is not `yes` | gap |
 | **Guard conflict** | same transition, two features demand different guards ("only admin" vs "any owner") | contradictory rules / permission |
 
 Each finding gets a **boundary condition** — the concrete scenario where it bites ("subscription expires (A) while the upgrade payment (B) is mid-capture") — and goes to `business-analysis:conflict-check` for the severity table + resolution recording.
@@ -61,9 +61,10 @@ Each finding gets a **boundary condition** — the concrete scenario where it bi
 **Sources**: <refs> · **Features touching this lifecycle**: E1 checkout, E2 fulfillment, E4 refunds, AREA-007 archival
 
 ## States
-| State | Meaning | Terminal? | Source |
-|---|---|---|---|
-| Draft | in cart, not submitted | no | US40 |
+| State | Meaning | Initial? | Terminal? | Source |
+|---|---|---|---|---|
+| Draft | in cart, not submitted | yes | no | US40 |
+| Archived | kept for records only | no | yes | AREA-007 |
 
 ## Transition grid
 Cell = target state `(owning feature id)` · `—` = illegal by decision · `?` = unspecified (finding) · column header = the trigger's `EVT-` id in `events.md`, free text until the map exists
@@ -84,9 +85,11 @@ Cell = target state `(owning feature id)` · `—` = illegal by decision · `?` 
 - ⚠️ Assumption: archival skips Submitted orders `#inferred`
 ```
 
+An entity file in the older shape, with no `Initial?` column, gains it in place the next time it is edited, never regenerated.
+
 ## Standards
 
-The quality bar is the business-analysis rule files, not a list here: `business-model-entities.md` (one shared model per entity, every cell filled, one owning feature per transition, lifecycle jobs as events, guards with owner and source, a boundary condition per finding) plus the core `business-model.md`. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win.
+The quality bar is the business-analysis rule files, not a list here: `business-model-entities.md` (one shared model per entity, initial and terminal states marked, every cell filled, one owning feature per transition, lifecycle jobs as events, guards with owner and source, a boundary condition per finding) plus the core `business-model.md`. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win.
 
 ## Anti-example
 

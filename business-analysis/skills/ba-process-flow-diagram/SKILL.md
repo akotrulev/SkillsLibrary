@@ -59,19 +59,34 @@ The timeline is scaffolding; keep it in the flow file under "Event timeline" —
 ## Diagram
 ```mermaid
 flowchart TD
-    n1([Customer submits order]) --> n2{Stock available?}
-    n2 -->|yes| n3[Reserve stock]
-    n2 -->|no| n7([Order rejected — out of stock])
-    n3 --> n4[Capture payment]
-    n4 -->|captured| n5([Order confirmed])
-    n4 -->|declined| n6[Release stock] --> n8([Order rejected — payment])
+    subgraph customer [Customer]
+        n1([Customer submits order])
+    end
+    subgraph system [System]
+        n2{Stock available?}
+        n3[Reserve stock]
+        n5([Order confirmed])
+        n6[Release stock]
+        n7([Order rejected — out of stock])
+        n8([Order rejected — payment])
+    end
+    subgraph provider [Payment provider]
+        n4[Capture payment]
+    end
+    n1 --> n2
+    n2 -->|yes| n3
+    n2 -->|no| n7
+    n3 --> n4
+    n4 -->|captured| n5
+    n4 -->|declined| n6
     n4 -->|timeout 30s| n6
+    n6 --> n8
 ```
 
 ## Steps
 | Node | Actor | Precondition | Action | Postcondition | Source |
 |---|---|---|---|---|---|
-| FLOW-001.4 | System | stock reserved | capture payment via provider | payment captured or declined or timed out | US42 AC2 |
+| FLOW-001.4 | Payment provider | stock reserved | capture the payment | payment captured or declined or timed out | US42 AC2 |
 
 ## Event timeline
 Order Placed → Stock Reserved → Payment Captured *(pivotal — hands to fulfillment)* → …

@@ -268,7 +268,7 @@ Write it into §6 as `**Execution model:** <which> — <what settled it>`. Getti
 
 ### Step 7 — Non-functional targets
 
-Only what is known or decidable now; the rest are `[TBD - <owner>]` lines, which is useful information rather than a gap. Cover: expected scale (users, requests/sec, data volume, growth), latency expectations on the paths that matter, availability target, data retention and deletion obligations, compliance constraints (PII, PCI, residency, audit trail), and the security posture (tenancy isolation model, who can see whose data).
+Only what is known or decidable now; the rest are `[TBD - <owner>]` lines, which is useful information rather than a gap. Where `requirements.md` exists, its §4 quality targets are the source of these targets, cited in *Evidence*; a target it leaves `[TBD]` stays `[TBD]` here. Cover: expected scale (users, requests/sec, data volume, growth), latency expectations on the paths that matter, availability target, data retention and deletion obligations, compliance constraints (PII, PCI, residency, audit trail), and the security posture (tenancy isolation model, who can see whose data).
 
 **The tenancy model is load-bearing** — it decides table shape, every query, the auth model, and an entire class of security test. If the system is multi-tenant, the isolation approach is a blueprint decision, not a Step-2 detail.
 

@@ -70,15 +70,17 @@ Pick from **what the visitor must decide**, not from what looks impressive. The 
 
 ## Review checklist
 
-- The pattern was **chosen from the corpus against the visitor's decision**, not defaulted to hero-features-CTA.
-- The row was taken **whole** — section order, CTA placement, color strategy, effects, and conversion rules all applied.
-- **Proof precedes the ask**; the primary CTA appears in the hero region and again after the argument.
-- Exactly **one primary action**; secondary actions are visually secondary.
-- **CTA label contrast ≥ 4.5:1** against its own fill, verified rather than assumed.
-- Every **auto-moving element has prev/next + play/pause**, pauses on hover and focus, and stops under reduced motion.
-- **Hover-only value is also reachable without a pointer**; the pattern has a real mobile form, not a squeeze.
-- Every section maps to **content that actually exists** — no invented testimonials, no placeholder logo wall.
-- Staged patterns show a **progress indicator** and disclose one step at a time.
+Numbered because audit finding ids cite the numbers: new checks are appended, and none is renumbered or removed (a retired check keeps its number and says *retired*).
+
+1. The pattern was **chosen from the corpus against the visitor's decision**, not defaulted to hero-features-CTA.
+2. The row was taken **whole** — section order, CTA placement, color strategy, effects, and conversion rules all applied.
+3. **Proof precedes the ask**; the primary CTA appears in the hero region and again after the argument.
+4. Exactly **one primary action**; secondary actions are visually secondary.
+5. **CTA label contrast ≥ 4.5:1** against its own fill, verified rather than assumed.
+6. Every **auto-moving element has prev/next + play/pause**, pauses on hover and focus, and stops under reduced motion.
+7. **Hover-only value is also reachable without a pointer**; the pattern has a real mobile form, not a squeeze.
+8. Every section maps to **content that actually exists** — no invented testimonials, no placeholder logo wall.
+9. Staged patterns show a **progress indicator** and disclose one step at a time.
 
 ## Related
 

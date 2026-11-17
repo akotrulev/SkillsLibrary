@@ -23,6 +23,7 @@ Input: an owner id (`E<n>`, `AREA-nnn`) or a trigger id (`EVT-nnn`). Read `INDEX
 
 - **Depth:** two hops past the feature's own reactions. Go further where an effect moves money or cannot be undone.
 - In lookup 4, copy every `—` and `?` cell of those rows into the third column. A `?` cell is an open question as well.
+- The entity file's *States* table marks each state `Initial?` (the entity is created in it) and `Terminal?` (nothing leaves it by decision), `yes`, `no` or `?`. A file in the older shape has no `Initial?` column: the creating trigger is then the `creates <Entity>` or `ENT-nnn — → <State>` effect in `events.md`.
 - `Built from:` reads `KB slice @ <the files' Created or Updated date>`.
 
 ## 2. Trace Edges → §8

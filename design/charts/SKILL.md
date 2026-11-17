@@ -73,7 +73,7 @@ A dashboard is read top-left first, in an F/Z scan. Compose to that, not as a un
 2. **One dashboard answers one question / serves one role.** An exec overview and an analyst's working view are two dashboards, not one crowded screen. Filters and drill-downs let the analyst dig without burdening the exec's summary.
 3. **Stat-tile anatomy** (the KPI card): **label** (what) → **value** (large, the one thing scanned) → **comparison** (delta vs prior period or target, with direction *and* whether up-is-good) → optional **sparkline/trend** for shape. A bare number with no comparison isn't a KPI — it's trivia; "1,204 orders" means nothing without "▲ 12% vs last week."
 4. **Information density is deliberate.** Remove chart junk (gridline clutter, redundant legends, borders, backgrounds) so ink maps to data. But don't strip context a reader needs (axis labels, units, the reference line). Whitespace groups related tiles; a heavy border does not.
-5. **Every data region has explicit loading / loaded / empty / error states.** A chart that silently renders nothing on no-data reads as "zero" — a lie. The *structure* of those states is the stack's `error-resilience`; the *words* in the empty/error state are [`design/ux-writing`](../ux-writing/SKILL.md) ("No orders yet" + how to get some, not "No data"). This skill's job: mandate that the four states exist and that empty ≠ zero ≠ error.
+5. **Every data region has explicit loading / loaded / empty / error states.** A chart that silently renders nothing on no-data reads as "zero" — a lie. The *structure* of those states is the stack's `error-handling`; the *words* in the empty/error state are [`design/ux-writing`](../ux-writing/SKILL.md) ("No orders yet" + how to get some, not "No data"). This skill's job: mandate that the four states exist and that empty ≠ zero ≠ error.
 
 ## Chart-element discipline
 
@@ -85,14 +85,16 @@ A dashboard is read top-left first, in an F/Z scan. Compose to that, not as a un
 
 ## Review checklist
 
-- Each chart answers **one** named question, and the chart family matches it (comparison→bar, trend→line, …).
-- No item from the **do-not list**: no pie past 5 categories (6 slices absolute max) or with slices within 5% of each other, no dual axis, no 3D, no truncated bar baseline, no rainbow ramp.
-- Viz palette is its **own** system — right kind (categorical/sequential/diverging) for the data, ≤6–8 categorical hues, colorblind-checked.
-- Categorical series are **disjoint from status colors**; the **brand accent** isn't an arbitrary data series.
-- Dashboard reads top-down in three bands (**KPIs → charts → detail**); serves one role.
-- Stat tiles carry **label + value + comparison** (up-is-good made explicit), not a bare number.
-- Every data region has **loading / loaded / empty / error** states; empty ≠ zero.
-- **Direct labels** where they fit; axes labeled with units; values not hidden only in tooltips.
+Numbered because audit finding ids cite the numbers: new checks are appended, and none is renumbered or removed (a retired check keeps its number and says *retired*).
+
+1. Each chart answers **one** named question, and the chart family matches it (comparison→bar, trend→line, …).
+2. No item from the **do-not list**: no pie past 5 categories (6 slices absolute max) or with slices within 5% of each other, no dual axis, no 3D, no truncated bar baseline, no rainbow ramp.
+3. Viz palette is its **own** system — right kind (categorical/sequential/diverging) for the data, ≤6–8 categorical hues, colorblind-checked.
+4. Categorical series are **disjoint from status colors**; the **brand accent** isn't an arbitrary data series.
+5. Dashboard reads top-down in three bands (**KPIs → charts → detail**); serves one role.
+6. Stat tiles carry **label + value + comparison** (up-is-good made explicit), not a bare number.
+7. Every data region has **loading / loaded / empty / error** states; empty ≠ zero.
+8. **Direct labels** where they fit; axes labeled with units; values not hidden only in tooltips.
 
 ## Related
 
@@ -101,5 +103,5 @@ A dashboard is read top-left first, in an F/Z scan. Compose to that, not as a un
 - [`design/ux-writing`](../ux-writing/SKILL.md) — the microcopy for empty/error states, stat-tile labels, and annotations.
 - [`observability/dashboards`](../../observability/dashboards/SKILL.md) — **ops/service** dashboards (RED / USE / golden signals). This skill owns *product* dashboards; that one owns operational ones.
 - [`qa/manual/quality-metrics`](../../qa/manual/quality-metrics/SKILL.md) — *defines* the metrics and SLO targets a dashboard then visualizes.
-- A stack's `error-resilience` ([Blazor](../../frontend/blazor/skills/error-handling/SKILL.md) · [React](../../frontend/react/skills/error-handling/SKILL.md)) — the loading/empty/error state *structure* this skill's composition rule depends on.
+- A stack's `error-handling` ([Blazor](../../frontend/blazor/skills/error-handling/SKILL.md) · [React](../../frontend/react/skills/error-handling/SKILL.md)) — the loading/empty/error state *structure* this skill's composition rule depends on.
 - [`design:corpus`](../ui-ux-pro-max/SKILL.md) — the 25-chart `chart` domain with per-type accessibility grades and library notes.

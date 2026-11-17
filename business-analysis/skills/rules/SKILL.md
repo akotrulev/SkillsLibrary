@@ -1,6 +1,6 @@
 ---
 name: rules
-description: Use when installing or updating the KB and backlog standards as path-scoped rules in .claude/rules/business-analysis/. Triggers "install the BA rules", "set up this project". Not for the KB protocol (knowledge-base).
+description: Use when installing or updating the KB and backlog rules in .claude/rules/business-analysis/. Triggers "install the BA rules", "set up this project". Not for the KB protocol (knowledge-base).
 argument-hint: "[replace | keep | beside]"
 ---
 

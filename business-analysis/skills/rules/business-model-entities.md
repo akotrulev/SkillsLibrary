@@ -3,7 +3,7 @@ paths:
   - "docs/business-model/entities/**/*.md"
 ---
 
-<!-- business-analysis rules v1 (2026-11-03): entity state grids. Installed by /business-analysis:rules; edit to fit this project. -->
+<!-- business-analysis rules v2 (2026-11-17): entity state grids. Installed by /business-analysis:rules; edit to fit this project. -->
 
 # Entity state-grid standards
 
@@ -11,7 +11,9 @@ Severity tags as in the core business-model rules: **blocker**, **major**, **min
 
 - One model per business entity, shared by every feature. A new feature's states and events are overlaid on it, never kept in a copy of their own. *blocker*
 - States are business conditions from the glossary ("Submitted", "Suspended"), not implementation flags. A near-synonym of an existing state is terminology drift. *major*
+- The States table marks every state `Initial?` (the entity is created in it: the target of a `creates <Entity>` or `ENT-nnn — → <State>` effect) and `Terminal?` (no transition leaves it by decision), each `yes`, `no` or `?`. An entity file without the `Initial?` column is in the older shape and gains it when next edited. *minor*
 - Every `state × event` cell is filled: the target state with its owning feature id, `—` (illegal by decision) or `?` (unspecified, a finding). Never a blank cell. *major*
+- A state no cell targets is unreachable unless it is `Initial?` `yes`; a state whose row holds no legal transition and no `?` is dead unless it is `Terminal?` `yes`. Both are gap findings. *major*
 - Events include lifecycle jobs (expiry, archival, cleanup), not only user actions. *major*
 - Once `events.md` exists, each column header is the trigger's `EVT-` id with a label. *minor*
 - Every legal transition names exactly one owning feature. Two owners is a double-fire finding; none is an orphan. *major*

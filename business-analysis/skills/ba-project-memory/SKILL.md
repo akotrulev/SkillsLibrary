@@ -73,6 +73,8 @@ Re-read **all** files, reconcile drift against the current requirements/codebase
 
 The standards every KB file must meet (what the KB holds, ids and traceability, feature identity, the annotation grammar, headers, provenance, recording decisions) are the business-analysis rule files, not a list here: `business-model.md` for every file under `docs/business-model/`, plus `business-model-flows.md`, `business-model-entities.md`, `business-model-decisions.md`, `business-model-connections.md` and `business-model-interactions.md` for those files. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win. Installed, they load in any session that touches the KB, so a plan task or `be-documenter` editing a KB file keeps it consistent without loading this skill.
 
+**The lint** checks the rules a script can (INDEX lines, ids, headers, grid cells, closed vocabularies, open conflicts listed): `python3 ${CLAUDE_PLUGIN_ROOT}/business-analysis/skills/ba-project-memory/scripts/kb-lint.py [<kb dir>]`. Run it as the last step of update-after. Fix every blocker and major (exit 1); one that is itself an open model finding (an orphan, an unconsumed event) stands only with its line in *Open questions*. Area guides are `doc-lint.py`'s.
+
 ## INDEX.md format
 
 ```markdown
@@ -100,6 +102,35 @@ Read this file first, every session. One line per artifact; read the ones your t
 ```
 
 An area line has this shape and no other: `- [<Area name>](areas/<name>.md) — AREA-nnn · <who, comma-separated> · <what a person does there, at most 20 words> · @ \`<sha>\``; `dev:doc-business-model`'s lint (`index-line`) checks it. The description is the area's row in the system overview's *Areas, by who uses them*. A line in the older style is edited into the shape in place, together with its guide when that guide is updated, never regenerated; entity, flow and decision lines keep their shape.
+
+## glossary.md and active-context.md format
+
+Every session reads and writes these two, so their shape is fixed here.
+
+```markdown
+# Glossary
+
+| Term (client) | Means | Called in code | Where the client sees it | Notes |
+|---|---|---|---|---|
+| Account | The billing relationship, not the login | — | invoice header | BRD §2 `#confirmed` |
+| Customer | **Drift:** the person (E1 accounts, US4) · the billing entity (E3 invoicing, US21) | — | — | CONF-004, open |
+```
+
+One row per term, in the client's words; the source and the confidence tag go in *Notes*. It is the table `dev:doc-business-model` writes from code, and a row authored from requirements leaves *Called in code* as `—`. A term with two meanings keeps both in its row, marked **Drift**, with the `CONF-` id of the terminology-drift finding; it is never merged.
+
+```markdown
+# Active context
+
+## Sessions
+### <YYYY-MM-DD> — <skill or agent>
+- <what changed, with the artifact ids; 1 to 3 bullets>
+
+## Open questions
+- <question> — <artifact id> · owner: <who can answer> · blocks: <what> · raised <YYYY-MM-DD>
+- CONF-005 — <the open conflict in one line> · owner: <who decides>
+```
+
+A new session entry goes directly under `## Sessions`, above the earlier ones. *Open questions* is the one list for the whole KB: every `[TBD]`, `?` cell and unresolved `CONF-` entry has a line there, and a line leaves the list only when its answer is written into the artifact it names.
 
 ## Feature slice
 

@@ -27,6 +27,10 @@ This skill owns the tier discipline — primitive → semantic → component, na
 
 Do **not** use it to *choose* the palette or type pairing (that decision is `visual-identity`), to write the actual CSS that consumes tokens (the stack's `styling`), or to pull a preset theme (`theme-presets`).
 
+## Native apps
+
+On a mobile or desktop app the discipline holds: the tier model, components read semantic tokens only, names by purpose, the status set disjoint from brand, bounded scales, theming as a semantic swap, contrast re-verified per theme. What does not transfer is the web delivery — CSS custom properties, `:root[data-theme]`, `clamp()`, CSS breakpoints. The platform's theme system is the semantic tier: iOS and macOS semantic colours, Material 3 tokens and `colorScheme` on Android (corpus `--stack jetpack-compose`: *Design system*, *Dark mode support*), `ThemeResource` on WinUI and resource dictionaries on WPF (`--stack winui` / `wpf`), typed tokens on React Native; Windows adds High Contrast as a third theme. Type steps are the platform's text styles; breakpoints are its size or window-size classes. A product shipping web and native from one source is the pipeline case *Delivery shape* names. Facts: those `--stack` rows, `--domain web` *Light/Dark Contrast*, `references/pro-rules.md` *Light/Dark Mode Contrast*, and the stack's `styling`.
+
 ## The tier model
 
 Three tiers, each with one job. A token in a lower tier **references** one in the tier above it — never a raw value, never a skip.
@@ -59,7 +63,7 @@ A token system is not "colors + a font." Cover these, each with a **scale** (a b
 | **Spacing** | one base unit (commonly 4px / `0.25rem`) and a geometric-ish ramp (`4 8 12 16 24 32 48 64`), not arbitrary pixels. Semantic aliases where useful (`--space-gutter`, `--space-section`). |
 | **Radius** | a small set (`none xs sm md lg pill`) — not a free-for-all of one-off `border-radius` values. |
 | **Elevation / shadow** | a stepped set (`raised overlay sticky modal`) tied to z-context, not hand-tuned `box-shadow`s per component. |
-| **Motion** | duration tokens (`fast base slow`, ~120/200/320ms) and easing tokens (standard/emphasized). Taste decides *whether/where* motion serves the subject (`visual-identity`); the durations/easings live here; the keyframe mechanics are the stack's `motion`. |
+| **Motion** | duration tokens (`fast base slow`, ~120/200/320ms) and easing tokens (standard/emphasized). Taste decides *whether/where* motion serves the subject (`visual-identity`); the durations/easings live here; the keyframe mechanics are the stack's `animation`. |
 | **Breakpoints** | the named breakpoint set as tokens, mirrored wherever the stack reads them (the stack's `responsive-design` owns the C# / query mechanics; the *values* are one source of truth here). |
 
 ## Theming as a swap set
@@ -87,13 +91,15 @@ The standards the token file must meet (this skill's, plus the brand-fidelity an
 
 ## Review checklist
 
-- Every literal value lives in a **primitive**; no raw hex / px / ms below that tier.
-- Components read **semantic** (or component) tokens — grep for primitives used directly in component styles → none.
-- Functional/status tokens are **purpose-named** (`--color-danger`) and **disjoint from brand** tokens.
-- Two tiers unless a real divergence justifies the third — no reflexive component-token-per-property.
-- Each category is a **bounded scale**, not ad-hoc values (spacing off one base, radius/shadow/motion from a small set).
-- Theming is a **semantic remap**; primitives don't fork; no component CSS changes per theme; no `invert()`.
-- Delivery is **CSS custom properties** unless a real multi-platform / Figma-sync pipeline justifies DTCG JSON.
+Numbered because audit finding ids cite the numbers: new checks are appended, and none is renumbered or removed (a retired check keeps its number and says *retired*).
+
+1. Every literal value lives in a **primitive**; no raw hex / px / ms below that tier.
+2. Components read **semantic** (or component) tokens — grep for primitives used directly in component styles → none.
+3. Functional/status tokens are **purpose-named** (`--color-danger`) and **disjoint from brand** tokens.
+4. Two tiers unless a real divergence justifies the third — no reflexive component-token-per-property.
+5. Each category is a **bounded scale**, not ad-hoc values (spacing off one base, radius/shadow/motion from a small set).
+6. Theming is a **semantic remap**; primitives don't fork; no component CSS changes per theme; no `invert()`.
+7. Delivery is **CSS custom properties** unless a real multi-platform / Figma-sync pipeline justifies DTCG JSON.
 
 ## Related
 

@@ -1,6 +1,6 @@
 ---
 name: rules
-description: Use when installing or updating the design-token and UI-copy standards as path-scoped rules in .claude/rules/design/. Triggers "install the design rules", "set up this project". Not for building tokens (tokens).
+description: Use when installing or updating the design-token and UI-copy rules in .claude/rules/design/. Triggers "install the design rules", "set up this project". Not for building tokens (tokens).
 argument-hint: "[replace | keep | beside]"
 ---
 
@@ -8,7 +8,7 @@ argument-hint: "[replace | keep | beside]"
 
 Plugins cannot ship Claude Code rules, so this skill copies them into the project. Each rule file carries `paths:` frontmatter, and Claude Code loads it only once the session reads or edits a matching file, so a session that never opens the token file never pays for the token rules.
 
-The design plugin owns no source files: components, stylesheets and screens are governed by the `fe-*` and `mobile-*` rule sets. These two files cover only what those do not, the token system and the words in the message catalogs, and they load beside the stack's rules on a shared file without contradicting them.
+The design plugin owns no source files: components, stylesheets and screens are governed by the `fe-*`, `mobile-*` and `desktop-*` rule sets. These two files cover only what those do not, the token system and the words in the message catalogs, and they load beside the stack's rules on a shared file without contradicting them.
 
 | File (beside this SKILL.md) | Loads when the session touches |
 |---|---|
@@ -32,11 +32,11 @@ Where a step needs the user's answer or agreement and nobody is there to give it
    - Identical: up to date.
    - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer or a `replace` argument.
 5. **Fit the paths to where this project keeps its tokens and its copy.** The defaults only catch files named for the purpose. Most apps keep tokens in a general stylesheet, and a glob as wide as `**/*.css` would load the token rules on every stylesheet, so propose **exact file paths**, never a wider pattern.
-   - **Tokens**: the files that define them. `git grep -l -E '^\s*--[a-z0-9-]+\s*:' -- '*.css' '*.scss'`, kept to those with a `:root`, `[data-theme` or `@theme` block (a `globals.css`, `app.css`, `wwwroot/css/tokens.css`); `git grep -l '"\$value"' -- '*.json'` for DTCG files; the theme file of a component library (`git grep -l -e 'createTheme(' -e 'extendTheme(' -e 'MudTheme'`). In a mobile app, the Compose `ui/theme/Color.kt` and `Type.kt`, an iOS `*.xcassets/**/*.colorset/Contents.json`, a React Native `theme.ts`. Propose each one as a literal path (`"apps/web/src/app/globals.css"`).
-   - **Copy**: the catalogs the UI reads. next-intl `messages/`, i18next `locales/`, a Blazor or MAUI client's `Resources/**/*.resx`, `*.po`, `*.xlf`, `*.arb`. Scope a `.resx` glob to the UI project (`"src/Shop.Client/Resources/**/*.resx"`), never a bare `**/*.resx`, which also catches a backend's resource files. If a default glob matches something that is not UI copy (a `messages/` folder of queue schemas), narrow it to the UI app's directory.
+   - **Tokens**: the files that define them. `git grep -l -E '^\s*--[a-z0-9-]+\s*:' -- '*.css' '*.scss'`, kept to those with a `:root`, `[data-theme` or `@theme` block (a `globals.css`, `app.css`, `wwwroot/css/tokens.css`); `git grep -l '"\$value"' -- '*.json'` for DTCG files; the theme file of a component library (`git grep -l -e 'createTheme(' -e 'extendTheme(' -e 'MudTheme'`). In a mobile app, the Compose `ui/theme/Color.kt` and `Type.kt`, an iOS or macOS `*.xcassets/**/*.colorset/Contents.json`, a React Native `theme.ts`. In a Windows app, the XAML `ResourceDictionary` that holds the colours and brushes (`git grep -l -e 'ThemeDictionaries' -e '<SolidColorBrush' -- '*.xaml'`). Propose each one as a literal path (`"apps/web/src/app/globals.css"`).
+   - **Copy**: the catalogs the UI reads. next-intl `messages/`, i18next `locales/`, a Blazor, MAUI or WPF client's `Resources/**/*.resx`, a WinUI app's `Strings/**/*.resw`, `*.po`, `*.xlf`, `*.arb`. Scope a `.resx` glob to the UI project (`"src/Shop.Client/Resources/**/*.resx"`), never a bare `**/*.resx`, which also catches a backend's resource files. If a default glob matches something that is not UI copy (a `messages/` folder of queue schemas), narrow it to the UI app's directory.
    - Change the installed copies only with the user's agreement, and list each glob added or narrowed.
 6. **Check it will be committed**: `git check-ignore -q <root>/.claude/rules/design/design-tokens.md`. If it is ignored, say so; the rules then apply on this machine only.
-7. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`) and the other `.claude/rules/` folders (`fe-react`, `fe-blazor`, `mobile-*`) for token or copy rules that contradict these files (a Title Case house style, a third token tier the project mandates, a different dark-mode mechanism), and list them. A written contradiction is the user's to settle.
+7. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`) and the other `.claude/rules/` folders (`fe-react`, `fe-blazor`, `mobile-*`, `desktop-*`) for token or copy rules that contradict these files (a Title Case house style, a third token tier the project mandates, a different dark-mode mechanism), and list them. A written contradiction is the user's to settle.
 
 ## Report
 
