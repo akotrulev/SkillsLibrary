@@ -1,21 +1,39 @@
 ---
-description: Run the free/open-source Metasploit Framework assessment workflow against a repo — three parallel readers derive the deploy profile (ports/services · dependency-CVE leads · app/auth fingerprint), one agent synthesizes the Framework setup + per-surface test plan with ready-to-paste operator commands, and a completeness critic checks it. Static planning only: it reads source, touches no live target, runs no exploit, and stops at the authorization gate. Live acts are operator-run via /penetration-testing:pentest.
-argument-hint: [the repo path to assess, and optionally the deployed lab target hint]
+description: Assess a repo end to end with the free/open-source Metasploit Framework. First a static pass profiles the repo (services/ports · dependency-CVE leads · app/auth fingerprint) and synthesizes a per-surface test plan. Then, against the repo's OWN deployment — which the command starts if it is not already running — it runs the testing live: non-destructive enumeration and default-credential checks directly, with any destructive/exploit/payload step handed off to the operator. Owned lab or isolated UAT targets only; leaves the environment as it found it.
+argument-hint: [the repo path to assess; optionally how its deployment is reached if not localhost]
 ---
 
-Run the **free Metasploit Framework** repo-assessment workflow and present the engagement package.
+Assess a repo with the **free Metasploit Framework** end to end: profile it, **start its deployment if it isn't already running**, then **run the testing live** against that running stack.
 
-1. Invoke the workflow with the `Workflow` tool, pointing at the script and passing the repo:
-   `Workflow({ scriptPath: "${CLAUDE_PLUGIN_ROOT}/security/workflows/metasploit-framework-assessment.mjs", args: { repo: "<repo path from $ARGUMENTS>", targetHint: "<lab target hint if given>" } })`
-   (inside the SkillsLibrary repo itself, use `security/workflows/metasploit-framework-assessment.mjs`).
-2. When it returns, present the engagement package to the user: the **deploy profile**, the **setup** (Docker image pinned by digest · engagement-named `msfdb` workspace · the Framework MCP server read-only), the **test plan** (each test's module, the single proven outcome, and the ready-to-paste **operator command**), the **scope-file skeleton**, and the **out-of-reach** surfaces plus the critic's findings.
+## Target and authorization
 
-**Planning only — this crosses no gate.** The workflow reads source statically and executes nothing against a live target. Every live act is **operator-run**: the user commits the scope file (`docs/security/engagement-<NNN>.md`), re-confirms authorization, then runs the kill chain via `/penetration-testing:pentest` (or `/penetration-testing:provision` to stand up the toolchain first). Where a live step is gated or the assistant cannot run it, follow the **operator-handoff protocol** in `security/metasploit-setup/SKILL.md`: state the exact command, the user runs it, pastes the result back, and the run continues.
+This command runs **live modules against a real deployment**. Run it only against a target the user owns and is authorized to test — their **local lab or an isolated UAT**, never a shared or production host. Invoking it against your own repo's deployment *is* the authorization for the non-destructive battery (version/directory enumeration, single-pair default-credential checks). A genuinely destructive step — anything flagged `availabilityRisk`, or that delivers a payload/shell — is still gated: follow the **operator-handoff protocol** in `security/metasploit-setup/SKILL.md` — state the exact command, the user runs it, pastes the result back, and the run continues.
+
+## Procedure
+
+1. **Resolve the repo** from `$ARGUMENTS`. If none was given, ask for it before doing anything.
+
+2. **Profile + plan (static — touches no host).** Invoke the workflow to read the source and produce the deploy profile and per-surface test plan:
+   `Workflow({ scriptPath: "${CLAUDE_PLUGIN_ROOT}/security/workflows/metasploit-framework-assessment.mjs", args: { repo: "<repo path>", targetHint: "<how its deployment is reached, if known>" } })`
+   (inside the SkillsLibrary repo itself, use `security/workflows/metasploit-framework-assessment.mjs`.) It maps services/ports, CVE leads, the auth surface, the test plan, the scope-file skeleton, and the out-of-reach surfaces.
+
+3. **Start the project if it is not already running.**
+   - **First read the repo to learn how *this* repo starts — do not assume.** Read the README (and any CONTRIBUTING / `docs/` / "getting started" guide), then the `Makefile`, `package.json` scripts, `docker-compose*.yml`, `.env.example` and any deploy workflow. Derive the repo's actual start procedure **and its prerequisites** (env file to copy, build step, DB migrations, seed) from what they say, not from a fixed default. The static profile from step 2, and the repo's own `run`/`dev:run` skill if it has one, feed this.
+   - **Check the run state before starting**, so an already-up stack is reused rather than double-started, and **record whether this command started it** (that decides teardown in step 6). For a compose repo that check is `docker compose ps`.
+   - **Run the discovered start procedure.** It is often `docker compose up -d --wait`, but only when that is in fact how the README/repo says to start it. If the repo gives no determinable way to start, ask rather than guess.
+   - Confirm the profile's services are actually listening, and note how they are reached. Compose typically binds to `127.0.0.1`; from a Metasploit container, reach the host via `host.docker.internal` (macOS/Windows) or `--network host` (Linux).
+
+4. **Run the testing live** against the running stack, working the plan's tests in order:
+   - Run the **non-destructive** modules directly (`http_version`, `dir_scanner`, single-pair `*_login` default-credential checks) and record each module's real result.
+   - For any test flagged `availabilityRisk` or that delivers a payload/shell, **do not run it** — hand it to the operator per the handoff protocol and continue on their pasted result. Verify a module exists (`search`) before asserting it.
+   - Keep loot out of the chat: report *that* a secret or working default credential exists, never its value.
+
+5. **Report the real outcome:** each test's actual module result next to the plan, the deploy profile, the out-of-reach surfaces, and the critic's findings. Call out anything that proved live — a default credential that worked, a service exposed beyond loopback.
+
+6. **Leave the environment as found.** If this command started the stack in step 3, stop it (`docker compose down`, or the matching stop command) once testing is done; if it was already running, leave it up. Say which.
 
 **The paid Metasploit Pro lane is a separate workflow**, planned in `docs/plans/` for later — this command is the Framework lane only.
 
-**Repo / target (required):**
+**Repo / target:**
 
 $ARGUMENTS
-
-If no repo path was given, ask for it before running anything.
