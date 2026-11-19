@@ -47,17 +47,23 @@ derived by `dev:plan-session-budget` while the task is being authored, not measu
 > **A task that touches both the API tree and the web tree is two tasks.** There is no mixed task at
 > any size, and no estimate justifies one.
 
-**Every task gates what it built.** Before it commits, a task builds what it touched and runs the tests
-for it: the tests it wrote, the acceptance tests it writes or must turn green (on a production build where
-they need one), and the coverage measure over the files it wrote. It leaves them green, fixing what stands
-in the way whichever task caused it. Its `**Gate:**` line names those exact commands. It does not run the
-project's whole suite, lint or typecheck beyond what those commands include. The last runnable task runs
-the whole set once more across the plan, ending with the coverage floor when the plan writes code, and
-**fixes what it finds rather than handing it back** by the fix loop (plan format §5). **The plan's last
+**Every task gates only its own tests.** Before it commits, a task builds what it touched and runs
+only its own tests, nothing more: the tests it wrote itself in this plan plus the acceptance tests bound to
+its own deliverable (the `Q` tests for its own endpoint or screen, usually one to three files), on a small core budget, on ports of its own and
+never under a machine-wide test lock, so two or three tasks gate at once. A non-frontend task runs its own
+unit and integration tests and its bound API acceptance tests plus typecheck, lint and format over what it
+touched, no e2e; a frontend or mobile task (and a `Q` journey task) runs only its own and its bound spec
+files on one or two workers, after the production build. None runs an earlier task's tests, another task's
+acceptance tests, the smoke suite or a coverage run. It leaves its tests green, fixing what stands in the way whichever task caused it. Its `**Gate:**`
+line names those exact commands. The last runnable task is the plan's one run under the lock: the smoke
+suite plus every test the plan wrote, then the whole set once more, ending with the coverage floor when
+the plan writes code, and it **fixes what it finds rather than handing it back** by the fix loop (plan
+format §5). The project's whole e2e suite runs in its nightly CI run; each test red there goes on the
+project's tracked list with an owner and comes off it only when a nightly run is green for it. **The plan's last
 task is the documentation task** (`DOC1`, the documenter agent), which updates the documentation from
-the code that landed, writes the delivery note and files the plan. An implementation task's gate also reruns the acceptance tests earlier tasks turned green
-in the same app, through the runner the last task's gate uses, so that loop stays short. It holds no feature work when the plan has any. A plan stopped halfway has
-each landed task's own tests green, but the whole suite has not run. See Step 4.
+the code that landed, writes the delivery note and files the plan. It holds no feature work when the plan has any. A plan stopped halfway has
+each landed task's own tests green, but the whole suite has not run, and the acceptance tests written by
+`Q` tasks have not run together until the gate task. See Step 4.
 
 And one property decides the shape of the sequence: **how the plan will be executed**. User-facing work
 is sequenced *feature-complete* by default — the tasks for one capability run consecutively and the last
@@ -301,7 +307,7 @@ test red on `not-implemented`, and record the reason. Do not run the unfiltered 
 `be-dotnet:opentelemetry`, `be-dotnet:structured-logging`
 **Deliverable:** the five Orders endpoints are live and reachable — a caller with the `orders:write`
 permission can place, cancel and close an order, and list or get their own — the 14 Orders acceptance
-tests from Q1 pass, and B3's unit tests cover ≥ 80% of its branches.
+tests from Q1 pass, and B3's unit tests cover its branches.
 **Depends on:** C1 (schema, auth wiring, shared DTOs + error middleware), Q1 (the acceptance tests it turns green)
 **Budget:** ~110k — CLAUDE.md 25k, `api-surface.md` §5 and two `data-model.md` entity blocks 6k,
 3 skills 24k, `src/Billing/*` as the module pattern ~14k, 6 files created and 1 modified 13.5k,
@@ -434,7 +440,7 @@ Rules:
   not-implemented response, never a fake success or an empty list.
 - **Tasks are implementation, and `Q` tasks write the acceptance tests before it.** In a test-first plan
   a `qa-*` task writes the API and journey acceptance tests against the stubs, before the implementation
-  they specify, and an implementation task turns the ones its deliverable names green, starting whatever
+  they specify, and an implementation task turns green the ones its deliverable names, starting whatever
   they need. Running the whole suite and any manual verification stay with the last runnable task. Unit
   tests are part of the implementation task, not a separate one.
 - **An implementation task names its signals.** Where a `be` task adds an entry point, an outbound call, a
@@ -452,8 +458,9 @@ Rules:
   `TP-` rows bound to its agent; the last runnable task checks each plan's Definition of Done.
 - **Test-first deliverables name the tests.** A `Q` task's deliverable names its tests and their red
   reason; an implementation task's deliverable names the `Q` tests it turns green. Every own-tests
-  command is filtered by file or class — never the unfiltered suite — and the `Q` task's `As built`
-  lists the filter each implementation task uses.
+  command is filtered by file or class — never the unfiltered suite — and runs only the tests the task
+  wrote and the `Q` tests bound to its deliverable; the `Q` task's `As built` lists the filter each
+  implementation task uses.
 
 ### Step 5 — The task table
 
@@ -513,8 +520,8 @@ The task graph maps 1:1 — the streams in §2 become MC's lanes, each task keep
 `stream` and `order` alongside its `deliverable`, `agent`, `skills`, `files` and
 `dependsOn`, and the open questions below carry their options. There is no grouping
 level: ordering is the `order` sequence, and every prerequisite is an explicit
-`dependsOn` edge. Every task gates what it built: its `Gate:` line names the commands
-it runs before it commits, and no earlier task runs the unfiltered suite, so a lane's
+`dependsOn` edge. Every task gates only its own tests: its `Gate:` line names the commands
+it runs before it commits, and no task runs an earlier task's tests, another task's acceptance tests or the unfiltered suite, so a lane's
 green covers its own tests. <the last runnable task> runs the whole set. MC's planner re-reads the target repo, so it may
 split a task it finds too large; that is expected and does not invalidate the
 sequence — the new pieces belong in the split task's own lane, and each needs its own
@@ -572,7 +579,7 @@ Run this **before** re-sequencing anything, when a plan and partially-built code
 
 **The governing rule: the plan is a lead, not evidence.** An `As built` note, a green pipeline, a commit message, a deleted prompt block and the header `Status:` line are all claims. A verdict is assigned only after reading the code **this session**.
 
-**A red build is a finding about the task that left it.** Every task gates what it built, so run the gate yourself and attribute each failure to the task that owns the file before assigning verdicts.
+**A red build is a finding about the task that left it.** Every task gates what it wrote, so run its gate yourself and attribute each failure to the task that owns the file before assigning verdicts.
 
 1. **Read the design pack**, so you know what was supposed to exist.
 2. **Walk each task** in the task table and look for its artifacts — the files it names, the migration, the endpoint, the registration.
@@ -619,13 +626,17 @@ that lands anything.>
 
 > **For agentic workers:** the tasks below are one flat sequence — work them in order. Each names the
 > agent that should execute it, the skills to load, and the one deliverable that means it is done.
-> **Every task gates what it built:** before it commits, it runs the commands its `Gate: own tests` line
-> names — the build of what it touched, its unit tests (≥ 80% of the branches it writes), the acceptance
-> tests it writes or must turn green, and the coverage measure over its files — and leaves them green,
-> fixing what stands in the way whichever task caused it. No earlier task runs the unfiltered suite. The
-> acceptance tests a `Q` task wrote are read-only to every later task but the gate. <The last runnable
-> task> runs the whole set once more and measures the coverage floor over the whole plan's change. A plan
-> stopped halfway has each landed task's own tests green, but the whole suite has not run.
+> **Every task gates only its own tests:** before it commits, it runs the commands its `Gate: own tests` line
+> names — the build of what it touched and only the tests it wrote itself plus the acceptance tests bound to
+> its deliverable (unit and integration, or its own and bound spec files for a frontend, mobile or journey
+> task), plus typecheck, lint and format over its files — on a small core budget and ports of its own, and
+> leaves them green, fixing what stands in the way whichever task caused it. No task runs an earlier task's
+> tests, another task's acceptance tests, the smoke suite or a coverage run. The acceptance
+> tests a `Q` task wrote are read-only to every later task but the gate. <The last runnable task> is the
+> plan's one run under the test lock: the smoke suite plus every test the plan wrote, the whole set once
+> more, and the coverage floor over the whole plan's change. A plan stopped halfway has each landed task's
+> own tests green, but the whole suite has not run, and the acceptance tests written by `Q` tasks have not
+> run together until the gate task.
 > **Update this document as you work** — the dated `As built` note on your task, the `Status:` line
 > above, and `## Decisions` for anything you built differently — rewrite the prompt blocks below yours
 > wherever what you landed differs from what they assume, commit, and only then **delete your own prompt

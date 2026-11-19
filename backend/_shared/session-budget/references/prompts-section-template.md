@@ -24,7 +24,7 @@ they disagree, the `As built` notes are right.
 | **Sections, never whole artifacts** | `api-surface.md` §5.3, not `api-surface.md`. This is the single biggest lever on the budget holding — a session told to read the pack reads the pack |
 | **Exact agent name, exact skill names** | The block is a binding, not a suggestion. An invented name is the most damaging defect here, same as in the plan |
 | **Every block carries its traps** | The two to four things specific to that task. This is what the prompt adds to the task block, and it is what earns it its place |
-| **Every block carries a gate line** | `Gate: own tests` with its filtered commands on every block that writes code or tests: a `Q` block expects red, any other expects green, and an implementation block also reruns the acceptance tests earlier tasks turned green in its app, through the runner the last block's gate uses. `Gate: none` only on a block with nothing runnable, saying so. The last block carries the whole set, in run order, its fix loop, and the instruction to fix what it finds |
+| **Every block carries a gate line** | `Gate: own tests` with its filtered commands on every block that writes code or tests: a `Q` block expects red, any other expects green, and every block runs only its own tests: the ones it wrote plus the acceptance tests bound to its own deliverable, on a small core budget and ports of its own, never under the test lock, and never an earlier task's tests, another task's acceptance tests, the smoke suite or a coverage run. `Gate: none` only on a block with nothing runnable, saying so. The last block carries the whole set, in run order, its fix loop, and the instruction to fix what it finds |
 | **An implementation block in a test-first plan repeats the read-only rule** | The acceptance tests are the spec; a block that omits the rule invites the session to pass a test by editing it |
 | **Every block ends with the close-out line** | `Close out per the plan's "Close-out — every task" before you stop.` — pointing at the section directly above this one, copied verbatim from plan format §7. Without it the section rots after the first session |
 | **A blocked task keeps its block** | It states its blocker and its owner. A deleted block reads as finished work — and it would file a plan that is still waiting |
@@ -42,8 +42,8 @@ they disagree, the `As built` notes are right.
 ## Prompts — one per task
 
 Run them in order, one session each. Every block is complete on its own — it names the agent, the
-skills, and the exact sections to read. **Every task gates what it built:** each block's `Gate:` line
-names its commands, and `<the last runnable task>` runs the whole set once more. <Anything no prompt may
+skills, and the exact sections to read. **Every task gates only its own tests:** each block's `Gate:` line
+names its commands, and `<the last runnable task>` is the plan's one run under the test lock: the smoke suite plus every test the plan wrote, then the whole set once more. <Anything no prompt may
 do — "none of them may start a real run; the user starts it.">
 
 **What runs together:** <one line — "After C1, B1 → B2 run beside Q1; F1 waits for both; F2 runs the whole set." Tasks that run together share one working tree: each commits only its own files, by path, and re-reads the plan before its close-out edits.>
@@ -92,16 +92,16 @@ Traps:
 - <the file that looks like the pattern but is not>
 - <the down-level API that does not exist in this project's version lane>
 
-Gate: own tests — before you commit, run `<the scoped build>` and `<the filtered tests>`, then read branch
-coverage over the files you wrote (plan-format.md §5) and write the tests a shortfall needs. Leave them
-green, fixing what stands in the way whichever task caused it, and name that task in `As built`. Do not
-run the unfiltered suite, or lint or typecheck beyond these commands.
-<An implementation block's acceptance command runs through the runner the last block's gate uses (the
-project's gate script, scoped to these files, where it has one), and its filter names the acceptance files
-of this task **and of every earlier task that turned tests green in the same app**: `<runner> <this task's
-specs> <earlier tasks' specs>`.>
-<In a test-first plan, an implementation block also names, under Deliverable, the `Q` tests it turns
-green, adds their filter to its commands, and carries the read-only paragraph below, verbatim. A block with
+Gate: own tests — before you commit, run `<the scoped build>` and `<the filtered tests you wrote>`, then
+`<typecheck, lint and format over the files you touched>`. Run only your own tests, on a small core budget
+and ports of your own, never under the test lock: not an earlier task's tests, another task's acceptance
+tests, the smoke suite or a coverage run. Leave them green, fixing what stands in the way whichever task
+caused it, and name that task in `As built`. Do not run the unfiltered suite.
+<A frontend or mobile block runs only its own spec files and its bound acceptance specs (usually one to
+three, on one or two workers, its own port, after the production build) instead of a backend's unit tests.>
+<In a test-first plan, an implementation block also names, under Deliverable, the `Q` tests bound to its
+own deliverable that it turns green, adds their filter to its commands (only those files), and carries the
+read-only paragraph below, verbatim. A block with
 nothing runnable, such as a docs-only task, says instead: `Gate: none — <why nothing here is runnable>.`>
 
 The acceptance tests a `Q` task wrote are the spec, and they are **read-only** to every later task
@@ -295,7 +295,7 @@ once more to close. Never rerun the whole set to check one fix. A failure that m
 defect in isolation (shared data, test order) or in the gate's scheduling: fix it in the code, shared
 setup you own or the gate script, never rerun until it happens to pass. Inside an acceptance test or
 fixture a `Q` task wrote it is read-only: record a dated `D<n>` with both readings and leave the test.
-A coverage shortfall is fixed by writing the missing tests — never by excluding a file that has logic
+The coverage floor is measured here, once, over the whole plan's change. A shortfall is fixed by writing the missing tests — never by excluding a file that has logic
 or lowering the number; record the figure per stack and every file left out.
 
 <Where the plan has `TD` tasks:> Check each test plan's §11 Definition of Done against what the run
@@ -402,8 +402,8 @@ The **workshop-booking** pack, caught after the contract wave has landed (its
 
 Run them one session each. Every block is complete on its own and opens with its `Depends on:` line.
 B1 and B2 share the .NET solution, so B2 waits for B1 and nothing runs beside anything. **Every task gates
-what it built:** each block's `Gate:` line names its commands. No block but F4's runs the unfiltered suite —
-F4 is the gate task: it runs the whole set once more for the plan and fixes what it catches. DOC1 then
+only its own tests:** each block's `Gate:` line names its commands. No block but F4's runs the unfiltered suite —
+F4 is the gate task: the plan's one run under the test lock, the smoke suite plus every test the plan wrote and then the whole set once more, and it fixes what it catches. DOC1 then
 updates the documentation from the merged code and files the plan.
 
 **Gates run locally.** Commit locally; ask before `git push`.
