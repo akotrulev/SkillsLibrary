@@ -54,7 +54,17 @@ dotnet new blazor -o MyApp --interactivity None
 
 ## Render-mode decision — per surface, not per app
 
-**Static SSR is the default. Interactivity is opt-in per surface.** A content page, an API-consuming dashboard, and a live ticker do not share a render mode. Decide per route:
+**Static SSR is the default. Interactivity is opt-in per surface.** A content page, an API-consuming dashboard, and a live ticker do not share a render mode. The route's rendering mode comes from the plan's `rendering_plan` (`experience-plan.md` §4a), or, with no plan, from the decision procedure in [`rendering-strategy.md`](../../../../backend/_shared/experience-plan/references/rendering-strategy.md). It maps to Blazor like this:
+
+| Plan mode | Blazor mechanism |
+|---|---|
+| `ssg` / `isr` | static SSR + `@attribute [OutputCache(Duration = <s>)]` with `app.UseOutputCache()` (no built-in static generation) |
+| `ssr` | static SSR |
+| `ssr-streaming` | static SSR + `@attribute [StreamRendering]` (net9+; `[StreamRendering(true)]` on net8), each streamed region with a sized placeholder |
+| `csr` | `@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))` |
+| island | per-component `@rendermode`, chosen by the tree below |
+
+Every island sets `data-hydrated="true"` on its own root in `OnAfterRenderAsync(firstRender)`, which runs only once it is interactive; the journey tests wait on it. **InteractiveServer holds a circuit per user**: keep it to internal tools with modest concurrency, and give public traffic WebAssembly or Auto. Then choose each island's interactivity:
 
 ```
 Does this surface need client interactivity at all?
@@ -187,7 +197,7 @@ The standards this skill's output must meet are the fe-blazor rule files, not a 
 
 - `dotnet build` — **0 warnings** (warnings-as-errors makes this real).
 - App **boots**: `dotnet run`, home page renders.
-- **One page per chosen render mode renders** — a static SSR page, and one interactive page per interactivity model in use (confirm the WASM page hydrates and the Server page opens a circuit).
+- **One page per chosen render mode renders** — a static SSR page, and one interactive page per interactivity model in use (confirm the WASM page hydrates and the Server page opens a circuit, `curl -s <route>` returns the static SSR content in the HTML, and each island's root gains `data-hydrated="true"`).
 - CPM resolves (no version on any `PackageReference`); `.editorconfig` present and enforced.
 
 ## Handoffs

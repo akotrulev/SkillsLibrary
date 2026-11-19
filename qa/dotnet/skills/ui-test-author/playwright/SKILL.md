@@ -88,6 +88,7 @@ namespace itself, because NUnit runs a `[SetUpFixture]` only for the namespace i
 | [`references/assertions.md`](references/assertions.md) | The web-first set (accessible name, role, classes, URL, aria snapshots), one expected condition, no one-shot reads, timeouts, `Expect(locator, "message")`, `Assert.ThrowsAsync`, HTTP responses |
 | [`references/emulation-and-mobile-web.md`](references/emulation-and-mobile-web.md) | `Playwright.Devices[...]`, touch, viewport, media features, locale, geolocation, `Page.Clock`, offline |
 | [`references/blazor.md`](references/blazor.md) | Blazor apps: wait for interactivity on a condition (enabled control or marker attribute, never `NetworkIdle` or polling `Blazor`), assert `#blazor-error-ui` hidden after every journey in a `BlazorTest` base |
+| [`references/server-rendered-pages.md`](references/server-rendered-pages.md) | SSR / SSG / streamed pages: wait for the `data-hydrated` signal before the first interaction, `PageHtmlClient` raw-HTML and `Cache-Control` tests per `rendering_plan` route, deferred-section and CSR deep-link tests |
 | [`references/trace-correlation.md`](references/trace-correlation.md) | One `traceparent` trace id per test on app-origin requests only (a scoped context route, never `extraHTTPHeaders`), and the failure link to the backend trace |
 | [`qa/dotnet/skills/api-test-author/writer/references/generation-checks.md`](../../api-test-author/writer/references/generation-checks.md) | The scenario × oracle table before any code, and the hallucination gate that reports every test id missing from the app source as `MISSING` |
 | [`assets/Directory.Packages.props`](assets/Directory.Packages.props), [`assets/UiTests.csproj`](assets/UiTests.csproj) | The pins in one place; a versionless project that picks up the runsettings |
@@ -98,6 +99,7 @@ namespace itself, because NUnit runs a `[SetUpFixture]` only for the namespace i
 | [`assets/LoginTests.cs`](assets/LoginTests.cs) | `Should_X_When_Y` tests, categories, pages built per test |
 | `assets/Components/Controls/`: [`DatePicker`](assets/Components/Controls/DatePicker.cs), [`Dropdown`](assets/Components/Controls/Dropdown.cs), [`Combobox`](assets/Components/Controls/Combobox.cs), [`DataGrid`](assets/Components/Controls/DataGrid.cs), [`GridRow`](assets/Components/Controls/GridRow.cs) | Control components built from their root, with intent methods |
 | [`assets/OrdersPage.cs`](assets/OrdersPage.cs), [`assets/OrdersTests.cs`](assets/OrdersTests.cs) | A page composing a date filter, a status dropdown and a grid; tests that seed an order through `Page.APIRequest` in `[SetUp]`, delete it in `[TearDown]` and pick its row by content |
+| [`assets/PageHtmlClient.cs`](assets/PageHtmlClient.cs), [`assets/RenderingTests.cs`](assets/RenderingTests.cs) | The raw-HTML client built from `Page.APIRequest`; tests that assert a server-rendered route's content and `Cache-Control` on its raw HTML ([`references/server-rendered-pages.md`](references/server-rendered-pages.md)) |
 
 Start from the assets: copy them, rename the root namespace, and keep their shape.
 

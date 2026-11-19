@@ -422,6 +422,13 @@ Rules:
   `design:app-structure` in its skills, and carries `experience-plan.md` §6's responsiveness budget as
   bullets verbatim; the capability's last task is usually this one, and its deliverable is the journey's
   behavioural sentence.
+- **Frontend tasks carry their routes' rendering spec.** A web `fe` task quotes the §4a
+  `rendering_plan` entries of its routes (mode, cache, server-rendered content, islands, deferred
+  sections) and their `acceptance` budgets, states that it may not change a route's `mode`, and its
+  `Gate:` adds the build-side checks of `experience-plan/references/rendering-strategy.md`
+  § Verification (no hydration warning, no-JS render, island-only bundle, budgets). The app-shell task
+  also sets the hydration signal the journey tests wait on. The raw-HTML and cache-header tests are the
+  `Q` journey task's, written red before the screens.
 - **`Not in <id>` per task** — mostly to keep the executing agent out of a peer's lane, and to name
   what a contract-first stub is waiting for. A stub with no behaviour yet returns an explicit
   not-implemented response, never a fake success or an empty list.
@@ -677,7 +684,7 @@ that lands anything.>
    capability has a last task whose deliverable says behaviourally what a user can then do, and the run
    of tasks ending there covers everything on the Step-1 capability set — including its screens and what
    makes it reachable, not only its endpoints. Every frontend task cites its screen ids and inherits the
-   responsiveness budget.
+   responsiveness budget; every web frontend task quotes its routes' §4a rendering spec.
 5. Every task binds to an **exact** catalog agent name and exact skill names.
 6. Every task carries `Epic`, `Story` and `Stack`; every `Stack` is exactly one of the eight values;
    every `Epic` resolves in `epic-map.md` and every non-`E0` `Story` resolves in `stories.md`. No task

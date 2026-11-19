@@ -16,7 +16,7 @@ Wait for a condition the app exposes once it is interactive — never for time:
 | The app renders | The test waits with |
 |---|---|
 | Controls disabled until interactive: `disabled="@(!RendererInfo.IsInteractive)"` (.NET 9+) | `await Expect(checkout.SubmitButton).ToBeEnabledAsync();` |
-| A marker set after the first interactive render (.NET 8, or any version): the component renders `data-interactive="true"` on its root once `OnAfterRenderAsync(firstRender)` has run in an interactive render mode | `await Expect(Page.GetByTestId("Checkout.Form")).ToHaveAttributeAsync("data-interactive", "true");` |
+| A marker set after the first interactive render (.NET 8, or any version): each interactive island sets `data-hydrated="true"` on its own root in `OnAfterRenderAsync(firstRender)`, which runs only in an interactive render mode | `await Expect(Page.GetByTestId("Checkout.Form")).ToHaveAttributeAsync("data-hydrated", "true");` |
 
 - Put the wait in the page object's `GoToAsync()` (or its optional `ExpectLoadedAsync()`), so every test that
   opens the page starts on an interactive page and no test repeats it.
@@ -28,6 +28,8 @@ Wait for a condition the app exposes once it is interactive — never for time:
 - **Never** poll the JavaScript runtime (`WaitForFunctionAsync("typeof Blazor !== 'undefined'")` or similar): the
   `Blazor` object exists before components become interactive, and the check couples the test to framework
   internals.
+
+The raw-HTML tests for prerendered routes are in [`server-rendered-pages.md`](server-rendered-pages.md).
 
 ## 2. Assert the error UI is hidden after every journey
 

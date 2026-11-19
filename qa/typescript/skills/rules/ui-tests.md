@@ -18,7 +18,9 @@ Severity tags as in the core rules. The codebase wins where it consistently does
 - Scope a locator that matches many; `nth()`/`first()` only where order is the behaviour; `exact: true` on ambiguous names; `visible()` over `:visible`. Never assert on an `or()` locator. *major; minor for the last two*
 - Specs get pages from fixtures and never call raw `page.*`. No `BasePage` until three pages share real behaviour. *major*
 - Web-first assertions only; no one-shot read compared later (`textContent()`, `isVisible()`, `page.url()`), no `expect.poll` where a locator assertion works. *major*
-- No `networkidle`, `force: true`, `waitForNavigation`, redundant `waitFor()` before an action, or hand-rolled retry loop; `toPass` is bounded. Start `waitForResponse` before the action, await it after. *major*
+- No `networkidle`, `force: true`, `waitForNavigation`, redundant `waitFor()` before an action (the hydration wait is not one), or hand-rolled retry loop; `toPass` is bounded. Start `waitForResponse` before the action, await it after. *major*
+- On a server-rendered page the page object waits for the app's `data-hydrated="true"` (on `<body>`, or on the island's root) before the first interaction; never visibility, a sleep or `networkidle`. No signal is a `missing-testids.md` row for `fe-*`. *major*
+- Server-rendered content and `Cache-Control` are asserted on the raw HTML fetched through a page-HTML client, per `rendering_plan` route; a spec never calls `request.get`. *major*
 - Overlays use `addLocatorHandler`, not `if (await x.isVisible())`. *major*
 - Sign in once per role in a setup project; records come from the API in a fixture and are deleted in its teardown. *major*
 - Tags go in the details object (`{ tag: '@smoke' }`), never the title. *nit*

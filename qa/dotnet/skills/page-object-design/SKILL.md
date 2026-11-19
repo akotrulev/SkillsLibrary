@@ -75,6 +75,8 @@ Avoid:
 
 A wait for the app's own busy signal (loading bar gone, snackbar gone) is a named wait condition on the base page or the shell component (`WaitUntilLoadedAsync()`), called by the action that triggers the load, never by the test. Playwright needs one only where auto-waiting cannot see the signal; Selenium and Appium put it on the thin base.
 
+On a server-rendered page the hydration signal is a named wait too: `GoToAsync()` waits for `data-hydrated="true"` on `<body>`, and an intent method on a late-hydrating island waits on the island's own root, before it acts. Never visibility, never a sleep. Details: [`ui-test-author/playwright/references/server-rendered-pages.md`](../ui-test-author/playwright/references/server-rendered-pages.md).
+
 ### .NET driver-lifecycle implications for the design
 
 - Pages must not own their own driver lifetime — `BaseTest` owns it. Pages take the `IPage` / driver in the constructor and are built in the test class's `[SetUp]`, never as properties of `BaseTest`.

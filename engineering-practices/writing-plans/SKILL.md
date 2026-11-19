@@ -78,6 +78,15 @@ flow, what is measured, how it runs, what it reports. Real values, exact paths, 
 choice you make while writing them becomes a `**D<n>**` entry in `## Decisions` with what it costs, and
 any question you could not answer becomes an `## Open questions` row naming what it blocks.
 
+**A plan that adds or changes web routes decides their rendering here, per route.** Where an
+`experience-plan.md` exists, cite its §4a `rendering_plan` and change nothing in it. Otherwise write a
+`## Rendering per route` section with the `rendering_plan` block from
+[`backend/_shared/experience-plan/references/rendering-strategy.md`](../../backend/_shared/experience-plan/references/rendering-strategy.md):
+the signals, mode, cache and server-rendered content per route, checked against that file's
+anti-patterns. The pattern chosen is a `D<n>`. Every web `fe` task quotes its routes' entries, and
+the `Q` journey task asserts their server-rendered content on the raw HTML. Native mobile and
+desktop plans skip this.
+
 ## Step 2 — Map the files
 
 Before defining tasks, map out which files will be created or modified and what each is responsible
@@ -312,14 +321,18 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 13. **Filing check:** the documentation task's block carries the filing duty; where a blocked task will
     outlive it, that block says the plan stays in `docs/plans/` until it clears; the plan's own number was taken from the high-water mark across both
     folders.
-13. **Prompt check:** one block per task, in task order, each carrying the deliverable verbatim, an
+14. **Prompt check:** one block per task, in task order, each carrying the deliverable verbatim, an
     exact reading list with **sections** rather than artifacts, its traps, its gate line and its
     close-out line; `## Close-out — every task` is present verbatim. Read each block as if it were the
     only thing you had: if you would need the task above it to start, the block is incomplete. Every
     `Blocked on <id>` placeholder is matched by that task's duty to write it.
-14. **Acceptance-test order:** every acceptance test precedes the tasks that turn it green — each `Q`
+15. **Acceptance-test order:** every acceptance test precedes the tasks that turn it green — each `Q`
     task sits after the stubs it runs against and before the implementation its tests specify, and
     every implementation deliverable names the acceptance tests it turns green.
+16. **Rendering check:** every web route the plan adds or changes has a rendering entry (mode, cache,
+    signals, server-rendered content) in §4a of the experience plan or in `## Rendering per route`,
+    with no anti-pattern from `rendering-strategy.md`. Its `fe` task quotes that entry, and a `Q`
+    task asserts its server-rendered content on the raw HTML.
 
 Fix what you find inline. No need to re-review — fix and move on. A spec requirement with no task gets
 a task.

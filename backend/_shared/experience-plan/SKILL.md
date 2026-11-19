@@ -1,6 +1,6 @@
 ---
 name: plan-experience
-description: Use when an approved blueprint needs its UX planned (actors, journeys, screen map, screen specs, screen-endpoint matrix). Triggers "plan the screens". Not for endpoints (plan-api-surface).
+description: Use when an approved blueprint needs its UX planned (actors, journeys, screen map, screen specs, SSR/CSR rendering per route, screen-endpoint matrix). Triggers "plan the screens", "SSR or CSR for this route". Not for endpoints (plan-api-surface).
 ---
 
 # Experience Plan — what the user sees, before the API exists
@@ -92,6 +92,15 @@ Rules:
 - **Role differences live on the screen block**, never as a duplicate screen.
 - **Every screen names its test ids** — the PascalCase dot-separated ids of its interactive elements and list containers (`SessionDetail.BookButton`, `SessionDetail.AttendeeList`), static and never carrying an index, id or state, per the stack's `test-ids` rules. The journey tests' page objects and the screen both bind to these names, which is what lets a journey test exist before its screen.
 
+### Step 4a — Rendering plan (web only)
+
+**Rendering is decided per route, here, before any code.** Load [`references/rendering-strategy.md`](references/rendering-strategy.md) and run its decision procedure on every screen route: record the signals, the mode (`ssg` · `isr` · `ssr` · `ssr-streaming` · `csr`), the cache, the content that must be in the raw HTML, the islands and the deferred sections. Then choose the hybrid pattern and the stack mechanism that cover the whole set, and write the `rendering_plan` block in that file's output contract.
+
+- **The default when signals conflict** is server-rendered first view plus islands; a route is `csr` only when it is signed-in **and** a long-session working tool.
+- **A Vite SPA fits only when every route is `csr`.** One route that must be found by search puts the app on Next.js (or Blazor) with a route split.
+- **Reject any anti-pattern** in the file's last table before handing the plan on.
+- A mobile or desktop frontend skips this step: write `Rendering plan: n/a — native client`.
+
 ### Step 5 — Screen ↔ endpoint matrix
 
 Once `api-surface.md` is written (the API step fills this in and hands the file back), one row per screen-endpoint pair:
@@ -135,6 +144,15 @@ Once, at the end, from `ux-patterns` §5–§9: **density** (and why) · **accel
 ## 4. Screens
 <!-- one block per screen, S1…Sn, in nav order — route, nav, actors, page type, surface, primary action, regions, states, data needed, test ids, serves, journeys -->
 
+## 4a. Rendering plan
+**Pattern:** <route split | islands | streaming sections | SSR shell + client fetch> — <why, one line>
+```yaml
+rendering_plan:
+  stack: <nextjs-app-router | vite-spa | blazor>
+  routes: []   # one entry per screen route, per references/rendering-strategy.md's output contract
+  acceptance: []
+```
+
 ## 5. Screen ↔ endpoint matrix
 <!-- filled by the API step; every user-facing endpoint on ≥ 1 screen, every data need resolved -->
 | Screen | Endpoint | Purpose on this screen |
@@ -169,15 +187,16 @@ A test id is not a component name: `Test ids:` lines name the elements a person 
 3. Every screen block has route, page type, surface, primary action, regions with four states, and a data-needed line resolved against `data-model.md`.
 4. Every journey counts its steps against a stated target, names its failure exit and carries an `Acceptance:` line; every screen block carries a `Test ids:` line.
 5. After the API step: the matrix covers every user-facing endpoint and every data need — the two Step-7 coverage lines read `n/n`.
-6. No `[TBD]` without an owner; no colour, component or copy decision leaked in.
+6. Web: every screen route has a `rendering_plan` entry with its signals, mode and cache; every non-`csr` route lists its `server_rendered_content`; no route shows an anti-pattern from `references/rendering-strategy.md`.
+7. No `[TBD]` without an owner; no colour, component or copy decision leaked in.
 
 ## Handoffs
 
 - **→ `dev:plan-api-surface`** (next step) — §4's data-needed lines are its input; it returns to fill §5.
-- **→ `dev:plan-delivery`** — every frontend task binds `fe-react` / `fe-blazor` with `design:app-structure` in its skills, cites the screen ids it delivers, and inherits §6's budget as acceptance criteria; a capability's last task is worded from its journey.
-- **→ `fe-react` / `fe-blazor`** — takes §2–§4 as the IA decision in its Step 1 (validates, does not redesign; disagreement is a `delivery-plan.md` §7 deviation) and applies `design:app-structure` per page in Step 2.
+- **→ `dev:plan-delivery`** — every frontend task binds `fe-react` / `fe-blazor` with `design:app-structure` in its skills, cites the screen ids it delivers, and inherits §6's budget and its routes' §4a entries as acceptance criteria; a capability's last task is worded from its journey.
+- **→ `fe-react` / `fe-blazor`** — takes §2–§4a as the IA and rendering decision in its Step 1 (validates, does not redesign; a route's `mode` changes only through a dated `D<n>` the planner rules on) and applies `design:app-structure` per page in Step 2.
 - **→ `design/ux-review`** — at build review, cites the screen id / nav-map row a finding contradicts.
-- **→ `qa-test-case-designer` / `qa-ui-<stack>`** — the journeys are their end-to-end test basis.
+- **→ `qa-test-case-designer` / `qa-ui-<stack>`** — the journeys are their end-to-end test basis; §4a's server-rendered routes get raw-HTML and cache-header tests, its deferred sections fallback tests.
 
 ## Version policy
 

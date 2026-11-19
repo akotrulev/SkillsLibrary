@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 export class HomePage {
   readonly greeting: Locator;
@@ -9,5 +9,6 @@ export class HomePage {
 
   async goto(): Promise<void> {
     await this.page.goto('/');
+    await expect(this.page.locator('body')).toHaveAttribute('data-hydrated', 'true');
   }
 }

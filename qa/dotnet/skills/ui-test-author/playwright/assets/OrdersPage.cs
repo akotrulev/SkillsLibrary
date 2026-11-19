@@ -1,5 +1,6 @@
 using Example.UiTests.Components.Controls;
 using Microsoft.Playwright;
+using static Microsoft.Playwright.Assertions;
 
 namespace Example.UiTests.Pages;
 
@@ -21,7 +22,11 @@ public sealed class OrdersPage
 
     public DataGrid Orders { get; }
 
-    public async Task GoToAsync() => await _page.GotoAsync("/orders");
+    public async Task GoToAsync()
+    {
+        await _page.GotoAsync("/orders");
+        await Expect(_page.Locator("body")).ToHaveAttributeAsync("data-hydrated", "true");
+    }
 
     public async Task FilterAsync(DateOnly placedOn, string status)
     {

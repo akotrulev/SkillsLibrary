@@ -7,6 +7,8 @@ import com.microsoft.playwright.Page;
 
 import java.util.List;
 
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+
 public final class OrdersPage {
     private final Page page;
     private final DatePicker placedOn;
@@ -20,6 +22,7 @@ public final class OrdersPage {
 
     public void goTo() {
         page.navigate("/orders");
+        assertThat(page.locator("body")).hasAttribute("data-hydrated", "true");
     }
 
     public DatePicker placedOn() {

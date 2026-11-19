@@ -20,6 +20,8 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 
 **Test-first (a `Q` task in a plan):** load `qa/_shared/test-first`. The app is a stub or placeholder, and red on `not-implemented` is the expected result.
 
+**Server-rendered routes:** where the experience plan's §4a `rendering_plan` marks a route `ssg`, `isr`, `ssr` or `ssr-streaming`, also write its raw-HTML and cache-header tests through a `PageHtmlClient`, and wait for the `data-hydrated` signal before interacting (`ui-test-author/playwright/references/server-rendered-pages.md`).
+
 ## Live-page POM (a URL or HTML is handed over)
 
 Needs the Playwright MCP server registered as `claude mcp add --scope user playwright -- npx @playwright/mcp@0.0.85 --caps=testing,storage,devtools --isolated --output-dir=.playwright-mcp --redact-url-params=code,state,access_token,id_token`; a plugin agent cannot set server flags on itself. The version is pinned because these `tools:` name its tools: a rename would silently drop one, so bump it deliberately. The page's own `webmcp_*` tools are not granted on purpose: WebMCP is tested in code through `qa/_shared/webmcp-testing`.

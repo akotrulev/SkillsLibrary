@@ -31,6 +31,8 @@ The Playwright MCP server must be registered as `claude mcp add --scope user pla
 
 Anything unclear (an element's purpose, the environment, credentials, an ambiguous step): ask, never guess.
 
+**Server-rendered routes:** where the experience plan's §4a `rendering_plan` marks a route `ssg`, `isr`, `ssr` or `ssr-streaming`, also write its raw-HTML and cache-header tests through a `PageHtmlClient`, and wait for the `data-hydrated` signal before interacting (`ui-test-author/playwright/references/server-rendered-pages.md`).
+
 ## Steps
 
 | # | Step | Load | Done when |

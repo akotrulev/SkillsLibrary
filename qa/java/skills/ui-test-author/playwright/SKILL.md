@@ -87,6 +87,7 @@ files go at the project root.
 | [`references/components.md`](references/components.md) | The control catalogue: DatePicker, Dropdown, Combobox, DataGrid + GridRow, Pagination, Modal, Toast, Tabs, FileUpload — each one's root, intent methods and Playwright API; picking a row by content; a date without a branch |
 | [`references/assertions.md`](references/assertions.md) | The web-first set (accessible name, role, `containsClass`, URL, aria snapshots), one expected condition, the one-shot-read ban, timeouts, `waitForCondition`, subject naming without a message parameter, HTTP responses |
 | [`references/emulation-and-mobile-web.md`](references/emulation-and-mobile-web.md) | Explicit device options, touch, viewport, media features, locale and geolocation, `page.clock()`, offline, and why emulation is not a device |
+| [`references/server-rendered-pages.md`](references/server-rendered-pages.md) | SSR / SSG / streamed pages: wait for the `data-hydrated` signal before the first interaction, `PageHtmlClient` raw-HTML and `Cache-Control` tests per `rendering_plan` route, deferred-section and CSR deep-link tests |
 | [`references/trace-correlation.md`](references/trace-correlation.md) | One `traceparent` trace id per test on app-origin requests only (a scoped context route, never `extraHTTPHeaders`), and the failure link to the backend trace |
 | [`qa/java/skills/api-test-author/writer/references/generation-checks.md`](../../api-test-author/writer/references/generation-checks.md) | The scenario × oracle table before any code, and the hallucination gate that reports every test id missing from the app source as `MISSING` |
 | [`assets/build.gradle.kts`](assets/build.gradle.kts) | The pins, Allure 3, TestNG with `testng.xml`, `PLAYWRIGHT_JAVA_SRC`, `installPlaywrightBrowsers` and a `playwright` CLI task |
@@ -97,6 +98,7 @@ files go at the project root.
 | [`assets/LoginTest.java`](assets/LoginTest.java) | Tests with `Should_X_When_Y` names, groups, and pages built per test |
 | [`assets/DatePicker.java`](assets/DatePicker.java), [`Dropdown.java`](assets/Dropdown.java), [`Combobox.java`](assets/Combobox.java), [`DataGrid.java`](assets/DataGrid.java), [`GridRow.java`](assets/GridRow.java) | Control components in `components.controls`: a root `Locator`, intent methods, assertion targets only as described locators |
 | [`assets/OrdersPage.java`](assets/OrdersPage.java), [`assets/OrdersTest.java`](assets/OrdersTest.java) | A page composing a `DataGrid` and a `DatePicker`; a test that seeds its order through the API in `@BeforeMethod`, deletes it in `@AfterMethod`, and keeps the body to the action and its outcome |
+| [`assets/PageHtmlClient.java`](assets/PageHtmlClient.java), [`assets/RenderingTest.java`](assets/RenderingTest.java) | The raw-HTML client in `clients`, built from `page.request()`; tests that assert a server-rendered route's content and `Cache-Control` on its raw HTML ([`references/server-rendered-pages.md`](references/server-rendered-pages.md)) |
 
 Start from the assets: copy them, rename, and keep their shape.
 

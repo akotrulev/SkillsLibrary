@@ -61,27 +61,18 @@ No server runtime, no RSC — every component is a client component, data comes 
 
 ## Rendering strategy — per route, not per app
 
-**Server Components are the default; client interactivity is opt-in per island.** A content page, an API-consuming dashboard, and a live ticker do not share a strategy. Decide per route:
+**Server Components are the default; client interactivity is opt-in per island.** The mode of each route comes from the plan's `rendering_plan` (`experience-plan.md` §4a). With no plan, classify each route with the decision procedure in [`rendering-strategy.md`](../../../../backend/_shared/experience-plan/references/rendering-strategy.md): discoverability, audience, freshness, personalisation, interactivity and session length decide it, in that file's order. Then express the mode with Next's own mechanism:
 
-```
-Does this route need client interactivity (state, effects, event handlers, browser APIs)?
-  NO  → keep it a Server Component (no JS shipped). Add <Suspense> + streaming for slow data.
-  YES → keep the route a Server Component and push 'use client' onto the interactive leaves.
-        Is the data personalized / request-time (cookies, headers, search params)?
-          YES → dynamic rendering (opt out of static: the request APIs force it)
-          NO  → static rendering (default) — prerender at build; revalidate on a timer/tag (ISR)
-        Is first data slow but the shell can paint now?
-          → wrap the slow part in <Suspense> and stream it
-```
-
-| Strategy | What it is | Best for | Cost |
+| Mode | Next.js mechanism | Best for | Cost |
 |---|---|---|---|
-| **Static (default)** | prerendered at build, cached; `revalidate` for ISR | content, marketing, catalog, anything not per-user | stale until revalidated |
-| **Dynamic** | rendered per request (triggered by `cookies()`/`headers()`/`searchParams`/`no-store`) | dashboards, personalized pages, authed views | a server render per request |
-| **Streaming** | shell now, slow parts stream in via `<Suspense>` | slow first data, above-the-fold speed matters | more moving parts; ensure fallbacks are designed |
-| **Client island** | a `'use client'` leaf inside a server route | one interactive widget on an otherwise static page | ships that subtree's JS — keep it small |
+| **`ssg` (default)** | static Server Component; `generateStaticParams` for dynamic segments | content, marketing, docs | stale until rebuilt |
+| **`isr`** | `export const revalidate = <s>`, or tag revalidation | catalogue, prices on a known cadence | stale up to the window |
+| **`ssr`** | request APIs (`cookies()`/`headers()`/`searchParams`) or `dynamic = 'force-dynamic'` | public per-request pages; signed-in pages that are not long-session tools | a server render per request |
+| **`ssr-streaming`** | a `<Suspense>` boundary or `loading.tsx` around the slow section | one or two slow or personalised sections | every boundary needs a sized fallback; redirects and 404 decided before the first flush |
+| **`csr`** | a `'use client'` route with client-only data, in its own route group (`app/(tool)/…`) | signed-in, long-session working tools: dashboards, editors, data grids | no SEO; the shell's first paint only |
+| **island** | a `'use client'` leaf inside a server route | one interactive widget on a server-rendered page | ships that subtree's JS, so keep it small |
 
-**Don't make the whole route a Client Component** to get one interactive button — that drags the entire subtree into the bundle. Keep the route server, island the button (the boundary rule from [`basics`](../basics/SKILL.md)). Document the per-route decision in the Step-1 decision record, like the Blazor render-mode map.
+**Don't make the whole route a Client Component** to get one interactive button: that drags the entire subtree into the bundle. Keep the route server, island the button (the boundary rule from [`basics`](../basics/SKILL.md)). **Set the hydration signal once:** a client component in the root layout (in a Vite SPA, the root component) sets `document.body.dataset.hydrated = 'true'` in an effect, and an island inside a streamed `<Suspense>` boundary sets `data-hydrated` on its own root. The journey tests wait on it. Record the per-route modes in the Step-1 decision record, like the Blazor render-mode map.
 
 ## Project layout — feature folders + the app router tree
 
@@ -167,7 +158,7 @@ The standards this skill's output must meet are the fe-react rule files `react.m
 
 Beyond the rule files, this skill's own rules:
 
-- **Decide the rendering strategy per route** (static / dynamic / streaming) from its data shape, using the matrix, and document it; never one strategy for the whole app, never one hardcoded inside a reusable component.
+- **Rendering is per route** (`ssg` / `isr` / `ssr` / `ssr-streaming` / `csr` + islands), taken from the plan's `rendering_plan` or derived with `rendering-strategy.md`, and recorded; never one mode for the whole app, never one hardcoded inside a reusable component. A Vite SPA only when every route is `csr`.
 - **Strict TS + ESLint (hooks rules) + Prettier + a locked lockfile** from commit one.
 - **`not-found.tsx` per app** and a typed, validated env.
 - **Feature folders, not type folders**; `app/` files stay thin; no global `atoms/`/`molecules/`/`organisms/` tree, no domain types inside an atom.
@@ -177,7 +168,7 @@ Beyond the rule files, this skill's own rules:
 
 - The `build` script, run with the package manager `packageManager` names — **clean** (type errors and lint errors fail it).
 - App **boots**: the `dev` script, home route renders.
-- **One route per chosen strategy renders** — a static content route, one dynamic/personalized route, and (if used) a streamed route with its `loading.tsx`. Confirm a client island hydrates and a Server Component ships no JS for its subtree.
+- **One route per chosen mode renders**: a static content route, one dynamic/personalised route, and (if used) a streamed route with its `loading.tsx`. Confirm a client island hydrates, a Server Component ships no JS for its subtree, `curl -s <route>` returns the route's server-rendered content in the HTML, and `<body data-hydrated="true">` appears after hydration.
 - Lockfile committed; `@/*` alias resolves; typed env parses at boot.
 
 ## Handoffs

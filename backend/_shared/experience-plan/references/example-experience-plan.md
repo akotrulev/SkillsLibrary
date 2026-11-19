@@ -132,6 +132,83 @@ Failure: publish with zero sessions → the action is disabled with the reason "
 **Data needed:** sessions on the date with bookedCount and attendedCount (aggregates)
 **Serves:** U6, U7 · **Journeys:** J4
 
+## 4a. Rendering plan
+
+**Pattern:** server components with islands — every screen is signed-in, none is a long-session tool, so all take the default (`ssr`, `cache: private`); no route needs search, so nothing is `ssg`/`isr`.
+
+```yaml
+rendering_plan:
+  stack: nextjs-app-router
+  routes:
+    - path: /schedule
+      screen: S1
+      mode: ssr
+      cache: private
+      signals: { discoverability: not-needed, audience: signed-in, freshness: never, personalisation: section, interactivity: light }
+      server_rendered_content: [session list grouped by day, seats left]
+      islands:
+        - { name: DateRangeFilter, hydrate: on-load }
+    - path: /sessions/[sessionId]
+      screen: S2
+      mode: ssr-streaming
+      cache: private
+      signals: { discoverability: not-needed, audience: signed-in, freshness: never, personalisation: section, interactivity: light }
+      server_rendered_content: [workshop title, starts-at, seats left, description]
+      islands:
+        - { name: BookSeatButton, hydrate: on-load }
+        - { name: AttendeeList, hydrate: on-load }
+      deferred_sections:
+        - { name: AttendeeList, strategy: stream, fallback: "skeleton, 5 rows reserved" }
+    - path: /my/bookings
+      screen: S3
+      mode: ssr
+      cache: private
+      signals: { discoverability: not-needed, audience: signed-in, freshness: never, personalisation: page, interactivity: light }
+      server_rendered_content: [upcoming bookings]
+      islands:
+        - { name: CancelBookingAction, hydrate: on-interaction }
+    - path: /staff/workshops
+      screen: S4
+      mode: ssr
+      cache: private
+      signals: { discoverability: not-needed, audience: signed-in, freshness: never, personalisation: none, interactivity: light }
+      server_rendered_content: [workshop list]
+      islands:
+        - { name: StatusFilter, hydrate: on-load }
+    - path: /staff/workshops/new
+      screen: S5
+      mode: ssr
+      cache: private
+      signals: { discoverability: not-needed, audience: signed-in, freshness: never, personalisation: none, interactivity: light }
+      server_rendered_content: [form fields]
+      islands:
+        - { name: WorkshopForm, hydrate: on-load }
+    - path: /staff/workshops/[workshopId]
+      screen: S6
+      mode: ssr
+      cache: private
+      signals: { discoverability: not-needed, audience: signed-in, freshness: never, personalisation: none, interactivity: light }
+      server_rendered_content: [title, status, sessions list]
+      islands:
+        - { name: AddSessionDrawer, hydrate: on-interaction }
+        - { name: PublishButton, hydrate: on-load }
+    - path: /staff/attendance
+      screen: S7
+      mode: ssr
+      cache: private
+      signals: { discoverability: not-needed, audience: signed-in, freshness: never, personalisation: none, interactivity: light }
+      server_rendered_content: [today's sessions with counts]
+      islands:
+        - { name: DatePicker, hydrate: on-load }
+  acceptance:
+    - raw HTML of every route contains its server_rendered_content
+    - every response carries Cache-Control private or no-store
+    - JS shipped on /schedule under 120 KB gzipped
+    - LCP under 2.5 s on mid-range mobile over 4G; CLS under 0.1
+```
+
+Rejected: a Vite SPA — every route would be `csr` for no reason, since no screen is a long-session tool.
+
 ## 5. Screen ↔ endpoint matrix
 
 *(filled by the API step against `api-surface.md` §4)*

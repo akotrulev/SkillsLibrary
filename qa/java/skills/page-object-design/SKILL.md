@@ -98,6 +98,7 @@ Avoid `if (platform.equals("iOS")) …` inside a single page object.
 
 - A screen that repeats with a different label is **one page class constructed with that data**: `new SimplePropertyPage(driver, "Suicide Genes")`, the label building its landmark and locators. That is data, not a behaviour flag: the argument changes what the page finds, never which code path runs. A `boolean` or enum that picks behaviour is still two methods or two classes.
 - The app's own busy signal (a loading bar, a snackbar) is a **named wait condition on the base page or shell component** (`waitUntilLoadingBarGone()`), called by the action that triggers it before it returns. The test never calls it.
+- On a server-rendered page the hydration signal is a named wait too: `goTo()` waits for `data-hydrated="true"` on `<body>`, and an intent method on a late-hydrating island waits on the island's own root, before it acts. Never visibility, never a sleep (`ui-test-author/playwright/references/server-rendered-pages.md`).
 
 ### Flows
 

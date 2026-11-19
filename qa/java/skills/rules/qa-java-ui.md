@@ -18,6 +18,8 @@ Severity tags as in the core qa-java rules: **blocker**, **major**, **minor**, *
 - Tests never call `driver.findElement`, `page.locator` or `page.navigate`. *major*
 - Drivers come from the base or factory, never `new ChromeDriver()`, `Playwright.create()` or `new AndroidDriver()` in a test. Playwright and Appium: instance fields, `parallel="classes"`, no `ThreadLocal`, no `parallel="methods"`, no `@DataProvider(parallel = true)`. Selenium: a `ThreadLocal<WebDriver>` factory. *blocker*
 - Explicit waits only, never mixed with an implicit wait; no forced click (`setForce(true)`, `JavascriptExecutor`). Playwright: web-first assertions, no `NETWORKIDLE`, `waitForNavigation` or page-level selector API. *major*
+- On a server-rendered page the page object waits for the app's `data-hydrated="true"` (on `<body>`, or on the island's root) before the first interaction; never visibility, a sleep or `NETWORKIDLE`. No signal is a `missing-testids.md` row for `fe-*`. *major*
+- Server-rendered content and `Cache-Control` are asserted on the raw HTML fetched through a `PageHtmlClient`, per `rendering_plan` route; a test never calls `page.request().get`. *major*
 - Sign in once per role per run; reuse the storage state. *major*
 - Evidence comes from the base class. *minor*
 - Appium: platform differences live in the finder, not an `if`; app state reset per test; OS dialogs go through `mobile:` commands; no `TouchAction`, `resetApp`, `@AndroidFindBy` or `PageFactory`. *major; blocker for leaked state*

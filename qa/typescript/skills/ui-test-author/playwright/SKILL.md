@@ -84,6 +84,7 @@ change. The config leaves `testDir` at its default, so it finds the specs either
 | [`references/assertions.md`](references/assertions.md) | The web-first set (accessible name, description and error, role, classes, value, URL forms, aria snapshots), one expected condition, the one-shot-read ban, `expect.poll` / `toPass` / `expect.soft`, failure messages |
 | [`references/config-and-fixtures.md`](references/config-and-fixtures.md) | The canonical config setting by setting, fixture kinds, the setup project, `webServer`, `TestProject.default`, retries and locks, tags, the CLI, the 1.64 breaking changes, Test Agents |
 | [`references/emulation-and-mobile-web.md`](references/emulation-and-mobile-web.md) | Device projects, touch, `screen`, viewport, media features, locale and geolocation, `page.clock`, offline, and why emulation is not a device |
+| [`references/server-rendered-pages.md`](references/server-rendered-pages.md) | SSR / SSG / streamed pages: wait for the `data-hydrated` signal before the first interaction, `PageHtmlClient` raw-HTML and `Cache-Control` tests per `rendering_plan` route, deferred-section and CSR deep-link tests |
 | [`references/trace-correlation.md`](references/trace-correlation.md) | One `traceparent` trace id per test on app-origin requests only (a scoped context route, never `extraHTTPHeaders`), and the failure link to the backend trace |
 | [`qa/typescript/skills/api-test-author/writer/references/generation-checks.md`](../../api-test-author/writer/references/generation-checks.md) | The scenario × oracle table before any code, and the hallucination gate that reports every test id missing from the app source as `MISSING` |
 | [`assets/playwright.config.ts`](assets/playwright.config.ts) | The canonical config |
@@ -94,6 +95,7 @@ change. The config leaves `testDir` at its default, so it finds the specs either
 | [`assets/login.spec.ts`](assets/login.spec.ts) | Specs with `Should_X_When_Y` names and `{ tag }` |
 | [`assets/DatePicker.ts`](assets/DatePicker.ts), [`Dropdown.ts`](assets/Dropdown.ts), [`Combobox.ts`](assets/Combobox.ts), [`DataGrid.ts`](assets/DataGrid.ts), [`GridRow.ts`](assets/GridRow.ts) | Control components, one per widget, each built from its root |
 | [`assets/OrdersPage.ts`](assets/OrdersPage.ts), [`assets/orders.spec.ts`](assets/orders.spec.ts) | A page composing a date filter, a status dropdown and a grid; specs that reach the filtered grid in `beforeEach` and act on one row picked by its order number |
+| [`assets/PageHtmlClient.ts`](assets/PageHtmlClient.ts), [`assets/rendering.spec.ts`](assets/rendering.spec.ts) | The raw-HTML client behind the `pageHtml` fixture; specs that assert a server-rendered route's content and `Cache-Control` on its raw HTML ([`references/server-rendered-pages.md`](references/server-rendered-pages.md)) |
 
 Start from the assets: copy them, rename, and keep their shape.
 

@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { DataGrid } from './DataGrid';
 import { DatePicker } from './DatePicker';
 import { Dropdown } from './Dropdown';
@@ -18,6 +18,7 @@ export class OrdersPage {
 
   async goto(): Promise<void> {
     await this.page.goto('/orders');
+    await expect(this.page.locator('body')).toHaveAttribute('data-hydrated', 'true');
   }
 
   async applyFilters(): Promise<void> {

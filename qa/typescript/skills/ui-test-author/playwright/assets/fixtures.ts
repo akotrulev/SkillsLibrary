@@ -3,6 +3,7 @@ import { test as base, expect } from '@playwright/test';
 import { HomePage } from './HomePage';
 import { type Credentials, LoginPage } from './LoginPage';
 import { OrdersPage } from './OrdersPage';
+import { PageHtmlClient } from './PageHtmlClient';
 
 export const authFile = 'playwright/.auth/user.json';
 
@@ -19,6 +20,7 @@ type Fixtures = {
   loginPage: LoginPage;
   homePage: HomePage;
   ordersPage: OrdersPage;
+  pageHtml: PageHtmlClient;
   testUser: Credentials;
   seededUser: SeededUser;
   seededOrder: SeededOrder;
@@ -41,6 +43,9 @@ export const test = base.extend<Fixtures>({
   },
   ordersPage: async ({ page }, use) => {
     await use(new OrdersPage(page));
+  },
+  pageHtml: async ({ request }, use) => {
+    await use(new PageHtmlClient(request));
   },
   testUser: async ({}, use) => {
     await use({ email: requiredEnv('E2E_USER'), password: requiredEnv('E2E_PASSWORD') });
