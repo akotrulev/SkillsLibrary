@@ -87,6 +87,7 @@ def test_should_give_each_rule_its_table_severity_when_reporting():
     ("tools/fixtures/skill-lint/", True),
     ("auth/cognito-react/x/", True),
     ("qa/vendor/lib/", True),
+    ("frontend/react/bundled/reference/", True),
     ("auth/auth0-react/", False),
     ("engineering-practices/debugging/", False),
 ])
@@ -215,6 +216,24 @@ def test_should_resolve_a_backticked_path_from_the_skill_root_when_a_reference_n
     assert skill_lint.lint_path(path, {}) == []
 
 
+def test_should_resolve_a_backticked_path_inside_a_named_skill_when_the_line_names_it():
+    skills = skill_lint.skill_index(str(FIXTURES / "r8-named-skill"))
+
+    findings = skill_lint.lint_path(str(FIXTURES / "r8-named-skill" / "caller"), {}, skills)
+
+    assert [(f.rule, f.line) for f in findings] == [("R8", 14)]
+
+
+def test_should_index_a_skill_by_folder_and_frontmatter_name_when_building_the_index():
+    index = skill_lint.skill_index(str(FIXTURES / "r8-named-skill"))
+
+    assert sorted(index) == ["caller", "owner", "r8-caller", "r8-owner"]
+
+
+def test_should_find_no_owning_skill_when_no_folder_above_holds_one(tmp_path):
+    assert skill_lint.skill_holding(str(tmp_path)) is None
+
+
 def test_should_resolve_a_markdown_link_from_the_file_folder_only_when_checking_a_reference(tree):
     tree("s/SKILL.md", skill())
     tree("s/references/other.md", "# Other\n")
@@ -281,9 +300,17 @@ def test_should_flag_banned_vocabulary_only_in_headings_and_table_headers():
     ("Run `/dev:secret-skill` yourself.", 0),
     ("Run dev:visible-skill.", 0),
     ("Run other:secret-skill.", 0),
+    ("Run `dev:secret-skill`'s procedure.", 1),
+    ("It loads `dev:secret-skill`, which you cannot invoke yourself.", 0),
+    ("When running against a cloud account, see `dev:secret-skill`.", 0),
+    ("Never run `dev:secret-skill` here; call `dev:secret-skill` instead.", 1),
 ])
 def test_should_flag_a_hidden_invocation_when_a_verb_meets_a_hidden_name(line, expected):
     assert len(skill_lint.check_r12("x.md", [(1, line)], HIDDEN)) == expected
+
+
+def test_should_report_nothing_when_a_hidden_skill_is_only_named():
+    assert skill_lint.lint_path(str(FIXTURES / "r12-hidden-mention"), HIDDEN) == []
 
 
 # R13, R14

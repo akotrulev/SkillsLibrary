@@ -10,11 +10,13 @@ script checks only the ones a regex can decide:
   R6   minor  a hidden skill has no When to use, When NOT to use, Handoffs or Related heading
   R7   minor  a front door (no `disable-model-invocation: true`) has When to use and When NOT to use
   R8   major  every relative Markdown link, and every backticked path under references/, scripts/,
-              templates/ or examples/, exists; a path holding <, {, * or … is a pattern and skipped
+              templates/ or examples/, exists; a path holding <, {, * or … is a pattern and skipped;
+              a backticked path may also resolve inside a skill named in a code span on its line
   R9   minor  a references/ file over 300 lines lists its ## headings before its first ##
   R10  major  no TODO, TBD, FIXME or XXX outside code, and no @path force-load link
   R11  minor  no Phase, Slice or Milestone in a heading or a table header row
-  R12  major  no line tells a model to invoke, call or run a hidden plugin:name, or to use the Skill tool on it
+  R12  major  no line puts invoke, call or run right before a hidden plugin:name, or names the Skill tool
+              beside one; a negated verb (cannot, never, not) is a warning, not an instruction
   R13  major  an agent has a ## Steps table with Load and Done when columns, and a ## Report holding Mode:
   R14  minor  an agent's Load cell never says when relevant, if relevant, as needed or if needed
 
@@ -47,7 +49,7 @@ SEVERITY = {
 }
 EXCLUDED_PREFIXES = ("communication/", "extras/", "meta/skill-creator/", ".skill-template/",
                      "tools/fixtures/", ".git/")
-EXCLUDED_PATTERN = re.compile(r"^auth/cognito-[^/]*/|(^|/)(vendor|node_modules)/")
+EXCLUDED_PATTERN = re.compile(r"^auth/cognito-[^/]*/|(^|/)(vendor|node_modules|bundled)/")
 REFERENCE_LINE_LIMIT = 300
 PLACEHOLDER_CHARS = ("<", "{", "*", "…")
 
@@ -64,7 +66,9 @@ PLACEHOLDER = re.compile(r"\b(TODO|TBD|FIXME|XXX)\b")
 FORCE_LOAD = re.compile(r"(?<![\w@`])@((?:[\w.~-]+/)*[\w-]+\.[A-Za-z]{1,5})\b")
 BANNED_WORDS = re.compile(r"\b(phase|slice|milestone)s?\b", re.I)
 SKILL_REF = re.compile(r"(?<![\w/:.-])([a-z][a-z0-9-]*):([a-z][a-z0-9-]*)(?![\w-])")
-INVOKE = re.compile(r"\bskill tool\b|\b(invoke[sd]?|invoking|call(?:s|ed|ing)?|run(?:s|ning)?|ran)\b", re.I)
+SKILL_TOOL = re.compile(r"\bskill tool\b", re.I)
+IMPERATIVE = re.compile(r"(?<![\w-])(?:invoke|call|run)\s+(?:the\s+)?[`*\[]*([a-z][a-z0-9-]*):([a-z][a-z0-9-]*)(?![\w-])", re.I)
+NEGATION = re.compile(r"\b(?:cannot|can't|never|not|don't)\s+$", re.I)
 VAGUE_LOAD = re.compile(r"\b(when relevant|if relevant|as needed|if needed)\b", re.I)
 ROUTING = re.compile(r"^(when (not )?to use|handoffs?|related)\b")
 DESCRIPTION_END = re.compile(r"Not for .+\([^()]+\)\.$")
@@ -237,13 +241,52 @@ def link_targets(line):
     return targets
 
 
-def check_r8(path, rows, base_dirs):
+def ancestors(path):
+    folder = os.path.dirname(path)
+    while True:
+        yield folder
+        parent = os.path.dirname(folder)
+        if parent == folder:
+            return
+        folder = parent
+
+
+def skill_holding(path):
+    """Return the nearest folder at or above `path` that holds a SKILL.md, or None."""
+    for folder in ancestors(os.path.join(path, "SKILL.md")):
+        if os.path.isfile(os.path.join(folder, "SKILL.md")):
+            return folder
+    return None
+
+
+def named_skills(path, line, skills):
+    """Return the folder of every skill a code span on `line` names: by name, or by a path into it from any ancestor folder."""
+    folders = []
+    for _, span in CODE_SPAN.findall(line):
+        token = re.sub(r"(/SKILL\.md|/)$", "", span.strip().lstrip("/"))
+        folders += skills.get(token.split(":")[-1], [])
+        targets = [os.path.join(base, token) for base in ancestors(path) if token and os.path.exists(os.path.join(base, token))]
+        folders += [folder for folder in map(skill_holding, targets) if folder]
+    return folders
+
+
+def resolves(target, bases):
+    return any(os.path.exists(os.path.join(base, target)) for base in bases)
+
+
+def check_r8(path, rows, base_dirs, skills=None):
+    """A backticked path may resolve inside a skill named on its line or, for hard-wrapped prose, the line above."""
     found = []
+    previous = (0, "")
     for number, line in rows:
-        pointers = [(target, (os.path.dirname(path),)) for target in link_targets(line)]
-        pointers += [(re.sub(r"(#.*|:\d+(-\d+)?)$", "", target), base_dirs) for target in BACKTICK_PATH.findall(line)]
-        for target, bases in pointers:
-            if is_pattern(target) or any(os.path.exists(os.path.join(base, target)) for base in bases):
+        context = (previous[1] + " " if previous[0] == number - 1 else "") + line
+        previous = (number, line)
+        pointers = [(target, (os.path.dirname(path),), False) for target in link_targets(line)]
+        pointers += [(re.sub(r"(#.*|:\d+(-\d+)?)$", "", target), base_dirs, True) for target in BACKTICK_PATH.findall(line)]
+        for target, bases, backticked in pointers:
+            if is_pattern(target) or resolves(target, bases):
+                continue
+            if backticked and resolves(target, named_skills(path, context, skills or {})):
                 continue
             found.append(finding(path, number, "R8", "pointer '%s' does not resolve" % target))
     return found
@@ -285,12 +328,20 @@ def check_r11(path, rows):
     return found
 
 
+def invoked_refs(line):
+    """Return the plugin:name pairs a line tells a model to invoke, in order and without repeats."""
+    if SKILL_TOOL.search(line):
+        refs = SKILL_REF.findall(line)
+    else:
+        refs = [(match.group(1), match.group(2)) for match in IMPERATIVE.finditer(line)
+                if not NEGATION.search(line[:match.start()])]
+    return list(dict.fromkeys(refs))
+
+
 def check_r12(path, rows, hidden):
     found = []
     for number, line in rows:
-        if not INVOKE.search(line):
-            continue
-        for plugin, name in SKILL_REF.findall(line):
+        for plugin, name in invoked_refs(line):
             if name in hidden.get(plugin, ()):
                 found.append(finding(path, number, "R12", "tells a model to invoke hidden skill %s:%s; "
                                      "name the path to Read, or the agent" % (plugin, name)))
@@ -327,32 +378,32 @@ def check_r14(path, lines, rows):
     return found
 
 
-def body_checks(path, rows, base_dirs, hidden):
-    return check_r8(path, rows, base_dirs) + check_r10(path, rows) + check_r11(path, rows) + check_r12(path, rows, hidden)
+def body_checks(path, rows, base_dirs, hidden, skills=None):
+    return check_r8(path, rows, base_dirs, skills) + check_r10(path, rows) + check_r11(path, rows) + check_r12(path, rows, hidden)
 
 
-def lint_skill_file(path, hidden):
+def lint_skill_file(path, hidden, skills=None):
     lines = read_lines(path)
     block, keys, body_start = parse_frontmatter(lines)
     rows = prose(lines, body_start)
     found = check_r1(path, keys) + check_r3(path, keys)
     found += check_r6(path, rows) if HIDDEN.search(block) else check_r7(path, rows)
-    return found + body_checks(path, rows, (os.path.dirname(path),), hidden)
+    return found + body_checks(path, rows, (os.path.dirname(path),), hidden, skills)
 
 
-def lint_companion(path, skill_dir, hidden):
+def lint_companion(path, skill_dir, hidden, skills=None):
     lines = read_lines(path)
     rows = prose(lines, parse_frontmatter(lines)[2])
-    found = body_checks(path, rows, (os.path.dirname(path), skill_dir), hidden)
+    found = body_checks(path, rows, (os.path.dirname(path), skill_dir), hidden, skills)
     if "references" in os.path.relpath(path, skill_dir).split(os.sep)[:-1]:
         found += check_r9(path, lines, rows)
     return found
 
 
-def lint_agent(path, hidden):
+def lint_agent(path, hidden, skills=None):
     lines = read_lines(path)
     rows = prose(lines, parse_frontmatter(lines)[2])
-    found = body_checks(path, rows, (os.path.dirname(path),), hidden)
+    found = body_checks(path, rows, (os.path.dirname(path),), hidden, skills)
     return found + check_r13(path, lines, rows) + check_r14(path, lines, rows)
 
 
@@ -364,10 +415,10 @@ def companions(skill_dir):
     return found
 
 
-def lint_skill(skill_dir, hidden):
-    found = lint_skill_file(os.path.join(skill_dir, "SKILL.md"), hidden)
+def lint_skill(skill_dir, hidden, skills=None):
+    found = lint_skill_file(os.path.join(skill_dir, "SKILL.md"), hidden, skills)
     for path in companions(skill_dir):
-        found += lint_companion(path, skill_dir, hidden)
+        found += lint_companion(path, skill_dir, hidden, skills)
     return found
 
 
@@ -392,16 +443,16 @@ def owning_skill(path):
     return None
 
 
-def lint_path(path, hidden):
+def lint_path(path, hidden, skills=None):
     """Lint one argument: a skill folder (or a folder of skills), a SKILL.md, a rule or reference file, or an agent."""
     if os.path.isdir(path):
-        return [found for folder in skill_dirs(path) for found in lint_skill(folder, hidden)]
+        return [found for folder in skill_dirs(path) for found in lint_skill(folder, hidden, skills)]
     if os.path.basename(path) == "SKILL.md":
-        return lint_skill(os.path.dirname(path), hidden)
+        return lint_skill(os.path.dirname(path), hidden, skills)
     skill_dir = owning_skill(path)
     if skill_dir:
-        return lint_companion(path, skill_dir, hidden)
-    return lint_agent(path, hidden)
+        return lint_companion(path, skill_dir, hidden, skills)
+    return lint_agent(path, hidden, skills)
 
 
 def load_plugins(root):
@@ -430,12 +481,22 @@ def hidden_names(root, plugins):
     return hidden
 
 
-def sweep(root, plugins, hidden):
-    found = [result for folder in skill_dirs(root) for result in lint_skill(folder, hidden)]
+def skill_index(root):
+    """Map every skill's frontmatter name and folder name to the folders that carry it."""
+    index = {}
+    for folder in skill_dirs(root):
+        names = {os.path.basename(folder), parse_frontmatter(read_lines(os.path.join(folder, "SKILL.md")))[1].get("name", ("", 0))[0]}
+        for name in names - {""}:
+            index.setdefault(name, []).append(folder)
+    return index
+
+
+def sweep(root, plugins, hidden, skills=None):
+    found = [result for folder in skill_dirs(root) for result in lint_skill(folder, hidden, skills)]
     agents = sorted({entry_path(root, entry) for plugin in plugins for entry in plugin.get("agents", [])})
     for agent in agents:
         if os.path.isfile(agent):
-            found += lint_agent(agent, hidden)
+            found += lint_agent(agent, hidden, skills)
     return found
 
 
@@ -461,10 +522,11 @@ def main(argv=None):
             parser.error("no SKILL.md under " + path)
     plugins = load_plugins(ROOT)
     hidden = hidden_names(ROOT, plugins)
+    skills = skill_index(ROOT)
     if args.paths:
-        findings = [f for path in args.paths for f in lint_path(os.path.abspath(path), hidden)]
+        findings = [f for path in args.paths for f in lint_path(os.path.abspath(path), hidden, skills)]
     else:
-        findings = sweep(ROOT, plugins, hidden)
+        findings = sweep(ROOT, plugins, hidden, skills)
     output = render(findings, args.json)
     if output:
         print(output)

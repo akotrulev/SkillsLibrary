@@ -8,11 +8,12 @@ ADRs that the interview writes while it runs. Add `design:prototype`, which rend
 different variants of a screen in the project's design language. When the project has no design
 language, it first interviews you on style through the `ui-ux-pro-max` corpus.
 
-**Status:** A1, A2, B1, P1, R1 and G1 landed: the standard (`engineering-practices/writing-for-agents/`),
-`tools/skill-lint.py` with its tests (99% branch), `dev:feature` with `domain-modeling`, `design:prototype`,
-and their registration; G1 ran the whole set green and found every cross-reference resolving. Next: A3,
-the library sweep. Built but unverified: `/dev:feature` and `/design:prototype` untried in a real project
-session, and their trigger phrases untested.
+**Status:** A1, A2, B1, P1, R1, G1 and A3 landed: the standard (`engineering-practices/writing-for-agents/`),
+`tools/skill-lint.py` with its tests (99% branch; A3 sharpened R12 and R8 and excluded `bundled/`, D16),
+`dev:feature` with `domain-modeling`, `design:prototype`, their registration, and the audit's first half,
+`docs/audits/004-skill-authoring-r1.md` (lint sweep: 238 findings; the 38 front doors judged). Next: A4,
+the agents and the sample. Built but unverified: `/dev:feature` and `/design:prototype` untried in a real
+project session, their trigger phrases untested; about two thirds of A3's judgment rows not spot-checked.
 
 **Test design:** none. The plan serves no stories. Its only code is `tools/skill-lint.py`, which A2
 covers with unit tests.
@@ -370,6 +371,28 @@ on an explicit folder argument are matched relative to that folder. The plan's r
 `SKILL.md` and rule files are linted, and only R10–R12 skip fences. Cost: more files linted means more
 findings for A3, and a dangling link written inside a fence is never caught.
 
+**D16 — Three lint readings ruled in A3's sweep: R12 needs the verb to govern the name, R8 resolves inside
+a named skill, and `bundled/` is out of scope** (A3, 2026-11-20). The first sweep gave 552 findings, and
+most R12 and R8 hits were not what the rules mean. (a) **R12**: A2 flagged a line holding *any* form of
+invoke/call/run *anywhere* beside a hidden `plugin:name`, so "when running against …", "`docker run`",
+"a failing run" and "which you cannot invoke yourself" were findings (140, 2 real). Built: a line is
+flagged when it names the Skill tool beside a hidden name, or when a bare `invoke`, `call` or `run`
+stands right before the name (``run `x:y` ``), and not after a negation (`cannot`, `never`, `not`).
+The `spec-vs-code-audit/SKILL.md:50` line is therefore clean: it names the agent, as R12 asks.
+(b) **R8**: an agent's or skill's backticked `references/x.md` that belongs to another skill named in a
+code span on the same line, or on the line above for hard-wrapped prose (`` `evidence-capture` +
+`references/playwright.md` ``, `` `ui-test-author/playwright`'s `references/…` ``), now resolves inside
+that skill, found by frontmatter name, folder name, `plugin:name`, or a path into it from any ancestor
+folder. An unqualified pointer still fails (`qa-explorer.md:28` names no skill). The standard's R8 text
+("relative to that file's folder") is left as it is: the skill is outside this task's files, so the
+wording is an audit finding for the remediation plan. (c) **Scope**: `**/bundled/**` joins
+`vendor/` in the exclusions; those are upstream rule sets deliberately left unregistered
+(`docs/skills-catalog.md:24`, `:195`), not house text. The plan's reading: every R12 verb form
+anywhere on the line, R8 relative to the file only, and only `vendor/` excluded. Cost: R12 misses an
+instruction phrased "the agent should run `x:y` via …" without a bare imperative, R8 accepts a
+pointer whose named skill is a different one with the same folder name, and bundled text is never
+linted.
+
 ## 10. Answered questions (2026-11-20)
 
 **O1 — Where do the glossary and ADRs live:** the existing BA glossary, extended, plus `docs/adr/` (D4, D6).
@@ -699,6 +722,30 @@ and reruns `python3 -m pytest tools/test_skill_lint.py -q`.
 - A lint finding that is a false positive is a lint defect: fix it in the script with a fixture that
   pins it, and say so in `As built`.
 - **Not in A3:** agents and hidden skills (A4); fixing any skill (the remediation plan).
+- **As built (2026-11-20):** `docs/audits/004-skill-authoring-r1.md`: scope, the lint per plugin × rule,
+  the size budgets, the 38 front doors (40 listings; `python-web-testing` sits in three plugins; 23 are
+  `rules` skills, judged as a group), and the findings under Data issues / Code issues / Logical
+  conflicts. **The lint changed** (D16): the first sweep gave 552 findings, most of R12 (140, 2 real)
+  and R8 (158) reading text that is not what the rules mean. R12 now needs a bare `invoke`/`call`/`run`
+  right before a hidden name, or the Skill tool named beside one, and skips a negated verb; R8 resolves a
+  backticked `references/…` inside a skill named in a code span on its line or the line above;
+  `**/bundled/**` joined the exclusions. Both A2 readings were ruled lint defects:
+  `spec-vs-code-audit/SKILL.md:50` is clean, and skill-relative Load-cell pointers resolve when the line
+  names the skill (`qa-explorer.md:28` names none and stays a finding). New fixtures
+  `tools/fixtures/skill-lint/r12-hidden-mention/`, `r8-named-skill/{owner,caller}/`; tests for both, the
+  `bundled/` exclusion, `skill_index` and `skill_holding`. Gate: `python3 tools/skill-lint.py --json >
+  /tmp/skill-lint-r1.json` → `238 findings` (41 major, 197 minor, 172 files), exit 1;
+  `python3 -m pytest tools/test_skill_lint.py -q` → `95 passed`; coverage → `tools/skill-lint.py 376
+  stmts, 174 branches, 99%`; the clean fixtures → `0 findings`. `token-audit.py --violations-only` → 89
+  violations. Judgment: the front doors were read by three Sonnet reviewers (dev ×8; audits, prototype,
+  `python-web-testing`, `inhouse-framework-conventions` ×3; the 23 `rules`), every row spot-checked or
+  verified before it went in; rows that judged a hidden-skill pointer by repo path as an R22 breach were
+  dropped (a path to `Read` passes R12/R22), as was one R17 row that cited the user's private global
+  `CLAUDE.md`. Not found by G1: `writing-plans/SKILL.md:3` and `systematic-debugging/SKILL.md:3` still
+  name the retired `design` sibling (Data issues). R10's 11 findings are mostly markers *mentioned* in
+  quotes, left as findings: D13 made a code span the way to mention one. R11's 8 are domain terms
+  ("KB slice", migration "Phases") and sit under Logical conflicts for the owner. **Unverified:** the
+  judgment rows not spot-checked (about two thirds) rest on the reviewers' line numbers.
 
 ### A4 — Audit round 1: the agents and the sample
 
@@ -785,55 +832,9 @@ three; then G1, A3, A4 and A5 run in sequence.
 | A5 | `docs` | `general-purpose` | A4 | — | ~110k |
 | — | try `/dev:feature`, `/design:prototype` in a real project | **the user** | G1 | — | — |
 
-A1, A2, B1, P1, R1 and G1 have landed; three prompts are live.
+A1, A2, B1, P1, R1, G1 and A3 have landed; two prompts are live.
 
 ---
-
-### A3 — audit round 1, the lint sweep and the front doors (general-purpose, docs)
-
-````
-Depends on: G1
-Agent: general-purpose · Stack: docs
-
-Task A3 of docs/plans/014-authoring-standard-domain-language-feature-prototype.md: start the
-read-only skill-authoring audit. Sweep the whole library with the lint, then judge every listed
-front door against the standard's judgment rules.
-
-Read, in this order:
-1. CLAUDE.md (repo root): "Review behavior" (the findings table and severities).
-2. The plan: §3, §8, D7, task A3, and "Close-out — every task".
-3. engineering-practices/writing-for-agents/SKILL.md, the rule table.
-4. Then the front doors themselves, one at a time, as you judge them.
-
-Do:
-- `python3 tools/skill-lint.py --json > /tmp/skill-lint-r1.json` and `python3 tools/token-audit.py --violations-only`;
-  summarise counts per plugin × rule with a short python one-off. Never paste the raw JSON into
-  the report.
-- List the listed front doors (registered skills without `disable-model-invocation: true`) and
-  write the list into the report.
-- Judge each against R4 and R15–R23. Read the `rules` skills as a group; they share one shape.
-- Write docs/audits/<NNN>-skill-authoring-r1.md (next free NNN in docs/audits/): scope, the lint
-  summary, the front-door list, findings under Data issues / Code issues / Logical conflicts (each
-  heading present, `None.` when empty), house review table rows citing rule ids.
-
-Traps:
-- A lint false positive is a lint defect: fix tools/skill-lint.py, add a fixture that pins it,
-  rerun its tests, and say so in As built.
-- Two readings A2 left for you to rule on (A2's As built, D15): R12 flags a line naming a hidden
-  skill to say it cannot be invoked (engineering-practices/spec-vs-code-audit/SKILL.md:50); R8
-  resolves an agent's backticked `references/x.md` against the agent's own folder, so skill-relative
-  pointers in agents' Load cells fail. Decide each: lint defect (fix + fixture) or real finding.
-- The lint covers each skill's rule files and references/*.md too (D15), so expect more findings
-  per skill than SKILL.md alone would give.
-- Read-only for every skill: fix nothing outside tools/ and the report.
-
-Gate (own tests):
-  python3 tools/skill-lint.py --json > /tmp/skill-lint-r1.json; test $? -le 1
-  python3 -m pytest tools/test_skill_lint.py -q   (only if you changed the lint)
-
-Commit: `docs(audits): skill-authoring audit r1, lint sweep and front doors (014 A3)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### A4 — audit round 1, the agents and the sample (general-purpose, docs)
 
@@ -849,7 +850,9 @@ Read, in this order:
 1. CLAUDE.md (repo root): "Review behavior".
 2. The plan: §3, §8, task A4, A3's As built, and "Close-out — every task".
 3. engineering-practices/writing-for-agents/SKILL.md, the rule table; .skill-template/agent.md.
-4. The report A3 wrote in docs/audits/.
+4. The report A3 wrote: docs/audits/004-skill-authoring-r1.md. Its lint sections already hold every
+   agent's R8, R12, R13 and R14 findings (`python3 tools/skill-lint.py <agent.md>` reproduces them, with
+   D16's reading of R8); do not re-run the sweep.
 
 Do:
 - Front-door agents: for each plugin in marketplace.json, the agent its plugin-name command runs
@@ -883,7 +886,8 @@ into the remediation plan, then file this plan as its last task.
 Read, in this order:
 1. CLAUDE.md (repo root): "Planning".
 2. engineering-practices/writing-plans/references/plan-format.md, all of it.
-3. The audit report in docs/audits/ (<NNN>-skill-authoring-r1.md).
+3. The audit report: docs/audits/004-skill-authoring-r1.md (A3 and A4's rounds; D16 for the lint's R8
+   and R12 readings — the R8 wording in the standard is itself a Logical-conflicts row to remediate).
 4. This plan: header, §8, task A5, and "Close-out — every task".
 
 Write docs/plans/<next>-skill-authoring-remediation.md, with the next free number across
