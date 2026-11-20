@@ -1165,54 +1165,9 @@ session that runs the task. No prompt edits a file outside the paths it names (�
 | P20 | `docs` | `general-purpose` | L1, T1, C1 | P1–P19 | ~130k |
 | G1 | `docs` | `general-purpose` | L1, T1, C1, P1–P20 | — | ~110k |
 
-No task has landed. All 23 prompts are live.
+L1 has landed. The 23 prompts of T1, C1, P1–P20 and G1 are live.
 
 ---
-
-### L1 — the owner's answers to O1–O24 (general-purpose, docs)
-
-````
-Depends on: none
-Agent: general-purpose · Stack: docs
-
-Task L1 of docs/plans/015-skill-authoring-remediation.md. Get the owner's answers to the 24 logical
-conflicts the audit found, and record them so that each later task applies its own.
-
-Read, in this order:
-1. The plan: §3, §5 (the Open questions table, O1–O24), D1, task L1, and "Close-out — every task".
-2. The task table under "## Prompts — one per task".
-
-Do:
-- Ask the owner every question in §5 in ONE message. For each one, give the number, the question in a
-  sentence, readings (a) and (b), and "recommended: (a)". Then stop and wait for the reply. Under Plan
-  Queue, end with the question and the line `PLAN_QUEUE: QUESTION`.
-- When the answers arrive, add `## Answered questions (<date>)` directly after `## 6. Decisions`. Give
-  one line per answer: `**O<n> — <question in a few words>: <answer>.**`. Delete each answered row from
-  the Open questions table. A row the owner defers stays, with "deferred" added to its Blocks cell.
-- An answer that is neither (a) nor (b): write the exact edit into each prompt block that §5's Blocks
-  column names, in place.
-- If O1 (b), O3 (b) or O4 (b) is chosen, write task T2 after T1. Its stack is `infra`, its agent
-  `general-purpose`, and it depends on L1. Its deliverable is `tools/skill-lint.py` implementing the
-  chosen readings, with a fixture each in `tools/fixtures/skill-lint/`. Its gate is
-  `python3 -m pytest tools/test_skill_lint.py -q` and
-  `python3 -m coverage run --branch -m pytest tools/test_skill_lint.py -q && python3 -m coverage report --include=tools/skill-lint.py`
-  at ≥ 80% branch.
-  - Under O1 (b), T2 also rewrites as a full path every Load-cell pointer that only D16's reading
-    resolved, listed with the stricter lint.
-  - Add T2's row to the task table and its prompt block after T1's, and add `T2` to every P block's
-    `Depends on:` line.
-- If O12 (b) is chosen, move O12's edit out of P5–P9 and into P1's block. That block then edits
-  plan-format §5 (`:204, 276`) and `CLAUDE.md` "Planning".
-
-Traps:
-- Edit no skill. Record answers and rewrite prompt blocks only.
-- Never answer a question yourself. Never treat silence as (a).
-
-Gate: none. It records decisions.
-
-Commit: `docs(plans): 015 L1 — the owner's answers to O1–O24`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### T1 — the agent template, the standard, and the 23 rules skills (general-purpose, docs)
 
