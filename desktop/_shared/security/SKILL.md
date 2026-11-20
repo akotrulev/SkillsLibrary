@@ -1,6 +1,6 @@
 ---
 name: security
-description: Use when macOS or Windows desktop code stores secrets, loads libraries, hosts a WebView, handles URL schemes, files or IPC. Triggers "where do tokens live". Not for scanning a built app (qa-security)
+description: Use when macOS or Windows desktop code stores secrets, loads libraries, hosts a WebView, handles URL schemes, files or IPC. Triggers "where do tokens live". Not for scanning a built app (qa-security).
 disable-model-invocation: true
 ---
 

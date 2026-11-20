@@ -1,5 +1,16 @@
 # QA — Email Testing with Mailpit (.NET)
 
+**Contents:**
+
+- When to use
+- When NOT to use
+- Inputs needed
+- Mailpit HTTP API surface (cheat-sheet)
+- Templates
+- Rules
+- Generation steps
+- Cross-references
+
 Scaffolds a typed Mailpit HTTP-API client and NUnit wait conditions that poll for a specific message (by recipient + subject), extract HTML/text body, links, and attachments, and reset the inbox between tests. Mailpit is the local SMTP sink — point the SUT's `SMTP_HOST`/`SMTP_PORT` at the container, then assert via Mailpit's HTTP API on port 8025.
 
 ## When to use

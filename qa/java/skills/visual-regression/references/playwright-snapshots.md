@@ -1,5 +1,20 @@
 # Visual Regression — Screenshot plus Comparator (Java / Playwright 1.63 + TestNG)
 
+**Contents:**
+
+- 1. Setup
+- 2. The baseline store
+- 3. Capture options — Locator.ScreenshotOptions
+- 4. The probe — support/VisualCheck.java
+- 5. The page object and the test
+- 6. Tolerance — the comparator's knobs
+- 7. Generating and updating baselines — only in the pinned image
+- 8. The nightly visual job
+- 9. A generated PDF is not a visual target
+- Anti-patterns
+- Rules
+- Cross-references
+
 Playwright Java has **no screenshot assertion** — `toHaveScreenshot` is a Node test-runner feature, and
 `assertThat(page).hasScreenshot()` / `HasScreenshotOptions` do not exist in any Java release. This reference
 builds the free lane from three parts that do exist:

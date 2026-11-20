@@ -5,7 +5,7 @@ description: Use when working in the .NET Accelerator test framework (JSON-drive
 
 # Accelerator Conventions
 
-The Accelerator is a C# / .NET 10 test automation framework (8/9 supported — match the repo's TFM) with separate projects for `AppiumTests`, `PlaywrightTests`, `ApiTests`, and `TestCore`. It uses a JSON-driven screen pattern, NUnit, Allure for reporting, BrowserStack for cloud execution, and a two-agent Claude Code workflow (Opus planner + Sonnet implementer). Its Playwright version is the one in the **Versions** table of `qa/dotnet/skills/ui-test-author/playwright/SKILL.md`; this skill pins nothing.
+The Accelerator is a C# / .NET 10 test automation framework (8/9 supported — match the repo's TFM) with separate projects for `AppiumTests`, `PlaywrightTests`, `ApiTests`, and `TestCore`. It uses a JSON-driven screen pattern, NUnit, Allure for reporting, BrowserStack for cloud execution. Its Playwright version is the one in the **Versions** table of `qa/dotnet/skills/ui-test-author/playwright/SKILL.md`; this skill pins nothing.
 
 This skill encodes the conventions that distinguish "Accelerator code" from generic test automation.
 
@@ -41,9 +41,7 @@ Accelerator/
 │   ├── Screens/               # screen objects, JSON-driven
 │   ├── ScreenDefinitions/     # *.screen.json files
 │   └── Tests/                 # grouped by feature
-└── .claude/
-    ├── commands/              # planner + implementer slash commands
-    └── settings.json
+└── .claude/settings.json
 ```
 
 ## Conventions
@@ -134,9 +132,14 @@ Rules:
 public sealed class LoginTests : BaseTest
 {
     private LoginPage _loginPage = null!;
+    private DashboardPage _dashboardPage = null!;
 
     [SetUp]
-    public void CreatePages() => _loginPage = new LoginPage(Page);
+    public void CreatePages()
+    {
+        _loginPage = new LoginPage(Page);
+        _dashboardPage = new DashboardPage(Page);
+    }
 
     [Test]
     [AllureStory("Successful login")]
@@ -147,7 +150,7 @@ public sealed class LoginTests : BaseTest
         await _loginPage.GoToAsync();
         await _loginPage.SignInAsync(user);
 
-        await Expect(Page).ToHaveURLAsync(new Regex("/dashboard$"));
+        await Expect(_dashboardPage.Heading).ToBeVisibleAsync();
     }
 
     [Test]
@@ -167,16 +170,12 @@ public sealed class LoginTests : BaseTest
 - **`TestCore`'s Playwright base is `BaseTest`** from `qa/dotnet/skills/ui-test-author/playwright`
   (`assets/BaseTest.cs`): `BASE_URL`, failure evidence, `ParallelScope.Self`. Page objects are built in the
   test class's own `[SetUp]`; tests never call a `Page` method directly.
-- **`ToHaveURLAsync(string)` is an exact match** of the whole URL after `BaseURL` resolution, so a glob such as
-  `"**/dashboard"` never matches. Match part of the URL with a `Regex` (`new Regex("/dashboard$")`); a glob
-  belongs in `WaitForURLAsync`.
+- **A URL is never asserted in a test body.** The page object waits for its own URL (`WaitForURLAsync` takes a
+  glob) or exposes a locator that proves arrival. Where `ToHaveURLAsync(string)` is used, it is an exact match
+  of the whole URL after `BaseURL` resolution, so match part of it with a `Regex` (`new Regex("/dashboard$")`).
 
-Rules:
-- Test class per feature or screen, not per AC
-- Test name reads `Should_<outcome>_When_<condition>`
-- Three-section body: Arrange / Act / Assert — single blank line between, no comments needed
-- Test data via builders (`UserBuilder.AValidUser().Build()`), never inline literals
-- One logical assertion per test
+A test class covers one feature or screen, not one AC. Test code follows `CLAUDE.md` "Test code rules" and
+`automation.md`.
 
 ### Test data builders
 
@@ -236,7 +235,7 @@ public sealed class UserBuilder
 ### API tests
 
 - One typed client per service in `ApiTests/Clients/`
-- Clients return strongly typed responses, not `IRestResponse`
+- Clients return a typed DTO, not `RestResponse`
 - Test data via builders, same convention as UI
 - Contract tests (Pact) run before integration tests in the pipeline
 
@@ -246,34 +245,14 @@ public sealed class UserBuilder
 - BrowserStack creds, base URLs, and feature flags come from env vars
 - Never commit `.env` files; commit `.env.example` only
 
-### Claude Code workflow
-
-The Accelerator uses a two-agent pattern:
-
-- **Planner** (Opus): reads the task, produces a numbered plan with files to create/modify and a verification step. Does not write code.
-- **Implementer** (Sonnet): executes the plan, one step at a time. After each step, runs the relevant tests.
-
-Slash commands:
-- `/plan <task>` — invokes the planner
-- `/implement` — invokes the implementer against the last plan
-- `/review` — invokes a reviewer pass against the current branch
-
-When rate-limited on one model, switch to another (Opus → Sonnet → Haiku) — the workflow is designed to degrade gracefully.
-
 ## Quality bar (reviewer checklist)
 
-- [ ] No literal selectors in page/screen methods
-- [ ] Page actions run on `Locator("key")`, never `Page.FillAsync/ClickAsync/InnerTextAsync(selector)`
-- [ ] URL assertions use a `Regex`, never a glob string in `ToHaveURLAsync`
-- [ ] No `Thread.Sleep` / `WaitForTimeout` / `Task.Delay` in tests
-- [ ] Test name follows `Should_X_When_Y`
-- [ ] Test data via a builder
+Beyond `CLAUDE.md` "Test code rules" and `automation.md`:
+
+- [ ] No literal selectors in page/screen methods; page actions run on `Locator("key")`, never `Page.FillAsync/ClickAsync/InnerTextAsync(selector)`
+- [ ] No URL assertion in a test body; a `Regex`, never a glob, in `ToHaveURLAsync`
 - [ ] Allure decorators present
-- [ ] One logical assertion per test
-- [ ] Page object methods describe intent, not mechanics
 - [ ] Builders provide valid defaults
-- [ ] No conditional logic in tests (`if`, `for` driving assertions)
-- [ ] Tests are independent and order-agnostic
 
 ## Anti-examples
 
@@ -281,9 +260,5 @@ When rate-limited on one model, switch to another (Opus → Sonnet → Haiku) �
 |---|---|---|
 | `await Page.ClickAsync("button.signin-btn")` in a page object | A selector in code, and a page-level selector method | `_signIn.ClickAsync()` built from `Locator("signInButton")`, the selector in `*.screen.json` |
 | `Task<string> GetErrorMessageAsync()` returning `Page.InnerTextAsync(...)`, then `Assert.That(text, ...)` | A one-shot read races the page | expose `ILocator ErrorMessage`; `Expect(_loginPage.ErrorMessage).ToHaveTextAsync(...)` |
-| `await Expect(Page).ToHaveURLAsync("**/dashboard")` | The string is an exact match after `BaseURL` resolution — it never passes | `ToHaveURLAsync(new Regex("/dashboard$"))` |
-| `await Task.Delay(2000)` | A sleep | auto-wait, web-first assertions, `TestCore.Waits` |
-| `public async Task Test_ClickLoginButton()` | Names the mechanics, not the behaviour | `Should_RedirectToTheDashboard_When_CredentialsAreValid` |
-| `await _loginPage.SignInAsync(new User("user@test.com", "Password1!", 1))` | Inline test data | `UserBuilder.AValidUser().Build()` |
-| `if (env == "staging") { … } else { … }` in a test | Conditional logic in a test | `[TestCase]` / `[TestCaseSource]` or a fixture per environment |
+| `await Expect(Page).ToHaveURLAsync(...)` in a test | A raw `Page` in the test; a glob string never matches | assert on a page object's locator (`_dashboardPage.Heading`) |
 | A `LoginTests` class with its own `Playwright.CreateAsync()` | A second lifecycle beside `BaseTest` | derive from `BaseTest` |

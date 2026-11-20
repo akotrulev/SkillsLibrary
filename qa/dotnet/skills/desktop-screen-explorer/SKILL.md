@@ -1,6 +1,6 @@
 ---
 name: desktop-screen-explorer
-description: Use when a .NET desktop E2E suite must inventory an open macOS or Windows window from page source or the UIA tree and derive locators. Triggers "explore this window". Not for window objects.
+description: Use when a .NET desktop E2E suite must inventory an open window from page source or the UIA tree and derive locators. Triggers "explore this window". Not for window objects (desktop-window-objects).
 disable-model-invocation: true
 ---
 

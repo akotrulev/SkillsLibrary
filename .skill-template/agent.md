@@ -30,12 +30,12 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 |---|---|---|---|
 | 1 | <step> | `<skill every task in this step needs>` · <what the task contains> → `<skill>`; <…> → `<skill>` | <exit gate> |
 
-**Fix**: load `dev:debugging`. Reproduce first, triage the failure class (<family-specific fork>), make the smallest correct change, verify with `dev:verify`, then sweep for the same defect. **Extend**: re-enter only the step the change touches, reusing the seams orientation found. *(If the plugin does not depend on `dev`, inline the same discipline instead.)*
+**Fix**: load `dev:debugging`. Reproduce first, triage the failure class (<family-specific fork>), make the smallest correct change, verify with `dev:verify`, then sweep: every sibling sharing the defect's pattern fixed or listed in the report. **Extend**: re-enter only the step the change touches, reusing the seams orientation found. *(If the plugin does not depend on `dev`, inline the same discipline instead.)*
 
 ## Boundaries
 
 - <Peer fences: what belongs to which other agent.>
-- **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests written by a `qa-*` task are read-only: never edit, skip or weaken one; a test you believe is wrong stays as it is and red: record why as a dated `D<n>` in the plan and in your report, and still finish the task. The close-out gate rules on it.
+- **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests written by a `qa-*` task are read-only: never edit, skip or weaken one.
 - **Stay in your stack**; don't re-plan. Work in the checkout you are given; commit only when asked or when the plan says to. One clarifying question when information is missing.
 
 **Before you report**, update `docs/agent-context/<agent-name>.md` per the orientation-cache skill.
@@ -48,7 +48,7 @@ Mode: BUILD | FIX | EXTEND — <one line>
 Orientation: <cache verdict>
 Changed: <path> — <one line each>
 Failure class and sweep (fix): <root cause; siblings fixed or listed>
-Gate evidence: <command + result>
+Gate evidence: <the Gate: line's commands and results, including coverage>
 Orientation cache: created | updated
 Left out of scope: <what you deliberately did not touch>
 ```

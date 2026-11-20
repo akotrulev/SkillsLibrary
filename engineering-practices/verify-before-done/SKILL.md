@@ -9,13 +9,19 @@ description: Use when about to claim work is done, fixed or passing, or before c
 
 **Make no completion claim without fresh verification evidence.** A claim that work is done, fixed or passing is a statement of fact; without output from a command run in this message, it is a guess presented as a fact, and the user acts on it.
 
-If you haven't run the verification command in this message, you cannot claim it passes.
+`quality-constraints` is the during-work counterpart to this end-of-work evidence check.
 
-`quality-constraints` is the during-work counterpart to this end-of-work evidence gate.
+**Inside a plan task, the prompt block's `Gate:` line decides what you run:** a `Gate: own tests` task runs exactly the commands its block names — its own tests, the acceptance tests it must turn green, the tests the landed tasks above it wrote and the coverage floor over the files they touched — reports those results, and leaves them green; it runs no unfiltered suite. A task with nothing runnable, such as a docs-only task, says so on its `Gate: none` line and claims nothing passes.
 
-**Inside a plan task, the prompt block's `Gate:` line decides what you run:** a `Gate: own tests` task runs exactly the commands its block names — its own tests and the acceptance tests it must turn green — reports those results, and leaves them green; it runs no unfiltered suite. A task with nothing runnable, such as a docs-only task, says so on its `Gate: none` line and claims nothing passes.
+## When to use
 
-## The Gate Function
+Before any success or completion claim, however it is worded — an exact phrase, a paraphrase, or an implication that the work is correct — and before committing, opening a PR, marking a task complete, moving to the next task, or delegating to an agent.
+
+## When NOT to use
+
+Holding the bar while the work is still in progress: `quality-constraints` applies there. This skill is the end-of-work evidence.
+
+## The evidence check
 
 ```
 Before claiming any status or expressing satisfaction:
@@ -102,15 +108,3 @@ Hedged wording ("should", "probably", "seems to"), satisfaction before a run ("D
 ✅ Agent reports success → Check VCS diff → Verify changes → Report actual state
 ❌ Trust agent report
 ```
-
-## Why This Matters
-
-Common failure modes when completion is claimed without verification:
-- The user says "I don't believe you" — trust broken
-- Undefined functions shipped — would crash
-- Missing requirements shipped — incomplete features
-- Time wasted on false completion → redirect → rework
-
-## When To Apply
-
-Before any success or completion claim, however it is worded — an exact phrase, a paraphrase, or an implication that the work is correct — and before committing, opening a PR, marking a task complete, moving to the next task, or delegating to an agent.

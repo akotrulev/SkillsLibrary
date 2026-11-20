@@ -1,5 +1,18 @@
 # Accessibility Testing — axe-core + Playwright (.NET 10 / Microsoft.Playwright 1.63 + NUnit)
 
+**Contents:**
+
+- 1. Setup
+- 2. The API — extension methods, no builder
+- 3. The native assertions come first
+- 4. The scan probe — Support/A11yScan.cs
+- 5. The core pattern — one scan per state
+- 6. Triage — a real app has existing violations
+- 7. CI
+- Anti-patterns
+- Rules
+- Cross-references
+
 `Deque.AxeCore.Playwright` runs the axe-core rule engine **inside your Playwright run**, against the live DOM,
 and returns an `AxeResult` you assert on. It is an **assertion layer** on page objects that already exist: a
 scan is added to a flow the page objects drive. axe runs entirely in the browser — no SaaS, no agent, no API

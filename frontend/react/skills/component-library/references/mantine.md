@@ -88,7 +88,7 @@ import { DataTable } from 'mantine-datatable';
 export function OrdersTable() {
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState({ columnAccessor: 'number', direction: 'asc' as const });
-  const { rows, total, fetching } = useOrders({ page, pageSize: 25, sort });   // TanStack Query — data-fetching
+  const { rows, total, fetching } = useOrders({ page, pageSize: 25, sort });
   return (
     <DataTable
       records={rows} totalRecords={total} recordsPerPage={25} page={page} onPageChange={setPage}
@@ -116,12 +116,12 @@ import { notifications } from '@mantine/notifications';
 
 function deleteOrder(order: OrderDto) {
   modals.openConfirmModal({
-    title: `Delete order ${order.number}?`,               // name the object — ui-rules
+    title: `Delete order ${order.number}?`,
     children: 'This cannot be undone.',
     labels: { confirm: 'Delete', cancel: 'Cancel' },
     confirmProps: { color: 'red', 'data-testid': 'Orders.DeleteConfirm' },
     onConfirm: async () => {
-      await deleteOrderAction(order.id);                  // Server Action / mutation — data-fetching
+      await deleteOrderAction(order.id);
       notifications.show({ color: 'green', message: `Order ${order.number} deleted` });
     },
   });

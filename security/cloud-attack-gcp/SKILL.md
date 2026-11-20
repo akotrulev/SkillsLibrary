@@ -102,22 +102,12 @@ analyze-iam-policy`): `references/gcp-enum.md`.
 
 ## Step 2 — Service-account impersonation & privilege escalation (`T1078.004`, `T1098`/`T1098.001`, `T1548`)
 
-**This is the spine of GCP offense.** The impersonation primitives are all exposed by the **IAM
-Credentials API**, gated by a permission held *on the target SA*:
-
-| Primitive | Permission | What it yields |
-|---|---|---|
-| `generateAccessToken` | `iam.serviceAccounts.getAccessToken` | Short-lived OAuth2 token **as the target SA** — `gcloud --impersonate-service-account=SA` uses this. |
-| `generateIdToken` | `iam.serviceAccounts.getOpenIdToken` | OIDC ID token as the target (IAP, Cloud Run auth). |
-| `signBlob` | `iam.serviceAccounts.signBlob` | Signs arbitrary bytes as the target — forge tokens, sign GCS signed URLs. |
-| `signJwt` | `iam.serviceAccounts.signJwt` | Signs a well-formed JWT as the target — exchange for an access token. |
-| Implicit delegation | `iam.serviceAccounts.implicitDelegation` | Chain: `getAccessToken` on SA B plus `implicitDelegation` on B, where B has `getAccessToken` on C, mints a token for C through B. |
-| Key creation | `iam.serviceAccountKeys.create` | A **long-lived** JSON key for the target — persistent, offline impersonation. |
-| `actAs` | `iam.serviceAccounts.actAs` | Not a token verb — the **"attach this SA to a resource I'm creating"** gate; combine with a deploy permission to run code as the SA. |
-
-`gcloud --impersonate-service-account` does single-hop `generateAccessToken` cleanly; a **multi-hop**
-delegation chain needs the `generateAccessToken` REST endpoint called directly with an ordered
-`delegates[]` list.
+**This is the spine of GCP offense.** The impersonation primitives — `generateAccessToken`,
+`generateIdToken`, `signBlob`, `signJwt`, implicit delegation, key creation, and `actAs` (the
+"attach this SA to a resource I'm creating" gate, not a token verb) — are all exposed by the **IAM
+Credentials API**, each gated by a permission held *on the target SA*. `gcloud
+--impersonate-service-account` does single-hop `generateAccessToken` cleanly; a **multi-hop** delegation
+chain needs the `generateAccessToken` REST endpoint called directly with an ordered `delegates[]` list.
 
 **`actAs` + a deploy permission is the dominant privesc pattern** — launch a workload bound to a more
 powerful SA, then read its token from the metadata server. Rhino Security Labs' two-part research (~20

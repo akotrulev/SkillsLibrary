@@ -1,5 +1,12 @@
 # Deep-dive details — `qa-java:language-testing`
 
+**Contents:**
+
+- 1. Locale-pinned UI text — assert the DOM against the catalog (idea #1)
+- 3. Pseudo-localization — surface hardcoded strings and truncation (idea #3)
+- 4b. Translation-key coverage — a static bundle diff (idea #4)
+- ICU plurals — assert the category, per language
+
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs. Every browser class extends J1's
 `BaseTest` (`qa/java/skills/ui-test-author/playwright/assets/BaseTest.java`) and sets its locale in
 `contextOptions()` from a `LocaleUnderTest` (SKILL.md § The locale under test), so each test method gets its own

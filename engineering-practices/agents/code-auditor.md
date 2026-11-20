@@ -51,7 +51,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 ## Report
 
 ```
-Mode A — BASELINE | Mode B — RE-AUDIT round <N> · SPEC | FEATURE lane — <sources or feature + driving question>
+Mode: A — BASELINE | B — RE-AUDIT round <N> · SPEC | FEATURE lane — <sources or feature + driving question>
 Stack/version: <detected>   Rules: project | plugin copy (not installed)
 Orientation: <cache verdict>
 Evidence mode: static | static + <opted-in commands>

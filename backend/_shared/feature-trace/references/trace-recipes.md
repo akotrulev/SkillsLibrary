@@ -4,7 +4,15 @@ A rule you do not find is a rule your documentation silently claims does not exi
 
 Take the stack and version from the orientation pass. Searching for idioms the project's version does not use under-reports, and under-reporting is invisible — nothing tells you the rule was there.
 
-Parts: **1** the seven hiding places · **2** the silent-rule catalogue · **3** per-stack searches (backend rules; **3a** screens, navigation, labels and forms per UI stack; **3b** following a seam) · **4** git archaeology · **5** reading tasks from journey tests and test-case suites.
+**Contents:**
+
+- Part 1 — The seven hiding places (stack-agnostic)
+- Part 2 — The silent-rule catalogue
+- Part 3 — Per-stack search patterns
+- Part 3a — Where people do things: screens, navigation, labels, forms
+- Part 3b — Following a seam (the Edges inventory)
+- Part 4 — Cross-stack: the git-archaeology pass
+- Part 5 — Cross-stack: reading tasks from journey tests and test-case suites
 
 ---
 

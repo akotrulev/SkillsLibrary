@@ -196,3 +196,46 @@ public class UserGrpcTest extends BaseGrpcTest {
     }
 }
 ```
+
+## Client- and bidi-streaming — async stub + a bounded latch
+
+The blocking stub can't drive client- or bidi-streaming (the client itself produces a stream). Use the **async
+stub** with a `StreamObserver`, and wait on a **`CountDownLatch` with a bounded `await(timeout)`** — the
+sanctioned no-sleep wait — never an unbounded `latch.await()`.
+
+```java
+import com.example.user.v1.*;
+import io.grpc.stub.StreamObserver;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+@Test
+public void importUsersAggregatesAllSentRequests() throws InterruptedException {
+    UserGrpcAction action = UserGrpcAction.authenticated(channel);
+
+    CountDownLatch done = new CountDownLatch(1);
+    AtomicReference<ImportSummary> summary = new AtomicReference<>();
+    AtomicReference<Throwable> failure = new AtomicReference<>();
+
+    StreamObserver<ImportSummary> responseObserver = new StreamObserver<>() {
+        @Override public void onNext(ImportSummary s) { summary.set(s); }
+        @Override public void onError(Throwable t)    { failure.set(t); done.countDown(); }
+        @Override public void onCompleted()           { done.countDown(); }
+    };
+
+    StreamObserver<CreateUserRequest> requestObserver = action.async().importUsers(responseObserver);
+    requestObserver.onNext(CreateUserRequest.newBuilder().setEmail("a@example.com").build());
+    requestObserver.onNext(CreateUserRequest.newBuilder().setEmail("b@example.com").build());
+    requestObserver.onCompleted();
+
+    assertThat(done.await(5, TimeUnit.SECONDS)).as("server completed within deadline").isTrue();  // bounded wait
+    assertThat(failure.get()).isNull();
+    assertThat(summary.get().getImported()).isEqualTo(2);
+}
+```
+
+> Bidi-streaming follows the same shape — interleave `requestObserver.onNext(...)` with messages collected in
+> `onNext`, all gated by a bounded latch. For richer bidi-stream-lifecycle assertions (ordering, mid-stream close
+> codes), cross-link `qa-java:realtime-stream-testing` — gRPC streaming and WebSocket/SSE share the
+> drain-then-assert-on-a-bounded-condition discipline.

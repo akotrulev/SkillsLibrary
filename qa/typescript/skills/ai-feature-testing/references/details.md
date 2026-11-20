@@ -1,5 +1,16 @@
 # Deep-dive details — `qa-typescript:ai-feature-testing`
 
+**Contents:**
+
+- The SDK path — Anthropic SDK in Vitest (the second half of the hybrid)
+- Idea #1 — assert a property, not a string (the assertion ladder)
+- Idea #2 — LLM-as-judge (llm-rubric): pin the model, calibrate the judge
+- Idea #3 — an eval is a dataset (data-driven, data-driven-testing)
+- Idea #4 — non-determinism: regression vs stochastic
+- Structured-output validation (the is-json analogue in code)
+- Tool-call assertions — did the model call the right tool with the right args?
+- Examples
+
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
 ## The SDK path — Anthropic SDK in Vitest (the second half of the hybrid)

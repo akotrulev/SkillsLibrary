@@ -20,7 +20,9 @@ This is **read-only analysis** on product code. The audit points; owners fix. Th
 
 Where `dev:audit-spec` persists a requirement register, this skill's **report is its own register**: the surface letters, finding IDs, and defect families are the stable spine every later round reuses. That is why the report is saved to a file, not just narrated.
 
-State the mode — Mode A (baseline) or Mode B (re-audit) — and the feature in the first line of output, so the reader knows whether the report is a baseline or a delta.
+State the mode and the feature in the first line of output.
+
+**A prior report exists →** this is Mode B: read `references/re-audit.md` (reload, re-verify, status markers, delta report) instead of the Mode A procedure below.
 
 ## Relationship to the `code-auditor` agent
 
@@ -47,7 +49,7 @@ This skill is the **FEATURE lane** of the `code-auditor` agent, and carries both
 
 ## Evidence policy — static-first, execute opt-in
 
-Same policy as `dev:audit-spec`: evidence is **read code** by default; running builds/tests or probing a live app is an explicit per-audit opt-in that corroborates a code trace but never replaces it.
+Evidence is **read code** by default; running builds/tests or probing a live app is an explicit per-audit opt-in that corroborates a code trace but never replaces it.
 
 ## Evidence rules
 
@@ -67,7 +69,7 @@ Mode B needs only the **prior report's path** (plus any new driving question). I
 
 `docs/audits/<NNN>-<slug>-audit-r<N>.md`, on the current branch. Round 1 from Mode A; `r2`, `r3`… from each Mode B run. **Rounds are never overwritten** — the trend ("9 open at r1 → 3 at r2") only exists if the old rounds survive.
 
-**Naming — `<NNN>-<slug>`, the library-wide artifact convention.** `<NNN>` is a zero-padded sequential number scoped to `docs/audits/`: list the folder, take the highest existing `NNN` prefix, and use `highest + 1` (start at `001` if the folder is empty or absent). It is minted **once per audit subject**, at the `r1` report, and **every later round reuses that same `NNN`**; never renumbered, never reused for a different subject. `<slug>` is a short kebab-case title naming the feature or area audited (`checkout-flow`, `notification-fanout`). Create `docs/audits/` if absent; if the repo already uses a different audits convention, follow it and say so.
+**Naming — `<NNN>-<slug>`.** `<NNN>` is zero-padded and scoped to `docs/audits/`: the highest existing prefix plus one (`001` when the folder is empty or absent), minted once per audit subject at the `r1` report and reused by every later round. `<slug>` is a short kebab-case feature name (`checkout-flow`). Create `docs/audits/` if absent; where the repo keeps audits another way, follow it and say so.
 
 ## Procedure — Mode A (baseline)
 
@@ -77,7 +79,7 @@ Turn "audit X" into an explicit boundary: which services/modules are in, which a
 
 ### 2. Decompose into surfaces
 
-Map the feature's territory: entry points (endpoints, handlers, jobs, consumers, UI actions) → the code paths behind them → the data they own → the boundaries they cross (API/queue/DB/external calls). Group these into **lettered surfaces** (A, B, C…) — coherent sub-areas like "scheduling", "order placement", "notifications" — that structure the whole report. Findings are numbered within their surface (A1, A2, B1…) so the priority table and prose cross-reference cleanly.
+Map the feature's territory: entry points (endpoints, handlers, jobs, consumers, UI actions) → the code paths behind them → the data they own → the boundaries they cross (API/queue/DB/external calls). Group these into **lettered surfaces** (A, B, C…) — coherent sub-areas like "scheduling", "order placement", "notifications" — that structure the whole report. Findings are numbered within their surface (A1, A2, B1…). Done when every entry point sits under a lettered surface.
 
 ### 3. Build the three inventories (per surface)
 
@@ -85,7 +87,7 @@ Read the code — 2–3 representative files first to calibrate the project's co
 
 - **Functionality narrative** — what the surface actually does, traced, in a few sentences per path. Where the code and its naming/docs disagree, the code wins and the disagreement is a finding.
 - **Validations & gates** — every check the surface enforces: input validation, guards/preconditions, authn/authz checks, feature flags, idempotency keys, concurrency/locking, rate limits, error paths and what each failure does. Also record the *absences* the driving question makes relevant, each naming the search.
-- **Integration map** — who calls it, what it calls, events published/consumed, shared tables/contracts, config it reads. Note the *trust assumptions* at each boundary (what inbound data is assumed already-validated/normalized — the classic audit payload).
+- **Integration map** — who calls it, what it calls, events published/consumed, shared tables/contracts, config it reads. Note the *trust assumptions* at each boundary (what inbound data is assumed already-validated/normalized — the classic audit payload). Done when every surface has its three inventories.
 
 ### 4. Findings
 
@@ -97,21 +99,23 @@ Each finding is one row of the priority table plus a short section containing, i
 4. **Class** — data issue / code issue / logical conflict, one per finding (table below)
 5. **Suggested fix direction** — one line pointing where; never the applied fix
 
-**Class every finding.** Class is orthogonal to severity and to defect family: severity says how much it hurts, the family groups by shared cause, the class says *what kind of wrong it is* and therefore *who can act*. Exactly one class per finding; the Priority table is split into the three, in this order (keep the definitions aligned with `dev:audit-spec`):
+**Class every finding**, one class per finding, per `audits.md`. The class definitions and the *Unblocked by* column are `spec-vs-code-audit`'s "Class every finding" table. What each class looks like in a feature audit:
 
-| Class | The defect lives in… | Typical here | Unblocked by |
-|---|---|---|---|
-| **Data issue** | the data the code runs on, not the logic — the code would be right on correct data | wrong seed/reference/lookup rows; a stale or wrong config value; migration residue; stored state violating an invariant the code assumes; an enum/column out of step with the schema | a data correction, migration, or config change — the data/platform owner |
-| **Code issue** | the logic itself — absent, incomplete, or wrong | a missing validation or gate; an unhandled error path; a wrong computation; inbound data trusted without normalization; a concurrency window | a code change — the owning `be-*`/`fe-*` agent |
-| **Logical conflict** | two things that cannot both hold, and which one wins is not the auditor's call | two code paths enforcing contradictory rules (one normalizes to UTC, another assumes local); a gate that contradicts another gate; the team's stated model vs what the code does; naming/docs vs behavior where it is genuinely unclear which was intended | a **decision** by the product/spec owner first, then code or data — the fix direction names the decision and its owner, never a side |
+| Class | Typical here |
+|---|---|
+| **Data issue** | wrong seed/reference/lookup rows; a stale or wrong config value; migration residue; stored state violating an invariant the code assumes; an enum/column out of step with the schema |
+| **Code issue** | a missing validation or gate; an unhandled error path; a wrong computation; inbound data trusted without normalization; a concurrency window |
+| **Logical conflict** | two code paths enforcing contradictory rules (one normalizes to UTC, another assumes local); a gate that contradicts another gate; naming/docs vs behavior where it is genuinely unclear which was intended |
 
 When a bad row is *caused by* a bug that writes it, the finding is a **code issue** (root cause) with the data consequence noted; if the already-written data needs correcting regardless of the code fix, that is a second, cross-referenced **data issue**. One family can span all three classes — that is normal, and the split is what tells the fixer which part of the family they can close alone.
 
 Also record what's **correct-but-dependent**: a surface that is internally consistent but inherits another finding's defect is itself a (low-severity) finding — it tells the fixer the blast radius. And group findings into **defect families** in the summary (e.g. "UTC conflated with a local concept" vs "inbound data trusted without normalization") — families reveal the systemic cause individual findings hide.
 
-Keep signal high: cap detailed findings at ~30; aggregate the rest in one overflow line per family.
+Cap detailed findings at ~30; aggregate the rest in one overflow line per family. Done when every finding has its mechanism, scenario, severity, class and fix direction.
 
 ### 5. Report (round 1)
+
+Done when the Summary, every surface summary, the Priority table with its three class headings and Recommended sequencing are all written.
 
 ```markdown
 # AUDIT — <feature>: <sub-areas covered> — Round 1
@@ -132,9 +136,7 @@ fix and what it closes/de-risks — leverage, not severity, leads.>
 
 ### A2 — …
 
-**Surface summary —** <2–4 sentences on the surface as a whole: how healthy it is, the
-family its findings belong to, and the one thing to fix here first. Not a walk through
-A1/A2 — those are above.>
+**Surface summary —** <how healthy, the family its findings belong to, the one thing to fix first (`audits.md`)>
 
 ## B. <Surface name>
 …
@@ -148,8 +150,7 @@ A1/A2 — those are above.>
 <who calls it / what it calls / events / shared data — with the trust assumption at each boundary>
 
 ## Priority table
-<Every finding under exactly one class. All three headings always present — `None.` when a
-class is empty — so rounds compare class by class. Severity-ordered within each.>
+<Severity-ordered within each class; `None.` when a class is empty.>
 
 ### Data issues
 | # | Finding | Severity | File |
@@ -174,125 +175,8 @@ code changes say so explicitly.>
 
 Scale to the ask: a narrow driving question over one surface can drop the inventory tables into prose; a multi-surface audit keeps all sections. Never drop the Summary, surface summaries, Priority table (with its three class headings), or Recommended sequencing.
 
-## Procedure — Mode B (re-audit)
-
-The question is no longer "what does this feature do" but **"what moved since round N−1"**.
-
-### 1. Reload, don't re-decompose
-
-Read the prior report. Inventory its surface letters, finding IDs, severities, defect families, and evidence trails. **Surface letters and finding IDs are permanent** — new surfaces continue the letters (…D, E), new findings continue their surface's numbering (A5, A6). Nothing is ever renumbered or reused.
-
-### 2. Re-verify — fresh, then sweep the family
-
-**Re-trace each finding's code path from scratch.** A "we fixed that" claim, a linked commit, a green test: leads, not evidence (`dev:verify` discipline). Read the code as if round N−1 never happened; then compare.
-
-Then **sweep the defect family** of every finding that moved. A fix applied at one site routinely misses its siblings, and the family grouping in the prior report exists precisely to make that sweep cheap. Family siblings found now are new findings continuing the sequence — not "the old finding, still open".
-
-Findings closed in an *earlier* round aren't re-verified by default — they appear as a single "previously closed (r1–r2): A1, B3" line — unless the diff since then touched their cited files, which promotes them back into the re-trace set.
-
-Default scope is *findings + their families*, not the whole feature. Re-run a full surface only when its narrative changed (the code no longer does what round N−1 said it does) — and when it did, say so loudly: a stale narrative misleads worse than a stale finding.
-
-### 3. Mark each finding Resolved or Still open
-
-Every finding carries its status **as a prefix**, so the report is scannable without reading a paragraph:
-
-| Marker | Meaning |
-|---|---|
-| **Resolved** | Re-traced this round; the mechanism is gone and the failure scenario no longer reproduces on the code |
-| **Resolved (differently)** | Fixed, but not the way the fix direction suggested — fine; judge the outcome, not adherence to your advice. Note the actual approach in one line |
-| **Still open** | Unchanged, or partially addressed (say which — "Still open — guard added on the sync path, job path still bare" is progress and reads as such) |
-| **Still open (regressed)** | Was resolved in an earlier round, is back. Always at least `major`, and always names what reintroduced it |
-| **New** | Found this round — a family sibling, or a defect introduced since round N−1 |
-
-Never mark Resolved on `#inferred` evidence, and never on a **correct-but-dependent** finding whose parent is still open — the blast radius hasn't shrunk just because the dependent site looks fine. A **logical conflict** is Resolved only when the owner's decision is recorded *and* the code or data now matches it — a decision alone, or a unilateral code change, is Still open. A finding keeps its class across rounds; if a re-trace shows it was misclassed, move it and say so in its row (`reclassed from data`).
-
-### 4. Report (round N)
-
-Same surface structure and section order as round 1, plus status prefixes and a delta header.
-
-```markdown
-# AUDIT — <feature> — Round <N>
-
-**Date:** <YYYY-MM-DD>  **Previous round:** `<path>` (<date>)  **Evidence mode:** static | static + <commands run>
-**Written by:** `dev:audit-feature` (via `code-auditor`)
-**Question driving the audit:** <verbatim — restated, or the new one if it changed>
-**Re-verify scope:** <"prior findings + defect families" | "+ surface B re-traced, narrative had changed">
-
-## Movement
-Resolved <n> · Still open <n> · Regressed <n> · New <n>
-By severity, open now: blocker <n> · major <n> · minor <n> · nit <n>  (was <…>)
-
-## Summary
-<Which defect families closed, which persist, which appeared. The single
-highest-leverage remaining fix — leverage, not severity, leads.>
-
-## A. <Surface name>
-<Narrative: unchanged, or the re-traced replacement if the code moved — say which.>
-
-### A1 — <title> — **Resolved** — <original severity>
-<What closed it, cited file:line, re-traced this round. One line on the approach if it
-differed from the suggested direction.>
-
-### A2 — <title> — **Still open** — **major**
-<What is still true, re-cited at current file:line. What moved, if anything. Fix
-direction — restated only if it changed.>
-
-### A5 — <title> — **New** — **minor**
-<Family sibling of A2, surfaced by this round's sweep. Mechanism · failure scenario · fix direction.>
-
-**Surface summary —** 1 of 3 resolved, 1 new sibling. <2–4 sentences: is this surface
-converging or churning, what the remaining opens have in common, whether a regression
-suggests the fix pattern here is unsafe, and the one next action. Never a walk through
-the findings above.>
-
-## B. <Surface name>
-…
-**Surface summary —** …
-
-## Validations & gates inventory
-<Deltas only — gates added, removed, or changed since round N−1; "unchanged" is a valid row.>
-
-## Integration map
-<Deltas only — new boundaries, changed trust assumptions.>
-
-## Priority table (open + new only)
-<Same three class headings as round 1, always present — `None.` when empty.>
-
-### Data issues
-| # | Finding | Severity | File | Status |
-
-### Code issues
-| # | Finding | Severity | File | Status |
-
-### Logical conflicts
-| # | Finding | Severity | File | Status |
-
-## Closed this round
-<one line per resolved finding — ID, what closed it, cited. The credit half of the
-report; not optional.>
-
-## Open questions
-<still unanswered · new · what execute-opt-in would settle>
-
-## Recommended sequencing
-<numbered, leverage-ordered, over what remains open.>
-```
-
-### Surface summaries — what makes them worth reading
-
-The rollup under each surface is the deliverable stakeholders actually read. Rules:
-
-- **One per surface, never per finding.** Findings have their own sections; a summary that walks them adds nothing.
-- **2–4 sentences.** Longer means the surface should have been split.
-- Say the **state**, the **pattern**, and the **next action** — "converging: everything left here is the same untrusted-inbound-payload family, one normalization at the boundary closes three" beats "2 resolved, 1 open".
-- Where a surface didn't move, **say why if you know and admit it if you don't** — "unmoved; no commits touched these paths since r2" is useful, silence is not.
-- The *Movement* block is arithmetic; the surface summaries are judgment. Don't swap them.
-
 ## Rules
 
-The report standards (permanent surface letters and finding ids, Resolved only on a fresh re-trace, the three finding classes, leverage-ordered sequencing, unknowns to Open questions) are the dev rule file `audits.md`; see Evidence rules above for where to read it. Beyond it:
-
-- **Strictly read-only** on product code. The audit reports are the only files this skill writes. Offer remediation direction; never apply it here.
 - Every finding answers the driving question or is explicitly marked adjacent.
 - A red build/test state on arrival is a finding, not yours to fix.
 - The report is a first-class test-basis input: write findings so `qa/manual/requirements-breakdown` can consume them (observable behavior, boundaries, states — boundary conditions in findings are BVA seeds).

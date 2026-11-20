@@ -1,5 +1,17 @@
 # Accessibility Testing — Lighthouse (.NET 10 / Microsoft.Playwright 1.63 + NUnit)
 
+**Contents:**
+
+- 1. Setup
+- 2. Two ways to run it
+- 3. lhci autorun — the URL-list gate
+- 4. A Lighthouse fixture with its own Chromium
+- 5. Performance variance
+- 6. Reporting
+- Anti-patterns
+- Rules
+- Cross-references
+
 Lighthouse is Google's Chrome auditor. It scores a page per **category** — `accessibility`,
 `best-practices`, `seo`, `performance` — from 0 to 1, and a gate fails when a score drops below its threshold.
 It is the **broad-audit and trend** sibling of `references/axe-playwright.md`: axe asserts the exact failing

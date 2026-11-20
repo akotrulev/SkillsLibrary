@@ -60,7 +60,7 @@ Each phase is **one release**. Never collapse phases into one release — the ro
 
 ### Common moves under expand–contract
 
-| Move | Phases |
+| Move | Steps |
 |---|---|
 | Add a column (nullable, then NOT NULL) | (1) ADD nullable column → (2) backfill in batches → (3) set NOT NULL after backfill completes |
 | Rename a column | (1) Add new column → (2) dual-write both → (3) backfill → (4) switch reads → (5) drop old |

@@ -36,12 +36,12 @@ Ask at most two or three questions up front (target project, base URL or spec lo
 | 3 | Deep verification (each only if in scope) | DB: `db-testing/connection`, `testcontainers`, `verification-queries` · messages: `messaging-testing` · files: `file-storage-testing` · email: `email-testing` · realtime: `realtime-stream-testing` · contracts: `qa/_shared/contract-testing-pact` + `api-contract-testing` (sync HTTP, message pact, or BDCT) · resilience: `failure-injection-testing` · flags: `feature-flag-testing` · clock, schedule, concurrency, duplicate delivery: `time-and-concurrency-testing` · synthetic probes: `production-uptime-checks` · payments: `payment-testing` *(provider sandbox, webhooks, refunds)* · whole system: `distributed-app-testing` *(multi-service compose stack)* | Suite green with the new layers; probes: `terraform plan` shows no unexpected diff |
 | 4 | Review | `api-test-author/review`; `test-quality-check` when the user wants test quality proven by mutation; `qa/_shared/change-coverage-review` *(when the input is a PR or diff)* | No blocker or major left |
 
-**Fix** (a failing, flaky or broken test): load `dev:debugging`. Reproduce in isolation first, then triage: a **product defect** goes to `qa-test-case-designer` as a bug report and the case is marked blocked, never made green by relaxing the assertion; a **test defect** gets the smallest correct fix; a **flake** has its nondeterminism root-caused, and its quarantine mechanics belong to `qa-reporting-java`. Verify with `dev:verify` that it is green for the right reason, then sweep the suite for the same defect. **Extend**: re-enter step 1 for the missing DTOs, clients and builders only, then step 2 for the new cases, reusing every existing seam; map a case's *Environment needs* to a seam per `time-and-concurrency-testing`, or to a deferral naming the missing hook for `be-java`, never a skip or a sleep.
+**Fix** (a failing, flaky or broken test): load `dev:debugging`. Reproduce in isolation first, then triage: a **product defect** goes to `qa-test-case-designer` as a bug report and the case is marked blocked, never made green by relaxing the assertion; a **test defect** gets the smallest correct fix; a **flake** has its nondeterminism root-caused, and its quarantine mechanics belong to `qa-reporting-java`. Verify with `dev:verify` that it is green for the right reason, then sweep: every sibling sharing the defect's pattern fixed or listed in the report. **Extend**: re-enter step 1 for the missing DTOs, clients and builders only, then step 2 for the new cases, reusing every existing seam; map a case's *Environment needs* to a seam per `time-and-concurrency-testing`, or to a deferral naming the missing hook for `be-java`, never a skip or a sleep.
 
 ## Boundaries
 
 - **Peers own their lanes.** Test-case design and bug reports: `qa-test-case-designer`. Allure and flake quarantine: `qa-reporting-java`. CI wiring: `qa-cicd-java`. Security gates: `qa-security`. UI, mobile, BDD, LLM and load suites: the matching `qa-*-java` agent. Product code: `be-java`.
-- **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests an earlier task wrote are read-only: never edit, skip or weaken one; one you believe is wrong stays as it is and red: record why as a dated `D<n>` in the plan and in your report, and still finish the task. The close-out gate rules on it.
+- **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests an earlier task wrote are read-only: never edit, skip or weaken one.
 - **Stay in your stack.** A change outside the test suite means the task was mis-cut: report it, don't widen your reach.
 - **Workspace.** Work in the checkout you are given; no new branch or worktree. Commit only when asked or when the plan says to.
 - One clarifying question when information is missing, never a guess. A tempting broader refactor is offered as a separate follow-up.
@@ -58,7 +58,7 @@ Orientation: <cache verdict>
 Changed: <path> — <one line each>
 Cases: <n automated, n deferred and why>
 Failure class and sweep (fix): <product defect | test defect | flake — root cause; siblings fixed or listed>
-Gate evidence: <command and result, e.g. "./gradlew test → 14 passed, 0 failed">
+Gate evidence: <the Gate: line's commands and results, including coverage>
 Orientation cache: created | updated
 Hand-off: <for qa-reporting-java, qa-cicd-java, qa-test-case-designer, or none>
 Left out of scope: <what you deliberately did not touch>

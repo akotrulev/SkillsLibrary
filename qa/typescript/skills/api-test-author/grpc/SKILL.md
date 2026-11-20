@@ -247,12 +247,6 @@ beforeAll(() => {
 gRPC-correct version asserts `res.code === status.NOT_FOUND` — same outcome, third location: the REST status line,
 the GraphQL `errors` envelope, the gRPC `status`. One family, three result-location conventions.
 
-**Composing with the protocol-trio siblings.** REST `generator` is status-driven over HTTP+JSON; GraphQL ``api-test-author/graphql`` is
-one HTTP 200 carrying `{ data, errors }`; gRPC is proto/HTTP2 with the result in the `status`. All three share the
-**Client + Spec** spine and the "wrap the call so the test asserts success *or* failure uniformly" move (the gRPC
-`GrpcCallResult` is the GraphQL raw-envelope analogue). Only the transport, the codegen, and where-the-result-lives
-differ.
-
 ## Rules
 
 The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md`, `api-tests.md` and `test-data.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.

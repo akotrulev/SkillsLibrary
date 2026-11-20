@@ -297,19 +297,3 @@ jobs:
 ## Deep-dive reference
 
 These sections live in `references/details.md` — **read it when the task touches them**: **Examples**.
-
-## Rules (hard constraints)
-
-- The gate is the **build failing** — **NuGet audit `NU190x` → `WarningsAsErrors`** *or* a
-  **parse-and-assert** step (because `dotnet list package --vulnerable` always exits 0). One logical
-  assertion per test; test names `Should_X_When_Y`; **async all the way** when shelling out (no
-  `.Result`/`.Wait()`).
-- Scan **direct + transitive** deps (`--include-transitive` / `NuGetAuditMode=all`) against a CVE feed —
-  transitive coverage is the point. SCA reads the **build graph** (no running app — contrast DAST).
-- Triage with a **ticketed `<NuGetAuditSuppress>`** scoped to the specific advisory URL (never blanket
-  `NoWarn`), with a ticket + re-review date. Gate **new** CVEs; shrink the list, never grow it (the
-  `axe-playwright`/`passive-scan` discipline). Prefer a **direct pin to the patched (transitive) version** over suppressing.
-- Emit **JSON**: attach to **Allure**, upload as a CI artifact, optionally convert to **SARIF** for GitHub
-  code-scanning.
-- Pair the **gate** with **remediation** (Dependabot/Renovate) and the **`dependency-review-action`**
-  PR-diff gate. A clean SCA ≠ "secure" — **run DAST too**: orthogonal layers.

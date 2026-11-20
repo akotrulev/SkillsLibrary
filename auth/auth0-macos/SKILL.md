@@ -1,6 +1,6 @@
 ---
 name: auth0
-description: Use when adding or fixing Auth0 login in a native macOS Swift/SwiftUI app (Auth0.swift, PKCE, Keychain). Triggers "add Auth0 login to the Mac app". Not for tenant setup or OIDC theory.
+description: Use when adding or fixing Auth0 login in a macOS Swift/SwiftUI app (Auth0.swift, PKCE, Keychain). Triggers "add Auth0 login to the Mac app". Not for tenant setup or OIDC theory (auth0-concepts).
 disable-model-invocation: true
 ---
 

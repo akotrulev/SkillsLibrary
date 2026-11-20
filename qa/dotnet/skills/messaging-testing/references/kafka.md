@@ -1,5 +1,22 @@
 # Messaging Testing — Apache Kafka (.NET 8 / NUnit)
 
+**Contents:**
+
+- The Kafka model — a LOG, not a queue (read this first)
+- Stack
+- Local broker for tests — Kafka / Redpanda via Testcontainers
+- The test-side reader — KafkaProbe (the "drain" analogue)
+- Core pattern 1 — producer-assert (the SUT produced record X)
+- Core pattern 2 — consumer-assert (the SUT consumed → side-effect Y)
+- Offsets, consumer groups & commit semantics
+- Keys → partition routing & per-key ordering
+- App-level dead-letter topic (DLT) — a convention, not a broker feature
+- Receiving a batch / draining
+- Anti-patterns
+- Examples
+- Rules (hard constraints)
+- Cross-references
+
 Ported from the **canonical** `java` stack of the `qa/dotnet/skills/messaging-testing/` node (Java leads this node by
 judgment — Kafka is JVM-native and `org.apache.kafka:kafka-clients` is its most first-class client; this file
 re-expresses the same model in .NET idioms — `Confluent.Kafka`, NUnit, a bounded `Consume` poll loop,

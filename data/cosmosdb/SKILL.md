@@ -274,38 +274,15 @@ Session consistency is the right default. Bump to Strong only when you've measur
 
 ## Rules
 
-- One `CosmosClient` per process — singleton
-- Always include the partition key in queries from app code
-- Indexing policy explicit on production containers — don't ship the "index everything" default unless writes are infrequent
-- ETag-based optimistic concurrency on every write that competes with another writer
-- Entra ID + data-plane RBAC for auth, `DefaultAzureCredential`; then **`disableLocalAuth = true`** for a zero-key account — master keys only as a legacy fallback, Key-Vault-stored + rotated
-- Data-plane role for item access is separate from control-plane Azure roles — grant the data-plane role explicitly, scoped as narrowly as possible
-- Private endpoint + public network access disabled for production accounts; CMK at account creation where key custody is required
-- Autoscale for prod containers
-- Change feed processed via Azure Functions or the SDK's hosted processor with a separate leases container
-- Container-level RU per workload class
-- Point reads (`item().read()`) for `GetById` — cheapest op
-- Session consistency the default; document any deviation
+Each rule is stated nowhere else in this file.
 
-## What NOT to do
-
-- No master keys in app config or env vars — go passwordless and disable local auth
-- No assuming a control-plane Contributor role can't read your data — it can read the keys unless local auth is off
-- No expecting to change an account's API family or add a CMK / hierarchical partition key after creation — all three are creation-time only
-- No cross-partition queries on hot paths — design the PK around the access pattern
-- No `SELECT * FROM c` without a `WHERE c.partitionKey = @pk` in production code
-- No `Strong` consistency as the default — measure first
-- No "index everything" policy on a high-write container
-- No more than one `CosmosClient` per process
-- No partition keys with low cardinality (e.g., `status` with 4 values)
-- No items > 2 MB (hard limit) — split or move to Blob Storage with the pointer in the item
-- No long-lived change-feed processors that don't checkpoint — they'll re-process on every restart
-- No production workloads on Serverless above ~50 GB or sustained > 1k RU/s — graduate to Autoscale
+- Keep each item under 2 MB (hard limit); split it, or move the payload to Blob Storage with a pointer in the item.
+- Checkpoint every long-lived change-feed processor; one that does not re-processes from the start on every restart.
 
 ## Generation steps
 
 1. Confirm API choice (NoSQL is the default), workload shape, access patterns, multi-region needs.
 2. Design partition key from access patterns — single-partition reads dominant.
 3. Generate IaC (Bicep / Terraform) for the database + container with autoscale RU, partition key (hierarchical where the levels are natural), indexing policy, TTL, change feed, **`disableLocalAuth = true`, the data-plane role assignment for the app identity, a private endpoint, and CMK if key custody is required** (CMK + API + hierarchical keys are all creation-time).
-4. Generate the singleton client setup and a typed repository per logical entity.
+4. Generate the singleton client setup. Wrap it in a repository only when a second store or a test seam needs it. Done when the client reads the container through the singleton.
 5. Smoke locally with the Cosmos emulator; replay access patterns; confirm queries are single-partition and within RU budget.

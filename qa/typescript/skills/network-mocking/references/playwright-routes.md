@@ -1,5 +1,24 @@
 # QA — Playwright Routing, Mocking and Traffic Assertions (TypeScript / Playwright 1.64)
 
+**Contents:**
+
+- When to use
+- When NOT to use
+- Inputs needed
+- Decision matrix
+- 1. The fixtures
+- 2. Mocking a response
+- 3. Asserting a call — method and typed payload
+- 4. Asserting a call did NOT happen, and that the page logged no errors
+- 5. Security headers and TLS — at the routing layer
+- 6. Modifying traffic in flight
+- 7. HAR replay and update
+- 8. Offline and latency
+- Rules
+- What NOT to do
+- Generation steps
+- Cross-references
+
 Intercepts, mocks, asserts and shapes HTTP traffic in `@playwright/test`. Built on the fixture model of
 `qa/typescript/skills/ui-test-author/playwright`: interception and traffic checks are **fixtures with intent
 names** (`mockApi.stubOrders([...])`, `traffic.requestedUrls(...)`), never `page.route(...)` in a spec. Every

@@ -1,5 +1,13 @@
 # Deep-dive details — `qa-typescript:language-testing`
 
+**Contents:**
+
+- 1. The i18n fixtures, the locale projects and locale-pinned UI text (idea #1)
+- 3. Pseudo-localization — surface hardcoded strings and truncation (idea #3)
+- 4b. Translation-key coverage — a static catalog diff (idea #4)
+- 5. ICU plurals & gender — assert the category, per language
+- 6. Locale matrix — one journey across every supported locale
+
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
 ## 1. The i18n fixtures, the locale projects and locale-pinned UI text (idea #1)

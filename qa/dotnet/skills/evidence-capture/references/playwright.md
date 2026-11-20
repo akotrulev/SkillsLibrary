@@ -1,5 +1,19 @@
 # Evidence capture — Microsoft.Playwright 1.63 (.NET / NUnit)
 
+**Contents:**
+
+- 1. Screenshots
+- 2. Video
+- 3. Screencast — a recording you start and stop [1.59]
+- 4. Trace
+- 5. HAR
+- 6. Attachments
+- 7. No error-context.md in .NET
+- 8. Viewing and reading evidence
+- 9. Exploratory capture: Playwright MCP and playwright-cli
+- 10. Codegen's recorder
+- 11. Size and CI
+
 Every capture API in its .NET spelling, with the version it shipped in. `SKILL.md` decides what to capture
 and where it lands; this file is how. The samples derive from
 `qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs` (`Example.UiTests.Support.BaseTest : PageTest`),

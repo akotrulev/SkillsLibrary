@@ -17,7 +17,7 @@ You describe a feature, or hand over a document with open questions. This skill 
 
 When the ask turns out to be several capabilities, or the requirements keep moving, stop and delegate to the `requirements-author` agent, or tell the user to type `/dev:refine`. A whole initiative's task list is the `solution-planner` agent's, typed as `/dev:plan-system`.
 
-**No implementation before an approved design.** Write no code, scaffold nothing and start no implementation skill until the user has approved a design, however small the change: a todo list, a one-function utility and a config change each get a design of a few sentences. A step-by-step agent that runs its own design gate (the `fe-blazor` build, the `qa-*` orchestrators) already satisfies this.
+**No implementation before an approved design.** Write no code, scaffold nothing and start no implementation skill until the user has approved a design, however small the change: a todo list, a one-function utility and a config change each get a design of a few sentences. A step-by-step agent that runs its own design approval (the `fe-blazor` build, the `qa-*` orchestrators) already satisfies this.
 
 ## The two modes
 
@@ -60,8 +60,7 @@ Pick the mode from the input before the first question.
 ## Design rules
 
 - **Small, well-bounded units.** Each unit has one purpose, a defined interface, and can be understood and tested without reading its internals. For each one, say what it does, how it is used and what it depends on. A unit you cannot describe that way needs better boundaries.
-- **YAGNI.** Take out every feature the stated need does not ask for.
-- **In an existing codebase, follow its patterns.** Where existing code stands in the way of the work (a file grown too large, a tangled responsibility), include a targeted improvement in the design. Leave unrelated refactoring out.
+- **Scope and patterns follow `CLAUDE.md`:** "Simplicity (KISS)" for what stays out, and the read-2–3-existing-files rule ("Backend code rules") for matching the codebase. The design-specific part: where existing code stands in the way of the work (a file grown too large, a tangled responsibility), include a targeted improvement in the design, and leave unrelated refactoring out.
 
 ## Output format
 

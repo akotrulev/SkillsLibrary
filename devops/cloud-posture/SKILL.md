@@ -8,11 +8,11 @@ disable-model-invocation: true
 
 **Cloud Security Posture Management (CSPM)** reads a **live, deployed cloud account** through its API and scores the *running* configuration against security benchmarks — the misconfigurations that only exist once resources are provisioned: an S3 bucket someone made public last week, a root account with no MFA, an unused IAM key that should have been rotated, a storage account whose encryption was disabled by a console click, a subscription with Activity Log turned off. This is the surface **IaC scanning cannot see** — a clean Terraform plan says nothing about drift, console changes, or resources created outside IaC entirely.
 
-**Prowler** (v5, `prowler-cloud/prowler`) is the primary scanner: one Python CLI, all three clouds (`prowler aws` / `prowler azure` / `prowler gcp`), hundreds of read-only checks mapped to **CIS benchmarks** and dozens of other frameworks, gated by severity and status. **ScoutSuite** (NCC Group) is the companion for a **single self-contained HTML report** an engineer or auditor browses by service. Both are OSS and need no paid license. Commercial CSPM (Wiz, Prisma Cloud, Prowler Pro, Microsoft Defender for Cloud) is noted per-provider in `references/` for teams that already have it.
+**Prowler** (v5, `prowler-cloud/prowler`) is the primary scanner: one Python CLI, all three clouds (`prowler aws` / `prowler azure` / `prowler gcp`), hundreds of read-only checks mapped to **CIS benchmarks** and dozens of other frameworks, gated by severity and status. **ScoutSuite** (NCC Group) is the companion for a **single self-contained HTML report** an engineer or auditor browses by service. Both are OSS; commercial CSPM (Wiz, Prisma Cloud, Prowler Pro, Defender for Cloud) is noted per provider in `references/`.
 
 This skill is **language-agnostic** (a cloud account has no stack) and owns the **Prowler/ScoutSuite invocation, the read-only credential model, the CIS/OWASP + MITRE ATT&CK Cloud mapping, and the scheduled-scan CI wiring**. It is loaded by the **`infra-security-tester`** agent as its Step-4 cloud-posture pass.
 
-> **⚠️ AUTHORIZATION-FIRST — this reads a live cloud account, and that is `#volatile`.** Every command here authenticates to a real cloud account and enumerates its configuration. That is only legitimate as a **read-only self-test of an account you own**. Before any live scan, record an authorization line — **who authorized it, the exact account/subscription/project or org scope, and an expiry** — and treat it as `#volatile`: never cache it in the orientation cache, never carry it across runs, re-confirm it each engagement. **Never point these tools at a third party's account.** Every posture report carries `Authorization: <cloud scope + who authorized + expiry>` as its first line. The credentials are **read-only** (see the per-provider IAM sections) — a posture scan never needs write access, and asking for it is the anti-pattern.
+> **Authorization first.** Every command here authenticates to a real cloud account, which is legitimate only as a **read-only self-test of an account you own**, never a third party's. Before any live scan, record who authorized it, the exact account/subscription/project or org scope, and an expiry. It is `#volatile`: never cached in the orientation cache, re-confirmed each engagement. Every posture report carries `Authorization: <cloud scope + who authorized + expiry>` as its first line.
 
 ## Decision matrix — Prowler vs ScoutSuite, and what this skill is NOT
 
@@ -28,7 +28,7 @@ This skill is **language-agnostic** (a cloud account has no stack) and owns the 
 | **Image / OS-package CVEs**, IaC template CVEs, SBOM | **`qa-<stack>:image-infra-scan`** (Trivy) | the built image / files | A03/A02 |
 | Whether a delivery **gate exists in the repo** (static conformance) | **`devops-auditor`** | repo files (read-only) | plugin rules |
 
-**Rule of thumb:** **`prowler <provider>`** is the gate (machine output, severity/status filters, benchmark mapping); **`scout <provider>`** is the human report (one HTML file, browse by service). Run **Prowler for the gate, ScoutSuite for the read**. Both hit the **live account** — that is the fence against `devops:iac-security` (templates on disk), `qa-<stack>:image-infra-scan` (the image), and `devops-auditor` (repo files, never the account).
+Both hit the **live account**, which is the fence against `devops:iac-security` (templates on disk), `qa-<stack>:image-infra-scan` (the image), and `devops-auditor` (repo files, never the account).
 
 ## Setup — pin the version, use a venv
 
@@ -48,7 +48,7 @@ pip install scoutsuite==5.14.0
 scout --help
 ```
 
-> **Pin the version** (`prowler==5.38.0`, `scoutsuite==5.14.0`, `prowlercloud/prowler:5.38.0` — never `:stable`/`:latest`) so a new check turning a green run red is a deliberate bump you reviewed, not a surprise that gets the scan disabled. Same discipline as the Trivy DB pin in `qa-<stack>:image-infra-scan`.
+Pin every version (never `:stable` / `:latest`): a new check turning a green run red is then a reviewed bump, not a surprise that gets the scan disabled.
 
 ## The read-only credential model — non-negotiable
 
@@ -132,8 +132,7 @@ scout azure --cli --report-dir "reports/scout/$(date +%F)"
 scout gcp --user-account --project-id my-project --report-dir "reports/scout/$(date +%F)"
 ```
 
-- **Prowler gates; ScoutSuite reads.** ScoutSuite has no CI exit-code gate worth building on — its value is the HTML picture. Use it for the human review and the auditor handoff; use Prowler for the pass/fail.
-- Both are read-only against the live account — the same authorization line covers both.
+ScoutSuite has no CI exit-code gate worth building on; use it for the human review and the auditor handoff, and Prowler for pass/fail. The same authorization line covers both.
 
 ## The two spines — CIS/OWASP + MITRE ATT&CK Cloud
 
@@ -173,80 +172,28 @@ prowler aws --mutelist-file mutelist.yaml --severity critical high --status FAIL
 - Scope each entry to a **specific check + resource** — never a blanket "mute all Highs."
 - **Prefer the real fix** (make the bucket private, enable MFA, turn on the log) over a suppression. Suppress only documented, ticketed accepted-risk or false-positives, with a re-review date.
 
-## CI wiring — scheduled, OIDC-authed, in the DEPLOY pipeline
+## CI wiring
 
-Cloud-posture scans run as a **scheduled/authorized job in the deploy pipeline** (`devops/github-actions` / `gitlab-ci` / `azure-pipelines`), **not** the `qa/cicd/*` test lane — the account credentials belong to the deploy context, and posture drift is a nightly concern, not a per-PR one.
-
-```yaml
-# .github/workflows/cloud-posture.yml — scheduled CSPM gate. Cross-link devops/github-actions.
-name: Cloud Posture (Prowler)
-on:
-  schedule: [{ cron: "0 6 * * *" }]     # nightly — posture drifts continuously, not per-PR
-  workflow_dispatch:                    # on-demand, with the run's authorization recorded in the trigger
-
-permissions:
-  id-token: write                       # OIDC — assume the read-only role, NO static keys (blocker if violated)
-  contents: read
-
-jobs:
-  prowler-aws:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::123456789012:role/prowler-security-audit   # read-only
-          aws-region: eu-west-1
-      - run: pip install prowler==5.38.0
-      # Pass 1 — informational: full HTML + OCSF, archived by date, never fails.
-      - run: prowler aws --output-formats html json-ocsf --output-directory "reports/$(date +%F)"
-      # Pass 2 — gating: Critical/High failures against CIS; fail the job on exit 3.
-      - run: |
-          prowler aws --severity critical high --status FAIL --compliance cis_3.0_aws \
-            --output-formats json-ocsf --output-directory "reports/$(date +%F)/gate" || \
-            { [ $? -eq 3 ] && echo "::error::Critical/High cloud-posture findings" && exit 1; }
-      - if: always()
-        uses: actions/upload-artifact@v4
-        with: { name: prowler-report, path: reports/ }
-```
-
-- **OIDC only** — `id-token: write` + an assumed read-only role. A long-lived `AWS_ACCESS_KEY_ID` in CI is a **blocker** (the library's no-static-cloud-credentials invariant).
-- Archive `reports/` as an artifact so a failing run names the findings without re-scanning; the dated dir gives a drift trail.
-- Azure/GCP run the identical two-pass with Workload Identity Federation instead of the AWS OIDC role (see the references).
-
-## Anti-patterns
-
-- **Static cloud keys in CI.** An `AWS_ACCESS_KEY_ID` / `AZURE_CLIENT_SECRET` / SA-key JSON committed or set as a plain CI secret. *Fix:* OIDC / Workload Identity Federation to a read-only role — the library's first infra invariant; a long-lived key is a blocker.
-- **Write-capable scan credentials.** Granting the scanner more than read to "make it work." *Fix:* `SecurityAudit`+`ViewOnlyAccess` / `Reader`+`ProwlerRole` / `roles/viewer` — a posture scan never writes.
-- **Gating without `--status FAIL`/`--severity`.** The job fails on informational and Manual checks, so the team mutes it. *Fix:* gate on `--severity critical high --status FAIL`; show the rest in Pass 1.
-- **Scanning a third party's account, or an account you can't name an authorizer for.** *Fix:* owned accounts only, with the recorded expiring authorization line — no exceptions.
-- **`:stable`/`:latest` or an unpinned `pip install prowler`.** A new check silently turns the nightly red and the gate gets disabled. *Fix:* pin `prowler==5.38.0` / `prowlercloud/prowler:5.38.0` / `scoutsuite==5.14.0`.
-- **Blanket mutelist ("mute all Highs" / a whole-service ignore).** Buries the next real finding. *Fix:* scope each entry to a specific check + resource, with a ticket and a re-review date; shrink the file.
-- **Treating a clean CSPM run as "the cloud is secure."** Prowler/ScoutSuite see **configuration**, not the running K8s workloads (`devops:kubernetes-security`), the image CVEs (`qa-<stack>:image-infra-scan`), the app's access control (`qa-security`), or whether a detected control actually *fires* (`purple-team`). *Fix:* a green posture run means the **account configuration** layer passed — run the full infra layer set.
-- **Confusing IaC scanning with posture.** A clean `checkov`/`tfsec` on the Terraform says nothing about drift, console changes, or resources created outside IaC. *Fix:* run **both** — `devops:iac-security` on the templates, this skill on the live account.
-- **Once-a-quarter manual scans.** Posture drifts continuously (a public bucket appears the day after the scan). *Fix:* the scheduled nightly job.
+Posture scans run as a **scheduled job in the deploy pipeline** (`devops/github-actions` / `gitlab-ci` / `azure-pipelines`), never the `qa/cicd/*` test lane: the account credentials belong to the deploy context, and posture drifts nightly, not per PR. Read `references/ci-wiring.md` before writing the workflow: the OIDC job, the two passes and the exit-3 gate.
 
 ## Rules (hard constraints)
 
-- **Authorization-first, `#volatile`.** Every live scan carries `Authorization: <cloud scope + who authorized + expiry>` as the report's first line, recorded per-run, never cached, re-confirmed each engagement. **Owned accounts only** — never a third party's.
-- **Read-only credentials, reached via OIDC/Workload Identity Federation in CI.** `SecurityAudit`+`ViewOnlyAccess`+supplementary (AWS) · `Reader`+`ProwlerRole`+Graph read (Azure) · `roles/viewer`/`cloudasset.viewer` (GCP). A static cloud key or a write-capable scan identity is a **blocker**.
-- **Prowler is the gate, ScoutSuite is the read.** Gate on `--severity critical high --status FAIL` + exit code `3`; pin the run to a benchmark with `--compliance cis_3.0_{aws,azure,gcp}`. Run the two-pass (informational HTML/OCSF + gating).
-- **Two spines per finding:** CIS benchmark + OWASP (A01/A02/A09), and the **MITRE ATT&CK Cloud/IaaS** matrix (not enterprise).
-- **Pin the versions** (`prowler==5.38.0`, `scoutsuite==5.14.0`, image tags) and run the scan **scheduled in the deploy pipeline**, not the `qa/cicd/*` test lane.
-- **Triage with a ticketed mutelist** scoped to a specific check + resource, with a re-review date; gate NEW findings hard; shrink the file. Prefer the real fix over a suppression.
-- **This skill finds and retests; it never fixes** and never touches infrastructure — `devops-engineer` applies remediation.
-- A clean CSPM run ≠ "secure" — it means the **account configuration** layer passed. Run the full infra layer set (K8s, container runtime, image/IaC, app-layer).
+- **Authorization first, owned accounts only**; the report's first line is the `Authorization:` line (blockquote above).
+- **Read-only credentials, reached via OIDC / Workload Identity Federation in CI.** A static cloud key or a write-capable scan identity is a **blocker**.
+- **Prowler is the gate, ScoutSuite is the read.** Gate on `--severity critical high --status FAIL` plus exit code `3`, pinned to a benchmark with `--compliance cis_3.0_{aws,azure,gcp}`; run the two passes.
+- **Triage with a ticketed mutelist** scoped to a specific check + resource, with a re-review date: never a blanket "mute all Highs". Gate NEW findings hard, shrink the file, and prefer the real fix over a suppression.
+- **Find and retest; never fix.** `devops-engineer` applies remediation.
+- A clean CSPM run ≠ "secure": it means the **account configuration** layer passed (not K8s workloads, image CVEs, app access control, or whether a control fires). Run the full infra layer set.
 
 ## Cross-references
 
-- `references/aws.md` · `references/azure.md` · `references/gcp.md` — the per-provider Prowler/ScoutSuite invocation, read-only IAM/role setup, org-wide scanning, and the commercial-tool note (Wiz / Prisma Cloud / Prowler Pro / Defender for Cloud). **Read the matching one before scanning.**
-- `devops:iac-security` — Checkov/tfsec/Terrascan on **IaC templates before deploy** (the *intended* state on disk). The boundary partner: this skill scans the **deployed account** (the *actual* state, incl. drift). **Run both.**
-- `devops:kubernetes-security` — kube-bench/Kubescape on **running K8s** workloads/RBAC/network policy. Cloud posture covers the account around the cluster; this covers inside it.
-- `devops:container-runtime-security` — kube-hunter/Falco runtime probing; the runtime sibling to this configuration-time scan.
-- `devops:supply-chain-security` · `devops:threat-modeling` · `devops:controls-validation` — the other infra-security skills the `infra-security-tester` agent orchestrates alongside this one.
-- `qa-<stack>:image-infra-scan` — Trivy for **image/OS-package CVEs, IaC-template CVEs, and SBOM** — a different surface (the artifact, not the account).
-- `security/cloud-recon-enumeration` + `security/cloud-attack-{aws,azure,gcp}` — the **offensive** counterpart (`penetration-testing` plugin). This skill scores the account's posture read-only; those skills exploit the same misconfigurations under an authorization gate. A CSPM finding here (over-permissive role, public bucket, disabled log) is the exact starting point an engagement enumerates and chains — the posture↔exploitation handoff.
-- `devops-auditor` — read-only **static** conformance: does a gate exist in the repo. **The fence:** the auditor reads repo files and never authenticates to the account; this skill reads the **live account** and never opens the repo's conformance rule set.
-- `infra-security-tester` (agent) — the step-by-step orchestrator that runs this as its **Step-4 cloud-posture & IAM** pass, under its scope/authorization gate.
-- `devops-engineer` — the remediation peer: this skill finds and retests, `devops-engineer` applies the fix.
-- `data-architect` — owns the **cross-tenant leak test** that proves data isolation holds (app-enforced tenancy the CSPM scan can't see).
-- `observability-engineer-{dotnet,java,node}` — whether the logging/monitoring controls this scan reports as *enabled* are actually **wired to a backend** (a CloudTrail that logs to a bucket nobody queries is a posture pass and a detection gap).
+- `references/aws.md` · `references/azure.md` · `references/gcp.md` — per-provider invocation, read-only IAM, org-wide scanning and the commercial-tool note. **Read the matching one before scanning.**
+- `devops:iac-security` — IaC templates before deploy (the *intended* state); this skill scans the **deployed account** (the *actual* state, incl. drift). Run both.
+- `devops:kubernetes-security` — inside the cluster; cloud posture covers the account around it. `devops:container-runtime-security` is the runtime sibling.
+- `devops:supply-chain-security` · `devops:threat-modeling` · `devops:controls-validation` — the other infra-security skills `infra-security-tester` orchestrates.
+- `qa-<stack>:image-infra-scan` — Trivy for image/OS-package CVEs, IaC-template CVEs and SBOM: the artifact, not the account.
+- `security/cloud-recon-enumeration` + `security/cloud-attack-{aws,azure,gcp}` — the **offensive** counterpart: a CSPM finding here (over-permissive role, public bucket, disabled log) is the starting point an engagement enumerates and chains.
+- `devops-auditor` — static conformance on repo files; it never authenticates to the account, and this skill never opens the repo's conformance rule set.
+- `infra-security-tester` (agent) — runs this as its **Step-4 cloud-posture & IAM** pass. `devops-engineer` applies every fix.
+- `data-architect` — owns the cross-tenant leak test that proves data isolation, which the CSPM scan cannot see.
+- `observability-engineer-{dotnet,java,node}` — whether the logging controls this scan reports as *enabled* are wired to a backend (a CloudTrail logging to a bucket nobody queries is a posture pass and a detection gap).

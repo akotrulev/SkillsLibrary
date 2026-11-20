@@ -1,5 +1,32 @@
 # mobile-react-native Conformance Checklist — the 23 sections
 
+**Contents:**
+
+- A — Version lane, toolchain & migration hygiene
+- B — Project structure, strictness & language standard
+- C — Architecture, state & DI
+- D — UI components & platform conventions
+- E — Styling, theming & adaptive layout
+- F — Navigation & deep links
+- G — Forms & input
+- H — Networking & realtime
+- I — Offline, storage & sync
+- J — Device features, permissions & native code
+- K — Security
+- L — Privacy & store compliance
+- M — Accessibility
+- N — Performance
+- O — Error resilience
+- P — Localization
+- Q — Motion & gestures
+- R — Testability & test ids
+- S — Dev-side tests
+- T — Release & signing
+- U — Observability & logging
+- V — Comments & KISS
+- X — In-app purchases
+- Section index
+
 The audit's spine. Section letters and check numbers are **permanent** — a finding is `<letter><n>` (`B3`, `M1`) and keeps that ID across every round, forever. Never renumber; append new checks at the end of a section with the next free number. The letters are identical on all three mobile stacks (`react-native`, `ios`, `android`): `M` is Accessibility everywhere.
 
 **How to read a row.** *Check* = the invariant. *Violation looks like* = what disqualifies it. *Find it with* = a mechanical lead (a grep hit is never a finding — read the code). *Sev* = the default severity; adjust for real impact and say why.

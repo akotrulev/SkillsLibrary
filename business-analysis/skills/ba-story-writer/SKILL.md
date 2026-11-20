@@ -12,7 +12,7 @@ A story describes **one feature that must be built**. It says what the goal is, 
 
 ## Inputs needed
 
-1. **The epics** (`epics.md` from `business-analysis:epics`, ideally) and the requirements document they cover
+1. **The epics** (`epics.md` from `dev:epics`, ideally) and the requirements document they cover
 2. **Who each feature is for**, specifically ("a member with a confirmed account", not "the user")
 3. **The business rules with their numbers** (limits, time windows, thresholds) and the quality targets from `requirements.md` §4, and the constraints in §5
 

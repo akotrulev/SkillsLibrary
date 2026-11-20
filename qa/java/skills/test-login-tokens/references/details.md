@@ -1,5 +1,9 @@
 # Deep-dive details — `qa-java:test-login-tokens`
 
+**Contents:**
+
+- Templates
+
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
 ## Templates

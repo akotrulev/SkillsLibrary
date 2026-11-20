@@ -37,7 +37,7 @@ On the App Router, **components are Server Components by default.** They run on 
 | Secrets / DB / server-only deps | Yes | **Never** — it ships to the client |
 | Ships JS to the browser | No | Yes |
 
-**The mental shift:** you are not building a client app backed by a server; you are building a **server app with selective client interactivity** — the App-Router analog of Blazor's "static SSR is the default, interactivity is an opt-in island."
+**The mental shift:** you are not building a client app backed by a server; you are building a **server app with selective client interactivity**.
 
 ### The `'use client'` boundary — push it to the leaves
 
@@ -57,7 +57,7 @@ Without RSC, **every** component is a client component and there is no server bo
 - **Props** are function parameters — typed with an explicit `Props` interface, no `any`.
 - **Children** are `children: React.ReactNode`; named slots are just more `ReactNode` props (`header`, `footer`).
 - **Two-way binding** is value-in / onChange-out — a controlled component takes `value` + `onChange`, it never owns the source of truth it's editing.
-- **Event props** are plain callbacks — `onSelect: (id: string) => void`. (React's analog of Blazor's `EventCallback`; there's no awaitable-callback ceremony.)
+- **Event props** are plain callbacks — `onSelect: (id: string) => void`.
 - **Compound components** share implicit state through a Context the parent provides and the children consume (`<Tabs><Tab/></Tabs>`) — see [`state-management`](../state-management/SKILL.md).
 
 ### `ref` as a prop (React 19)
@@ -117,9 +117,9 @@ There is no `OnInitialized`/`OnAfterRender` ladder; effects and derived values r
 - **Rules of hooks:** call them unconditionally at the top level of a component/hook — **except `use()`**, which may be called conditionally, in loops, and inside `if`.
 - **`useDeferredValue` / `useTransition`** — keep the UI responsive during expensive updates (mark a state change non-urgent; show the old value while the new one computes). See [`performance`](../performance/SKILL.md).
 
-### Client-only browser APIs (the "there is no interop barrier" note)
+### Client-only browser APIs
 
-React has no Blazor-style JS-interop boundary: browser APIs (`window`, `localStorage`, `IntersectionObserver`, a charting lib) are just called from a **Client Component**, guarded so they don't run during the server render — inside `useEffect` (which never runs on the server) or behind a mounted check. Wrap the access in a custom hook (`useLocalStorage`, `useMediaQuery`) rather than touching the global directly in render. A third-party non-React widget is initialized in an effect against a `ref` and **torn down in the effect's cleanup**. That's the whole story — there's no separate interop skill.
+Browser APIs (`window`, `localStorage`, `IntersectionObserver`, a charting lib) are called from a **Client Component**, guarded so they don't run during the server render: inside `useEffect` (which never runs on the server) or behind a mounted check. Wrap the access in a custom hook (`useLocalStorage`, `useMediaQuery`) rather than touching the global in render. A third-party non-React widget is initialized in an effect against a `ref` and **torn down in the effect's cleanup**.
 
 ## React 19 data & Actions
 
@@ -133,7 +133,7 @@ On the App Router these pair with **Server Actions** (`'use server'` functions) 
 
 ## Context — the built-in cross-cutting mechanism
 
-The analog of Blazor's `CascadingValue`. One provider, many consumers:
+One provider, many consumers:
 
 ```tsx
 'use client';
@@ -148,7 +148,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     () => ({ mode, toggle: () => setMode(m => (m === 'light' ? 'dark' : 'light')) }),
     [mode],
   );
-  return <ThemeContext value={value}>{children}</ThemeContext>; // React 19 provider shorthand
+  return <ThemeContext value={value}>{children}</ThemeContext>;
 }
 
 export function useTheme() {
@@ -158,37 +158,17 @@ export function useTheme() {
 }
 ```
 
-Rules: **memoize the value** (stable identity), **throw on use-outside-provider**, and **split read/write Contexts** when write churn would re-render read-only consumers ([`state-management`](../state-management/SKILL.md) shows the split). Don't cascade a 30-field "page model" — one Context per concern.
+`<ThemeContext value>` is the React 19 provider shorthand. Rules: **memoize the value** (stable identity), **throw on use-outside-provider**, and **split read/write Contexts** when write churn would re-render read-only consumers ([`state-management`](../state-management/SKILL.md) shows the split). Don't cascade a 30-field "page model" — one Context per concern.
 
 ## Hydration & the double-render trap
 
-A Client Component renders **on the server (prerender)** and **again in the browser (hydrate)** — the markup must match. Reading `window`/`Date.now()`/`localStorage`/`Math.random()` during render produces a **hydration mismatch** (server HTML ≠ client HTML). Fixes: read those in `useEffect` (post-hydration), gate on a mounted flag, or mark the subtree `suppressHydrationWarning` only when the difference is intentional and cosmetic. This is React's version of Blazor's prerender double-fetch — and RSC avoids the *data* double-fetch outright because the Server Component fetches once and the client never re-runs that body.
+A Client Component renders **on the server (prerender)** and **again in the browser (hydrate)** — the markup must match. Reading `window`/`Date.now()`/`localStorage`/`Math.random()` during render produces a **hydration mismatch** (server HTML ≠ client HTML). Fixes: read those in `useEffect` (post-hydration), gate on a mounted flag, or mark the subtree `suppressHydrationWarning` only when the difference is intentional and cosmetic. RSC avoids the *data* double-fetch outright, because the Server Component fetches once and the client never re-runs that body.
 
 ## Keys, lists, and reconciliation
 
-- **Keys are stable domain ids** (`order.id`), never the array index — an index key corrupts state and focus when the list reorders or an item is removed. (The React analog of Blazor's `@key`.)
+- **Keys are stable domain ids** (`order.id`), never the array index — an index key corrupts state and focus when the list reorders or an item is removed.
 - Derive rendered lists from state during render; don't mirror a list into a second `useState`.
 - Sort/filter deterministically — a grid with no stable sort reorders on every refetch ([`ui-rules`](../ui-rules/SKILL.md)).
-
-## Navigation
-
-- In-app navigation is a **real `<Link href>`** (`next/link`, or `<Link>`/`<NavLink>` from React Router in the SPA lane) — never an `onClick` calling `router.push` on a `<div>`. Real links get prefetch, middle-click, open-in-new-tab, and crawlability for free (the SEO rule — [`seo`](../seo/SKILL.md)).
-- `useRouter().push` is for **programmatic** navigation only (after a mutation, a redirect) — not to replace anchors.
-
-## Comparison: React ↔ Blazor
-
-| Concept | React (App Router) | Blazor |
-|---|---|---|
-| Component | `.tsx` function | `.razor` file |
-| Props | function parameters | `[Parameter]` |
-| Default render | Server Component | Static SSR |
-| Interactivity opt-in | `'use client'` leaf | `@rendermode` island |
-| State | `useState` / Context / Zustand | service / `CascadingValue` / `[Parameter]` |
-| Event prop | `(t: T) => void` | `EventCallback<T>` |
-| Side effect | `useEffect` | `OnInitializedAsync` / `OnAfterRenderAsync` |
-| Context | `createContext` + provider/hook | `CascadingValue` / `CascadingParameter` |
-| Mutation + pending | Action + `useActionState` | `EditForm` + `OnValidSubmit` |
-| No-double-fetch | RSC fetches once (no client re-run) | `[PersistentState]` |
 
 ## Common gotchas
 

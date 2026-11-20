@@ -1,5 +1,16 @@
 # QA — Validate Outbound Mail via SendGrid Sandbox Mode (Java)
 
+**Contents:**
+
+- When to use
+- When NOT to use
+- Inputs needed
+- SendGrid SDK surface (cheat-sheet — com.sendgrid:sendgrid-java)
+- Templates
+- Rules
+- Generation steps
+- Cross-references
+
 Scaffolds a thin, intent-revealing wrapper over the official `com.sendgrid:sendgrid-java` SDK plus TestNG probes that **validate
  the SUT's send request without delivering any email**. With a `MailSettings` whose `Setting sandboxMode.setEnable(true)`, SendGrid runs its real validator over the form, type, and shape of the request — template IDs, personalizations, dynamic template data, `from` / `reply-to`, categories — accepts a valid one with **`200`** (note: not the `202` a real send returns), and **delivers nothing**. A malformed request surfaces as a **`4xx` with an error body**.
 

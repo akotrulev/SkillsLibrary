@@ -1,5 +1,16 @@
 # Stripe sandbox at the API layer (TestNG + REST Assured + stripe-java)
 
+**Contents:**
+
+- Versions
+- 1. The guard and the sandbox client
+- 2. Test cards
+- 3. The SUT contract used in the samples
+- 4. Payment outcomes
+- 5. Minor units, idempotency, refunds
+- 6. Subscriptions with a test clock
+- Anti-patterns
+
 Test cards and tokens checked against [docs.stripe.com/testing](https://docs.stripe.com/testing) and test clocks
 against [docs.stripe.com/billing/testing/test-clocks/api-advanced-usage](https://docs.stripe.com/billing/testing/test-clocks/api-advanced-usage)
 on 2026-11-14. SDK surface checked in the `stripe-java` 34.1.0 source (`StripeClient.v1()`, `Webhook.Signature`).

@@ -1,5 +1,21 @@
 # QA — Chrome DevTools Protocol Hooks (Java / Playwright 1.63 + TestNG)
 
+**Contents:**
+
+- When to use
+- When NOT to use
+- Inputs needed
+- Decision matrix — the CDP calls
+- 1. The fixture — support/CdpControls.java
+- 2. Real throttling — Slow 3G
+- 3. Cache disabled — the reload goes to the network
+- 4. CPU throttling
+- 5. Performance budget
+- Rules
+- What NOT to do
+- Generation steps
+- Cross-references
+
 Drives the raw **Chrome DevTools Protocol** from a Playwright for Java test through
 `page.context().newCDPSession(page)`, for the hooks that live **below the routing layer**: real bandwidth and
 latency throttling, HTTP-cache disable, CPU throttling and `Performance` metrics. The session and every

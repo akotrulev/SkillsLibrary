@@ -98,7 +98,7 @@ asserts on is exposed as a `Locator`, so the assertion is web-first and retries;
 invites a one-shot read that races the page.
 
 ```typescript
-import type { Locator, Page } from '@playwright/test';
+import { test, type Locator, type Page } from '@playwright/test';
 import type { Credentials } from '../builders/user-builder';
 import { PageBase } from '@accelerator/test-core';
 
@@ -111,13 +111,17 @@ export class LoginPage extends PageBase {
   }
 
   async goTo(): Promise<void> {
-    await this.page.goto('/login');
+    await test.step('Open the login page', async () => {
+      await this.page.goto('/login');
+    });
   }
 
   async signIn(user: Credentials): Promise<void> {
-    await this.locator('emailInput').fill(user.email);
-    await this.locator('passwordInput').fill(user.password);
-    await this.locator('signInButton').click();
+    await test.step('Sign in', async () => {
+      await this.locator('emailInput').fill(user.email);
+      await this.locator('passwordInput').fill(user.password);
+      await this.locator('signInButton').click();
+    });
   }
 }
 ```
@@ -131,7 +135,7 @@ export const test = base.extend<{ loginPage: LoginPage }>({
 ```
 
 Rules:
-- **No literal selectors in page methods.** Always go through `this.selector("key")`.
+- **No literal selectors in page methods.** Always go through `this.locator("key")`.
 - **Method names describe user intent**, not mechanics. `signIn`, not `clickSignInButton`.
 - **One page object per screen.** Composite flows live in a `<Name>Flow` class or a fixture, not in page objects.
 - **No assertions inside page objects.** They expose state; tests assert.
@@ -152,7 +156,7 @@ test.describe('Authentication › Login', () => {
   test('Should_ShowError_When_PasswordIsWrong', async ({ loginPage, registeredUser }) => {
     await loginPage.goTo();
 
-    await loginPage.signIn(aValidUser().withEmail(registeredUser.email).withPassword('Wrong-Passw0rd!').build());
+    await loginPage.signIn(aValidUser().withEmail(registeredUser.email).withPassword(`Wrong-${crypto.randomUUID()}`).build());
 
     await expect(loginPage.errorMessage).toHaveText('Invalid email or password');
   });
@@ -162,13 +166,8 @@ test.describe('Authentication › Login', () => {
 `registeredUser` is a fixture that creates the user through the API client and deletes it in its teardown, so
 every test owns its data.
 
-Rules:
-- One spec file per feature or screen, not per AC
-- Test names are `Should_<Outcome>_When_<Condition>`
-- Three-section body: Arrange / Act / Assert — single blank line between, no comments needed
-- Test data via builders/factories (`aValidUser().build()`), never inline literals
-- One logical assertion per test
-- `strict: true` — no `any`; page objects and builders are fully typed
+A spec file covers one feature or screen, not one AC. Test code follows `CLAUDE.md` "Test code rules" and
+`qa-typescript.md`; page objects and builders are fully typed under `strict: true`.
 
 ### Test data builders
 
@@ -222,31 +221,15 @@ export const aValidUser = (): UserBuilder => new UserBuilder();
 
 ### Claude Code workflow
 
-The Accelerator uses a two-agent pattern:
-
-- **Planner** (Opus): reads the task, produces a numbered plan with files to create/modify and a verification step. Does not write code.
-- **Implementer** (Sonnet): executes the plan, one step at a time. After each step, runs the relevant tests (`pnpm --filter playwright-tests test`).
-
-Slash commands:
-- `/plan <task>` — invokes the planner
-- `/implement` — invokes the implementer against the last plan
-- `/review` — invokes a reviewer pass against the current branch
-
-When rate-limited on one model, switch to another (Opus → Sonnet → Haiku) — the workflow is designed to degrade gracefully.
+The Opus planner and Sonnet implementer run as slash commands: `/plan <task>`, `/implement` (against the last plan) and `/review` (the current branch). The implementer runs `pnpm --filter playwright-tests test` after each step.
 
 ## Quality bar (reviewer checklist)
 
+Beyond `CLAUDE.md` "Test code rules" and `qa-typescript.md`:
+
 - [ ] No literal selectors in page/screen methods; actions go through `Locator`s, never `page.fill/click/innerText(selector)`
-- [ ] No `waitForTimeout` / `browser.pause` / `setTimeout` sleeps in tests
-- [ ] Test name is `Should_X_When_Y`
-- [ ] Test data via a builder
 - [ ] Allure metadata present
-- [ ] One logical assertion per test
-- [ ] Page object methods describe intent, not mechanics
 - [ ] Builders provide valid defaults
-- [ ] No `if`, `else`, `switch`, ternary, loop or `try` in a test body — use parameterized tests
-- [ ] No `any`; everything typed under `strict`
-- [ ] Tests are independent and order-agnostic
 
 ## Anti-examples
 
@@ -254,8 +237,3 @@ When rate-limited on one model, switch to another (Opus → Sonnet → Haiku) �
 |---|---|---|
 | `await this.page.click('button.signin-btn')` in a page object | A selector in code, and a page-level selector method | `this.locator('signInButton').click()` with the selector in `*.screen.json` |
 | `getErrorMessage(): Promise<string>` read once, then `expect(text).toBe(...)` | A one-shot read races the page | expose `errorMessage: Locator`; `await expect(loginPage.errorMessage).toHaveText(...)` |
-| `await page.waitForTimeout(2000)` | A sleep | auto-wait, web-first assertions, `test-core` `waits` |
-| `test('clicks the login button', ...)` | Names the mechanics, not the behaviour | `Should_ShowDashboard_When_CredentialsAreValid` |
-| `await loginPage.signIn({ email: 'user@test.com', password: 'Password1!' })` | Inline test data | a builder: `aValidUser().build()` or a fixture-created user |
-| `if (env === 'staging') { ... } else { ... }` in a test | Conditional logic in a test | a parameterized test or a fixture per environment |
-| `const body: any = await res.json()` | An untyped escape hatch | parse with the Zod schema |

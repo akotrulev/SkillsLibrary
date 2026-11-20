@@ -1,12 +1,12 @@
 # Golden example — "a member cancels a booking"
 
-The filled example for `cross-feature-test-design`: the slice for `EVT-002`, the basis's §8 as `requirements-breakdown` writes it, the coverage-item list, and the suite. The system is the **workshop-booking** toy of `backend/_shared/business-documentation/references/example-area.md` (Ana's month, AREA-004), and the connections are the map in `business-analysis/skills/ba-dependency-map/references/example-dependency-map.md`. **Shape and ids are normative; domain content is illustrative.** Facts: Basic plan = 8 credits, £6.00 per overage credit; tiers Standard 1, Workshop 2, Masterclass 3; cut-off 24 h; staff cancellations always return credits; posting on the 1st at 00:00; session capacity 6 in case 6 `#assumption`.
+The filled example for `cross-feature-test-design`: the cross-section for `EVT-002`, the basis's §8 as `requirements-breakdown` writes it, the coverage-item list, and the suite. The system is the **workshop-booking** toy of `backend/_shared/business-documentation/references/example-area.md` (Ana's month, AREA-004), and the connections are the map in `business-analysis/skills/ba-dependency-map/references/example-dependency-map.md`. **Shape and ids are normative; domain content is illustrative.** Facts: Basic plan = 8 credits, £6.00 per overage credit; tiers Standard 1, Workshop 2, Masterclass 3; cut-off 24 h; staff cancellations always return credits; posting on the 1st at 00:00; session capacity 6 in case 6 `#assumption`.
 
 ## Before — what the field-level pipeline produces
 
 Input: `DELETE /bookings/{id}` plus the story. Seven cases: id missing, id malformed, id unknown, another member's booking, already cancelled, happy path, maybe one late cancellation. None looks at credits, the freed seat, a staff session cancellation or the monthly job, and every AC is "covered".
 
-## 1. The slice for EVT-002
+## 1. The cross-section for EVT-002
 
 | # | Lookup | Result |
 |---|---|---|
@@ -22,7 +22,7 @@ Input: `DELETE /bookings/{id}` plus the story. Seven cases: id missing, id malfo
 ## 2. §8 as `requirements-breakdown` writes it
 
 ## 8. Connections
-**Built from:** KB slice @ 2026-08-02 (`events.md`, `shared-data.md`, `invariants.md`, `entities/accrued-charge.md`, `decisions/credit-return.md`)
+**Built from:** KB cross-section @ 2026-08-02 (`events.md`, `shared-data.md`, `invariants.md`, `entities/accrued-charge.md`, `decisions/credit-return.md`)
 
 ### Triggers and chains
 | Trigger | Reaction (owner) | Effects | Emits → next | Mode | On failure | Source |
@@ -71,9 +71,9 @@ The four findings sit in `example-dependency-map.md` without CONF ids, so the id
 
 ## 3. The coverage-item list
 
-Slice ids: `L<n>` is the lookup of §1. Layers per the depth gate. Cases are listed in §4.
+Cross-section ids: `L<n>` is the lookup of §1. Layers per the depth gate. Cases are listed in §4.
 
-| Slice id | Condition | Technique (layer) | Coverage items | Cases |
+| Cross-section id | Condition | Technique (layer) | Coverage items | Cases |
 |---|---|---|---|---|
 | L1 L2 RX-002 → EVT-006 → RX-006 | A member cancels with 24 h or more of notice | scenario, main (interaction) | the path, DEC-003 R1 | 1 |
 | L1 L2 RX-002 | The session has started, the booking is unknown, not the member's, or already cancelled | scenario, exception exits; rule / state | RX-002 guard, the rolls-back exits | 14–16 |
@@ -100,7 +100,7 @@ Open questions raised by §8 and handed back: **OQ-1** what happens to a member'
 
 Prefix `TC-CANCEL-`. Dates are March and April of the example year.
 
-| ID | Case | Priority | Technique (layer) | Slice id |
+| ID | Case | Priority | Technique (layer) | Cross-section id |
 |---|---|---|---|---|
 | 001 | Ana cancels *Glazing workshop* on 15 Mar 09:00, 25 h ahead: 2 credits come back, credits used 8 → 6, and the £6.00 accrued on 11 Mar stays | P1 | scenario + DEC-003 R1 (interaction) | L1 L2 RX-002 → EVT-006 → RX-006 |
 | 002 | Session starts 16 Mar 10:00. Ana cancels at 15 Mar 10:00:00 (24 h 00 m 00 s): the credits come back | P1 | BVA 3-value, at the boundary (rule) | L5 DEC-003 |

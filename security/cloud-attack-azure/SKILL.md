@@ -101,102 +101,36 @@ low-privileged member or **guest** can typically read large parts of the directo
 
 ## Step 2 — identity abuse & token theft (`T1552.005` → `T1078.004`, `T1098.001`)
 
-- **Managed-identity IMDS token theft (`T1552.005` → `T1078.004`), the highest-value path.** The Instance
-  Metadata Service at **`169.254.169.254`** issues OAuth bearer tokens for the MI attached to the host; the
-  only gate is the **`Metadata: true`** header — a minimal anti-SSRF measure, not an auth control:
-  ```
-  GET http://169.254.169.254/metadata/identity/oauth2/token
-        ?api-version=2018-02-01&resource=https://management.azure.com/   # or ...vault.azure.net / ...graph.microsoft.com
-  Header: Metadata: true
-  ```
-  For a **user-assigned** MI add `&client_id=<miClientId>`; App Service/Functions use `IDENTITY_ENDPOINT` +
-  `IDENTITY_HEADER` instead of the link-local IP. Two ways to reach it: code execution on the host, or an
-  **SSRF** in an app on the host (the `Metadata: true` header blocks naive URL-fetch SSRF but not SSRF that
-  sets custom headers, follows redirects, or proxies; IP-encoding and DNS-rebinding bypasses are documented
-  leads). **Impact = the MI's RBAC roles** — report as blast-radius ("MI held Contributor on RG x → could
-  read all storage keys / run commands on all VMs"), never the token value.
-- **Service-principal credential abuse (`T1078.004`, `T1552.001`).** Loot SP client secrets/certs from
-  source control, pipeline variables, `.azure`/`.env` files, App Service config, ARM/Terraform state, or
-  Key Vault; authenticate non-interactively
-  (`az login --service-principal -u <appId> -p <secret|cert> --tenant <tid>`) to act as the SP with its
-  often-broad roles. SP sign-ins frequently **bypass MFA** (no interactive user) — a reason they are prized.
-- **Consent & app abuse / credential addition (`T1098.001`/`.003`, `T1528`).** Adding a client secret or
-  certificate to an app/SP you can write to grants durable non-interactive access (persistence + privesc);
-  illicit OAuth consent to Graph scopes retains delegated access that survives password resets. **Note these
-  as persistence mechanisms; never run phishing against third parties.**
-- **Device-code & PRT (awareness only).** Device-code phishing (RFC 8628; Storm-2372 active since Aug 2024)
-  and Primary-Refresh-Token abuse via the Microsoft Authentication Broker client
-  (`29d9ed98-a469-4536-ade2-f981bc1d605e`) are taught for **recognition and detection**, not execution
-  against live users — the skill teaches what these trip, and that defenders block device-code flow via
-  Conditional Access.
+The highest-value path is **managed-identity IMDS token theft**: a token from `169.254.169.254` for the MI
+attached to the host, gated only by a `Metadata: true` header. Alongside it: service-principal credential
+abuse (loot + non-interactive `az login`, often MFA-exempt), consent/app-credential addition as a
+persistence mechanism, and device-code/PRT abuse taught for recognition only, never against live users.
+Full recipes, impact framing and cleanup: `references/identity-token-theft.md`.
 
 ## Step 3 — Key Vault data-plane access testing (`T1552`, `T1078.004`)
 
-Key Vault has a **control plane** (manage the vault resource, via Azure RBAC) and a **data plane**
-(read/write secrets, keys, certs). Data-plane authorization uses one of two models, set per vault:
-
-- **Access policies (legacy)** — a per-vault list of (principal → permitted operations). No PIM support;
-  the **classic privesc**: the control-plane **Key Vault Contributor** role was meant to manage vaults
-  *without* reading data, but it can **edit access policies and grant itself** data-plane access → read
-  every secret. Flag it and recommend migration to RBAC.
-- **Azure RBAC (recommended)** — standard roles (**Key Vault Secrets User**, **Key Vault Administrator**)
-  spanning control + data plane; simpler to audit, still over-grants if assigned at subscription scope.
-
-Read secrets with a compromised identity (`*.vault.azure.net`): `az keyvault secret list --vault-name <v>`,
-`az keyvault secret show --vault-name <v> --name <s>`, `az keyvault key list`, `az keyvault certificate
-list` — or request an IMDS token for `resource=https://vault.azure.net` and call the Key Vault REST API.
-**Common misconfigs to enumerate:** access-policy model still in use (`enableRbacAuthorization` not `true`);
-vault reachable from the public network (no private endpoint / firewall `defaultAction: Allow`); over-broad
-data-plane grants; soft-delete/purge-protection off; high-value secrets stored that are themselves pivots
-(SP secrets, storage keys, DB connection strings). **Blast-radius chain to show:** compromised web app's MI
-→ `Key Vault Secrets User` → DB connection string → database. Report secrets as blast-radius, never values.
-Full detail: `references/azure-keyvault.md`.
+Key Vault splits a **control plane** (Azure RBAC, manage the vault resource) from a **data plane**
+(`*.vault.azure.net`, read/write secrets/keys/certs) authorized by one of two models — **access policies**
+(legacy, no PIM, the classic Key Vault Contributor self-grant privesc) or **Azure RBAC** (recommended) —
+and that distinction is the whole of Key Vault offense. Full model, commands, misconfig checklist and
+detection footprint: `references/azure-keyvault.md`.
 
 ## Step 4 — Azure RBAC privilege escalation & service attacks
 
-- **Role-assignment abuse (control plane, `T1098`).** **Owner**, **User Access Administrator**, and **Role
-  Based Access Control Administrator** hold `Microsoft.Authorization/roleAssignments/write` — they can grant
-  roles, including granting a controlled principal **Owner**. Owner/UAA at a high scope (management group /
-  subscription) is **game over for that scope**. Holders of `roleDefinitions/write` can also **edit a custom
-  role** to add `Actions`, silently raising everyone assigned it.
-- **Storage account key theft (`T1552`, `T1537`/`T1530`).**
-  `Microsoft.Storage/storageAccounts/listKeys/action` (held by **Contributor**, Owner, Storage Account
-  Contributor) returns the **account key** = full control of all blobs/files/queues/tables, **bypassing
-  data-plane RBAC**; `az storage account keys list -n <acct> -g <rg>` (report the key as blast-radius, never
-  the value). Minting **SAS** tokens gives scoped, time-boxed exfil access.
-- **VM command execution without creds (`T1651`).** With the right RBAC action you run commands as
-  SYSTEM/root on a VM: **Run Command** (`Microsoft.Compute/virtualMachines/runCommand/action`, in
-  Contributor/VM Contributor — `az vm run-command invoke -g <rg> -n <vm> --command-id RunShellScript
-  --scripts "<cmd>"`), then read the VM's **MI token from IMDS** to pivot; or push a **Custom Script
-  Extension** for the same outcome.
-- **Automation Accounts & Runbooks.** Create/edit a Runbook and run it on an Azure sandbox or a **Hybrid
-  Worker** → code execution with the Automation Account's identity (historically a Run As account with
-  subscription Contributor, or a user-assigned MI). Hybrid Workers run on-prem/VM boxes where local admin
-  can harvest the worker's credentials/MI. **Microsoft has since removed `ListKeys` from the Reader role and
-  pushes the extension-based Hybrid Worker with Entra auth — version-check the tenant before asserting the
-  old path.** Full enumeration + loot recipes: `references/microburst.md`.
+Four escalation paths once a foothold holds an RBAC role: **role-assignment abuse** (Owner/UAA/RBAC-Admin
+granting themselves Owner — game over for that scope), **storage-account key theft** (`listKeys` bypasses
+data-plane RBAC entirely), **VM command execution without creds** (Run Command / Custom Script Extension as
+SYSTEM/root), and **Automation Account runbooks** (code execution as the account's identity, version-check
+the Hybrid-Worker `ListKeys` path before asserting it). Full recipes: `references/rbac-privesc.md`,
+`references/microburst.md`.
 
 ## Step 5 — Sentinel / Defender detection-surface awareness (awareness not evasion, D5)
 
-Per **D5**, this skill teaches what an authorized action **emits** — so a tester knows their footprint and a
-defender knows what to tune — and **never** how to evade detection against a real target:
-
-| Source | What it records / detects |
-|---|---|
-| **Entra sign-in logs** | Interactive + non-interactive (SP/MI) sign-ins; the **client app id** used (e.g. the broker `29d9ed98-…` flagging device-code/PRT abuse); IP, device, CA result, MFA, risk. |
-| **Entra audit logs** | Directory changes: **app credential added**, consent grants, role assignments, group membership, CA edits — the `T1098` trail. |
-| **Entra ID Protection** | Risky sign-ins/users: impossible travel, anonymous IP, token anomalies, leaked credentials. |
-| **Azure Activity Log** | Control-plane ARM ops: `listKeys`, `roleAssignments/write`, `runCommand`, extension deploys, Key Vault policy edits. |
-| **Key Vault logs** (→ Log Analytics) | Every data-plane `SecretGet`/`KeyList` with caller identity — bulk secret reads stand out. |
-| **Defender for Cloud** | CSPM posture (vault not-RBAC, public storage, exposed MI) + CWPP threat alerts (anomalous Key Vault access, suspicious Run Command, IMDS-token misuse). |
-| **Microsoft Sentinel** | SIEM/SOAR over the above via KQL; analytics rules for mass secret enumeration, impossible travel, device-code sign-ins, suspicious SP credential additions. |
-
-**Sentinel is migrating into the unified Defender portal but the migration is not complete in 2026** —
-know both the Log-Analytics and Defender-portal paths. **Pairing rule:** every attack technique above is
-reported with the log it writes and the analytics rule it tends to trip (loud, high-signal actions to flag:
-`listKeys`, bulk Key Vault reads — ROADrecon-style bursts are detectable by Elastic's prebuilt rule —
-`roleAssignments/write`, Run Command, new SP client secret, device-code sign-ins), so the learner reasons
-about footprint and the report notes detectability.
+Per **D5**, this skill teaches what an authorized action **emits** — sign-in/audit logs, Activity Log,
+Key Vault logs, Defender for Cloud, Sentinel analytics rules — so a tester knows their footprint and a
+defender knows what to tune, and **never** how to evade detection against a real target. Every technique
+above is reported with the log it writes and the analytics rule it tends to trip. Full source-by-source
+table: `references/detection-surface.md`.
 
 ## Decision matrix — which tool, which step, which reference
 

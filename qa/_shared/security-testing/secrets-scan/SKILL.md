@@ -235,48 +235,6 @@ jobs:
 > **`fetch-depth: 0` is mandatory.** The default shallow clone gives the scanner only the tip commit — it
 > would scan HEAD and miss every secret buried in history. Fetch the full history or the scan is theatre.
 
-## Anti-patterns
+## Guardrails
 
-- **Scanning only HEAD, not history.** A secret committed then "removed" is still in every clone/fork — a
-  HEAD-only scan reports clean while the credential is live. *Fix:* `gitleaks detect` over the full repo +
-  `fetch-depth: 0` in CI.
-- **Deleting the line instead of rotating the credential.** Removing the secret in a follow-up commit
-  changes nothing — it's still in history, already scraped. *Fix:* **rotate at the source** first; history
-  purge is cleanup, not the fix.
-- **Blanket-allowlisting** (a whole directory, a broad path regex, or `useDefault = false` to silence noise).
-  Hides every future real secret in that scope. *Fix:* scope each allowlist entry to a specific
-  path/regex/commit, ticketed.
-- **No pre-commit hook, so secrets reach CI (or the remote) before they're caught.** By then it may already
-  be in history and need rotating. *Fix:* `gitleaks protect --staged` as a pre-commit hook — stop it on the
-  dev's machine.
-- **Ignoring unverified-but-real findings.** `--results=verified` is great for a low-noise gate, but a
-  high-entropy string for a credential type TruffleHog *can't* live-verify (a private internal token) is
-  still a real leak. *Fix:* triage `unknown` results out-of-band (`--results=verified,unknown` in a
-  scheduled/audit run); never assume "unverified" means "not a secret."
-- **No verification → high false-positive noise mutes the gate.** A pure-regex CI gate that fires on every
-  fixture key trains the team to ignore it. *Fix:* gate CI on TruffleHog `--results=verified`; keep the
-  noisy broad regex at pre-commit where a human triages each hit live.
-- **Committing the `.gitleaks.toml` allowlist as a dumping ground** — every red finding gets a line to go
-  green. The file rots into a list of un-reviewed mutes that bury a real leak. *Fix:* ticket every entry,
-  rotate true-positives (don't allowlist them live), shrink the file over time.
-- **Hard-coding the scanner's own auth** (`GITLEAKS_LICENSE`, registry creds) in the workflow. *Fix:* env
-  var / secret store, read lazily — never committed (global rule: no secrets in code).
-
-## Rules (hard constraints)
-
-- The gate is the **process exit code** — Gitleaks exits `1` on findings (`--exit-code` to customize);
-  TruffleHog `--fail` exits non-zero on a verified finding. Gate **new** secrets hard.
-- **Scan the full git history, not just HEAD** (`gitleaks detect` over the repo; `fetch-depth: 0` in CI). A
-  HEAD-only scan misses the secrets that most need rotating.
-- A **true-positive secret means ROTATE the credential** at its source — deleting the line is not enough
-  (it's in history, possibly already scraped). History purge is cleanup *after* rotation.
-- Run **both tools, by role:** Gitleaks as a **fast pre-commit hook** (+ history sweep), TruffleHog in **CI
-  with `--results=verified`** for the low-noise gate. Note Gitleaks is security-patch-only maintenance
-  (successor: Betterleaks).
-- Triage with a **ticketed `.gitleaks.toml` allowlist + `--baseline-path`**: scope each entry narrowly,
-  ticket it, **gate new findings**, shrink the file over time. Never blanket-allowlist; never allowlist a
-  live true-positive instead of rotating it.
-- Emit **SARIF** → code-scanning (inline PR findings) + **JSON/junit** → Allure + CI artifact.
-- **No secrets in the scanner config** (license, registry auth) — env vars, read lazily, never committed.
-- Map findings to **OWASP A02:2025 / A07:2025**; a clean secrets scan ≠ "secure" — run the other layers
-  (SAST, SCA, DAST) too (per `qa-<stack>:security-foundations`).
+- A live true-positive is rotated, never allowlisted.

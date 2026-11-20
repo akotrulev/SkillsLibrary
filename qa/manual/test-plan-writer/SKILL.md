@@ -1,6 +1,6 @@
 ---
 name: test-plan-writer
-description: Use when writing a test plan for an epic, a feature or a release; versions, what is tested, approach, harness, scenarios, Definition of Ready and Done. Triggers "write a test plan for X". Not for risk strategy alone (test-strategy).
+description: Use when writing a test plan for an epic, feature or release (versions, approach, harness, scenarios, Ready/Done). Triggers "write a test plan for X". Not for risk strategy alone (test-strategy).
 disable-model-invocation: true
 ---
 
@@ -82,7 +82,7 @@ Test data strategy: <builders/ObjectMother · seeding · anonymized copy — and
 
 ## 11. Definition of Ready and Definition of Done
 **Ready — testing may start when**
-- [ ] <every in-scope story is ready: no `[TBD]` in its criteria, no open blocker from `business-analysis:story-review`>
+- [ ] <every in-scope story is ready: no `[TBD]` in its criteria, no open blocker from `dev:story-review`>
 - [ ] <the build in §2 is deployed to the §8 environment>
 - [ ] <accounts, test data and external sandboxes in §8 are issued and reachable>
 - [ ] <the harness in §6 runs green on the default branch>
@@ -127,5 +127,5 @@ Test data strategy: <builders/ObjectMother · seeding · anonymized copy — and
 3. Close the scope: every basis item (every included part of every covered story) into in / out / deferred with reasons
 4. Fill §5–§7 from the automation inventory — detected first, proposed only for gaps
 5. Build the scenarios: conditions × techniques → scenario rows; stamp coverage status from §7; assign executors
-6. Write the Definition of Ready and the Definition of Done as checklists; collect every assumption and TBD into §12
+6. Write the Definition of Ready and the Definition of Done as checklists; collect every assumption and `[TBD]` into §12
 7. Self-review against the Section rules; save to `docs/test-plans/`

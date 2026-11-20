@@ -31,27 +31,9 @@ docs/business-model/
 └── active-context.md     # dynamic tier: last sessions' changes + open questions/hotspots
 ```
 
-**Two tiers:**
-
-| Tier | Files | Changes |
-|---|---|---|
-| **Stable** | `glossary.md`, `system-overview.md`, `areas/`, `flows/`, `entities/`, `decisions/`, `events.md`, `shared-data.md`, `invariants.md`, `interaction-map.md` | deliberately, when the business model actually changes |
-| **Dynamic** | `active-context.md` (+ the INDEX line-items) | every session that touches the model |
-
 ## The contract
 
-### Read-first (before any modeling or conflict reasoning)
-
-1. `Read` **`INDEX.md`** — always, in full. If it doesn't exist, offer to initialize the KB (below) before proceeding.
-2. From the INDEX, `Read` the **topic files relevant to the task**: the entities/flows/decisions the new feature touches, `glossary.md` when new terms appear, `interaction-map.md` before any conflict sweep, and `active-context.md` for open questions that may already cover the task.
-3. Never reason about a feature against an empty mental model when a KB exists — an analysis that ignores the KB is wrong by construction, because the conflicts live *between* the new feature and what's already recorded.
-
-### Update-after (part of closing the work, not an afterthought)
-
-1. Update every **touched artifact** — new flow file, extended state table, new decision-table rows, new interaction-map entries.
-2. Update **`active-context.md`**: a new session entry **at the top** (newest first — critical facts near the top applies here too), 1–3 bullets on what changed; keep **one** consolidated "Open questions" list current rather than per-session copies that go stale.
-3. Update **`INDEX.md`**: add/adjust the one-line entry for anything added or materially changed.
-4. New terms encountered → `glossary.md`, with the source. A term used with *two meanings* is a finding (terminology drift), not a silent merge.
+Read and update the KB per `business-model.md`: read `INDEX.md` in full and the files it names for the ids the task touches before any modeling or conflict reasoning, then close the work with the touched artifacts, `active-context.md` and `INDEX.md` updated. A KB with no `INDEX.md`: offer to initialise it (below) before proceeding. Done when the task's analysis names the KB files it read, and the report lists every file it changed.
 
 ### Refresh (on the explicit command "refresh the business model")
 
@@ -59,17 +41,15 @@ Re-read **all** files, reconcile drift against the current requirements/codebase
 
 ## Authoring standards
 
-The standards every KB file must meet (what the KB holds, ids and traceability, feature identity, the annotation grammar, headers, provenance, recording decisions) are the business-analysis rule files, not a list here: `business-model.md` for every file under `docs/business-model/`, plus `business-model-flows.md`, `business-model-entities.md`, `business-model-decisions.md`, `business-model-connections.md` and `business-model-interactions.md` for those files. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win. Installed, they load in any session that touches the KB, so a plan task or `be-documenter` editing a KB file keeps it consistent without loading this skill.
+The standards every KB file must meet are the business-analysis rule files: `business-model.md` for every file under `docs/business-model/`, plus the `business-model-*.md` file of the artifact the task touches. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win. Installed, they load in any session that touches the KB, so a plan task or `be-documenter` editing a KB file keeps it consistent without loading this skill.
 
-**The lint** checks the rules a script can (INDEX lines, ids, headers, grid cells, closed vocabularies, open conflicts listed): `python3 ${CLAUDE_PLUGIN_ROOT}/business-analysis/skills/ba-project-memory/scripts/kb-lint.py [<kb dir>]`. Run it as the last step of update-after. Fix every blocker and major (exit 1); one that is itself an open model finding (an orphan, an unconsumed event) stands only with its line in *Open questions*. Area guides are `doc-lint.py`'s.
+**The lint** is `python3 ${CLAUDE_PLUGIN_ROOT}/business-analysis/skills/ba-project-memory/scripts/kb-lint.py [<kb dir>]`; `--help` lists every rule it checks. Run it as the last step of every update. Fix every blocker and major (exit 1); one that is itself an open model finding (an orphan, an unconsumed event) stands only with its line in *Open questions*. Area guides are `doc-lint.py`'s.
 
-## INDEX.md format
+## INDEX.md and active-context.md examples
+
+One example line per artifact type. `kb-lint.py` checks the lines, ids and headers.
 
 ```markdown
-# Business Model — <Project>
-
-Read this file first, every session. One line per artifact; read the ones your task touches.
-
 ## Areas
 - [Ordering](areas/ordering.md) — AREA-003 · customers, support agents · Place, change, cancel and track an order · @ `4f2a91c`
 ## Entities
@@ -80,55 +60,28 @@ Read this file first, every session. One line per artifact; read the ones your t
 - [Order pricing](decisions/order-pricing.md) — DEC-001; hit policy C+ (stacking); contributed by promos, loyalty, shipping
 ## Dependencies
 - [Events & reactions](events.md) — 7 triggers, 7 reactions; 1 unconsumed event, 2 reactions with `?` failure
-- [Shared data](shared-data.md) — 2 entities, 2 shared fields
-- [Invariants](invariants.md) — INV-001…INV-004; 3 not enforced or unknown
 ## Cross-cutting
-- [Glossary](glossary.md) — canonical terms; "customer" ≠ "account" here
 - [Interaction map](interaction-map.md) — 4 resolved conflicts, 1 open (CONF-005)
-- [System overview](system-overview.md) — 6 areas, 3 cross-area journeys; 2 areas not yet documented
-- [Active context](active-context.md) — last touched 2026-07-12; 3 open questions
 ```
 
-An area line has this shape and no other: `- [<Area name>](areas/<name>.md) — AREA-nnn · <who, comma-separated> · <what a person does there, at most 20 words> · @ \`<sha>\``; `dev:doc-business-model`'s lint (`index-line`) checks it. The description is the area's row in the system overview's *Areas, by who uses them*. A line in the older style is edited into the shape in place, together with its guide when that guide is updated, never regenerated; entity, flow and decision lines keep their shape.
+An area line has the shape ``- [<Area name>](areas/<name>.md) — AREA-nnn · <who, comma-separated> · <what a person does there, at most 20 words> · @ `<sha>` ``, which `dev:doc-business-model`'s lint (`index-line`) checks; its description is the area's row in the system overview's *Areas, by who uses them*. A line in the older style is edited into the shape in place, together with its guide when that guide is updated, never regenerated.
 
-## glossary.md and active-context.md format
+`glossary.md` follows `${CLAUDE_PLUGIN_ROOT}/engineering-practices/domain-modeling/references/glossary-format.md`, the one format every writer of the glossary shares.
 
-Every session reads and writes these two, so their shape is fixed.
-
-**`glossary.md`** follows `${CLAUDE_PLUGIN_ROOT}/engineering-practices/domain-modeling/references/glossary-format.md`, the one format every writer of the glossary shares: its columns (`Avoid` included), synonyms ruled out under `Avoid`, drift kept as a finding, and lazy creation.
-
-**`active-context.md`**:
+`active-context.md` is `## Sessions` (newest directly under the heading) then one `## Open questions` list for the whole KB:
 
 ```markdown
-# Active context
-
-## Sessions
 ### <YYYY-MM-DD> — <skill or agent>
-- <what changed, with the artifact ids; 1 to 3 bullets>
+- <what changed, with the artifact ids>
 
-## Open questions
 - <question> — <artifact id> · owner: <who can answer> · blocks: <what> · raised <YYYY-MM-DD>
-- CONF-005 — <the open conflict in one line> · owner: <who decides>
 ```
 
-A new session entry goes directly under `## Sessions`, above the earlier ones. *Open questions* is the one list for the whole KB: every `[TBD]`, `?` cell and unresolved `CONF-` entry has a line there, and a line leaves the list only when its answer is written into the artifact it names.
+A line leaves *Open questions* only when its answer is written into the artifact it names.
 
-## Feature slice
+## Connection cross-section
 
-The slice is the set of connections that matter for one feature. The input is an owner id (`E<n>`, `AREA-nnn`) or a trigger id (`EVT-nnn`). It is eight lookups, each a grep, because every row carries ids under the feature-identity rule.
-
-| # | Lookup | Where | What it yields |
-|---|---|---|---|
-| 1 | Own triggers and reactions | `events.md`, rows with *Owner* = id | What can start this feature, and what it does |
-| 2 | Downstream | follow *Emits* → reactions whose *When* is that event, repeated | What it sets off in other features |
-| 3 | Upstream | other owners' reactions whose *Emits* reach this feature's reactions | Who else can start it |
-| 4 | States depended on | for each `ENT` transition this feature makes, the target state's row in the grid | Other owners' triggers that are legal in that state, plus every `—` and `?` in the row |
-| 5 | Decisions | `decisions/` files this feature contributes rows to | The other contributors' rows |
-| 6 | Shared data | `shared-data.md` rows naming this feature's reactions | The other writers and readers |
-| 7 | Invariants | `invariants.md` rows whose *Threatened by* includes this feature's reactions | What it can break, and whether it guards against it |
-| 8 | Known interactions | `interaction-map.md` entries with this feature in *Pair* | Resolved and open conflicts, each with its boundary condition |
-
-**Depth:** two hops past the feature's own reactions. Go further where an effect moves money or cannot be undone. `business-analysis:conflict-check` uses the slice as its pair list when the map exists. QA reads it through `qa/manual/requirements-breakdown/references/connections.md`.
+Building one feature's connection cross-section (its triggers, reactions, states, decisions, shared data, invariants and known interactions), as `ba-feature-conflict-check` and QA do: read `references/feature-cross-section.md`.
 
 ## Initializing a KB
 

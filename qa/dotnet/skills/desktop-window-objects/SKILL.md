@@ -1,6 +1,6 @@
 ---
 name: desktop-window-objects
-description: Use when creating or updating a C# window object for a macOS or Windows app (Appium or FlaUI) from explored elements. Triggers "create a window object". Not for finding elements.
+description: Use when creating or updating a C# window object (Appium or FlaUI) from explored elements. Triggers "create a window object". Not for finding elements (desktop-screen-explorer).
 disable-model-invocation: true
 ---
 

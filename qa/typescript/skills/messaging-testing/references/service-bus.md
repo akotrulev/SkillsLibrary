@@ -1,5 +1,21 @@
 # Messaging Testing — Azure Service Bus (Node 24 + TypeScript / Vitest)
 
+**Contents:**
+
+- Stack
+- The Service Bus model — entities, settlement, sub-queues
+- Local broker for tests — the Azure Service Bus emulator
+- Core pattern 1 — producer-assert (the SUT produced message X)
+- Core pattern 2 — consumer-assert (the SUT consumed → side-effect Y)
+- Peek-lock vs receive-and-delete — message settlement
+- Dead-letter-queue assertions
+- Topics, subscriptions & filters
+- Receiving a batch / draining
+- Anti-patterns
+- Examples
+- Rules (hard constraints)
+- Cross-references
+
 Ported from the **canonical** `.NET` stack of the `qa/typescript/skills/messaging-testing/` node (Service Bus is
 Azure-native and `Azure.Messaging.ServiceBus` is its most first-class client, so .NET led; this file
 re-expresses the same model in TypeScript idioms — `@azure/service-bus`, Vitest, `expect.poll`,

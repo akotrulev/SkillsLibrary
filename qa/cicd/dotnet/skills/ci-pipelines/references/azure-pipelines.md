@@ -1,5 +1,15 @@
 # QA — Azure Pipelines for .NET Test Suites
 
+**Contents:**
+- When to use
+- When NOT to use
+- Inputs needed
+- Decision matrix
+- Templates
+- Rules
+- Generation steps
+- Cross-references
+
 Authors `azure-pipelines.yml` (or template fragments) that run NUnit / Playwright / Testcontainers-backed integration tests on Microsoft-hosted Linux agents, shard for speed with NUnit class filters, upload the Playwright failure evidence, publish Allure with history, fail on real failures (not flakes), and pull secrets via workload-identity-federation (OIDC) rather than PATs.
 
 **The UI lifecycle is not written here.** `qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs` owns it: it reads `BASE_URL` (required), runs headless unless `HEADED=1`, and on a failed test keeps a full-page screenshot, the trace and the video in `UiTests/bin/<cfg>/net10.0/playwright-artifacts/<Class>.<Test>.{png,zip,webm}`. The pipeline runs that as is and publishes exactly that folder. `playwright-videos/` holds raw recordings `BaseTest` deletes after every test; it is never published. What the evidence is and how to read it is `qa/dotnet/skills/evidence-capture`. The shard filters come from `ci/nunit-shards.sh`, defined once in this skill's `SKILL.md`.

@@ -6,8 +6,7 @@ disable-model-invocation: true
 
 # Security Testing — Access Control / Authorization Matrix (.NET / NUnit)
 
-The **.NET port** of the canonical `qa/typescript/skills/security-testing/permission-testing` skill. This
-is the highest-value security testing most teams are missing, and the one security concern you **cannot**
+This is the highest-value security testing most teams are missing, and the one security concern you **cannot**
 delegate to a scanner.
 
 > **⚠️ Why this is a functional test, not a scan.** A scanner authenticated as Alice has no way to know that
@@ -265,50 +264,9 @@ public class AdminBflaTests // API5:2023 BFLA — admin-only functions reject re
 
 ## Object Property Level — API3 (mass-assignment & over-read)
 
-```csharp
-// Tests/Security/AccessControl/InvoicePropertyTests.cs
-using System.Net;
-using ApiTests.Clients;
-using ApiTests.Models.Billing.InvoiceModels;
-using NUnit.Framework;
-using RestSharp;
-
-namespace Tests.Security.AccessControl;
-
-[TestFixture]
-public class InvoicePropertyTests // API3:2023 — object property level authorization
-{
-    // Mass-assignment: a client must NOT be able to set a privileged field via the normal write path.
-    [Test]
-    public async Task Should_IgnoreOwnerId_When_UserAttemptsMassAssignment()
-    {
-        InvoiceClient client = new InvoiceClient(await Actor.Alice.Token());
-
-        // The attacker-controlled privileged field is carried as a raw extra property.
-        RestResponse created = client.CreateRaw(new InvoiceCreateWithOwner(
-            Amount: 50, Currency: "EUR", OwnerId: Actor.Bob.Name));
-        Assert.That(created.StatusCode, Is.EqualTo(HttpStatusCode.Created));
-
-        // The server must have ignored OwnerId — the invoice belongs to Alice, not Bob.
-        string id = Deserialize<InvoiceDto>(created).Id;
-        InvoiceDto readBack = client.GetById(id, HttpStatusCode.OK);
-        Assert.That(readBack.OwnerId, Is.Not.EqualTo(Actor.Bob.Name));
-    }
-
-    // Over-read: a sensitive property must not be serialized to a caller who may not see it.
-    [Test]
-    public async Task Should_NotExposeInternalNotes_When_NonOwnerRoleReads()
-    {
-        RestResponse response = new InvoiceClient(await Actor.Alice.Token())
-            .GetByIdRaw(/* a shared, readable id */ "inv_shared");
-        Assert.That(response.Content ?? string.Empty, Does.Not.Contain("\"internalNotes\""));
-    }
-}
-```
-
-`InvoiceCreateWithOwner` is a throwaway record carrying the privileged `OwnerId` the legitimate
-`InvoiceInDto` deliberately omits — that is the whole point of mass-assignment: send a field the contract
-does not expose and prove the server drops it.
+A mass-assignment test sends a privileged field the contract does not expose (`OwnerId`, `Role`) and reads the
+object back to prove the server dropped it; an over-read test asserts a sensitive field is absent from the raw
+body of a caller who may not see it. For an API3 test, read `references/object-property.md`.
 
 ## Building the matrix from a policy table (scales past a few endpoints)
 
@@ -330,6 +288,8 @@ public sealed record PolicyRow(
 // Adding an endpoint = adding a row. A new endpoint with no row is a visible coverage gap.
 ```
 
+Tag each case with its OWASP API id and WSTG-ATHZ test id, as the examples above do.
+
 ## Anti-patterns
 
 - **Asserting "any 4xx" instead of the policy's exact status.** Hides a `403`-that-leaks-existence when the
@@ -349,18 +309,3 @@ public sealed record PolicyRow(
 - **Hardcoding credentials/tokens.** *Fix:* env, read lazily via `Environment.GetEnvironmentVariable`.
 - **Treating a green access-control suite as "access control is secure."** It covers the rows you wrote;
   business-logic abuse (API6) still needs a manual pentest. *Fix:* say so; track endpoint coverage.
-
-## Rules (hard constraints)
-
-- Cover **BOLA (API1)**, **object-property (API3)**, and **BFLA (API5)** — horizontal *and* vertical
-  escalation — plus an anonymous `401` baseline and a **positive control** per resource.
-- Assert the **project's documented denial status** (`403` vs `404` leak policy) **and** that **no resource
-  body leaks**. One logical assertion per test; test names `Should_X_When_Y`; parameterized matrix via
-  `[TestCaseSource]` / `[TestCase]` (no conditional logic in tests).
-- Seed **≥2 peer users + 1 elevated role**; each owns its own fixture; tests are independent. Matrix the
-  **verbs** (`GET`/`PUT`/`PATCH`/`DELETE`), not just reads.
-- Reuse the project's `{Resource}Client` **raw** overloads (status asserted by the test) and
-  `qa/dotnet/skills/test-login-tokens` for per-actor tokens (cached, secrets via env read lazily). Async all
-  the way — never `.Result` / `.Wait()` / `.GetAwaiter().GetResult()` on a token or HTTP call.
-- Tag cases with their **OWASP API id** and **WSTG-ATHZ** test-id; a new protected endpoint with no matrix
-  row is a visible coverage gap. A green suite ≠ "secure" — business-logic abuse needs manual pentest.

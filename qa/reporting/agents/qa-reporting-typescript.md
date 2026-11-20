@@ -36,7 +36,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 
 Run what you write: a reporting config that has never produced a report has not passed its gate.
 
-**Fix** (an empty report, a missing attachment, a mislabel, a quarantine hiding a real failure): load `dev:debugging`. Reproduce first, then triage: **reporting wiring** (adapter, results dir, attachment hook), **quarantine hygiene** (no owner or exit, a passing test to re-activate, a real defect posing as a flake), or **labelling**. A real product defect goes to `qa-test-case-designer` for a bug report; a test-logic fix to the owning stack agent. Make the smallest correct change, verify with `dev:verify` (a real run, honest counts), then sweep for the same defect. **Extend** (tag or quarantine more): re-enter only step 2 or 3, reusing the existing label convention rather than forking one.
+**Fix** (an empty report, a missing attachment, a mislabel, a quarantine hiding a real failure): load `dev:debugging`. Reproduce first, then triage: **reporting wiring** (adapter, results dir, attachment hook), **quarantine hygiene** (no owner or exit, a passing test to re-activate, a real defect posing as a flake), or **labelling**. A real product defect goes to `qa-test-case-designer` for a bug report; a test-logic fix to the owning stack agent. Make the smallest correct change, verify with `dev:verify` (a real run, honest counts), then sweep: every sibling sharing the defect's pattern fixed or listed in the report. **Extend** (tag or quarantine more): re-enter only step 2 or 3, reusing the existing label convention rather than forking one.
 
 ## Boundaries
 

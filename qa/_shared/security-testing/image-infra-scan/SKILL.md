@@ -73,6 +73,8 @@ trivy --version
 > **DB caching.** Trivy downloads a vulnerability DB (and, separately, a Java-index / checks DB) on first
 > run; cache `~/.cache/trivy` (or the OCI registry mirror via `--db-repository`) so cold runs aren't slow
 > and rate-limited — the same NVD-cache discipline `dependency-scan` calls out.
+>
+> **No secrets** (registry creds, tokens) in scan config: env vars, read lazily.
 
 ## The scan commands + gating flags
 
@@ -289,53 +291,3 @@ jobs:
 The action exposes `scan-type` (`image`/`fs`/`repo`/`config`/`sbom`/`k8s`), `exit-code`, `severity`,
 `ignore-unfixed`, and `format`/`output` — the same flags as the CLI. **GitLab CI / Azure Pipelines** run the
 identical two-pass via `aquasec/trivy` Docker steps (cross-link `qa-<stack>:ci-pipelines`).
-
-## Anti-patterns
-
-- **Gating with `--exit-code 1` but no `--severity`.** Every `LOW`/`UNKNOWN` fails the build — the team
-  bypasses the gate within a day. *Fix:* always scope the gating pass with `--severity HIGH,CRITICAL`; show
-  the rest in the informational Pass 1.
-- **Not using `--ignore-unfixed`, so unactionable CVEs block merge.** A Critical with **no upstream patch**
-  gives developers no move but suppress-it. *Fix:* `--ignore-unfixed` on the gating pass; surface the
-  unfixable ones in Pass 1.
-- **Double-gating app-deps in both Trivy and the per-stack SCA tool.** The same npm/Gradle/NuGet CVE fails
-  two pipelines, needs two suppressions, and produces conflicting noise. *Fix:* let **one** tool own
-  app-deps (the per-stack `dependency-scan` skill); restrict Trivy's value to **OS / image / IaC**
-  (`--scanners` / scoping it to the layers SCA can't see).
-- **Scanning the Dockerfile but never the built image.** A clean `trivy config` on the Dockerfile says
-  nothing about CVEs in the **base image** or what the **shipped** image actually runs as. *Fix:* always run
-  `trivy image` on the **built artifact**, not just `trivy config` on the source.
-- **Ignoring IaC misconfig entirely.** A perfectly clean image deployed by a Terraform plan that opens a
-  security group to `0.0.0.0/0` is still a breach. *Fix:* add the `trivy config ./infra` gate (A02).
-- **Blanket `.trivyignore` ("ignore all Highs", or a whole-image ignore).** Buries every future finding,
-  including a real one. *Fix:* scope each entry to a **specific CVE / AVD check ID**, with a ticket and an
-  `expired_at` expiry; shrink the file, never grow it.
-- **Treating an image-clean scan as "the app is secure."** Trivy is blind to broken access control, business
-  logic, and the running HTTP surface. *Fix:* run the full layer set per `qa-<stack>:security-foundations` — SCA, DAST,
-  access-control matrix; a green Trivy run means the **image / OS / IaC** layers passed, nothing more.
-- **No SBOM, so no supply-chain provenance.** When the next Log4Shell drops you can't answer "which shipped
-  artifacts are affected?" without rebuilding everything. *Fix:* `--format cyclonedx`/`spdx-json` as a
-  release artifact; rescan the stored SBOM when new CVEs land (A03).
-
-## Rules (hard constraints)
-
-- The gate is **`--exit-code 1` scoped by `--severity HIGH,CRITICAL`** (a bare scan is report-only). Run the
-  **two-pass** shape: informational Pass 1 (exit 0, full table) + gating Pass 2 (`--exit-code 1
-  --severity HIGH,CRITICAL --ignore-unfixed`, `--exit-on-eol 1`).
-- **Use `--ignore-unfixed`** on the gating pass — never block the build on CVEs with no available fix.
-- **Gate the BUILT IMAGE** (`trivy image`), not just the Dockerfile — and **add the IaC gate**
-  (`trivy config ./infra`, A02). Run both; they cover orthogonal surfaces.
-- **Own the boundary:** Trivy = **base OS image + container-as-shipped + IaC**; let the per-stack
-  `dependency-scan` skill own **application** dependency CVEs. **Do not double-gate app-deps.** Run both
-  layers.
-- **Emit an SBOM** (`--format cyclonedx`/`spdx-json`) as a release artifact for **A03** supply-chain
-  provenance; rescan the stored SBOM (`trivy sbom`) when new CVEs land.
-- **Triage with a ticketed `.trivyignore`/`.trivyignore.yaml`**: scope to a specific CVE/AVD ID, with a
-  ticket + reason + **`expired_at`** expiry; gate NEW findings hard; shrink the file (defer the full
-  discipline to `qa-<stack>:security-foundations`). Prefer the real fix (bump the base image / fix the IaC setting) over
-  a suppression.
-- **Emit SARIF** → code-scanning for inline PR findings; attach the HTML/JSON to **Allure** + a CI artifact.
-- **Pin the Trivy version** and **cache `~/.cache/trivy`** in CI. **No secrets** (registry creds, tokens) in
-  scan config — env vars, read lazily.
-- A clean Trivy run ≠ "secure" — it means the **image / OS / IaC** layers passed. Run the full layer set
-  (`qa-<stack>:security-foundations`).

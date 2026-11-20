@@ -1,5 +1,14 @@
 # Deep-dive details — `qa-typescript:realtime-stream-testing`
 
+**Contents:**
+
+- The harness — tests/realtime/ws-harness.ts
+- Browser fixtures — specs/stream.fixtures.ts
+- Protocol-client 1 — raw WebSocket (ws lib / native WebSocket)
+- Protocol-client 2 — a higher-level client (socket.io / SignalR-JS)
+- Protocol-client 3 — SSE (native EventSource / the eventsource package)
+- Disciplines & gotchas (apply to every real-time test)
+
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
 ## The harness — `tests/realtime/ws-harness.ts`

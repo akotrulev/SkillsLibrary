@@ -1,24 +1,33 @@
 ---
 name: plan-feature
-description: Use when an approved spec needs an implementation plan (ordered tasks, one paste-ready prompt each) before code. Triggers "write the implementation plan". Not for the design itself (design).
+description: Use when an approved spec needs an implementation plan (ordered tasks, one paste-ready prompt each) before code. Triggers "write the implementation plan". Not for the design itself (feature).
 ---
 
 # Writing Plans
 
-## Overview
+Write the plan for an engineer who is skilled but has zero context for this codebase. Document what
+they need: what exists today and what is missing, the decisions already made and what they cost,
+which files each task touches, the real values the code will use, and the traps that specific task
+will hit. A decision bound to a framework or version cites its official doc: see `source-grounding`.
 
-Write the plan for an engineer who is skilled but has zero context for this codebase — who knows
-almost nothing about our toolset or our problem domain, and whose taste you should not rely on.
-Document what they need: what exists today and what is missing, the decisions already made and what
-they cost, which files each task touches, the real values the code will use, and the traps that
-specific task will hit. DRY. YAGNI. Frequent commits.
+## When to use
 
-A decision bound to a framework or version cites its official doc: see `source-grounding`.
+An approved spec, design or set of requirements that must become an ordered list of tasks, each with a paste-ready prompt, before any code.
 
-**The plan document format is a contract — read it before writing anything.** It is at
+## When NOT to use
+
+- The design itself, with the *how* still open: `feature` (brainstorming) writes the spec this skill plans from.
+- A whole initiative's task list from stories: `/dev:plan-system` (`solution-planner`).
+
+## The format is a contract
+
+**The plan document format is a contract — read it before writing anything.** It is
 [`./references/plan-format.md`](./references/plan-format.md): the header, the numbered sections, the
-task block's fields, the gate rule, and the `## Prompts — one per task` section. This skill is
-the procedure; that file is the shape. Do not improvise either.
+task block's fields, the gate rule, the `## Prompts — one per task` section and the close-out. This
+skill is the procedure; that file is the shape. Do not improvise either. The standards a plan must
+meet are the dev rule file `plans.md` (the project's copy in `.claude/rules/dev/`, or the plugin's in
+`engineering-practices/rules/` before `/dev:rules` has installed it); where the project's `CLAUDE.md`
+states its own plan rules, those win, and where this skill and the rule file disagree, the rule file wins.
 
 **Three properties of that format drive everything below:**
 
@@ -28,36 +37,25 @@ the procedure; that file is the shape. Do not improvise either.
 2. **The narrative comes first; the tasks come last.** A task block is only readable against the
    context above it, so `## 1. What already exists, and what is missing` and the sections that decide
    the work are written *before* any task is.
-3. **Every task gates only its own tests** (the ones it wrote plus the acceptance tests bound to its deliverable). It runs the commands its `Gate:` line names and leaves
-   them green before it commits, on a small core budget, on ports of its own, under no test lock; the last
-   runnable task is the plan's one locked run of the whole set.
+3. **Every task gates its own work and the work landed above it** (plan-format §5).
 
 **The unit of work is a task.** A plan is one flat, ordered list of them, ids prefixed by the family of
 work (`B1`, `B2`, `B3`, then `P1`) — never a "slice", never a "phase", never a "stage", and never
 grouped into any of those. A task's *internal* actions are its **steps**; that is the only thing the
-word "step" names. Use the word **task** in the plan, in the checkpoint reports, and when talking to
-the user, so the same thing has the same name everywhere.
+word "step" names. Use the word **task** in the plan, in the task reports, and when talking to the
+user, so the same thing has the same name everywhere.
 
 **Context:** Write the plan on whatever branch you are already on — do not create or check out a branch
-or worktree to author it. Plan Queue gives each plan its own worktree when it runs, so plans can run in
-parallel; nothing in the plan creates branches or worktrees.
+or worktree to author it.
 
-**Save plans to:** `docs/plans/NNN-<feature-name>.md` — the live folder. A plan moves to
-`docs/plans/implemented/` once every task in it has landed (format reference §8), and that is done by
-the task that deletes the last prompt block, not by you.
-- `NNN` is zero-padded and sequential, and **its high-water mark spans both folders**: list
-  `docs/plans/` *and* `docs/plans/implemented/`, take the highest existing `NNN` prefix (files and
-  folders both count), use `highest + 1` — `001` if neither folder exists. Never reuse or renumber an
-  existing number; a moved plan's number stays spent, because it is cited by commit messages, prompt
-  blocks and `Depends on` lines that outlive the plan being live.
-- Resolve the path under the **current project's** root — the repo the session is working in — never
-  this skills-library checkout and never a global config directory, unless the user explicitly asks
-  for a global copy. (A user preference for plan location overrides this default.)
+**Save plans to** `docs/plans/NNN-<feature-name>.md` under the **current project's** root, never this
+skills-library checkout and never a global config directory unless the user asks for a global copy
+(a user preference for plan location overrides this default). `NNN` takes the high-water mark across
+`docs/plans/` and `docs/plans/implemented/` plus one (plan-format §1).
 
 **Commands:** Every build, test, lint, format and migration command written into the plan is the
 **project's own**, read from the repo (`package.json` scripts and `packageManager`, the `Makefile`, the
-`.csproj`/`gradle` layout, the CI workflow) — never a guessed default. The snippets in the format
-reference are shapes, not the required runner.
+`.csproj`/`gradle` layout, the CI workflow) — never a guessed default.
 
 ## Scope Check
 
@@ -79,14 +77,10 @@ flow, what is measured, how it runs, what it reports. Real values, exact paths, 
 choice you make while writing them becomes a `**D<n>**` entry in `## Decisions` with what it costs, and
 any question you could not answer becomes an `## Open questions` row naming what it blocks.
 
-**A plan that adds or changes web routes decides their rendering here, per route.** Where an
-`experience-plan.md` exists, cite its §4a `rendering_plan` and change nothing in it. Otherwise write a
-`## Rendering per route` section with the `rendering_plan` block from
-[`backend/_shared/experience-plan/references/rendering-strategy.md`](../../backend/_shared/experience-plan/references/rendering-strategy.md):
-the signals, mode, cache and server-rendered content per route, checked against that file's
-anti-patterns. The pattern chosen is a `D<n>`. Every web `fe` task quotes its routes' entries, and
-the `Q` journey task asserts their server-rendered content on the raw HTML. Native mobile and
-desktop plans skip this.
+A web route in the plan → read [`./references/web-routes.md`](./references/web-routes.md) and decide each route's rendering here.
+
+**Done when** the gap table is written, each `Today` cell carries a `file:line` or `—`, and every choice
+is a `D<n>`.
 
 ## Step 2 — Map the files
 
@@ -95,15 +89,12 @@ for. This is where decomposition decisions get locked in, and it is what the tas
 are both derived from.
 
 - Design units with clear boundaries and well-defined interfaces. One clear responsibility per file.
-- You reason best about code you can hold in context at once, and your edits are more reliable when
-  files are focused. Prefer smaller, focused files over large ones that do too much.
 - Files that change together live together. Split by responsibility, not by technical layer.
-- In existing codebases, follow established patterns. If the codebase uses large files, don't
-  unilaterally restructure — but if a file you're modifying has grown unwieldy, planning a split is
-  reasonable.
 - **Note, per task, which files it writes and which build tree it sits in** (one .NET solution, one
   Gradle build, one pnpm package graph). Step 3 turns every overlap into a `Depends on` edge: two
   tasks that touch the same file or build the same tree cannot run beside each other.
+
+**Done when** every file a task writes is listed once, with its build tree.
 
 ## Step 3 — Put the tasks in workable order
 
@@ -114,62 +105,46 @@ them — the sequence itself carries the ordering, and the third task is "the th
   against, registers with, or configures was produced by an earlier task. A task that cannot be started
   at its position is in the wrong position — move it, don't annotate it.
 - **Dependencies are stated, not implied.** Where a task needs an earlier one that is not immediately
-  before it, say so: `**Depends on:** B1 (the ledger column)`. Adjacency is not a dependency claim, and
-  a dependency on a later task is a defect in the ordering, not an exception to note.
+  before it, say so: `**Depends on:** B1 (the ledger column)`. A dependency on a later task is a defect
+  in the ordering, not an exception to note.
 - **Overlap is a dependency too.** A task also depends on every earlier task whose files overlap its
   own or that builds the same tree, and names it in `**Depends on:**` with the overlap as the reason
   (`B1 (same solution)`). Position orders nothing once each prompt carries its `Depends on:` line
   (Step 6): a task that leaves out an overlapping predecessor runs beside it, in the same working tree.
   Tasks with disjoint files and different trees are the ones that run in parallel.
-- **Everything both sides bind to comes first** — the API contract, the schema, the shared types and
-  the stubs that answer `not-implemented` — then **the acceptance tests written against them** (the `Q`
-  family: `qa-api-<stack>`, then `qa-ui-<stack>` / `qa-mobile-<stack>`), then the backend tasks, then
-  the shared-package tasks, then the frontend and mobile tasks. A plan with no API surface or journey
-  has no `Q` tasks and keeps the shorter order.
+- **Test-first order, `TD` tasks and the two closing tasks** are in plan-format §4 (order, `TD`) and §5
+  (the gate task, `DOC1`), and in `rules/plans.md`: the contract and stubs first, then the `Q`
+  acceptance tests, then the implementation tasks.
 - **Prerequisites a human must do come first**, as their own tasks with `Agent: human` and an
   `**Owner:**` line (an account to provision, an API key to request, a run only they can start), so
   nothing downstream stalls on them silently.
 - **Fill the session, then stop.** Merge consecutive same-stack work into one task until it would
   exceed the budget target, then start the next. **The goal is the fewest sessions, not the smallest
-  tasks** — an agent switch costs a whole context reload, so a plan of twenty tiny tasks is more
-  expensive than one of eight full ones, and it re-reads the same files eight times instead of once.
-- **Two tasks close a plan.** The **gate task** (the last task that builds and runs code) runs the whole
-  set and holds no feature work when the plan has any. The **documentation task** is the plan's last
-  task: `DOC1`, stack `docs`, agent `be-documenter` (or `be-feature-documenter` where the project
-  documents per feature), depending on the gate task. It updates the documentation from the code that
-  landed, never from the plan, writes the delivery note (`docs/deliveries/`) and files the plan; it names the
-  non-production environment for screenshots or says there is none, and never blocks on it. Left out only with `Documentation task: none — <why>`
-  in the header (format reference §5).
-- **A plan that serves stories plans its testing too:** `TD` tasks after the contract and before the `Q`
-  tasks, the test plan per epic (`qa-test-planner`), then the test-case suites per story
-  (`qa-test-case-designer`) (format reference §4).
+  tasks** — an agent switch costs a whole context reload, so twenty tiny tasks cost more than
+  eight full ones.
 
-**A plan stopped halfway has each landed task's own tests green, but the whole suite has not run, and the
-acceptance tests written by `Q` tasks have not run together until the gate task.** Say so in the plan, in
-those words. Where a stack-cut task cannot be
-demonstrated end to end on its own — a backend task whose screen arrives two tasks later — say so in
-its `Not in <id>` line rather than pretending the capability landed, and have the contract-first side
-return an explicit not-implemented response, never a fake success.
+Where a stack-cut task cannot be demonstrated end to end on its own, its `Not in <id>` line says so
+(plan-format §4). The plan states what a halfway stop leaves, in the words of plan-format §5.
+
+**Done when** every task has its position and its `Depends on:`, and every `Depends on:` points backwards.
 
 ## Step 4 — One stack, one agent, one session per task
 
-**Every task names exactly one stack:** `be` (backend, database, migrations) · `fe` (the web client) ·
-`ts` (shared TypeScript packages — CLI, MCP, generated clients) · `data` · `infra` · `qa` · `docs` ·
-`human`.
+**Every task names exactly one stack, from the list in plan-format §4.**
 
 > **A task that touches both the API tree and the web tree is two tasks.** There is no mixed task at
 > any size, and no estimate justifies one.
 
-This is what makes a task handable to a single agent without it wandering across a boundary it does not
-own, and it is what makes the ordering mechanical rather than a judgement call — same-stack work is
-already adjacent. **Split along a seam inside the same stack**, never by handing part of a task to
-another stack.
+**Split along a seam inside the same stack**, never by handing part of a task to another stack.
 
 **Every task also names its agent** — an exact catalog name on the same line as the stack
 (`be-dotnet`, `be-java`, `be-node`, `be-python`, `be-rust`, `fe-react`, `fe-blazor`, `data-architect`,
 `devops-engineer`, `tooling-engineer`, `qa-api-<stack>`, …). One stack, one agent, one session: the
-agent is who the session is opened as, and it is who each prompt block tells the session to be. A task whose agent you cannot name is a task whose stack you
-have not actually decided; an invented agent name is the most damaging defect in the document.
+agent is who the session is opened as, and it is who each prompt block tells the session to be. A task
+whose agent you cannot name is a task whose stack you have not actually decided; an invented agent name
+is the most damaging defect in the document.
+
+**Done when** every task names one stack from plan-format §4 and one exact catalog agent.
 
 ## Step 5 — Budget the session
 
@@ -212,10 +187,6 @@ then **× 1.2** on the sum for conversation and tool churn.
 
 `Budget = (floor + skills + sections + orientation + files + read-back) × 1.2`
 
-**Worked example** — a task creating an Orders resource: 25k floor + 24k (3 skills) + 1k task block +
-6k (3 sections) + 10k (4 source files + 1 test) + 1.5k (1 modified) + 10k read-back = 77.5k × 1.2 =
-**~95k**.
-
 **Aim for ~80k–150k, centred on ~130k.** Under ~80k, look at the next task in the same stack — merge
 only if the result still states **one** deliverable. Over ~150k, name the task's natural split point,
 inside its own stack.
@@ -228,123 +199,66 @@ from a 95k of one large one:
 3 skills 24k, 5 files created and 1 modified 11.5k, commit, diff and gate read-back 10k, churn ×1.2
 ```
 
-Re-derive it whenever the task's files, skills or cited sections change. A stale budget is worse than
-none — it is a number someone will trust.
+Re-derive it whenever the task's files, skills or cited sections change.
 
 > **The budget is a guide, never a gate.** Three rules outrank it, always: one deliverable; one stack
-> and one agent; every task gates only its own tests. A task that overshoots with
+> and one agent; every task gates its own work and the work landed above it. A task that overshoots with
 > all three satisfied is a large task correctly authored — it is labelled, not filed as a defect. Never
 > split something coherent to hit a number, and never pad a task to fill one.
 
+**Done when** every task carries a `**Budget:**` with itemized drivers, and the prompts table agrees.
+
 ## Step 6 — Write the task blocks and the prompts
 
-Both shapes are specified in [`./references/plan-format.md`](./references/plan-format.md) §4 and §6.
-Four rules are easy to get wrong and expensive when you do:
+Both shapes are in [`./references/plan-format.md`](./references/plan-format.md) §4 and §6, the gate
+in §5, the close-out in §7, and the standards in `rules/plans.md`. Four things are easy to get wrong:
 
-- **Plan Queue reads the heading and the first two lines.** The heading is
-  `### <id> — <title> (<agent>, <stack>)`, then one blank line and the body, nothing between; nothing
-  else is a `###` under `## Prompts`. The body's first line is `Depends on: <ids>` — this plan's ids
-  only, comma-separated, or `Depends on: none` when the task can start at once — and its second is
-  `Agent: <agent> · Stack: <stack>` (format reference §6). It is the task block's
-  `**Depends on:**` reduced to ids, overlap edges included; a program reads it, so no prose on that line.
-  The last runnable task waits for every task that nothing else waits for. The prompts table carries a
-  `Runs beside` column, and the preamble says what runs together in one line — "After C1, B1 → B2 run
-  beside Q1; F1 waits for both; F2 runs the whole set."
-- **Every task that writes code or tests carries `**Gate: own tests**`**, naming the commands, filtered by
-  file or class, that build what it touched and run **only its own tests: the tests it wrote
-  itself in this plan plus the acceptance tests bound to its own deliverable** (format reference §5). A
-  non-frontend task runs its own unit and integration tests and its bound API acceptance tests plus
-  typecheck, lint and format over what it touched, no e2e; a frontend or mobile task (and a `Q` journey
-  task) runs only its own and its bound spec files, usually one to three, on one or two workers and its own
-  port, after the production build. None runs an earlier task's tests, another task's acceptance tests, the
-  smoke suite or a coverage run. A `Q` task expects red for
-  the recorded reason; a `Q` task whose app cannot start in one command proves its tests load and list
-  (Playwright's `--list`). An implementation task expects green on its own tests and its bound acceptance tests, which
-  are read-only to it (format reference §4); acceptance tests not bound to a task first run in the gate
-  task. `**Gate: none**` is only for a task with nothing runnable, and it says so. The last
-  runnable task is the plan's one run under the project's test lock: the smoke suite plus every test the
-  plan wrote, then the whole set in run order, and it **fixes what it finds rather than handing it back**
-  by the fix loop (format reference §5), which its block spells out. When the plan writes code, it ends
-  with the **coverage floor** (format reference §5): ≥ 80% branch coverage of the code the plan wrote,
-  short of which that task writes the missing tests. Every task before it still writes tests for each
-  branch — each one's bullets name the branches its tests must reach, as `OrderServiceTests` does in the
-  format reference's deliverable table — but does not run the coverage measure. The project's whole e2e
-  suite runs in its nightly CI run, and each test red there goes on the project's tracked list with an
-  owner until a nightly run is green for it.
-- **A prompt you cannot write yet is not guessed.** Where a block genuinely depends on what an earlier
-  task lands — the shape of a file it has not created, an id it will assign, a decision it will make —
-  write `**Blocked on <id>** — <id> writes this prompt when it lands, from <what it will then know>.`
-  and put "write B4's prompt block" in the blocking task's bullets **and** in its own prompt's closing
-  duty. Guessing the block produces the one kind of stale that reads as current.
-- **Every plan carries `## Close-out — every task`**, copied verbatim from the format reference §7,
-  directly above the prompts, and every block names it last in its reading list and ends with its
-  close-out line. A queued session loads nothing else, so this is the only place it learns to write
-  its `As built` note, repair the blocks below it, delete its own block and file the plan.
-- **The block that will delete the last prompt carries the filing duty.** Deleting the last block is
-  what finishes the plan (§8). The close-out's step 6 already tells every task to file the plan when its
-  deletion leaves no blocks, which is normally the documentation task; where a blocked task will still
-  be holding a block, say so in the documentation task's block: that plan stays in `docs/plans/` until
-  it clears.
+- **A program reads the prompt's first lines** (plan-format §6): `Depends on: <ids>` is the task
+  block's `**Depends on:**` reduced to ids, overlap edges included, no prose. The last runnable task
+  waits for every task that nothing else waits for, and the preamble's one line says what runs together.
+- **Every task that writes code or tests carries `**Gate: own tests**`** with the commands named,
+  filtered by file or class (plan-format §5); each task's bullets name the branches its tests must
+  reach, as `OrderServiceTests` does in the format reference's deliverable table.
+- **A prompt you cannot write yet is not guessed.** Where a block depends on what an earlier task
+  lands, write `**Blocked on <id>**` as plan-format §6 gives it, and put "write B4's prompt block" in
+  the blocking task's bullets **and** in its own prompt's closing duty.
+- **`## Close-out — every task` is copied verbatim from plan-format §7**, directly above the prompts.
+  The documentation task's block carries the filing duty; where a blocked task will still hold a
+  block, that block says the plan stays in `docs/plans/` until it clears.
 
-## Rules
-
-The standards a plan must meet are the dev rule file `plans.md`, not a list here: the document, its tasks, its prompts and the close-out every task runs. Read the project's copy in `.claude/rules/dev/`, or the plugin's in `engineering-practices/rules/` when the project has not installed it (`/dev:rules` does). Where the project's `CLAUDE.md` states its own plan rules, those win; where this skill and the rule file disagree, the rule file wins. The full shape, with the template, stays in [`./references/plan-format.md`](./references/plan-format.md), and §9 there is the placeholder scan.
+**Done when** every task has its block and its prompt, and the close-out section is in place.
 
 ## Self-Review
 
-After writing the complete plan, look at the spec with fresh eyes and check the plan against it.
+After writing the complete plan, look at the spec with fresh eyes and test the plan against these
+criteria. Fix what you find inline; a spec requirement with no task gets a task.
 
-1. **Grounding:** every row of `## 1.`'s gap table traces to a task, and every task traces back to a
-   row. List any gap in either direction.
-2. **Spec coverage:** skim each section of the spec. Can you point to a task that implements it?
-3. **Placeholder scan:** search the plan for the format reference's §9 list. Fix what you find.
-4. **Type consistency:** do the types, signatures and property names in later tasks match what earlier
-   tasks define? A function called `clearLayers()` in B3 but `clearFullLayers()` in B7 is a bug.
-5. **Order check:** read the tasks in order and ask, at each one, "could I actually start this now?"
-   Everything it needs must come from a task above it, and every `Depends on` must point backwards.
-   The contract, the schema and the stubs come before any `Q` task.
-6. **Parallel check:** every block opens with a `Depends on:` line of ids only, equal to its task
-   block's `**Depends on:**`; any two tasks whose `Files` overlap, or that build one tree, are ordered by
-   an edge; the `Runs beside` column lists only pairs with disjoint files and different trees; the last
-   runnable task waits for every task nothing else waits for.
-7. **Deliverable check:** every task has one, and each states a result rather than an activity.
-8. **Stack check:** every task names exactly one of the eight — run it as a mechanical check on the
-   files each task touches. A task whose files span two trees is two tasks, and the split is an
-   ordering, not a redesign.
-9. **Agent check:** every task names exactly one agent, it is an exact catalog name, and it matches the
-   task's stack (a `be` task run by `fe-react` is a mis-cut).
-10. **Budget check:** every task carries a `**Budget:**` with itemized drivers, and the task table in
-   the prompts section agrees. Every estimate over ~150k names its natural split point or says why the
-   task is one thing anyway; every one under ~80k was checked against the next same-stack task and
-   either merged or left alone deliberately.
-11. **Gate check:** every code task's `**Gate: own tests**` names its commands, filtered and never the
-    unfiltered suite; a code task whose gate runs nothing is a defect. `**Gate: none**` appears only on a
-    task with nothing runnable, which says so. No task's gate runs an earlier task's tests, another task's acceptance tests, the smoke suite or a coverage run. The last runnable task is
-    the one locked run of the whole set: its commands are the project's own and in run
-    order, its block spells out the fix loop, it ends with the coverage floor (format reference §5) when the
-    plan writes code, and it holds no feature work when the plan has any. What a halfway stop leaves (each landed task's own tests green, the `Q` acceptance tests not yet run
-    together) is stated in the plan.
-12. **Documentation check:** the plan's last task is `DOC1` (stack `docs`, the documenter agent),
-    depends on the gate task, names the documents it updates and the delivery note, and its gate is the doc lint; or the header
-    says `Documentation task: none — <why>`. The gate task writes no product documentation.
-13. **Filing check:** the documentation task's block carries the filing duty; where a blocked task will
-    outlive it, that block says the plan stays in `docs/plans/` until it clears; the plan's own number was taken from the high-water mark across both
-    folders.
-14. **Prompt check:** one block per task, in task order, each carrying the deliverable verbatim, an
-    exact reading list with **sections** rather than artifacts, its traps, its gate line and its
-    close-out line; `## Close-out — every task` is present verbatim. Read each block as if it were the
-    only thing you had: if you would need the task above it to start, the block is incomplete. Every
-    `Blocked on <id>` placeholder is matched by that task's duty to write it.
-15. **Acceptance-test order:** every acceptance test precedes the tasks that turn it green — each `Q`
-    task sits after the stubs it runs against and before the implementation its tests specify, and
-    every implementation deliverable names the acceptance tests it turns green.
-16. **Rendering check:** every web route the plan adds or changes has a rendering entry (mode, cache,
-    signals, server-rendered content) in §4a of the experience plan or in `## Rendering per route`,
-    with no anti-pattern from `rendering-strategy.md`. Its `fe` task quotes that entry, and a `Q`
-    task asserts its server-rendered content on the raw HTML.
-
-Fix what you find inline. No need to re-review — fix and move on. A spec requirement with no task gets
-a task.
+1. **Grounding.** Every row of `## 1.`'s gap table traces to a task, and every task traces back to a row.
+2. **Spec coverage.** Each section of the spec points at the task that implements it.
+3. **Placeholders.** The plan holds none of plan-format §9's list.
+4. **Type consistency.** Types, signatures and property names in later tasks match what earlier tasks
+   define: `clearLayers()` in B3 and `clearFullLayers()` in B7 is a bug.
+5. **Order.** At each task, everything it needs comes from a task above it, and every `Depends on` points
+   backwards. The contract, the schema and the stubs come before any `Q` task, and every acceptance
+   test precedes the tasks that turn it green.
+6. **Parallel order.** Every block opens with a `Depends on:` line of ids only, equal to its task
+   block's; tasks whose `Files` overlap, or that build one tree, are ordered by an edge; the
+   `Runs beside` column lists only pairs with disjoint files and different trees.
+7. **Deliverable.** Every task has one, stated as a result rather than an activity.
+8. **Stack.** Every task's files sit in one tree and the task names one stack from plan-format §4.
+9. **Agent.** Every task names one exact catalog agent that matches its stack.
+10. **Budget.** Every estimate over ~150k names its split point or says why the task is one thing; every
+    one under ~80k was checked against the next same-stack task.
+11. **Gate.** Every code task's gate and the last runnable task meet plan-format §5 and `rules/plans.md`.
+12. **Documentation.** The plan ends with `DOC1`, or its header says `Documentation task: none — <why>`
+    (plan-format §5).
+13. **Filing.** The filing duty is on the documentation task, and the plan's number came from the
+    high-water mark across both folders.
+14. **Prompt.** One block per task, in task order, each carrying the deliverable verbatim, a reading
+    list of **sections**, its traps, its gate line and its close-out line; each block is complete
+    without the task above it, and every `Blocked on <id>` is matched by that task's duty to write it.
+15. **Web routes.** Where the plan adds or changes a web route, the criterion in
+    [`./references/web-routes.md`](./references/web-routes.md) holds.
 
 ## Execution Handoff
 
@@ -352,8 +266,5 @@ After saving the plan, hand off to execution.
 
 **"Plan complete and saved to `docs/plans/<filename>.md` — ready to queue in Plan Queue."**
 
-The plan file is the whole handoff. It is self-contained on purpose: Plan Queue runs it in its own
-worktree, one prompt block per session, in order, and each session closes out per the plan's
-`## Close-out — every task`. Tasks whose `Depends on:` lines allow it run in parallel in that one
-working tree — the preamble's runs-together line says which — and each commits only its own files, by
-path, and re-reads the plan before its close-out edits.
+The plan file is the whole handoff. Plan Queue runs it in its own worktree, one prompt block per
+session, in order, and each session closes out per the plan's `## Close-out — every task`.

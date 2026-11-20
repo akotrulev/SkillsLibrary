@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Owns **every dev-side test of logic the agent writes**: ViewModels, repositories, mappers, formatters, state machines, the request policy, and the Compose UI of a single screen. In-process, no device journeys, no real backend. Web analog: [`fe-react:component-testing`](../../../../frontend/react/skills/component-testing/SKILL.md) — test behaviour, not markup; fakes at the boundary; pure logic without a renderer carry over; jsdom and RTL queries do not. Sibling: [`mobile-ios:unit-testing`](../../../ios/skills/unit-testing/SKILL.md).
 
-**Boundary.** Real devices, real navigation, permission dialogs, deep links, TalkBack and cross-screen journeys are `qa-mobile-<stack>`'s — **Appium (UiAutomator2)** with a **Maestro** lane (plan 003). A unit test fakes the platform, so it can never prove a system dialog or a gesture on hardware. This skill hands them the ids ([`test-ids`](../test-ids/SKILL.md)); it does not write the journeys.
+**Boundary.** Real devices, real navigation, permission dialogs, deep links, TalkBack and cross-screen journeys are `qa-mobile-<stack>`'s — **Appium (UiAutomator2)** with a **Maestro** lane. A unit test fakes the platform, so it can never prove a system dialog or a gesture on hardware. This skill hands them the ids ([`test-ids`](../test-ids/SKILL.md)); it does not write the journeys.
 
 ## Version lane
 
@@ -17,9 +17,9 @@ Owns **every dev-side test of logic the agent writes**: ViewModels, repositories
 | Runner | **JUnit 4** (`org.junit.Test`, `@RunWith`) | The default: Robolectric, Compose rules and `androidTest` need it |
 | `[JUnit5]` | JUnit 5 **only where the `de.mannodermaus.android-junit5` plugin is already applied** — and only for plain-JVM tests | Never mix both runners in one module's `test` source set; never add the plugin as a side effect |
 | Coroutines | `kotlinx-coroutines-test`: `runTest`, `StandardTestDispatcher`, `TestScope`, `advanceUntilIdle()`, `testScheduler` | `Dispatchers.setMain` through one **`MainDispatcherRule`** |
-| Flow | **Turbine** (`app.cash.turbine`) — `flow.test { awaitItem() }` | Version-key against the project's catalog (1.2.0 at last check — **built but unverified**) |
-| Local Android | **Robolectric** (4.17 line in §4.3; stable-release status **unconfirmed**) with `@RunWith(AndroidJUnit4::class)` | **JDK 21 toolchain** for SDK 36 targets; `@Config(sdk = [36])` set once in `robolectric.properties` |
-| Compose UI | **Compose UI test v2** — `androidx.compose.ui.test.junit4.v2.createComposeRule` / `androidx.compose.ui.test.v2.runComposeUiTest` | **Runs on `StandardTestDispatcher`** — see below. v2 needs `ui-test-junit4` 1.11.0-alpha03+; `ComposeUiTestConfig` 1.13.0-alpha01+ — both are well below the BOM 2026.09 line |
+| Flow | **Turbine** (`app.cash.turbine`) — `flow.test { awaitItem() }` | Version-key against the project's catalog |
+| Local Android | **Robolectric** with `@RunWith(AndroidJUnit4::class)` | **JDK 21 toolchain** for SDK 36 targets; `@Config(sdk = [36])` set once in `robolectric.properties` |
+| Compose UI | **Compose UI test v2** — `androidx.compose.ui.test.junit4.v2.createComposeRule` / `androidx.compose.ui.test.v2.runComposeUiTest` | **Runs on `StandardTestDispatcher`** — see `references/compose-ui-tests.md` |
 | Screenshots | **Roborazzi** (JVM, over Robolectric) — a lane where the project already uses it | Single composables, never whole screens |
 | Compose a11y | `enableAccessibilityChecks()` from `androidx.compose.ui:ui-test-junit4-accessibility` (Compose 1.8+) | One screen, one test |
 | `[AGP8]` | Same libraries; `testOptions.unitTests.isIncludeAndroidResources = true` for Robolectric | AGP 9 default is the same — set it explicitly |
@@ -72,11 +72,10 @@ class MainDispatcherRule(
 }
 ```
 
-- **Names read `Should_X_When_Y`**; one convention per module.
-- **One expected value per assertion** — `assertEquals(Orders.defaultPage(), …)`, never "loaded or stale". Two outcomes are two tests or `@RunWith(Parameterized::class)` rows.
+- Names, assertions, parameterized variants and the dispatcher choice: per `android-tests.md`.
 - **`runTest` owns time.** It runs on a `StandardTestDispatcher` with a virtual clock; `delay` costs nothing. Inject the dispatcher into the class under test (`TestDispatcher(testScheduler)`), never reach for `Dispatchers.Main` directly — the rule sets it for the ones you do not own.
-- **Advance explicitly**: `advanceUntilIdle()` to drain, `advanceTimeBy(1_000)` + `runCurrent()` to step. **No real `Thread.sleep` or `delay` waiting on a result.**
-- **Standard, not Unconfined.** `UnconfinedTestDispatcher` runs launched coroutines eagerly and hides ordering bugs; use it only for a collector that must see every emission, and say why in the test's name.
+- **Advance explicitly**: `advanceUntilIdle()` to drain, `advanceTimeBy(1_000)` + `runCurrent()` to step.
+- **Unconfined** runs launched coroutines eagerly and hides ordering bugs; use it only for a collector that must see every emission, and say why in the test's name.
 - **Cancellation**: `launch`, `cancel()`, `advanceUntilIdle()`, assert the state did not move to `Failed` ([`error-handling`](../error-handling/SKILL.md)).
 
 ## Errors — assert them, never catch them
@@ -92,9 +91,9 @@ fun Should_ThrowDrifted_When_BodyIsNotAnOrderList() = runTest {
 }
 ```
 
-- **`assertFailsWith<T>` (kotlin.test) or `assertThrows` is the assertion**; a test body contains **no `try` / `catch`**. An unexpected exception reaches the runner untouched and fails the test with its message.
-- **A failed decode names the path and carries the payload**: assert on the `SerializationException`'s path through a helper that attaches the raw body — "Unexpected JSON token at offset 0" tells the reader nothing.
-- A cleanup helper doing I/O (a teardown closing `MockWebServer`) may catch one named exception and log it — never a blanket catch. Resource cleanup is `@After` / the `TestWatcher`, never an inline `try` / `finally`.
+- **`assertFailsWith<T>` (kotlin.test) or `assertThrows` is the assertion**, per `android-tests.md`.
+- **A failed decode names the path and carries the payload**: assert on the `SerializationException`'s path through a test client that attaches the raw body — "Unexpected JSON token at offset 0" tells the reader nothing.
+- A teardown registry doing I/O (closing `MockWebServer`) may catch one named exception and log it; cleanup runs in `@After` or the `TestWatcher`.
 
 ## Seams — what makes logic testable
 
@@ -110,57 +109,9 @@ The `Clock` / id-factory constructor sample is in [`references/flows-and-seams.m
 
 Turbine usage (`awaitItem`, `expectNoEvents`, `StateFlow` conflation, `WhileSubscribed` shutdown) and the Room / DataStore / `MockWebServer` seam recipes are in [`references/flows-and-seams.md`](references/flows-and-seams.md).
 
-## Compose UI test v2 — and the dispatcher change
+## Compose UI tests
 
-```kotlin
-class OrdersScreenTest {
-
-    @get:Rule
-    val compose = createComposeRule()
-
-    @Test
-    fun Should_KeepFiltersInteractive_When_ListFails() {
-        compose.setContent {
-            AppTheme {
-                OrdersScreen(OrdersUiState.failed(query = "mug"), actions = NoOpOrdersActions)
-            }
-        }
-
-        compose.onNodeWithTag("Orders.Search").assertIsEnabled()
-        compose.onNodeWithTag("Orders.Error").assertIsDisplayed()
-    }
-}
-```
-
-with `import androidx.compose.ui.test.junit4.v2.createComposeRule` (v2). Facts, verified at the Compose migration page 2026-10-10:
-
-| v1 (deprecated) | v2 |
-|---|---|
-| `androidx.compose.ui.test.junit4.createComposeRule` / `createAndroidComposeRule` / `createEmptyComposeRule` | the same names in `androidx.compose.ui.test.junit4.v2` |
-| `androidx.compose.ui.test.runComposeUiTest` / `runAndroidComposeUiTest` / `runEmptyComposeUiTest` | the same names in `androidx.compose.ui.test.v2` |
-| Coroutines on **`UnconfinedTestDispatcher`** — launched work runs immediately | Coroutines on **`StandardTestDispatcher`** — launched work is **queued** and runs only when the test advances the virtual clock |
-
-- **Tests that rely on immediate execution break**: a `LaunchedEffect`, a `viewModel.load()` or a `produceState` that used to have finished by the next line has not. Fix the *test*, not the dispatcher: `compose.waitForIdle()` or `compose.runOnIdle { assert… }` before asserting state; `compose.mainClock.scheduler.runCurrent()` when `autoAdvance` is off; `mainClock.advanceTimeBy(1_000 + 16)` to step a `delay` (the 16 is a frame buffer).
-- **Prefer `runComposeUiTest { }` over `createComposeRule()` + `runTest { }`** — two schedulers in one test is how v2 migrations go flaky; one `runComposeUiTest` has one.
-- **v2 pins `InputMode.Touch`** at the start of each test; a keyboard-focus test sets `ComposeUiTestConfig(inputMode = InputMode.Keyboard)` (1.13+).
-- `ComposeUiTestConfig` replaces the deprecated `effectContext`, `runTestContext` and `testTimeout` parameters (1.13.0-alpha01+).
-- **A project on v1 is not flagged for being on v1** until it bumps to a version where v1 is removed; a *new* test is written on v2. Migrate by package rename first, then fix the red tests one at a time.
-- **Find by `testTag`, then by semantics** (`onNodeWithContentDescription`, `onNodeWithText`) — the tag is the contract ([`test-ids`](../test-ids/SKILL.md)); `onNodeWithTag` works **without** the root `testTagsAsResourceId` flag.
-- **Test the screen's stateless composable with a hand-built state** — the ViewModel is covered by its own test; a screen test that boots a Hilt graph is an integration test.
-
-### Accessibility check
-
-```kotlin
-@Test
-fun Should_PassAccessibilityChecks_When_OrdersLoaded() {
-    compose.setContent { AppTheme { OrdersScreen(OrdersUiState.loaded(), NoOpOrdersActions) } }
-    compose.enableAccessibilityChecks()
-
-    compose.onRoot().tryPerformAccessibilityChecks()
-}
-```
-
-It catches a missing label, low contrast, a small target and a traversal-order problem; every `performClick` also runs the checks. It **complements** a TalkBack pass ([`accessibility`](../accessibility/SKILL.md)); it never replaces one, and a green check is not an accessibility claim.
+Write every new Compose UI test on v2, one stateless screen per test with a hand-built state. A task that writes or migrates one → read [`references/compose-ui-tests.md`](references/compose-ui-tests.md): the v2 sample, the move from `UnconfinedTestDispatcher` to `StandardTestDispatcher` (launched work is queued until the clock advances), and the accessibility check.
 
 ## Robolectric, Roborazzi and test data
 
@@ -177,46 +128,19 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 - **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — each `if`/`else`, `when` arm including `else`, `?:` and `?.`, short-circuit `&&`/`||`, `try`/`catch`, a failing `require`/`check`, an early `return`, each region state (loading / loaded / failed / stale / offline), a loop run zero times and many — and give each a test or a parameterized row that asserts its effect. The slack under 100% is for branches no honest unit test reaches, such as the ones the compiler adds around coroutines and inline functions.
 - **Only an asserting test counts.** A test that runs a branch without asserting what it did is a **major** finding — it moves the number and catches nothing. *Validation*'s mutate-one-rule check is how hollow coverage gets caught.
 - **Leave out what *Test what has behaviour* does not test, by name.** Type-only files, constants, DAO interfaces, forwarding wrappers and generated code (`androidGeneratedClasses()`, plus KSP / Room / Hilt output) stay out of the measured class list, and the report names each one left out. Never reach 80% by lowering the number or by a Kover exclusion over code that has behavior.
-- **Measure** with Kover. A plan task's `Gate: own tests` runs this over the files it wrote; outside a plan, run it before you report:
-
-  ```kotlin
-  // app/build.gradle.kts — once per module; the plugin is the `kover` alias in libs.versions.toml (0.9.x)
-  import kotlinx.kover.gradle.plugin.dsl.CoverageUnit
-  import kotlinx.kover.gradle.plugin.dsl.GroupingEntityType
-
-  plugins { alias(libs.plugins.kover) }
-
-  kover {
-      reports {
-          filters { excludes { androidGeneratedClasses() } }
-          variant("debug") {
-              log {
-                  groupBy = GroupingEntityType.CLASS
-                  coverageUnits = CoverageUnit.BRANCH
-                  format = "<entity> branch coverage: <value>%"
-              }
-          }
-      }
-  }
-  ```
-
-  ```bash
-  ./gradlew :app:koverLogDebug | grep -E 'CheckoutViewModel|CartMapper'
-  ```
-
-  One line per class is the number; `:app:koverHtmlReportDebug` shows the branches per function. Kover counts Kotlin's inline functions and coroutine state machines more faithfully than raw JaCoCo, which is why it is this lane's tool.
+- **Measure** with Kover, set up once per module as in [`references/coverage-kover.md`](references/coverage-kover.md). Inside a plan task, the `Gate:` line runs this over the files the task and the landed tasks above it touched. Outside a plan, run it before you report.
 - **Below 80%, write the missing tests.** The HTML report's missed branches are the list.
 
 ## Generation steps
 
-1. Read the target's constructors, existing fakes, `MainDispatcherRule`, runner and Compose-test version; match them.
-2. List the behaviours worth testing and each one's branch outcomes — that list is the test plan (*Coverage floor*); add the missing seam to the constructor, not a global.
-3. Write each test as Arrange / Act / Assert with a behaviour name; parameterize variants; put shared fakes, fixtures and builders in test support.
-4. Leave journeys as a hand-off note naming the `testTag`s, for `qa-mobile-<stack>`.
+1. Read the target's constructors, existing fakes, `MainDispatcherRule`, runner and Compose-test version, and match them. Done when the test plan names the runner, the dispatcher rule and each fake it reuses.
+2. Write the branch-outcome list (*Coverage floor*), one row per outcome, with each missing seam added to the constructor, not a global. Done when every behaviour worth testing has its rows.
+3. Write each test as Arrange / Act / Assert with a behaviour name, parameterized variants, and shared fakes, fixtures and builders in test support. Done when every row has a test asserting its effect.
+4. Write the journeys as a hand-off note for `qa-mobile-<stack>`. Done when each journey is a line naming its `testTag`s.
 
 ## Validation
 
-Inside a plan task, `Gate: own tests` runs this task's tests — the red run, then green — and the *Coverage floor* measure over the files it wrote; the last runnable task runs everything else.
+Inside a plan task, `Gate: own tests` runs this task's tests — the red run, then green —, the tests of the landed tasks above it, and the *Coverage floor* measure over the files the task and those tasks touched; the last runnable task runs everything else.
 
 - `./gradlew testDebugUnitTest` passes on JDK 21; each test passes alone (`--tests`) and in a shuffled order; `connectedDebugAndroidTest` for the Compose rules that need a device.
 - Mutate one rule in the code under test; a test fails with a message naming the value.

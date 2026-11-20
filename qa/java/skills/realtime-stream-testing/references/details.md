@@ -1,5 +1,14 @@
 # Deep-dive details — `qa-java:realtime-stream-testing`
 
+**Contents:**
+
+- Protocol-client 1 — raw WebSocket (OkHttp WebSocket)
+- Protocol-client 2 — STOMP-over-WebSocket (Spring WebSocketStompClient)
+- Protocol-client 3 — SSE (OkHttp-SSE / WebClient Flux)
+- Browser page objects and MockStreams
+- Disciplines & gotchas (apply to every real-time test)
+- Examples
+
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
 ## Protocol-client 1 — raw WebSocket (OkHttp `WebSocket`)

@@ -113,7 +113,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 - **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — `@if`/`else` and `@switch` in markup, each region state (loading / loaded / failed / empty), a `@foreach` over no items and many, event-handler `if`/`else`, `OnParametersSet` guards, `??` and `?.` — and give each a test or a `[TestCase]` row that asserts its effect. The slack under 100% is for branches no honest test reaches, such as compiler-generated ones in the Razor output.
 - **Only an asserting test counts.** A render that executes a branch without asserting the markup or state it produced is a **major** finding — it moves the number and catches nothing. The tautology rule in `blazor-tests.md` applies.
 - **Leave out what the matrix says not to test, by name.** Markup-only components, `_Imports.razor`, `App.razor`/`Routes.razor` and `Program.cs` stay out of the measured file list, and the report names each one left out. Never reach 80% by lowering the number or by `[ExcludeFromCodeCoverage]` on code that has behavior.
-- **Measure.** A plan task's `Gate: own tests` runs this over the files it wrote; outside a plan, run it before you report:
+- **Measure.** Inside a plan task, the `Gate:` line runs this over the files the task and the landed tasks above it touched. Outside a plan, run it before you report:
 
   ```bash
   dotnet test --collect:"XPlat Code Coverage" --results-directory TestResults
@@ -124,7 +124,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 
   `Branch coverage` in `TestResults/coverage/Summary.txt` is the number; for a method changed in an existing file, that file's page in the HTML report shows its branches. `coverlet.collector` comes with the test project template — add it where it is missing; ReportGenerator is the local tool `dotnet-reportgenerator-globaltool`.
 - **Below 80%, write the missing tests.** The report's uncovered branches are the list.
-- **Gate.** Inside a plan task, `Gate: own tests` runs this task's tests — the red run, then green — and the *Coverage floor* measure over the files it wrote; the last runnable task runs everything else.
+- **Gate.** Inside a plan task, `Gate: own tests` runs this task's tests — the red run, then green —, the tests of the landed tasks above it, and the *Coverage floor* measure over the files the task and those tasks touched; the last runnable task runs everything else.
 
 ## Pure-logic tests (no renderer)
 

@@ -6,38 +6,25 @@ disable-model-invocation: true
 
 # Solution Blueprint — the high-level backend plan
 
-The blueprint is the document the human approves. Everything downstream — data model, API surface, integrations, task sequence — is derived from it, so a wrong blueprint is not a cheap mistake to discover in Step 5. Its job is to make the *consequential* decisions visible and confirmable in one page-sized pass, and to make the uncertain ones explicit rather than silently resolved.
+The blueprint is the document the human approves, and everything downstream (data model, API surface, integrations, task sequence) derives from it. It makes the *consequential* decisions visible and confirmable in one page-sized pass, and the uncertain ones explicit.
 
 ## Output
 
-**`docs/plans/<NNN>-<initiative>/blueprint.md`** under the **target project's** root — never the skills-library checkout, never a global directory. `NNN` is zero-padded, and its high-water mark spans `docs/plans/` **and** `docs/plans/implemented/` (files and folders both count — a finished pack is moved there, and its number stays spent); never reuse or renumber. `<initiative>` is a short kebab-case noun phrase (`billing-service`, `tenant-onboarding`), stable for the life of the initiative — the folder name is cited by every other artifact and by every prompt block in `delivery-plan.md`'s `## Prompts — one per task` section.
+**`docs/plans/<NNN>-<initiative>/blueprint.md`** under the **target project's** root, never the skills-library checkout or a global directory. `NNN` is zero-padded and takes the high-water mark across `docs/plans/` **and** `docs/plans/implemented/` (a finished pack's number stays spent). `<initiative>` is a short kebab-case noun phrase (`billing-service`), stable for the life of the initiative: every artifact and prompt block cites it.
 
-**A filled golden example is at `references/example-blueprint.md`** — all five planner examples describe the same toy initiative (`001-workshop-booking`), so together they show one coherent pack. Shapes and disciplines there are normative; the domain content is illustrative.
+`references/example-blueprint.md` is a filled golden example (the toy initiative `001-workshop-booking`, shared by the planner examples). Its shapes are normative, its domain content illustrative.
 
-## Annotation grammar (used across the whole plan pack)
+## Annotation grammar and evidence marks (the whole plan pack)
 
 | Marker | Means |
 |---|---|
-| `#confirmed` | Stated by the human — in this session or in a requirements document. Never read out of code; that is `#observed` |
-| `#inferred` | Your reasoning from indirect evidence — the human should scan these |
-| `#observed` | Read out of existing code/behavior rather than a document — `business-analysis:knowledge-base`'s grammar is the canonical definition; in the documenter lane it always carries `file:line` |
-| `[TBD - <owner>, <by when>]` | Genuinely unknown; has a named owner. **Not** a synonym for vague |
-| `⚠️ Assumption:` | You proceeded on an unconfirmed premise. Every one of these is also a line in Open Questions |
+| `#confirmed` | Stated by the human, in this session or in a requirements document. Never read out of code (that is `#observed`) |
+| `#inferred` | Your reasoning from indirect evidence; the human should scan these |
+| `#observed` | Read out of existing code or behavior, per `dev:knowledge-base`; in the documenter lane it always carries `file:line` |
+| `[TBD - <owner>, <by when>]` | Genuinely unknown, with a named owner; never a synonym for vague |
+| `⚠️ Assumption:` | You proceeded on an unconfirmed premise; each is also a line in Open Questions |
 
-An unmarked claim reads as `#confirmed`. Mark honestly — the value of the pack is that a reader can tell fact from inference at a glance.
-
-## Evidence marks (used in the tech-stack and architecture tables)
-
-| Mark | Means |
-|---|---|
-| `detected` | Found in the repo — a TFM, a lockfile, an existing migration, an existing route |
-| `stated` | The human said so, in this session or in the requirements |
-| `proposed` | Your inference from the workload. **These are the rows the human needs to look at** |
-| `proposed → approved` | A `proposed` row the human confirmed at the gate — the post-approval state, recorded when the blueprint moves to APPROVED |
-
-The two systems encode one axis: `stated` ≈ `#confirmed` · `detected` ≈ `#observed` · `proposed` ≈ `#inferred` — the evidence marks are the table-cell form of the annotation grammar, used where a one-word cell reads better than a tag.
-
-In an existing repo, `detected` beats the library Stack defaults every time. In a greenfield one, the Stack defaults from `CLAUDE.md` are the proposal, marked `proposed`.
+An unmarked claim reads as `#confirmed`. Tech-stack and architecture table cells use the one-word form of the same axis: `detected` (found in the repo: a TFM, a lockfile, a migration, a route) ≈ `#observed` · `stated` (the human said so) ≈ `#confirmed` · `proposed` (your inference from the workload) ≈ `#inferred`, the rows the human must look at · `proposed → approved` (confirmed at the gate). In an existing repo `detected` beats the Stack defaults; in a greenfield one the `CLAUDE.md` defaults are the proposal, marked `proposed`.
 
 ---
 
@@ -45,187 +32,75 @@ In an existing repo, `detected` beats the library Stack defaults every time. In 
 
 ### Step 1 — Frame the initiative
 
-Three to five sentences answering: what business problem, for whom, what changes when it ships, and what success looks like. If the input is raw prose (a BRD, a transcript, an email thread), distill it first with `qa/manual/requirements-breakdown` — that produces a sourced test-basis with silent/contradictory items already flagged, which is exactly the input this step wants.
+Three to five sentences answering: what business problem, for whom, what changes when it ships, and what success looks like. Raw prose input (a BRD, a transcript, an email thread) is distilled first with `qa/manual/requirements-breakdown`, which flags silent and contradictory items.
 
-If you cannot write these sentences without inventing business facts, stop and route to `requirements-author`. Say which facts are missing.
+When these sentences need an invented business fact, stop, name the missing facts and route to `requirements-author`. Done when they rest on stated facts.
 
 ### Step 2 — Decompose into functional areas
 
-A **functional area** is a coherent slice of business capability that could plausibly be owned by one person and tested as a unit — `Identity & access`, `Catalog`, `Ordering`, `Billing`, `Notifications`, `Reporting`. It is not a technical layer (`Controllers`, `Repositories` are not functional areas) and not a single endpoint.
+A **functional area** is a coherent slice of business capability that one person could own and test as a unit (`Identity & access`, `Catalog`, `Ordering`, `Billing`). It is not a technical layer and not a single endpoint.
 
 | Column | Content |
 |---|---|
 | Area | Short noun phrase |
-| Epics | The `E` ids from `epics.md` this area serves — `E1, E3`, or `E0` for a cross-cutting foundation. This is the join the whole pack is later checked on |
-| Purpose | One sentence — the capability, in business terms |
-| User-facing capabilities | The things a person can *do* here, one short sentence each in the user's voice (*"a member books a session"*, *"an admin publishes a workshop"*) — empty for areas nothing user-facing sits on. `dev:plan-delivery` sequences user-facing work one capability at a time, so this column is what it sequences on; an area with none is planned layer-first |
+| Epics | The `E` ids from `epics.md` this area serves (`E1, E3`, or `E0` for a cross-cutting foundation). The join the whole pack is checked on |
+| Purpose | One sentence, the capability in business terms |
+| User-facing capabilities | What a person can *do* here, one short sentence each in the user's voice (*"a member books a session"*); empty where nothing user-facing sits. `dev:plan-delivery` sequences user-facing work one capability at a time on this column |
 | Primary actors | Who or what drives it (end user, admin, scheduled job, external system) |
-| Key entities | The 2–5 nouns it owns — the seed of `data-model.md` |
-| In scope | What this initiative builds for it |
-| Out of scope | What it deliberately excludes, and where that work lives instead |
+| Key entities | The 2–5 nouns it owns, the seed of `data-model.md` |
+| In scope / Out of scope | What this initiative builds for it; what it excludes and where that work lives instead |
 | Depends on | Other areas or external systems |
 
-Rules:
-- **Every area names the epic ids it serves, and every epic is served by an area.** The ids come from `epics.md` as `requirements-author` wrote them — read, never renumbered, never invented. An area serving no epic is work nobody asked for; an epic no area serves is a capability the architecture forgot. Both are gate defects, and finding them here costs a sentence, while finding them at the delivery plan costs a re-plan. Cross-cutting foundations (auth, config, the error envelope, the app shell) serve `E0` — the planner-created epic that carries no stories and never appears in `epics.md`.
-- **Name the user-facing capabilities in the user's voice, not the system's.** *"A member books a session"* is a capability; *"exposes the bookings endpoint"* is an implementation of one. The delivery plan turns each into a step that closes when a person can actually do it, so a vague capability produces a step with no checkable exit.
-- **6–8 areas is a lot.** Beyond that, either the initiative should be decomposed into separate initiatives (each with its own folder and its own executable plan), or several "areas" are really one. Say which.
-- **Out of scope is not optional.** The most common plan defect is an unstated boundary that someone later reads as included.
-- Every area gets at least one entity or it is not an area — it is a cross-cutting concern (auth, logging, config), which belongs in the architecture section instead.
-- **Name the actors and propose the shell when anything is user-facing.** Where the table has a non-empty *User-facing capabilities* column, add a short §2b: one line per actor with their two or three most frequent tasks (*verb + object + outcome*), and the **app shell** — sidebar / top nav / hybrid, from `design/ux-patterns` §2's table — as a `proposed` row with its one-line reason. This is what lets the approver judge the experience at the gate; the nav map, journeys and screens are `dev:plan-experience`'s in Step 3, not the blueprint's. An initiative with no user-facing capability writes "no user-facing area" and skips the section.
-- **Ask about existing data.** If any area replaces a current system of record (a spreadsheet, a legacy app, a manual process), the data living there is in scope or out — say which. What must come across, and whether it is a one-time import or an ongoing sync, is a scope boundary and usually an open question; the mapping detail belongs to `dev:plan-data-model`'s backfill section.
+- **Every area names the epic ids it serves, and every epic is served by an area.** The ids come from `epics.md` as `requirements-author` wrote them, read and never renumbered or invented. An area serving no epic is work nobody asked for; an epic no area serves is a capability the architecture forgot. Cross-cutting foundations (auth, config, the error envelope, the app shell) serve `E0`, the planner-created epic that carries no stories and never appears in `epics.md`.
+- **Name capabilities in the user's voice**: *"A member books a session"* is a capability; *"exposes the bookings endpoint"* is an implementation of one. The delivery plan closes each on a person actually doing it.
+- **6–8 areas is a lot.** Beyond that, split into separate initiatives (own folder, own plan) or merge areas, and say which. **Out of scope is mandatory**: an unstated boundary is the most common plan defect.
+- An area owning no entity is a cross-cutting concern, and belongs in the architecture section.
+- **When anything is user-facing, name the actors and propose the shell** in a short §2b: one line per actor with their two or three most frequent tasks (*verb + object + outcome*), and the **app shell** (sidebar / top nav / hybrid, from `design/ux-patterns` §2) as a `proposed` row with its reason. The nav map, journeys and screens are `dev:plan-experience`'s in Step 3. With no user-facing capability write "no user-facing area".
+- **Ask about existing data.** An area that replaces a system of record (a spreadsheet, a legacy app) puts that data in scope or out, and says which. Whether it comes across once or stays in sync is usually an open question; the mapping belongs to `dev:plan-data-model`'s backfill section.
+
+Done when every area names its epics, every epic is served, and each area states its scope boundary.
 
 ### Step 3 — Decide the architecture style
 
-State the decision, the reason it is **earned for this system**, and what you rejected. Default toward the least structure that works:
+State the decision, the reason it is **earned for this system**, and what you rejected. Default toward the least structure that works: a modular monolith built to be split later, with one team, one deployable and no split trigger met. An existing codebase keeps the architecture it has. **A greenfield system or a live architecture decision → read `references/architecture-style.md`** (the styles table, the four split-later rules, the split triggers, the repository layout, the context diagram).
 
-| Style | Earned when | Costs you should say out loud |
-|---|---|---|
-| **Modular monolith, built to be split later** (default proposal) | One team, one deployable, and none of the split triggers below is met | A boundary costs a schema, a public API and an architecture test from the first task; no foreign key across modules, so the owning module keeps referential integrity; cross-module reads go through an API call, not a join |
-| **Modular monolith + extracted service** | One module meets a split trigger below | A network hop, a second deployment, distributed failure modes for that seam only |
-| **Services per area** | Several areas each meet a split trigger — independent teams on their own release cadence, or hard isolation requirements | Distributed transactions, versioned contracts, per-service observability, N pipelines |
-| **Event-driven core** | Fan-out to multiple consumers, or ordering/replay is a business requirement | A broker to run, idempotent consumers, eventual consistency the UI must reflect |
+For each *pattern* in play (CQRS, event sourcing, Saga, Outbox, Repository over the ORM) write one line stating it is earned, loading `backend/_shared/pattern-guide` for the concept card when the decision is live. **One pattern per problem**; a pattern with no stated reason is a finding against your own blueprint.
 
-**Built to be split later — four rules**, written into the blueprint and enforced from the first task:
-
-1. **A module owns its data.** Its tables live in its own schema. No other module reads or writes them: no cross-module join, no shared table, no foreign key into another module's schema — another module holds the id.
-2. **Modules talk through a public surface.** Each module exposes one public API — a facade or interface shaped like the HTTP contract it would become, DTOs in and out, never an entity — and the events it publishes. Everything else is internal.
-3. **An architecture test fails the build on a reach-in.** It runs with the unit tests; the first contract task writes it (`be-<stack>:patterns-apply`, "Module boundaries").
-4. **One folder per module**, mirrored by one schema, one DI registration and one test folder — one module per functional area.
-
-**Split triggers** — the only reasons a module becomes a service, each recorded as a dated decision when used: it must **scale apart** from the rest; **another team** will own it on its own release schedule; it needs **isolation the process cannot give** (untrusted input, a compliance scope — the sandboxed upload worker is the house example); it needs a **different runtime**. Size, tidiness and "we might need it later" are not triggers; the number of areas decides nothing. Splitting moves the module's folder to `services/<name>/`, gives its schema a database of its own, and replaces the in-process calls with a client generated from the same contract. An existing codebase keeps the architecture it has — this default is for new systems.
-
-Then, for each *pattern* in play, one line stating it is earned — CQRS, event sourcing, Saga, Outbox, Repository over the ORM. Load `backend/_shared/pattern-guide` for the concept card if the decision is live. **One pattern per problem**; a pattern with no stated reason is a finding against your own blueprint.
-
-**Propose the repository layout** beside the style. The default is **one repo per product**, because a plan runs in one worktree and a test-first plan keeps its contract, its acceptance tests and its code in one history:
-
-```
-<product>/
-  contracts/                OpenAPI and AsyncAPI documents: what every side binds to
-  services/<name>/          one deployable each, in its stack's native workspace
-  services/<name>/tests/    unit tests and the acceptance tests that drive its implementation
-  web/  mobile/             the clients, in the TypeScript workspace or their own native projects
-  e2e/                      journey suites that need several deployables running together
-  deploy/local/             the local Grafana stack, started with one command
-  docs/plans/               the plans
-```
-
-Mixed languages are fine: each stack keeps its native workspace in its own folder, with CI on path filters. **Multi-repo needs a stated reason** — independent teams or release cadences — and means one plan per repo, with the contract travelling as the OpenAPI asset.
-
-Include a Mermaid context diagram — the areas, the external systems, and the direction of every dependency:
-
-````markdown
-```mermaid
-flowchart LR
-    Client[Web / mobile client] --> API[Ordering API]
-    API --> DB[(PostgreSQL)]
-    API --> Cache[(Redis)]
-    API --> Mail[Email provider]
-    Payments[Payment provider] -->|webhook| API
-```
-````
+Done when the blueprint holds the style, its reason, what was rejected, a reason per pattern, the repository layout and a context diagram.
 
 ### Step 3.5 — Model the key flows and decisions
 
-Prose hides the questions a diagram forces. A flowchart makes you name the failure exit nobody had thought about; a decision table makes you say what happens when two rules both apply. **This is the cheapest place in the whole pack to find a missing requirement** — before a table, an endpoint, or a task exists to be rewritten.
+Prose hides the questions a diagram forces, and this is the cheapest place in the pack to find a missing requirement. Model only what is load-bearing: a **process flowchart** per primary business flow (the 2–5 journeys the system exists to serve), a **decision table** per rule where 3+ inputs combine to select an outcome. Entity lifecycles belong in `data-model.md`. A single-step CRUD path and a two-branch `if` need neither.
 
-Model, at blueprint altitude, only what is genuinely load-bearing:
+**A flow or a multi-input rule in the initiative → read `references/key-flows-and-decisions.md`** for the diagram and table shapes, and load `business-analysis:process-flow` and `business-analysis:decision-table` by path for the full discipline. Where the project keeps a business-model KB, the models live there as `FLOW-nnn` / `DEC-nnn` and the blueprint links them by ID.
 
-| Model | Build one for | Skip when |
-|---|---|---|
-| **Process flowchart** | Each primary business flow — the 2–5 journeys the system exists to serve | A single-step CRUD path; the endpoint table already says it |
-| **Decision table** | Each business rule where **3+ inputs** combine to select an outcome (pricing, eligibility, routing, fees, access) | A two-branch `if`; state it as a rule in prose |
-| **State diagram** | Entities with a real lifecycle | — these live in `data-model.md`, not here |
+**The hit policy is never invented.** When nobody has decided what happens if two rules both apply, it is a `[TBD]` and an open question.
 
-**Process flowcharts** — named actors, every decision exit labeled *including the failure exit*, and timeouts/external failures modeled rather than assumed away:
-
-````markdown
-```mermaid
-flowchart TD
-    subgraph Customer
-        A[Confirms basket]
-    end
-    subgraph System
-        B{All items available?}
-        C[Price the order]
-        D[Reserve stock]
-        E{Payment authorized?}
-        F[Order placed]
-        G[Order rejected — items unavailable]
-        H[Order pending — payment retry offered]
-    end
-    subgraph Payment provider
-        P[Authorize payment]
-    end
-    A --> B
-    B -- no --> G
-    B -- yes --> C --> D --> P --> E
-    E -- yes --> F
-    E -- no --> H
-    E -- timeout / provider unreachable --> H
-```
-````
-
-The two failure exits in that diagram are the point of drawing it. A flow with only a happy path is an illustration, not a model — and the exits you cannot label are open questions, not details to settle later.
-
-**Decision tables** — one per decision point, with a **declared hit policy** (DMN semantics: U unique · A any · F first · P priority · C collect) and the completeness and overlap checks run:
-
-```markdown
-**Decision:** shipping cost · **Hit policy:** F (first match wins) `[TBD - confirm with business]`
-
-| # | Order total | Customer tier | Destination | → Shipping |
-|---|---|---|---|---|
-| R1 | ≥ £50 | any | domestic | £0 |
-| R2 | < £50 | premium | domestic | £0 |
-| R3 | < £50 | standard | domestic | £4.99 |
-| R4 | any | any | international | £14.99 |
-
-**Completeness:** every combination of the three inputs is matched by exactly one rule.
-**Overlap:** R1 and R4 both match a £60 international order → resolved by the F policy (R1 first).
-⚠️ The hit policy is **inferred from the intended reading, not sourced to a business decision** — open question Q2.
-```
-
-**The hit policy is never invented.** If nobody has decided what happens when two rules both apply, that is a `[TBD]` and an open question — an invented precedence rule is a business decision made silently by whoever wrote the table.
-
-Load `business-analysis:process-flow` and `business-analysis:decision-table` for the full discipline (the event-timeline pass, swimlane rules, the completeness/overlap procedure, the KB file formats). They are loaded by path. Where the project keeps a business-model KB, the models belong in it as `FLOW-nnn` / `DEC-nnn` artifacts and the blueprint links them by ID rather than duplicating them.
+Done when every primary flow has a flowchart with each failure exit labelled, and every multi-input rule a decision table with a declared hit policy.
 
 ### Step 4 — Settle the tech stack
 
-One row per dimension, every row evidence-marked. Only include rows this initiative actually needs — an unused row invites a decision nobody has to make.
+One evidence-marked row per dimension this initiative needs, with columns `Dimension | Choice | Version | Why | Evidence`. Draw dimensions from: runtime / language, web framework, primary datastore, cache, messaging / queue, ORM / data access, auth provider and flow, background jobs, hosting target, CI host, observability. An unused row invites a decision nobody has to make.
 
-| Dimension | Choice | Version | Why | Evidence |
-|---|---|---|---|---|
-| Runtime / language | | | | detected/stated/proposed |
-| Web framework | | | | |
-| Primary datastore | | | | |
-| Cache | | | | |
-| Messaging / queue | | | | |
-| ORM / data access | | | | |
-| Auth provider + flow | | | | |
-| Background jobs / scheduling | | | | |
-| Hosting target | | | | |
-| CI host | | | | |
-| Observability | | | | |
+**Detected wins.** An upgrade is its own task in the delivery plan, never a side effect of a feature; an up-level-only API is never planned onto a down-level project. Greenfield defaults come from `CLAUDE.md`'s Stack defaults.
 
-Version policy: **detected wins**. Never propose an up-level runtime as a side effect of a feature — an upgrade is its own task with its own justification, and it belongs in the delivery plan as one. Never plan an up-level-only API onto a down-level project, and never flag a down-level project for lacking one. Greenfield defaults come from `CLAUDE.md`'s Stack defaults (.NET 10 primary / Java 21 + Spring Boot 3.x / Node 24 + TypeScript; Auth0; OpenTelemetry → Grafana; Allure).
+Done when every needed dimension has a row with a version and an evidence mark.
 
 ### Step 5 — Name the external systems (architecture altitude only)
 
-One line each: system, what it does for us, direction (we call it / it calls us / both), and criticality (does the feature fail without it, or degrade?). Depth — auth method, config keys, retry policy, sandbox strategy — belongs to `dev:plan-integrations` in Step 5. Here you only need enough to make the architecture and the risk list honest.
+One line each: system, what it does for us, direction (we call it / it calls us / both), and criticality (does the feature fail without it, or degrade?). Depth (auth method, config keys, retry policy, sandbox strategy) belongs to `dev:plan-integrations`; here only enough to make the architecture and the risk list honest.
 
 ### Step 6 — Build the routing map
 
-**This is the section that makes the plan executable.** Each functional area and cross-cutting concern binds to the exact library agent that will build it, plus the skills that agent should load. Mission Control binds tasks on these strings, so an invented name is the most damaging defect in the pack.
+**This section makes the plan executable.** Each functional area and cross-cutting concern binds to the exact library agent that builds it, plus the skills that agent loads. Mission Control binds tasks on these strings, so an invented name is the pack's most damaging defect.
 
 | Area / concern | Agent | Skills it will load | Note |
 |---|---|---|---|
-| Screens, shell, navigation (`experience-plan.md` S1–Sn) | `fe-react` | `design:app-structure`, `fe-react:component-writer`, `fe-react:routing` | Builds from the experience plan; IA is decided there, not re-derived |
-| Ordering domain + persistence | `be-dotnet` | `be-dotnet:patterns-apply`, `be-dotnet:persistence`, `be-dotnet:unit-testing` | Unit tests ship with the task, not after |
+| Screens, shell, navigation (`experience-plan.md` S1–Sn) | `fe-react` | `design:app-structure`, `fe-react:component-writer`, `fe-react:routing` | Builds from the experience plan; IA is decided there |
+| Ordering domain + persistence | `be-dotnet` | `be-dotnet:patterns-apply`, `be-dotnet:persistence`, `be-dotnet:unit-testing` | Unit tests ship with the task |
 | Schema, indexes, tenancy enforcement | `data-architect` | `data:postgresql`, `data:schema-design` | Beyond ORM mechanics |
-| Service-side auth | `be-dotnet` | `be-dotnet:auth0` | Frontend half is `fe-react` |
-| Telemetry base | `observability-engineer-dotnet` | `be-dotnet:opentelemetry`, `be-dotnet:structured-logging` | Runs in the foundation, right after the scaffold, so every later task is observable while it is built; each `be` task then instruments what it builds |
+| Telemetry base | `observability-engineer-dotnet` | `be-dotnet:opentelemetry`, `be-dotnet:structured-logging` | Runs in the foundation, right after the scaffold; each `be` task then instruments what it builds |
 | Contract + integration tests | `qa-api-dotnet` | `qa-dotnet:api-tests` | Test basis is `api-surface.md` |
-| Access-control proof | `qa-security` | `qa-dotnet:permission-testing` | BOLA/IDOR over the auth column |
-| Image, IaC, pipeline, secrets | `devops-engineer` | `devops:docker`, `devops:environment-config` | |
 
 **The agent catalog** — pick only from these names:
 
@@ -243,176 +118,67 @@ One line each: system, what it does for us, direction (we call it / it calls us 
 | Requirements | `requirements-author` · `business-analyst` |
 | Audit | `code-auditor` |
 
-If a needed capability has no agent, say so plainly and name the skill or the human step that covers it — do not stretch an agent past its description.
+A capability with no agent is said so, naming the skill or human step that covers it.
 
-**Then record the execution model — one line, and it is an answer, not an inference.** The routing map says *which* agents build the system; the execution model says *how the run happens*, and the delivery plan's sequencing shape is chosen from it. Ask it in the Step-9 question batch:
+**Then record the execution model, one line, as an answer and not an inference.** The routing map says *which* agents build the system; the execution model says *how the run happens*, and selects the delivery plan's sequencing shape. Ask it in the Step-9 batch:
 
 | Execution model | Recognized by | Selects (in `dev:plan-delivery` Step 2) |
 |---|---|---|
-| **One operator, sequential batches** | One person drives one session at a time; the integration/E2E pass happens once at the end; nothing has to be demonstrable before the last batch | `agent-batched` — a contract wave, then one batch per backend module, then one per frontend screen area |
-| **Concurrent lanes / Mission Control** | Several lanes run at once, or a stakeholder wants the first capability working early | `feature-complete` — one capability at a time, each usable end to end |
-| **No user journey at stake** | A service or platform whose consumer is another system | `platform-first` — one layer at a time |
+| **One operator, sequential batches** | One person drives one session at a time; integration/E2E happens once at the end; nothing must be demonstrable before the last batch | `agent-batched` |
+| **Concurrent lanes / Mission Control** | Several lanes run at once, or a stakeholder wants the first capability early | `feature-complete` |
+| **No user journey at stake** | A service or platform whose consumer is another system | `platform-first` |
 
-Write it into §6 as `**Execution model:** <which> — <what settled it>`. Getting it wrong is expensive both ways: feature-complete sequencing under one operator pays an agent switch and a context reload per capability for a property nobody is using, and agent-batching under a demo deadline hides every capability behind the last batch.
+Write it into §6 as `**Execution model:** <which> — <what settled it>`.
+
+Done when every area and concern has an agent from the catalog and the execution model is recorded.
 
 ### Step 7 — Non-functional targets
 
-Only what is known or decidable now; the rest are `[TBD - <owner>]` lines, which is useful information rather than a gap. Where `requirements.md` exists, its §4 quality targets are the source of these targets, cited in *Evidence*; a target it leaves `[TBD]` stays `[TBD]` here. Cover: expected scale (users, requests/sec, data volume, growth), latency expectations on the paths that matter, availability target, data retention and deletion obligations, compliance constraints (PII, PCI, residency, audit trail), and the security posture (tenancy isolation model, who can see whose data).
+Only what is known or decidable now; the rest are `[TBD - <owner>]` lines. Where `requirements.md` exists, its §4 quality targets are the source, cited in *Evidence*; a target it leaves `[TBD]` stays `[TBD]`. Cover expected scale, latency on the paths that matter, availability, data retention and deletion, compliance (PII, PCI, residency, audit trail) and the security posture.
 
-**The tenancy model is load-bearing** — it decides table shape, every query, the auth model, and an entire class of security test. If the system is multi-tenant, the isolation approach is a blueprint decision, not a Step-2 detail.
+**The tenancy model is load-bearing**: it decides table shape, every query, the auth model and a class of security test. In a multi-tenant system the isolation approach is a blueprint decision.
+
+Done when every dimension has a target or a `[TBD]` with an owner, and the tenancy model is stated.
 
 ### Step 8 — Risks and assumptions
 
-| Risk | Likelihood | Impact | Mitigation / early signal |
-|---|---|---|---|
-
-Include the risks that come from the plan itself, not just the domain: an unconfirmed integration, a `[TBD]` on the critical path, an area whose requirements are `#inferred`, an upgrade the plan depends on.
-
-Then list every `⚠️ Assumption:` from the document in one place. A reader should be able to scan the assumptions and catch a wrong one in thirty seconds.
+A table of `Risk | Likelihood | Impact | Mitigation / early signal`, including risks from the plan itself: an unconfirmed integration, a `[TBD]` on the critical path, an area whose requirements are `#inferred`, an upgrade the plan depends on. Then every `⚠️ Assumption:` in the document, listed in one place so a wrong one is caught in thirty seconds.
 
 ### Step 9 — Open questions, then the gate
 
-**Ask only what materially changes the work.** A question you can settle by reading the repo is not a question. A matter of ordinary engineering judgment is not a question — decide it, mark it `⚠️ Assumption:`, and move on. Aim for **three to six** questions; a dozen means you are outsourcing the thinking.
-
-Each question carries:
+**Ask only what materially changes the work.** A question the repo answers is not a question, and ordinary engineering judgment is decided and marked `⚠️ Assumption:`. Aim for **three to six** questions; a dozen means you are outsourcing the thinking. **The execution-model question is always one of them** (Step 6), unless the human already stated how the plan gets run: it cannot be read off the repo and it decides the delivery plan's shape.
 
 ```markdown
 **Q1 — <the question>?**
 *Context:* <one or two sentences on why it matters and what it blocks>
 - **A. <option>** *(recommended)* — <the real trade-off>
 - **B. <option>** — <the real trade-off>
-- **C. <option>** — <the real trade-off>
 *Blocks:* <the areas or decisions that cannot be detailed until this is answered>
 ```
 
-Options must be genuinely different, and the trade-off must be real — "A is better" is not a trade-off. Use the harness's structured-question tool if one is available; otherwise present the block above and ask directly.
+Options are genuinely different, each with a real trade-off. Use the harness's structured-question tool when there is one; otherwise present the block above.
 
-**The execution-model question is always one of them** (Step 6), unless the human already stated how the plan gets run. It is cheap to ask, it cannot be read off the repo, and it decides the whole shape of the delivery plan.
-
-**Then the gate — this blocks:**
+**The gate blocks:**
 
 > "Blueprint saved to `docs/plans/<NNN>-<initiative>/blueprint.md`. Review it — particularly the `proposed` rows in the tech stack, the architecture decision, and the assumptions list — and answer the open questions. I'll build the detail pack (data model → API surface → integrations → delivery plan) once you approve."
 
-Do not write `data-model.md` or anything else in Step 2+ until the human approves. Deferring a question is a valid answer — record the deferral with its owner and proceed, noting what it leaves `[TBD]`.
+Write nothing past the blueprint (`data-model.md` and on) until the human approves. A deferred question is a valid answer: record it with its owner and mark what it leaves `[TBD]`. In `DETAIL` mode the gate is shorter but still blocks: present your normalized reading of their plan (the same sections, inferences marked `#inferred`) plus the gaps to settle.
 
-In `DETAIL` mode, where the human supplied the high-level plan, the gate is shorter but still blocking: present your normalized reading of their plan (the same sections, filled from their document, with everything you had to infer marked `#inferred`) plus the gaps you need settled, and wait.
+Done when the questions are asked, the gate message is shown and the run has stopped for approval.
 
 ---
 
 ## Blueprint template
 
-```markdown
-# <Initiative> — Solution Blueprint
+**Read [`references/blueprint-template.md`](references/blueprint-template.md) before writing `blueprint.md`.** Its numbered sections, in order, are the contract.
 
-**Date:** YYYY-MM-DD · **Written by:** `dev:plan-blueprint` · **Status:** DRAFT — awaiting approval
-**Initiative folder:** `docs/plans/<NNN>-<initiative>/`
-**Entry mode:** NEW | DETAIL | RESUME | EXTEND — <what settled it>
-**Sources:** <requirements docs, stories, KB entries, repo paths — with what each contributed>
+## What stays out of a blueprint
 
-## 1. The initiative
-<3–5 sentences: problem, for whom, what changes when it ships, what success looks like.>
-
-**Success signals:** <measurable where possible; `[TBD - <owner>]` where not.>
-
-## 2. Functional areas
-| Area | Epics | Purpose | User-facing capabilities | Primary actors | Key entities | In scope | Out of scope | Depends on |
-|---|---|---|---|---|---|---|---|
-
-**Explicitly not in this initiative:** <the boundary, stated once, plainly.>
-
-**Existing data & backfill:** <the system of record being replaced and what comes across, or "none — no predecessor system".>
-
-## 2b. Actors & app shell
-<!-- Only when a User-facing capabilities cell is non-empty; otherwise the single line "no user-facing area". -->
-| Actor | Most frequent tasks (verb + object + outcome) | Evidence |
-|---|---|---|
-
-**App shell:** sidebar | top nav | hybrid — <one-line reason, per `design/ux-patterns` §2> · `proposed`
-<!-- Nav map, journeys, screens: experience-plan.md (Step 3), not here. -->
-
-## 3. Architecture
-**Style:** <choice> — <why it is earned for this system>
-**Rejected:** <what you considered and why not>
-**Patterns in play:** <pattern — the reason it is earned. One line each.>
-**Modules:** <for a modular monolith: module → schema → owning functional area, one row each, and the split trigger (if any) that would make it a service. Omit for a service-based style.>
-**Repository layout:** <one repo per product — contracts/, services/<name>/ with its driving acceptance tests beside the code, web/ mobile/, e2e/, deploy/local/ — or multi-repo with the stated reason (independent teams or release cadences) and one plan per repo.>
-
-```mermaid
-flowchart LR
-```
-
-**Cross-cutting concerns:** <auth, error handling, logging/telemetry, config, background work — one line each on the approach. Telemetry names the local Grafana stack (`deploy/local/`: Collector, Loki, Tempo, Prometheus, Grafana) and says the telemetry base lands in the foundation.>
-
-## 3b. Key flows & decisions
-<!-- One flowchart per primary business flow (named actors, every exit labeled incl. failure).
-     One decision table per 3+-input business rule, with a declared hit policy.
-     Link to KB artifacts by ID (FLOW-nnn / DEC-nnn) where a business-model KB exists. -->
-
-## 4. Tech stack
-| Dimension | Choice | Version | Why | Evidence |
-|---|---|---|---|---|
-
-**Version lane:** <what was detected and what it implies; any upgrade this plan assumes, as its own task.>
-
-## 5. External systems
-| System | What it does for us | Direction | Criticality | Detail owed to |
-|---|---|---|---|---|
-<!-- Detail lands in integrations.md — this is the architecture-altitude view only. -->
-
-## 6. Routing map — who builds what
-| Area / concern | Agent | Skills it will load | Note |
-|---|---|---|---|
-
-**Capabilities with no agent:** <named plainly, with what covers them instead.>
-
-**Execution model:** <one operator, sequential batches | concurrent lanes / Mission Control | no user journey at stake> — <what settled it, and the sequencing shape it selects>
-
-## 7. Non-functional targets
-| Dimension | Target | Evidence |
-|---|---|---|
-| Scale | | |
-| Latency | | |
-| Availability | | |
-| Retention & deletion | | |
-| Compliance | | |
-| Tenancy & isolation | | |
-
-## 8. Risks
-| Risk | Likelihood | Impact | Mitigation / early signal |
-|---|---|---|---|
-
-## 9. Assumptions
-- ⚠️ **Assumption:** <…> — *confirm by:* <who/when>
-
-## 10. Open questions
-**Q1 — <question>?**
-*Context:* …
-- **A. …** *(recommended)* — …
-- **B. …** — …
-*Blocks:* …
-
-## 11. Approval
-- [ ] Functional areas and scope boundary confirmed, each naming the epic ids it serves
-- [ ] Every epic in `epics.md` served by at least one area
-- [ ] Actors, their primary tasks and the app shell confirmed (or "no user-facing area")
-- [ ] Architecture style and pattern choices confirmed
-- [ ] Key flows modelled, every failure exit labeled; decision-table hit policies confirmed (not inferred)
-- [ ] Tech stack `proposed` rows confirmed
-- [ ] Non-functional targets confirmed or explicitly deferred
-- [ ] Open questions answered or deferred with an owner
-
-**Approved by:** <name> · **Date:** <YYYY-MM-DD>
-```
-
-## What NOT to put in a blueprint
-
-- **Nav maps, routes, screen lists, page layouts** — those are Step 3 (`experience-plan.md`); the blueprint names the actors, their tasks and the shell, and stops.
-- **Table columns, endpoint paths, or field-level schemas** — those are Steps 2 and 4. A blueprint that specifies columns will be wrong before it is approved, and it hides the decisions that actually need review.
-- **Task lists or estimates** — Step 6 owns sequencing, and it can only sequence once the detail exists.
-- **Code** — no scaffolds, no snippets beyond the diagrams and tables above.
-- **Silent decisions** — anything consequential that appears without a `why` and an evidence mark.
-- **A pattern with no earned reason** — the single most common way a plan makes a system worse.
+- **Nav maps, routes, screen lists, page layouts** — `experience-plan.md` (Step 3) owns them; the blueprint names actors, their tasks and the shell.
+- **Table columns, endpoint paths, field-level schemas** — Steps 2 and 4 own them; a blueprint that specifies columns is wrong before it is approved.
+- **Task lists or estimates** — the delivery plan owns sequencing, once the detail exists.
+- **Code**, beyond the diagrams and tables, and **silent decisions** — every consequential decision carries a `why` and an evidence mark.
 
 ## Version policy
 
-Version-aware, keyed to `CLAUDE.md`'s Stack defaults: **.NET 10 primary / 8-9 supported** · **Java 21 + Spring Boot 3.x** · **Node 24 active LTS / 22 maintenance** (Node 20 EOL since April 2026 — flag it, never target it) · **PostgreSQL 18 primary / 15–17**, **SQL Server 2025 / 2022 / 2019 / Azure SQL**, **MySQL 8.4 LTS**, **MongoDB 8.0 LTS**, **Redis 8.x / Valkey**. In an existing repo the **detected** version wins over every default above, and the blueprint records it as `detected`.
+Version-aware, keyed to `CLAUDE.md`'s Stack defaults and its Version policy. In an existing repo the **detected** version wins over every default, and the blueprint records it as `detected`.

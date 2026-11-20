@@ -76,15 +76,12 @@ def sniff_raster(payload: bytes, declared: str, limits: Limits) -> ValidationRes
     return Ok(Sniffed(fmt, width, height, len(payload)))
 ```
 
-Rules the code above encodes:
+The rules this code encodes are `python-pipeline.md`'s. What it adds:
 
-- **Set `Image.MAX_IMAGE_PIXELS` explicitly at import** to the project ceiling (`limits.max_pixels`); Pillow's default is ~89 M and only warns at 1× and raises at 2×. Rely on the explicit `width * height` check anyway — the ceiling applies to the *header*, and the header is what a bomb lies in.
-- **`ImageFile.LOAD_TRUNCATED_IMAGES` stays `False`.** A truncated file is a rejection, not something to render half of.
-- **`verify()` and `load()` need fresh handles**; `verify()` invalidates the image. Both run, in that order: `verify` catches structural damage cheaply, `load` proves the pixel data decodes.
-- **Polyglots**: a file whose sniffed format differs from the declared one is rejected, not silently re-labelled — the mismatch is the attack signal (`GIFAR`, PNG-with-trailing-SVG, JPEG-with-PHP).
-- **Animated inputs are rejected** for logos and photos; `n_frames > 1` on PNG (APNG), WebP and GIF.
-- Formats outside the allowlist (TIFF, BMP, PSD, ICO, HEIC) are `unsupported-format` even though Pillow can open some of them: each extra decoder is attack surface.
-- **A polyglot whose leading bytes match the declared type passes the sniffer** (a real PNG with an SVG appended is, to Pillow, a PNG). The defence is Step 3: every output is built from decoded pixels, never from the input bytes, so the trailing payload never leaves the worker. The sniffer catches the mismatch class; the re-encode neutralises the rest. Both are tests.
+- Set `Image.MAX_IMAGE_PIXELS` at import to `limits.max_pixels` (Pillow's default is ~89 M, warns at 1× and raises at 2×). The explicit `width * height` check stays: the ceiling applies to the *header*, which is where a bomb lies.
+- `verify()` invalidates the image, so it runs first on its own handle and `load()` on another: `verify` catches structural damage cheaply, `load` proves the pixels decode.
+- Each extra decoder is attack surface: TIFF, BMP, PSD, ICO and HEIC are `unsupported-format` though Pillow opens some of them.
+- **A polyglot whose leading bytes match the declared type passes the sniffer** (a real PNG with an SVG appended is, to Pillow, a PNG). The defence is Step 3: every output is built from decoded pixels, so the trailing payload never leaves the worker. The sniffer catches the mismatch class; the re-encode neutralises the rest. Both are tests.
 
 `looks_like_xml` checks the first non-whitespace bytes for `<?xml`, `<svg`, or a UTF-8 BOM followed by either; never trust the extension.
 
@@ -138,14 +135,11 @@ def sanitize_svg(payload: bytes, limits: Limits) -> Ok[bytes] | Rejected:
     return Ok(SafeET.tostring(root, encoding="utf-8", xml_declaration=True))
 ```
 
-- **Reject, do not strip.** A logo with a `<script>` in it is not a logo with a bug; it is an attack, and the verdict says so. Stripping produces "sanitised" files whose behaviour nobody can predict.
-- `unsafe_reference` rejects `href` / `xlink:href` unless it is a same-document fragment (`#id`); rejects any `url(` in a style-bearing attribute that is not `url(#id)`; rejects `data:` URIs; rejects `javascript:` case-insensitively after entity decoding.
-- `forbid_dtd` kills XXE and billion-laughs; `forbid_external` kills remote entity fetches even though the sandbox has no network. Defence in depth is the point of a sandbox, not a substitute for it.
-- Depth: `root.iter()` is already bounded by the element ceiling; add an explicit depth walk when nested `<g>` count matters for a renderer.
-- `<style>` is forbidden; presentation attributes carry everything a logo needs. `<use>` survives only with a fragment `href`.
-- Namespaces: compare on the local name; reject any element or attribute in a namespace other than SVG or xlink. `register_namespace` at import is what keeps `tostring` from emitting `ns0:svg`, which some renderers refuse.
-
-Every SVG that leaves the worker — including one VTracer produced — passes through `sanitize_svg`. That invariant is a test.
+- A `<script>` in a logo is an attack, not a bug: reject, never strip, because a stripped file's behaviour is unpredictable.
+- `unsafe_reference` rejects `href` / `xlink:href` unless it is a same-document fragment (`#id`), any `url(` that is not `url(#id)`, `data:` URIs, and `javascript:` case-insensitively after entity decoding.
+- `forbid_external` stops remote entity fetches even though the sandbox has no network: defence in depth.
+- `root.iter()` is bounded by the element ceiling; add an explicit depth walk when nested `<g>` count matters for a renderer. `<use>` survives only with a fragment `href`.
+- Compare on the local name; `register_namespace` at import keeps `tostring` from emitting `ns0:svg`, which some renderers refuse.
 
 ## Step 3 — Normalise orientation, strip metadata
 
@@ -164,8 +158,8 @@ def normalised_pixels(payload: bytes, target_mode: Literal["RGB", "RGBA"]) -> Im
 
 - `Image.frombytes(...)` builds an image with an **empty `info`**: no EXIF, no GPS, no XMP, no JPEG comment, no PNG `tEXt` / `iTXt`, no thumbnail. This is deliberate over `copy()` (keeps every `info` key) and over `save(exif=b"")` — measured on Pillow 11.3: a JPEG saved with `exif=b""` still carries the original **comment**, because `save` falls back to `im.info` for it. One extra memory copy is the cost.
 - **Convert mode before `frombytes`**, not after: a palette (`P`) image loses its palette through `frombytes`, and `LA` / `CMYK` / `I;16` are not what any operation wants. `RGBA` for transparency-bearing classes (logos), `RGB` for photos, decided by the upload class.
-- The ICC profile is the one metadatum to keep: dropping it shifts colours. It carries no location or identity.
-- Encode with an explicit argument list and nothing else: `clean.save(buf, "PNG", optimize=True)`; `clean.save(buf, "JPEG", quality=85, optimize=True, progressive=True, icc_profile=clean.info.get("icc_profile"))`; `clean.save(buf, "WEBP", quality=82, method=6, icc_profile=...)`. Never pass `exif=` or `xmp=`.
+- The ICC profile is the one metadatum kept: dropping it shifts colours, and it carries no location or identity.
+- Encode with an explicit argument list: `clean.save(buf, "PNG", optimize=True)`; `clean.save(buf, "JPEG", quality=85, optimize=True, progressive=True, icc_profile=clean.info.get("icc_profile"))`; `clean.save(buf, "WEBP", quality=82, method=6, icc_profile=...)`.
 - The test that proves it (unit-testing skill): a fixture JPEG with a GPS IFD and an XMP packet goes in; the output's `getexif()` is empty, `info` contains none of `exif` `xmp` `comment` `gps`, and the pixel data still matches the oriented input. **Any Pillow upgrade that changes fallback behaviour turns that test red**, which is what pins the recipe.
 
 ## Step 4 — The operations
@@ -182,7 +176,7 @@ class RembgRemover:
 ```
 
 - The session is created **once**, at the composition root: `new_session("u2net")` (or `isnet-general-use` for finer edges on logos; `birefnet-general` is larger and slower — choose per upload class and pin it). Creating a session per job re-reads a 170 MB model.
-- **Weights are baked into the image at build time** under `U2NET_HOME` (`sandboxed-worker`); at runtime the first `new_session` must find them on disk, and a missing file is a startup failure, never a download attempt. There is no network to download from, and a worker that starts anyway and fails on the first job is a false-healthy container.
+- **Weights are baked into the image** under `U2NET_HOME` (`sandboxed-worker`); a missing file is a startup failure, so the container is never healthy while failing its first job.
 - Input to `remove` is the *normalised* RGBA image, never the raw upload. Output is RGBA with a soft alpha; `alpha_matting=True` improves hair and fine edges at ~3× the cost — expose it per upload class, not per request.
 - Output encoding is PNG (alpha). Cut-outs are never re-encoded to JPEG.
 - The call is CPU-bound and can take seconds on a large photo; it runs inside the per-job subprocess with the memory and time limits from `sandboxed-worker`, and the caller downsizes to the ceiling (long edge ≤ 2048) before inference. Inference output is upscaled only for the mask, never the RGB.
@@ -227,55 +221,13 @@ def dpi_verdict(width: int, height: int, print_width_mm: float, print_height_mm:
     return DpiVerdict(round(effective, 1), metadata_dpi, grade)
 ```
 
-- `metadata_dpi` comes from `im.info.get("dpi")` (Pillow converts PNG `pHYs` pixels/metre to inches for you); it is reported so the UI can say "the file claims 72 DPI but has enough pixels", never used for the grade.
+- `metadata_dpi` comes from `im.info.get("dpi")` and is reported so the UI can say "the file claims 72 DPI but has enough pixels".
 - A vector upload (SVG) has no DPI; the verdict is `print-ready` with `effective_dpi = inf` or the operation is not offered for SVG — pick one in the contract, do not return `None` grades.
 - Thresholds are constants with names (`PRINT_READY_DPI = 300`), not literals inside the comparison.
 
-### Dominant colours
+### Dominant colours and the venue-photo resize ladder
 
-```python
-def dominant_colours(rgba: Image.Image, count: int) -> list[Swatch]:
-    sample = rgba.convert("RGBA")
-    sample.thumbnail((200, 200), Image.Resampling.LANCZOS)
-    opaque = [px[:3] for px in sample.getdata() if px[3] >= 128]
-    if not opaque:
-        return []
-    flat = Image.new("RGB", (len(opaque), 1))
-    flat.putdata(opaque)
-    quantised = flat.quantize(colors=count, method=Image.Quantize.MEDIANCUT)
-    palette = quantised.getpalette()[: count * 3]
-    counts = sorted(quantised.getcolors() or [], reverse=True)
-    total = sum(n for n, _ in counts)
-    return [Swatch(hex=rgb_to_hex(palette[i * 3 : i * 3 + 3]), share=round(n / total, 3)) for n, i in counts]
-```
-
-- Transparent pixels are excluded before quantising, or every cut-out's dominant colour is black.
-- Thumbnail first: colour share does not need 20 M pixels, and `getdata` on the full image is the slowest line in the worker.
-- Median-cut in Pillow needs no numpy; use k-means only when the project already ships numpy and the palette quality complaint is real.
-- `share` sums to 1.0 across the returned swatches; the UI decides what "near-white background" means, the worker reports.
-
-### Venue-photo resize ladder
-
-```python
-LADDER = ((320, "thumb"), (1024, "card"), (2048, "hero"))
-
-def resize_ladder(rgb: Image.Image, scratch: Path) -> list[Rendition]:
-    renditions = []
-    for long_edge, name in LADDER:
-        copy = rgb.copy()
-        copy.thumbnail((long_edge, long_edge), Image.Resampling.LANCZOS)
-        webp = scratch / f"{name}.webp"
-        copy.save(webp, "WEBP", quality=82, method=6, icc_profile=rgb.info.get("icc_profile"))
-        jpeg = scratch / f"{name}.jpg"
-        copy.save(jpeg, "JPEG", quality=85, optimize=True, progressive=True, icc_profile=rgb.info.get("icc_profile"))
-        renditions.append(Rendition(name, copy.size, webp, jpeg))
-    return renditions
-```
-
-- `thumbnail` never upscales; a 600 px photo yields a 600 px "hero", and the verdict reports the actual size so the UI can warn.
-- Input is the normalised (oriented, stripped, `RGB`) image. `draft("RGB", (2048, 2048))` on the original JPEG before `load()` halves decode time for very large photos; apply it inside `normalised_pixels` when the class is photo.
-- Colour: if the ICC profile is not sRGB, convert with `ImageCms.profileToProfile(..., ImageCms.createProfile("sRGB"))` once, then keep no profile. Web renderers assume sRGB.
-- WebP is the primary rendition, JPEG the fallback; both from the same resized copy so they match pixel for pixel.
+The job requests `DominantColours` or `ResizeLadder` → read `references/photo-operations.md`.
 
 ## Verdict shape (what leaves the worker)
 
@@ -290,7 +242,7 @@ class Verdict(BaseModel):
     timings_ms: dict[str, int] = {}
 ```
 
-Written as one JSON document to stdout (or the HTTP response); output files go to the job's output directory and are referenced by relative path only. No absolute paths, no hostnames, no stack traces — the exception class name in `detail` is enough for the TypeScript side; the traceback goes to the structured log.
+Written as one JSON document to stdout (or the HTTP response); output files go to the job's output directory, referenced by relative path. The exception class name in `detail` is enough for the TypeScript side; the traceback goes to the structured log.
 
 ## Rules
 

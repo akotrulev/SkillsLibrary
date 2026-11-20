@@ -1,5 +1,22 @@
 # File-Storage Testing — Azure Blob Storage (.NET 8 / NUnit)
 
+**Contents:**
+
+- Stack
+- The Azure Blob model — containers/blobs, staging, SAS, tiers, snapshots, lifecycle, events
+- Local store for tests — Azurite (well-known connection string)
+- Core pattern 1 — upload-assert (the SUT uploaded blob X)
+- Core pattern 2 — process-assert (the SUT processed a blob → side-effect Y)
+- Large-blob upload (block staging) — BlockBlobClient
+- SAS tokens — mint one, prove a credential-less client can use it
+- Snapshots — assert the older content survives an overwrite
+- Access tiers — set and assert (the data-plane tier control)
+- Event Grid → Storage Queue notifications (the bridge to service-bus) — and the Azurite limitation
+- Anti-patterns
+- Examples
+- Rules (hard constraints)
+- Cross-references
+
 This **closes the `qa/dotnet/skills/file-storage-testing/` family** (s3 → azure-blob). It is the **sibling ported
 from the canonical `s3` stack** (`references/s3.md`, `s3`) — **same two assertion shapes, same
 eventual-consistency condition-wait discipline**; only the store SDK and its primitives change. Where S3 has

@@ -6,13 +6,7 @@ disable-model-invocation: true
 
 # Data-Driven Testing (Java 21 / TestNG) — **canonical stack**
 
-This is the **canonical** stack of the `qa/java/skills/data-driven-testing/` family, and it leads by judgment (the
-"lead where the tool is most authentic" call WireMock / Kafka / flaky-quarantine made):
-TestNG's `@DataProvider` is the **archetypal** data-driven mechanism — a first-class language feature
-returning rows to a test method, with native support for separate provider classes, lazy iterators, and
-parallel rows. The `dotnet` (NUnit `[TestCaseSource]`) and `typescript` (Vitest `test.for` / a
-test-per-row loop in Playwright) siblings are **ported** from this file — the *moves* are identical; only
-the runner API and the parsing library change.
+This is the **canonical** stack of the `qa/java/skills/data-driven-testing/` family: TestNG's `@DataProvider` is the archetypal data-driven mechanism. The `dotnet` (NUnit `[TestCaseSource]`) and `typescript` (Vitest `test.for`) siblings are ported from this file; only the runner API and the parsing library change.
 
 ## What "data-driven" means (and what it does not)
 
@@ -232,40 +226,7 @@ expectedTotalCents` — Jackson binds records natively. The `name` field is the 
 
 ## Source 4 — external Excel (Apache POI, stakeholder-owned)
 
-Use Excel **only** when non-technical stakeholders own and edit the sheet — it's binary, doesn't diff or
-merge in git, and is heavier than CSV. Read `.xlsx` with **Apache POI**, skip the header row, bind cells to
-the record. Read cells **by their typed accessor**, and prefer the **cell name/index map** over magic
-indexes where you can.
-
-```java
-@DataProvider(name = "excelPricingCases")
-public static Object[][] excelPricingCases() throws Exception {
-    var cases = new ArrayList<TaxCase>();
-    try (var in = TaxCaseProviders.class.getResourceAsStream("/data/pricing-cases.xlsx");
-         var workbook = WorkbookFactory.create(in)) {
-        var sheet = workbook.getSheetAt(0);
-        for (int r = 1; r <= sheet.getLastRowNum(); r++) {
-            var row = sheet.getRow(r);
-            if (row == null) continue;
-            var tc = new TaxCase();
-            tc.setRegion(row.getCell(0).getStringCellValue());
-            tc.setAmountCents((long) row.getCell(1).getNumericCellValue());
-            tc.setExpectedTaxCents((long) row.getCell(2).getNumericCellValue());
-            cases.add(tc);
-        }
-    }
-    return cases.stream().map(c -> new Object[]{ c }).toArray(Object[][]::new);
-}
-```
-
-`WorkbookFactory` picks XSSF for `.xlsx`; the loop starts at row 1 to skip the header and tolerates trailing
-blank rows.
-
-> **Excel gotchas to encode:** numeric cells come back as `double` (cast deliberately, watch precision on
-> money — store cents as integers, never floating dollars); a "number" a user typed may be a *text* cell
-> (`getStringCellValue` vs `getNumericCellValue` — use a `DataFormatter` or check `getCellType()` if the
-> column is mixed); empty trailing rows return `null`. POI 5.x: use `WorkbookFactory.create` (don't
-> hard-code `XSSFWorkbook`) so `.xls`/`.xlsx` both work.
+Use Excel **only** when non-technical stakeholders own and edit the sheet — it is binary and does not diff or merge in git. Reading `.xlsx` with POI, binding cells to the typed row and the cell-type gotchas → read `references/excel-source.md`.
 
 ## Lazy rows for huge datasets — return an `Iterator`
 
@@ -329,33 +290,6 @@ context options (a viewport, a locale) is a `@Factory` row instead — one insta
 
 ## Examples
 
-**End-to-end: same test body, three sources, one typed row, named failures.**
-
-```java
-public class TaxCalculatorTest {
-
-    private final TaxCalculator calc = new TaxCalculator();
-
-    @Test(dataProvider = "csvTaxCases", dataProviderClass = TaxCaseProviders.class)
-    public void Should_ComputeTax_When_CaseComesFromCsv(TaxCase tc) {
-        assertThat(calc.taxFor(tc.region(), tc.amountCents()))
-            .as("case=%s", tc)
-            .isEqualTo(tc.expectedTaxCents());
-    }
-
-    @Test(dataProvider = "excelPricingCases", dataProviderClass = TaxCaseProviders.class)
-    public void Should_ComputeTax_When_CaseComesFromExcel(TaxCase tc) {
-        assertThat(calc.taxFor(tc.region(), tc.amountCents()))
-            .as("case=%s", tc)
-            .isEqualTo(tc.expectedTaxCents());
-    }
-}
-```
-
-Engineer-owned flat data comes from CSV, stakeholder-owned pricing from Excel — the same body shape and the same
-typed row. A run produces one Allure result **per row**, each labelled with the case — so a regression points
-straight at `DE @ 10000¢ → 1900¢`, not "row 1".
-
 **Composing with a builder (the boundary made concrete):** a row supplies the *varying* fields; the
 **builder** (`qa-java:test-data-builder`) fills the rest — the ObjectMother default is the unchanging 90%.
 
@@ -370,22 +304,3 @@ public void Should_ApplyDiscount_When_OrderMatchesTheRow(OrderCase row) {
     assertThat(discountEngine.apply(order)).isEqualTo(row.expectedDiscountCents());
 }
 ```
-
-## Rules (hard constraints)
-
-- **Data lives outside the test body** — inline `@DataProvider` for a handful, an external CSV/JSON/Excel
-  file (under `src/test/resources/data/`, versioned) beyond that. One test body, N rows; **never** a `for`
-  loop or `if` branch driving assertions inside a test (CLAUDE.md — parameterize instead).
-- **Parse with a real library, bind to a typed object** — OpenCSV `CsvToBean` (CSV), Jackson `TypeReference`
-  (JSON), Apache POI `WorkbookFactory` (Excel). **Never** `split(",")`; never index a loose `Object[]` in the
-  test. The row record's getters expose **intent**, not column order.
-- **Each row is an independent, named case** — one logical assertion per row; the failure message carries the
-  **input** (`toString()` / `.as(...)`). Rows run in any order; parallel rows hold no shared mutable state.
-- **Pick the source for the shape** — CSV for flat tabular, JSON for nested, Excel **only** for
-  stakeholder-owned sheets, inline for a few. Prefer diffable CSV/JSON in git over binary Excel.
-- **Money is integer cents / `BigDecimal`, never float** (Excel/CSV round-off corrupts it). No secrets or
-  real PII in committed data files (synthetic data; secrets via env — `qa-java:test-login-tokens`).
-- **Lazy `Iterator<Object[]>` for huge datasets**; `@DataProvider(parallel = true)` + suite
-  `data-provider-thread-count` for independent rows **only where no browser or device is driven** — a
-  Playwright or Appium class keeps its rows sequential (`parallel="classes"`, plan D8). No `Thread.sleep`;
-  structured logging; constructor injection.

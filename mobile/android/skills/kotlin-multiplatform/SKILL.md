@@ -1,6 +1,6 @@
 ---
 name: kotlin-multiplatform
-description: Use when sharing Kotlin code between Android and iOS with Kotlin Multiplatform (KMP), incl. opt-in Compose Multiplatform. Triggers "set up KMP". Not for the Swift side of the iOS app.
+description: Use when sharing Kotlin code between Android and iOS with Kotlin Multiplatform (KMP), incl. opt-in Compose Multiplatform. Triggers "set up KMP". Not for the Swift side of the iOS app (mobile-ios).
 disable-model-invocation: true
 ---
 

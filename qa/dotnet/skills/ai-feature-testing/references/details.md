@@ -1,5 +1,16 @@
 # Deep-dive details — `qa-dotnet:ai-feature-testing`
 
+**Contents:**
+
+- Running the spine — Process + System.Text.Json (no SDK)
+- The SDK path — Microsoft.Extensions.AI in NUnit (the second half of the hybrid)
+- Idea #1 — assert a property, not a string (the ladder, in config)
+- Idea #2 — LLM-as-judge: pin the model, calibrate the judge
+- Idea #3 — an eval is a dataset (data-driven, data-driven-testing)
+- Idea #4 — non-determinism: regression vs stochastic
+- Structured-output validation (the is-json analogue in code)
+- Tool-call assertions — right tool, right args
+
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
 ## Running the spine — `Process` + `System.Text.Json` (no SDK)

@@ -1,5 +1,14 @@
 # Deep-dive details — `qa-dotnet:language-testing`
 
+**Contents:**
+
+- 0. Page objects
+- 3. Pseudo-localization — surface hardcoded strings and truncation (idea #3)
+- 4b. Translation-key coverage — a static resource diff (idea #4)
+- ICU plurals & gender — assert the category, per language
+- Locale matrix — one journey across every supported culture
+- Examples
+
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs. Every browser fixture here
 derives from `BaseTest` (`qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs`) and takes its culture
 as a fixture parameter, exactly as SKILL.md §1 shows; the `ContextOptions()` override is the same four lines in

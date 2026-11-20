@@ -38,12 +38,12 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 
 Step 6's `ci-pipelines` and `test-reports` loads, and writing a confirmed regression with `qa/manual/bug-report-writer/SKILL.md` so the workload numbers travel with it, are deliberate exceptions to "don't load a peer's skills".
 
-**Fix** (a failing gate or suspected regression): load `dev:debugging`, and never call it a regression or a flake without evidence. Re-run on the same environment and load, capturing percentiles, error rate and throughput, then triage: a **real regression** against the baseline is a finding, written up with the comparison and the gate left failing; a **script or config defect** (a stale payload after an API change, a wrong injection profile, a threshold no SLA ever set) gets the smallest correct fix; **environment noise** is re-run on a clean environment before any conclusion, and a recurring one marks the environment unfit for gating. Verify with `dev:verify`, report the actual metrics, then sweep every scenario hitting the same endpoint. **Extend**: re-enter step 3 for the new scenario, reusing payloads, injection profiles and threshold conventions, and confirm its threshold is SLA-derived.
+**Fix** (a failing gate or suspected regression): load `dev:debugging`, and never call it a regression or a flake without evidence. Re-run on the same environment and load, capturing percentiles, error rate and throughput, then triage: a **real regression** against the baseline is a finding, written up with the comparison and the gate left failing; a **script or config defect** (a stale payload after an API change, a wrong injection profile, a threshold no SLA ever set) gets the smallest correct fix; **environment noise** is re-run on a clean environment before any conclusion, and a recurring one marks the environment unfit for gating. Verify with `dev:verify`, report the actual metrics, then sweep: every scenario hitting the same endpoint fixed or listed in the report. **Extend**: re-enter step 3 for the new scenario, reusing payloads, injection profiles and threshold conventions, and confirm its threshold is SLA-derived.
 
 ## Boundaries
 
 - **Peers own their lanes**: the functional API suite and its clients `qa-api-dotnet` (reuse, never duplicate); Allure and report publishing `qa-reporting-dotnet`; the rest of the pipeline `qa-cicd-dotnet`; the bug-report process `qa-test-case-designer`; the service under test the `be-*` peer.
-- **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests an earlier `Q` task wrote are read-only to later tasks: never edit, skip or weaken one; a test you believe is wrong stays as it is and red: record why as a dated `D<n>` in the plan and in your report, and still finish the task. The close-out gate rules on it.
+- **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests an earlier `Q` task wrote are read-only to later tasks: never edit, skip or weaken one.
 - **Stay in your stack.** A file outside the test suite means the task was mis-cut: report it, don't widen your reach. Don't re-plan.
 - **Workspace.** Work in the checkout you are given; no new branch or worktree. Commit only when asked or when the plan says to.
 - At most two or three clarifying questions up front (target endpoints and the authority to load them, traffic profile or SLOs, credentials source). With no SLOs, propose defaults from the baseline and mark them assumed.
@@ -59,7 +59,7 @@ Orientation: <cache verdict>   Target: <environment, authorized by>
 Workload and thresholds: <model per scenario; threshold source: SLA | assumed>
 Changed: <path> — <one line each>
 Failure class and sweep (fix): <real-regression | script/config-defect | environment-noise — evidence; siblings fixed or listed>
-Gate evidence: <p95/p99, error rate, throughput vs baseline; run command>
+Gate evidence: <the Gate: line's commands and results, including coverage>
 Orientation cache: created | updated
 Left out of scope: <what you deliberately did not touch>
 ```

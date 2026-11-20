@@ -1,5 +1,20 @@
 # QA — Out-of-Browser MITM Proxy (.NET 10 / `Titanium.Web.Proxy` + NUnit)
 
+**Contents:**
+
+- Stack
+- When to use
+- When NOT to use
+- Inputs needed
+- Decision matrix — the Titanium.Web.Proxy moves
+- 1. The proxy controls — Support/Proxy/ProxyControls.cs
+- 2. Point the client at the proxy
+- 3. The page object, the hooks and the tests
+- Rules
+- What NOT to do
+- Generation steps
+- Cross-references
+
 Stands up an **out-of-process MITM HTTP(S) proxy** with `Titanium.Web.Proxy` to capture, assert and
 fault-inject traffic when **there is no Playwright in the picture** — the client under test is Selenium
 WebDriver, an Appium driver, an `HttpClient`, or several processes. The proxy sits between the client and the

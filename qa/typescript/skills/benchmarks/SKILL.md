@@ -241,7 +241,7 @@ npx vitest bench --run --compare "$BASELINE_DIR/bench.json"          # print thi
 `files[].groups[].benchmarks[]` (`name`, `median` in ms) from both `--outputJson` files instead of `writeResult`
 files; the thresholds and runner rules above are the same.
 
-## Handoff to the profiler
+## Profiling a slow function
 
 A benchmark says **that** a function is slow; a CPU profile says **where**. Profile the same function outside Vitest,
 from a short driver script that calls it in a loop on the same inputs and prints a checksum:

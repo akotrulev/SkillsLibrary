@@ -155,10 +155,14 @@ package security.accesscontrol;
 
 import clients.billing.InvoicesClient;
 import models.billing.InvoiceDto;
+import models.billing.InvoiceInDto;
+import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.testng.annotations.*;
 import security.accesscontrol.InvoiceFixtures.OwnedResource;
 import security.accesscontrol.InvoiceFixtures.SeededInvoices;
+
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static security.accesscontrol.AccessControlAssertions.expectDenied;
@@ -177,42 +181,42 @@ public class InvoiceBolaTest extends BaseTest {
         InvoicesClient.using(Actor.BOB.token().get()).delete(seeded.bob().id());
     }
 
-    // POSITIVE control — the owner CAN read their own invoice. Proves the suite isn't trivially always-deny.
     @Test(description = "WSTG-ATHZ-04 positive control")
     public void Should_ReturnInvoice_When_OwnerReadsOwn() throws Exception {
         InvoiceDto invoice = InvoicesClient.using(Actor.ALICE.token().get())
-            .getById(seeded.alice().id(), HttpStatus.SC_OK); // typed → status asserted + deserialized
+            .getById(seeded.alice().id(), HttpStatus.SC_OK);
         assertThat(invoice.amount()).isEqualTo(100);
     }
 
-    // The matrix of cross-user / privilege rows. 404 here = this project hides existence cross-tenant.
+    @FunctionalInterface
+    interface InvoiceCall { Response invoke(InvoicesClient client, String id) throws Exception; }
+
+    private static final InvoiceCall GET = (client, id) -> client.getByIdRaw(id);
+    private static final InvoiceCall PUT = (client, id) -> client.updateRaw(id, new InvoiceInDto(1, "EUR"));
+    private static final InvoiceCall DELETE = (client, id) -> client.deleteRaw(id);
+
     @DataProvider(name = "crossUserRows")
     public Object[][] crossUserRows() {
         return new Object[][] {
-            { Actor.ALICE, (java.util.function.Supplier<OwnedResource>) () -> seeded.bob(),   "GET",    HttpStatus.SC_NOT_FOUND },
-            { Actor.ALICE, (java.util.function.Supplier<OwnedResource>) () -> seeded.bob(),   "PUT",    HttpStatus.SC_NOT_FOUND },
-            { Actor.ALICE, (java.util.function.Supplier<OwnedResource>) () -> seeded.bob(),   "DELETE", HttpStatus.SC_NOT_FOUND },
-            { Actor.BOB,   (java.util.function.Supplier<OwnedResource>) () -> seeded.alice(), "GET",    HttpStatus.SC_NOT_FOUND },
-            { Actor.ANON,  (java.util.function.Supplier<OwnedResource>) () -> seeded.alice(), "GET",    HttpStatus.SC_UNAUTHORIZED },
+            { Actor.ALICE, (Supplier<OwnedResource>) () -> seeded.bob(),   GET,    HttpStatus.SC_NOT_FOUND },
+            { Actor.ALICE, (Supplier<OwnedResource>) () -> seeded.bob(),   PUT,    HttpStatus.SC_NOT_FOUND },
+            { Actor.ALICE, (Supplier<OwnedResource>) () -> seeded.bob(),   DELETE, HttpStatus.SC_NOT_FOUND },
+            { Actor.BOB,   (Supplier<OwnedResource>) () -> seeded.alice(), GET,    HttpStatus.SC_NOT_FOUND },
+            { Actor.ANON,  (Supplier<OwnedResource>) () -> seeded.alice(), GET,    HttpStatus.SC_UNAUTHORIZED },
         };
     }
 
     @Test(dataProvider = "crossUserRows")
     public void Should_DenyCrossUserAccess_When_CallerActsOnOthersInvoice(
-            Actor caller, java.util.function.Supplier<OwnedResource> target, String action, int expected)
-            throws Exception {
-        String token = caller.token().get();
-        String id = target.get().id();
-        var client = InvoicesClient.using(token);
-        Response response = switch (action) {
-            case "GET"    -> client.getByIdRaw(id);
-            case "PUT"    -> client.updateRaw(id, new InvoiceInDto(1, "EUR"));
-            default       -> client.deleteRaw(id);
-        };
+            Actor caller, Supplier<OwnedResource> target, InvoiceCall call, int expected) throws Exception {
+        Response response = call.invoke(InvoicesClient.using(caller.token().get()), target.get().id());
+
         expectDenied(response, expected);
     }
 }
 ```
+
+The owner-reads-own test is the positive control: the suite is not always-deny. `404` is the cross-user status because this project hides existence across tenants.
 
 The `getByIdRaw`/`updateRaw`/`deleteRaw` variants return the `Response` *without* asserting `200` (that's what
 the client's typed overloads do) — access-control tests assert the **status themselves**, so use the raw
@@ -304,32 +308,9 @@ public class InvoicePropertyTest extends BaseTest {
 }
 ```
 
-## Building the matrix from a policy table (scales past a few endpoints)
+## Building the matrix from a policy table
 
-For a real API, express the policy once as data and generate the rows — one source of truth that doubles as
-documentation of intended access:
-
-```java
-// src/test/java/.../security/accesscontrol/PolicyRow.java
-package security.accesscontrol;
-
-import io.restassured.response.Response;
-import java.util.List;
-
-@FunctionalInterface
-interface ProtectedCall { Response invoke(String token, String id) throws Exception; }
-
-/** One PolicyRow per protected operation; a @DataProvider emits one test per (row × denied actor). */
-public record PolicyRow(
-    String endpoint,                 // for the test name
-    ProtectedCall call,
-    Actor owner,                     // who may (200)
-    List<Denied> others) {           // who may not, and how it's denied
-
-    public record Denied(Actor actor, int expected) {} // 401 | 403 | 404
-}
-// Adding an endpoint = adding a row. A new endpoint with no row is a visible coverage gap.
-```
+An API past a few endpoints expresses the policy once as data and generates the rows (one `PolicyRow` per protected operation) → read `references/policy-matrix.md`.
 
 ## Anti-patterns
 
@@ -348,19 +329,6 @@ public record PolicyRow(
 - **Minting a token per test / sleeping for auth.** *Fix:* cache per actor via `test-login-tokens`; never
   `Thread.sleep`.
 - **Hardcoding credentials/tokens.** *Fix:* env, read lazily (`System.getenv`).
+- **Untagged cases and rowless endpoints.** *Fix:* tag each case with its OWASP API id and WSTG-ATHZ id; a new protected endpoint with no matrix row is a visible coverage gap.
 - **Treating a green access-control suite as "access control is secure."** It covers the rows you wrote;
   business-logic abuse (API6) still needs a manual pentest. *Fix:* say so; track endpoint coverage.
-
-## Rules (hard constraints)
-
-- Cover **BOLA (API1)**, **object-property (API3)**, and **BFLA (API5)** — horizontal *and* vertical
-  escalation — plus an anonymous `401` baseline and a **positive control** per resource.
-- Assert the **project's documented denial status** (`403` vs `404` leak policy) **and** that **no resource
-  body leaks**. One logical assertion per test; test names `Should_X_When_Y`; parameterized matrix via
-  `@DataProvider` (no conditional logic in tests).
-- Seed **≥2 peer users + 1 elevated role**; each owns its own fixture; tests are independent. Matrix the
-  **verbs** (`GET`/`PUT`/`PATCH`/`DELETE`), not just reads.
-- Reuse the project's `{Resource}Client` **raw** overloads (status asserted by the test) and
-  `qa/java/skills/test-login-tokens` for per-actor tokens (cached, secrets via env read lazily).
-- Tag cases with their **OWASP API id** and **WSTG-ATHZ** test-id; a new protected endpoint with no matrix
-  row is a visible coverage gap. A green suite ≠ "secure" — business-logic abuse needs manual pentest.

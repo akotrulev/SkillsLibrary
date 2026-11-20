@@ -12,7 +12,7 @@ It also produces the thing that keeps the whole exercise honest: a **coverage le
 
 ## Output
 
-The area map and reading plan. On a `be-documenter` run they are presented for confirmation and then recorded in the KB's `system-overview.md` (per `business-analysis:knowledge-base`): each area under the people who use it, every parked surface under *What is not documented* with its reason. The per-surface coverage ledger is working material: it lives in the session, or in the plan's §2 in a run of more than one session, until the last task has checked every surface against an area or the parked list. The orientation cache holds only the surface **counts** and the parked list; a 120-controller ledger belongs in the KB, not in a file meant to orient a run in one read.
+The area map and reading plan. On a `be-documenter` run they are presented for confirmation and then recorded in the KB's `system-overview.md` (per `dev:knowledge-base`): each area under the people who use it, every parked surface under *What is not documented* with its reason. The per-surface coverage ledger is working material: it lives in the session, or in the plan's §2 in a run of more than one session, until the last task has checked every surface against an area or the parked list. The orientation cache holds only the surface **counts** and the parked list; a 120-controller ledger belongs in the KB, not in a file meant to orient a run in one read.
 
 ---
 

@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Owns **every dev-side test in an Expo app**, at two altitudes: **component tests** (it renders → RNTL) and **pure-logic tests** (it doesn't → plain Jest, no renderer). The split is mechanical — *does the unit need a renderer?* Web analog: [`fe-react:component-testing`](../../../../frontend/react/skills/component-testing/SKILL.md) — query-by-role-first, behaviour-over-implementation, logic-not-markup carry over; **jsdom, Vitest, `vi.*` and async Server Components do not exist here.**
 
-**Boundary.** Real devices, real navigation, real network and cross-screen journeys are `qa-mobile-typescript`'s — **Appium**, or its **Maestro** lane on Expo projects (plan 003). A component test fakes the native layer, so it can never prove a gesture, a permission dialog or a deep link on a device.
+**Boundary.** Real devices, real navigation, real network and cross-screen journeys are `qa-mobile-typescript`'s — **Appium**, or its **Maestro** lane on Expo projects. A component test fakes the native layer, so it can never prove a gesture, a permission dialog or a deep link on a device.
 
 ## Version lane
 
@@ -166,7 +166,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 - **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — conditional rendering, each region state (loading / loaded / failed / stale / offline), a `Platform.OS` fork, a permission granted and denied, event-handler `if`/`else`, reducer `switch` cases and their `default`, `??` and `?.` — and give each a test or an `it.each` row that asserts its effect. The slack under 100% is for branches no honest test reaches, such as the `never` default of an exhaustive `switch`.
 - **Only an asserting test counts.** A render that executes a branch without asserting what the user sees is a **major** finding — it moves the number and catches nothing.
 - **Leave out what the matrix says not to test, by name.** Markup-only components, type-only files, barrels and generated clients stay out of the measured file list, and the report names each one left out. Never reach 80% by lowering the number or by an `istanbul ignore` hint over code that has behavior.
-- **Measure.** A plan task's `Gate: own tests` runs this over the files it wrote; outside a plan, run it before you report:
+- **Measure.** Inside a plan task, the `Gate:` line runs this over the files the task and the landed tasks above it touched. Outside a plan, run it before you report:
 
   ```bash
   npx jest --coverage --collectCoverageFrom='{src/features/cart/useCart.ts,src/features/cart/CartSummary.tsx}'
@@ -185,7 +185,7 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 
 ## Validation
 
-Inside a plan task, `Gate: own tests` runs this task's tests — the red run, then green — and the *Coverage floor* measure over the files it wrote; the last runnable task runs everything else.
+Inside a plan task, `Gate: own tests` runs this task's tests — the red run, then green —, the tests of the landed tasks above it, and the *Coverage floor* measure over the files the task and those tasks touched; the last runnable task runs everything else.
 
 - Every `render` / `fireEvent` / `act` / `renderHook` in the diff is preceded by `await`.
 - `npx jest` is green, with no "not wrapped in act" warnings and no open-handle warning.

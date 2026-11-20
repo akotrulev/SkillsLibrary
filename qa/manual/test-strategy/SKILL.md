@@ -163,7 +163,7 @@ Avoid testing the *same* thing at three layers — that's not safety, that's tax
 ## What NOT to do
 
 - No "we'll write 80% test coverage" as the strategy
-- No "TBD" in the risk register on the day of the kickoff
+- No `[TBD]` in the risk register on the day of the kickoff
 - No coverage matrix where every risk has every layer ticked — that's not a strategy, that's wishful thinking
 - No quality gates with no owner — every gate has a tool and a name
 - No exit criteria that depend on a human judgement call ("looks good") — explicit checks only

@@ -25,7 +25,7 @@ This is `be-documenter` at feature altitude: no survey, area gate or KB; the tra
 
 1. **Read the rules.** `.claude/rules/dev/feature-docs.md`; when the project has none, `engineering-practices/rules/feature-docs.md`, and tell the user `/dev:rules` installs it. Read it before writing (it auto-loads only after a matching Read/Write/Edit); it wins over a skill.
 2. **Orient.** Load `engineering-practices/agent-orientation-cache`, gate on `docs/agent-context/be-feature-documenter.md` (TRUST / DELTA / FULL); fields: stack and version lane, where routing / authorization / roles / configuration live, client-facing text files, the screenshot environment's name (never address or login), `docs/features/` numbering. Derive only what it leaves open (`backend/_shared/feature-trace/references/trace-recipes.md`).
-3. **Read what already exists.** `docs/features/` for a guide on this feature (update it, never write a second; compare its stamp's `source:` sha with HEAD, report if stale), and `docs/business-model/`, if present, by `business-analysis:knowledge-base`'s read-first contract only (`INDEX.md`, then areas touched).
+3. **Read what already exists.** `docs/features/` for a guide on this feature (update it, never write a second; compare its stamp's `source:` sha with HEAD, report if stale), and `docs/business-model/`, if present, by `dev:knowledge-base`'s read-first contract only (`INDEX.md`, then areas touched).
 4. **Read the intent sources.** As `DOC1`: the plan's initiative folder (the prompt names it; else the `**Pack:**` line) — `requirements.md`, `epics.md`, `stories.md`. Standalone: search `docs/plans/**`, `implemented/` included, for stories covering the feature, naming the searches in the report (none found is normal). They are the approved purposes and the *Not delivered* baseline, never evidence of what was built.
 5. **Fold the answered open questions** of an existing guide first, by `dev:doc-business-model`'s reconcile procedure, step 1. An answer the code contradicts stays and is escalated.
 6. **Screens — ask once, never block.** Unless the request or plan prompt gives them, ask for a running non-production environment and a test login per role (administrators included) in Step 1's scope-table message; carry on. No environment: write the guide in full, record `**Screenshots:** pending — <why>`, and repeat the need in the report. Only the person can waive screenshots (`waived — <their reason>`). A no-screen feature needs no environment — say so.
@@ -36,7 +36,7 @@ This is `be-documenter` at feature altitude: no survey, area gate or KB; the tra
 |---|---|---|---|
 | 1 | Locate & scope | — | The description is mapped to the entry points (routes, handlers, jobs, consumers, flags, screens) that ARE the feature, apart from adjacent code, and each one's roles. **Proportional gate:** one unambiguous match → show the table, proceed; several candidates, a fuzzy match or a scope past a feature → **block and ask** |
 | 2 | Trace | `backend/_shared/feature-trace` (`dev:doc-feature-trace`), profile `guide`, all ten stops | Tasks inventory first; every entry point traced into a task, automatic work, a no-screen task or parked; the Business rules inventory non-empty or the feature declared a pass-through |
-| 3 | Write the guide | `dev:doc-business-model` — *The guide*, *Screenshots*, *Language discipline*, golden example | `docs/features/<NNN>-<slug>.md` written (`<NNN>` next free): tasks from the inventory, one `## For <role>` per role, every rule a row of *Rules and limits*, every formula under *How it is calculated* |
+| 3 | Write the guide | `dev:doc-business-model` — `references/guide-shape.md`, *Screenshots*, *Language discipline*, golden example | `docs/features/<NNN>-<slug>.md` written (`<NNN>` next free): tasks from the inventory, one `## For <role>` per role, every rule a row of *Rules and limits*, every formula under *How it is calculated* |
 | 4 | Capture | `dev:doc-business-model` *Screenshots* | With an environment: signed in as each role, one screen per task (six at most) into `docs/features/screenshots/<NNN>-<slug>/`, referenced under the task's `**Where:**` line; every bold label checked. Without: the `pending` line stands |
 | 5 | Self-review | — | The Step 5 checklist passes. **As `DOC1`, then:** the delivery note `docs/deliveries/<NNN>-<plan-slug>.md` (the plan's number and slug) per `dev:doc-business-model`'s `references/delivery-note.md`, written last from the code at HEAD; each story the code does not do is a *Not delivered* row |
 
@@ -89,6 +89,7 @@ The shape is `dev:doc-business-model`'s guide, with no `AREA-` id, owner or KB m
 ## Report
 
 ```
+Mode: WRITE | UPDATE | CAPTURE | DOC1 — <one line>
 Feature: <name> — scope: <n> entry points · <n> traced · <n> parked
 Step 1 gate: proceeded (unambiguous) | blocked → confirmed
 Stack/version: <stack, version, framework>   Rules: project | plugin copy

@@ -1,6 +1,7 @@
 ---
 name: orientation-cache
-description: The shared protocol every agent uses to persist and reuse its orientation pass — write the current-state map to docs/agent-context/<agent-name>.md, validate it against a git delta on later runs, and update it before finishing. Loaded by an agent, which supplies its own field list. Do NOT invoke directly or route a user request here — it carries no fields of its own. Do NOT use for findings, plans, or specs (docs/audits, docs/plans, docs/specs) or the business model (docs/business-model).
+description: Use when an agent saves or reuses its orientation pass in docs/agent-context/<agent>.md. Triggers "orientation cache". Not for findings, plans or specs (writing-plans).
+disable-model-invocation: true
 ---
 
 # Agent Orientation Cache — the protocol
@@ -92,7 +93,7 @@ It records **what the code is**. It never records what is wrong with it or what 
 | Findings, verdicts, severity tables, conformance rounds | `docs/audits/` |
 | Implementation plans, task lists | `docs/plans/` |
 | Designs, specs, approved approaches | `docs/specs/` |
-| Business flows, entity states, decision tables, conflicts | `docs/business-model/` (`business-analysis:knowledge-base`) |
+| Business flows, entity states, decision tables, conflicts | `docs/business-model/` (`dev:knowledge-base`) |
 | Screen inventories from a live crawl | `docs/app-map/` (`mobile-app-crawler`) |
 | Missing `data-testid` reports for the dev team | `missing-testids.md` |
 
@@ -115,7 +116,7 @@ Orientation cache: updated | updated (partial — <why>) | created
 
 **Bad:** a run finishes, having added four new page objects and a fixture, and doesn't update the file. The next run's map is confidently incomplete — worse than the run before it, because the delta gate will report only the sections git says changed and the agent will trust the rest.
 
-## Handoffs
+## Where else things live
 
 - The file skeleton to write → `references/file-template.md`
 - The agent's own field list (what goes in each section) → the agent that loaded this skill

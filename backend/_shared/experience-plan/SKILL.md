@@ -1,6 +1,6 @@
 ---
 name: plan-experience
-description: Use when an approved blueprint needs its UX planned (actors, journeys, screen map, screen specs, SSR/CSR rendering per route, screen-endpoint matrix). Triggers "plan the screens", "SSR or CSR for this route". Not for endpoints (plan-api-surface).
+description: Use when an approved blueprint needs its UX planned (journeys, screens, SSR/CSR per route). Triggers "plan the screens", "SSR or CSR for this route". Not for endpoints (plan-api-surface).
 disable-model-invocation: true
 ---
 
@@ -156,7 +156,7 @@ rendering_plan:
 - [ ] no layout shift on load; independent regions load independently
 
 ## 7. Open questions
-<!-- the [TBD] items above, each with an owner -->
+<!-- the `[TBD]` items above, each with an owner -->
 ```
 
 ## What NOT to put in an experience plan

@@ -42,8 +42,8 @@ Confirm before analyzing; ask only what's missing, at most 2–3 questions:
    | Requirements / BRD | numbered requirements | rules, restrictions, dependencies between requirements |
    | API contract (OpenAPI/Swagger) | endpoints + schemas | per-field validations, required/optional, formats, auth/restrictions, status codes |
    | State diagram / workflow | states + events | the state model, legal/illegal transitions, guards |
-   | Business-model KB artifact (`docs/business-model/` flow/entity/decision file) and the §8 slice | the artifact's tables + IDs | rules/transitions with sources already traced; open questions + `⚠️ Assumption` items carry over as flags; the slice becomes §8 (`references/connections.md`) |
-   | Feature guides (`docs/features/<NNN>-<slug>.md` from `be-feature-documenter`) | `## In short` (orientation only), task steps and outcomes (under `## For <person>`), refusals under *If it doesn't go through*, `## What happens automatically` (**When**, what people notice), every `## Rules and limits` row (with *Where you meet it*), the formulas under `## How it is calculated`, task examples and `## A <period> in numbers`, the `## Who uses it` table | each task → a journey (J) row; each rules row → a rule (BR), its *Where you meet it* naming the journey; each formula + worked example → a calculation (C) row, data dictionary ranges and rounding; `Who uses it` → actors; open questions carry over as `#assumption` + question, an answered one as the rule it states; `## See also` is not a §8 source (§8 comes from the KB slice or the trace's Edges) |
+   | Business-model KB artifact (`docs/business-model/` flow/entity/decision file) and the §8 cross-section | the artifact's tables + IDs | rules/transitions with sources already traced; open questions + `⚠️ Assumption` items carry over as flags; the cross-section becomes §8 (`references/connections.md`) |
+   | Feature guides (`docs/features/<NNN>-<slug>.md` from `be-feature-documenter`) | `## In short` (orientation only), task steps and outcomes (under `## For <person>`), refusals under *If it doesn't go through*, `## What happens automatically` (**When**, what people notice), every `## Rules and limits` row (with *Where you meet it*), the formulas under `## How it is calculated`, task examples and `## A <period> in numbers`, the `## Who uses it` table | each task → a journey (J) row; each rules row → a rule (BR), its *Where you meet it* naming the journey; each formula + worked example → a calculation (C) row, data dictionary ranges and rounding; `Who uses it` → actors; open questions carry over as `#assumption` + question, an answered one as the rule it states; `## See also` is not a §8 source (§8 comes from the KB cross-section or the trace's Edges) |
    | Code-trace evidence (`dev:doc-feature-trace`, run by the agent's Code mode) | the trace's inventories, `file:line` on every row; Tasks inventory first (a `guide` profile lacks the Reads, Writes, Also written by and Mode columns) | each task → a journey; rules, states and validations tagged `#observed`; the Edges inventory → §8; intent the code cannot show → `#assumption` + question |
    | Exploration report (`app-exploration`, or a human's session report), live app | the journeys walked, findings, test-case candidates | every row sourced `#observed <finding id>`; a walked journey becomes a J row, a recomputed figure a C row, a candidate a BR/V row, a finding a V row with the *actual* behavior; anything the docs contradict is a ⚠️ conflict, not a fact |
    | Business-rules table | the rules | the rule set (candidate decision table) |
@@ -56,7 +56,7 @@ Confirm before analyzing; ask only what's missing, at most 2–3 questions:
 5. **Write every calculation as a formula** in plain math with its inputs, its rounding and order of operations, and one worked example with real numbers. A rounding rule or an order the source does not state is an open question, never a guess.
 6. **Catalog every business validation and every restriction** as a discrete, testable line — cross-field, state-dependent, authorization and rule-based, each with the message/outcome on violation. Plain schema constraints are not V rows: they sit in the data dictionary, where EP and BVA read them.
 7. **Sweep for the silent / contradictory / untestable** and log each as an Open question or `#assumption`.
-8. **Map the connections (§8)** per `references/connections.md`: slice the KB first, trace the code where the KB is missing or stale, read the docs only as the thin fallback. Every row cites a source; an edge nobody can confirm is an open question.
+8. **Map the connections (§8)** per `references/connections.md`: cut the KB's cross-section first, trace the code where the KB is missing or stale, read the docs only as the thin fallback. Every row cites a source; an edge nobody can confirm is an open question.
 9. **Keep it lean.** Re-read; cut anything that doesn't help design or run a test.
 
 ## Output format
@@ -128,7 +128,7 @@ What a black-box tester must account for, not architecture.
 - Session/token expires after 15 min of inactivity
 
 ## 8. Connections
-**Built from:** KB slice @ <date> | code trace @ <sha> | docs only (thin) — <what was missing>
+**Built from:** KB cross-section @ <date> | code trace @ <sha> | docs only (thin) — <what was missing>
 
 ### Triggers and chains
 | Trigger | Reaction (owner) | Effects | Emits → next | Mode | On failure | Source |
@@ -164,7 +164,7 @@ The document must:
 - [ ] Give every actor goal a **journey** row that ends at a business outcome and says where it shows, and every figure a **calculation** row with its formula and a worked example
 - [ ] List every input field in the data dictionary with type, required, and range/format
 - [ ] Express each business validation as a discrete testable line (field → rule → outcome); schema constraints sit in the data dictionary
-- [ ] Write §8 from the KB slice, a trace or the docs, every row sourced, every unconfirmed edge an open question, and no edge written to the KB
+- [ ] Write §8 from the KB cross-section, a trace or the docs, every row sourced, every unconfirmed edge an open question, and no edge written to the KB
 - [ ] Surface **every** silent/contradictory/untestable item under Open questions
 - [ ] Tag any stated-but-unconfirmed behavior `#assumption`
 - [ ] State "None in the source" for empty sections rather than dropping them

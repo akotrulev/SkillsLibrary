@@ -13,7 +13,7 @@ Wires Pact V4 into a Java 21 + Spring Boot 3 service via **Pact-JVM** for consum
 | The interaction is… | Contract type | Where in this skill |
 |---|---|---|
 | Synchronous request/response over **HTTP** | **CDCT — HTTP** (consumer-driven) | "Consumer test" + "Provider verification" below |
-| **Asynchronous** — an event/message over Kafka, SQS, RabbitMQ, Service Bus | **CDCT — message pact** | "Async / message contracts" below |
+| **Asynchronous** — an event/message over Kafka, SQS, RabbitMQ, Service Bus | **CDCT — message pact** | "Async / message contracts" below, then `references/message-pacts.md` |
 | The provider already publishes an **OpenAPI** spec and you don't control its tests | **BDCT** (bi-directional) | "Bi-directional contracts (BDCT)" below |
 | A **GraphQL** operation (`POST /graphql`) | CDCT — HTTP, query-body variant | "GraphQL contracts" below |
 
@@ -251,121 +251,9 @@ Verification results are published back to the Broker via `pact.verifier.publish
 
 See `qa/_shared/contract-testing-pact` for the shared `can-i-deploy` and `record-deployment` commands. Wire them in the deploy stage of **both** the consumer and the provider pipelines, before `kubectl apply` / `helm upgrade`.
 
-## Async / message contracts (message pacts)
+## Async / message contracts
 
-For event-driven interactions the consumer never makes an HTTP call — it consumes a message off a broker. Pact contracts the **message body + metadata**, not the broker. The consumer test asserts that its real message handler can process a message of the agreed shape; the provider test asserts the code that produces the message emits that shape. The broker (Kafka/SQS/RabbitMQ) is mocked out on both sides — its wiring belongs to `qa/java/skills/messaging-testing`, not here.
-
-Use the V4 async DSL: `@PactTestFor(providerType = ProviderType.ASYNCH)` and the `PactBuilder` (not `PactDslWithProvider`).
-
-### Consumer side — feed the message through the real handler
-
-```java
-package com.example.cart.contract;
-
-import au.com.dius.pact.consumer.dsl.PactBuilder;
-import au.com.dius.pact.consumer.junit5.PactConsumerTestExt;
-import au.com.dius.pact.consumer.junit5.PactTestFor;
-import au.com.dius.pact.consumer.junit5.ProviderType;
-import au.com.dius.pact.core.model.V4Interaction;
-import au.com.dius.pact.core.model.V4Pact;
-import au.com.dius.pact.core.model.annotations.Pact;
-import com.example.cart.messaging.OrderPaidHandler;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-@ExtendWith(PactConsumerTestExt.class)
-@PactTestFor(providerName = "orders-service", providerType = ProviderType.ASYNCH)
-class OrderPaidConsumerTest {
-
-    @Pact(consumer = "cart-service")
-    public V4Pact orderPaidPact(PactBuilder builder) {
-        return builder
-            .expectsToReceive("an OrderPaid event", "core/interaction/message")
-            .with(java.util.Map.of(
-                "message.contents", new au.com.dius.pact.consumer.dsl.PactDslJsonBody()
-                    .stringType("orderId", "123")
-                    .stringType("customerId", "cus_alice")
-                    .integerType("amountMinor", 9999)
-                    .stringMatcher("currency", "^[A-Z]{3}$", "EUR")
-                    .datetime("paidAt", "yyyy-MM-dd'T'HH:mm:ssXXX"),
-                "message.metadata", java.util.Map.of("contentType", "application/json", "topic", "order.paid")
-            ))
-            .toPact();
-    }
-
-    @Test
-    @PactTestFor(pactMethod = "orderPaidPact")
-    void handlerProcessesOrderPaid(V4Pact pact) {
-        List<V4Interaction.AsynchronousMessage> messages = pact.getInteractions().stream()
-            .map(i -> (V4Interaction.AsynchronousMessage) i)
-            .toList();
-
-        var payload = messages.get(0).getContents().getContents().valueAsString();
-        // Drive the consumer's REAL handler with the contracted payload — no broker involved.
-        new OrderPaidHandler().handle(payload);
-
-        assertThat(/* observable side effect of the handler */ true).isTrue();
-    }
-}
-```
-
-- Assert the message through the **actual handler** the consumer ships — a passing test means "our deserialization + processing works against this shape", which is the only thing worth contracting.
-- `eachLike(min)`, `stringType`, `datetime` matchers apply to message bodies exactly as to HTTP bodies.
-- Metadata (topic, partition key, `contentType`) is part of the contract — assert it via `message.metadata`.
-
-### Provider side — `@PactVerifyProvider` returns the produced message
-
-```java
-package com.example.orders.contract;
-
-import au.com.dius.pact.provider.junit5.MessageTestTarget;
-import au.com.dius.pact.provider.junit5.PactVerificationContext;
-import au.com.dius.pact.provider.junit5.PactVerificationInvocationContextProvider;
-import au.com.dius.pact.provider.junitsupport.Provider;
-import au.com.dius.pact.provider.junitsupport.State;
-import au.com.dius.pact.provider.junitsupport.loader.PactBroker;
-import au.com.dius.pact.provider.junitsupport.loader.VersionSelector;
-import au.com.dius.pact.provider.junitsupport.target.PactVerifyProvider;
-import com.example.orders.events.OrderPaidPublisher;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.TestTemplate;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-@Provider("orders-service")
-@PactBroker(selectors = {
-    @VersionSelector(mainBranch = "true"),
-    @VersionSelector(deployedOrReleased = "true")
-})
-class OrderPaidProviderVerificationTest {
-
-    @BeforeEach
-    void setTarget(PactVerificationContext context) {
-        context.setTarget(new MessageTestTarget());   // NOT HttpTestTarget — no HTTP for async
-    }
-
-    @TestTemplate
-    @ExtendWith(PactVerificationInvocationContextProvider.class)
-    void verifyPact(PactVerificationContext context) {
-        context.verifyInteraction();
-    }
-
-    // The method name is irrelevant; the description string must match `expectsToReceive(...)`.
-    @PactVerifyProvider("an OrderPaid event")
-    String produceOrderPaid() {
-        // Build the message exactly as production does — serialize the real event object.
-        return new OrderPaidPublisher().serialize(/* a representative OrderPaid */);
-    }
-}
-```
-
-- Provider target is **`MessageTestTarget`**, never `HttpTestTarget`.
-- `@PactVerifyProvider("<description>")` matches the consumer's `expectsToReceive(...)` description; the returned string is replayed against the consumer's expected body/metadata.
-- State setup (`@State`) works the same as HTTP when the produced message depends on data.
-- Publish/verify CI and `can-i-deploy` are identical to the HTTP flow — message pacts go to the same Broker.
+An interaction over Kafka, SQS, RabbitMQ or Service Bus is a message pact: read `references/message-pacts.md` for the consumer handler test, the `@PactVerifyProvider` side and the `MessageTestTarget`. Publish, verify and `can-i-deploy` run exactly as for HTTP.
 
 ## Bi-directional contracts (BDCT)
 
@@ -394,32 +282,15 @@ Decision rule:
 
 GraphQL rides on HTTP — contract it as a CDCT HTTP interaction: `POST /graphql`, the query in the request body, the `{ "data": { ... } }` envelope matched in the response. Match the `data` payload by type (`stringType`/`integerType`/`eachLike`) and treat `errors` as present-or-absent per case. Do **not** try to contract the schema itself — that's the GraphQL server's job; Pact contracts the one operation your consumer actually sends. See `qa/java/skills/api-test-author/graphql` for the request/response envelope conventions; apply Pact matchers on top.
 
-## Rules (Java-specific)
+## Guardrails
 
-- **Contract tests live in a dedicated Gradle sub-module** using `useJUnitPlatform()`; the rest of the suite stays on TestNG.
-- **Consumer's HTTP client takes the base URL via constructor.** Tests pass `mockServer.getUrl()` — never use static config.
-- **`@SpringBootTest(webEnvironment = RANDOM_PORT)`** on the provider verification class; bind via `@LocalServerPort`.
-- **State handlers use `@State("...")`** methods on the verification class, with `@Autowired` repositories / services to seed real persistence.
-- **`V4Pact`** for new contracts; `RequestResponsePact` only for legacy interop.
-- **`pact.rootDir` system property** points at `build/pacts/`; that directory is gitignored.
-- **AssertJ** for assertions; `assertEquals(...)` from JUnit is acceptable but AssertJ reads better.
-- **Records** for client DTOs returned in tests; no mutable POJOs in test code.
-- **No `Thread.sleep`** between the consumer call and the assertion — `MockServer` is already running.
-
-## What NOT to do
-
-- No verifying against the consumer's `localhost` test instance — boot the provider with `@SpringBootTest(RANDOM_PORT)` and target it via `HttpTestTarget`.
-- No state handlers that call out to staging/prod systems — handlers seed local data only.
-- No exact-value matchers everywhere — over-asserting breaks on harmless field additions.
-- No pact files committed and treated as the source of truth.
-- No `MockMvc` for provider verification — Pact-JVM needs a real HTTP target (`HttpTestTarget`).
-- No mixing the consumer's contract test with its regular unit tests in the same Gradle task — keep them separate so the test task can be skipped on PRs that don't touch the contract.
-- No publishing without `--branch` and `--consumer-app-version` — Broker becomes incapable of correctly answering `can-i-deploy`.
-- No `@VersionSelector(mainBranch = "true")` alone — always also include `@VersionSelector(deployedOrReleased = "true")`.
-- No real broker (Kafka/SQS/RabbitMQ) in a message-pact test — Pact contracts the message shape only; broker plumbing belongs to `messaging-testing`.
-- No `HttpTestTarget` for async verification — use `MessageTestTarget`.
-- No re-implementing the message handler/serializer in the test — drive the **production** handler (consumer) / serializer (provider), or the contract proves nothing.
-- No BDCT where you control the provider's tests — CDCT proves behaviour; a spec only describes intent.
+- Verify the provider over real HTTP: `@SpringBootTest(RANDOM_PORT)` with `HttpTestTarget`, never `MockMvc`.
+- State handlers seed local data only; the Broker, not a committed `build/pacts/` file, is the source of truth.
+- Match by type (`stringType`, `integerType`, regex) and keep exact values for true enum constraints, so a harmless added field does not break the provider.
+- Publish with `--branch` and `--consumer-app-version`, and select both `mainBranch` and `deployedOrReleased` versions, so the Broker can answer `can-i-deploy`.
+- Keep contract tests in their own Gradle task, so a PR that does not touch a contract can skip it.
+- Use `V4Pact` for new contracts; `RequestResponsePact` only for legacy interop.
+- Choose CDCT wherever the provider's tests are yours: it proves behaviour, a spec only describes intent.
 
 ## Generation steps
 

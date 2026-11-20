@@ -49,7 +49,7 @@ export function ConfirmDialog({ order, onConfirm }: { order: OrderDto; onConfirm
       <Dialog.Portal>
         <Dialog.Overlay className={styles.overlay} />
         <Dialog.Content className={styles.content} data-testid="Orders.DeleteDialog">
-          <Dialog.Title>Delete order {order.number}?</Dialog.Title>     {/* name the object — ui-rules */}
+          <Dialog.Title>Delete order {order.number}?</Dialog.Title>
           <Dialog.Description>This cannot be undone.</Dialog.Description>
           <Dialog.Close>Cancel</Dialog.Close>
           <button onClick={onConfirm} data-testid="Orders.DeleteConfirm">Delete</button>
@@ -70,7 +70,7 @@ import { useReactTable, getCoreRowModel, flexRender } from '@tanstack/react-tabl
 
 const table = useReactTable({
   data: rows, columns, rowCount: total,
-  manualPagination: true, manualSorting: true,        // server-driven — data-fetching owns the query
+  manualPagination: true, manualSorting: true,
   state: { pagination, sorting }, onPaginationChange: setPagination, onSortingChange: setSorting,
   getCoreRowModel: getCoreRowModel(),
 });

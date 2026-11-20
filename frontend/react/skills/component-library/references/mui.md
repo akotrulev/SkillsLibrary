@@ -21,7 +21,7 @@ The theme provider relies on React Context + the Emotion runtime, so it **cannot
 'use client';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
-import { theme } from '@/theme';                     // one theme object — styling skill owns it
+import { theme } from '@/theme';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -77,7 +77,7 @@ const columns: GridColDef<OrderDto>[] = [
 
 export function OrdersGrid() {
   const [model, setModel] = useState<GridPaginationModel>({ page: 0, pageSize: 25 });
-  const { rows, rowCount, loading } = useOrders(model);   // TanStack Query hook — data-fetching
+  const { rows, rowCount, loading } = useOrders(model);
   return (
     <DataGrid
       columns={columns} rows={rows} rowCount={rowCount} loading={loading}
@@ -105,7 +105,7 @@ function DeleteButton({ order }: { order: OrderDto }) {
   const [open, setOpen] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   async function confirm() {
-    await deleteOrder(order.id);                          // Server Action / mutation — data-fetching
+    await deleteOrder(order.id);
     setOpen(false);
     enqueueSnackbar(`Order ${order.number} deleted`, { variant: 'success' });
   }
@@ -113,7 +113,7 @@ function DeleteButton({ order }: { order: OrderDto }) {
     <>
       <Button color="error" onClick={() => setOpen(true)} data-testid="Orders.Delete">Delete</Button>
       <Dialog open={open} onClose={() => setOpen(false)} data-testid="Orders.DeleteDialog">
-        <DialogTitle>Delete order {order.number}?</DialogTitle>       {/* name the object — ui-rules */}
+        <DialogTitle>Delete order {order.number}?</DialogTitle>
         <DialogContent>This cannot be undone.</DialogContent>
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>

@@ -28,7 +28,7 @@ On a mobile or desktop app the method holds — task inventory and depth budget,
 - **Accelerators (§6):** `⌘K` and the `?` overlay become menu-bar commands with standard shortcuts (macOS) or access keys and accelerators (Windows).
 - **§9 and §10:** Core Web Vitals give way to the stack's `performance` launch and frame budgets; "in the URL" becomes deep links and restored screen state.
 
-Platform facts: the corpus (`--domain web` for iOS / Android / React Native rows, `--stack swiftui | jetpack-compose | react-native | winui | wpf`, `references/pro-rules.md` for mobile) and the stack's `navigation` (mobile), `windows-and-scenes` + `menus-and-commands` (macOS), `windows-and-navigation` (Windows). The web skills named here have same-named native counterparts, except: `animation` is `styling` on desktop, `responsive-design` is `styling`'s adaptive layout, and `ui-rules` has none — its rules apply as stated.
+Platform facts: the corpus (`--domain web` for iOS / Android / React Native rows, `--stack swiftui | jetpack-compose | react-native | winui | wpf`, `design/ui-ux-pro-max/references/pro-rules.md` for mobile) and the stack's `navigation` (mobile), `windows-and-scenes` + `menus-and-commands` (macOS), `windows-and-navigation` (Windows). The web skills named here have same-named native counterparts, except: `animation` is `styling` on desktop, `responsive-design` is `styling`'s adaptive layout, and `ui-rules` has none — its rules apply as stated.
 
 ## 1. Task inventory → information architecture
 

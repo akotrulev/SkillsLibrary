@@ -89,7 +89,12 @@ spec:
         identities:
           - issuer: https://token.actions.githubusercontent.com
             subjectRegExp: '^https://github.com/myorg/.+@refs/heads/main$'
+      attestations:
+        - name: must-have-provenance
+          predicateType: slsaprovenance
 ```
+
+`policy-controller` enforces only in namespaces labelled `policy.sigstore.dev/include: "true"`, so a namespace created after the policy lands bypasses it silently. Enforce the label with a separate admission policy, or use Kyverno's `verifyImages`, which matches by resource selector. Kyverno fits a cluster that already runs it as the one policy engine; policy-controller tracks cosign most closely. Ratchet the rollout: warn-only verification in the deploy job → fail the deploy job → admission in `warn` mode → `enforce` on one namespace → cluster-wide `enforce`. Flipping straight to cluster-wide enforce on an estate with unsigned legacy images gets the policy deleted by the first person paged at 02:00.
 
 Deploying the webhook is an **enforcement change to a live cluster** — it belongs to `devops-engineer`, not to
 a read-only assessment. This lane *verifies signatures exist and identities are pinned*; the engineer stands
@@ -110,6 +115,13 @@ steps:
 No `COSIGN_PRIVATE_KEY` secret exists in this design — the presence of one is a finding, because it re-
 introduces the long-lived key keyless signing exists to remove. Signing runs in the **deploy pipeline**, never
 the `qa/cicd/*` test lane.
+
+## cosign v2 → v3 and the key-based fallback
+
+- `--bundle` is required on `cosign sign-blob`; `--output-certificate` and `--output-signature` are removed in favour of the bundle.
+- The standardized Sigstore bundle format is the default for signing and verification; container signatures are stored as an OCI 1.1 referring artifact. A registry or downstream verifier that understands only the legacy layout needs `--new-bundle-format=false`; record why.
+- `--certificate-identity-regexp` is correct when you accept many workflows (a monorepo, a release matrix): anchor it (`^…$`) and scope it to your org. A `.*` regexp, or an unanchored one a fork's ref can satisfy, verifies nothing. `--certificate-oidc-issuer` is never a wildcard.
+- Key-based signing is permitted only where keyless cannot work (air-gapped, no self-hosted Fulcio): record the reason and keep the key in a KMS or HSM, never a repo secret.
 
 ## Cross-references
 

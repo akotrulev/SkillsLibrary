@@ -95,7 +95,7 @@ protobuf {
 
 ## Deep-dive reference
 
-These sections live in `references/details.md` — **read it when the task touches them**: **The contract + two layers**.
+These sections live in `references/details.md` — **read it when the task touches them**: **The contract + two layers**; **Client- and bidi-streaming — async stub + a bounded latch** (an RPC that sends a stream).
 
 ## Rich error details — assert `ErrorInfo`, not just the code (idea #2)
 
@@ -117,17 +117,12 @@ public void createUserWhenDuplicateEmailReturnsErrorInfoReason() {
 
     assertThat(result.code()).isEqualTo(io.grpc.Status.Code.ALREADY_EXISTS);
 
-    // The structured detail rides in the trailers as a google.rpc.Status with an ErrorInfo.
     Status richStatus = StatusProto.fromStatusAndTrailers(result.status(), result.trailers());
     ErrorInfo info = richStatus.getDetails(0).unpack(ErrorInfo.class);
     assertThat(info.getReason()).isEqualTo("EMAIL_TAKEN");
     assertThat(info.getDomain()).isEqualTo("user.example.com");
 }
 ```
-
-> Asserting only `ALREADY_EXISTS` proves *a* conflict; asserting the `ErrorInfo.reason` proves the **right**
-> conflict — the same step up from "an error happened" to "the contracted error happened" that
-> `errors[0].extensions.code` makes in the GraphQL sibling.
 
 ## Unary write — assert the payload, then round-trip the read (idea #4)
 
@@ -144,7 +139,6 @@ public void createUserWhenValidPersistsAndIsReadable() {
     assertThat(created.isOk()).isTrue();
     assertThat(created.value().getEmail()).isEqualTo("neo@example.com");
 
-    // round-trip: prove it persisted, don't trust the RPC's own echo
     GrpcCallResult<User> fetched = action.getUser(created.value().getId());
     assertThat(fetched.value().getEmail()).isEqualTo("neo@example.com");
 }
@@ -167,7 +161,6 @@ import java.util.concurrent.TimeUnit;
 public void listUsersStreamsAllUsersInOrder() {
     UserGrpcAction action = UserGrpcAction.authenticated(channel);
 
-    // Deadline bounds the wait — the stream ends on onCompleted, or DEADLINE_EXCEEDED trips deterministically.
     Iterator<User> stream = action.listUsers(/* pageSize */ 50);
 
     List<User> received = new ArrayList<>();
@@ -182,49 +175,6 @@ public void listUsersStreamsAllUsersInOrder() {
 > The bound is the server's `onCompleted` plus the channel/stub **deadline** — not a timer you guessed. If a
 > server-streaming RPC can run unbounded, attach `stub.withDeadlineAfter(...)` so a hung stream fails as
 > `DEADLINE_EXCEEDED` instead of hanging the suite.
-
-## Client- and bidi-streaming — async stub + a bounded latch
-
-The blocking stub can't drive client- or bidi-streaming (the client itself produces a stream). Use the **async
-stub** with a `StreamObserver`, and wait on a **`CountDownLatch` with a bounded `await(timeout)`** — the
-sanctioned no-sleep wait — never an unbounded `latch.await()`.
-
-```java
-import com.example.user.v1.*;
-import io.grpc.stub.StreamObserver;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-@Test
-public void importUsersAggregatesAllSentRequests() throws InterruptedException {
-    UserGrpcAction action = UserGrpcAction.authenticated(channel);
-
-    CountDownLatch done = new CountDownLatch(1);
-    AtomicReference<ImportSummary> summary = new AtomicReference<>();
-    AtomicReference<Throwable> failure = new AtomicReference<>();
-
-    StreamObserver<ImportSummary> responseObserver = new StreamObserver<>() {
-        @Override public void onNext(ImportSummary s) { summary.set(s); }
-        @Override public void onError(Throwable t)    { failure.set(t); done.countDown(); }
-        @Override public void onCompleted()           { done.countDown(); }
-    };
-
-    StreamObserver<CreateUserRequest> requestObserver = action.async().importUsers(responseObserver);
-    requestObserver.onNext(CreateUserRequest.newBuilder().setEmail("a@example.com").build());
-    requestObserver.onNext(CreateUserRequest.newBuilder().setEmail("b@example.com").build());
-    requestObserver.onCompleted();
-
-    assertThat(done.await(5, TimeUnit.SECONDS)).as("server completed within deadline").isTrue();  // bounded wait
-    assertThat(failure.get()).isNull();
-    assertThat(summary.get().getImported()).isEqualTo(2);
-}
-```
-
-> Bidi-streaming follows the same shape — interleave `requestObserver.onNext(...)` with messages collected in
-> `onNext`, all gated by a bounded latch. For richer bidi-stream-lifecycle assertions (ordering, mid-stream close
-> codes), cross-link `qa-java:realtime-stream-testing` — gRPC streaming and WebSocket/SSE share the
-> drain-then-assert-on-a-bounded-condition discipline.
 
 ## Deadlines — the sanctioned bounded-wait, asserted as `DEADLINE_EXCEEDED`
 
@@ -271,7 +221,6 @@ public abstract class BaseGrpcTest {
 
     @BeforeClass
     public void openChannel() {
-        // host:port from Testcontainers / env — never hardcoded. usePlaintext only for local test brokers.
         channel = NettyChannelBuilder.forTarget(Env.required("GRPC_TARGET"))
             .usePlaintext()
             .build();
@@ -284,17 +233,13 @@ public abstract class BaseGrpcTest {
 }
 ```
 
-> **Reflection / `grpcurl` are for exploration, not the test path.** gRPC server reflection + `grpcurl` are great
-> for poking a service by hand, but a regression test goes through the **typed stub** — it's the contract-bound,
-> refactor-safe path. Note reflection in a comment; assert through the stub.
-
 ## Anti-patterns
 
 - **Looking for an HTTP status code.** gRPC has none in the application sense — the outcome is the gRPC
   `Status.Code`. *Fix:* assert `result.code()` / `result.isOk()`, never a 200/404.
 - **Calling the blocking stub directly and letting `StatusRuntimeException` fly.** The failure path becomes
   `assertThrows` plumbing and looks nothing like the success path. *Fix:* the wrapper catches it and returns a
-  `GrpcCallResult<T>` the test asserts on uniformly (the GraphQL "never throw — return the envelope" analogue).
+  `GrpcCallResult<T>` the test asserts on uniformly; the action holds no deserialization and no assertion.
 - **Asserting only the `Status.Code` on a rich error.** "An `ALREADY_EXISTS` happened" is not the contract. *Fix:*
   unpack the `google.rpc.Status` / `ErrorInfo` from the trailers and assert `reason` / `domain` / field violations.
 - **`Thread.sleep` to wait for a stream.** Banned by CLAUDE.md and unnecessary. *Fix:* drain the `Iterator` (it
@@ -313,36 +258,8 @@ public abstract class BaseGrpcTest {
 
 ## Examples
 
-**End-to-end: a not-found RPC proves the status discipline.** A REST author writes
-`assertEquals(response.getStatusCode(), SC_NOT_FOUND)`; a GraphQL author writes
-`errors[0].extensions.code == "NOT_FOUND"`. The gRPC-correct version asserts
-`result.code() == Status.Code.NOT_FOUND` — same outcome, third location: the REST status line, the GraphQL
-`errors` envelope, the gRPC `status`. One family, three result-location conventions.
-
 **Composing with the protocol-trio siblings.** REST `generator` is status-driven over HTTP+JSON; GraphQL ``api-test-author/graphql`` is
 one HTTP 200 carrying `{ data, errors }`; gRPC is proto/HTTP2 with the result in the `status`. All three share the
 **Action + Test** spine and the "wrap the call so the test asserts success *or* failure uniformly" move (the gRPC
 `GrpcCallResult` is the GraphQL raw-envelope analogue). Only the transport, the codegen, and where-the-result-lives
 differ.
-
-## Rules (hard constraints)
-
-- **The gate is the gRPC `Status.Code`, not an HTTP status.** Assert `result.isOk()` (success) or the specific
-  failure `code()` (`NOT_FOUND` / `INVALID_ARGUMENT` / `UNAUTHENTICATED` / `DEADLINE_EXCEEDED` / …) — never a
-  200/404.
-- **The action never lets `StatusRuntimeException` escape.** `call(...)` returns a `GrpcCallResult<T>` holding the
-  message **or** the status + trailers; the test decides whether a non-OK status was expected. No `assertThrows`
-  in the assertion path, no deserialization or assertion inside the action.
-- **Rich errors assert the `google.rpc.Status` details** (`ErrorInfo.reason`/`domain`, `BadRequest` field
-  violations) from the trailers — not a bare `Status.Code`.
-- **Assert on the typed generated message** — never hand-parse bytes; the `.proto` is the contract. Messages via
-  `qa-java:api-models`.
-- **A write RPC test round-trips a read** to prove persistence; data created in a test is cleaned up in
-  `@AfterMethod` (guarded so it can't mask a failure).
-- **Streaming = drain-then-assert on a bounded condition** — drain the `Iterator` (server-streaming) or await a
-  `CountDownLatch` with `await(timeout, unit)` (client-/bidi-streaming); bound unbounded streams with
-  `withDeadlineAfter`. **No `Thread.sleep`, no unbounded `await()`.** Deep stream-lifecycle assertions →
-  `qa-java:realtime-stream-testing`.
-- **One `ManagedChannel` per suite** (`@BeforeClass` open, `@AfterClass(alwaysRun=true)` shutdown); service stood
-  up via Testcontainers. **Target + token via `Env`**, lazy, never logged. TestNG +
-  grpc-java + AssertJ.

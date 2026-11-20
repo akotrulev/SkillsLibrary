@@ -1,12 +1,12 @@
 # Reading guide — building §8 Connections
 
-How `requirements-breakdown` fills the basis's §8 (**Connections**). Four parts, in the order they are tried: the KB slice, the code trace, the docs, then the hand-back.
+How `requirements-breakdown` fills the basis's §8 (**Connections**). Four parts, in the order they are tried: the KB cross-section, the code trace, the docs, then the hand-back.
 
 **This guide reads `docs/business-model/` as data**, in the format `business-analysis:dependency-map` and `knowledge-base` define (`events.md`, `shared-data.md`, `invariants.md`, plus the grids, decision files and `interaction-map.md`). **QA never writes there.** A format change in those skills updates this file in the same commit.
 
 The ids are the KB's: `EVT-` triggers, `RX-` reactions, `INV-` invariants, `ENT-` entities, `DEC-` decisions, `E<n>` / `AREA-nnn` owners. Restate an id in §8; never copy a row. With no KB (Code mode), the ids are `T<n>` trigger, `R<n>` reaction, `S<n>` shared field and `I<n>` invariant, local to one basis and stated to be local in §8's header; KB ids win whenever a KB exists.
 
-## 1. The KB slice
+## 1. The KB cross-section
 
 Input: an owner id (`E<n>`, `AREA-nnn`) or a trigger id (`EVT-nnn`). Read `INDEX.md` first. Compare each file's `Derived from … @ <sha>` line with the code it cites; where the commit is behind, trace those rows (part 2) instead of trusting them. Run eight lookups, each a grep over ids:
 
@@ -24,7 +24,7 @@ Input: an owner id (`E<n>`, `AREA-nnn`) or a trigger id (`EVT-nnn`). Read `INDEX
 - **Depth:** two hops past the feature's own reactions. Go further where an effect moves money or cannot be undone.
 - In lookup 4, copy every `—` and `?` cell of those rows into the third column. A `?` cell is an open question as well.
 - The entity file's *States* table marks each state `Initial?` (the entity is created in it) and `Terminal?` (nothing leaves it by decision), `yes`, `no` or `?`. A file in the older shape has no `Initial?` column: the creating trigger is then the `creates <Entity>` or `ENT-nnn — → <State>` effect in `events.md`.
-- `Built from:` reads `KB slice @ <the files' Created or Updated date>`.
+- `Built from:` reads `KB cross-section @ <the files' Created or Updated date>`.
 
 ## 2. Trace Edges → §8
 

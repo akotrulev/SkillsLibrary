@@ -5,7 +5,7 @@ description: Use when working in the Java Accelerator test framework (JSON-drive
 
 # Accelerator Conventions (Java)
 
-The Accelerator is a Java 21 test automation framework with separate Gradle modules for `appium-tests`, `playwright-tests`, `api-tests`, and `test-core`. It uses a JSON-driven screen pattern, TestNG, Allure for reporting, BrowserStack for cloud execution, and a two-agent Claude Code workflow (Opus planner + Sonnet implementer).
+The Accelerator is a Java 21 test automation framework with separate Gradle modules for `appium-tests`, `playwright-tests`, `api-tests`, and `test-core`. It uses a JSON-driven screen pattern, TestNG, Allure for reporting, BrowserStack for cloud execution.
 
 This skill encodes the conventions that distinguish "Accelerator code" from generic test automation.
 
@@ -49,9 +49,7 @@ accelerator/
 │       ├── screens/           # screen objects, JSON-driven
 │       └── tests/             # grouped by feature
 ├── screen-definitions/        # *.screen.json files — selectors + metadata (shared by web + mobile)
-└── .claude/
-    ├── commands/              # planner + implementer slash commands
-    └── settings.json
+└── .claude/settings.json
 ```
 
 ## Conventions
@@ -169,13 +167,8 @@ public final class LoginTests extends BaseTest {
 context and page per test, `BASE_URL`, `parallel="classes"`, and failure evidence. Page objects are built in the
 test class's own `@BeforeMethod`; tests never call `page` directly.
 
-Rules:
-- Test class per feature or screen, not per AC
-- Test name reads `Should_<Outcome>_When_<Condition>`
-- Three-section body: Arrange / Act / Assert — single blank line between, no comments needed
-- Test data via builders (`UserBuilder.aValidUser().build()`), never inline literals
-- One logical assertion per test
-- Use `org.testng.annotations.Test`; assertions via Playwright's `assertThat` or AssertJ — never raw TestNG `assertEquals` chains that hide intent
+A test class covers one feature or screen, not one AC. Test code follows `CLAUDE.md` "Test code rules" and
+`qa-java.md`; the Accelerator uses `org.testng.annotations.Test` with Playwright's `assertThat` or AssertJ.
 
 ### Test data builders
 
@@ -246,33 +239,13 @@ public final class UserBuilder {
 - BrowserStack creds, base URLs, and feature flags come from env vars
 - Never commit `.env` files; commit `.env.example` only
 
-### Claude Code workflow
-
-The Accelerator uses a two-agent pattern:
-
-- **Planner** (Opus): reads the task, produces a numbered plan with files to create/modify and a verification step. Does not write code.
-- **Implementer** (Sonnet): executes the plan, one step at a time. After each step, runs the relevant tests (`./gradlew :playwright-tests:test --tests ...`).
-
-Slash commands:
-- `/plan <task>` — invokes the planner
-- `/implement` — invokes the implementer against the last plan
-- `/review` — invokes a reviewer pass against the current branch
-
-When rate-limited on one model, switch to another (Opus → Sonnet → Haiku) — the workflow is designed to degrade gracefully.
-
 ## Quality bar (reviewer checklist)
 
-- [ ] No literal selectors in page/screen methods
-- [ ] Page actions run on `locator("key")`, never `page.fill/click/innerText(selector)`
-- [ ] No `Thread.sleep` in tests
-- [ ] Test name follows `Should_X_When_Y`
-- [ ] Test data via a builder
+Beyond `CLAUDE.md` "Test code rules" and `qa-java.md`:
+
+- [ ] No literal selectors in page/screen methods; page actions run on `locator("key")`
 - [ ] Allure annotations present
-- [ ] One logical assertion per test
-- [ ] Page object methods describe intent, not mechanics
 - [ ] Builders provide valid defaults
-- [ ] No conditional logic in tests (`if`, `for` driving assertions) — use `@DataProvider`
-- [ ] Tests are independent and order-agnostic
 
 ## Anti-examples
 
@@ -280,8 +253,4 @@ When rate-limited on one model, switch to another (Opus → Sonnet → Haiku) �
 |---|---|---|
 | `page.click("button.signin-btn")` in a page object | A selector in code, and a page-level selector method | `locator("signInButton").click()` with the selector in `*.screen.json` |
 | `String getErrorMessage()` returning `page.innerText(...)`, then `assertEquals(text, ...)` | A one-shot read races the page | expose `Locator errorMessage()`; `assertThat(loginPage.errorMessage()).hasText(...)` |
-| `Thread.sleep(2000)` | A sleep | auto-wait, web-first assertions, `test-core` `waits` |
-| `public void test_clickLoginButton()` | Names the mechanics, not the behaviour | `Should_ShowDashboard_When_CredentialsAreValid` |
-| `loginPage.signIn(new User("user@test.com", "Password1!"))` | Inline test data | `UserBuilder.aValidUser().build()` |
-| `if (env.equals("staging")) { ... } else { ... }` in a test | Conditional logic in a test | `@DataProvider` or a class per environment |
 | `assertThat(page).hasURL(...)` in a test | A raw `page` in the test | assert on a page object's locator (`dashboardPage.heading()`) |

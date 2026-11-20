@@ -113,17 +113,7 @@ Set `core.autocrlf=false` for this path or add `*.json text eol=lf` to `.gitattr
 
 ### When the user renamed it too (path B variant)
 
-A user replacing the file by hand often renames it in the same move — dropping in `{service}-openapi-2026-07-29.json` beside the old `…-2026-03-01.json`, or `git mv`-ing then overwriting. The delta is still recoverable; take it against the committed old path rather than the working tree:
-
-```bash
-git status --porcelain -- <specs dir>                    # see both sides of the move
-git diff -M -- <specs dir>                               # rename-detecting diff (staged move)
-# or, explicitly, old committed content vs the new file:
-git show HEAD:<old asset path> > "$SCRATCH/spec-before.json"
-git diff --no-index "$SCRATCH/spec-before.json" <new asset path>
-```
-
-Then continue from step 5. Two rules hold: **the old file must end up deleted** — one asset per service, always, so fix it in this run if the user left both — and **the rename is not evidence**; classify from the diff exactly as on any other path, even when the new name's date makes the change look obvious.
+The asset shows `R`/`??` beside a deleted sibling → read `references/renamed-spec.md`, take the delta from it, then continue from step 5.
 
 ## Diff → code work list
 
@@ -164,20 +154,6 @@ git diff --no-index "$SCRATCH/spec-before.json" <existing asset>   # or: diff -u
 ```
 
 Then proceed from step 5. Report that the run used a sidecar diff, and get the asset committed so the next one doesn't have to.
-
-## Anti-patterns
-
-- **Reading the filename date to decide anything.** The one rule. `-2026-03-01` in the name and a spec issued today may be identical; same-day names may differ wildly.
-- **Overwriting a working-tree replacement with a supplied spec** without asking. Both were candidate deltas; you just destroyed one.
-- **Reformatting a user-replaced file before reading its diff.** Canonicalization is for *your* writes; on path B it comes after the delta is captured, via scratch copies if the raw diff is unreadable.
-- **Renaming to today's date first, then editing code.** A crashed run then looks finished.
-- **Committing the spec replacement before the delta is consumed**, with no saved patch — the work list's evidence is now one indirection away and easy to get wrong.
-- **Keeping `{service}-openapi-2026-03-01.json` *and* `…-2026-07-29.json`.** Two assets means the next diff has no single baseline. Git holds history.
-- **Skipping canonicalization** because "the JSON looked fine" — a generator that switched key order turns a two-field change into a 4,000-line diff.
-- **Re-generating every DTO and client because the spec changed.** The diff exists precisely so the change is scoped; a full re-generation also silently reverts every local convention applied to those files.
-- **Deleting DTOs/clients for removed spec elements without touching their tests**, leaving a suite that does not compile or, worse, coverage that quietly disappeared.
-- **Treating an `info.version` bump as the work list.**
-- **Storing the spec outside the repo** (a scratch dir, a chat attachment). Next hand-over has no baseline and this skill has nothing to offer.
 
 ## Report contract
 

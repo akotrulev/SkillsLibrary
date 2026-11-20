@@ -1,6 +1,6 @@
 # Checkov — deep dive
 
-**Checkov** (Bridgecrew → Palo Alto Networks, Python, `checkov==3.2.529` at time of writing) is the primary
+**Checkov** (Bridgecrew → Palo Alto Networks, Python, pinned in `../SKILL.md` Setup) is the primary
 IaC scanner in this skill: 1,000+ built-in policies, **graph-based** checks that reason across resources, and
 custom policies in **YAML or Python**. Read this when the SKILL.md decision matrix routed you here — deep
 Terraform, plan scanning, Bicep/ARM, CI-config scanning, or a custom policy.
@@ -203,5 +203,39 @@ takes a matching comma-separated list where `console` means stdout. `--compact` 
 `--quiet` shows failures only — together they are the difference between a readable CI log and 4,000 lines of
 green.
 
-Commit a `.checkov.yml` (see SKILL.md) so a developer's local run and CI produce the same verdict. Every flag
-above has a config-file key.
+Commit a `.checkov.yml` so a developer's local run and CI produce the same verdict. Every flag above has a config-file key.
+
+```yaml
+directory:
+  - infra
+framework:
+  - terraform
+skip-path:
+  - .terraform/
+  - infra/modules/vendored/
+skip-check:
+  # JIRA-5141: CKV_AWS_144 (cross-region replication) is out of scope until the DR programme lands; re-review 2026-12.
+  - CKV_AWS_144
+baseline: infra/.checkov.baseline
+compact: true
+```
+
+Repo-wide skips live here, each ticketed. A repo-wide skip for a check that fails in one place buries every future occurrence, including the real one; scope to one check on one resource inline instead.
+
+## Flag reference
+
+| Flag | Effect |
+|---|---|
+| `-d` / `-f` | Directory or single file (mutually exclusive) |
+| `-c` / `--check`, `--skip-check` | IDs or severities to run, or to skip; the severity asymmetry is above |
+| `--soft-fail`, `--soft-fail-on`, `--hard-fail-on` | Exit-code control, above |
+| `--baseline .checkov.baseline` | Report only failures not in the baseline: the gate-NEW mechanism |
+| `--create-baseline` | Write the baseline from the current results; once, at adoption |
+| `--skip-path` | Regex path exclusion (`.terraform/`, vendored modules, fixtures) |
+| `--external-checks-dir` | Load custom Python or YAML policies |
+| `--var-file` | Extra `.tfvars`; source-Terraform and Helm scans only, requires `-d` |
+| `--download-external-modules` | Fetch remote modules for a complete graph; network egress, opt-in |
+| `--deep-analysis` + `--repo-root-for-plan-enrichment` | Merge the plan graph with the HCL graph so plan findings carry real `file:line` |
+| `--config-file .checkov.yml` | All of the above, committed |
+
+Checkov needs no vulnerability DB: the checks ship in the package, so cold runs are fast and offline. The one network dependency is `--download-external-modules`.

@@ -1,5 +1,20 @@
 # QA — Out-of-Browser MITM Proxy (Java, BrowserUp Proxy + Selenium)
 
+**Contents:**
+
+- Stack
+- When to use
+- When NOT to use
+- Inputs needed
+- Decision matrix — the BrowserUp moves
+- 1. The fixture — support/proxy/ProxyControls.java
+- 2. The lifecycle and the client
+- 3. Assert a request fired — method and payload
+- Rules
+- What NOT to do
+- Generation steps
+- Cross-references
+
 An **out-of-process MITM HTTP(S) proxy** for tests whose client is **not Playwright** — a Selenium
 WebDriver, an Appium driver, or several processes — on Java 21 + TestNG. The proxy sits between the client
 and the network: the test points the client at it, records a HAR, asserts a request fired, or injects a fault.

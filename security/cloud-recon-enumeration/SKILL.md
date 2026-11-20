@@ -54,36 +54,41 @@ This is **`T1619` Cloud Storage Object Discovery** (anonymous half) — see `ref
 
 ## The instance metadata service — IMDSv1/v2, SSRF→credentials, T1552.005
 
-The single most important **SSRF-to-credentials** primitive in cloud pentesting: a compute instance with an attached role/identity exposes temporary credentials on a link-local address the workload itself can reach, so any SSRF or RCE landing on that workload reaches the credentials too. This is **`T1552.005` — Unsecured Credentials: Cloud Instance Metadata API**.
-
-- **AWS** `http://169.254.169.254/latest/meta-data/` — role credentials at `.../iam/security-credentials/<role-name>`. **IMDSv1** is a bare unauthenticated `GET` — no header, no token, no handshake; any SSRF that can issue a GET harvests the role's keys outright. **IMDSv2** requires a two-step session: `PUT .../latest/api/token` with `X-aws-ec2-metadata-token-ttl-seconds` returns a token, and every subsequent `GET` must carry `X-aws-ec2-metadata-token: <token>` — this blocks the common SSRF shape because most SSRF primitives can only force a GET and cannot set arbitrary headers or issue a PUT. The response additionally carries a configurable **hop limit** (default 1) that prevents the token/response leaving the instance; a container on the host counts as an extra hop, so reaching IMDS from a container needs hop limit 2 — which re-widens the SSRF path, a deliberate trade-off to flag rather than a default to recommend.
-- **Azure** `http://169.254.169.254/metadata/instance?api-version=...` and `.../metadata/identity/oauth2/token?resource=...` — **requires the header `Metadata: true`**, a built-in anti-SSRF guard; a naive GET with no header fails.
-- **GCP** `http://metadata.google.internal/computeMetadata/v1/` — **requires header `Metadata-Flavor: Google`**; a service-account token lives at `.../instance/service-accounts/default/token`.
-
-**What to actually check (control-plane read, not endpoint-hammering):** whether an instance's `MetadataOptions` enforce `HttpTokens=required` (v2-only) or still accept v1 (the **dual-accept** finding — IMDSv2 has been the EC2-console default since Nov 2023, but plenty of brownfield instances still launch v1-optional, and v1 is a documented **live risk**: an active SSRF→IMDSv1 credential-theft campaign was reported in the wild in March 2025). Report the finding as the configuration state, and where an SSRF chain is proven, report the **role's blast-radius** (what it can reach) — never the key material. See `references/metadata-service.md`.
+The single most important **SSRF-to-credentials** primitive in cloud pentesting: a compute instance with
+an attached role/identity exposes temporary credentials on a link-local address the workload itself can
+reach, so any SSRF or RCE landing on that workload reaches the credentials too. This is **`T1552.005` —
+Unsecured Credentials: Cloud Instance Metadata API**. Each provider gates the endpoint differently — AWS's
+IMDSv1/v2 split and hop-limit trade-off, Azure's and GCP's required headers — and the check is a
+control-plane config read (`MetadataOptions`/`HttpTokens`), never endpoint-hammering: report the dual-accept
+IMDSv1 posture as a live risk, and where an SSRF chain is proven, report the **role's blast-radius**, never
+the key material. Full per-cloud endpoints, the SSRF-chain shape and the check: `references/metadata-service.md`.
 
 ## IAM / principal / permission enumeration
 
-Once a credential is in hand — anonymous discovery, metadata service, or a provided test key — map **who it is** and **what it can do**, provider-agnostically: identity → attached/inline policies → effective permissions → reachable roles.
-
-- **Whoami, always first:** `aws sts get-caller-identity`; `az account show` / `az ad signed-in-user show`; `gcloud auth list` + `gcloud config list`.
-- **Direct policy read, if permitted:** list attached/inline policies, group memberships, role trust policies — often denied for a deliberately-scoped test principal, which is exactly why the next technique exists.
-- **Permission brute-force (non-destructive):** fire read-only `Get*`/`List*`/`Describe*` calls and record which succeed vs return `AccessDenied` — the success set **is** the permission map, inferred without ever calling `iam:GetPolicy`. Non-destructive by construction: only get/list calls, never a mutating one. This is `enumerate-iam`'s lane for AWS; the technique generalizes to GCP's `testIamPermissions` and Azure role-assignment reads.
-- **Principal/role enumeration:** enumerate roles and their trust policies to find assumable roles (`sts:AssumeRole`), cross-account trust, and over-broad `Principal: *` — building the escalation graph that a privilege-escalation-graph tool (PMapper, cross-referenced from `cloud-attack-aws`) formalizes.
-
-This is **`T1087.004` — Account Discovery: Cloud Account**. Report as blast-radius: "principal P can perform {actions} on {resources}, and can assume {roles}" — never a secret dump. See `references/enumerate-iam.md`.
+Once a credential is in hand, map **who it is** and **what it can do**, provider-agnostically: whoami first
+(`sts get-caller-identity` / `az account show` / `gcloud auth list`), a direct policy read where permitted,
+and — where it is not — a **non-destructive permission brute-force** (`enumerate-iam` for AWS; the same
+shape generalizes to GCP's `testIamPermissions` and Azure role-assignment reads): fire read-only
+`Get*`/`List*`/`Describe*` calls and record which succeed vs `AccessDenied` — the success set **is** the
+permission map. Principal/role enumeration then maps assumable roles and over-broad trust, feeding the
+escalation graph `cloud-attack-aws`'s PMapper formalizes. This is **`T1087.004` — Account Discovery: Cloud
+Account**. Report as blast-radius, never a secret dump. Full recipes: `references/enumerate-iam.md`.
 
 ## OIDC / workload-identity-federation enumeration
 
-Keyless federation (CI/CD, Kubernetes, cross-cloud) exchanges a short-lived OIDC token from an external issuer for cloud credentials, governed by a trust/condition policy — and the recurring flaw is an **over-broad trust condition**. The cloud verifies the token signature against the issuer's public keys, checks claims against configured conditions, and mints short-lived creds; the decisive claim is **`sub`** (plus `aud` and the `iss` issuer URL).
-
-- **GitHub Actions `sub` format:** `repo:<owner>/<repo>:<qualifier>`, where qualifier is `ref:refs/heads/<branch>`, `environment:<name>`, or `pull_request`. A trust condition matching `repo:org/*`, omitting the branch/environment, or allowing `pull_request` lets a fork- or PR-triggered workflow reach a sensitive role.
-- **AWS:** IAM OIDC identity providers + role trust policies with `StringLike`/`StringEquals` on `token.actions.githubusercontent.com:sub` — enumerate by listing OIDC providers and reading each role's trust condition for wildcards or missing scoping.
-- **Azure:** **federated identity credentials (FIC)** on an app registration or user-assigned managed identity — issuer + subject + audience; over-broad `subject` scoping is the finding.
-- **GCP:** **Workload Identity Federation** pools and providers with attribute mappings/conditions; a loose `attribute.repository` mapping or missing condition over-trusts.
-- **Cross-tenant risk ("Sub:jugation" class):** shared **global** OIDC issuers mean a trust policy can inadvertently trust subjects from *other organizations' repos* — assuming such a role crosses a tenant boundary and is a **universal red line, out of scope regardless of what the scope file says**. Enumerate the trust *conditions* only (a control-plane read); never validate a token exchange across that boundary.
-
-This is the federation half of `T1087.004` / adjacent `T1199` Trusted Relationship. Enumeration posture here is **config review** — read OIDC providers, federated credentials, pool/provider conditions, and trust policies, flagging wildcard or missing-scope subjects. Only validate an actual token exchange against an **in-scope, owned** trust relationship.
+Keyless federation (CI/CD, Kubernetes, cross-cloud) exchanges a short-lived OIDC token from an external
+issuer for cloud credentials, governed by a trust/condition policy — and the recurring flaw is an
+**over-broad trust condition** on the decisive claim, **`sub`** (plus `aud` and the `iss` issuer URL): a
+GitHub Actions trust condition matching `repo:org/*`, omitting the branch/environment, or allowing
+`pull_request` lets a fork- or PR-triggered workflow reach a sensitive role, and the same shape recurs in
+AWS OIDC-provider trust policies, Azure federated identity credentials, and GCP Workload Identity
+Federation attribute mappings. **Cross-tenant risk ("Sub:jugation" class):** shared **global** OIDC issuers
+mean a trust policy can inadvertently trust subjects from *other organizations' repos* — assuming such a
+role crosses a tenant boundary and is a **universal red line, out of scope regardless of what the scope
+file says**. This is the federation half of `T1087.004` / adjacent `T1199` Trusted Relationship.
+Enumeration posture is **config review only** — read providers, credentials and conditions, flagging
+wildcard or missing-scope subjects; only validate an actual token exchange against an **in-scope, owned**
+trust relationship.
 
 ## Decision matrix — which tool, which question, which reference
 

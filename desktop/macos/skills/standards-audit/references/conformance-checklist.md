@@ -1,5 +1,30 @@
 # desktop-macos Conformance Checklist — the 21 sections
 
+**Contents:**
+
+- A — Version lane, toolchain & migration hygiene
+- B — Project structure, strictness & language standard
+- C — Architecture, state & DI
+- D — UI components & platform conventions
+- E — Styling, theming, motion & adaptive layout
+- F — Windows, navigation & commands
+- G — Forms & input
+- H — Networking & realtime
+- I — Storage, documents & sync
+- J — Platform integration, permissions & background
+- K — Security
+- L — Distribution & store compliance
+- M — Accessibility
+- N — Performance
+- O — Error resilience
+- P — Localization
+- R — Testability & test ids
+- S — Dev-side tests
+- U — Observability & logging
+- V — Comments & KISS
+- X — Interop & native code
+- Section index
+
 The audit's spine. Section letters and check numbers are **permanent** — a finding is `<letter><n>` (`B3`, `M1`) and keeps that ID across every round, forever. Never renumber; append new checks at the end of a section with the next free number. The letters are identical on both desktop platforms (`macos`, `windows`) and keep their meaning from the mobile checklists: `M` is Accessibility everywhere. `Q` (motion) and `T` (release) are unused: motion is in E, release in L.
 
 **How to read a row.** *Check* = the invariant. *Violation looks like* = what disqualifies it. *Find it with* = a mechanical lead (a grep hit is never a finding — read the code). *Sev* = the default severity; adjust for real impact and say why.

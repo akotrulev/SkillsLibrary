@@ -10,11 +10,11 @@ Owns **dev-side unit tests of backend logic**: instantiate a class directly, dri
 
 **The boundary, one sentence:** if the test needs a `WebApplicationFactory`, a Testcontainer, or a live dependency, it is not a unit test and it belongs to the **peer** [`qa-api-dotnet`](../../../../qa/dotnet/agents/qa-api-dotnet.md).
 
-**This skill is not a licence to replace integration tests with mocks.** `CLAUDE.md`'s standing preference for real-DB integration tests over mocks still governs the integration lane, which is the `qa-api-dotnet` peer's. Some things are only provable against a real dependency, and a unit test that fakes them proves nothing:
+**This skill is not a licence to replace integration tests with mocks.** Some things are only provable against a real dependency, and a unit test that fakes them proves nothing:
 
 | Never unit-test this | Because | Belongs to |
 |---|---|---|
-| An EF Core `IQueryable` (LINQ→SQL translation, `Include`, split queries) | The in-memory provider translates differently from the real one — a green test over `UseInMemoryDatabase` is a false negative machine | `qa-api-dotnet` `db-testing/testcontainers` |
+| An EF Core `IQueryable` (LINQ→SQL translation, `Include`, split queries) | The in-memory provider translates differently from the real one — a green test over it is a false negative | `qa-api-dotnet` `db-testing/testcontainers` |
 | A migration | Only a real engine proves it applies | `qa-api-dotnet` + `data-architect` |
 | JWT bearer validation, JWKS, RBAC policy evaluation end-to-end | The middleware pipeline is the thing under test | `qa-api-dotnet` `test-login-tokens`, `qa-security` |
 | Model binding, filters, middleware order, routing | Transport concerns | `qa-api-dotnet` |
@@ -22,7 +22,7 @@ Owns **dev-side unit tests of backend logic**: instantiate a class directly, dri
 
 ## Version policy
 
-**First act: detect `<TargetFramework>` in the target `.csproj`.** .NET **10 primary, 8/9 supported**. Everything here works unmodified on all three — `TimeProvider` and `FakeTimeProvider` are net8+, so the time seam below is available on every supported TFM. Never up-level a project to reach a testing API, and never flag a down-level project for lacking one. Match the test project's TFM to the project under test.
+The lane per `CLAUDE.md` 'Version policy'. `TimeProvider` and `FakeTimeProvider` are net8+, so the time seam is available on every supported TFM. Match the test project's TFM to the project under test.
 
 ## Stack
 
@@ -37,7 +37,7 @@ Versions pinned once in `Directory.Packages.props` if the repo uses CPM (`Packag
 | Doubles analyzers | `NSubstitute.Analyzers.CSharp` | **1.0.17** | Optional but recommended — catches substituting non-virtual members, the #1 silent NSubstitute failure |
 | Time | `Microsoft.Extensions.TimeProvider.Testing` | **match the TFM major** (10.x / 9.x / 8.x) | `FakeTimeProvider` |
 
-**Assertions: use NUnit's built-in constraint model.** Do **not** add FluentAssertions to a product repo without a licence review — v8 requires a paid licence for commercial use, which is why the QA suite deliberately pins 6.12.1. If the repo already references 6.12.x, match it; otherwise `Assert.That` + `Assert.Multiple` (the convention `pattern-writer` already emits).
+**Assertions: use NUnit's constraint model** (`Assert.That` + `Assert.Multiple`, as `pattern-writer` emits). FluentAssertions v8 needs a paid licence for commercial use, so add none without a licence review; if the repo already references 6.12.x, match it.
 
 ## What deserves a unit test — the selection matrix
 
@@ -78,30 +78,22 @@ tests/Ordering.Application.Tests/    # this project
 ```
 
 - **One test class per class under test**, mirroring the namespace. `<ClassName>Tests`.
-- The test project's TFM matches the project under test; `<IsPackable>false</IsPackable>`, `<Nullable>enable</Nullable>` (the same nullable contract as production — a test project with nullable off hides the API's real shape).
-- `[TestFixture]` is optional in NUnit 4 for a class with `[Test]` methods; be consistent with the repo.
-- **No `InternalsVisibleTo` to reach private behavior.** If a test needs an internal, either the behavior belongs on the public surface or it's already covered through it. (Conformance **M3** flags test-only back doors.)
-- **No shared mutable state across fixtures** — no `static` collections, no `[OneTimeSetUp]` mutating a field that tests write to. NUnit parallelizes; a shared field is an order-dependent flake.
+- `<IsPackable>false</IsPackable>`, `<Nullable>enable</Nullable>` (a test project with nullable off hides the API's real shape).
+- `[TestFixture]` is optional in NUnit 4; be consistent with the repo.
+- **No `InternalsVisibleTo`** to reach private behavior (conformance **M3**). NUnit parallelizes, so a shared mutable field is an order-dependent flake.
 
 ## Naming
 
-`Should_<Outcome>_When_<Condition>` or `Given_<Y>_When_<X>_Then_<Z>` (`CLAUDE.md`). The name states behavior, never implementation:
+`Should_<Outcome>_When_<Condition>` or `Given_<Y>_When_<X>_Then_<Z>`. The name states behavior, never implementation (`Should_CallRepository` asserts a mechanism):
 
 ```csharp
-// good
 Should_RejectOrder_When_CartIsEmpty
-Should_RoundHalfUp_When_TaxHasThirdDecimal
 Given_ExpiredCard_When_Charging_Then_ReturnsPaymentDeclined
-
-// bad
-TestPlaceOrder            // says nothing
-Should_CallRepository     // asserts a mechanism, not a behavior
-PlaceOrder_Works
 ```
 
 ## The five seams — what makes logic untestable
 
-This is the constructive half of conformance check **M2** (`standards-audit`: `DateTime.Now`/`Guid.NewGuid()`/`Environment.*` called directly in logic). If you cannot write the test without one of these, **fix the seam first** — don't reach for a static mocking tool.
+The constructive half of conformance check **M2** (`standards-audit`). If you cannot write the test without one of these, **fix the seam first** — no static mocking tool.
 
 | Seam | Untestable | Injectable | Fake it with |
 |---|---|---|---|
@@ -111,21 +103,9 @@ This is the constructive half of conformance check **M2** (`standards-audit`: `D
 | **Config / env** | `Environment.GetEnvironmentVariable`, `IConfiguration` reads in logic | `IOptions<T>` / the settings record | `Options.Create(new T { … })` |
 | **Outbound I/O** | `new HttpClient()`, `File.*`, direct SMTP/SDK calls | a typed client interface owned by you | a hand-written fake, or a substitute of *your* interface |
 
-```csharp
-// Time
-var clock = new FakeTimeProvider(new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
-var sut = new SubscriptionService(clock);
-clock.Advance(TimeSpan.FromDays(31));
-Assert.That(sut.IsExpired(subscription), Is.True);
-```
+A fake-clock test and a test over `Options.Create` → read `references/seam-examples.md`.
 
-```csharp
-// Config
-var options = Options.Create(new PricingOptions { MaxDiscountPercent = 20 });
-var sut = new DiscountCalculator(options);
-```
-
-**Never substitute a type you don't own** — no `Substitute.For<HttpClient>()`, no substituting `DbContext`, `TimeProvider`, or an SDK client. Wrap it in your own interface and fake that. (`TimeProvider` is the exception that already ships its own fake — use `FakeTimeProvider`, not a substitute.)
+**Never substitute a type you don't own** — no `Substitute.For<HttpClient>()`, no substituting `DbContext`, `TimeProvider`, or an SDK client. Wrap it in your own interface and fake that. (`TimeProvider` ships its own fake: use `FakeTimeProvider`.)
 
 ## Test doubles
 
@@ -156,7 +136,7 @@ public async Task Should_PublishOrderPlaced_When_OrderIsAccepted()
 }
 ```
 
-**Note the `e!` in the `Arg.Is` predicate.** `Arg.Is<T>` types its predicate as accepting a possibly-null `T`, so `e => e.CustomerId == …` raises **CS8602** in a nullable-enabled test project — and a warning fails this stack's 0-warning gate. Either null-forgive (`e!.`) or guard (`e => e != null && e.…`). Do **not** disable nullable in the test project to make it go away (see *Project layout* above).
+**Note the `e!` in the `Arg.Is` predicate.** `Arg.Is<T>` types its predicate as accepting a possibly-null `T`, so `e => e.CustomerId == …` raises **CS8602** in a nullable-enabled test project, and a warning fails the 0-warning gate. Null-forgive (`e!.`) or guard (`e => e != null && e.…`); never disable nullable in the test project.
 
 **Prefer a state assertion over a call assertion** where both are possible: `Assert.That(fakeRepo.Saved, Has.Count.EqualTo(1))` survives a refactor that `Received(1).SaveAsync(...)` does not.
 
@@ -170,7 +150,7 @@ public async Task Should_PublishOrderPlaced_When_OrderIsAccepted()
 
 ## Parameterized tests
 
-`CLAUDE.md` forbids `if`/`for` driving assertions. NUnit's data attributes are the escape hatch:
+NUnit's data attributes replace `if`/`for` around assertions:
 
 ```csharp
 [TestCase(0.005, 0.01)]      // half-up at the boundary
@@ -180,7 +160,7 @@ public void Should_RoundHalfAwayFromZero_When_ThirdDecimalPresent(decimal input,
     => Assert.That(Money.Round(input), Is.EqualTo(expected));
 ```
 
-`[TestCaseSource]` for cases that need construction, `[Values]`/`[Combinatorial]` for small matrices. **One boundary per case** — a 12-column `[TestCase]` row is a builder waiting to happen.
+`[TestCaseSource]` for cases that need construction, `[Values]`/`[Combinatorial]` for small matrices. **One boundary per case.**
 
 ## Beyond example tests
 
@@ -190,8 +170,8 @@ public void Should_RoundHalfAwayFromZero_When_ThirdDecimalPresent(decimal input,
 
 ## Test data
 
-- 1–3 fields: inline literals, named via local constants when the value carries meaning (`const string ExpiredCard = "4000000000000069";`).
-- **4+ fields: a builder** (`CLAUDE.md`). Fluent, with sane defaults so each test overrides only what it's about — the overridden field *is* the test's subject, and the reader should see it in one line.
+- 1–3 fields: inline literals, named via local constants when the value carries meaning.
+- **4+ fields: a builder**, fluent, with sane defaults so each test overrides only its subject:
 
 ```csharp
 var order = new OrderBuilder().WithStatus(OrderStatus.Shipped).Build();
@@ -201,11 +181,8 @@ var order = new OrderBuilder().WithStatus(OrderStatus.Shipped).Build();
 
 ## Async & concurrency
 
-- Test methods return `Task`; never `async void`, never `.Result` / `.Wait()` / `.GetAwaiter().GetResult()` (the production rule applies to tests too).
 - `Assert.ThatAsync` / `Assert.MultipleAsync` for async constraint groups; `Assert.ThrowsAsync<T>` for expected failures.
-- **Assert on the exception's identity, not its message string** — a message is not a contract.
 - **`CancellationToken` propagation is behavior worth a test** on anything long-running: pass a canceled token, assert `OperationCanceledException`.
-- **No `Task.Delay` / `Thread.Sleep` in a test.** If a class needs time to pass, that's the `FakeTimeProvider` seam.
 
 ## Rules
 
@@ -216,18 +193,11 @@ The standards a test must meet are the be-dotnet rule file `dotnet-tests.md`, no
 The tests cover **at least 80% of the branches in the code the change wrote**: every file it created, whole, and the methods it changed in a file that already existed. The scope is the change, never the repo — a legacy module's low number is not the excuse, and the repo-wide number is not the target.
 
 - **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — each `if`/`else` arm, `switch` arm and its default, ternary, `??` and `?.`, short-circuit `&&`/`||`, guard-clause return, `catch`, a loop run zero times and many — and give each a test or a `[TestCase]` row that asserts its effect. The slack under 100% is for branches no honest unit test reaches: compiler-generated ones (async state machines, record equality) and a guard the type system already excludes.
-- **Only an asserting test counts.** A test that runs a branch without asserting what it did is a **major** finding — it moves the number and catches nothing. The tautology test applies; mutation score is how hollow coverage gets caught.
+- **Only an asserting test counts.** A test that runs a branch without asserting what it did is a **major** finding; mutation score catches hollow coverage.
 - **Leave out what the matrix says not to test, by name.** DTOs, EF configurations, DI registration, migrations and generated code stay out of the measured file list, and the report names each one left out. Never reach 80% by lowering the number or by putting `[ExcludeFromCodeCoverage]` on code that has behavior.
-- **Measure.** A plan task's `Gate: own tests` runs this over the files it wrote; outside a plan, run it before you report:
+- **Measure.** Inside a plan task, the `Gate:` line runs this over the files the task and the landed tasks above it touched. Outside a plan, run it before you report:
 
-  ```bash
-  dotnet test --collect:"XPlat Code Coverage" --results-directory TestResults
-  dotnet tool run reportgenerator -reports:"TestResults/*/coverage.cobertura.xml" \
-    -targetdir:TestResults/coverage -reporttypes:"TextSummary;Html" \
-    -filefilters:"+*PlaceOrderHandler.cs;+*PricingStrategyResolver.cs"
-  ```
-
-  `Branch coverage` in `TestResults/coverage/Summary.txt` is the number; for a method changed in an existing file, that file's page in the HTML report shows its branches. `coverlet.collector` ships in the `dotnet new nunit` template — add it where the test project lacks it. ReportGenerator is the local tool `dotnet-reportgenerator-globaltool`.
+  The commands and where to read the number → read `references/coverage-measure.md`.
 - **Below 80%, write the missing tests.** The report's uncovered branches are the list.
 
 ## Generation steps
@@ -237,5 +207,5 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 3. **Fix the seams first** — if a unit reads the clock, a GUID, config, or does I/O directly, inject it (that's a `pattern-writer` edit, not a test edit) before writing the test.
 4. **Write the failing test** (behavior name, AAA, one logical assertion), watch it fail for the right reason (the run a `Gate: own tests` task may make), then make it pass.
 5. **Add the boundary cases** as `[TestCase]` rows — nulls, empties, min/max, the rounding boundary, the state that must be refused.
-6. **Verify:** `dotnet test` green, `dotnet build` 0 warnings, `dotnet format --verify-no-changes`, branch coverage of the changed code ≥ 80% (*Coverage floor*). Report the counts and the coverage figure. Inside a plan task, `Gate: own tests` runs this task's tests — step 4's red run, then green — and the *Coverage floor* measure over the files it wrote; the last runnable task runs everything else.
+6. **Verify:** `dotnet test` green, `dotnet build` 0 warnings, `dotnet format --verify-no-changes`, branch coverage of the changed code ≥ 80% (*Coverage floor*). Report the counts and the coverage figure. Inside a plan task, `Gate: own tests` runs this task's tests — step 4's red run, then green —, the tests of the landed tasks above it, and the *Coverage floor* measure over the files the task and those tasks touched; the last runnable task runs everything else.
 7. **Sweep:** any sibling of the same shape left untested? A strategy family with one tested member is a gap.

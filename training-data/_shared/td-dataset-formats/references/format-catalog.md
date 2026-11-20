@@ -7,7 +7,7 @@ Concrete JSON schemas and conversions for every record shape the domain uses. Th
 ```json
 {
   "id":         "string, unique, stage-prefixed (sft- pref- pt- eval- vlm-)",
-  "source":     "web:<domain> | human:<team> | synthetic:<model> | public:<dataset>",
+  "source":     "web:<domain> | human:<team> | synthetic:<exact-model-id> | public:<dataset>",
   "license":    "SPDX id | proprietary-internal | synthetic-review-required",
   "created_at": "YYYY-MM-DD",
   "meta":       { "topic": "…", "difficulty": "easy|medium|hard", "lang": "en", "task": "…" }

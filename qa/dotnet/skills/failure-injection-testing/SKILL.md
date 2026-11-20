@@ -12,10 +12,6 @@ Scaffolds **fault-injection resilience tests** in .NET against a deployed servic
 every happy-path skill in this library: the REST/gRPC authors assert *the dependency answered correctly*; a chaos
 test **breaks the dependency on purpose and asserts the app under test copes**.
 
-This is the **.NET port of the canonical** `qa/java/skills/failure-injection-testing`. The four ideas, the proxy-between mechanism, and
-the steady→inject→degraded→remove→recovered lifecycle are identical; only the client lib (`Toxiproxy.Net`), the
-resilience library (**Polly**), and the runner (NUnit) change.
-
 > **The discipline this skill encodes** — four ideas that separate a correct chaos test from a happy-path reflex:
 >
 > 1. **A chaos test does NOT assert the dependency works — it INJECTS a fault and asserts the app DEGRADES
@@ -271,35 +267,6 @@ cluster", that is out of scope — flag it and point at the chaos-engineering pl
   requests. *Fix:* pick the `ToxicDirection` that matches the failure you mean to simulate.
 - **One Toxiproxy/dependency per `[Test]`.** Slow and churns ports. *Fix:* stand them up once in `[OneTimeSetUp]` on
   a shared `Network`; reset toxics (`Healed()`) between tests, not the containers.
+- **Raw `proxy.Add(new TimeoutToxic …)` in a `[Test]`.** *Fix:* wrap all toxic wiring in `ChaosProxy` with intent names.
 - **Treating this as production chaos engineering.** *Fix:* deterministic toxic in a test ≠ GameDay on a live
   cluster — route prod-chaos requests to Gremlin/Litmus/Chaos Mesh.
-
-## Examples
-
-**End-to-end: the inverted assertion.** A REST author writes `response.StatusCode.Should().Be(200)`. A chaos author
-writes: inject `Timeout`, then `result.IsFallback.Should().BeTrue()` **and**
-`app.CircuitState.Should().Be(CircuitState.Open)`. Same dependency, opposite question — *does the app survive it
-failing?*
-
-**Composing with the dependency families.** The thing you fault is stood up by Testcontainers
-(`ToxiproxyContainer` next to a `PostgreSqlContainer` on a shared `Network`); the dependency itself is exercised
-happy-path by `qa-dotnet:db-testcontainers` / `qa-dotnet:messaging-testing`. Chaos adds the proxy in front and
-asserts the resilience layer — it **composes**. A data-driven fault matrix binds via `qa-dotnet:data-driven-testing`.
-
-## Rules (hard constraints)
-
-- **The assertion is the resilience PATTERN, never the dependency working or the fault itself** — retry count,
-  Polly circuit-breaker state transitions, an honored timeout (fails fast), or fallback content.
-- **The app under test connects to the PROXY**, not the real dependency — rewire its connection string / base URL /
-  bootstrap server to `Chaos.Host:Chaos.Port`. If the app bypasses the proxy, the test is inert.
-- **Every fault test runs the lifecycle** where recovery matters: steady → inject → assert degraded → `Healed()` →
-  assert recovery. Always remove injected toxics (between tests / in teardown) so faults don't leak.
-- **No `Task.Delay` / `Thread.Sleep` as a wait.** Use a bounded condition-poll (`EventuallyBecomesTrue` / Polly
-  wait-and-retry) on the real condition — breaker state, a successful probe call.
-- **Pick the toxic + `ToxicDirection` deliberately** (latency/`Bandwidth` for slow, `Timeout`/`ResetPeer` for drop,
-  `Slicer`/`LimitData` for partial; DownStream = responses, UpStream = requests).
-- **One Toxiproxy + dependency per fixture** on a shared `Network` in `[OneTimeSetUp]`; reset toxics between tests,
-  not the containers. Named toxics so they can be removed.
-- **This is functional fault-injection, not production chaos engineering** — route live-cluster chaos elsewhere.
-- **Wrap all toxic wiring in `ChaosProxy`** with intent names — no raw `proxy.Add(new TimeoutToxic …)` in `[Test]`.
-  NUnit + Toxiproxy.Net + Testcontainers + FluentAssertions.

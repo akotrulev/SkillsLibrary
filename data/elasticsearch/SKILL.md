@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Index design, client setup, ingest, query shape, security, and operational concerns for **Elasticsearch 9** and **OpenSearch 3** from the library's three backend stacks. Use for **full-text search**, **structured queries on semi-structured documents**, **aggregations on event data**, and **vector / kNN search**. Logs are handled by Loki (`observability/logs-traces-setup`); only use ES for logs if you have a strong reason (rich aggregations / wildcards that LogQL struggles with).
 
-This is also the **destination for two inbound handoffs** authored elsewhere in `data/`: `data/mongodb/references/indexing.md` routes *self-hosted* full-text / semantic search here (Atlas Search / Vector Search is Atlas-only, so self-hosted Mongo that needs real relevance ranking projects into ES); `data/redis/references/data-structures.md` routes *vector search beyond a cache* here (Redis's vector module is fine as a fast KV-adjacent ANN cache, but a durable, filterable, reindexable vector store is an ES/OpenSearch `dense_vector` job). **First check the cheaper stop:** if the embeddings belong to data already in Postgres, a `pgvector` column on that row (`data/postgresql/references/indexing.md`) beats standing up a second cluster — ES/OpenSearch earns its place only when relevance/hybrid ranking, independent scaling, or non-Postgres data justify it.
+This is also the **destination for two inbound handoffs** from `data/`: `data/mongodb/references/indexing.md` routes *self-hosted* full-text / semantic search here (Atlas Search is Atlas-only), and `data/redis/references/data-structures.md` routes *vector search beyond a cache* here (a durable, filterable, reindexable vector store is an ES/OpenSearch `dense_vector` job). **First check the cheaper stop:** embeddings for data already in Postgres belong in a `pgvector` column (`data/postgresql/references/indexing.md`); ES/OpenSearch earns its place only when relevance/hybrid ranking, independent scaling, or non-Postgres data justify it.
 
 ## Version & distribution policy
 
@@ -113,13 +113,12 @@ PUT /products_v1
 ### Node 24 + TypeScript
 
 ```typescript
-// src/persistence/es.ts
 import { Client } from '@elastic/elasticsearch';
 
 export const es = new Client({
   node: process.env.ES_URL!,
   auth: {
-    apiKey: process.env.ES_API_KEY!,                // never username/password in apps
+    apiKey: process.env.ES_API_KEY!,
   },
   tls: { rejectUnauthorized: true },
 });
@@ -147,8 +146,6 @@ RestClient httpClient = RestClient.builder(HttpHost.create(System.getenv("ES_URL
 ElasticsearchTransport transport = new RestClientTransport(httpClient, new JacksonJsonpMapper());
 ElasticsearchClient es = new ElasticsearchClient(transport);
 ```
-
-All clients are **thread-safe and expensive to construct** — one per process.
 
 ## Ingest
 
@@ -299,8 +296,8 @@ PUT /_security/role/tenant_42_reader
   "indices": [{
     "names": ["products", "orders"],
     "privileges": ["read"],
-    "query": { "term": { "tenantId": "42" } },                 // DLS: only this tenant's docs
-    "field_security": { "grant": ["*"], "except": ["internalNotes"] }  // FLS: hide a field
+    "query": { "term": { "tenantId": "42" } },
+    "field_security": { "grant": ["*"], "except": ["internalNotes"] }
   }]
 }
 ```
@@ -324,40 +321,16 @@ PUT /_security/role/tenant_42_reader
 
 ## Observability
 
-- **Slow query log** — `index.search.slowlog.threshold.query.warn: 10s` etc.
-- Cluster health, node JVM heap, indexing rate, search rate, queue rejections in Grafana via Prometheus exporter or built-in monitoring
-- Query latency p95 / p99 via the slow log + dashboards
+- Set the slow query log thresholds (`index.search.slowlog.threshold.query.warn: 10s`).
+- Chart cluster health, JVM heap, indexing and search rate, queue rejections and p95 / p99 query latency in Grafana (Prometheus exporter or built-in monitoring).
 
 ## Rules
 
-- Explicit mapping (`dynamic: strict`)
-- Index design: versioned for reference data, rolling for time-series; always alias-fronted
-- Bulk ingest; never per-doc on hot paths
-- Use `filter` clauses for non-scoring conditions (cached, fast)
-- `from + size` only for the first few pages; `search_after` beyond
-- Reindex pattern for breaking schema changes
-- ILM / ISM for time-series retention
-- Security enabled always; per-service API keys scoped by role descriptor (never the `elastic` superuser); IAM/SigV4 for AWS OpenSearch
-- Multi-tenant isolation via a **DLS** query on the role (+ FLS for sensitive fields), not just an app-side filter — and QA'd with a cross-tenant leak test
-- TLS on both HTTP and transport layers; cluster on a private network, never 9200 exposed publicly
-- Snapshots to encrypted object storage on a schedule
-- Shard size 10–50 GB; over-sharding is the #1 operational pain
+Each rule is stated nowhere else in this file.
 
-## What NOT to do
-
-- No dynamic mapping in production
-- No per-document indexing in a tight loop
-- No `from: 100000` deep paging
-- No 1000+ small shards
-- No `text` field on something you need to sort / aggregate (use `keyword` or a multi-field)
-- No username/password auth — API keys / IAM
-- No live mapping changes on a hot index — reindex
-- No queries unfiltered by tenant / customer when multi-tenant — enforce with DLS on the role, don't rely on the app remembering
-- No running with security disabled, even "internally"
-- No assuming an ES recipe drops onto OpenSearch unchanged (diverged security config + clients + advanced APIs)
-- No production cluster without snapshots
-- No ES for logs when Loki is in the stack — different optimization curves
-- No `_id` derived from a value the application doesn't control (use UUIDs or app-known keys)
+- Map a field you sort or aggregate on as `keyword` (or a multi-field), never `text`.
+- Derive `_id` from UUIDs or keys the application controls, never from a value it does not.
+- Keep logs in Loki when it is in the stack; Elasticsearch optimizes for search, a different curve.
 
 ## Generation steps
 

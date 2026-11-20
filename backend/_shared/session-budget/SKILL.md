@@ -71,8 +71,6 @@ Add up the lines that apply, then apply the churn multiplier. Everything is in t
 
 So: `Budget = (floor + skills + pack sections + orientation + files + read-back) × 1.2`, with read-back 10k + the task's own gate output on any code task.
 
-**Every task pays for its own gate, and the last runnable task pays for what is left.** A failure surfaces in the task that caused it, so the last task's fix loop is small; it holds no feature work when the plan has any.
-
 **Worked example** — a `be-dotnet` task creating an Orders resource: floor 25k + 3 skills 24k + task block 1k + 3 pack sections 6k + 5 files created (4 source at 2k, 1 test at 2k) 10k + 1 file modified 1.5k + read-back 10k = 77.5k, × 1.2 = **~95k**. Comfortably one session, with room to absorb the next coherent piece.
 
 ### Step 2 — Compare against the target and act
@@ -133,16 +131,7 @@ everything that session needs and names nothing it does not:
 - **The traps**: the two to four things specific to that task. The convention that is easy to miss, the
   file that looks like the pattern but is not, the migration that must run before the test, the
   down-level API that does not exist here. This is the part the prompt adds, and it is what earns it.
-- **The gate line.** `Gate: own tests — <commands>` on every block that writes code or tests: a `Q`
-  block expects **red** for the recorded reason (or, when its app cannot start in one command, proves the
-  tests load and list), and any other code block expects **green**, on its own tests only: the tests it wrote
-  plus the acceptance tests bound to its own deliverable, with the static checks over its files, on a small
-  core budget and ports of its own, never under the test lock. No block runs an earlier task's tests,
-  another task's acceptance tests, the smoke suite or a coverage run; the coverage floor is the gate
-  block's. `Gate: none — <why nothing here is runnable>` only on a block with
-  nothing runnable. The last block carries the project's own commands for the whole set in run order, the
-  instruction to **fix what they find rather than hand it back**, and the fix loop (plan format §5) with
-  the project's narrowest-rerun and rerun-failed commands filled in.
+- **The gate line**, in the form of `plan-format.md` §5: `Gate: own tests — <commands>` on every block that writes code or tests, `Gate: none — <why>` only on a block with nothing runnable, and on the last block the project's own commands for the whole set, in run order, with the fix loop and its narrowest-rerun and rerun-failed commands filled in. A `Q` block expects **red** for the recorded reason (or proves its tests load and list when its app cannot start in one command); any other code block expects **green**.
 - **A `TD` block** names one of two agents. The test-plan block (`qa-test-planner`) reads the epics and
   stories it covers whole, the surfaces by section, and the repo for the harness; the test-case block
   (`qa-test-case-designer`) reads its stories whole and the test plan's §2, §8 and §10 by the path in the
@@ -170,22 +159,14 @@ kind of stale that reads as current.
 
 ### Step 5 — Carry the close-out into the plan
 
-**Maintaining this section as each task lands is the executing agent's duty, not the planner's**, and
-the planner's job is to make sure the plan tells it so. Write `## Close-out — every task` directly
-above `## Prompts — one per task`, copied verbatim from
-`engineering-practices/writing-plans/references/plan-format.md` §7 — it holds the whole duty: the
-`As built` note, `## Decisions`, repairing the blocks below, deleting the task's own block, the
-`Status:` line, filing the plan when no block is left, and the one commit. Do not restate or edit it
-per plan; a copy that drifts from §7 is two contracts.
+Write `## Close-out — every task` directly above `## Prompts — one per task`, copied verbatim from `engineering-practices/writing-plans/references/plan-format.md` §7. It holds the whole duty of the executing agent; a copy edited per plan is a second contract.
 
 Two things stay this skill's to get right, because the close-out section cannot know them:
 
 - **The last block is the documentation task's** (`DOC1`): the documenter agent, reading the plan's `As
   built` notes as leads and the code as evidence, its gate the doc lint. Budget it on the areas re-traced
   (~15k each) and the documents updated (~8k per area set); over ~150k it is split by area.
-- **Which block files the plan.** Normally the documentation task's; where a blocked task sits below it, the
-  filing falls to that block, and the documentation task's block says the plan stays in `docs/plans/` until it
-  clears (plan format §8).
+- **Which block files the plan.** The documentation task's; where a blocked task sits below it, the filing falls to that block, and `DOC1`'s block says the plan stays in `docs/plans/` until it clears (plan format §8).
 - **Which block writes which.** Every `Blocked on <id>` placeholder is matched by a line in that
   task's own block, above its close-out line.
 
@@ -193,7 +174,7 @@ Two things stay this skill's to get right, because the close-out section cannot 
 
 ## Rules
 
-The standards the `**Budget:**` lines and the prompt blocks must meet (drivers itemized, sections never whole artifacts, one task per block, a blocked task keeping its block, a landed task's block deleted, the last block's filing duty, every code block naming its own gate) are the dev rule file `plans.md`, not a list here. Read the project's copy in `.claude/rules/dev/`, or the plugin's in `engineering-practices/rules/` when the project has not installed it (`/dev:rules` does); a project's own plan rules in its `CLAUDE.md` win. Three sizing rules are this skill's own:
+The standards the `**Budget:**` lines and the prompt blocks must meet are the dev rule file `plans.md`. Read the project's copy in `.claude/rules/dev/`, or the plugin's in `engineering-practices/rules/` when the project has not installed it (`/dev:rules` does); a project's own plan rules in its `CLAUDE.md` win. Three sizing rules are this skill's own:
 
 - **Estimate before authoring is finished, not after.** The number is an input to how the task is written. Producing a task list and then measuring it turns the estimate into trivia.
 - **The floor is not negotiable and not divisible.** Two tasks in one session do not pay one floor — they are one task, or they are two sessions.
@@ -212,7 +193,7 @@ The standards the `**Budget:**` lines and the prompt blocks must meet (drivers i
 3. No task was split or merged in a way that breaks one deliverable, one stack, one agent, or whole work at the boundary.
 4. `## Prompts — one per task` has one block per task that has not landed — no more (a landed task's block is deleted), no fewer (a task with no block is a session nobody knows they can start), and each `Blocked on <id>` placeholder is matched by a bullet on that task.
 5. Every block names one task, an exact agent, exact skills, and **sections** rather than artifacts, and carries its traps.
-6. The last runnable block runs the whole set, with the project's own commands in run order and the instruction to fix what they find. Every other code block says `Gate: own tests` with its filtered commands and the colour it expects; only a block with nothing runnable says `Gate: none`, and says why. Every implementation block in a test-first plan repeats the read-only rule.
+6. The last runnable block runs the whole set with the project's own commands and the fix instruction. Every other code block says `Gate: own tests` with its filtered commands and the colour it expects; `Gate: none` carries its reason. Every implementation block in a test-first plan repeats the read-only rule.
 7. `## Close-out — every task` sits directly above `## Prompts — one per task`, verbatim from plan format §7; every block names it last in its reading list and ends with its close-out line; and the block that will delete the **last** one is the one the filing falls to.
 8. Blocked tasks appear with their blocker and its owner.
 9. A plan that serves stories has its `TD` blocks (the test plan, then the test cases) above the `Q` blocks, each `Gate: none` with its reason; the last block is `DOC1`, the documenter agent, with the doc lint as its gate, or the header says why there is none.

@@ -1,5 +1,20 @@
 # Visual Regression — Screenshot plus Comparer (.NET 10 / Microsoft.Playwright 1.63 + NUnit)
 
+**Contents:**
+
+- 1. Setup
+- 2. The baseline store
+- 3. Capture options — LocatorScreenshotOptions
+- 4. The visual check — Support/VisualCheck.cs
+- 5. The page object and the test
+- 6. Tolerance — the comparer's knobs
+- 7. Generating and updating baselines — only in the pinned image
+- 8. The nightly visual job
+- 9. A generated PDF is not a visual target
+- Anti-patterns
+- Rules
+- Cross-references
+
 Microsoft.Playwright has **no screenshot assertion**: `toHaveScreenshot` is a Node test-runner feature, and
 the .NET `IPageAssertions` / `ILocatorAssertions` in 1.63 have no screenshot or snapshot member, no options
 class for one, and no `--update-snapshots`. This reference builds the free lane from three parts that do

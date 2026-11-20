@@ -5,17 +5,13 @@ description: Use when checking a local web app ad hoc via Playwright from Python
 
 # Web Application Testing (Python / Playwright 1.63)
 
-> **Scope / when to use this vs the stack-native Playwright skills.** This is a **Python** toolkit for *ad-hoc,
-> throwaway* browser automation — quickly driving a local web app to verify frontend behavior, debug UI, capture
-> screenshots, or read browser logs *inside a Claude session*. It is **not** the way to author a maintained UI
-> test suite. For a project's regression/E2E suite, use the **stack-native** skills, which produce page objects,
-> fixtures and CI-runnable tests in the project's own language and runner:
-> - `qa/typescript/skills/ui-test-author/playwright` · `qa/dotnet/skills/ui-test-author/playwright` ·
->   `qa/java/skills/ui-test-author/playwright` — the maintained web UI suites (owned by the `qa-ui-{stack}`
->   agents), plus `page-object-design` / `page-objects-from-url` for POMs.
->
-> **Rule of thumb:** reach for *this* skill when Claude needs to poke a running app once and report back; reach
-> for the stack skill when the tests live in the repo and run in the pipeline.
+## When to use
+
+- Claude needs to poke a running local web app once and report back: drive it, capture screenshots, read console logs, debug the UI, from a throwaway Python script inside the session.
+
+## When NOT to use
+
+- A project's regression or E2E suite, or any check that runs in a pipeline: hand it to the `qa-ui-<stack>` agent (`qa-ui-typescript`, `qa-ui-dotnet`, `qa-ui-java`), which writes page objects, fixtures and CI-runnable tests in the project's own language and runner.
 
 ## Versions
 
@@ -40,20 +36,16 @@ needed.
 
 ## The house rules for these scripts
 
-These scripts are throwaway, but they follow the same wait and locator rules as every suite in this library — a
-script that sleeps or waits for the network gives a wrong answer as easily as a test does.
+The wait and locator rules are the lane's UI rule file: `qa/typescript/skills/rules/ui-tests.md`, `qa/dotnet/skills/rules/web-ui.md`, `qa/java/skills/rules/qa-java-ui.md`. A throwaway script follows them too. The Python spellings:
 
 | Never | Instead |
 |---|---|
-| `page.wait_for_load_state('networkidle')` | `expect(locator).to_be_visible()` on the element that proves the page rendered. `networkidle` is discouraged by Playwright: polling, analytics and websockets keep the network busy (it hangs) or idle too early (it races) |
-| `page.wait_for_timeout(1000)` | `expect(...)` on the state the action should produce — it waits exactly as long as needed and fails with the locator it waited for |
-| `page.wait_for_selector('.x')` | a locator plus `expect(locator).to_be_visible()` / `.to_have_text(...)` / `.to_have_count(...)` |
-| `page.click('text=Dashboard')`, `page.fill('#name', ...)` | locator actions: `page.get_by_role("link", name="Dashboard").click()`, `page.get_by_label("Name").fill(...)` |
+| `page.wait_for_load_state('networkidle')`, `page.wait_for_timeout(1000)`, `page.wait_for_selector('.x')` | `expect(locator).to_be_visible()` / `.to_have_text(...)` / `.to_have_count(...)` on the element or state the action should produce |
+| `page.click('text=Dashboard')`, `page.fill('#name', ...)` | `page.get_by_role("link", name="Dashboard").click()`, `page.get_by_label("Name").fill(...)` |
 | `:visible` in a selector | `locator.filter(visible=True)` |
-| Writing to `/tmp` or `/mnt/user-data/outputs` | files **under the project**: `evidence/<YYYY-MM-DD>-<topic>/` (create it with `Path.mkdir(parents=True, exist_ok=True)`). `evidence/` is git-ignored — screenshots and traces can carry tokens |
+| Writing to `/tmp` or `/mnt/user-data/outputs` | files **under the project**: `evidence/<YYYY-MM-DD>-<topic>/` (create it with `Path.mkdir(parents=True, exist_ok=True)`). `evidence/` is git-ignored: screenshots and traces can carry tokens |
 
-**Locator order**: `get_by_test_id` → `get_by_role` (with `name`) → `get_by_label` → `get_by_placeholder` →
-`get_by_text` → `get_by_alt_text` / `get_by_title` → CSS as the last resort.
+Locator methods, in the rule file's order: `get_by_test_id`, `get_by_role` (with `name`), `get_by_label`, `get_by_placeholder`, `get_by_text`, `get_by_alt_text` / `get_by_title`, then CSS.
 
 ## Decision tree: choosing your approach
 
@@ -118,20 +110,9 @@ page rendered — a heading, a test id, the first row of a list.
 2. **Pick locators** from what you saw, in the locator order above.
 3. **Act**, and after each action `expect(...)` the state it should produce before the next one.
 
-## From a script to a check (pytest-playwright 0.10.0)
+## From a script to a check
 
-When the same verification will be run again, make it a pytest file and let the plugin keep the evidence:
-
-```ini
-[pytest]
-addopts = --tracing=retain-on-failure --video=retain-on-failure --screenshot=only-on-failure --full-page-screenshot --output=test-results
-```
-
-- `--tracing` and `--video` take only `on`, `off` or `retain-on-failure` in 0.10.0; `--screenshot` takes `on`,
-  `off` or `only-on-failure`. Kept files land under `test-results/` per test.
-- Open a kept trace with `playwright show-trace test-results/<test>/trace.zip`, or drop it on
-  https://trace.playwright.dev, which loads it in the browser without uploading it.
-- A check that must run in a pipeline is no longer ad hoc: move it to the stack-native skill.
+The same verification will run again → read `references/pytest-check.md` (pytest-playwright 0.10.0 config and kept evidence). A check that must run in a pipeline is no longer ad hoc: hand it to the `qa-ui-<stack>` agent.
 
 ## Reference files
 

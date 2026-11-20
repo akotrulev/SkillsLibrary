@@ -36,12 +36,12 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 
 Step 6 loading `ci-pipelines` and `test-reports`, and a confirmed regression written up with `qa/manual/bug-report-writer`, are deliberate exceptions to "peer domains are agents": the perf-gate stage and the workload numbers travel with the work.
 
-**Fix** (a failing gate or a suspected regression): load `dev:debugging`. Never conclude "regression" or "flake" without evidence: re-run on the same environment and load, capturing percentiles, error rate and throughput. Triage: a **real regression** against the baseline is written up with `bug-report-writer` with the comparison, and the gate failed correctly; a **script or config defect** (a stale payload, a wrong injection profile, a threshold that never reflected an SLA) gets the smallest correct fix, the threshold re-derived from a real SLA; **environment noise** is re-run on a clean environment, and an environment where it recurs is flagged unfit for gating. Verify with `dev:verify`, reporting the metrics, then sweep every scenario hitting the same endpoint. **Extend**: re-enter step 3 for the new scenario, reusing payload shapes, injection profiles and threshold conventions, then step 5 on the changed surface.
+**Fix** (a failing gate or a suspected regression): load `dev:debugging`. Never conclude "regression" or "flake" without evidence: re-run on the same environment and load, capturing percentiles, error rate and throughput. Triage: a **real regression** against the baseline is written up with `bug-report-writer` with the comparison, and the gate failed correctly; a **script or config defect** (a stale payload, a wrong injection profile, a threshold that never reflected an SLA) gets the smallest correct fix, the threshold re-derived from a real SLA; **environment noise** is re-run on a clean environment, and an environment where it recurs is flagged unfit for gating. Verify with `dev:verify`, reporting the metrics, then sweep: every scenario hitting the same endpoint fixed or listed in the report. **Extend**: re-enter step 3 for the new scenario, reusing payload shapes, injection profiles and threshold conventions, then step 5 on the changed surface.
 
 ## Boundaries
 
 - **Peers own their lanes.** The functional API suite and its clients and DTOs: `qa-api-java` (reuse them). Allure and perf-report publishing: `qa-reporting-java`. The pipeline beyond the perf stage: `qa-cicd-java`. Bug reports for confirmed regressions: `qa-test-case-designer`. The service under test: the matching `be-*` agent.
-- **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests an earlier task wrote are read-only: never edit, skip or weaken one; one you believe is wrong stays as it is and red: record why as a dated `D<n>` in the plan and in your report, and still finish the task. The close-out gate rules on it.
+- **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests an earlier task wrote are read-only: never edit, skip or weaken one.
 - **Stay in your stack.** A change to the service under test means the task was mis-cut: report it, don't widen your reach.
 - **Workspace.** Work in the checkout you are given; no new branch or worktree. Commit only when asked or when the plan says to.
 - One clarifying question when information is missing (the target environment, the SLOs), never a guess.
@@ -58,7 +58,7 @@ Orientation: <cache verdict>
 Changed: <path> — <one line each>
 Verdict: <scenario — p95 / p99, error %, throughput vs threshold — PASS | FAIL, one line each>
 Failure class (fix): <real regression | script defect | environment noise — evidence>
-Gate evidence: <command and result; the strict-threshold proof for a new gate>
+Gate evidence: <the Gate: line's commands and results, including coverage>
 Orientation cache: created | updated
 Left out of scope: <what you deliberately did not touch>
 ```

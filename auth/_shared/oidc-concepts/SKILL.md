@@ -1,6 +1,6 @@
 ---
 name: oidc-concepts
-description: Use when explaining OAuth 2.0 / OpenID Connect concepts that are the same across providers — roles, Authorization Code + PKCE, Client Credentials, ID vs access vs refresh tokens, JWT validation, rotation, scopes vs RBAC — plus the Auth0-vs-Cognito comparison that picks the provider skill. Triggers "explain Authorization Code + PKCE", "ID token vs access token", "Auth0 vs Cognito differences". Do NOT use for provider-specific setup (`auth/auth0-*` / `auth/cognito-*`).
+description: Use when explaining OAuth 2.0 / OIDC concepts common to all providers: PKCE, token types, JWT validation. Triggers "Authorization Code + PKCE", "ID vs access token". Not for Auth0 (auth0-concepts).
 ---
 
 # Auth — OAuth 2.0 / OpenID Connect Concepts (Shared)

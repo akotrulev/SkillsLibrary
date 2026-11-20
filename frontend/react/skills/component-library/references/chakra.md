@@ -21,7 +21,7 @@ v3's `Provider` (wrapping `ChakraProvider` + the `next-themes` `ThemeProvider`) 
 'use client';
 import { ChakraProvider } from '@chakra-ui/react';
 import { ThemeProvider } from 'next-themes';
-import { system } from '@/theme';                     // createSystem output — styling skill owns it
+import { system } from '@/theme';
 
 export function Provider({ children }: { children: React.ReactNode }) {
   return (
@@ -88,7 +88,7 @@ function DeleteDialog({ order }: { order: OrderDto }) {
     <Dialog.Root>
       <Dialog.Trigger asChild><Button colorPalette="red" data-testid="Orders.Delete">Delete</Button></Dialog.Trigger>
       <Dialog.Content data-testid="Orders.DeleteDialog">
-        <Dialog.Header>Delete order {order.number}?</Dialog.Header>   {/* name the object — ui-rules */}
+        <Dialog.Header>Delete order {order.number}?</Dialog.Header>
         <Dialog.Body>This cannot be undone.</Dialog.Body>
         <Dialog.Footer>
           <Dialog.ActionTrigger asChild><Button variant="outline">Cancel</Button></Dialog.ActionTrigger>

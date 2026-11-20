@@ -1,5 +1,14 @@
 # Analytics and consent with Playwright Test (TypeScript / Playwright 1.64)
 
+**Contents:**
+
+- 1. The fixtures
+- 2. Consent gating
+- 3. Advanced Consent Mode — the gcs value
+- 4. An event and its parameters
+- 5. Global Privacy Control
+- Anti-patterns
+
 Built on the fixture model of `qa/typescript/skills/ui-test-author/playwright`. Verified against Playwright 1.63
 on Chromium and WebKit: a `navigator.sendBeacon` to `/g/collect` is caught by `context.route` as a `POST` whose
 `postData()` holds the beacon body, `waitForRequest` resolves for routed requests, `context.setExtraHTTPHeaders`

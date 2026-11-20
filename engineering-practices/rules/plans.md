@@ -14,32 +14,32 @@ Apply to every plan you write, edit, run a task from, or review. Severity: **blo
 
 ## The document
 
-- One self-contained file: context, decisions, tasks and one prompt per task. No `NEXT-PROMPTS.md` or `HANDOFF.md`. *major*
+- One self-contained file: context, decisions, tasks and one prompt per task; no companion file. *major*
 - `docs/plans/NNN-<slug>.md`, or a `solution-planner` pack's `docs/plans/NNN-<initiative>/delivery-plan.md`. `NNN` is zero-padded and its high-water mark spans `docs/plans/` and `docs/plans/implemented/`; never reused, never renumbered. *blocker*
-- Title `# NNN — <Title> — plan (YYYY-MM-DD)`, then `**Goal:**`, then `**Status:**`: built, next, built but unverified (never just "in progress"); who starts anything metered. *major*
-- Narrative first: `## 1. What already exists, and what is missing` (`| Need | Today | Gap |`), the deciding sections, `## Decisions` (`D<n>`, why, cost), open questions naming what each blocks, the tasks, `## Close-out — every task`, `## Prompts — one per task`. *major*
+- Title `# NNN — <Title> — plan (YYYY-MM-DD)`, `**Goal:**`, then `**Status:**`: built, next, built but unverified (never just "in progress"). *major*
+- Narrative first, tasks last, in the order of plan-format §2, ending in `## Close-out — every task` and `## Prompts — one per task`. *major*
 - One flat ordered list of **tasks**: no phases, slices, stages or milestones. "Step" names only a task's internal actions. *minor*
 - No `TODO`, "handle edge cases", "similar to B2", or an undefined type, file or command. An unknown is `[TBD — <who decides, by when>]` plus an open question. *major*
 
 ## Tasks
 
 - Ids are a family letter and a number (`C1`, `B2`, `Q1`, `F3`, `H1`), in execution order, never renumbered. An unnecessary task is marked with why, never deleted. *blocker*
-- Exactly one `**Stack:**` (`be` · `fe` · `mobile` · `ts` · `data` · `infra` · `qa` · `docs` · `human`) and one exact catalog `**Agent:**`; a `human` task names its `**Owner:**`. A task touching the API tree and the web tree is two tasks, at any size. *blocker*
+- Exactly one `**Stack:**` (plan-format §4's list) and one exact catalog `**Agent:**`; a `human` task names its `**Owner:**`. A task touching the API tree and the web tree is two tasks, at any size. *blocker*
 - One `**Deliverable:**`: a checkable result, not an activity. Done means it exists, not that the bullets ran. *major*
 - `**Depends on:**` points backwards only and names every earlier task whose files overlap or that builds the same tree. *blocker*
 - `**Budget:**` is `~<n>k` with its drivers itemized; over ~150k it names a split inside its own stack. *minor*
-- `**Gate: own tests**` names filtered commands that run only the task's own tests (the tests it wrote plus the acceptance tests bound to its own deliverable, usually one to three files), on a small core budget, on ports of its own, under no machine-wide lock; `**Gate: none**` says why. A non-frontend task runs its own unit and integration tests and its bound API acceptance tests plus typecheck, lint and format over what it touched, no e2e. A frontend or mobile task runs only its own and its bound spec files on one or two workers, after the production build they need. No task runs an earlier task's tests, another task's acceptance tests, the smoke suite or a coverage run. *major*
+- `**Gate: own tests**` names filtered commands that run the task's own tests (the tests it wrote plus the acceptance tests bound to its own deliverable, usually one to three files), the tests the landed tasks above it in the same plan wrote (acceptance tests bound to a deliverable no landed task has built yet first run in the task that builds it, or in the gate task), and the branch-coverage floor over the files it and those tasks touched, on a small core budget, on ports of its own, under no machine-wide lock; `**Gate: none**` says why. What each stack runs is plan-format §5's. A task never runs another plan's tests, the smoke suite or the unfiltered suite. *major*
 - The last task is the plan's one run under the project's test lock: the smoke suite plus every test the plan wrote, then the whole set, the ≥ 80% branch floor over the plan's code and the telemetry smoke when service behaviour changed; it fixes what it finds and holds no feature work. The project's whole e2e suite runs in its nightly CI run; each test red there goes on the project's tracked list with an owner and comes off it only when a nightly run is green for it. *major*
-- The last task's gate carries the fix loop: the whole set once; each failure reproduced and fixed with the narrowest command; only the failed rerun; the whole set once more to close. Never a full run to check one fix; a failure that moves between runs is an isolation or scheduling defect to fix in the code, owned setup or gate script, never retried until green; inside a `Q` test or fixture it is a `D<n>`, the test left as it is. *major*
-- Order: contract, schema, shared types and stubs answering `501 not-implemented`; then, in a plan that serves stories, the `TD` test-design tasks (the test plan per epic by `qa-test-planner`, then the test-case suites per story by `qa-test-case-designer`); then the `Q` acceptance tests, red on the stubs, automating the scenarios the test plan binds to them; then backend, shared packages, frontend and mobile. Human prerequisites come first. *major*
-- The plan's last task is the documentation task: `DOC1`, stack `docs`, agent `be-documenter` (or `be-feature-documenter` where the project documents per feature), after the gate task and depending on it. It updates the documentation from the code that landed, never from the plan, writes the delivery note and files the plan; its prompt names the non-production environment for screenshots or says there is none. The gate task writes no product documentation. Left out only with `Documentation task: none — <why>` in the header. *major*
-- A plan that serves stories and has no `TD` tasks says in its header who opted out and why. The last task checks each test plan's Definition of Done and records unmet lines in `Status:`. *major*
+- The last task's gate carries the fix loop of plan-format §5. Never a full run to check one fix; a failure that moves between runs is an isolation or scheduling defect fixed in the code, never retried until green; inside a `Q` test or fixture it is a `D<n>`, the test left as it is. *major*
+- Order is plan-format §4's: contract and stubs answering `501 not-implemented`, then `TD`, then `Q`, then implementation; human prerequisites first. *major*
+- The plan's last task is `DOC1`, stack `docs`, agent `be-documenter` or `be-feature-documenter`, depending on the gate task (plan-format §5); the gate task writes no product documentation. Left out only with `Documentation task: none — <why>`. *major*
+- A plan that serves stories and has no `TD` tasks says in its header who opted out and why. *major*
 - `**Not in <id>:**` names what belongs elsewhere. A stack-cut task that cannot be demonstrated says so; never a fake success or an empty list. *major*
 - Acceptance tests a `Q` task wrote are read-only to every later task but the gate. A test you believe wrong stays red, recorded as a dated `D<n>` with both readings. *blocker*
 
 ## Prompts
 
-- One block per unlanded task, in order, under the table (`# · Stack · Agent · Depends on · Runs beside · Budget`, human steps included) and a "what runs together" line. *major*
+- One block per unlanded task, in order, under the table (`# · Stack · Agent · Depends on · Runs beside · Budget`) and a "what runs together" line. *major*
 - Heading `### <id> — <title> (<agent>, <stack>)`: id first, no `Prompt`/`Task` prefix, no other trailing parenthetical. The body (fenced or blockquote) follows after one blank line, nothing between. No other `###` inside `## Prompts`. *blocker*
 - Body line 1 `Depends on: <ids>` or `Depends on: none`, this plan's ids only (`114 B1` reads as `B1`); line 2 `Agent: <agent> · Stack: <stack>`. *blocker*
 - A block copies the task's deliverable, files and gate, adds the reading order (sections, never whole artifacts) and the task's traps, and never says "see the task". Gates run locally: never `ssh`, push before a gate, or copy the tree. *major*
@@ -48,7 +48,10 @@ Apply to every plan you write, edit, run a task from, or review. Severity: **blo
 
 ## Running a task: the close-out
 
-- Re-read the plan just before your close-out edits; touch only your task block, your prompt block and the landed line. Commit on the current branch, your own files by path, never `git add -A`; never check out the default branch. *blocker*
-- Append a dated `**As built:**` with `file:line` or command output; never edit an earlier note. A divergence is a dated `D<n>`, never absorbed. Rewrite every block below yours that your work invalidated. *major*
-- Delete your prompt only after the work is committed, in a follow-up commit `docs: delete <id>'s prompt (<plan>)`; never stop between the two. With other tasks of the plan running beside you under Plan Queue, do not commit, stash, reset or check out: delete it as your last edit. Stopping mid-task or blocked: keep it, with `Picking up from:` or the blocker and its owner. *blocker*
-- The gate task merges the default branch into the plan's branch before deleting its prompt, keeping both sides' rows. Deleting the last block files the plan: final `Status:`, `git mv` into `docs/plans/implemented/`, its row in that README. Never edit a plan after it moves. *major*
+The steps are plan-format §7's and the plan's own `## Close-out — every task`. The constraints:
+
+- Commit on the current branch, your own files by path, never `git add -A`; never check out the default branch. With other tasks of the plan running beside you under Plan Queue, do not commit, stash, reset or check out. *blocker*
+- Re-read the plan just before the close-out edits; touch only your task block, your prompt block and the landed line. *blocker*
+- Delete your prompt only after the work is committed (under Plan Queue with tasks beside you, as your last edit); a stopped or blocked task keeps it, with `Picking up from:` or the blocker and its owner. *blocker*
+- `As built` is dated and append-only; a divergence is a dated `D<n>`, never absorbed. *major*
+- A plan is never edited after it moves to `docs/plans/implemented/`. *major*

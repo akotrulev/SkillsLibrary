@@ -1,11 +1,12 @@
 ---
 name: audit-engine
-description: The shared procedure behind every stack's conformance audit — Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping policy, and the report templates. Loaded by a stack's `<plugin>-conformance-audit` skill, which supplies the rule set. Do NOT invoke directly or route a user request here — it carries no rules of its own, so an audit run from this file alone would have nothing to check against. Always enter through the stack skill or its `/<plugin>-audit` command.
+description: Use when a stack's `standards-audit` skill (`/<plugin>:audit`) or the `design-auditor` starts a conformance round. Triggers "run a conformance audit". Not for spec checks (audit-spec).
+disable-model-invocation: true
 ---
 
 # Conformance Audit — the engine
 
-The stack-agnostic half of a conformance audit: **how** the audit runs, what it writes, and what counts as evidence. The **what** — the rule set being audited — is supplied by the stack skill that loads this file.
+The stack-agnostic half of a conformance audit: **how** the audit runs, what it writes, and what counts as evidence. The **what** — the rule set being audited — is supplied by the stack's `standards-audit` skill, or by the `design-auditor` agent for `design`, which loads this file.
 
 This engine is the **CONVENTION lane**, the third of the library's three read-only audit lanes:
 
@@ -117,16 +118,7 @@ Identical to the library's other audit lanes — they bind every claim:
 
 ## Severity
 
-The library's standard table (`CLAUDE.md`), applied to conformance:
-
-| Severity | Means here |
-|---|---|
-| **blocker** | Ships a bug, breaks a hard rule, or leaks something (a secret in a public bundle/log, sync-over-async, shared mutable state, a test that asserts nothing) |
-| **major** | Design/correctness issue that will hurt soon (wrong pattern, leaky layering, missing failure state, order-dependent tests) |
-| **minor** | Style, naming, or small inconsistency |
-| **nit** | Optional preference |
-
-Impact qualifiers after the severity are welcome (`major (8 sites, all in the orders module)`).
+Severities are those of `CLAUDE.md` "Review behavior". Impact qualifiers after the severity are welcome (`major (8 sites, all in the orders module)`).
 
 ## Read-only contract
 
@@ -157,8 +149,4 @@ Highest-leverage remaining: <one line>
 
 ## When uncertain
 
-- A check is ambiguous → read the owning skill named in the checklist section before verdicting. Don't guess a rule you can look up.
-- The codebase consistently does something different on purpose → **deviations table** + one question for the owner, not a finding.
-- A verdict you can't settle statically → `Unverifiable` + what would settle it. Never guess to complete a row.
-- Scope ambiguity that changes what gets audited (a monorepo with three apps, a legacy directory) → ask **one** question; smaller ambiguities become a stated assumption in the report.
-- Tempted to fix while auditing → don't. Read-only is the contract that makes the report trustworthy.
+Scope ambiguity that changes what gets audited (a monorepo with three apps, a legacy directory) → ask **one** question; smaller ambiguities become a stated assumption in the report.

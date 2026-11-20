@@ -1,5 +1,16 @@
 # QA — Email Testing with Mailpit (TypeScript)
 
+**Contents:**
+
+- When to use
+- When NOT to use
+- Inputs needed
+- Mailpit HTTP API surface (cheat-sheet)
+- Templates
+- Rules
+- Generation steps
+- Cross-references
+
 Scaffolds a typed Mailpit HTTP-API client and Vitest / Playwright fixtures that poll for a specific message (by recipient + subject), extract HTML / text body / links / OTPs, download attachments. Tests share one Mailpit and isolate by **recipient**: every test sends to its own unique
 address and searches for it, so nothing is ever wiped.
 

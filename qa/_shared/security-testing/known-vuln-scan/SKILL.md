@@ -247,49 +247,7 @@ Map each gating template/tag to its OWASP item per `qa-<stack>:security-foundati
 covers the **known-signature** slice of A02/A03/A05 — never the access-control (A01) or business-logic
 (API6) slices a matcher is structurally blind to.
 
-## Anti-patterns
+## Guardrails
 
-- **Assuming a native fail-on-match exit code.** Nuclei docs don't document a reliable one; a critical
-  finding can still exit `0`. *Fix:* gate by **parsing `-je`/`-jsonl`** — non-empty at/above your severity →
-  `exit 1`. Verify any `-exit-on-match`-style flag per installed version, and keep the parse-gate anyway.
-- **Relying on a matcher for a crawler's coverage.** Nuclei doesn't spider, discover params/forms, or inject
-  — a clean run says nothing about custom IDOR/XSS in undiscovered inputs. *Fix:* pair with
-  `qa-<stack>:active-scan` (crawl + inject) and `qa-<stack>:api-fuzzing`.
-- **Unpinned templates changing the gate.** `-update-templates` pulls latest → a green build goes red (or a
-  check vanishes) with no code change. *Fix:* pin the template release tag and bump it in a reviewable PR;
-  pin the engine tag too (no `:latest`).
-- **Gating on info-severity noise.** Tech-detection / version banners are `info` — gating on them makes the
-  gate red forever and gets it muted. *Fix:* `-s critical,high` (maybe `medium`); treat `info` as inventory,
-  not a finding.
-- **Running intrusive templates against prod/shared.** `default-logins/` (attempts real logins),
-  `-tags dast,fuzz` send attack traffic / mutate state. *Fix:* run those only against a throwaway env you
-  own and are authorized to attack; for a PR gate use the passive/CVE-match set + `-etags dast,fuzz`.
-- **Treating a clean Nuclei run as "secure."** It means *no known signature matched at the URLs you gave it*
-  — nothing about access control, business logic, or undiscovered inputs. *Fix:* run the full layer set
-  (`qa-<stack>:security-foundations`'s layer map); never imply green = secure.
-- **Not pinning the template version (reproducibility).** Even without `-update-templates`, an unpinned
-  `nuclei-templates` checkout drifts. *Fix:* pin a template ref; the gate must be deterministic so red = real
-  regression.
-- **Scanning before the app is ready** (sleep-then-scan). Races startup → false-clean. *Fix:* `compose up
-  --wait` / a Testcontainers wait strategy — never a fixed sleep (global rule).
-- **Committing target auth tokens / API keys in flags or templates.** *Fix:* env vars read lazily; no secrets
-  in scan config (`qa-<stack>:security-foundations`).
-
-## Rules (hard constraints)
-
-- **The gate is a parsed-output assertion, not the exit code.** Run with `-je`/`-jsonl`, then fail the job
-  when the export is non-empty at/above your gating severity (`jq` count). Verify any `-exit-on-match`-style
-  flag per installed version before trusting it; keep the parse-gate as the source of truth.
-- **Nuclei is a matcher, not a crawler** — it doesn't discover params/forms or inject. Pair it with a DAST
-  crawler (`active-scan`) and API fuzzing; a clean run is not coverage.
-- **Filter severity** (`-s critical,high`); never gate on `info`.
-- **Pin the template release and the engine version** so the gate is deterministic run-over-run; bump in a
-  reviewable PR.
-- **Intrusive templates** (`-tags dast,fuzz`, `default-logins/` login attempts) run **only** against a
-  throwaway env you own and are authorized to attack — never prod/shared (defer to `qa-<stack>:security-foundations`).
-- The app must be **ready** before scanning — wait on a **condition** (`compose up --wait` / a wait
-  strategy), never a fixed sleep.
-- **No secrets in scan config** — auth tokens/keys via env vars, read lazily.
-- Emit **SARIF → code-scanning** + attach the JSON report to **Allure** and CI artifact. Map gating templates
-  to their OWASP item. A clean Nuclei run ≠ "secure" — run the full layer set and reserve business-logic /
-  access-control to functional tests + manual pentest.
+- Scan only after the app is ready: wait on a condition (`compose up --wait` or a Testcontainers wait strategy), never a fixed sleep.
+- Keep target auth tokens and API keys out of flags and templates: env vars, read lazily.

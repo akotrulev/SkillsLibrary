@@ -1,6 +1,7 @@
 ---
 name: claude-api
-description: "Reference for the Claude API / Anthropic SDK — model ids, pricing, params, streaming, tool use, MCP, agents, caching, token counting, model migration. TRIGGER when: the prompt names Claude/Anthropic (Fable, Opus, Sonnet, Haiku, `anthropic`, `@anthropic-ai`, `claude-*`); the user asks about LLM pricing, model choice, limits or caching; or an LLM-shaped task names no provider. Do NOT use when another provider is in use: OpenAI/Gemini/Llama/Mistral/Cohere/Ollama named, or its SDK imported."
+description: Use when writing code against the Claude API or Anthropic SDK, such as models, tool use or caching. Triggers "use the Claude API", "which Claude model". Not for MCP servers (mcp-builder).
+disable-model-invocation: true
 ---
 
 # Building LLM-Powered Applications with Claude
@@ -527,7 +528,7 @@ The Quick Task Reference below uses the `{lang}/claude-api/FILE.md` path notatio
 
 ---
 
-## When to Use WebFetch
+## Fetching live documentation
 
 Use WebFetch to get the latest documentation when:
 
