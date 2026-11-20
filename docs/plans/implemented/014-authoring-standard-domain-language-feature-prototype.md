@@ -8,14 +8,23 @@ ADRs that the interview writes while it runs. Add `design:prototype`, which rend
 different variants of a screen in the project's design language. When the project has no design
 language, it first interviews you on style through the `ui-ux-pro-max` corpus.
 
-**Status:** A1, A2, B1, P1, R1, G1, A3 and A4 landed: the standard (`engineering-practices/writing-for-agents/`),
-`tools/skill-lint.py` with its tests (99% branch; A3 sharpened R12 and R8 and excluded `bundled/`, D16),
-`dev:feature` with `domain-modeling`, `design:prototype`, their registration, and the audit,
-`docs/audits/004-skill-authoring-r1.md`, complete: lint sweep, the 38 front doors, the 24 front-door
-agents and a 14-skill sample (D17), and the summary (528 findings, 249 major; R17 the top judgment rule).
-Next: A5, the remediation plan, which files 014. Built but unverified: `/dev:feature` and
-`/design:prototype` untried in a real project session, their trigger phrases untested; about two thirds
-of A3's judgment rows and most of A4's Code rows not re-read at their lines.
+**Status:** Done and filed, 2026-11-20. Every task landed.
+
+Delivered:
+- **The standard:** `engineering-practices/writing-for-agents/`, rules R1–R23.
+- **The lint:** `tools/skill-lint.py`, with its tests at 99% branch. It carries D16's readings of R12
+  and R8, and excludes `bundled/`.
+- **`dev:feature`** with `domain-modeling` (glossary and ADRs), **`design:prototype`**, and their
+  registration.
+- **The audit:** `docs/audits/004-skill-authoring-r1.md`, with 528 findings, 249 of them major.
+- **The remediation plan:** `docs/plans/015-skill-authoring-remediation.md`, with L1 (the owner's
+  answers to O1–O24), T1, P1–P20 and G1.
+
+**Unverified:**
+- `/dev:feature` and `/design:prototype` have not been tried in a real project session, and their
+  trigger phrases are untested.
+- About two thirds of A3's judgment rows and most of A4's Code rows were not re-read at their lines.
+  015's tasks re-read them before fixing.
 
 **Test design:** none. The plan serves no stories. Its only code is `tools/skill-lint.py`, which A2
 covers with unit tests.
@@ -811,6 +820,28 @@ plan is filed.
 - The next free number spans `docs/plans/` and `docs/plans/implemented/`.
 - Mechanical findings batch by rule across a plugin; judgment findings go with the skill they name.
 - **Not in A5:** fixing any skill.
+- **As built (2026-11-20):** `docs/plans/015-skill-authoring-remediation.md` is the next free number,
+  since 014 was the highest across both folders. It has 23 tasks.
+  - **L1** asks the owner every logical conflict in one message, as O1–O24, and records the answers.
+    These are A3's 7 judgment rows, its 8 R11 rows folded into O3 and O4, and A4's 15 rows. Each O
+    names reading (a), which is the audit's fix, reading (b), and the task that applies it. That is
+    015 D1.
+  - **T1** fixes the agent template (the Fix sweep, then `Gate evidence` under O18), the standard's R8
+    and R20 rows (O1, O5), and the 23 `rules` skills as one shape.
+  - **P1–P20** are one cluster of plugins each, with disjoint files, so any three run side by side.
+    Every one names its paths, lines and rule ids. A group row is split by path: each agent's Fix line,
+    "Read the rules", version asides, Done-when and `Gate evidence` go to its own plugin's task.
+  - **G1** sweeps the whole library and files 015.
+  - **Differed from the prompt:** each gate also runs `token-audit` grepped to the task's R2 files,
+    because the lint does not check R2. A qa task also runs `qa-version-check.py`, because pins move.
+    An answer that changes the lint (O1 b, O3 b, O4 b) makes L1 write an `infra` task T2, since that
+    is code.
+  - **Resolved A4's unverified item.** `grep -n "own tests"` finds the coverage-in-a-task line in the
+    `unit-testing` or `component-testing` skill of all five `be-*` stacks, both `fe-*`, `mobile/ios` and
+    `mobile/react-native`, possibly `desktop/windows:185`, and not `desktop/macos`. 015 §1 lists them
+    under O12.
+  - **Unverified:** the audit's line numbers. Each 015 task re-reads its rows first (015 D6). The
+    budgets are estimates from `wc -c`. 014 is filed here.
 
 ## Close-out — every task
 
@@ -866,51 +897,5 @@ three; then G1, A3, A4 and A5 run in sequence.
 | A5 | `docs` | `general-purpose` | A4 | — | ~110k |
 | — | try `/dev:feature`, `/design:prototype` in a real project | **the user** | G1 | — | — |
 
-A1, A2, B1, P1, R1, G1, A3 and A4 have landed; one prompt is live.
+Every task has landed, and all prompts are deleted. The plan is filed in `docs/plans/implemented/`.
 
----
-
-### A5 — the remediation plan, and filing 014 (general-purpose, docs)
-
-````
-Depends on: A4
-Agent: general-purpose · Stack: docs
-
-Task A5 of docs/plans/014-authoring-standard-domain-language-feature-prototype.md: turn the audit
-into the remediation plan, then file this plan as its last task.
-
-Read, in this order:
-1. CLAUDE.md (repo root): "Planning".
-2. engineering-practices/writing-plans/references/plan-format.md, all of it.
-3. The audit report: docs/audits/004-skill-authoring-r1.md (A3's part, then "Round 1, second half
-   (A4)" and "Summary"; D16 for the lint's R8 and R12 readings — the R8 wording in the standard is
-   itself a Logical-conflicts row to remediate; D17 for which agents A4 judged). Group rows name many
-   files in one row (up to 20 agents, the 23 `rules` skills): split them into per-file work by path.
-   Two group rows land in `.skill-template/agent.md` (the Fix sweep, the `Gate evidence` line) and
-   are fixed there first, then in each agent.
-4. This plan: header, §8, task A5, and "Close-out — every task".
-
-Write docs/plans/<next>-skill-authoring-remediation.md, with the next free number across
-docs/plans/ and docs/plans/implemented/:
-- §1 Need | Today | Gap from the report's findings.
-- Tasks: stack docs, agent general-purpose, one per cluster of findings by plugin, merged until a
-  session would pass ~150k. Mechanical findings batch by rule; judgment findings go with their
-  skill. Each gate: `python3 tools/skill-lint.py <its paths>` + `python3 tools/plugin-surface-check.py`.
-- A gate task that sweeps every touched path, and its prompts, the close-out section and the task
-  table per plan-format.
-- Header: `Documentation task: none — <why>` and `Test design: none — <why>`.
-- The Logical-conflicts rows (A3 7, A4 15) need an owner's choice, not a fix: list each in the plan's
-  open questions with the two readings, and give its task the decision once answered; the R11
-  domain-term rows and `/dev:refine`'s missing `business-analysis` dependency are such rows.
-
-Traps:
-- Fix no skill here.
-- Every remediation prompt names the exact paths and rule ids it fixes; never "the findings in the
-  report".
-
-Gate: none. It writes a plan document.
-
-Commit: `docs(plans): <next> skill-authoring remediation, from the 014 audit (014 A5)`.
-You delete the last prompt block, so you file this plan (close-out step 8).
-Close out per the plan's "Close-out — every task" before you stop.
-````
