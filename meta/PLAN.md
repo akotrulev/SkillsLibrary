@@ -1,3 +1,5 @@
+**Superseded by docs/plans/014-authoring-standard-domain-language-feature-prototype.md (D12).**
+
 # meta/ Remediation Plan
 
 Source: audit of `meta/skill-creator` + `meta/writing-skills`, 2026-07-12.

@@ -8,7 +8,9 @@ ADRs that the interview writes while it runs. Add `design:prototype`, which rend
 different variants of a screen in the project's design language. When the project has no design
 language, it first interviews you on style through the `ui-ux-pro-max` corpus.
 
-**Status:** Not started. Nothing is built. Next: A1. After A1, tasks A2, B1 and P1 run side by side.
+**Status:** A1 landed: the standard (`engineering-practices/writing-for-agents/`, not yet registered)
+and the `CONTRIBUTING.md` pointers. Next: A2, B1 and P1, side by side. Unverified: the standard has not
+been linted (A2 builds the lint; R1 and G1 run it).
 
 **Test design:** none. The plan serves no stories. Its only code is `tools/skill-lint.py`, which A2
 covers with unit tests.
@@ -62,9 +64,9 @@ the one tool that checks it. Nothing is checked twice.
 | **R5** — listed to the model only when a front door | skills, commands | `plugin-surface-check` | major |
 | **R6** — a hidden skill has no `When to use`, `When NOT to use`, `Handoffs` or `Related` heading | skills | `skill-lint` | minor |
 | **R7** — a front door has `When to use` and `When NOT to use` | skills | `skill-lint` | minor |
-| **R8** — pointers resolve: every relative Markdown link, and every backticked `references/…`, `scripts/…`, `templates/…` or `examples/…` path in a skill or agent, exists relative to that file's folder | skills, agents | `skill-lint` | major |
+| **R8** — pointers resolve: every relative Markdown link, and every backticked path under `references/`, `scripts/`, `templates/` or `examples/` in a skill or agent, exists relative to that file's folder; a path holding a placeholder (`<`, `{`, `*` or `…`) is a pattern and is skipped | skills, agents | `skill-lint` | major |
 | **R9** — a reference file over 300 lines opens with a contents list of its `##` headings, before its first `##` | skill `references/*.md` | `skill-lint` | minor |
-| **R10** — no placeholders: `TODO`, `TBD`, `FIXME`, `XXX` outside a code fence, and no `@path` force-load links | skills, agents | `skill-lint` | major |
+| **R10** — no placeholders: `TODO`, `TBD`, `FIXME`, `XXX` outside a code fence or an inline code span, and no `@path` force-load links | skills, agents | `skill-lint` | major |
 | **R11** — vocabulary: `Phase`, `Slice` or `Milestone` never appears in a heading or a table header row | skills, agents | `skill-lint` | minor |
 | **R12** — no line tells a model to invoke a hidden skill through the Skill tool; it names the path to `Read`, or the agent | skills, agents | `skill-lint` | major |
 | **R13** — agent shape per `.skill-template/agent.md`: a `## Steps` table whose header has `Load` and `Done when`, and a `## Report` section holding a `Mode:` line | agents | `skill-lint` | major |
@@ -108,6 +110,10 @@ python3 tools/skill-lint.py --json …         # a JSON array of {path, line, ru
   `Skill tool` or a verb from `invoke|call|run` together with `<plugin>:<name>`, where that name is
   hidden.
 - **Code fences are skipped** for R10, R11 and R12. A fence shows text; it is not an instruction.
+  **Inline code spans are skipped for R10 too**, for the same reason (a skill that says "remove
+  `TODO` comments" names the marker, it does not leave one). **R8 skips a path holding `<`, `{`, `*`
+  or `…`**: it is a pattern such as `references/<topic>.md`, not a pointer. Both keep the standard's
+  own rule table clean under its own lint (D13).
 - **Tests:** `tools/test_skill_lint.py`, pytest, loading the hyphenated script through
   `importlib.util` the way `test_kb_lint.py` loads `kb-lint.py`. Fixtures under
   `tools/fixtures/skill-lint/`: one clean skill, one clean agent, and per rule one file that breaks
@@ -335,6 +341,13 @@ standard replaces its unique content: the description trap is R4, and pressure-t
 `CONTRIBUTING.md`'s "Testing a new skill". Cost: its rationalization tables are gone, and are still
 in git history.
 
+**D13 — R8 and R10 are reworded so the standard passes its own lint** (A1, 2026-11-20). §3 as
+planned named `TODO` and `references/…` in backticks, so a literal R10 or R8 check would flag the
+rule table itself, and R1's gate lints that file. R10 now skips inline code spans as well as fences;
+R8 skips a path holding a placeholder (`<`, `{`, `*`, `…`). The plan's reading: only fences are
+skipped and every backticked path is checked. Cost: a real marker written inside backticks passes
+R10, and a mistyped pattern path is never checked.
+
 ## 10. Answered questions (2026-11-20)
 
 **O1 — Where do the glossary and ADRs live:** the existing BA glossary, extended, plus `docs/adr/` (D4, D6).
@@ -372,6 +385,23 @@ anything unique 10k, writes ~25k, review 5k.
 - `git rm -r meta/writing-skills`. Add a first line to `meta/PLAN.md`: `**Superseded by
   docs/plans/014-authoring-standard-domain-language-feature-prototype.md (D12).**`
 - **Not in A1:** registration and `FRONT_DOORS` (R1); the lint (A2).
+- **As built (2026-11-20):** `engineering-practices/writing-for-agents/SKILL.md` (13,858 chars,
+  description 158): a five-step `## Procedure` with done-whens, then the levers (Pointers, The two
+  loads, Information hierarchy, Completion criteria, When to split, Leading words, Positive targets,
+  Pruning), then `## The rules` R1–R23 (`SKILL.md:89`–`117`), then When to use / When NOT to use.
+  `references/skill-mechanics.md` (101 lines, no contents list needed under R9): Frontmatter, Front
+  door or hidden, The description (the good/bad examples plus the workflow-summary trap and the
+  third-person point kept from `meta/writing-skills`), Skill body, Agents: thin routers, Rule files,
+  Names. No rule added or renumbered; **R8 and R10 reworded** (D13), with §3, §4 and A2's prompt
+  rewritten to match. `CONTRIBUTING.md`: the four writing sections are now contributor facts plus a
+  pointer; beyond the four, "Naming conventions" folded into "Names and registration" (name rules
+  moved to the reference, the reserved list stays), the rule-file writing bullets of "Code standards
+  are rules" moved to the reference (install and glob-proving stay), and the front-door enumeration
+  is replaced by the pointer to `FRONT_DOORS`. The PR checklist cites R1–R15, R21. `meta/writing-skills/`
+  removed; `meta/PLAN.md` line 1 marks it superseded. `python3 tools/plugin-surface-check.py` → `OK`.
+  **Unverified:** nothing lints the new files until A2 lands (G1, R1's gate). `README.md:284` and
+  `:476` still name `writing-skills`; R1's prompt now carries them. B1's and P1's prompts now also read
+  `references/skill-mechanics.md`.
 
 ### A2 — `tools/skill-lint.py`: the mechanical half of the standard
 
@@ -616,59 +646,9 @@ three; then G1, A3, A4 and A5 run in sequence.
 | A5 | `docs` | `general-purpose` | A4 | — | ~110k |
 | — | try `/dev:feature`, `/design:prototype` in a real project | **the user** | G1 | — | — |
 
-No prompt has landed yet; all nine are live.
+A1 has landed; eight prompts are live.
 
 ---
-
-### A1 — writing-for-agents, the house authoring standard (general-purpose, docs)
-
-````
-Depends on: none
-Agent: general-purpose · Stack: docs
-
-Task A1 of docs/plans/014-authoring-standard-domain-language-feature-prototype.md: write the
-library's one authoring standard for anything an agent reads, as a `dev` front door, and make
-CONTRIBUTING.md point to it.
-
-Read, in this order:
-1. CLAUDE.md (repo root).
-2. The plan: §1, §2, §3, D1, D2, D8, D12, task A1, and "Close-out — every task".
-3. CONTRIBUTING.md: "SKILL.md structure" through "Names and registration", and the PR checklist.
-4. .skill-template/{reference,generator,reviewer}.SKILL.md and .skill-template/agent.md.
-5. Upstream, for ideas only (rewrite in your own words, copy no sentence):
-   https://raw.githubusercontent.com/mattpocock/skills/5863806dd4e15c63174bee4e7515a4256792ecfa/skills/productivity/writing-for-agents/SKILL.md
-   https://raw.githubusercontent.com/mattpocock/skills/5863806dd4e15c63174bee4e7515a4256792ecfa/skills/productivity/writing-for-agents/SKILL-MECHANICS.md
-6. The docstrings of tools/plugin-surface-check.py and tools/token-audit.py (what they already enforce).
-7. meta/writing-skills/SKILL.md, skimmed for anything not covered by §3 (D12).
-
-Write:
-- engineering-practices/writing-for-agents/SKILL.md: frontmatter `name: writing-for-agents`, no
-  `disable-model-invocation` (front door). Draft description, ≤ 200 chars, shape R3:
-  `Use when writing or editing a skill, agent, rule file or CLAUDE.md. Triggers "write a skill", "tighten this CLAUDE.md". Not for plan documents (plan-feature).`
-  Body: the writing levers (pointers, two loads, hierarchy, co-location, completion criteria,
-  splitting, leading words, positive targets, pruning), then §3's rule table with ids, enforcer and
-  severity, then When to use / When NOT to use.
-- engineering-practices/writing-for-agents/references/skill-mechanics.md: frontmatter, front door
-  vs hidden, the description shape with CONTRIBUTING's good/bad examples, agents as thin routers
-  with conditional Load cells, rule files (paths:, sizes), naming.
-- CONTRIBUTING.md: the four writing sections shrink to contributor facts plus a pointer; the PR
-  checklist cites rule ids.
-- `git rm -r meta/writing-skills`; first line of meta/PLAN.md:
-  `**Superseded by docs/plans/014-authoring-standard-domain-language-feature-prototype.md (D12).**`
-
-Traps:
-- The standard must obey itself: front-loaded leading words, no no-op sentences, positive targets.
-  Keep SKILL.md under 16,000 characters; anything only one branch needs goes to references/.
-- If you add, merge or reword a rule, rewrite §3, §4 and the A2 prompt block below in place. Never
-  renumber a rule id.
-- Don't register the skill or touch FRONT_DOORS. That is R1.
-- No colon followed by a space in the description line.
-
-Gate: none. The deliverable is text; G1 lints it.
-
-Commit: `feat(dev): writing-for-agents, the house authoring standard (014 A1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### A2 — tools/skill-lint.py, the mechanical half of the standard (general-purpose, infra)
 
@@ -702,6 +682,9 @@ Traps:
   Stdlib only.
 - Skip fenced code blocks for R10, R11 and R12. A Rust skill legitimately says "slice" in prose;
   R11 checks headings and table header rows only.
+- R10 also skips inline code spans, and R8 skips a backticked path holding `<`, `{`, `*` or `…` (a
+  pattern, not a pointer). A1 reworded both so the standard's own rule table, which names `TODO`
+  and `references/` in backticks, passes its own lint (D13); R1's gate lints it.
 - R12 needs the hidden-name set per plugin from .claude-plugin/marketplace.json; a name hidden in
   one plugin and absent from another is only hidden where registered.
 - Do not run the no-argument sweep as your gate, and fix no existing skill. A3 owns the sweep.
@@ -729,7 +712,8 @@ glossary and ADR formats, and make the glossary format a single source.
 Read, in this order:
 1. CLAUDE.md (repo root).
 2. The plan: §1, §2, §5, §6, D3–D6, task B1, and "Close-out — every task".
-3. engineering-practices/writing-for-agents/SKILL.md (the standard you write to).
+3. engineering-practices/writing-for-agents/SKILL.md (the standard you write to) and its
+   references/skill-mechanics.md (frontmatter, front door or hidden, the description shape).
 4. engineering-practices/brainstorming/SKILL.md and engineering-practices/decision-interview/SKILL.md.
 5. business-analysis/skills/ba-project-memory/SKILL.md: "glossary.md and active-context.md format"
    and the init procedure only.
@@ -794,7 +778,8 @@ Read, in this order:
 1. CLAUDE.md (repo root), especially the React and Mobile "data region" rules (states and the
    persistent failure notification).
 2. The plan: §2, §7, D9–D11, task P1, and "Close-out — every task".
-3. engineering-practices/writing-for-agents/SKILL.md (the standard you write to).
+3. engineering-practices/writing-for-agents/SKILL.md (the standard you write to) and its
+   references/skill-mechanics.md (frontmatter, front door or hidden, the description shape).
 4. design/ui-ux-pro-max/SKILL.md (the query contract, --design-system, --persist layout, dials).
 5. design/visual-identity/SKILL.md and design/brand-import/SKILL.md (what they own; prototype
    never writes token files).
@@ -859,8 +844,11 @@ Do:
 - Every hit from step 5 renamed to dev:feature / writing-for-agents as fits; solution-planner gains
   the conditional Load (a blueprint decision passing the three ADR tests →
   engineering-practices/domain-modeling).
-- CONTRIBUTING.md front-door list, README.md, docs/skills-catalog.md (dev chain, design catalog,
-  skill counts, front-door counts), and CLAUDE.md's catalog pointer line if a count in it changed.
+- README.md (including the `meta/` folder line and the `meta` status row, which still name
+  writing-skills without the `meta/` prefix, so the gate grep misses them), docs/skills-catalog.md
+  (dev chain, design catalog, skill counts, front-door counts), and CLAUDE.md's catalog pointer line
+  if a count in it changed. CONTRIBUTING.md no longer enumerates the front doors (A1 replaced the
+  list with a pointer to FRONT_DOORS); touch it only for a hit from step 5.
 
 Traps:
 - Skills share one slash namespace with commands per plugin: `feature` must not collide with a
