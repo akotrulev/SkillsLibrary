@@ -14,15 +14,6 @@ Everything runs **offline** against the data under `data/`. No network call, no 
 
 **What this skill owns:** the searchable corpus and its query contract, the `--design-system` generator and its persistence layout, the two reference rulesets (`references/quick-reference.md` — 119 UX guidelines by priority; `references/pro-rules.md` — native/mobile polish rules + the canonical pre-delivery checklist). **What it does not own:** any of the decisions the other `design/` skills make with the results — identity ([`design:visual-identity`](../visual-identity/SKILL.md)), token tiers ([`design:tokens`](../design-tokens/SKILL.md)), IA and page anatomy ([`design:app-structure`](../ux-patterns/SKILL.md)), the audit ([`design-auditor`](../agents/design-auditor.md)).
 
-## When to use
-
-- **Before** any new page, screen, or product gets a look — run `--design-system` and start from what it returns.
-- Whenever another `design/` skill needs a fact from its domain: a palette, a font pairing, a style profile, a UX guideline, an icon, a chart type, a landing structure, a motion preset.
-- When implementing UI on any of the 22 supported stacks — `--stack` returns that stack's own conventions.
-- When a UI "doesn't look professional" and the cause isn't obvious — `references/pro-rules.md`.
-
-Skip it for pure backend logic, API/database design, non-visual performance work, or infrastructure — unless the task changes how something **looks, feels, moves, or is interacted with**.
-
 ## Rule categories by priority
 
 Follow priority 1→10 to decide which category to focus on first; use `--domain <Domain>` for full details. The full rule text for every category lives in `references/quick-reference.md` — read it on demand rather than loading it every time.
@@ -193,13 +184,3 @@ Numbered because audit finding ids cite the numbers: new checks are appended, an
 5. `--persist` passed `--output-dir` at the project root; `--force` was used only with explicit authorization, after reading the existing `MASTER.md`.
 6. Accessibility queries named an **observable outcome**, not a generic "accessibility" term.
 7. Corpus facts beat prose defaults; the owning `design/*` skill supplied the judgment on top.
-
-## Related
-
-- [`design:visual-identity`](../visual-identity/SKILL.md) — turns `style`/`color`/`typography`/`product` results into one per-brief direction.
-- [`design:tokens`](../design-tokens/SKILL.md) — takes the generator's `--color-*` / `--space-*` block into primitive→semantic→component tiers.
-- [`design:motion`](../motion/SKILL.md) — owns how the `gsap` presets are applied and gated behind `prefers-reduced-motion`.
-- [`design:landing-patterns`](../landing-patterns/SKILL.md) — owns the `landing` section-order and conversion patterns.
-- [`design:app-structure`](../ux-patterns/SKILL.md) · [`design:ux-review`](../ux-review/SKILL.md) — consume `--domain ux` for design and for review.
-- [`design:ui-code-audit`](../ui-code-audit/SKILL.md) — pairs the web interface guidelines with `--stack` and `--domain react` rules; on a native app it judges against `--domain web`, the stack file and `references/pro-rules.md` instead.
-- [`design-auditor`](../agents/design-auditor.md) — the whole-design audit; queries this corpus per section.

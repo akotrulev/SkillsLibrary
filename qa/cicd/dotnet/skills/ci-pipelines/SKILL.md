@@ -101,8 +101,3 @@ docker run --rm --init --ipc=host -e BASE_URL -e E2E_USER -e E2E_PASSWORD \
   GitHub-hosted and Microsoft-hosted Ubuntu runners have a Docker daemon. A GitLab Docker-executor job needs
   the `docker:dind` service of `references/gitlab-ci.md`, and a `-v` source must sit under `$CI_PROJECT_DIR`,
   the job directory dind shares; `$PWD/…` from the project root does.
-
-## Cross-references
-
-Each `references/<tool>.md` carries its own cross-references to sibling skills (DB verification,
-test environments, CI, chaos). Route there after picking the tool.

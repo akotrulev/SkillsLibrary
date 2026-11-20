@@ -242,18 +242,3 @@ waits for the collapsed state before the resize back, so the test never grows a 
 - **Viewport is configured** (`test.use` per row, or a project) — except the deliberate resize inside
   live-resize specs. Tests reach the page only through page objects and the `Layout` fixture.
 - Test names are `Should_X_When_Y`; one logical assertion per test; `strict: true`.
-
-## Cross-references
-
-- `qa-java:responsive-testing` · `qa-dotnet:responsive-testing` — sibling stacks (Playwright-Java + TestNG ·
-  Playwright .NET + NUnit); same four ideas, different APIs.
-- `qa-typescript:ui-tests-playwright` — the fixtures this extends, and
-  `references/emulation-and-mobile-web.md` for viewport, `screen`, device projects and media features.
-- `qa-typescript:visual-regression` — the pixel complement: one baseline per viewport project, after the
-  structural checks pass.
-- `qa-typescript:accessibility-testing` — reflow/zoom (WCAG 1.4.10) and touch-target sizes at mobile widths
-  overlap with a11y scans; run them at the same widths.
-- `qa-typescript:data-driven-testing` — the breakpoint rows are its row-binding pattern applied to widths.
-- `frontend/react/skills/responsive-design` (`fe-react:responsive-design`, the FE peer) — the dev-side skill
-  that defines the breakpoint contract this skill reads; its variant-suffixed test ids (`Nav.Desktop` /
-  `Nav.Hamburger`) are what make the variant swap assertable.

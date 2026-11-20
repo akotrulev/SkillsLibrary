@@ -27,20 +27,6 @@ This skill pins only `stripe`; `@playwright/test` is in the **Versions** table o
 | `references/webhooks.md` | The SUT's webhook handler: signed test events, duplicate delivery, bad signature, `stripe listen` / `stripe trigger` in local runs and CI |
 | `references/checkout-ui.md` | Checkout in the browser: card entry in Stripe's iframe, completing or failing the 3DS2 test challenge through nested `frameLocator` chains |
 
-## When to use
-
-- A checkout, a pay endpoint or a subscription must be proven against Stripe's sandbox, not a stub
-- Decline handling, 3DS/SCA, refunds or partial refunds must reach the right order state
-- The SUT's webhook handler must verify signatures and apply each event once
-- A renewal, trial end or dunning path needs simulated time (test clocks)
-
-## When NOT to use
-
-- The provider is replaced by a canned response to test UI states → `network-mocking`
-- Load on the pay endpoint → `load-testing` (never against a provider sandbox: it rate-limits)
-- Purchase events sent to GA4 or a pixel → `analytics-testing`
-- The provider SDK itself — test what the SUT does with it
-
 ## Decision matrix
 
 | To prove | Drive | Assert |
@@ -81,11 +67,3 @@ Adyen's test-card page; webhooks are verified with the HMAC key from the Custome
 base URL `api-m.sandbox.paypal.com` with sandbox app credentials and sandbox buyer accounts; guard on the base
 URL; webhooks are verified through the verify-webhook-signature API. Look up each provider's current test data at
 the time of writing; never copy it from an old suite.
-
-## Handoffs
-
-- API clients and schemas on `APIRequestContext` → `qa/typescript/skills/api-test-author/playwright`, `api-models`
-- Fixtures, page objects, config → `qa/typescript/skills/ui-test-author/playwright`
-- Builders → `qa/typescript/skills/test-data-builder`; order-state probes → `qa/typescript/skills/db-testing`
-- CI secrets and the `stripe listen` step → `qa/cicd/typescript/skills/ci-pipelines`
-- Java and .NET → `qa-java:payment-testing`, `qa-dotnet:payment-testing`

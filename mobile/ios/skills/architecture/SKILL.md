@@ -20,23 +20,6 @@ SwiftUI is already a state-driven view layer: a view is a function of its state,
 
 An iOS 16 project is not flagged for lacking `@Observable`; migration is [`mobile-ios:migration`](../migration/SKILL.md)'s. Swift and isolation rules (`@MainActor` default in an app module, `nonisolated` in packages) are [`basics`](../basics/SKILL.md).
 
-## When to use
-
-- A feature must share state across views or screens
-- "Do I need a view model?", "where does this service live?"
-- Injecting a client, clock or store into a view
-- Choosing `@State` vs `@Bindable` vs `@Environment`
-
-## When NOT to use
-
-- `URLSession` clients, retries, token refresh → `mobile-ios:networking`
-- SwiftData / Keychain / `UserDefaults` → `mobile-ios:offline-and-storage`
-- Route paths and sheets → [`navigation`](../navigation/SKILL.md)
-- Form state and validation → `mobile-ios:forms`
-- Concurrency and isolation rules → [`basics`](../basics/SKILL.md)
-- Existing UIKit view controllers → [`uikit`](../uikit/SKILL.md)
-- Another stack → `mobile-react-native:architecture`, `mobile-android:architecture`
-
 ## Inputs needed
 
 - Deployment target (17 vs 16) and whether the codebase already has a view-model or TCA convention
@@ -187,14 +170,3 @@ The standards this skill's output must meet are the mobile-ios rule files, not a
 - [ ] All dependencies arrive via `init` or `@Environment` from the `App` composition root; no `.shared`
 - [ ] No protocol with one implementation; no container library
 - [ ] Loading states are one enum covering loading, loaded, failed
-
-## Handoffs
-
-- Views, previews, `.task` → [`ui-components`](../ui-components/SKILL.md)
-- Routes → [`navigation`](../navigation/SKILL.md)
-- Clients and retries → `mobile-ios:networking`
-- Persistence → `mobile-ios:offline-and-storage`
-- Failure, stale, offline UI → `mobile-ios:error-handling`
-- Tests for models → `mobile-ios:unit-testing`
-- `ObservableObject` → `@Observable` → `mobile-ios:migration`
-- Concurrency and isolation → [`basics`](../basics/SKILL.md)

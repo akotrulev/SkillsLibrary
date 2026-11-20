@@ -19,20 +19,6 @@ How a WPF codebase is built and modernized **as WPF**: **MVVM with CommunityTool
 | New in .NET 10 | `Grid ColumnDefinitions="1*, Auto"` short form; `MessageBox` buttons (`RetryCancel`, `AbortRetryIgnore`, `CancelTryContinue`); clipboard shared with WinForms (`GetData` obsolete for `TryGetData<T>`) | |
 | Packaging | Unpackaged by default; MSIX optional | Package identity is needed only for APIs that require it |
 
-## When to use
-
-- The project has `<UseWPF>true</UseWPF>` and `.xaml` using `System.Windows`
-- "Add dark mode", "use the Fluent look", "add a view model", "modernize this WPF window"
-
-## When NOT to use
-
-- WinUI project (`UseWinUI`) → [`ui-components`](../ui-components/SKILL.md), [`styling`](../styling/SKILL.md)
-- Moving views to WinUI, .NET Framework → .NET 10 → `desktop-windows:migration`
-- Win32 / WinRT calls and hosting → `desktop-windows:interop`
-- WinForms project → `desktop-windows:winforms`
-
----
-
 ## Stay in the lane
 
 - **Detect first:** `UseWPF`, `System.Windows` in `.xaml`, `App.xaml` with `StartupUri`. Report the detected lane and TFM before changing anything.
@@ -112,11 +98,3 @@ Same base as every desktop app (`desktop-shared:observability`): `ILogger` throu
 - **`StartupUri` left in while DI builds the window** — two windows.
 - **Static `SystemEvents` handlers not removed** — the window never collects.
 - **Literal colours** — break High Contrast and dark.
-
-## Handoffs
-
-- Lane changes, .NET Framework upgrade → `desktop-windows:migration`; Win32/WinRT, HWND → `desktop-windows:interop`
-- View-model and DI shape → [`architecture`](../architecture/SKILL.md); forms → [`forms`](../forms/SKILL.md) (WPF notes above)
-- HTTP → `desktop-windows:networking`; storage and secrets → `desktop-windows:offline-and-storage`
-- Window and command behaviour → `desktop-windows:windows-and-navigation`
-- Tests → `desktop-windows:unit-testing`; ids → `desktop-windows:test-ids`

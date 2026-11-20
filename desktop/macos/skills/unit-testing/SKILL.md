@@ -27,22 +27,6 @@ Owns **every dev-side test of logic the agent writes**: models, services, mapper
 
 Detect first: the test target layout, XCTest vs Swift Testing mix, existing fakes and builders, the snapshot library and the test plans; extend them. Never rewrite a stable XCTest suite to Swift Testing as a side effect.
 
-## When to use
-
-- A model, service, mapper, formatter, validator or state machine has logic
-- Region states from [`error-handling`](../error-handling/SKILL.md): failed keeps the filters, stale keeps the rows, offline is not failed, wake revalidates once
-- Command enablement: a menu command is disabled, not hidden, in the states the model says
-- The request policy against a `URLProtocol` stub; a `Codable` type, a URL-scheme parser, a route builder, a version comparison
-- Multi-window state: one model, two consumers
-
-## When NOT to use
-
-- Window journeys, menus, panels, drag and drop, permission prompts, VoiceOver → `qa-desktop-<lang>` (peer)
-- Markup-only views with no branches: a snapshot of hand-written layout is a tautology
-- API contract tests and real-backend integration → `qa-api-typescript` / `qa-api-dotnet` / `qa-api-java`
-- Writing `accessibilityIdentifier`s → [`test-ids`](../test-ids/SKILL.md)
-- Windows apps → `desktop-windows:unit-testing`; iOS → `mobile-ios:unit-testing`
-
 ## Test what has behaviour
 
 | Unit | Test? | Assert |
@@ -211,10 +195,3 @@ The tests cover **at least 80% of the code the change wrote**: every type it cre
 - Mutate one rule in the code under test; a test fails with a message naming the value.
 - Line coverage of the changed code is at least 80%, reported as a figure.
 - No `XCTAssert` in a Swift Testing file; no `try!`; no `sleep` or `Task.sleep`.
-
-## Handoffs
-
-- Window journeys, menus, panels, VoiceOver passes → `qa-desktop-<lang>` · API contract tests → the `qa-api-<stack>` peer
-- Identifiers → [`test-ids`](../test-ids/SKILL.md) · state ownership and seams → [`architecture`](../architecture/SKILL.md)
-- Request policy under test → [`networking`](../networking/SKILL.md) · region states → [`error-handling`](../error-handling/SKILL.md)
-- Test plans and targets → [`project-setup`](../project-setup/SKILL.md)

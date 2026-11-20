@@ -24,18 +24,6 @@ This is the BDD analogue of the UI project scaffold; it assumes a Playwright (we
 - Features under `src/test/resources/features/`; step defs + hooks + context under `src/test/java/.../steps` and `.../support`
 - `io.qameta.allure:allure-cucumber7-jvm` **3.0.0** when the project reports through Allure (the library default) — allure-java 3.0, the same major as every other `allure-*` module (Java 17+; the Allure Gradle plugin 4.3.0 rejects mixed 2.x/3.x adapters)
 
-## When to use
-
-- A Java UI/mobile project needs Cucumber-JVM added (BOM, packages, runner, config, hooks, DI).
-- Starting a Cucumber-JVM suite from zero.
-
-## When NOT to use
-
-- Writing `.feature` files → `qa/_shared/bdd/feature-file-writer`
-- Generating step-definition classes → `qa/java/skills/gherkin-step-code`
-- Building page objects → `qa/java/skills/page-object-design` / `page-objects-from-url`
-- BDD in .NET/TS → `qa/{dotnet,typescript}/skills/bdd-project-scaffold` (those use Reqnroll / playwright-bdd)
-
 ## Inputs needed
 
 Confirm at most 2–3.
@@ -265,12 +253,3 @@ Page objects extend the existing `BaseAppiumPage` and take the **driver**, never
 
 The standards a BDD project must meet are the qa-java rule files, not a list here: `qa-java-bdd.md`, `qa-java-suite.md` (the build and the Cucumber BOM), `qa-java-page-objects.md` (the reused page objects) and `qa-java.md` (core).
  Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where they and this skill's templates disagree, the rule files win. PicoContainer is zero-config: the BOM-pinned `cucumber-picocontainer` dependency is the entire wiring, and the BDD layer reuses the existing UI project's page objects rather than re-declaring them.
-
-## Handoffs
-
-- Feature files → `qa/_shared/bdd/feature-file-writer`
-- Step definitions + POM wiring → `qa/java/skills/gherkin-step-code`
-- Page objects → `qa/java/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
-- Allure reporting → `qa/reporting/java/skills/test-reports`
-- Failure-evidence rules the `Hooks` class follows, and reading a scenario's trace → `qa/java/skills/evidence-capture`
-- CI (feature/tag shard, publish report) → `qa/cicd/java/skills/ci-pipelines`

@@ -12,23 +12,6 @@ Scaffolds TS (strict mode) pattern implementations into the active repo. Prefers
 
 Detect the project's Node major (`package.json` `engines`, `.nvmrc`, or lockfile) before scaffolding. Node 20 is EOL since April 2026 — flag it, don't target it. Nothing generated here is Node-version-gated between 22 and 24.
 
-## When to use
-
-- Replacing `if`/`else` / `switch` chains with discriminated unions
-- Introducing a `Result<T, E>` type for domain failures
-- Promoting string ids to branded types
-- Extracting an `Options` config from scattered `process.env` reads (with Zod validation)
-- Wrapping a function/handler with logging / retry / metrics via HOF decorators
-- Building a repository when there's a real abstraction need (not just for the sake of it)
-
-## When NOT to use
-
-- Explanations → `backend/node/skills/pattern-guide`
-- Reviewing → `backend/node/skills/code-review`
-- React component patterns → `frontend/react/skills/component-writer`
-- React Native → `mobile/react-native` (the `mobile-react-native` agent)
-- Scaffolding tests → `backend/node/skills/unit-testing` for the class/function-level tests (Vitest, no HTTP); `qa/typescript/skills/api-test-author/writer` (peer) once it's reachable over HTTP
-
 ## Inputs needed
 
 1. **Pattern** to scaffold
@@ -325,12 +308,3 @@ After scaffolding, run the project's own scripts (from `package.json`, with its 
 - lint — 0 warnings
 - test — generated tests pass
 - Sweep old call sites; remove the `if-else` chain the new pattern replaces
-
-## Handoffs
-
-- Conceptual lookup → `backend/node/skills/pattern-guide`
-- Reviewing the result → `backend/node/skills/code-review`
-- React patterns → `frontend/react/skills/component-writer`
-- API DTOs (Zod schemas) → `qa/typescript/skills/api-models`
-- Unit-testing the generated code → `backend/node/skills/unit-testing`
-- API tests (contract/integration) → **peer** `qa/typescript/skills/api-test-author/writer`

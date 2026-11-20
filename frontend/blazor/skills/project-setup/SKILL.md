@@ -10,22 +10,6 @@ Stands up a **Blazor Web App** (.NET 8/9/10) from zero: the interactivity choice
 
 **Version rule:** detect the project's `TargetFramework` **first** — it drives every version-sensitive recipe below. net10 is the primary target; net8 (LTS, supported to Nov 2026) and net9 (STS, out of Microsoft support May 2026 — support existing apps but flag the upgrade) are tagged fallbacks. Never emit a net10-only template flag or API into a down-level project.
 
-## When to use
-
-- New Blazor Web App solution
-- Deciding the interactivity model (`--interactivity` flag) and its location (global vs per-page)
-- Deciding the render mode for a specific surface
-- Setting up the server + `.Client` layout, feature folders, CPM, `.editorconfig`
-
-## When NOT to use
-
-- Adding a component / page to an existing solution → `frontend/blazor/skills/component-writer`
-- Request/response data fetching → `frontend/blazor/skills/data-fetching`
-- Live/push data → `frontend/blazor/skills/realtime`
-- Component library + theming → `frontend/blazor/skills/component-library`, `frontend/blazor/skills/styling`
-- Auth0 wiring → `auth/auth0-blazor`
-- Non-Blazor .NET project layout → the `backend/dotnet` dev stack, if installed
-
 ## Inputs needed
 
 0. **TargetFramework** — net8.0 / net9.0 / net10.0 (drives template flags + recipe variants)
@@ -200,12 +184,3 @@ The standards this skill's output must meet are the fe-blazor rule files, not a 
 - App **boots**: `dotnet run`, home page renders.
 - **One page per chosen render mode renders** — a static SSR page, and one interactive page per interactivity model in use (confirm the WASM page hydrates and the Server page opens a circuit, `curl -s <route>` returns the static SSR content in the HTML, and each island's root gains `data-hydrated="true"`).
 - CPM resolves (no version on any `PackageReference`); `.editorconfig` present and enforced.
-
-## Handoffs
-
-- Fetch data into these surfaces → [`data-fetching`](../data-fetching/SKILL.md) (request/response) · [`realtime`](../realtime/SKILL.md) (live/push)
-- Scaffold pages/components → [`component-writer`](../component-writer/SKILL.md)
-- Component library + theme → [`component-library`](../component-library/SKILL.md), [`styling`](../styling/SKILL.md), `design/theme-presets`
-- Auth → `auth/auth0-blazor`
-- Concepts/render-mode explanation → [`basics`](../basics/SKILL.md)
-- CI pipeline for the solution → `qa/cicd/dotnet` (peer, invoked separately)

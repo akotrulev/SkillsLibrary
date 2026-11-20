@@ -8,23 +8,6 @@ disable-model-invocation: true
 
 Produces a Session-Based Test Management (SBTM) charter: a short, mission-shaped brief that scopes one or two hours of deliberate, evidence-producing exploration. Charters are the lightweight planning artifact between "the suite of automated tests" and "let's poke around and see what breaks" — they keep exploration learnable, comparable, and reportable.
 
-## When to use
-
-- A new feature is ready and the automated suite is intentionally thin pending learning
-- Risk-tilting tests in `qa/manual/test-strategy` call out "exploratory: high"
-- A regression has surfaced and you want a focused investigation
-- Onboarding a new tester — charters double as a tour of the system
-- Post-incident learning: explore the area to find adjacent risks
-- Pre-release "shake-down" before a major launch
-
-## When NOT to use
-
-- An agent should explore the running app itself → `qa/manual/app-exploration` (the `qa-explorer` agent): it owns the run mode, the safe-action floor, the checks and the report; this skill gives it the mission form
-- Step-by-step formal test cases → `qa/manual/test-case-writer`
-- Filing a defect → `qa/manual/bug-report-writer`
-- The whole release plan → `qa/manual/test-strategy`
-- Automated regression scaffolding → the per-stack `qa/<stack>/skills/api-test-author/...` / `qa/<stack>/skills/ui-test-author/...`
-
 ## What a charter is (and isn't)
 
 A charter is a **mission**, not a script. It says *what we're exploring* and *why* — never *how* step by step. The tester picks heuristics, tours, and oracles during the session.
@@ -252,12 +235,3 @@ Pick the two or three that fit the area. A charter that says "look for bugs" pro
 7. Define the reportable outcome
 8. Hand off to the tester; the tester runs the session, fills in the report
 9. Bugs/questions feed back to the team
-
-## Handoffs
-
-- An agent runs the session on a live app → `qa/manual/app-exploration` (the `qa-explorer` agent)
-- Bugs found during the session → `qa/manual/bug-report-writer`
-- Distill docs into a test-basis document when they exist → `qa/manual/requirements-breakdown`
-- Strategy that includes exploratory effort → `qa/manual/test-strategy`
-- Automation candidates → `qa/<stack>/skills/api-test-author/writer` / `qa/<stack>/skills/ui-test-author/<tool>`
-- Cross-team status update → `communication/stakeholder-updates`

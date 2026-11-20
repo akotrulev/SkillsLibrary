@@ -20,21 +20,6 @@ Motion on a phone runs on the **UI thread** or it janks. This skill owns Reanima
 
 **Detect the Gesture Handler major from `package.json` before writing a gesture.** A 2.x snippet in a 3.x project (or the reverse) compiles to a dead gesture. Never up-level the library as a side effect ([`migration`](../migration/SKILL.md)).
 
-## When to use
-
-- Press feedback, entrances, exits, springs, shared values and derived values
-- Drag, swipe-to-delete, pinch, pan-to-dismiss, bottom-sheet-like interactions
-- Layout animation when items insert, remove or reorder
-- A scroll-linked header or parallax
-- Honouring the system Reduce Motion setting
-
-## When NOT to use
-
-- Where motion belongs in the product, durations, restraint → [`design:motion`](../../../../design/motion/SKILL.md)
-- Screen transitions, native stack and tab animations → [`navigation`](../navigation/SKILL.md)
-- Jank from list rendering → [`performance`](../performance/SKILL.md)
-- Native menus, sheets, system modals (already animated by the OS) → [`ui-components`](../ui-components/SKILL.md)
-
 ## Rules
 
 The standards every animation must meet are the mobile-react-native rule files, not a list here: `react-native-a11y.md` (motion, Reduce Motion, test ids) and `react-native-ui.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
@@ -184,12 +169,3 @@ export function Draggable({ children }: { children: React.ReactNode }) {
 - `rg "\.value\b"` over components under the compiler → none; `rg "onStart|onEnd"` on an SDK 58 project → none in gesture config (Q3, Q4).
 - A list with insert / remove: rows animate and reflow; none is keyed by index.
 - A swipe inside a vertical scroller does not scroll at the same time.
-
-## Handoffs
-
-- Where / whether, durations, restraint → [`design:motion`](../../../../design/motion/SKILL.md)
-- Screen transitions, native stack / tabs → [`navigation`](../navigation/SKILL.md)
-- Jank, list rendering, profiling → [`performance`](../performance/SKILL.md)
-- Roles, labels, focus and Reduce Motion as an accessibility requirement → [`accessibility`](../accessibility/SKILL.md)
-- Upgrading Reanimated or Gesture Handler → [`migration`](../migration/SKILL.md)
-- Test ids on animated targets → [`test-ids`](../test-ids/SKILL.md)

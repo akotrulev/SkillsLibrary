@@ -8,19 +8,6 @@ disable-model-invocation: true
 
 Cross-engine principles for diagnosing and fixing slow queries. Applies to PostgreSQL / SQL Server / MySQL / MongoDB / DynamoDB / Cosmos DB. Engine-specific syntax lives in `data/<db>`.
 
-## When to use
-
-- A query is slow and the user wants the systematic approach before fiddling with hints
-- Designing the first index for a new query pattern
-- Choosing between `OFFSET` and keyset pagination
-- Reading a plan / `EXPLAIN` / `executionStats` structurally
-- Spotting anti-patterns (N+1, missing projections, accidental full scans, unbounded queries)
-
-## When NOT to use
-
-- Engine-specific syntax / DMVs / system views → `data/<db>`
-- Caching as a substitute for a missing index → `data/_shared/caching-patterns`
-
 ## The universal triage
 
 For every slow query, walk these in order. **Don't skip steps.**
@@ -176,10 +163,3 @@ The query standards for SQL files (bound parameters, explicit columns, bounded q
 3. Propose the smallest fix that addresses the symptom; reach for the engine's specific feature only when the universal one doesn't apply.
 4. Confirm with a re-run plan; measure latency before/after.
 5. Add a test (`qa/<stack>/skills/api-test-author/generator`) that asserts the response shape so the optimization doesn't regress the contract.
-
-## Handoffs
-
-- Engine-specific syntax → `data/<db>`
-- Caching layer → `data/_shared/caching-patterns`
-- Tracing the query in prod → `observability/opentelemetry-{stack}` (slow query = long span)
-- Schema redesign → `data/_shared/schema-design`

@@ -8,21 +8,6 @@ disable-model-invocation: true
 
 The on-disk contract every training dataset in this domain obeys: the record schema, the conversation format, how VLM examples reference images, the provenance/license fields that ride on every record, and how splits and shards are laid out. Stage skills (`training-data:pretraining-corpus`, `training-data:instruction-sft`, `training-data:preference-data`, `training-data:eval-sets`, `training-data:vision-language-data`) fill in *what* goes in a record; this skill fixes *how* it is stored so every downstream tool — the tokenizer, the trainer, the auditor — reads it the same way.
 
-## When to use
-
-- Deciding the record schema and file format before generating or curating any example
-- Choosing a conversation format (OpenAI `messages` vs ShareGPT vs raw chat-template string)
-- Laying out train / validation / test splits and sharding a large corpus
-- Fixing the provenance, license, and PII fields that must exist on every record
-- Deciding how VLM records reference images (path vs base64 vs URL) and where images live
-
-## When NOT to use
-
-- Deduplication, decontamination, quality filtering → `training-data:data-quality`
-- Generating records with a teacher model → `training-data:synthetic-generation`
-- Corpus collection / cleaning mechanics → `training-data:pretraining-corpus`
-- Image-specific record content (bbox, OCR, VQA) → `training-data:vision-language-data`
-
 ## The one rule: JSONL, one example per line
 
 **Every dataset in this domain is newline-delimited JSON (`.jsonl`), UTF-8, one complete example per line, no trailing commas, no wrapping array.** It streams without loading the whole file into memory, `wc -l` counts examples, `head`/`sed`/`shuf` slice it, and a corrupt line fails one example instead of the file. Parquet is the *export* target for very large pretraining corpora where columnar compression pays (note it in the dataset card); JSONL stays the authoring and review format. Never author a dataset as one giant JSON array.

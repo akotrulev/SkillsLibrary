@@ -10,17 +10,6 @@ This skill stands up a **runnable Appium 3 test project from zero**: the package
 
 **Version rule:** new projects use Node 24 (22 maintenance) and TypeScript strict mode. WebdriverIO 10 needs Node ≥ 22.19 and an Appium 3 server. Node 20 is end-of-life: never target it.
 
-## When to use
-
-- A fresh repo with no TypeScript mobile test project, and the user wants iOS or Android coverage.
-- The user asks which versions, layout or Appium setup a WebdriverIO mobile framework should use.
-
-## When NOT to use
-
-- The project exists → author into it with `qa/typescript/skills/ui-test-author/appium`.
-- Real-device clouds → `qa/typescript/skills/device-cloud`.
-- Web-UI or API scaffolding → the matching `*-project-setup` skill.
-
 ## Versions
 
 The table is the **Versions** table of `ui-test-author/appium/SKILL.md`, and `assets/package.json` there holds the same pins.

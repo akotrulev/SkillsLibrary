@@ -10,18 +10,6 @@ Breadth before depth. A backend of any size cannot be read end-to-end in one pas
 
 It also produces the thing that keeps the whole exercise honest: a **coverage ledger** where every entry point in the system is assigned to exactly one area or explicitly parked. Without it, "we documented the system" means "we documented the parts we happened to open".
 
-## When to use
-
-- Step 1 of a `be-documenter` run
-- An inherited or long-lived backend needs decomposing before anyone can reason about it
-- A `solution-planner` `RESUME`/`EXTEND` run needs to know what functional areas already exist in the code
-
-## When NOT to use
-
-- One area is already named and needs tracing → `dev:doc-feature-trace`
-- The area map already exists and is confirmed → go straight to tracing (re-survey only what the git delta touched)
-- The goal is finding defects → `dev:audit-feature` (it decomposes into *surfaces* for fault-finding, not *areas* for comprehension)
-
 ## Output
 
 The area map and reading plan. On a `be-documenter` run they are presented for confirmation and then recorded in the KB's `system-overview.md` (per `business-analysis:knowledge-base`): each area under the people who use it, every parked surface under *What is not documented* with its reason. The per-surface coverage ledger is working material: it lives in the session, or in the plan's §2 in a run of more than one session, until the last task has checked every surface against an area or the parked list. The orientation cache holds only the surface **counts** and the parked list; a 120-controller ledger belongs in the KB, not in a file meant to orient a run in one read.
@@ -180,14 +168,6 @@ If the human has no opinion (common — they may know the business but not the c
 6. Depth is assigned per area and justified, not uniform by default; every area carries a token estimate and no session exceeds 135k.
 7. The split was **confirmed** — or the human declined to weigh in, and the low-confidence names are marked `#inferred`.
 8. A reading plan of more than one session is written as a plan, and nothing was traced in the survey session.
-
-## Handoffs
-
-- **→ `dev:doc-feature-trace`** — the reading plan drives it, one area at a time, in the confirmed order.
-- **→ `dev:doc-business-model`** — the area names become `areas/<area>.md`; the Foundations table and the coverage ledger become part of `system-overview.md`.
-- **→ `business-analysis:knowledge-base`** — the area map is recorded in `system-overview.md` under the KB contract.
-- **→ `code-auditor`** — if the survey's findings are dominated by defects rather than capabilities, the user wants an audit, not documentation. Say so.
-- **→ `dev:plan-blueprint`** — a confirmed area map of an existing system is directly reusable as the functional-area decomposition of a plan to extend it.
 
 ## Version policy
 

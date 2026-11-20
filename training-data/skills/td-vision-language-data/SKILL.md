@@ -8,21 +8,6 @@ disable-model-invocation: true
 
 The image-text data a small vision-language model learns from. VLM data is the text domain plus one hard new axis — **the image and the text must actually correspond, the image must survive the pipeline intact, and the model must see the image token where the architecture expects it.** This skill is the multimodal extension across *all* stages (VLM pretraining pairs, VLM SFT, VLM preference, VLM eval); it builds on the text stage skills and `training-data:dataset-formats`' VLM record shape rather than replacing them.
 
-## When to use
-
-- Building image caption / alt-text pretraining or SFT data
-- Visual QA (VQA) — questions about an image
-- OCR / document understanding (receipts, forms, charts, screenshots)
-- Region grounding — bounding boxes / points tied to referring expressions
-- Multi-image or interleaved image-text data
-- VLM preference or eval data (chosen/rejected on an image; scored visual eval)
-
-## When NOT to use
-
-- Text-only data of any stage → `training-data:instruction-sft` / `training-data:preference-data` / `training-data:pretraining-corpus` / `training-data:eval-sets`
-- The base record envelope, splits, sharding → `training-data:dataset-formats` (this skill adds the image parts)
-- Dedup/decontam algorithms → `training-data:data-quality` (this skill adds image dedup)
-
 ## The VLM record — image as a typed content part
 
 Use the `training-data:dataset-formats` VLM shape: images are typed parts inside `content`, referenced by **relative `path` to a content-hashed file** in a sibling `images/` directory — never base64 in the JSONL, never a remote URL. The image token placement matters:

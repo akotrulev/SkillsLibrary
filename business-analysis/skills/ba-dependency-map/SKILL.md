@@ -10,21 +10,6 @@ Records how features connect: what **starts** each piece of behavior (a trigger)
 
 A reaction that nobody fires, an event that nobody consumes, a field two features write with no rule between them: each is invisible inside one feature's spec and visible the moment the connections sit in one place.
 
-## When to use
-
-- A feature fires, or reacts to, something another feature owns: an API call, a schedule, a timeout, a webhook, an internal event
-- Two features write or read the same entity or field
-- The user asks "what else happens when X", "who else uses this data", "what must never be violated"
-- A conflict sweep needs its pair list, or an entity grid needs trigger ids for its columns
-- The KB is being built or refreshed from specs or from code
-
-## When NOT to use
-
-- One entity's lifecycle → `business-analysis:state-grid`
-- Rule tables for one decision point → `business-analysis:decision-table`
-- Step paths and failure exits of one process → `business-analysis:process-flow`
-- Test cases for any of this → `qa/manual/*`. This skill records what the software does and how features interact, never how to test it
-
 ## Contract with the KB
 
 Per `business-analysis/skills/ba-project-memory`: **read first** (`INDEX.md`, the three files if they exist, and the entity grids and decision files the feature touches), **update after** (the three files, `INDEX.md`, `active-context.md`). New rows join the existing files; a second events file for one feature is the anti-pattern.
@@ -123,12 +108,3 @@ Bad: the bookings spec says a cancellation frees a seat; the credits spec says c
 Also bad: one row per field of every table. The shared-data file holds only what two features touch.
 
 A filled example is in `references/example-dependency-map.md`.
-
-## Handoffs
-
-- Every finding → `business-analysis/skills/ba-feature-conflict-check`
-- Grid columns become trigger ids → `business-analysis/skills/ba-entity-state-grid`
-- A reaction hides a multi-input rule → `business-analysis/skills/ba-decision-table`
-- A flow's "who else reacts" answers → recorded here from `business-analysis/skills/ba-process-flow-diagram`
-- KB mechanics and the feature slice → `business-analysis/skills/ba-project-memory`
-- The QA consumer reads these files as data through `qa/manual/requirements-breakdown/references/connections.md`; a format change here updates that file in the same commit

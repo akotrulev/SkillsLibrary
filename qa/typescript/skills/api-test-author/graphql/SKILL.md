@@ -233,18 +233,3 @@ transport contract differs.
 ## Rules
 
 The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md`, `api-tests.md` and `test-data.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
-
-## Cross-references
-
-- `qa-typescript:api-tests` — the **REST sibling** this extends: the Schema + Client + Spec
-  layering, `BaseClient`-over-`fetch`, `ProblemDetailsSchema` (the REST analogue of `GraphQLErrorSchema`), and
-  the env/cleanup discipline. Read it for the shared spine.
-- `qa-java:api-tests-graphql` · `qa-dotnet:api-tests-graphql` — the sibling stacks (RestAssured+TestNG
-  treating `/graphql` as a POST · NUnit+RestSharp); same four ideas, different runner/client/assertion libs.
-- `qa-typescript:realtime-stream-testing` — **GraphQL subscriptions** (graphql-ws over WebSocket) live here;
-  this skill stops at queries + mutations.
-- `qa-typescript:api-models` — generate the typed `data` Zod schema / operation types (GraphQL Code Generator)
-  in isolation; this skill consumes them.
-- `qa-typescript:test-login-tokens` — obtain the `GRAPHQL_TOKEN` bearer for authenticated operations.
-- `qa-typescript:load-testing` — GraphQL **load** + the **N+1 / DataLoader** performance pitfall; out of scope for this
-  functional skill. `qa-typescript:test-reports` — each operation renders as a named result.

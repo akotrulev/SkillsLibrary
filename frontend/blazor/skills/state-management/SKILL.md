@@ -8,22 +8,6 @@ disable-model-invocation: true
 
 The right place for state in Blazor (.NET 8/9/10) depends on lifetime + scope + render mode. The default: **scoped DI services with a `Changed` event**, `[PersistentState]` (net10) or `PersistentComponentState` (net8/net9) to bridge prerender → interactive, `CascadingValue` for cross-cutting concerns. Avoid Fluxor / Redux-style stores unless the team is genuinely committed to the pattern.
 
-## When to use
-
-- Multiple components need to share state
-- Page lifecycle changes (navigate, refresh, prerender → interactive) lose data the user expects to survive
-- App-wide concerns (current user, theme, feature flags, cart) need a home
-- Migrating from prop-drilling / static fields to a sane pattern
-- Picking between scoped service + event, CascadingValue, Fluxor
-
-## When NOT to use
-
-- Component scaffolding → `frontend/blazor/skills/component-writer`
-- Forms specifically → `frontend/blazor/skills/forms`
-- Render mode trade-offs → `frontend/blazor/skills/basics`
-- React → `frontend/react/skills/state-management`
-- Auth state from Auth0 → `auth/auth0-blazor`
-
 ## Lifetime / scope mental model
 
 Blazor's DI scope behavior differs between Server and WASM. Pick the right lifetime for **what the state must outlive**.
@@ -251,11 +235,3 @@ The standards this skill's output must meet are the fe-blazor rule file `blazor.
 5. Consumer pattern: inject + `Changed += StateHasChanged` + `IDisposable`.
 6. For prerendered + interactive pages, persist initial fetches — `[PersistentState]` on net10, `PersistentComponentState` on net8/net9.
 7. For app-wide concerns, add a `CascadingValue` at the root layout.
-
-## Handoffs
-
-- Component scaffolding using this state → `frontend/blazor/skills/component-writer`
-- Render-mode and lifecycle background → `frontend/blazor/skills/basics`
-- Forms specifically → `frontend/blazor/skills/forms`
-- Auth state from Auth0 → `auth/auth0-blazor`
-- React equivalent → `frontend/react/skills/state-management`

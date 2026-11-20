@@ -14,22 +14,6 @@ Owns the **mechanics** of animating a Blazor UI: how a reveal, transition, or pa
 
 **Version rule:** CSS transitions/keyframes and `prefers-reduced-motion` are version-agnostic (net8/9/10 identical). The net-sensitive piece is **enhanced-navigation view transitions** — enhanced navigation is net8+ (default in static SSR), so the `::view-transition` cross-document/enhanced-nav flow applies net8/9/10 the same; net10 changes nothing about the API. CSS scroll-driven animations (`animation-timeline: view()`) are a *browser* capability, not a .NET one — broadly available across engines as of late 2025, with the IntersectionObserver fallback for older targets.
 
-## When to use
-
-- A page-load entrance sequence (staggered reveals of a hero, cards, list rows)
-- Fade/slide/scale an element in as it scrolls into view
-- A transition between routes/pages under enhanced navigation
-- Hover/press micro-interactions on interactive elements
-- Making any of the above respect `prefers-reduced-motion` correctly
-
-## When NOT to use
-
-- Deciding *whether* or *where* to animate, the orchestrated concept → [`design/visual-identity`](../../../../design/visual-identity/SKILL.md)
-- Setting up CSS isolation, tokens, dark mode → [`styling`](../styling/SKILL.md)
-- Reconnection modal / circuit pause-resume UX → [`error-handling`](../error-handling/SKILL.md)
-- Focus movement + live-region announcement (not "motion") → [`accessibility`](../accessibility/SKILL.md)
-- A component library's own transition props (MudBlazor `Transition`, Fluent motion tokens) → [`component-library`](../component-library/SKILL.md) — use them before hand-rolling
-
 ## The technique decision
 
 ```
@@ -193,12 +177,3 @@ The standards this skill's output must meet are the fe-blazor rule files, not a 
 - Navigate between routes → the transition plays under enhanced nav; on a browser without the API it swaps instantly with no error.
 - DevTools Performance/Rendering → animated frames stay on the compositor (no purple "Layout" bars per frame).
 - Navigate away from a page using an IntersectionObserver → no leaked observer or `DotNetObjectReference` (the module's `dispose` ran).
-
-## Handoffs
-
-- Whether/where to animate, the orchestrated concept, restraint ("remove one accessory") → [`design/visual-identity`](../../../../design/visual-identity/SKILL.md)
-- CSS isolation, tokens, `:focus-visible`, dark mode → [`styling`](../styling/SKILL.md)
-- Reconnection/circuit UX (a different kind of "motion") → [`error-handling`](../error-handling/SKILL.md)
-- Focus movement + announcement on navigation (not visual motion) → [`accessibility`](../accessibility/SKILL.md)
-- Component-library transition props (use before hand-rolling) → [`component-library`](../component-library/SKILL.md)
-- Interop-module lifecycle/disposal patterns → [`realtime`](../realtime/SKILL.md) (same `IAsyncDisposable` discipline)

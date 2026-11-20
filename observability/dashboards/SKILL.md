@@ -8,20 +8,6 @@ disable-model-invocation: true
 
 Designs and builds Grafana dashboards on top of the library's standard stack (Loki for logs, Prometheus / Mimir for metrics, Tempo for traces) plus the OTel pipelines wired up in `observability/opentelemetry-{stack}`. Standardizes on **RED for services**, **USE for resources**, and **Four Golden Signals for SRE-style overviews**. Exemplars make every panel jump to the underlying trace.
 
-## When to use
-
-- New service needs a default dashboard
-- Existing dashboard sprawls into 80 panels and no one knows which to look at
-- Adding alerts on key metrics
-- Wiring trace exemplars / log links
-- Designing a per-team or per-environment overview dashboard
-
-## When NOT to use
-
-- Instrumenting code → `observability/opentelemetry-{dotnet,java,node}`
-- Writing the LogQL / PromQL itself → `observability/queries`
-- Designing the SLO / SLI math → `qa/manual/quality-metrics` for product-side SLIs; this skill for the panel
-
 ## Inputs needed
 
 1. **Service(s)** the dashboard covers
@@ -218,12 +204,3 @@ Safe `by`/`group by` dimensions: `service`, `env`, `http_route`, `http_method`, 
 6. Add annotations from deploys + incidents.
 7. Add alerts — SLO-tied as Prometheus rules (Git), threshold-tactical as Grafana-managed.
 8. Export the dashboard JSON, commit to `observability/dashboards/`.
-
-## Handoffs
-
-- LogQL / PromQL queries → `observability/queries`
-- Metrics backend + exemplar-storage enablement → `observability/metrics-setup`
-- Instrumentation (what shapes the data) → `observability/opentelemetry-{dotnet,java,node}`
-- Structured logging fields → `observability/structured-logging-{dotnet,java,node}`
-- Pipeline-side deploy annotations → `devops/{github-actions,gitlab-ci,azure-pipelines}`
-- SLO math / quality KPIs → `qa/manual/quality-metrics`

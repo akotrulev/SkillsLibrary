@@ -31,20 +31,6 @@ So **one string serves Appium and Maestro on every stack**. Notes carried from R
 - Maestro's `id` (and `text`) are **case-insensitive regular expressions**: the `.` in `Login.EmailField` also matches any character. Escape it (`Login\.EmailField`) when two ids differ only at a dot.
 - The page source of the **same build** is the final authority; the explorer records both `name` and `label`.
 
-## When to use
-
-- Add identifiers to one or more SwiftUI views / UIKit controllers
-- Audit a screen for missing, duplicated, label-derived or unstable ids
-- A `missing-testids.md` has been handed over by QA
-- An E2E flow finds an element on Android (or in React Native) but not on iOS
-
-## When NOT to use
-
-- Writing page objects or device tests → `qa-mobile-<stack>` (peer; plan 003)
-- Labels, traits, VoiceOver order → `mobile-ios:accessibility`
-- Choosing or building components → [`ui-components`](../ui-components/SKILL.md)
-- Another stack → `mobile-react-native:test-ids`, `mobile-android:test-ids`
-
 ## Output format
 
 One modifier only: `.accessibilityIdentifier("…")`. **Never `accessibilityLabel` (or a hint) as the identifier, and never label text copied into the id.** Always PascalCase, dot-separated segments.
@@ -184,11 +170,3 @@ QA's explorer writes, per screen, a table of `Element | Type | Visible text / la
 ## Rule file
 
 The review form of these rules, with severities, is the mobile-ios rule file `ios-accessibility.md` (Test ids). Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where it and this skill disagree, the rule file wins.
-
-## Handoffs
-
-- Page objects, Appium and Maestro flows, device runs → `qa-mobile-<stack>` (peer; plan 003)
-- Labels, traits, order, Dynamic Type → `mobile-ios:accessibility`
-- Components that emit ids by default → [`ui-components`](../ui-components/SKILL.md)
-- Region states and banner ids → [`error-handling`](../error-handling/SKILL.md)
-- Hygiene as part of a broader review → `mobile-ios:conventions-review`

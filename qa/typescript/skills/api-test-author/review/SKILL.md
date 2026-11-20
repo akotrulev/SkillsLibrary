@@ -8,21 +8,6 @@ disable-model-invocation: true
 
 Reviews TypeScript API test code against the patterns enforced by `qa/typescript/skills/api-test-author/writer`, `qa/typescript/skills/api-client-writer`, and `qa/typescript/skills/api-models` (the Zod schema/types + `{resource}Client` factory with dual raw/typed methods layering). Produces a findings table in the `CLAUDE.md` review format. Does **not** rewrite — points to the fix and lets the human apply it.
 
-## When to use
-
-- A diff or file is submitted for review (`*.spec.ts`, `{resource}Client.ts`, Zod schema/types module)
-- Pre-merge gate on a PR that touches `src/specs/`, `src/clients/`, or `src/models/`
-- The user wants a second opinion on schema coverage, `ProblemDetails` handling, or async assertion style
-
-## When NOT to use
-
-- Generating new TS tests → `qa/typescript/skills/api-test-author/writer`
-- .NET reviews → `qa/dotnet/skills/api-test-author/review`
-- Java reviews → `qa/java/skills/api-test-author/review`
-- Schema/client scaffolding → `qa/typescript/skills/api-models` / `qa/typescript/skills/api-client-writer`
-- UI tests → `qa/typescript/skills/ui-test-author/review`
-- Reviewing the overall test strategy / pyramid → `qa/manual/test-strategy`
-
 ## Inputs needed
 
 1. **Files** under review — Vitest spec, `{resource}Client.ts`, Zod schema/types module
@@ -75,13 +60,3 @@ Severities (from `CLAUDE.md`):
 - **nit** — optional preference
 
 End with one line: `Rules: project .claude/rules/qa-typescript/ | plugin copy (not installed)`.
-
-## Handoffs
-
-- Need a rewrite → `qa/typescript/skills/api-test-author/writer`
-- Schemas / types need fixing → `qa/typescript/skills/api-models`
-- Client layer needs refactor → `qa/typescript/skills/api-client-writer`
-- Whole test pyramid is the issue → `qa/manual/test-strategy`
-- .NET sibling → `qa/dotnet/skills/api-test-author/review`
-- Java sibling → `qa/java/skills/api-test-author/review`
-- A rule is missing or wrong → edit the project's `.claude/rules/qa-typescript/`; for every project, the plugin's `qa/typescript/skills/rules/`

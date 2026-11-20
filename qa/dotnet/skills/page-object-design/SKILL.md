@@ -8,23 +8,6 @@ disable-model-invocation: true
 
 Designs the **shape** of a Page Object Model in a .NET UI test project: page vs region component vs control component vs flow, base-class hierarchy, where controls and flows live, and how to split when one page gets too big. Output is an architecture sketch — folder tree + class responsibilities + decision rationale — not concrete page code.
 
-## When to use
-
-- Greenfield UI test suite — first POM layout in `Pages/`
-- Existing suite has grown to 30+ pages and patterns are diverging
-- Multi-platform app (web + mobile via Appium .NET) needs shared abstractions
-- One page object has grown past ~200 lines and feels wrong
-- Tests are slow / brittle and the root cause is structural
-
-## When NOT to use
-
-- Writing the page object code itself → `qa/dotnet/skills/ui-test-author/playwright`, `qa/dotnet/skills/ui-test-author/selenium`, or `qa/dotnet/skills/ui-test-author/appium`
-- Reviewing a single existing page object → `qa/dotnet/skills/ui-test-author/review`
-- Designing test data / fixtures → `qa/dotnet/skills/test-data-builder`
-- Designing the entire test strategy → `qa/manual/test-strategy`
-- Java POM architecture → `qa/java/skills/page-object-design`
-- TypeScript POM architecture → `qa/typescript/skills/page-object-design`
-
 ## Inputs needed
 
 1. **App shape** — single web app, mobile, or web + mobile
@@ -197,10 +180,3 @@ The page-object standards a design must meet are the qa-dotnet rule files, not a
 4. Decide whether a Playwright `BasePage` is warranted: only when a third page shares real behaviour. Pick the multi-platform strategy if relevant.
 5. Produce the output: folder tree, responsibilities table, base hierarchy, migration plan (smallest refactor first).
 6. Hand off code generation to the matching generator skill.
-
-## Handoffs
-
-- Implementing the design → `qa/dotnet/skills/ui-test-author/playwright`, `qa/dotnet/skills/ui-test-author/selenium`, or `qa/dotnet/skills/ui-test-author/appium`
-- Reviewing existing pages → `qa/dotnet/skills/ui-test-author/review`
-- Test data / builders → `qa/dotnet/skills/test-data-builder`
-- Higher-level strategy → `qa/manual/test-strategy`

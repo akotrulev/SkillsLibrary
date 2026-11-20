@@ -33,21 +33,6 @@ tower-http = { version = "0.7", features = ["trace"] }
 
 `grpc-tonic` exports over gRPC on 4317. Without it, the exporters use HTTP/protobuf on 4318 (`.with_http()`). Pick the one the Collector exposes, and use one transport for all three signals.
 
-## When to use
-
-- A Rust service with no telemetry, or with `println!`/`env_logger` only
-- Spans missing, detached from their parent, or not continuing an incoming trace
-- Adding a counter or histogram for a business event
-- Logs that reach stdout but not Loki, or reach Loki without `trace_id`
-- The last spans before shutdown never arrive
-
-## When NOT to use
-
-- Event and field conventions, `EnvFilter`, redaction → `observability/structured-logging-rust`
-- Collector / Loki / Tempo / Prometheus setup → `observability/logs-traces-setup`, `observability/metrics-setup`
-- Dashboards and queries → `observability/dashboards`, `observability/queries`
-- .NET / Java / Node → their `opentelemetry-*` siblings
-
 ## Inputs needed
 
 1. **Service name, version, environment** — from `OTEL_SERVICE_NAME`, `CARGO_PKG_VERSION`, `OTEL_RESOURCE_ATTRIBUTES=deployment.environment.name=…`
@@ -321,11 +306,3 @@ impl OrderMetrics {
 4. Add `#[instrument(skip_all, fields(...))]` to 3–5 domain operations and every background job's unit of work; propagate on outbound calls.
 5. Add the counter/histogram for the service's core business event.
 6. Local smoke against `deploy/local/` (Collector + Tempo + Loki + Prometheus + Grafana): one request shows a trace in Tempo with a `GET /orders/{id}` root span, a log line in Loki with the same `trace_id`, and a series for `http_server_request_duration_seconds`.
-
-## Handoffs
-
-- JSON log layer, fields, redaction → `observability/structured-logging-rust`
-- Collector and backends → `observability/logs-traces-setup`, `observability/metrics-setup`
-- Queries and dashboards → `observability/queries`, `observability/dashboards`
-- The service code being instrumented → `be-rust`
-- .NET / Java / Node equivalents → `observability/opentelemetry-{dotnet,java,node}`

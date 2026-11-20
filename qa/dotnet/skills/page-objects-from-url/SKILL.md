@@ -17,20 +17,6 @@ primary, `Microsoft.Playwright` async API, `private readonly ILocator` fields pl
 properties for assertion targets, intent-named methods) — this skill owns **extraction and locator
 policy**, not test authoring.
 
-## When to use
-
-- The user provides a URL or HTML file and wants a page object created from it
-- An existing page object must be reconciled against the current state of a page (elements added/removed/renamed)
-- The team wants an inventory of which elements on a page lack a test id
-
-## When NOT to use
-
-- Designing where pages/components/flows live → `qa/dotnet/skills/page-object-design`
-- Writing or tagging the tests that use the POM → `qa/dotnet/skills/ui-test-author/playwright`
-- Reviewing an existing page object → `qa/dotnet/skills/ui-test-author/review`
-- Java / TypeScript stacks → `qa/java/skills/page-objects-from-url` / `qa/typescript/skills/page-objects-from-url`
-- The page is behind auth you have no credentials for, or the URL is unreachable and no HTML was provided → **ask the user**; never fabricate locators
-
 ## Prerequisites
 
 The Playwright MCP server, registered by the user (a plugin agent cannot set server flags on itself):
@@ -227,12 +213,3 @@ When MCP is not connected, or a long extraction would flood the context, run the
 - Deleting "stale" fields in update mode without confirming the element isn't state-dependent
 - Writing tests in the same breath — that's `ui-test-author/playwright`'s job, after the POM compiles
 - Fabricating locators for a page you never reached
-
-## Handoffs
-
-- POM architecture (first page in a bare project, splitting a god page) → `qa/dotnet/skills/page-object-design`
-- Writing/tagging tests against the built POM → `qa/dotnet/skills/ui-test-author/playwright`
-- Formal test cases the tests are written from → `qa/manual/test-case-writer`
-- Reviewing the resulting page object → `qa/dotnet/skills/ui-test-author/review`
-- The page registers WebMCP tools → `qa/_shared/webmcp-testing`
-- Java / TypeScript siblings → `qa/java/skills/page-objects-from-url` / `qa/typescript/skills/page-objects-from-url`

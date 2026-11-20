@@ -49,27 +49,6 @@ ui-tests/
 The assets are flat; each `.java` file goes under `src/test/java` at its package path, and the three build
 files go at the project root.
 
-## When to use
-
-- A new test class, page object, region or control component, or the `BaseTest` itself.
-- A new or rewritten `build.gradle.kts`, `testng.xml`, browser install task or signed-in state.
-- Scoping or fixing locators, replacing one-shot reads with web-first assertions.
-- Running a class per device, viewport, colour scheme, locale or time.
-
-## When NOT to use
-
-- Native mobile apps → `qa/java/skills/ui-test-author/appium`
-- Selenium → `qa/java/skills/ui-test-author/selenium`
-- A new project from zero (Gradle wrapper, `Env`, fat jar, container) → `qa/java/skills/ui-project-setup`
-- Reviewing Playwright code → `qa/java/skills/ui-test-author/review`
-- Designing the page-object hierarchy → `qa/java/skills/page-object-design`
-- Extracting page objects and test ids from a live URL → `qa/java/skills/page-objects-from-url`
-- Screenshots, video, traces and HAR beyond the `BaseTest` defaults → `qa/java/skills/evidence-capture`
-- Visual regression, accessibility scans, network mocking → `visual-regression`, `accessibility-testing`,
-  `network-mocking`
-- Playwright TypeScript or .NET → `qa/typescript/skills/ui-test-author/playwright`,
-  `qa/dotnet/skills/ui-test-author/playwright`
-
 ## Inputs needed
 
 1. **Feature or page** under test (`Login`, `CheckoutCart`).
@@ -158,14 +137,3 @@ The build is `assets/build.gradle.kts`: the pins above, Allure on allure-java 3,
    device's options.
 8. Run the hallucination gate (generation checks §2) and report every `MISSING` test id. Run `./gradlew installPlaywrightBrowsers test` (0 failures) and debug with `HEADED=1` or
    `PWDEBUG=1`.
-
-## Handoffs
-
-- Page-object hierarchy → `qa/java/skills/page-object-design`
-- Page objects and test ids from a live URL → `qa/java/skills/page-objects-from-url`
-- Reviewing Playwright tests → `qa/java/skills/ui-test-author/review`
-- Screenshots, video, screencast, trace, HAR → `qa/java/skills/evidence-capture`
-- Test data builders → `qa/java/skills/test-data-builder`
-- Breakpoint matrices → `qa/java/skills/responsive-testing`
-- Real-device mobile web → `qa/java/skills/device-cloud`
-- Allure reporting and CI → `qa/reporting/java/skills/test-reports`, `qa/cicd/java/skills/ci-pipelines`

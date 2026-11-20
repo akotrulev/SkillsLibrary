@@ -32,21 +32,6 @@ Elasticsearch and OpenSearch share a Lucene core and a common ancestor but have 
 
 **Pick by hosting + license posture**: AWS-first and want Apache-2.0 → OpenSearch on AWS OpenSearch Service; want the newest ES features / Elastic Cloud → Elasticsearch. Both speak compatible REST at the basic level; **advanced features, security config, and client libraries diverge** — don't assume an ES recipe drops onto OpenSearch unchanged.
 
-## When to use
-
-- App needs a search box that does relevance ranking, fuzzy matching, synonyms, highlighting
-- Aggregations on event / document data ("top sellers by region this month") that don't fit a relational shape
-- Vector / kNN search for embedding-based retrieval (RAG, similar-product)
-- Time-series event store where Postgres would be slow without significant work
-
-## When NOT to use
-
-- Logs / observability — `observability/logs-traces-setup`
-- Transactional store of record — use Postgres / Mongo / SQL Server / etc.
-- Operational metrics — Prometheus / Mimir
-- Strongly-relational queries with joins — Postgres
-- Tiny datasets (< 100k rows) — Postgres `tsvector` full-text is fine
-
 ## Stack defaults
 
 - **Cluster**: 3 master-eligible nodes (production); separate data + ingest nodes at scale
@@ -385,13 +370,3 @@ PUT /_security/role/tenant_42_reader
 7. Define roles + per-service API keys; add DLS (+ FLS) where the index is multi-tenant or holds sensitive fields.
 8. Add observability — slow-log thresholds + Grafana dashboards from `observability/dashboards`.
 9. Plan reindex strategy + snapshot (encrypted) retention; document the runbook.
-
-## Handoffs
-
-- Log search → `observability/logs-traces-setup` (use Loki, not ES, for logs)
-- Source of record alongside ES → `data/postgresql` / `data/mongodb`
-- Caching in front of ES → `data/_shared/caching-patterns` + `data/redis`
-- Vector embeddings producer → application code; this skill consumes them
-- **Inbound** (this skill is the destination): self-hosted full-text/semantic search from `data/mongodb/references/indexing.md`; vector search beyond a cache from `data/redis/references/data-structures.md`
-- Verifying tenant DLS actually isolates (cross-tenant leak matrix) → the `qa-security` peer + `qa/<stack>/skills/security-testing/permission-testing`
-- IaC / cloud deploy for the cluster (OpenSearch Service, Elastic Cloud) → cloud provisioning / IaC for the store itself has no owning skill in this library yet; out of this domain's scope

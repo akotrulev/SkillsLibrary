@@ -15,18 +15,6 @@ Two failure modes this document exists to prevent:
 
 **Prerequisites:** an approved `blueprint.md` (its External systems section is the seed list) and `api-surface.md` (endpoints that call out, and the outbound webhooks it emits).
 
-## When to use
-
-- Step 5 of a `solution-planner` run
-- A new external system is being added to an existing planned build (`EXTEND`)
-- An existing integration needs documenting before it is changed (`RESUME` — read the client code and config, mark `#confirmed`, then plan the delta)
-
-## When NOT to use
-
-- The ask is to provision the secret store, the network path, or the environments → `devops-engineer` (this plan *tells* it what is needed)
-- The ask is to write the client, the retry policy code, or the webhook handler → `be-<stack>`
-- The dependency is this system's own database or cache → that is `data-model.md` and the blueprint's tech stack, not an integration
-
 ## Output
 
 **`docs/plans/<NNN>-<initiative>/integrations.md`** in the initiative folder.
@@ -185,14 +173,6 @@ One table that makes the system's degraded behavior reviewable in one read:
 5. Every blocking unknown exists in all three places (register row, open question, prerequisite task).
 6. Section 6 answers honestly whether a new developer can run the system on day one.
 7. Every `critical` dependency's user-visible failure is described in the same terms `api-surface.md` uses (503 + `Retry-After`, not "it errors").
-
-## Handoffs
-
-- **→ `dev:plan-delivery`** (Step 6). Prerequisite tasks for blocking unknowns, plus a client-implementation task per dependency.
-- **→ `devops-engineer`** — the secrets checklist and section 7 are its work order: stores, environment config, network paths, egress rules.
-- **→ `be-<stack>`** — writes the typed clients, retry/circuit-breaker policies, and webhook handlers. Outbound M2M token acquisition is its `auth0`/`cognito` skill.
-- **→ QA peers** — `qa-<stack>:network-mocking` (stub outbound HTTP), `qa-<stack>:email-testing` (assert what was sent), `qa-<stack>:messaging-testing` (broker assertions), `qa-<stack>:file-storage-testing` (object storage), `qa-<stack>:failure-injection-testing` (prove the failure matrix is real rather than aspirational).
-- **→ `observability-engineer-<stack>`** — every boundary here is a span, and every `critical` dependency deserves an SLO and an alert.
 
 ## Version policy
 

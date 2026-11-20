@@ -27,23 +27,6 @@ Authors `*.spec.ts` files on top of the **Schema/types + Client + Spec** layerin
 
 This skill writes **only the spec files**. If a schema/type or client a test needs is missing, run the owner skill first — never call `fetch` directly or inline a one-off client to avoid generating one.
 
-## When to use
-
-- New `{operation}{Resource}.spec.ts` for an endpoint that has (or will get) a client
-- Adding scenarios to an existing spec
-- Automating cases from a `qa/manual/test-case-writer` document or an OpenAPI/Swagger spec
-
-## When NOT to use
-
-- UI / browser tests → `qa/typescript/skills/ui-test-author/playwright`
-- .NET API tests → `qa/dotnet/skills/api-test-author/writer`
-- Java API tests → `qa/java/skills/api-test-author/writer`
-- GraphQL / gRPC → the protocol siblings under `qa/typescript/skills/api-test-author/`
-- Schema/type-only scaffolding → `qa/typescript/skills/api-models`
-- Client-only scaffolding → `qa/typescript/skills/api-client-writer`
-- Reviewing existing tests → `qa/typescript/skills/api-test-author/review`
-- A new project from zero (layout, pins, config loader, base client) → `qa/typescript/skills/api-project-setup`
-
 ## Inputs needed
 
 1. **Source of truth** — one of: an OpenAPI/Swagger spec, a formal test-case document (TC-IDs), or a verbal scenario list. When a spec or test-case document is provided, derive resources, endpoints, body shapes, and scenarios from it — do not re-ask.
@@ -199,12 +182,3 @@ The standards this skill's output must meet are the qa-typescript rule files, no
 5. Verify every test title describes behavior (and carries the TC-ID when a document exists) and asserts one behavior; verify every TC-ID maps to a test or is explicitly deferred.
 6. Run the hallucination gate (`references/generation-checks.md` §2); report every `MISSING` endpoint and write no test against it.
 7. Run the project's own typecheck script (with the package manager `packageManager` names), then `npx vitest run` — expect 0 type errors and 0 failures.
-
-## Handoffs
-
-- Schema / type scaffolding → `qa/typescript/skills/api-models`
-- Client scaffolding → `qa/typescript/skills/api-client-writer`
-- Test data builders → `qa/typescript/skills/test-data-builder`
-- Parameterized matrices → `qa/typescript/skills/data-driven-testing`
-- Reviewing tests → `qa/typescript/skills/api-test-author/review`
-- Allure reporting setup → `qa/reporting/typescript/skills/test-reports`

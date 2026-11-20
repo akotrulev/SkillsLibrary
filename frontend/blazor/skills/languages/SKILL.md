@@ -12,21 +12,6 @@ Owns the **mechanics** of running a Blazor UI in multiple languages and cultures
 
 **Version rule:** `IStringLocalizer`/`.resx`, `RequestLocalizationOptions`, the cookie switch, and `@bind:culture` are **identical across net8/9/10**. The render-mode split (Server vs WASM culture pipeline) is a net8+ Blazor-Web-App reality, unchanged through net10. Nothing here is net10-only; the net10 docs refresh clarified the guidance but added no new API. Apply the same recipe to all three TFMs.
 
-## When to use
-
-- Standing up multi-language support (resource files, localizer injection, `@Loc["Key"]`)
-- Establishing the current culture correctly for Server, WASM, or a mixed Blazor Web App
-- A language switcher users can operate, persisted across visits
-- Culture-correct number/date/currency display and input parsing
-- Right-to-left layout enablement
-
-## When NOT to use
-
-- The app's canonical format-per-data-type policy, humanized enums, GUID→name → [`ui-rules`](../ui-rules/SKILL.md) (localization supplies the culture; ui-rules owns the policy)
-- RTL styling mechanics (logical properties, mirrored icons) beyond setting `dir` → [`styling`](../styling/SKILL.md) + [`responsive-design`](../responsive-design/SKILL.md)
-- Validation-message wording/voice → [`design/ux-writing`](../../../../design/ux-writing/SKILL.md); the *plumbing* of localized validation messages is here + [`forms`](../forms/SKILL.md)
-- Asserting translations/culture behavior in tests → the qa **`language-testing`** peer (locale-pinned assertions, pseudo-loc, RTL) — a peer, not loaded here
-
 ## The shared half: resources + `IStringLocalizer`
 
 Same in every render mode. Register once, key text to `.resx`, inject the localizer.
@@ -139,12 +124,3 @@ The standards this skill's output must meet are the fe-blazor rule files, not a 
 - Form validation messages appear in the active language.
 - An RTL culture flips layout direction with no broken alignment (logical properties held).
 - WASM published size stays within budget with the chosen ICU strategy.
-
-## Handoffs
-
-- Canonical format-per-type policy, humanized enums, GUID→name → [`ui-rules`](../ui-rules/SKILL.md)
-- Localized validation-message plumbing → [`forms`](../forms/SKILL.md); their wording/voice → [`design/ux-writing`](../../../../design/ux-writing/SKILL.md)
-- RTL/logical-property styling, mirrored components → [`styling`](../styling/SKILL.md) + [`responsive-design`](../responsive-design/SKILL.md)
-- WASM ICU-data size trade-off → [`performance`](../performance/SKILL.md)
-- Which render mode a surface uses (drives the culture pipeline) → [`project-setup`](../project-setup/SKILL.md)
-- Locale-pinned test assertions, pseudo-localization, RTL testing → the qa **`language-testing`** peer (invoke separately)

@@ -20,21 +20,6 @@ Detect the project's `<TargetFramework>` (`net8.0` / `net9.0` / `net10.0`) befor
 - For server-rendered web that signs users in (rare; SPA is the default for browsers): `Microsoft.AspNetCore.Authentication.OpenIdConnect`
 - Configuration via `appsettings.json` overrides + env vars + Key Vault — never hardcoded
 
-## When to use
-
-- Protecting an ASP.NET Core Web API with Auth0 JWTs
-- Adding `[Authorize(Policy = "orders:read")]`-style permission checks
-- Calling another API with Client Credentials (M2M)
-- A server-rendered MVC / Razor Pages app that needs to sign users in via Auth0 (Authorization Code + PKCE)
-
-## When NOT to use
-
-- React SPA token acquisition → `auth/auth0-react`
-- Blazor Server / WASM → `auth/auth0-blazor`
-- Java / Spring → `backend/java/skills/auth0`
-- AWS Cognito instead of Auth0 → `backend/dotnet/skills/cognito`
-- Concepts (audience, RBAC, organizations) → `auth/_shared/auth0-concepts`
-
 ## Inputs needed
 
 1. **Auth0 tenant domain** per env (`yourco-dev.eu.auth0.com`)
@@ -256,14 +241,3 @@ Log out via `/v2/logout?client_id=...&returnTo=...` on the Auth0 side **and** cl
 5. If outbound M2M is needed: add `Auth0M2MTokenService` + `M2MAuthHandler` and register typed clients.
 6. If server-rendered sign-in is needed: add `AddOpenIdConnect("Auth0", ...)` and cookie auth.
 7. Smoke test: hit `/me` with a fresh access token; confirm `permissions` array; revoke and re-fetch.
-
-## Handoffs
-
-- Concepts → `auth/_shared/auth0-concepts`
-- React SPA token acquisition → `auth/auth0-react`
-- Blazor → `auth/auth0-blazor`
-- Java backend equivalent → `backend/java/skills/auth0`
-- AWS Cognito equivalent → `backend/dotnet/skills/cognito`
-- Pattern/persistence scaffolding for the rest of the service → `backend/dotnet/skills/{generator,persistence}`
-- Storing client secrets → `devops/environment-config` + Key Vault
-- API contract tests with auth → `qa/dotnet/skills/api-test-author/writer` + `qa/dotnet/skills/test-login-tokens` (use a seeded test user; document tenant in `qa/manual/test-strategy`)

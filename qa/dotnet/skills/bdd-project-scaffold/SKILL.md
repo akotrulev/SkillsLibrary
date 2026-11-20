@@ -33,18 +33,6 @@ project built by `qa-mobile-dotnet`.
   the library default
 - Features under `Features/`, step definitions under `StepDefinitions/`, hooks + state + DI under `Support/`
 
-## When to use
-
-- A .NET UI/mobile project needs Reqnroll added (packages, config, hooks, DI).
-- Starting a Reqnroll suite from zero.
-
-## When NOT to use
-
-- Writing `.feature` files → `qa/_shared/bdd/feature-file-writer`
-- Generating `[Binding]` step classes → `qa/dotnet/skills/gherkin-step-code`
-- Building page objects → `qa/dotnet/skills/page-object-design` / `page-objects-from-url`
-- Reqnroll in Java/TS → `qa/{java,typescript}/skills/bdd-project-scaffold` (those use Cucumber-JVM / playwright-bdd)
-
 ## Inputs needed
 
 Confirm at most 2–3.
@@ -224,12 +212,3 @@ evidence follows `qa/dotnet/skills/evidence-capture`'s Appium reference.
 ## Rules
 
 The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `bdd.md`, `automation.md` and `suite-config.md`. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
-
-## Handoffs
-
-- Feature files → `qa/_shared/bdd/feature-file-writer`
-- Step definitions + POM wiring → `qa/dotnet/skills/gherkin-step-code`
-- Page objects → `qa/dotnet/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
-- Evidence rules and reading a failed scenario's trace → `qa/dotnet/skills/evidence-capture`
-- Allure reporting → `qa/reporting/dotnet/skills/test-reports`
-- CI (feature shard, publish report, upload `playwright-artifacts/`) → `qa/cicd/dotnet/skills/ci-pipelines`

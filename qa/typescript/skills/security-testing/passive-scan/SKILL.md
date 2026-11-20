@@ -362,20 +362,3 @@ These sections live in `references/details.md` — **read it when the task touch
   context file or `cmd_options`.
 - Attach the JSON/HTML report to **Allure** + upload as a CI artifact. A clean baseline ≠ "secure" — pair
   with SCA, a safe-env full scan, and manual pentest.
-
-## Cross-references
-
-- `qa-dotnet:passive-scan` — same skill, .NET / NUnit. Same Docker choreography via
-  `Process` + `System.Text.Json` report parsing.
-- `qa-java:passive-scan` — same skill, Java / TestNG. Same shape via `ProcessBuilder` +
-  Jackson.
-- `qa-typescript:dependency-scan` — the **SCA** sibling that closes the
-  `security-testing` family: dependency/library CVEs from your lockfile vs ZAP's running-app HTTP surface.
-  Different layers — run both.
-- `qa-typescript:accessibility-testing` — the **ticketed-baseline triage** discipline
-  reused here for `-c rules.tsv` (gate new findings, document every suppression with a ticket).
-- `qa-typescript:accessibility-testing` — the closest **port-shape precedent**: a
-  CLI/Docker tool invoked from each stack with the report parsed as JSON.
-- `qa-typescript:ci-pipelines` — the `zaproxy/action-baseline` job, `fail_action`, artifact
-  upload, Docker availability on the runner.
-- `qa-typescript:test-reports` — attach the ZAP HTML/JSON report and alert summary to the run.

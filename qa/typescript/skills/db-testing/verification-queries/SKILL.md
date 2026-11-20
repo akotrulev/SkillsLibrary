@@ -8,22 +8,6 @@ disable-model-invocation: true
 
 Guardrails for the **SQL string itself** when a Node 24 + TypeScript Vitest integration test reaches into the database to verify behaviour. The pool, seeder, and probe scaffolding live in `qa/typescript/skills/db-testing/connection`; this skill owns *what the SQL is allowed to look like* — `$1` placeholder binding only, explicit column lists, safe `LIKE`, type-correct parsing (especially `BIGINT` → `number`), exists / not-exists / count probes, a probe wait condition that re-runs the same safe query, and a hard refusal list for destructive verbs outside cleanup.
 
-## When to use
-
-- A test is about to embed a SQL string (`pool.query(...)`, `knex.raw(...)`, `prisma.$queryRaw`) and you need it reviewed or generated.
-- An existing probe / seeder uses template-literal interpolation, `SELECT *`, or unbounded `DELETE` and needs a rewrite.
-- A test needs an "assert exactly one row matches these columns" or "assert no row matches" probe.
-- An async flow needs a wait-for-eventual-consistency poll that re-runs the verification query.
-
-## When NOT to use
-
-- Pool / fixture lifecycle / cleanup wiring → `qa/typescript/skills/db-testing/connection`.
-- Container boot, migrations on startup → `qa/typescript/skills/db-testing/testcontainers`.
-- Production data-access SQL → the `backend/node` dev stack's generator, if installed.
-- .NET SQL guardrails → `qa/dotnet/skills/db-testing/verification-queries`.
-- Java SQL guardrails → `qa/java/skills/db-testing/verification-queries`.
-- Pure unit tests with no SQL surface — keep them mock-driven.
-
 ## Inputs needed (≤2 questions)
 
 1. **Engine + client**: Postgres + `pg` (default), Postgres + Knex (when joins / windowing earn it), Postgres + Prisma (`$queryRaw`, only if production already uses Prisma), or Mongo?
@@ -328,13 +312,3 @@ expect(order!.customer.name).toBe('Alice');   // extra query, surprise
 - Probes are read-only modules using the shared `getPool()`; never `new pg.Client(...)` per test.
 - Strict TS; ESM with explicit `.js` extensions; ESLint `no-floating-promises` on.
 - Knex only when joins / windowing earn it; always explicit `.select(col, ...)`; `??` for identifiers, `?` for values in `knex.raw`.
-
-## Handoffs
-
-- Pool / fixture / cleanup wiring → `qa/typescript/skills/db-testing/connection`
-- Container lifecycle → `qa/typescript/skills/db-testing/testcontainers`
-- Test data factories feeding seeders → `qa/typescript/skills/test-data-builder`
-- .NET SQL guardrails → `qa/dotnet/skills/db-testing/verification-queries`
-- Java SQL guardrails → `qa/java/skills/db-testing/verification-queries`
-- Production data access SQL → the `backend/node` dev stack's generator, if installed
-- Test strategy where DB tests fit → `qa/manual/test-strategy`

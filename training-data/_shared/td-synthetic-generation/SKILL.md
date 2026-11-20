@@ -10,21 +10,6 @@ Producing training data with a teacher model rather than collecting it. This is 
 
 **Load `ai-development/claude-api` for the API mechanics** — model ids, the Messages API, structured output, streaming, batching, prompt caching, token counting. This skill owns the *data-generation discipline* on top of it; it does not restate the SDK. Use the latest capable model as the teacher (a stronger model than the one being trained — that is the point of distillation) and pin its exact id in every record's `source`.
 
-## When to use
-
-- Generating instruction/response (SFT) pairs from a topic list, a seed set, or a document corpus
-- Expanding a small seed set into a large diverse one (self-instruct / evol-instruct)
-- Producing preference pairs by sampling multiple responses and judging them
-- Building rubric-graded or LLM-judge eval items
-- Diversifying an existing set that has collapsed onto a few patterns
-
-## When NOT to use
-
-- The on-disk record shape → `training-data:dataset-formats`
-- Dedup, decontamination, PII → `training-data:data-quality` (always run after generation)
-- Collecting/cleaning real corpora → the stage skills
-- Raw API usage questions → `ai-development/claude-api`
-
 ## The legal and honesty line — read first
 
 - **Respect the teacher model's terms.** Anthropic's terms govern whether and how Claude output may be used to train another model; check them for the intended use (internal eval data, a research model, a competing commercial model are different cases) before generating at scale. Record the decision in the dataset card. This skill does not grant permission it cannot grant.

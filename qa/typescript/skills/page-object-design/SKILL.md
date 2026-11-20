@@ -8,23 +8,6 @@ disable-model-invocation: true
 
 Designs the **shape** of a Page Object Model in a TypeScript UI test project: which of the four kinds (page, region component, control component, flow) each piece is, the base-class hierarchy, where shared locators live, and how to split when one page gets too big. Output is an architecture sketch — folder tree + class responsibilities + decision rationale — not concrete page code.
 
-## When to use
-
-- Greenfield UI test suite — first POM layout in `pages/` or `pageObjects/`
-- Existing suite has grown to 30+ pages and patterns are diverging
-- Multi-platform app (web + mobile via WebdriverIO Appium) needs shared abstractions
-- One page object has grown past ~200 lines and feels wrong
-- Tests are slow / brittle and the root cause is structural
-
-## When NOT to use
-
-- Writing the page object code itself → `qa/typescript/skills/ui-test-author/playwright`, `qa/typescript/skills/ui-test-author/selenium`, or `qa/typescript/skills/ui-test-author/appium`
-- Reviewing a single existing page object → `qa/typescript/skills/ui-test-author/review`
-- Designing test data / fixtures → `qa/typescript/skills/test-data-builder`
-- Designing the entire test strategy → `qa/manual/test-strategy`
-- .NET POM architecture → `qa/dotnet/skills/page-object-design`
-- Java POM architecture → `qa/java/skills/page-object-design`
-
 ## Inputs needed
 
 1. **App shape** — single web app, mobile, or web + mobile
@@ -253,10 +236,3 @@ The code standards a page object must meet (no unearned `BasePage`, pages from f
 5. Pick the multi-platform strategy if relevant; pick fixture vs `Flow` class for flows.
 6. Produce the output: folder tree, responsibilities table, fixture strategy, migration plan (smallest refactor first).
 7. Hand off code generation to the matching generator skill.
-
-## Handoffs
-
-- Implementing the design → `qa/typescript/skills/ui-test-author/playwright`, `qa/typescript/skills/ui-test-author/selenium`, or `qa/typescript/skills/ui-test-author/appium`
-- Reviewing existing pages → `qa/typescript/skills/ui-test-author/review`
-- Test data / builders → `qa/typescript/skills/test-data-builder`
-- Higher-level strategy → `qa/manual/test-strategy`

@@ -341,20 +341,3 @@ data-driven fault matrix (toxic × parameter) binds cleanly via `qa-java:data-dr
   live-cluster chaos (Gremlin/Litmus/Chaos Mesh) elsewhere.
 - **Wrap all toxic wiring in `ChaosProxy`** with intent names — no raw `proxy.toxics().timeout(...)` in `@Test`.
   TestNG + toxiproxy-java + Testcontainers + AssertJ + Awaitility.
-
-## Cross-references
-
-- `qa-dotnet:failure-injection-testing` · `qa-typescript:failure-injection-testing` — the sibling stacks (`Toxiproxy.Net` + Polly ·
-  `toxiproxy-node-client` + Vitest); same four ideas, same lifecycle, different client lib + resilience library.
-- `qa-java:network-mocking` — the **closest neighbor and the inverse**: that stands up a MITM proxy
-  to **observe/mock** out-of-browser requests; this stands up Toxiproxy to **inject transport faults**. Observe vs
-  break. Read it for the proxy-in-the-middle model; draw the boundary cleanly.
-- `qa-java:data-driven-testing` — drive a **fault matrix** (toxic × parameter × expected pattern) via
-  row-binding instead of copy-pasted `@Test` methods.
-- `qa-java:db-testcontainers` · `qa-java:messaging-testing` — the
-  dependencies you fault (DB / broker connections through the proxy); they cover the happy path this inverts.
-- `qa-java:realtime-stream-testing` — shares the **lifecycle discipline** (steady → perturb → assert → recover)
-  and bounded-condition waits (Awaitility, never sleep).
-- `qa-java:load-testing` — behaviour under **load/volume** vs behaviour under **fault** (this skill); they
-  answer different questions.
-- `qa-java:test-reports` — render each fault scenario as a named result.

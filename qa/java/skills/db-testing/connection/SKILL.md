@@ -8,21 +8,6 @@ disable-model-invocation: true
 
 Wires Java 21 TestNG tests to talk to a **real** database — seed fixtures via builders, run read-only assertion queries via Spring `JdbcTemplate` / jOOQ, wait for eventual consistency, and clean state safely. Pairs with `qa/java/skills/db-testing/testcontainers` for the container lifecycle and `qa/java/skills/db-testing/verification-queries` for SQL safety.
 
-## When to use
-
-- A test must verify a row was written, an FK held, a trigger fired, or a soft-delete column was set.
-- Test setup needs to seed reference data (currencies, countries, plan tiers) that production reads.
-- Async write flows need a "wait until the projection catches up" wait condition.
-- Test suite leaks data between tests and needs a deterministic cleanup strategy.
-
-## When NOT to use
-
-- Production data-access code → the `backend/java` dev stack's generator, if installed (Spring Data JPA, jOOQ patterns).
-- Container booting itself → `qa/java/skills/db-testing/testcontainers`.
-- SQL guardrails (parameterization, no `SELECT *` in assertions) → `qa/java/skills/db-testing/verification-queries`.
-- Pure unit tests with no SQL surface — keep them mock-driven.
-- .NET / TypeScript stacks → `qa/{dotnet,typescript}/skills/db-testing/connection`.
-
 ## Stack
 
 - **Runtime**: Java 21
@@ -241,14 +226,3 @@ The standards seeders, probes and their tests must meet are the qa-java rule fil
 4. Add `DbWaits` (Awaitility wrapper) if the SUT involves async projections.
 5. Pick a cleanup strategy (transactional rollback default); annotate / wire `@AfterMethod`.
 6. Run `./gradlew test` — every test passes; no leaks between tests.
-
-## Handoffs
-
-- Container lifecycle → `qa/java/skills/db-testing/testcontainers`
-- SQL guardrails on assertion queries → `qa/java/skills/db-testing/verification-queries`
-- Test data builders feeding seeders → `qa/java/skills/test-data-builder`
-- .NET DB testing client → `qa/dotnet/skills/db-testing/connection`
-- TypeScript DB testing client → `qa/typescript/skills/db-testing/connection`
-- API tests that own the SUT call → `qa/java/skills/api-test-author/writer`
-- Test strategy where DB tests fit → `qa/manual/test-strategy`
-- Production data access patterns → the `backend/java` dev stack's generator, if installed

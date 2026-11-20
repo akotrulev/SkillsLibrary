@@ -8,22 +8,6 @@ disable-model-invocation: true
 
 Eliminates repeated inline test data literals in TypeScript test projects (Vitest primary) by generating function-based factories with `Partial<T>` overrides and ObjectMother namespaces. Required by `CLAUDE.md`: "Builder pattern for test data objects with 4+ fields" and "Test data via builders or ObjectMother, not inline literals duplicated across tests."
 
-## When to use
-
-- Two or more tests construct the "same" object with slightly different fields → extract a factory
-- One test sets 6 fields just to test one behavior → extract a factory that defaults the other 5
-- A complex aggregate (Order → Lines → Customer → Address) needs assembling for many tests
-- Reading a test is hard because half the body is data setup
-- API tests need a known-shape DTO with one varying field per scenario
-
-## When NOT to use
-
-- .NET test data → `qa/dotnet/skills/test-data-builder`
-- Java test data → `qa/java/skills/test-data-builder`
-- Production-code builders → the `backend/node` dev stack's generator, if installed
-- Test data for performance scenarios (volume) → `qa/typescript/skills/load-testing`
-- An object with fewer than four fields → construct it in the test's setup; a builder starts at four fields, at first use
-
 ## Factory function vs class builder vs ObjectMother
 
 | Pattern | When to choose |
@@ -317,13 +301,3 @@ The standards this skill's output must meet are the qa-typescript rule files, no
 5. Replace inline literals in 2–3 representative tests so the pattern is set; leave the rest as a follow-up sweep.
 6. Run the project's own test script with the package manager `packageManager` names — every test still passes with the new defaults.
 7. Run `tsc --noEmit` — strict TS green.
-
-## Handoffs
-
-- .NET test data → `qa/dotnet/skills/test-data-builder`
-- Java test data → `qa/java/skills/test-data-builder`
-- API tests where these feed into request bodies → `qa/typescript/skills/api-test-author/writer`
-- UI tests where they back form-fill page-object methods → `qa/typescript/skills/ui-test-author/playwright` / `qa/typescript/skills/ui-test-author/selenium` / `qa/typescript/skills/ui-test-author/appium`
-- Test reviewers (verify factories used, not literals) → `qa/typescript/skills/api-test-author/review` / `qa/typescript/skills/ui-test-author/review`
-- Test strategy / pyramid → `qa/manual/test-strategy`
-- Production-code builders → the `backend/node` dev stack's generator, if installed

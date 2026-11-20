@@ -27,19 +27,6 @@ Owns **every dev-side test of logic the agent writes**: view models, services, m
 
 Detect first: the runner already in use (`NUnit`, `xunit`, `MSTest`), whether a logic library exists, existing fakes and builders, and the coverage tool. Extend them; never migrate a stable suite to NUnit as a side effect.
 
-## When to use
-
-- A view model, service, mapper, validator, formatter or state machine has logic
-- "Add tests for this", "how do I test a `RelayCommand`?", "this needs a `Dispatcher`"
-
-## When NOT to use
-
-- Real UI journeys, activation, WebView2 content → `qa-desktop-typescript` / `-java` / `-dotnet`
-- Contract tests of the HTTP API → the `qa-api-<stack>` peer
-- Accessibility and High Contrast → `desktop-windows:accessibility` (a manual and E2E concern)
-
----
-
 ## Where tests live
 
 | Code | Test with |
@@ -216,10 +203,3 @@ Tests assert behaviour, not telemetry. A test that proves a failure raises the b
 - **A loop of asserts over a collection** — use `[TestCaseSource]`, or one assertion on the whole collection.
 - **Coverage reported for the whole solution** — the changed files are the scope.
 - **MSTest used for plain logic** — the deviation is for XAML types only.
-
-## Handoffs
-
-- View-model shape, DI and where logic lives → `desktop-windows:architecture`
-- `Load<T>` states and the banner under test → `desktop-windows:error-handling`; validation rules → `desktop-windows:forms`
-- Ids the E2E suite uses → `desktop-windows:test-ids`; the E2E suites → `qa-desktop-typescript`, `qa-desktop-java`, `qa-desktop-dotnet`
-- C++ tests and coverage commands → `desktop-windows:cpp-winrt`; the macOS twin → `desktop-macos:unit-testing`

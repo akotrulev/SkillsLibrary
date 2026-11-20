@@ -337,25 +337,3 @@ record + Jackson; the **stochastic refusal** rung asserts a rate (idea #4), expl
   — global rule). No `Thread.sleep`.
 - **Budgets are assertions** — `cost`/`latency` ceilings, capped `maxTokens`. **Keys via env**, read lazily, never
   in config/code. **No real PII** in committed cases. Prefer `final`/records where they fit.
-
-## Cross-references
-
-- `qa-typescript:ai-feature-testing` — **the canonical**: promptfoo + `@anthropic-ai/sdk`, the four ideas, the
-  assertion ladder, the config the spine here parses. Read it for the family rationale.
-- `qa-dotnet:ai-feature-testing` — the .NET sibling: promptfoo via `Process` + `System.Text.Json`,
-  `Microsoft.Extensions.AI` in-test. Same four ideas.
-- `qa-java:data-driven-testing` — **the closest-discipline sibling**: an eval IS a data-driven test
-  (`@DataProvider`, one named case per row, OpenCSV). Reuse its mechanics for the dataset.
-- `qa-java:flaky-test-quarantine` — **the boundary**: model non-determinism (assert a rate) vs *test*
-  flakiness (`IRetryAnalyzer` / quarantine). Don't quarantine a model regression.
-- `qa-java:api-models` — the **structured-output** record + Jackson the `is-json` rung / SDK deserialize
-  validates.
-- `qa-java:passive-scan` / `qa-java:accessibility-testing` — the
-  **CLI-from-JVM port-shape precedent**: a Node/CLI tool invoked via `ProcessBuilder`, report parsed with Jackson.
-- `ai-development/*` (`claude-api`, `mcp-builder`) — **build-vs-test boundary**: those *build* the AI feature; this
-  *tests* it. `qa-java:test-login-tokens` — env/secret-store discipline for `ANTHROPIC_API_KEY`.
-- `qa-<stack>:quality-metrics` — eval **pass-rate over time**. `qa-java:test-reports` — each case as a named
-  result. `qa-java:load-testing` — LLM **load/latency under concurrency** (here latency is a per-case
-  *budget*, not a load profile).
-- `qa-<stack>:webmcp-testing` — the deterministic side of WebMCP tools a page registers (schema, `execute()`
-  contract, annotations); this skill keeps the agent evals over them.

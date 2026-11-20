@@ -23,21 +23,6 @@ disable-model-invocation: true
 
 Check the exact artifacts and versions (`androidx.navigation3:navigation3-runtime` / `-ui`, `androidx.lifecycle:lifecycle-viewmodel-navigation3`) against developer.android.com/jetpack/androidx/releases/navigation3 when writing. **An existing Navigation Compose app is not flagged for lacking Navigation 3**; migration is [`mobile-android:migration`](../migration/SKILL.md)'s and is incremental per graph.
 
-## When to use
-
-- Adding a screen, a detail, a dialog or a tab; navigating from code after an action
-- Mapping an App Link / intent URI to a screen
-- Two-pane layouts on tablets and foldables; handling back
-
-## When NOT to use
-
-- `assetlinks.json`, link verification, push payload routing, `PendingIntent` → `mobile-android:push-and-deep-links`
-- Where a screen's state lives → [`architecture`](../architecture/SKILL.md)
-- Composable structure → [`ui-components`](../ui-components/SKILL.md); window size classes → [`styling`](../styling/SKILL.md)
-- Transition and back animations → [`animation`](../animation/SKILL.md)
-- XML nav graphs and Fragments → [`views-interop`](../views-interop/SKILL.md)
-- iOS / RN → `mobile-ios:navigation`, `mobile-react-native:navigation`
-
 ## Inputs needed
 
 - New app or existing (which navigation library is in the build file)
@@ -144,12 +129,3 @@ The standards this skill's output must meet are the mobile-android rule files, n
 - [ ] Kill the process on a detail screen, return: it restores and loads from its key
 - [ ] Deep link `adb shell am start -a android.intent.action.VIEW -d <uri>` opens the right stack; a malformed one does not crash
 - [ ] Back gesture previews and works on target 36; no `onBackPressed` override
-
-## Handoffs
-
-- Link verification, push → `mobile-android:push-and-deep-links`
-- Screen state, entry ViewModels → [`architecture`](../architecture/SKILL.md)
-- Window classes, rails → [`styling`](../styling/SKILL.md)
-- Back and transition animation → [`animation`](../animation/SKILL.md)
-- Navigation Compose → Navigation 3 → [`migration`](../migration/SKILL.md)
-- Test ids on bars and rows → [`test-ids`](../test-ids/SKILL.md)

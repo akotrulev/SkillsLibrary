@@ -10,21 +10,6 @@ The dev-side half of mobile security: the rules an agent follows **while writing
 
 **The fence.** Scanning and attacking are `qa-security`'s: `mobile-app-scan` reads a **built** APK/AAB/IPA with MobSF; `mobile-runtime-testing` drives a device, authorization-gated. This skill reads **source and config** and writes the fix. It never runs MobSF, Frida, a proxy or a device. A rule whose truth only shows at run time is written **requires dynamic test → `qa-security`** and reported *unverified*, never *passed*.
 
-## When to use
-
-- Choosing where a token, key, PII or cache lives
-- Adding a network call, a WebView, a deep link, a push handler, an exported Android component or an iOS extension
-- Adding biometric unlock, a screenshot-sensitive screen, a clipboard copy
-- Reviewing or auditing mobile code for the K section of the conformance checklist
-
-## When NOT to use
-
-- A built artifact needs scanning → qa `mobile-app-scan` (peer, not loaded)
-- Pinning, storage-at-runtime, jailbreak / root, tamper resistance must be *proven* → qa `mobile-runtime-testing` (peer, not loaded)
-- App Store / Play rules (privacy manifest, deletion, declarations) → `mobile-<stack>:store-compliance`
-- Server-side auth, rate limits, authorisation → the `be-*` stack (MASVS-AUTH-1 lives there)
-- Auth0 integration mechanics → `mobile-react-native:auth0` / `mobile-ios:auth0` / `mobile-android:auth0`
-
 ## Version lane (verified 2026-10-10)
 
 | Standard | Version | Note |
@@ -158,11 +143,3 @@ Every report carries the line: *static read only — MASVS-NETWORK-2, STORAGE ru
 - A recovered secret is rotated, not hidden.
 - Obfuscation is not encryption; Hermes bytecode is not obfuscation.
 - Do not add a pinning or RASP library on the assumption it works — verify it is maintained and test it dynamically.
-
-## Related skills & peers
-
-- qa `mobile-app-scan` / `mobile-runtime-testing` *(peers, not loaded)* — the static-binary and device halves; fixes land back here
-- `mobile-<stack>:store-compliance` — privacy manifest, deletion, declarations
-- `mobile-<stack>:release` — signing keys, CI secrets
-- `mobile-react-native:auth0` · `mobile-ios:auth0` · `mobile-android:auth0` — token handling in the Auth0 SDKs
-- `be-*` stacks — server-side authorisation (MASVS-AUTH-1)

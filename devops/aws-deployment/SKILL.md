@@ -19,20 +19,6 @@ Deploys services to AWS using the right primitive for the workload. Default for 
 - IaC via Terraform (preferred) or AWS CDK — see `devops/infrastructure-as-code`
 - Pipelines via GitHub Actions / GitLab CI / Azure Pipelines using OIDC (no long-lived keys)
 
-## When to use
-
-- New service needs a deploy target on AWS
-- Migrating a workload between targets (Lambda → ECS, App Runner → ECS, EC2 → Fargate)
-- Setting up the deploy pipeline's *destination* (the pipeline itself lives in `devops/github-actions` etc.)
-- Choosing among AWS primitives for a specific workload
-
-## When NOT to use
-
-- Azure → `devops/azure-deployment`
-- IaC syntax → `devops/infrastructure-as-code`
-- Pipeline YAML → `devops/github-actions` / `devops/gitlab-ci` / `devops/azure-pipelines`
-- App-level config / secrets injection → `devops/environment-config`
-
 ## Picking the right target
 
 | Workload | Default target | Use because |
@@ -248,12 +234,3 @@ The standards this skill's output must meet are the devops rule files, not a lis
 3. Produce the deployable artifact: Dockerfile + task definition (ECS), Lambda zip / container image, or the output of the SPA's own build script, run with the package manager `packageManager` names.
 4. Wire the pipeline (`devops/github-actions` / `gitlab-ci` / `azure-pipelines`) with OIDC role assumption + the appropriate deploy step (`ecs update-service` / `lambda update-function-code` / `s3 sync` + invalidation).
 5. Smoke: hit `/health` after deploy; verify CloudWatch Logs receive logs; verify metrics arrive in Prometheus via the Collector.
-
-## Handoffs
-
-- IaC (Terraform/CDK) → `devops/infrastructure-as-code`
-- Pipelines → `devops/github-actions` / `devops/gitlab-ci` / `devops/azure-pipelines`
-- App-level config & secrets injection → `devops/environment-config`
-- Logging → `observability/structured-logging-{dotnet,java,node}`
-- Tracing/metrics → `observability/opentelemetry-{dotnet,java,node}`
-- Azure equivalent → `devops/azure-deployment`

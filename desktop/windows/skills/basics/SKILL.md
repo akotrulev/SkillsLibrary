@@ -24,23 +24,6 @@ Read the `.csproj` / `Directory.Build.props` (`TargetFramework`, `UseWinUI`, `Us
 
 A down-level project is not flagged for lacking a newer feature, except an out-of-support runtime or SDK, which is always a finding.
 
-## When to use
-
-- Writing C# or XAML for a Windows desktop app, or choosing a UI framework for one
-- "WinUI, WPF or WinForms?", "is this project packaged?", "why does this crash off the UI thread?"
-- Detecting what a brownfield repo is before any other skill runs
-
-## When NOT to use
-
-- Project, TFM, packaging, analyzers → [`project-setup`](../project-setup/SKILL.md)
-- ViewModels, DI, services → [`architecture`](../architecture/SKILL.md)
-- Controls and pages → [`ui-components`](../ui-components/SKILL.md); theme and Fluent → [`styling`](../styling/SKILL.md)
-- Windows, titlebar, navigation, commands → `desktop-windows:windows-and-navigation`
-- WPF, WinForms, C++/WinRT specifics → `desktop-windows:wpf`, `:winforms`, `:cpp-winrt`
-- macOS → `desktop-macos:concepts`; an ASP.NET or library project with no UI → `be-dotnet`
-
----
-
 ## The lane table
 
 | Lane | Role | Skill | Never |
@@ -114,13 +97,3 @@ Formatting is the `.editorconfig`'s; this list is what formatting cannot.
 - **Adding a Windows App SDK package to a WPF or WinForms app** pulls WinUI in transitively — a side-effect lane change; reference only the component needed and say so.
 - **`.NET 8` / `9` left in a `global.json`** — the SDK is out of support: raise to 10, never silently.
 - **Reading `Window.Content.XamlRoot` before the window is activated** — null; use it from `Loaded`.
-
-## Handoffs
-
-- Project files, TFM, packaging, analyzer, ARM64 → [`project-setup`](../project-setup/SKILL.md)
-- MVVM, DI, services → [`architecture`](../architecture/SKILL.md)
-- Pages, controls, dialogs → [`ui-components`](../ui-components/SKILL.md); Fluent, theme, motion → [`styling`](../styling/SKILL.md)
-- Windows, navigation, commands → `desktop-windows:windows-and-navigation`
-- Secrets, WebView2, signing → `desktop/_shared/security`, `desktop/_shared/distribution`
-- .NET 8/9 → 10, WinAppSDK 1.x → 2.x, WPF → WinUI → `desktop-windows:migration`
-- Mac counterpart → `desktop-macos:concepts`

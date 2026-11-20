@@ -8,20 +8,6 @@ disable-model-invocation: true
 
 Authors IaC for the cloud resources the library deploys to. **Bicep** when the project is Azure-only and the team values Microsoft-native syntax; **Terraform** when the project is AWS, multi-cloud, or already invested in HCL. The same standards apply to both: modules, environments via stacks/workspaces, state in remote backends, drift detection, and IaC tested before merge.
 
-## When to use
-
-- New project needs its first IaC
-- Adding a new resource (Container App, ECS service, Lambda, Cosmos DB, Postgres) to an existing project
-- Splitting a monolithic Terraform / Bicep file into modules
-- Setting up remote state / state locking
-- Migrating from one IaC tool to the other (rare; usually only when the tooling story changes)
-
-## When NOT to use
-
-- Pipeline YAML → `devops/{github-actions,gitlab-ci,azure-pipelines}`
-- Cloud-specific app deploy → `devops/{aws,azure}-deployment`
-- App-level config / secrets pulled at runtime → `devops/environment-config`
-
 ## Inputs needed
 
 1. **Tool**: Bicep or Terraform — pick by team / cloud
@@ -302,10 +288,3 @@ The standards this skill's output must meet are the devops rule files, not a lis
 5. Author the per-env stack file consuming modules; pass per-env parameters.
 6. Add CI to run plan-on-PR; add CD to apply-on-merge with environment approval.
 7. Smoke a `plan` locally; verify resources, tags, identities, and outputs match expectations.
-
-## Handoffs
-
-- Pipelines that run plan/apply → `devops/{github-actions,gitlab-ci,azure-pipelines}`
-- App deploy specifics built on these resources → `devops/{aws,azure}-deployment`
-- App-level secrets binding → `devops/environment-config`
-- Cost/budget alerts → AWS Budgets / Azure Cost Management, per the Rules in `devops/{aws,azure}-deployment`

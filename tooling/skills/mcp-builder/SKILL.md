@@ -12,18 +12,6 @@ An MCP server is a **projection of the capability contract**, nothing more. Ever
 
 **Read before writing code:** the contract's capability table, flows, and dependency section, plus `tooling/_shared/capability-contract/references/output-contract.md` — the envelope you are about to implement.
 
-## When to use
-
-- Step 2 of a `tooling-engineer` run, after the contract is confirmed
-- An existing MCP server gains capabilities (`EXTEND` — read the existing server, inherit its naming, prefix, and envelope; add only the delta)
-- A CLI built from the same contract now needs an MCP twin — the contract is already there; only the rendering is new
-
-## When NOT to use
-
-- No local project, just a third-party HTTP API → the vendor `ai-development/mcp-builder` skill owns the API-wrapping lane and its evaluation harness
-- The surface is for humans at a terminal → `tooling:cli-builder`
-- The ask is to *use* an existing MCP server → nothing to build
-
 ## Implementation lane
 
 Decide once, from the contract's detected stack, and state which lane you took:

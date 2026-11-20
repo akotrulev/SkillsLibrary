@@ -229,16 +229,3 @@ assert through the protocol client (`references/details.md`), or drive the brows
 - **Auth tokens from env, read lazily, never logged**; a browser `EventSource` can't set headers — query/cookie.
 - Constructor injection for the SUT's stream client; test names `Should_X_When_Y`; one logical assertion per
   test; builders for 4+-field payloads; no secrets in code.
-
-## Cross-references
-
-- `qa-dotnet:realtime-stream-testing` — the family lead: raw `ClientWebSocket`, SignalR `HubConnection`,
-  `SseParser`, a `Channel<T>` deadline, Playwright-.NET observe/mock.
-- `qa-typescript:realtime-stream-testing` — the `ws` lib / native `WebSocket`, `EventSource`, Playwright-TS; its
-  `MockStreams` is the same fixed-event-set shape.
-- `qa-java:messaging-testing` — the **eventual-consistency lineage** and the **boundary**: messaging = discrete
-  queue/topic messages; this skill = an open WS/SSE stream.
-- `qa-java:network-mocking` — the **HTTP** mock counterpart and the "register before the action" rule; this skill
-  owns WebSocket mocking and browser SSE.
-- `qa-java:ui-tests-playwright` — `BaseTest` and the page-object rules the browser surface layers on.
-- `qa-java:test-login-tokens` — tokens for an authenticated socket, read from env, never logged.

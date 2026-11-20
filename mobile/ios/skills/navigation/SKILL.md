@@ -22,21 +22,6 @@ SwiftUI navigation is **data-driven**: the path is a value, destinations are reg
 
 Use the `Tab` API where the deployment target is iOS 18+; `.tabItem` remains right for 17 and 16. Liquid Glass tab bars, minimise-on-scroll (`tabBarMinimizeBehavior`) and bottom accessories are system chrome — confirm availability in the SDK docs, and never rebuild them by hand ([`styling`](../styling/SKILL.md)).
 
-## When to use
-
-- Adding a screen, a detail, a modal or a tab
-- Navigating from code (after a save, from a notification)
-- Mapping a URL to a screen
-- Laying out iPad / large-screen navigation
-
-## When NOT to use
-
-- APNs, universal-link entitlements and AASA, scheme validation → `mobile-ios:push-and-deep-links`
-- Model ownership, the composition root → [`architecture`](../architecture/SKILL.md)
-- View internals → [`ui-components`](../ui-components/SKILL.md)
-- Not-found and failure screens → `mobile-ios:error-handling`
-- RN / Compose routing → `mobile-react-native:navigation`, `mobile-android:navigation`
-
 ## Inputs needed
 
 - The screen graph: tabs, stacks, modals
@@ -178,13 +163,3 @@ The standards this skill's output must meet are the mobile-ios rule files, not a
 - [ ] Every sheet can be dismissed; `.sheet(item:)` used
 - [ ] Links and tabs carry `accessibilityIdentifier`
 - [ ] No `NavigationView` / `NavigationLink(destination:)` remains in new code
-
-## Handoffs
-
-- Push, universal links, schemes → `mobile-ios:push-and-deep-links`
-- Models, injection → [`architecture`](../architecture/SKILL.md)
-- Views, `.task` loads → [`ui-components`](../ui-components/SKILL.md)
-- Tab bar and split-view look, iPad → [`styling`](../styling/SKILL.md)
-- Not-found, failed states → `mobile-ios:error-handling`
-- Test ids → `mobile-ios:test-ids`
-- `NavigationView` → `NavigationStack` → `mobile-ios:migration`

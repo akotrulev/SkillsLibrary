@@ -10,21 +10,6 @@ Turns the basis's **§8 Connections** into coverage items. `test-design-techniqu
 
 The analysis half lives in `qa/manual/requirements-breakdown` (§8 and `references/connections.md`). This skill is the design half: §8 says what is connected; this skill says how many cases that deserves and of which kind.
 
-## When to use
-
-- The basis has §8 entries and the suite must go beyond field validation
-- A story changes data another feature reads, or a state another feature's trigger acts on
-- A schedule, timeout, webhook, retry or at-least-once consumer sits next to the feature
-- The question is "what else should we test when X changes" or "which side effects are untested"
-
-## When NOT to use
-
-- Field constraints, thresholds, rule combinations or the feature's own lifecycle → `qa/manual/test-design-techniques`
-- The basis itself (building §8) → `qa/manual/requirements-breakdown`
-- Formatting, IDs, Setup and Cleanup → `qa/manual/test-case-writer`
-- Automating a temporal, concurrency or delivery case → `qa/<stack>/skills/time-and-concurrency-testing`
-- §8 reads `Not built — single-feature basis` → nothing to design here; say so and stop
-
 ## Inputs needed
 
 1. **The basis with §8** (the connections, each row sourced) and the coverage-item list `test-design-techniques` produced from §1–§7
@@ -92,12 +77,3 @@ The input is `DELETE /bookings/{id}` plus the story. Bad response: seven cases �
 Also bad: a cross product of every feature with every other, or a case that asserts a returned credit and a freed seat and a notification in one go. Take pairs from the slice, one reaction per case.
 
 A filled example, slice to cases, is in `references/example-cancel-booking.md`.
-
-## Handoffs
-
-- Format the cases (layer groups, parameterized fields, async and temporal forms) → `qa/manual/test-case-writer`
-- Field, rule and own-state coverage → `qa/manual/test-design-techniques`
-- Orchestrate basis → connections → design → suite → `qa/manual/agents/qa-test-case-designer`
-- Automate temporal, concurrency and delivery cases → `qa/<stack>/skills/time-and-concurrency-testing`
-- Edges the KB lacks (KB candidates) → `business-analysis/agents/business-analyst`
-- A defect noticed while designing → `qa/manual/bug-report-writer`

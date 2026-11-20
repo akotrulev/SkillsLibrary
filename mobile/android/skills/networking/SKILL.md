@@ -21,25 +21,6 @@ Owns the **request-level half** of resilience: how a call is made, cancelled, ti
 
 Detect an existing client first (Retrofit, Ktor, a generated OpenAPI client, an in-house wrapper) — **match it; never add a second HTTP layer.**
 
-## When to use
-
-- Writing the API service or a call against it, an upload, a download
-- A request hangs on a bad cell link; a retry storm; a duplicate write
-- Attaching a token, handling `401`, refreshing once
-- Refetching on foreground and on reconnect
-- A WebSocket or SSE stream that must close in the background
-
-## When NOT to use
-
-- Failed region, banner, offline indicator, forced-update prompt → `mobile-android:error-handling`
-- Persisting responses, an offline write queue, sync → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Where server data lives → [`architecture`](../architecture/SKILL.md)
-- Form submit UX, field errors → [`forms`](../forms/SKILL.md)
-- Auth provider setup → `mobile-android:auth0`; token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- FCM token registration → `mobile-android:push-and-deep-links`
-- Uploads that outlive the process → `mobile-android:system-integration`
-- Another stack → `mobile-ios:networking`, `mobile-react-native:networking`
-
 ## One concrete client
 
 One `OkHttpClient` and one Retrofit service per API; budgets, interceptors and the authenticator live in **one module**. Repositories call the service; a ViewModel never does. The service is a Retrofit **interface** (the framework's idiom) — no wrapper interface on top of it.
@@ -209,11 +190,3 @@ The standards this skill's output must meet are the mobile-android rule files, n
 - Airplane mode: no retry attempts in the log; reconnect refetches.
 - A `503` with `Retry-After: 5` retries after 5 s, not sooner; N concurrent `401`s cause exactly one refresh.
 - Dev-side tests (`MockWebServer`, `runTest` with a virtual clock for backoff): [`unit-testing`](../unit-testing/SKILL.md).
-
-## Handoffs
-
-- Failed region, banner, stale, forced update → `mobile-android:error-handling`
-- Persisted cache, write queue, token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- State ownership → [`architecture`](../architecture/SKILL.md) · field errors → [`forms`](../forms/SKILL.md)
-- Cleartext, pinning, secrets → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
-- API contract tests → `qa-api-typescript` / `qa-api-dotnet` / `qa-api-java` (peer of the backend)

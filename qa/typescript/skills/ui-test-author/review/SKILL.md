@@ -14,18 +14,6 @@ The Playwright know-how behind those rules is `qa/typescript/skills/ui-test-auth
 locators in `references/locators.md`, assertions in `references/assertions.md`, the config in
 `references/config-and-fixtures.md`.
 
-## When to use
-
-- A diff or file (page object, `.spec.ts`, fixture, config, base class) is submitted for review
-- Pre-merge gate on a PR touching `tests/`, `e2e/`, `pages/` or `pageObjects/`
-
-## When NOT to use
-
-- Generating new code → `qa/typescript/skills/ui-test-author/playwright`, `…/selenium`, `…/appium`, `…/maestro`
-- Architecting the POM → `qa/typescript/skills/page-object-design`
-- API tests → `qa/typescript/skills/api-test-author/review`
-- .NET or Java UI code → `qa/dotnet/skills/ui-test-author/review`, `qa/java/skills/ui-test-author/review`
-
 ## Inputs needed
 
 1. **Stack** — Playwright TS, Selenium WebDriverJS / WebdriverIO, WebdriverIO + Appium, or Maestro
@@ -88,13 +76,3 @@ A comment explaining a locator (`// the third span is the price`) is evidence th
 3. Walk the rules: waits, async and assertions in page objects first, where most blockers live, then the object model (`page-objects.md`), then locators, then the rest.
 4. For each finding: file and line, the rule broken, a one-sentence fix. The severity is the tag on the rule, never a new judgment.
 5. **Do not rewrite the code.** Hand off to the generator if the user asks for a rewrite.
-
-## Handoffs
-
-- Rewrite → `qa/typescript/skills/ui-test-author/playwright`, `…/selenium`, `…/appium` or `…/maestro`
-- Architecture is the real problem → `qa/typescript/skills/page-object-design`
-- Test data shape → `qa/typescript/skills/test-data-builder`
-- API tests in the same PR → `qa/typescript/skills/api-test-author/review`
-- Evidence settings beyond the config defaults → `qa/typescript/skills/evidence-capture`
-- Allure reporting → `qa/reporting/typescript/skills/test-reports`
-- A rule is missing or wrong → edit the project's `.claude/rules/qa-typescript/`; for every project, the plugin's `qa/typescript/skills/rules/`

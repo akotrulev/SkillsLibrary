@@ -24,19 +24,6 @@ How a Windows app stays fast: **the window shows before the work finishes, the U
 
 Never up-level a TFM or Windows App SDK to gain speed as a side effect; say what the new version fixes and ask.
 
-## When to use
-
-- Slow start, a janky scroll, a growing working set, a large package, a slow list
-- "Should this be `x:Bind`?", "can we publish AOT?", "where is the time going?"
-
-## When NOT to use
-
-- Crashes and fail-fast → `desktop-windows:error-handling`
-- Network timeouts and retry → `desktop-windows:networking`
-- Local database design → `desktop-windows:offline-and-storage`
-
----
-
 ## Measure first
 
 Every change in this skill starts with a number and ends with one.
@@ -185,10 +172,3 @@ A startup span (`app.start`) from process start to first content, with `cold` / 
 - **AOT turned on, `{Binding}` left in** — a run-time failure after publish.
 - **A splash with a fixed delay** — it is the slowness.
 - **Measuring on the dev machine only** — the target class (an older laptop, ARM64) is the benchmark.
-
-## Handoffs
-
-- Failure states while loading → `desktop-windows:error-handling`; local storage → `desktop-windows:offline-and-storage`
-- XAML structure and lists → `desktop-windows:ui-components`; project properties → `desktop-windows:project-setup`
-- Native hops → `desktop-windows:cpp-winrt`; observability base → `desktop-shared:observability`
-- Mac counterpart → `desktop-macos:performance`

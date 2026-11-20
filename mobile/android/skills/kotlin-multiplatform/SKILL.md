@@ -22,22 +22,6 @@ Owns the **KMP lane** of the Android plugin: what to share, how a shared module 
 
 Detect first: an existing `shared` module, its Kotlin version and DI choice are matched, not replaced. A project on AGP 8 keeps `com.android.library` + `kotlin("multiplatform")` until [`migration`](../migration/SKILL.md) moves it.
 
-## When to use
-
-- Deciding whether a piece of logic is shared with an iOS app, and how
-- Creating or extending a `shared` / `:core:*` KMP module
-- Choosing Koin vs Metro, or finding Hilt / Android types in `commonMain`
-- Exposing Kotlin to Swift (framework, XCFramework, Swift export)
-- Deciding whether to share the UI
-
-## When NOT to use
-
-- Android-only code, no iOS app → the plain skills ([`architecture`](../architecture/SKILL.md), [`offline-and-storage`](../offline-and-storage/SKILL.md))
-- The Swift side: calling the framework, SwiftUI, SPM in Xcode → `mobile-ios`
-- Moving an AGP 8 / Kotlin-only project to AGP 9 → [`migration`](../migration/SKILL.md)
-- A React Native project → `mobile-react-native`; this skill does not bridge to JS
-- A web / desktop KMP target — out of scope; the lane is Android + iOS
-
 ## Inputs needed
 
 1. Does an iOS app exist or is planned — if not, this is not a KMP task
@@ -139,12 +123,3 @@ The standards this skill's output must meet are the mobile-android rule files, n
 - [ ] Every shared repository has a `commonTest` test with a fake
 - [ ] The framework surface is listed and everything else is `internal`
 - [ ] Swift export, if on, is recorded as Alpha with the Kotlin version it was tested on
-
-## Handoffs
-
-- State, ViewModel, DI rules → [`architecture`](../architecture/SKILL.md)
-- Client policy → [`networking`](../networking/SKILL.md); storage and sync → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Gradle, catalog, SDK levels → [`project-setup`](../project-setup/SKILL.md)
-- Moving to AGP 9 / the library plugin → [`migration`](../migration/SKILL.md)
-- Consuming the framework in Swift → `mobile-ios:concepts` and `mobile-ios:architecture`
-- Test seams and fakes → [`unit-testing`](../unit-testing/SKILL.md)

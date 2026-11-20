@@ -25,19 +25,6 @@ bUnit **v2 was a rewrite** — the API moved. Detect the bUnit package version b
 
 `.NET` TFM is separate from the bUnit version: bUnit v2 targets net8/net9/net10 alike. Author against v2 on any supported TFM; only flag a project for v1 patterns, never for its TFM.
 
-## When to use
-
-- A component has **logic**: conditional rendering, computed display, event handling that mutates state, validation, a state-machine of enabled/disabled actions.
-- You want to prove a component reacts correctly to parameter changes, cascading values, injected service results, or JS interop responses.
-- Regression-locking a fixed component bug at the unit level (cheaper than an E2E).
-
-## When NOT to use
-
-- **Markup-only components** (a static card, a layout shell with no branching) — a snapshot of hand-written markup asserts nothing but tautology. Test *logic-bearing* components only.
-- **End-to-end journeys / real navigation / real backend** → `qa-ui-dotnet` (peer). bUnit fakes `NavigationManager`; it does not actually route.
-- **Pure C# logic** with no rendering (a formatter, a validator, a state container) → **not bUnit, but still yours** — see **Pure-logic tests** below.
-- **Authoring `data-testid`s** → `frontend/blazor/skills/test-ids`. (Tests here *consume* those testids as stable selectors — `cut.Find("[data-testid='Orders.Row']")`.)
-
 ## Test what has behavior — the selection matrix
 
 | Component shape | Test with bUnit? | What to assert |
@@ -187,12 +174,3 @@ public void Should_RaiseChangedOnce_When_ValueIsSet()
 ```
 
 Conventions, seams, doubles policy and anti-patterns for this altitude are the same ones the backend stack documents in depth — see [`be-dotnet:unit-testing`](../../../../backend/dotnet/skills/unit-testing/SKILL.md) for the full treatment (NUnit constraint model, NSubstitute traps, `FakeTimeProvider`, parameterized cases, builders). Do not duplicate it here; the fence is only *where the code runs*, and the discipline is identical.
-
-## Handoffs
-
-- Non-rendering logic (state containers, validators, formatters, culture helpers) → **Pure-logic tests**, in this skill
-- Data-testid authoring/audit → `frontend/blazor/skills/test-ids`
-- End-to-end / real-browser journeys, POM → **peer** `qa-ui-dotnet`
-- Visual/pixel regression → **peer** `qa/dotnet/skills/visual-regression`
-- Component code smells / rewrites → `frontend/blazor/skills/code-review` / `component-writer`
-- What a component *should* do (behavior spec) → the test-case suite from **peer** `qa-test-case-designer`

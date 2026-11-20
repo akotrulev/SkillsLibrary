@@ -259,19 +259,3 @@ Cross-link `qa-<stack>:ci-pipelines` for the OIDC-secret + artifact wiring.
 - Treat **schema-conformance** failures as real defects (app or spec); never blanket-suppress them.
 - **A green run ≠ "API secure"** — Schemathesis is blind to **BOLA/BFLA** (use `permission-testing`)
   and **business-logic abuse** (manual pentest). Map findings to A05/API4/API8/API9; say so in reports.
-
-## Cross-references
-
-- `qa-<stack>:security-foundations` — the **master ref**: OWASP Top 10:2025 / API 10:2023 map, the **authorization-to-scan**
-  rule this skill defers to, the triage discipline, the scanner-blind-spot framing. Load **alongside** this.
-- `qa-<stack>:active-scan` — the **DAST active attack** scan (payload injection,
-  crawl) — a different engine from spec-driven property fuzzing; run both.
-- `qa-{stack}:permission-testing` — the functional **BOLA/BFLA/IDOR** authz matrix the
-  fuzzer **cannot** find; the highest-value layer most teams miss.
-- `qa-{stack}:api-tests` — **example-based** functional contract/conformance tests (hand-written,
-  deterministic) — the non-generative counterpart.
-- `qa-{stack}:test-login-tokens` — acquire the M2M/ROPG token (for a seeded test user) injected via
-  `--header`, read lazily from env.
-- `qa-<stack>:test-reports` — attach the JUnit XML + VCR/HAR repro.
-- `qa-<stack>:ci-pipelines` + `qa-<stack>:ci-conventions` — wire the `schemathesis/action` job,
-  OIDC secrets, artifact upload.

@@ -28,24 +28,6 @@ Owns **dev-side unit tests of backend logic**: construct a class or call a funct
 
 **First act: detect the Node major and the package manager** (`package.json` `engines`, `packageManager`, the lockfile). **Node 24 active LTS primary, 22 maintenance supported. Node 20 is EOL (April 2026)** — flag it, don't target it. `strict: true` in `tsconfig.json` applies to test files too; a test directory excluded from strict checking hides the API's real nullability.
 
-## When to use
-
-- A class or function `pattern-writer` just generated has behavior: a discriminated-union strategy, a `Result<T,E>` producer, a higher-order-function decorator, a handler, a factory.
-- A domain rule, invariant, or guard needs pinning before a refactor.
-- A calculation: money (minor units), rounding, proration, date math.
-- A Zod schema — its accept **and** reject cases, including the error path.
-- A mapper, a branded-id conversion, an error-to-ProblemDetails translation.
-- Reproducing a bug at the unit level before fixing it (`dev:debugging` RED).
-
-## When NOT to use
-
-- supertest / a booted app / HTTP-level assertions → **peer** `qa-api-typescript`
-- Contract / integration / E2E, Testcontainers, real-DB seed-assert-clean → **peer** `qa-api-typescript` (`db-testing/*`)
-- Whether the tests actually catch faults (mutation score) → no TypeScript peer exists yet (StrykerJS would be its tool); see Handoffs
-- Suite-scale builders / fixtures → **peer** `qa-typescript:test-data-builder`
-- React components / hooks → `fe-react:component-testing`
-- **Types with no runtime behavior, barrel re-exports, constants, generated clients** → don't test them at all
-
 ## Stack
 
 ```jsonc
@@ -298,14 +280,3 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 5. **Add the boundary cases** with `it.each` — nulls, empties, min/max, the rounding boundary, **both `Result` branches**, the refused transition.
 6. **Verify:** the project's test script green (from `package.json`, run with its `packageManager`), `tsc --noEmit` clean, lint clean, branch coverage of the changed code ≥ 80% (*Coverage floor*). Report counts and the coverage figure. Inside a plan task, `Gate: own tests` runs this task's tests — step 4's red run, then green — and the *Coverage floor* measure over the files it wrote; the last runnable task runs everything else.
 7. **Sweep:** a union whose members are handled in one place but tested in one case is a gap.
-
-## Handoffs
-
-- supertest / HTTP-level, contract / integration / E2E → **peer** [`qa-api-typescript`](../../../../qa/typescript/agents/qa-api-typescript.md)
-- Real-DB verification, Testcontainers → **peer** `qa/typescript/skills/db-testing/*`
-- Do the tests actually catch faults? → no TypeScript mutation-testing skill exists yet; the siblings `qa-java:test-quality-check` (PIT) and `qa-dotnet:test-quality-check` (Stryker.NET) do. Treat mutation grading as unavailable on this stack rather than substituting a coverage number
-- Suite-scale builders / fixtures → **peer** `qa/typescript/skills/test-data-builder`
-- Flaky triage / quarantine → **peer** `qa/reporting/typescript/skills/flaky-test-quarantine`
-- The unit needs a seam / a pattern → [`pattern-writer`](../pattern-writer/SKILL.md)
-- Reviewing the tests with the change → [`code-review`](../code-review/SKILL.md)
-- .NET equivalent → `backend/dotnet/skills/unit-testing` · Java equivalent → `backend/java/skills/unit-testing`

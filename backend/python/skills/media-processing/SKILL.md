@@ -12,18 +12,6 @@ Writes the image-pipeline modules of a Python upload worker. Every function here
 
 Pillow **12.x primary, 11.x supported** (detect via `uv lock` / `PIL.__version__`); the metadata behaviour below is pinned by tests precisely because `save()` fallbacks have moved between minors. `rembg` 2.0.x, `onnxruntime` 1.2x, `vtracer` 0.6.x, `defusedxml` 0.7. Interpreter per `pattern-writer`.
 
-## When to use
-
-- Any function that opens, parses, converts, or encodes an upload
-- Deciding the rejection reasons and the verdict shape the TypeScript side consumes
-- Choosing rembg model / VTracer parameters for a logo or a photo
-
-## When NOT to use
-
-- Process isolation, memory / CPU / time limits, `--network none` → `sandboxed-worker` (this skill assumes it runs inside that)
-- Package layout, `Result`, settings, logging → `pattern-writer`
-- Fixture builders and the hostile suite → `unit-testing`
-
 ## Inputs needed
 
 1. Allowed formats for this upload class (logo: `png svg jpeg webp`; venue photo: `jpeg png webp heic?`)
@@ -36,14 +24,12 @@ Pillow **12.x primary, 11.x supported** (detect via `uv lock` / `PIL.__version__
 ```python
 type Operation = RemoveBackground | TraceToSvg | DpiVerdict | DominantColours | ResizeLadder
 
-
 @dataclass(frozen=True, slots=True)
 class Sniffed:
     format: Literal["png", "jpeg", "webp", "svg"]
     width: int
     height: int
     byte_size: int
-
 
 type ValidationResult = Ok[Sniffed] | Rejected
 ```
@@ -61,7 +47,6 @@ def sniff(payload: bytes, declared: str, limits: Limits) -> ValidationResult:
     if looks_like_xml(payload):
         return sniff_svg(payload, declared, limits)
     return sniff_raster(payload, declared, limits)
-
 
 def sniff_raster(payload: bytes, declared: str, limits: Limits) -> ValidationResult:
     try:
@@ -127,7 +112,6 @@ ALLOWED_ATTRIBUTES = frozenset({"id", "class", "d", "x", "y", "x1", "y1", "x2", 
                                 "font-family", "font-size", "font-weight", "text-anchor", "href"})
 FORBIDDEN_ELEMENTS = frozenset({"script", "foreignObject", "image", "a", "animate", "set", "style",
                                 "iframe", "video", "audio", "feImage"})
-
 
 def sanitize_svg(payload: bytes, limits: Limits) -> Ok[bytes] | Rejected:
     if len(payload) > limits.max_svg_bytes:
@@ -237,7 +221,6 @@ class DpiVerdict:
     metadata_dpi: float | None
     grade: Literal["print-ready", "acceptable", "web-only"]
 
-
 def dpi_verdict(width: int, height: int, print_width_mm: float, print_height_mm: float, metadata_dpi: float | None) -> DpiVerdict:
     effective = min(width / (print_width_mm / 25.4), height / (print_height_mm / 25.4))
     grade = "print-ready" if effective >= 300 else "acceptable" if effective >= 150 else "web-only"
@@ -276,7 +259,6 @@ def dominant_colours(rgba: Image.Image, count: int) -> list[Swatch]:
 ```python
 LADDER = ((320, "thumb"), (1024, "card"), (2048, "hero"))
 
-
 def resize_ladder(rgb: Image.Image, scratch: Path) -> list[Rendition]:
     renditions = []
     for long_edge, name in LADDER:
@@ -313,10 +295,3 @@ Written as one JSON document to stdout (or the HTTP response); output files go t
 ## Rules
 
 The standards this skill's output must meet are the be-python rule files, not a list here: `python-pipeline.md`, with `python.md` for the code around it and `python-project.md` for a new dependency. Read the project's copies in `.claude/rules/be-python/`, or the plugin's in `backend/python/skills/rules/` when the project has not installed them (`/be-python:rules` does). Where they and this skill's recipes disagree, the rule files win.
-
-## Handoffs
-
-- Package skeleton, `Result`, settings, logging → `pattern-writer`
-- Process isolation, limits, weights baked into the image, `--network none` → `sandboxed-worker`
-- Fixture builders (GPS JPEG, header-only bomb, polyglot, script SVG) and the suite → `unit-testing`
-- Review of the pipeline → `code-review`

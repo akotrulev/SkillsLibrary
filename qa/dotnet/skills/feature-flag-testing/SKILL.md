@@ -178,20 +178,3 @@ flip vs dependency fault — adjacent, not the same).
 - **The flag client is constructor-injected** into the code under test — never a static lookup. NUnit +
   FluentAssertions; **async all the way** (`await SetProviderAsync` so the first evaluation never races
   initialization; never `.Result`).
-
-## Cross-references
-
-- `qa-java:feature-flag-testing` — the **canonical** stack this sibling is ported from (`dev.openfeature:sdk` +
-  `launchdarkly-java-server-sdk` `TestData` + TestNG); same four ideas, same fixtures, different SDK surface.
-- `qa-typescript:feature-flag-testing` — the other sibling (`@openfeature/server-sdk` +
-  `@launchdarkly/node-server-sdk` `TestData` + Vitest).
-- `qa-dotnet:data-driven-testing` — the **matrix mechanics** the on/off/variation table binds through
-  (`[TestCase]`/`[TestCaseSource]` row-binding); this skill defines *what* the rows are, that one defines *how*
-  rows drive tests.
-- `qa-dotnet:failure-injection-testing` — the **kill-switch boundary**: the off-path of a flag flip is this skill; a
-  faulted dependency behind the feature is chaos. The lifecycle shape (steady → perturb → assert-degraded) is shared.
-- `qa-dotnet:api-tests` · `qa-dotnet:ui-tests-playwright` — the branch under test is
-  usually an API or UI behavior; those skills own the assertion style inside each pinned branch.
-- `qa-dotnet:test-login-tokens` — the same "test fixture over live service" posture applied to auth; pairs
-  when targeting rules key off claims-derived attributes.
-- `qa-dotnet:test-reports` — render the flag matrix as named results (one per variation row).

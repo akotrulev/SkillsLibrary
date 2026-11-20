@@ -8,19 +8,6 @@ disable-model-invocation: true
 
 Scaffolds NUnit-based API tests against a REST backend that emits a uniform `ProblemDetails` envelope on every 4xx. Output mirrors a single canonical fixture, applies a rich happy-path template for 2xx and a strict `ProblemDetails` template for 4xx.
 
-## When to use
-
-- New `{Resource}Tests.cs` fixture in `ApiTests/Tests/`
-- Adding test methods (happy path, 4xx, 401) to an existing fixture
-- Generating parameterized validation tests against a single endpoint
-
-## When NOT to use
-
-- UI / browser tests → `qa/dotnet/skills/ui-test-author`
-- Generating the typed client itself → `qa/dotnet/skills/api-client-writer`
-- Generating request/response DTOs → `qa/dotnet/skills/api-models`
-- Performance / load tests → `qa/dotnet/skills/load-testing`
-
 ## Source of truth & input modes
 
 Before generating, establish the **source of truth** — one of:

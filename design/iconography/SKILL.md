@@ -22,14 +22,6 @@ Query it before picking a glyph or deciding an icon's accessibility treatment.
 
 On a mobile or desktop app the family rules (one style default, filled for selected, one weight, one grid), one glyph per meaning, the icon+label policy, decorative-vs-meaningful, and never-state-by-icon-alone all hold. Inline SVG, `currentColor`, `em` sizing, `aria-hidden` and the OG image do not transfer. The library is the platform's symbol set where it has one — SF Symbols on iOS and macOS (the stack's `ui-components`; they scale with Dynamic Type), Segoe Fluent Icons through `FontIcon` / `SymbolIcon` on Windows (`styling`; they inherit the foreground colour and follow High Contrast); Android's examples use the Material `Icons` set, and React Native tab icons take SF Symbols or Material Symbols (`navigation`). The corpus `icons` domain is web-first (Phosphor imports); native facts come from `references/pro-rules.md` *Icons & Visual Elements* (44 pt / 48 dp hit areas, icon sizes as tokens, 3:1 icon contrast), `--domain web` (*Icon Button Labels*, *Decorative Icons*) and the stack's `accessibility` for the label mechanics.
 
-## When to use
-
-- Picking an icon library for a new app, or reconciling an app that has drifted into several.
-- An icon set looks inconsistent — mixed weights, some stroke some fill, sizes that don't align to text.
-- Writing or reviewing inline SVG for color/size/accessibility correctness.
-- Deciding whether a control can be icon-only or needs a visible label.
-- Designing an Open Graph / social share image that must survive being scaled to a feed thumbnail.
-
 ## One family per product
 
 An icon set reads as a system only when every glyph shares construction. Pick one family and hold it:
@@ -91,14 +83,3 @@ Numbered because audit finding ids cite the numbers: new checks are appended, an
 4. **Decorative icons hidden** from assistive tech; **meaningful icons carry an accessible name** (mechanics deferred to a stack's `accessibility`).
 5. **Icon-only used only where** meaning is universal and space is constrained; primary actions/nav pair icon **with** label; **never state by icon/color alone**; one glyph = one meaning app-wide.
 6. **OG image** is 1200×630, essential content in the safe zone, legible at thumbnail size, on-brand; tags emitted by the stack's SEO skill.
-
-## Related
-
-- [`design/visual-identity`](../visual-identity/SKILL.md) — the color/character taste icons inherit (they don't set palette); the color-not-alone rule.
-- [`design/design-tokens`](../design-tokens/SKILL.md) — the semantic color tokens that flow into `currentColor` and the size tokens icons use.
-- [`design/brand-import`](../brand-import/SKILL.md) — supplies the brand tokens an OG image and icon color follow when the brand is fixed.
-- A stack's `component-library` ([Blazor](../../frontend/blazor/skills/component-library/SKILL.md) · [React](../../frontend/react/skills/component-library/SKILL.md)) — its bundled icon set is the preferred family when the library is in play.
-- A stack's `ui-rules` ([Blazor](../../frontend/blazor/skills/ui-rules/SKILL.md) · [React](../../frontend/react/skills/ui-rules/SKILL.md)) — owns the **icon-only-button** decision rule this skill applies.
-- A stack's `accessibility` ([Blazor](../../frontend/blazor/skills/accessibility/SKILL.md) · [React](../../frontend/react/skills/accessibility/SKILL.md)) — owns the accessible-name **mechanics** for meaningful icons.
-- A stack's `seo` ([Blazor](../../frontend/blazor/skills/seo/SKILL.md) · [React](../../frontend/react/skills/seo/SKILL.md)) — emits the `og:image` / `twitter:card` tags for the social image designed here.
-- [`design:corpus`](../ui-ux-pro-max/SKILL.md) — the 105-icon `icons` domain, with semantic role and allowed contexts per glyph.

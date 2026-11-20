@@ -30,20 +30,6 @@ The primary lane is Appium 3 with WebdriverIO 10. WDIO 10 needs an Appium 3 serv
 3. `browser.capabilities` on the started session shows what the vendor actually granted; `GET <hub>/status` reports `build.version` where the hub proxies it.
 4. Check the vendor's WDIO service as well. `@wdio/browserstack-service` was on 9.39.4 on 2026-10-11, with a peer of `@wdio/cli` ≤ 9, so it does not install on WDIO 10; `@wdio/sauce-service` has a 10.0.2. On WDIO 10 against BrowserStack, connect without the service (below) and mark the status in the hook.
 
-## When to use
-
-- Uploading a build (`.apk`/`.aab`/`.xapk`/`.ipa`) and referencing it from the `app` capability
-- One suite across a **matrix of real devices and OS versions**
-- A feature that needs a **real device**: biometric, GPS, a network condition, a localized build
-- AWS Device Farm's upload → schedule → poll lifecycle, or choosing between the two paradigms
-
-## When NOT to use
-
-- Connect, capability blocks, parallelism, tunnels, status wiring → `qa/typescript/skills/browser-cloud-setup`
-- Java / .NET farms → `qa/{java,dotnet}/skills/device-cloud`
-- Page objects and tests → `qa/typescript/skills/ui-test-author/appium`
-- CI matrix and sharding → `qa/cicd/typescript/skills/ci-pipelines`
-
 ## Pick a paradigm
 
 | | **Live-session farm** | **Remote-run farm** |
@@ -278,13 +264,3 @@ export function browserStackCreds(): BrowserStackCreds {
 1. Confirm the paradigm, the platform and the vendor's Appium version.
 2. Live session: `farm-credentials.ts`, `uploadApp`, `device-matrix.ts`, `FarmDevice.ts`, the farm config. Remote run: `DeviceFarmRunner`.
 3. Map the device count onto `maxInstances` per `browser-cloud-setup`, run **one** device first, and confirm the dashboard shows the right build tags.
-
-## Cross-references
-
-- **`references/details.md`** — agent tooling on the farm: BrowserStack MCP triage of a red run, `appium-mcp` against a cloud hub
-- **`qa/typescript/skills/browser-cloud-setup`** — hub, capability blocks, parallelism, tunnels, status
-- **`qa/typescript/skills/ui-test-author/appium`** — the pages, tests and `BaseTest.ts` that run unchanged on a farm; its Versions table owns the pins
-- **`qa/typescript/skills/evidence-capture`** — a farm run keeps the dashboard URL and the status, not a local video
-- **`qa/java/skills/device-cloud`**, **`qa/dotnet/skills/device-cloud`** — the sibling stacks
-- **`qa/cicd/typescript/skills/ci-pipelines`** — build-then-upload, OIDC for AWS, sharding the matrix
-- **`qa/reporting/typescript/skills/test-reports`** — the session or run URL and the device name in the report

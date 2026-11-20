@@ -10,17 +10,6 @@ This skill stands up a **runnable Appium 3 test project from zero**: the Gradle 
 
 **Version rule:** new projects use Java 21 (17 is the minimum) and Gradle with the Kotlin DSL. An existing Maven project stays on Maven: put the same coordinates in the `pom.xml` and keep the package layout.
 
-## When to use
-
-- A fresh repo with no Java mobile test project, and the user wants iOS or Android coverage.
-- The user asks which versions, layout or Appium setup a Java mobile framework should use.
-
-## When NOT to use
-
-- The project exists → author into it with `qa/java/skills/ui-test-author/appium`.
-- Real-device clouds (BrowserStack, Sauce, AWS Device Farm) → `qa/java/skills/device-cloud`.
-- Web-UI or API scaffolding → the matching `*-project-setup` skill.
-
 ## Versions
 
 The table is the **Versions** table of `ui-test-author/appium/SKILL.md`, and `assets/build.gradle.kts` there holds the same pins.

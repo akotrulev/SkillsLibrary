@@ -183,19 +183,3 @@ skill pins which branch runs; those skills assert what the branch does. The vari
 - **The flag client is constructor-injected** into the code under test — never a static lookup. Vitest, strict
   TypeScript; **await readiness** (`setProviderAndWait` / `waitForInitialization`) so the first evaluation never
   races initialization.
-
-## Cross-references
-
-- `qa-java:feature-flag-testing` — the **canonical** stack this sibling is ported from (`dev.openfeature:sdk` +
-  `launchdarkly-java-server-sdk` `TestData` + TestNG); same four ideas, same fixtures, different SDK surface.
-- `qa-dotnet:feature-flag-testing` — the other sibling (`OpenFeature` NuGet + `LaunchDarkly.ServerSdk` `TestData`
-  + NUnit).
-- `qa-typescript:data-driven-testing` — the **matrix mechanics** the on/off/variation table binds through
-  (`it.each` row-binding); this skill defines *what* the rows are, that one defines *how* rows drive tests.
-- `qa-typescript:failure-injection-testing` — the **kill-switch boundary**: the off-path of a flag flip is this skill;
-  a faulted dependency behind the feature is chaos. The lifecycle shape (steady → perturb → assert-degraded) is shared.
-- `qa-typescript:api-tests` · `qa-typescript:ui-tests-playwright` — the branch under test
-  is usually an API or UI behavior; those skills own the assertion style inside each pinned branch.
-- `qa-typescript:test-login-tokens` — the same "test fixture over live service" posture applied to auth;
-  pairs when targeting rules key off claims-derived attributes.
-- `qa-typescript:test-reports` — render the flag matrix as named results (one per variation row).

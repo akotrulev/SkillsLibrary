@@ -10,22 +10,6 @@ House pattern: **React Hook Form (RHF) + Zod** validated against a strongly-type
 
 **Version rule:** `useActionState` (React 19; supersedes React 18's `useFormState`) + `useOptimistic` + Server Actions are the primary App Router lane. On React 18 / a Vite SPA (no Server Actions), use the **RHF + fetch/`useMutation`** lane throughout. Detect the React/Next major and pick the lane.
 
-## When to use
-
-- Any form past a single field
-- Replacing scattered ad-hoc validation with one schema as the source of truth
-- Wiring server-side validation errors back onto the fields
-- Multi-step / wizard forms; file uploads; optimistic submit
-
-## When NOT to use
-
-- A single search input or filter — `useState` (or URL state) is fine, no library
-- State management at large → [`state-management`](../state-management/SKILL.md)
-- The fetch/mutation mechanics + caching/revalidation → [`data-fetching`](../data-fetching/SKILL.md)
-- Broad accessibility audit → [`accessibility`](../accessibility/SKILL.md)
-- Component scaffolding → [`component-writer`](../component-writer/SKILL.md)
-- Auth UI (login/signup) → `auth/auth0-react`
-
 ## Which lane?
 
 ```
@@ -240,13 +224,3 @@ The standards this skill's output must meet are the fe-react rule files `react-f
 5. Wire submit — map `ProblemDetails` to `setError`/`state.errors`; revalidate/redirect in the action.
 6. Multi-step → schema-per-step + parent state; optimistic → `useOptimistic`.
 7. Smoke locally: valid submit, client-validation fail, server-side fail; confirm screen-reader announcement.
-
-## Handoffs
-
-- State management at large → [`state-management`](../state-management/SKILL.md)
-- Fetch/mutation mechanics, caching, revalidation → [`data-fetching`](../data-fetching/SKILL.md)
-- Accessibility deep dive → [`accessibility`](../accessibility/SKILL.md)
-- Component scaffolding → [`component-writer`](../component-writer/SKILL.md)
-- Auth-protected forms → `auth/auth0-react`
-- API contract (ProblemDetails fields must match) → `qa/typescript/skills/api-test-author` (peer)
-- Blazor forms → `frontend/blazor/skills/forms`

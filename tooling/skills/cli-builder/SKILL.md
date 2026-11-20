@@ -12,18 +12,6 @@ A CLI is the same capability contract as an MCP server, addressed to a shell ins
 
 **Prerequisite: a confirmed capability contract.** Read its capability table, flows, and dependency section, plus `tooling/_shared/capability-contract/references/output-contract.md` — the envelope `--json` emits.
 
-## When to use
-
-- Step 2 of a `tooling-engineer` run, after the contract is confirmed
-- An existing CLI gains commands (`EXTEND` — read it, inherit its binary name, flag conventions, and exit codes; add only the delta)
-- An MCP server built from the same contract now needs a terminal twin
-
-## When NOT to use
-
-- The surface is for an agent over a protocol → `tooling:mcp-builder` (build both from one contract when both are wanted)
-- The ask is CI pipeline configuration → `devops/*` owns pipelines; this skill builds the tool a pipeline step *calls*
-- The project already has a CLI and the ask is to *use* it → nothing to build
-
 ## Implementation lane
 
 From the contract's detected stack:

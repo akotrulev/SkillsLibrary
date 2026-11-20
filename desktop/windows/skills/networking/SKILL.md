@@ -18,20 +18,6 @@ How a Windows desktop app talks to a server: **`IHttpClientFactory` typed client
 | Realtime | `System.Net.WebSockets.ClientWebSocket`; SignalR client `Microsoft.AspNetCore.SignalR.Client` when the server is SignalR | |
 | Host | `Microsoft.Extensions.Hosting` composes it (WinUI: `architecture`; WPF: `wpf`; WinForms: `winforms`) | |
 
-## When to use
-
-- A view model needs data from, or sends data to, a server
-- "Add a retry", "the call hangs", "refresh the token", "show the server's field errors", "keep a socket open"
-
-## When NOT to use
-
-- The form, the field errors, the banner → `desktop-windows:forms`, [`ui-components`](../ui-components/SKILL.md)
-- Where the token and cache are stored → `desktop-windows:offline-and-storage`
-- Sign-in flow itself → `auth0-winui` / `auth0-wpf` (S3)
-- Server-side API design → the `be-*` plugins
-
----
-
 ## The typed client
 
 One class per remote capability, constructor-injected `HttpClient`, registered once in the host. No `new HttpClient()` anywhere (it leaks sockets or pins DNS).
@@ -178,11 +164,3 @@ HTTP is instrumented by `OpenTelemetry.Instrumentation.Http` (span per call, `tr
 - **Ten parallel refreshes** — single-flight it.
 - **Token in the WebSocket URL** — it is logged by proxies.
 - **A reconnect loop with no backoff** — hammers a recovering server.
-
-## Handoffs
-
-- Field errors, banner, retry button → `desktop-windows:forms`, [`ui-components`](../ui-components/SKILL.md)
-- State type and cancellation in view models → [`architecture`](../architecture/SKILL.md)
-- Token and cache storage → `desktop-windows:offline-and-storage`
-- Sign-in → `auth0-winui` / `auth0-wpf`; TLS and certificate pinning rules → `desktop-shared:security`
-- Mac counterpart → `desktop-macos:networking`

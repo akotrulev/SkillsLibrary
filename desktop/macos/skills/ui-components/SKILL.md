@@ -24,23 +24,6 @@ Writes Mac SwiftUI that is small, previewable, cancels its own work, renders eve
 
 A `[mac13]` project is not flagged for lacking an inspector. `[AppKit]` codebases host SwiftUI through `NSHostingView`: [`appkit`](../appkit/SKILL.md).
 
-## When to use
-
-- Building a window's content, a row, a sidebar, an inspector, an empty or error state
-- A multi-column data list, selection, sorting
-- Context menus, hover effects, a control that must work by touch
-- A view that re-renders too much, or a `#Preview`
-
-## When NOT to use
-
-- Where state lives → [`architecture`](../architecture/SKILL.md)
-- Colour, type, density, glass, materials → [`styling`](../styling/SKILL.md)
-- Scenes, window placement, toolbars at window level → `windows-and-scenes`; the menu bar → `menus-and-commands`
-- `Form` in Settings and inspectors → `forms`
-- VoiceOver and Full Keyboard Access → `accessibility`
-- AppKit controllers → [`appkit`](../appkit/SKILL.md)
-- iPhone screens → `mobile-ios:ui-components`
-
 ## Inputs needed
 
 - The data and its states: loading, loaded, empty, failed, stale, offline
@@ -214,11 +197,3 @@ struct AlbumsContent: View {
 - [ ] Loads are `.task`; nothing does I/O in `body` or `init`
 - [ ] Every interactive element and container has a static `accessibilityIdentifier`
 - [ ] A `#Preview` per state
-
-## Handoffs
-
-- State, injection, `@FocusedValue` → [`architecture`](../architecture/SKILL.md)
-- Colour, density, glass → [`styling`](../styling/SKILL.md)
-- Window declaration, utility windows → `windows-and-scenes`; menus → `menus-and-commands`
-- Forms → `forms`; accessibility → `accessibility`; test ids → `test-ids`
-- AppKit hosting → [`appkit`](../appkit/SKILL.md)

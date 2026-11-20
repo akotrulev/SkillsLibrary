@@ -320,18 +320,3 @@ Lifecycle for this gate:
 - Pair the **gate** with **remediation** (`npm audit fix` / Dependabot / Renovate) and the
   **`dependency-review-action`** PR-diff gate. A clean SCA ≠ "secure" — **run DAST too**: orthogonal
   layers.
-
-## Cross-references
-
-- `qa-java:dependency-scan` — same skill, Java / **OWASP Dependency-Check Gradle
-  plugin** (`failBuildOnCVSS`, suppression XML with `until=`); the **canonical** sibling and the cross-stack
-  throughline.
-- `qa-dotnet:dependency-scan` — same skill, .NET / `dotnet list package --vulnerable
-  --include-transitive` + NuGet audit (`<NuGetAudit>`, `NuGetAuditLevel`).
-- `qa-typescript:passive-scan` — the **DAST** sibling that opened the
-  `security-testing` family: ZAP probes the **running app's HTTP surface**; SCA reads your **lockfile**.
-  Orthogonal layers — **run both** (together they close Step 2).
-- `qa-typescript:accessibility-testing` — the **ticketed-baseline triage** discipline
-  reused here for the allow-list (gate new findings, document every suppression with a ticket).
-- `qa-typescript:ci-pipelines` — the gate step, `dependency-review-action`, artifact upload.
-- `qa-typescript:test-reports` — attach the `npm audit --json` report and summary to the run.

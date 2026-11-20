@@ -20,13 +20,6 @@ python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<observa
 
 Query the outcome (`"error summary validation"`, `"bottom nav deep linking"`), not the component. The priority ordering of those guidelines — accessibility and touch first, charts last — lives in the corpus skill's table and in `design/ui-ux-pro-max/references/quick-reference.md`. A **marketing** page's section order is [`design:landing-patterns`](../landing-patterns/SKILL.md), not this skill.
 
-## When to use
-
-- Designing a new application's navigation and layout, or a new functional area's screens, before any route exists.
-- Writing the experience section of a plan (`dev:plan-experience`) — actors, journeys, screen map, per-screen pattern.
-- A frontend agent's architecture step: the app shell, the nav map, and the page type of each route go into the decision record.
-- A user says the app is hard to navigate or "feels clunky" and the question is *how it should be shaped*, not *what is wrong with the current build* (that is `ux-review`).
-
 ## Native apps
 
 On a mobile or desktop app the method holds — task inventory and depth budget, page types, forms, density, feedback, first run, the §9 windows. The web shell and its devices do not transfer; the platform's navigation replaces them:
@@ -156,17 +149,3 @@ Numbered because audit finding ids cite the numbers: new checks are appended, an
 - No page-centre spinner; no blank region while loading; no toast for what the screen already shows; no empty notification bell.
 - No optimistic update on money, sends, or deletes.
 - No zero-results dead end; no Apply button on a quick filter; no facet that returns nothing; no search whose query and filters vanish from the URL or on the way back from a result.
-
-## Related
-
-- [`design/ux-review`](../ux-review/SKILL.md) — judges a built UI against the decisions made here; its IA and flow findings cite the decision they contradict.
-- [`design/ux-writing`](../ux-writing/SKILL.md) — the words on the labels, actions, empty states and hints this skill positions.
-- [`design/visual-identity`](../visual-identity/SKILL.md) — the look; its application lane styles the shell and pages decided here.
-- [`design/design-tokens`](../design-tokens/SKILL.md) — the spacing, type and tone scales density and hierarchy are expressed in.
-- [`design/charts`](../charts/SKILL.md) — the dashboard's charts.
-- A stack's `ui-rules` ([Blazor](../../frontend/blazor/skills/ui-rules/SKILL.md) · [React](../../frontend/react/skills/ui-rules/SKILL.md)) — display/CRUD/table/bulk/confirmation correctness, the surface rule, the nav-label rules; this skill applies them at design time.
-- A stack's `error-handling` — the three-state regions, the persistent failure notification, the soft-threshold acknowledgement.
-- A stack's `responsive-design` — the shell's reflow (sidebar → drawer, table → card).
-- `backend/_shared/experience-plan` (`dev:plan-experience`) — the planner artifact that carries this skill's decision block for a whole initiative.
-- [`design:corpus`](../ui-ux-pro-max/SKILL.md) — the 119 UX guidelines this skill decides against.
-- [`design:landing-patterns`](../landing-patterns/SKILL.md) — the marketing-page counterpart to this skill's application IA.

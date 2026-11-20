@@ -22,22 +22,6 @@ Views are in **maintenance mode** (Google I/O 2026) — they are not deprecated,
 
 Detect first: `viewBinding` / `dataBinding` flags, Fragments or Activities, XML themes (AppCompat vs Material Components), RxJava / LiveData, `kapt` and the DI container. **Match what is there.** DataBinding is a lane: do not add it to a ViewBinding project, do not rip it out of one that has it.
 
-## When to use
-
-- Adding or changing a screen, a layout or an adapter in an XML codebase
-- Embedding a Compose screen or component in a Fragment or a layout
-- Wrapping a View (`MapView`, `PlayerView`, `WebView`, an ad view) in Compose
-- A `ComposeView` that leaks, a Fragment whose binding crashes after `onDestroyView`
-- Insets, edge-to-edge and the IME in a Views activity
-
-## When NOT to use
-
-- A new screen in an app that is mostly Compose → [`ui-components`](../ui-components/SKILL.md)
-- Replacing Views with Compose, Java → Kotlin, LiveData / Rx → Flow → [`mobile-android:migration`](../migration/SKILL.md)
-- State ownership → [`architecture`](../architecture/SKILL.md) · routes → [`navigation`](../navigation/SKILL.md)
-- Theme and tokens → [`styling`](../styling/SKILL.md) (a Material Components XML theme is read here, written there)
-- Another stack → `mobile-ios:uikit`, `mobile-react-native:native-modules`
-
 ## Inputs needed
 
 - ViewBinding / DataBinding / neither; Fragments or Activities; the navigation owner
@@ -171,11 +155,3 @@ The standards this skill's output must meet are the mobile-android rule files, n
 - With the IME open and font scale 200 %: the focused field and the list's last row stay reachable; edge-to-edge shows content under the bars with correct padding.
 - TalkBack reads every actionable View; Layout Inspector shows a flat hierarchy.
 - Dev-side tests: [`mobile-android:unit-testing`](../unit-testing/SKILL.md).
-
-## Handoffs
-
-- New Compose screens → [`ui-components`](../ui-components/SKILL.md) · theme mapping → [`styling`](../styling/SKILL.md)
-- State and ViewModels → [`architecture`](../architecture/SKILL.md) · routes → [`navigation`](../navigation/SKILL.md)
-- Rewrites, Rx / LiveData → Flow → [`mobile-android:migration`](../migration/SKILL.md)
-- Test ids → [`test-ids`](../test-ids/SKILL.md) · accessibility → `mobile-android:accessibility`
-- WebView and manifest hardening → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)

@@ -25,22 +25,6 @@ Division of labour with [`networking`](../networking/SKILL.md): it **produces** 
 
 Detect first: the existing banner host, `LoadState` / `AppError` types, the wired crash reporter, whether the app is multi-window. Extend them, never add a second.
 
-## When to use
-
-- Rendering a region's loading / loaded / failed / stale / offline states and the three empty kinds
-- The persistent inline banner, a timeout, a 401 mid-session, a forced update
-- Wake from sleep, reactivation, a second window on the same data
-- A write cut off by quit or sleep, a dead helper or XPC service, a full disk, a revoked bookmark
-
-## When NOT to use
-
-- Producing the error, retries, `Retry-After`, token-refresh mechanics → [`networking`](../networking/SKILL.md)
-- Persisting data, the write queue, conflicts → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Field validation messages → [`forms`](../forms/SKILL.md)
-- Permission denied screens → [`sandbox-and-permissions`](../sandbox-and-permissions/SKILL.md)
-- Crash-reporter setup, symbols → [`desktop/_shared/observability`](../../../_shared/observability/SKILL.md)
-- Windows → `desktop-windows:error-handling`
-
 ## The failure surfaces
 
 ```
@@ -173,11 +157,3 @@ Standards come from the desktop-macos rule files `swiftui-mac.md`, `swift-networ
 - Sleep the Mac, wake it with an expired token → one refresh, the window current or the re-auth sheet shown, not a wall of failed regions.
 - Fail a refresh after a load → rows remain, stale marker with an age, one banner. System Settings → Network off → offline or stale, never "failed".
 - Dev-side tests of the state transitions: [`unit-testing`](../unit-testing/SKILL.md); end-to-end failure journeys → `qa-desktop-<lang>` (peer).
-
-## Handoffs
-
-- The categorised error, timeouts, retries, token refresh → [`networking`](../networking/SKILL.md)
-- Persistence and the write queue → [`offline-and-storage`](../offline-and-storage/SKILL.md) · field errors → [`forms`](../forms/SKILL.md)
-- Ids → [`test-ids`](../test-ids/SKILL.md) · announcements → [`accessibility`](../accessibility/SKILL.md)
-- Window state shared across windows → [`architecture`](../architecture/SKILL.md) · reactivation at the root → [`windows-and-scenes`](../windows-and-scenes/SKILL.md)
-- Crash reporter, symbols → [`desktop/_shared/observability`](../../../_shared/observability/SKILL.md) · updater and signing → [`desktop/_shared/distribution`](../../../_shared/distribution/SKILL.md)

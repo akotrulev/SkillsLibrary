@@ -21,24 +21,6 @@ Writes SwiftUI views that are small, previewable, cancel their own work and rend
 
 Do not flag an iOS 16 project for lacking an iOS 17 API; do not apply an iOS 17 recipe to it. `[UIKit]` codebases host SwiftUI through `UIHostingController` — [`uikit`](../uikit/SKILL.md).
 
-## When to use
-
-- Building a screen, a row, a reusable component or an empty / error state
-- Loading data when a view appears; cancelling when it goes
-- A view that re-renders too much or is slow
-- Adding a `#Preview`
-
-## When NOT to use
-
-- Where the state lives; view-model decisions → [`architecture`](../architecture/SKILL.md)
-- Colour, type, materials, Liquid Glass, iPad layout → [`styling`](../styling/SKILL.md)
-- Routes, sheets, tabs → [`navigation`](../navigation/SKILL.md)
-- Forms and text input → `mobile-ios:forms`
-- VoiceOver detail → `mobile-ios:accessibility`; test ids → `mobile-ios:test-ids`
-- Animation → `mobile-ios:animation`
-- UIKit controllers → [`uikit`](../uikit/SKILL.md)
-- RN / Compose screens → `mobile-react-native:ui-components`, `mobile-android:ui-components`
-
 ## Inputs needed
 
 - The data the screen shows, and its states: loading, loaded, empty, failed, stale, offline
@@ -169,13 +151,3 @@ The standards this skill's output must meet are the mobile-ios rule files, not a
 - [ ] Lists use stable ids; long ones use `List` or a lazy stack
 - [ ] `#Preview` per state exists; none uses live data
 - [ ] Interactive elements and containers have `accessibilityIdentifier`
-
-## Handoffs
-
-- State ownership → [`architecture`](../architecture/SKILL.md)
-- Colour, type, Liquid Glass → [`styling`](../styling/SKILL.md)
-- Routes and sheets → [`navigation`](../navigation/SKILL.md)
-- Forms → `mobile-ios:forms`; clients → `mobile-ios:networking`
-- Banner, offline, resume → `mobile-ios:error-handling`
-- Labels, traits, Dynamic Type sizes → `mobile-ios:accessibility`
-- Test ids → `mobile-ios:test-ids`; render cost → `mobile-ios:performance`

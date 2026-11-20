@@ -18,20 +18,6 @@ Owns changing the **toolchain, framework, library generation or target SDK** of 
 | Dated | Play: new apps **and updates** must target API 36 since **2026-08-31** (extension to 2026-11-01) | The one deadline — [`target-sdk-behaviour`](references/target-sdk-behaviour.md) |
 | Below Kotlin 2.0 / AGP 8 | — | A finding plus an AGP / Kotlin run first; never authored for |
 
-## When to use
-
-- The user names a move from the table below
-- The audit reports A1, A3, A5, A6, A7 or A10 ([`standards-audit`](../standards-audit/SKILL.md) section A)
-- A post-migration break: `Cannot add extension with name 'kotlin'`, a release build that crashes only after R8, a screen that lost state, a Room `no such table`
-
-## When NOT to use
-
-- New app → [`project-setup`](../project-setup/SKILL.md)
-- Feature work, bug fix → the agent's FIX / EXTEND modes; they never up-level a lane
-- A patch / minor dependency bump with no lane change — dependency hygiene
-- Moving KMP modules to the library plugin → covered in [`agp8-to-9`](references/agp8-to-9.md); the KMP design itself is [`kotlin-multiplatform`](../kotlin-multiplatform/SKILL.md)
-- iOS → `mobile-ios:migration`; an Expo project's native side → `mobile-react-native:migration`
-
 ## Inputs needed
 
 1. **The move** — one row below. A request for two is two runs, in the table's order
@@ -87,11 +73,3 @@ Order: 0 moves first when its date is near; 1 before 3–5 (Hilt 2.59+ needs AGP
 ## Rules
 
 The standards this skill's output must meet are the mobile-android rule files, not a list here: `android-build.md` and `android-data.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win. The cross-move rules above are how a move is run.
-
-## Handoffs
-
-- Gradle target state → [`project-setup`](../project-setup/SKILL.md); Kotlin standard → [`basics`](../basics/SKILL.md)
-- State and DI target → [`architecture`](../architecture/SKILL.md); routes → [`navigation`](../navigation/SKILL.md)
-- Database target → [`offline-and-storage`](../offline-and-storage/SKILL.md); the Views lane while it lasts → [`views-interop`](../views-interop/SKILL.md)
-- KMP target → [`kotlin-multiplatform`](../kotlin-multiplatform/SKILL.md)
-- Tests that prove the move → [`unit-testing`](../unit-testing/SKILL.md)

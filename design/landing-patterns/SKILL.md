@@ -10,15 +10,6 @@ Owns the **structure** of a page whose job is to persuade in one visit: which of
 
 **Where this sits:** [`design:visual-identity`](../visual-identity/SKILL.md)'s marketing lane decides the *look* — the hero thesis, the signature element, the one aesthetic risk. This skill decides the *skeleton* those choices are hung on. [`design:app-structure`](../ux-patterns/SKILL.md) owns the other side of the fence: an **application's** IA, shell, and page anatomy. A brief with a marketing site and the app behind it uses both, and the app never inherits the landing page's structure.
 
-## When to use
-
-- A landing, campaign, launch, pricing, waitlist, or portfolio page needs its section order decided.
-- The page exists but converts badly, or reads as a generic hero-features-CTA template.
-- The `--design-system` generator returned a pattern and it has to become real sections.
-- Deciding where the primary CTA goes, and how many CTAs the page gets.
-
-Do **not** use it for an application's navigation and page anatomy (`design:app-structure`), for the visual direction (`design:visual-identity`), or for the words in the sections (`design:ux-writing`).
-
 ## Query the catalog first
 
 The pattern is chosen from the corpus, not from habit:
@@ -82,12 +73,3 @@ Numbered because audit finding ids cite the numbers: new checks are appended, an
 7. **Hover-only value is also reachable without a pointer**; the pattern has a real mobile form, not a squeeze.
 8. Every section maps to **content that actually exists** — no invented testimonials, no placeholder logo wall.
 9. Staged patterns show a **progress indicator** and disclose one step at a time.
-
-## Related
-
-- [`design:corpus`](../ui-ux-pro-max/SKILL.md) — the `landing` domain that is this skill's catalog.
-- [`design:visual-identity`](../visual-identity/SKILL.md) — the marketing lane's look: hero thesis, signature element, the one risk.
-- [`design:app-structure`](../ux-patterns/SKILL.md) — the application counterpart: IA, shell, page anatomy.
-- [`design:motion`](../motion/SKILL.md) — the tier and preset behind the recommended-effects column.
-- [`design:ux-writing`](../ux-writing/SKILL.md) — section headings, value props, and CTA labels.
-- [`design:dark-patterns`](../ethical-patterns/SKILL.md) — urgency, scarcity, and proof claims that cross into deceptive design.

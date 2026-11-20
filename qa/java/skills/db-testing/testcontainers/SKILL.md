@@ -8,20 +8,6 @@ disable-model-invocation: true
 
 Scaffolds TestNG fixtures (per CLAUDE.md default) or JUnit 5 classes that boot a real database container per suite, run Flyway / Liquibase migrations once, and clean rows between tests. Uses Spring Boot 3 `@DynamicPropertySource` to inject the container's connection details into the SUT.
 
-## When to use
-
-- New `src/test/java/.../integration/{Feature}IT.java` that hits a real DB
-- Replacing H2 / in-memory DBs with the production engine
-- Spring Boot integration tests asserting DB side-effects
-- Cross-version checks (Postgres 16 vs 17)
-
-## When NOT to use
-
-- Unit tests with no SQL surface
-- Non-JVM stacks — see siblings
-- Performance against the DB → `qa/java/skills/load-testing`
-- SQL safety review → `qa/java/skills/db-testing/verification-queries`
-
 ## Inputs needed
 
 1. Engine? (Postgres default; SQL Server / Mongo / Redis on request)
@@ -211,10 +197,3 @@ The standards a Testcontainers fixture must meet are the qa-java rule files, not
    - Concrete `{Feature}IT.java`
    - `build.gradle.kts` dependency additions.
 4. Run `./gradlew test --tests "*IT"` — expect green or real assertion failure.
-
-## Cross-references
-
-- **`qa/java/skills/db-testing/verification-queries`** — SQL guardrails for assertion queries.
-- **`qa/java/skills/test-data-builder`** — builders / ObjectMother for seed data.
-- **`qa/cicd/java/skills/ci-pipelines`** — DinD enablement and Allure publish.
-- **`qa/reporting/java/skills/test-reports`** — attach container logs on failure.

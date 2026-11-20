@@ -10,20 +10,6 @@ A suite exists to show that **the business works**: that a person gets what they
 
 The output is implementation-agnostic Markdown: a manual script, a test-management import, and the specification automation is later written from. The skill **assembles and formats**: it takes the **coverage-item list** that `qa/manual/test-design-techniques` (and `cross-feature-test-design`) derived from a `qa/manual/requirements-breakdown` basis, groups it, factors shared preconditions into one **Setup**, writes the cases and closes with a **Cleanup**. Run standalone on a raw story, it runs those skills first (*Standalone fallback*). The whole flow is orchestrated by the `qa-test-case-designer` agent.
 
-## When to use
-
-- A requirement, story, AC set or spec needs test cases
-- A feature needs its end-to-end journeys and business rules written down as executable cases
-- An exploration report (`qa/manual/app-exploration`, or a human's session report) lists **test-case candidates**: they go through `requirements-breakdown` first, and their cases carry `#observed <finding id>` as `Source`
-- Existing cases to lint or rank for automation → *Lint mode*
-
-## When NOT to use
-
-- A feature **test plan** (scope, harness, a scenario-level inventory with no steps) → `qa/manual/test-plan-writer`
-- An exploratory charter → `qa/manual/exploratory-charter-writer`; exploring a live app → `qa/manual/app-exploration`
-- Automation code → `qa/<stack>/skills/ui-test-author`, `api-test-author`
-- A defect to report → `qa/manual/bug-report-writer`
-
 ## Inputs needed
 
 Ask only what is missing:
@@ -179,11 +165,3 @@ Asked for test cases for booking a session, with the story and `POST /bookings`.
 Bad: eleven cases. Session id missing, malformed, unknown, negative, very long, SQL in the id, an expired token, a double click, the happy path. Every AC is "covered", and no case shows what a booking costs, what happens at zero credits, or that the member is charged once at month end. The form validates; nobody knows whether the business works.
 
 Good: the example above. If the basis has no journeys, rules or formulas to write from, that is the finding: run `requirements-breakdown`, or ask.
-
-## Handoffs
-
-- The basis (journeys, rules, calculations, data dictionary) → `qa/manual/requirements-breakdown`
-- Which cases to write, and how many → `qa/manual/test-design-techniques`; for the feature's connections → `qa/manual/cross-feature-test-design`
-- The whole documentation → suite flow → the `qa-test-case-designer` agent; an e2e-only suite from a code trace → `qa-feature-spec-writer`
-- A basis from a live app → the `qa-explorer` agent; a defect found on the way → `qa/manual/bug-report-writer`
-- Gherkin → `qa/_shared/bdd/feature-file-writer` (the `qa-bdd-<stack>` agent); automation → `qa-api-<stack>` / `qa-ui-<stack>` / `qa-mobile-<stack>`

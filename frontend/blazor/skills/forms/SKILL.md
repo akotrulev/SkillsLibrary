@@ -8,21 +8,6 @@ disable-model-invocation: true
 
 The house pattern: **`EditForm` + `FluentValidation` (default)** or **`DataAnnotationsValidator` (simpler cases)**, validated against a strongly-typed record/class, with server-side errors mapped into the form's `EditContext`, accessibility baked in, and submission state managed cleanly. Applies to .NET 8/9/10; net10 widens what DataAnnotations alone can cover (nested objects via `AddValidation()` + `[ValidatableType]`) — version notes inline.
 
-## When to use
-
-- Any form past a single field
-- Replacing scattered ad-hoc validation with a single source of truth
-- Wiring server-side validation errors back onto the form
-- Multi-step / wizard forms
-- File upload forms
-
-## When NOT to use
-
-- State management at large → `frontend/blazor/skills/state-management`
-- Component scaffolding → `frontend/blazor/skills/component-writer`
-- React → `frontend/react/skills/forms`
-- Auth UI specifics (login / signup) → `auth/auth0-blazor`
-
 ## Default stack
 
 - `<EditForm>` (Blazor built-in)
@@ -348,11 +333,3 @@ The standards this skill's output must meet are the fe-blazor rule files, not a 
 5. Add the focus-first-error helper after submit failure.
 6. For wizards, structure the model + RuleSets.
 7. Smoke locally: valid submit, client-validation fail, server-side fail.
-
-## Handoffs
-
-- State management → `frontend/blazor/skills/state-management`
-- Component scaffolding → `frontend/blazor/skills/component-writer`
-- Auth-protected forms → `auth/auth0-blazor`
-- API contract → `qa/dotnet/skills/api-test-author/writer`
-- React equivalent → `frontend/react/skills/forms`

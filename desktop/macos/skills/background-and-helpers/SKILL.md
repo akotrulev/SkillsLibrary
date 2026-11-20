@@ -21,24 +21,6 @@ What runs when no window is open: a login item that starts with the user, a laun
 
 Detect first: how the project registers existing helpers (an old `SMLoginItemSetEnabled` call, a copied plist) and its deployment target. **Migrating an existing helper to `SMAppService` is a recorded step (`migration`), not a side effect.**
 
-## When to use
-
-- A "Launch at login" setting; a menu bar app that must start with the user
-- A background agent that syncs or watches while the app is closed
-- Moving risky work (parsing untrusted files, a codec) to an XPC service
-- A helper that talks to the app and needs to be restarted when it dies
-- Deferrable maintenance (compaction, cache trim)
-
-## When NOT to use
-
-- The window-less menu bar item itself → `windows-and-scenes` (`MenuBarExtra`)
-- Entitlements, TCC, bookmarks passed to a helper's job → [`sandbox-and-permissions`](../sandbox-and-permissions/SKILL.md)
-- Notifications, App Intents → [`system-integration`](../system-integration/SKILL.md)
-- Background `URLSession` transfers → [`networking`](../networking/SKILL.md)
-- Daemons needing root: **out of scope** — a daemon is a privileged-install decision with a written reason; the rule is never to require admin or root (CLAUDE.md § Desktop code rules)
-- Signing the helper, notarization → `desktop/_shared/distribution`
-- Windows services → `desktop-windows:platform-integration`; iOS background → `mobile-ios:system-integration`
-
 ## Which mechanism?
 
 | Need | Use | Lives in the bundle at |
@@ -205,14 +187,3 @@ Standards come from `.claude/rules/desktop-macos/` (`/desktop-macos:rules` insta
 - **Passing a path to the service**: it cannot open it; pass a bookmark.
 - **A listener that accepts anyone**: any process can drive your helper.
 - **`.notFound` after an update**: the bundle moved; re-register.
-
-## Handoffs
-
-- Entitlements, bookmarks, TCC → [`sandbox-and-permissions`](../sandbox-and-permissions/SKILL.md)
-- The menu bar scene, windows → `windows-and-scenes`
-- Notifications from a helper, App Intents → [`system-integration`](../system-integration/SKILL.md)
-- Reconnect, transfers → [`networking`](../networking/SKILL.md) · the store a helper shares → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Failed region and banner → `error-handling`
-- Signing helpers, notarization, update feed → `desktop/_shared/distribution`; IPC validation policy → `desktop/_shared/security`
-- Moving off `SMJobBless` → `migration`
-- iOS counterpart → `mobile-ios:system-integration`

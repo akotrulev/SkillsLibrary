@@ -30,20 +30,6 @@ Detect the project's `<TargetFramework>` before wiring. Everything below is unch
 - Outbound M2M: `IHttpClientFactory` + `IMemoryCache` (no Cognito SDK needed for the token call)
 - Config via `appsettings.json` + env vars + Secrets Manager / Key Vault — never hardcoded
 
-## When to use
-
-- Protecting an ASP.NET Core Web API with Cognito user-pool access tokens
-- `[Authorize(Policy = "orders:read")]`-style **scope** or **group** checks
-- Calling another Cognito-protected API with Client Credentials (M2M)
-
-## When NOT to use
-
-- Blazor Server / WASM sign-in → `auth/cognito-blazor`
-- Auth0 → `backend/dotnet/skills/auth0`
-- Java → `backend/java/skills/cognito`
-- Cognito **identity pools** / temporary AWS credentials → out of scope (user-pool OIDC only)
-- Concepts → `auth/_shared/oidc-concepts`
-
 ## Inputs needed
 
 1. **Region** + **`userPoolId`** per env
@@ -221,13 +207,3 @@ Attach via a `DelegatingHandler` on the typed downstream client (same shape as `
 4. `UseAuthentication()` + `UseAuthorization()`; guard endpoints with `.RequireAuthorization("…")`.
 5. If outbound M2M is needed: add `CognitoM2MTokenService` + a `DelegatingHandler` on the typed client.
 6. Smoke: call `/me` with a fresh access token → confirm `scopes`/`groups`; present an ID token → expect 401 (`token_use` guard).
-
-## Handoffs
-
-- Blazor client that obtains these tokens → `auth/cognito-blazor`
-- Auth0 equivalent → `backend/dotnet/skills/auth0`
-- Java backend equivalent → `backend/java/skills/cognito`
-- Concepts → `auth/_shared/oidc-concepts`
-- Pattern/persistence scaffolding for the rest of the service → `backend/dotnet/skills/{generator,persistence}`
-- Storing secrets → `devops/environment-config` + Secrets Manager / Key Vault
-- API contract tests with auth → `qa/dotnet/skills/api-test-author/writer` (seed a test user / M2M client)

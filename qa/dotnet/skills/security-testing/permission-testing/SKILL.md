@@ -364,18 +364,3 @@ public sealed record PolicyRow(
   the way — never `.Result` / `.Wait()` / `.GetAwaiter().GetResult()` on a token or HTTP call.
 - Tag cases with their **OWASP API id** and **WSTG-ATHZ** test-id; a new protected endpoint with no matrix
   row is a visible coverage gap. A green suite ≠ "secure" — business-logic abuse needs manual pentest.
-
-## Cross-references
-
-- `qa/_shared/security/SKILL.md` — the OWASP backbone + the scanner-blind-spot rationale; **load alongside**.
-- `qa/typescript/skills/security-testing/permission-testing` — the **canonical** (Vitest + fetch) skill
-  this .NET port mirrors; `qa/java/skills/security-testing/permission-testing` — the TestNG sibling.
-- `qa/dotnet/skills/test-login-tokens` — mint per-actor tokens (ROPG as a specific test user; M2M for
-  service roles), cached for their lifetime.
-- `qa/dotnet/skills/api-client-writer` / `api-models` — the `{Resource}Client` raw/typed overloads
-  and record DTOs the matrix reuses.
-- `qa/dotnet/skills/api-test-author/writer` — generic functional API tests (this skill is the
-  authorization slice of the same suite).
-- `qa/_shared/security-testing/api-fuzzing` — complementary spec-driven fuzzing (finds malformed-input bugs;
-  does **not** find BOLA).
-- `qa/manual/bug-report-writer` — write up a confirmed BOLA/BFLA with the caller, target object, and response.

@@ -22,22 +22,6 @@ How a Windows desktop solution is created and kept strict: **a template, an expl
 
 Never raise the TFM, the Windows App SDK major, the C# version or `TargetPlatformMinVersion` as a side effect of other work.
 
-## When to use
-
-- Creating a WinUI, WPF or WinForms project, or a class library beside one
-- Hardening an existing project: analyzers, nullable, warnings, central props, packaging
-- "Packaged or unpackaged?", "which TFM?", "why does `dotnet run` have no identity?"
-
-## When NOT to use
-
-- The coding standard and lane detection → [`basics`](../basics/SKILL.md)
-- ViewModels and DI wiring → [`architecture`](../architecture/SKILL.md)
-- Signing, Store, updates, CI → `desktop/_shared/distribution`
-- Moving 8/9 → 10 or WinAppSDK 1.x → 2.x → `desktop-windows:migration`
-- C++/WinRT project shape → `desktop-windows:cpp-winrt`
-
----
-
 ## Create the project
 
 **Visual Studio 2026** (fallback that always works): *Create a new project* → "WinUI Blank App (Packaged)" (or the NavigationView / MVVM variants the installed workload offers).
@@ -169,13 +153,3 @@ The dev certificate is for local testing only; production signing is `desktop/_s
 - **A TFM without the OS part** (`net10.0`) on the app project — no WinUI; only the Core library takes it.
 - **Mixed `Platforms`** — a `Any CPU` configuration on a packaged WinUI project; use `x64;ARM64`.
 - **`PackageReference` with a `Version`** while central management is on — NU1008; remove the attribute.
-
-## Handoffs
-
-- Standard and lane detection → [`basics`](../basics/SKILL.md)
-- MVVM, DI, host → [`architecture`](../architecture/SKILL.md)
-- Pages and controls → [`ui-components`](../ui-components/SKILL.md)
-- Store, signing (Azure Artifact Signing), updates → `desktop/_shared/distribution`
-- Capabilities, secrets, WebView2 → `desktop/_shared/security`
-- Version upgrades → `desktop-windows:migration`
-- Unit-test project → `desktop-windows:unit-testing`

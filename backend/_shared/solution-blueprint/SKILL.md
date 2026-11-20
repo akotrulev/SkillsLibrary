@@ -8,18 +8,6 @@ disable-model-invocation: true
 
 The blueprint is the document the human approves. Everything downstream — data model, API surface, integrations, task sequence — is derived from it, so a wrong blueprint is not a cheap mistake to discover in Step 5. Its job is to make the *consequential* decisions visible and confirmable in one page-sized pass, and to make the uncertain ones explicit rather than silently resolved.
 
-## When to use
-
-- A business case, a feature brief, an epic set, or a "we need a backend that does X" direction needs turning into an architecture and a build direction
-- A human-written high-level plan needs validating and normalizing before detail work starts (`DETAIL` entry mode)
-- A new functional area is being added to an existing planned system (`EXTEND` — run this for the new area only)
-
-## When NOT to use
-
-- The requirements themselves are missing or contradictory → `requirements-author` / `business-analyst` first. Planning against guessed requirements produces a document indistinguishable from a real plan, which is what makes it dangerous
-- The blueprint is already approved → move to `dev:plan-data-model`
-- The ask is a single endpoint or a bug fix → no blueprint; that is a `be-<stack>` task directly
-
 ## Output
 
 **`docs/plans/<NNN>-<initiative>/blueprint.md`** under the **target project's** root — never the skills-library checkout, never a global directory. `NNN` is zero-padded, and its high-water mark spans `docs/plans/` **and** `docs/plans/implemented/` (files and folders both count — a finished pack is moved there, and its number stays spent); never reuse or renumber. `<initiative>` is a short kebab-case noun phrase (`billing-service`, `tenant-onboarding`), stable for the life of the initiative — the folder name is cited by every other artifact and by every prompt block in `delivery-plan.md`'s `## Prompts — one per task` section.
@@ -424,15 +412,6 @@ flowchart LR
 - **Code** — no scaffolds, no snippets beyond the diagrams and tables above.
 - **Silent decisions** — anything consequential that appears without a `why` and an evidence mark.
 - **A pattern with no earned reason** — the single most common way a plan makes a system worse.
-
-## Handoffs
-
-- **Approved →** `dev:plan-data-model` (Step 2). The Key entities column is its input. Then **`dev:plan-experience` (Step 3)** whenever the routing map names `fe-react` / `fe-blazor` — §2's capabilities, §2b's actors and shell, and §3b's flows are its inputs.
-- **Requirements too thin →** `requirements-author`, or `business-analyst` when the ask may conflict with existing features. Their `docs/business-model/` KB is a first-class input here.
-- **Architecture turns on a pattern question →** `backend/_shared/pattern-guide` for the concept card (loaded, not delegated).
-- **Flows and decision rules need the full modelling discipline →** `business-analysis:process-flow` / `business-analysis:decision-table` (loaded, not delegated); `business-analysis:state-grid` for entity lifecycles, which `dev:plan-data-model` also draws.
-- **Engine choice or tenancy enforcement needs real depth →** state the requirement here, route the decision to `data-architect`.
-- **The blueprint reveals the ask spans multiple systems →** propose the decomposition, plan the first one; one initiative folder per system.
 
 ## Version policy
 

@@ -145,11 +145,3 @@ await redis.connect();
 4. Generate the singleton client + a small typed helper for the pattern (e.g. `OrderCache.getOrLoad(id)`), with TTL + versioned key + invalidation hooks on the write path.
 5. Set security (ACL user, TLS) and operational config (maxmemory/eviction/persistence) per `references/security.md` + `references/operations.md`.
 6. Smoke with `redis-cli MONITOR` / `--bigkeys` to verify keys, TTLs, and sizes behave under load.
-
-## Handoffs
-
-- Caching **strategy** (pattern choice, key namespace, TTL tiers, stampede, negative caching, multi-level) → `data/_shared/caching-patterns`
-- Systems of record Redis fronts → `data/postgresql` · `data/mongodb` · `data/sqlserver` · `data/mysql`
-- Durable/ordered/at-scale messaging beyond Streams → a real broker (Kafka / Service Bus / SQS); broker selection/implementation has no owning skill in this library yet, and `qa/<stack>/skills/messaging-testing` only *tests* an existing broker
-- Hit-ratio / key-count / latency telemetry → `observability/*` skills (via the `observability-engineer-{dotnet,java,node}` peer bundled in the matching `be-*` plugin)
-- Load/soak behavior under cache pressure → `qa/<stack>/skills/performance/*`

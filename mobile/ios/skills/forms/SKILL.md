@@ -20,24 +20,6 @@ A SwiftUI form is a value (the draft), a validator (a pure function over it), a 
 
 Design facts (field heights, labels, keyboard behaviour): `design/ui-ux-pro-max` `--stack swiftui`.
 
-## When to use
-
-- A screen with more than one input, or any input that is validated
-- Autofill, password manager or passkey sign-in not appearing
-- The keyboard covers the field or Return does nothing useful
-- A server `422` / ProblemDetails must show on specific fields
-- A multi-step flow (a wizard) with a draft across steps
-
-## When NOT to use
-
-- A single search field or filter — `@State` and `.searchable`, no form machinery
-- Building the request, retries, timeouts → [`networking`](../networking/SKILL.md)
-- Where the draft model lives, `@Bindable` vs `@Environment` → [`architecture`](../architecture/SKILL.md)
-- A load / failed region around a form's data → [`ui-components`](../ui-components/SKILL.md); the failure banner → `mobile-ios:error-handling`
-- Photos, camera, files picked inside a form → [`device-features`](../device-features/SKILL.md)
-- UIKit form screens → [`uikit`](../uikit/SKILL.md)
-- Another stack → `mobile-react-native:forms`, `mobile-android:forms`
-
 ## Inputs needed
 
 - Deployment target, and whether forms in the codebase use `@Observable`, `ObservableObject` or UIKit
@@ -249,12 +231,3 @@ The standards this skill's output must meet are the mobile-ios rule files, not a
 - On a device or simulator: Return walks the fields in order and the last one submits; the password manager offers a credential on the sign-in form; an invalid submit focuses the first invalid field; Dynamic Type at the largest accessibility size keeps every field reachable.
 - A double tap on submit sends one request.
 - Dev-side tests: the validator and the error mapper as Swift Testing cases ([`mobile-ios:unit-testing`](../unit-testing/SKILL.md)).
-
-## Handoffs
-
-- The request, retries, ProblemDetails → [`networking`](../networking/SKILL.md)
-- Draft persistence → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Failure banner and offline copy → `mobile-ios:error-handling`
-- VoiceOver for errors → `mobile-ios:accessibility`
-- Passkeys and sign-in → `mobile-ios:auth0`
-- E2E journeys → `qa-mobile-<stack>` (peer)

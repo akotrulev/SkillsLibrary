@@ -25,23 +25,6 @@ Standardises **authoring** accessible Mac windows against **WCAG 2.2 AA** (EN 30
 
 Detect first: SwiftUI or AppKit per window, any in-house component library that already sets roles (use it), and whether `.font(.system(size:))` or a fixed frame exists around text.
 
-## When to use
-
-- Labelling a control, grouping a row into one stop, marking headings, exposing a value
-- Keyboard reach, focus order and Full Keyboard Access in a new window
-- Focus and announcements after a sheet, an async result or an error
-- Text and control sizes, contrast, Reduce Motion, Reduce Transparency, Increase Contrast
-- A drag or context-menu-only action that needs a keyboard alternative
-
-## When NOT to use
-
-- Scanning, VoiceOver journeys, audits in CI → `qa-desktop-<lang>` (peer)
-- Validation messages on fields → [`forms`](../forms/SKILL.md) · banner and failed regions → [`error-handling`](../error-handling/SKILL.md)
-- Menu commands and shortcuts → [`menus-and-commands`](../menus-and-commands/SKILL.md)
-- Motion mechanics, tokens, Liquid Glass → [`styling`](../styling/SKILL.md)
-- `accessibilityIdentifier` → [`test-ids`](../test-ids/SKILL.md) (an identifier is never a label)
-- Windows apps → `desktop-windows:accessibility`; iOS → `mobile-ios:accessibility`
-
 ## Lean on the platform
 
 | Want | Use, not |
@@ -130,10 +113,3 @@ Standards come from the desktop-macos rule file `mac-accessibility.md` in `.clau
 - A VoiceOver pass: each row is one stop, each action reachable, the error announced once, no hover-only content.
 - System Settings → Accessibility with Increase Contrast, Reduce Transparency, Reduce Motion and Differentiate Without Color on: nothing disappears, nothing relies on colour.
 - Dev-side tests of the logic that picks a layout or label: [`unit-testing`](../unit-testing/SKILL.md); VoiceOver journeys → `qa-desktop-<lang>`.
-
-## Handoffs
-
-- Field-level error wiring → [`forms`](../forms/SKILL.md) · failure surfaces → [`error-handling`](../error-handling/SKILL.md)
-- Shortcuts and the menu bar → [`menus-and-commands`](../menus-and-commands/SKILL.md) · tokens, motion and Liquid Glass → [`styling`](../styling/SKILL.md)
-- Identifiers → [`test-ids`](../test-ids/SKILL.md) · localized labels → [`languages`](../languages/SKILL.md)
-- Windows and focus across windows → [`windows-and-scenes`](../windows-and-scenes/SKILL.md)

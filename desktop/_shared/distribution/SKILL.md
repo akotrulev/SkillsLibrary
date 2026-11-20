@@ -10,22 +10,6 @@ Rules for getting a desktop build from a commit to a user's machine: **which cha
 
 **The fence.** This skill states *what must be true*; it writes no pipeline. Workflow / pipeline YAML (GitHub Actions, Azure Pipelines) is `devops-engineer`'s (`devops/github-actions`, `azure-pipelines`); the test-suite CI lane is `qa-cicd-<stack>`'s. Where a rule needs a pipeline step, name the step and hand it over.
 
-## When to use
-
-- Choosing how a macOS or Windows app ships: Developer ID or Mac App Store; Store, MSIX sideload or unpackaged
-- Setting up or reviewing signing, notarization, stapling, DMG / `.pkg`, MSIX, `.appinstaller`, `winget`
-- Adding or auditing an auto-update channel (Sparkle 2, Velopack, `.appinstaller`)
-- A build is rejected by notarization, App Review, SmartScreen or Smart App Control
-- Choosing the CI runner image, or deciding where a signing secret lives
-
-## When NOT to use
-
-- Writing the CI workflow / pipeline YAML → `devops-engineer`
-- Test sharding, Allure, UI-test runners → `qa-cicd-<stack>`
-- Where tokens, keys and entitlements live at runtime; update-channel threat model → `desktop/_shared/security`
-- Crash reporter, symbol upload, telemetry → `desktop/_shared/observability`
-- Mobile store release → `mobile-<stack>:release`
-
 ## Version lane (verified 2026-11-15)
 
 | Fact | Value | Re-verify after |

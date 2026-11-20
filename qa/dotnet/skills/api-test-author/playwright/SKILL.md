@@ -54,20 +54,6 @@ dual raw + typed overloads, fixtures that own scenarios, the rich happy-path tem
 If a DTO or client a test needs is missing, run the owner skill first — never call `context.GetAsync(...)`
 inline in a test to avoid creating a client.
 
-## When to use
-
-- The project already runs Microsoft.Playwright for UI and wants API coverage without adding RestSharp
-- Hybrid suites where API setup/assertions and UI flows must share one Playwright installation, report, and storage state
-- New `{Resource}Tests.cs` under a Playwright-based API suite, or new test methods on an existing fixture
-
-## When NOT to use
-
-- No Playwright in the project → `qa/dotnet/skills/api-test-author/writer` (NUnit + RestSharp, the stack default)
-- API calls **inside a UI test** (seed data, then drive the browser) → the UI suite's arrange step; conventions in `qa/dotnet/skills/ui-test-author/playwright`
-- Mocking/intercepting the browser's network traffic (`page.RouteAsync`) → `qa/dotnet/skills/network-mocking`
-- GraphQL / gRPC → the protocol siblings under `qa/dotnet/skills/api-test-author/`
-- Reviewing existing tests → `qa/dotnet/skills/api-test-author/review`, which checks against the rule files
-
 ## Base class template — the lifecycle lives here once
 
 ```csharp
@@ -184,15 +170,3 @@ Step 4 of `qa-api-dotnet` reviews a suite this skill wrote with `qa/dotnet/skill
    `ProblemDetails` template for 4xx, single status assert for 401.
 6. Verify every test name follows `Should_X_When_Y` and every TC-ID maps to a test or is explicitly deferred; review with § Review.
 7. Run `dotnet build ApiTests/ApiTests.csproj` then `dotnet test` — expect 0 errors, 0 failures.
-
-## Cross-references
-
-- `qa-dotnet:api-tests` — the **stack default** (NUnit + RestSharp); this skill is its Playwright-first
-  variant with the same layering, overloads and templates.
-- `qa-typescript:api-tests-playwright` · `qa-java:api-tests-playwright` — the sibling stacks.
-- `qa-dotnet:api-models` / `qa-dotnet:api-client-writer` — DTOs / the client layer this skill consumes.
-- `qa-dotnet:ui-tests-playwright` — the UI suite this skill shares the Playwright dependency with.
-- `qa-dotnet:network-mocking` — browser traffic mocking, not API testing.
-- `qa-dotnet:api-tests-review` — review against the rule files `automation.md` and `api.md`.
-- `qa-dotnet:test-login-tokens` — the tokens `NewContextAsync(token)` injects.
-- `qa-dotnet:test-reports` — Allure NUnit wiring shared with the UI suite.

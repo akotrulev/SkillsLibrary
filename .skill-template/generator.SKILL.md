@@ -8,16 +8,6 @@ disable-model-invocation: true
 
 # <Skill Title>
 
-## When to use
-
-- The user asks to scaffold or create something
-- The user has an existing repo and wants code added to it
-
-## When NOT to use
-
-- The user wants a concept explained — defer to the reference skill
-- The user wants their code critiqued — defer to the reviewer skill
-
 ## Inputs needed
 
 Before generating, confirm these. Ask at most 2–3 questions; infer the rest from context.

@@ -18,21 +18,6 @@ Scaffolds Selenium 4 page objects and Mocha (or Vitest) UI tests in TypeScript s
 - **Allure Mocha** (or **allure-vitest**) for reporting
 - ESM modules
 
-## When to use
-
-- New page object under `src/pages/`
-- A region component (a card, a row) or a control component (a dropdown, a date picker) under `src/components/controls/`
-- New UI test under `test/`
-
-## When NOT to use
-
-- Selenium Java → `qa/java/skills/ui-test-author/selenium`
-- Selenium .NET → `qa/dotnet/skills/ui-test-author/selenium`
-- Playwright TS → `qa/typescript/skills/ui-test-author/playwright`
-- Appium TS → `qa/typescript/skills/ui-test-author/appium`
-- Reviewing → `qa/typescript/skills/ui-test-author/review`
-- POM architecture → `qa/typescript/skills/page-object-design`
-
 ## Inputs needed
 
 1. **Page name** (PascalCase: `Login`, `Product`, `Cart`)
@@ -295,10 +280,3 @@ The standards this skill's output must meet are the qa-typescript rule files, no
 5. If a destination page is missing, stub it or recursively generate it.
 6. Generate the spec file: driver and screen reached in `beforeEach`, one `it(...)` per scenario named `Should_X_When_Y`.
 7. Run the project's own test script with the package manager `packageManager` names — expect 0 failures.
-
-## Handoffs
-
-- POM architecture → `qa/typescript/skills/page-object-design`
-- Test data builders → `qa/typescript/skills/test-data-builder`
-- Reviewing → `qa/typescript/skills/ui-test-author/review`
-- Allure → `qa/reporting/typescript/skills/test-reports`

@@ -26,22 +26,6 @@ Owns **every dev-side test of logic the agent writes**: ViewModels, repositories
 
 Detect first: the runner (`junit`, `junit-jupiter`, `mannodermaus`), the existing fakes and `MainDispatcherRule`, whether tests are Hilt-instrumented, and the screenshot library — extend them; never migrate a stable suite as a side effect.
 
-## When to use
-
-- A ViewModel, repository, mapper, formatter, validator or state machine has logic
-- The region states from [`error-handling`](../error-handling/SKILL.md): failed keeps the filters, stale keeps the rows, offline is not failed
-- The request policy: backoff, `Retry-After`, the single-flight refresh — against `MockWebServer`
-- A serializable payload, a deep-link parser, a route builder, a version comparison
-- One Compose screen's states and its accessibility check
-
-## When NOT to use
-
-- Device journeys, gestures, permission dialogs, deep links, push, TalkBack passes → `qa-mobile-<stack>` (peer)
-- Markup-only composables with no branches — a screenshot of hand-written layout is a tautology
-- API contract tests and real-backend integration → `qa-api-typescript` / `qa-api-dotnet` / `qa-api-java`
-- Writing `testTag`s → [`test-ids`](../test-ids/SKILL.md)
-- Other stacks → `mobile-react-native:component-testing`, `mobile-ios:unit-testing`
-
 ## Test what has behaviour
 
 | Unit | Test? | Assert |
@@ -238,10 +222,3 @@ Inside a plan task, `Gate: own tests` runs this task's tests — the red run, th
 - Mutate one rule in the code under test; a test fails with a message naming the value.
 - Branch coverage of the changed code ≥ 80% (*Coverage floor*), reported as a figure.
 - No `Thread.sleep`, `runBlocking` or v1 Compose rule import in a test.
-
-## Handoffs
-
-- Device journeys, gestures, TalkBack passes → `qa-mobile-<stack>` · API contract tests → the `qa-api-<stack>` peer
-- Ids → [`test-ids`](../test-ids/SKILL.md) · state ownership and seams → [`architecture`](../architecture/SKILL.md)
-- Request policy under test → [`networking`](../networking/SKILL.md) · region states → [`error-handling`](../error-handling/SKILL.md)
-- Gradle test options, JDK toolchain → [`project-setup`](../project-setup/SKILL.md)

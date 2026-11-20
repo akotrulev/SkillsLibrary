@@ -25,21 +25,6 @@ Owns **every dev-side test of logic the agent writes**: models, services, mapper
 
 Detect first: existing test target layout, XCTest vs Swift Testing mix, any existing fakes or builders, the snapshot library, and the test plans — extend them; never rewrite a stable XCTest suite to Swift Testing as a side effect.
 
-## When to use
-
-- A model, service, mapper, formatter, validator or state machine has logic
-- The region states from [`error-handling`](../error-handling/SKILL.md): failed keeps the filters, stale keeps the rows, offline is not failed
-- The request policy: backoff, `Retry-After`, the single-flight refresh — against a `URLProtocol` stub
-- A `Codable` type, a deep-link parser, a route builder, a version comparison
-
-## When NOT to use
-
-- Device journeys, gestures, permission dialogs, deep links, push, VoiceOver passes → `qa-mobile-<stack>` (peer)
-- Markup-only views with no branches — a snapshot of hand-written layout is a tautology
-- API contract tests and real-backend integration → `qa-api-typescript` / `qa-api-dotnet` / `qa-api-java`
-- Writing `accessibilityIdentifier`s → [`test-ids`](../test-ids/SKILL.md)
-- Other stacks → `mobile-react-native:component-testing`, `mobile-android:unit-testing`
-
 ## Test what has behaviour
 
 | Unit | Test? | Assert |
@@ -201,10 +186,3 @@ Inside a plan task, `Gate: own tests` runs this task's tests — the red run, th
 - Mutate one rule in the code under test; a test fails with a message naming the value.
 - Line coverage of the changed code ≥ 80% (*Coverage floor*), reported as a figure.
 - No `XCTAssert` in a Swift Testing file; no `try!`; no `sleep` or `Task.sleep`.
-
-## Handoffs
-
-- Device journeys, gestures, VoiceOver passes → `qa-mobile-<stack>` · API contract tests → the `qa-api-<stack>` peer
-- Identifiers → [`test-ids`](../test-ids/SKILL.md) · state ownership and seams → [`architecture`](../architecture/SKILL.md)
-- Request policy under test → [`networking`](../networking/SKILL.md) · region states → [`error-handling`](../error-handling/SKILL.md)
-- Test plans and targets → [`project-setup`](../project-setup/SKILL.md)

@@ -346,20 +346,3 @@ differ.
 - **One `ManagedChannel` per suite** (`@BeforeClass` open, `@AfterClass(alwaysRun=true)` shutdown); service stood
   up via Testcontainers. **Target + token via `Env`**, lazy, never logged. TestNG +
   grpc-java + AssertJ.
-
-## Cross-references
-
-- `qa-typescript:api-tests-grpc` · `qa-dotnet:api-tests-grpc` — the sibling stacks (`@grpc/grpc-js` +
-  `@grpc/proto-loader` · `Grpc.Net.Client` + `Grpc.Tools`); same four ideas, different codegen/client/assertion
-  libs.
-- `qa-java:api-tests` · `qa-java:api-tests-graphql` — the **protocol-trio siblings**: REST
-  (HTTP+JSON status-driven) and GraphQL (HTTP 200 `{ data, errors }` envelope). Three protocols, three
-  result-location conventions, one `api-test-author` family + shared Action + Test spine.
-- `qa-java:realtime-stream-testing` — gRPC **streaming** reuses its drain-then-assert-on-a-bounded-condition
-  discipline; cross-link for deep stream-lifecycle (ordering, mid-stream close) assertions, don't duplicate.
-- `qa-java:api-models` — generate/model the proto messages (the DTO analogue) in isolation; this skill
-  consumes them.
-- `qa-java:api-contract-testing` — the **Protobuf contract** boundary (Pact's Protobuf/gRPC plugin) vs the
-  functional test this skill writes. `qa-java:load-testing` — gRPC **load**.
-- `qa-java:test-login-tokens` — obtain the per-call **bearer** carried in leading metadata.
-- `qa-java:test-reports` — each RPC renders as a named result.

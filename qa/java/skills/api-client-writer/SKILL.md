@@ -8,23 +8,6 @@ disable-model-invocation: true
 
 Generator skill. Scaffolds a single `{Resource}Client.java` file in the Java API test project under `src/test/java/.../clients/{api}/`, following the conventions below.
 
-## When to use
-
-- The user asks to add a new client class under `clients/{api}/`.
-- A new endpoint group has been added to the API under test and needs a typed wrapper for tests to call.
-- The user is extending an existing client with new endpoints in the same style.
-
-## When NOT to use
-
-- Writing the test fixture / `@Test` methods — use `qa/java/skills/api-test-author/writer`.
-- Reviewing an existing client for convention drift — use `qa/java/skills/api-test-author/review`.
-- Authoring DTOs the client returns — use `qa/java/skills/api-models` first.
-- A new API test project from zero (build, `Env`, `BaseApiClient`) — use `qa/java/skills/api-project-setup`.
-- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa/_shared/api-spec-assets` (`qa-<stack>:api-spec-assets`): it replaces the stored spec asset in place and derives from `git diff` exactly which client methods changed. Come back here for those methods only.
-- .NET stack (RestSharp) — use `qa/dotnet/skills/api-client-writer`.
-- TypeScript stack (`fetch` + Zod) — use `qa/typescript/skills/api-client-writer`.
-- Any non-RestAssured / non-Java stack not covered by the siblings above.
-
 ## Folder & naming convention
 
 Clients are organized by API group. **One client per resource**; user-facing and admin operations live in the same class.

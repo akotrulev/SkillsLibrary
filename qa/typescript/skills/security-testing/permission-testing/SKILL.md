@@ -270,18 +270,3 @@ export interface PolicyRow {
   `qa/typescript/skills/test-login-tokens` for per-actor tokens (cached, secrets via env read lazily).
 - Tag cases with their **OWASP API id** and **WSTG-ATHZ** test-id; a new protected endpoint with no matrix
   row is a visible coverage gap. A green suite ≠ "secure" — business-logic abuse needs manual pentest.
-
-## Cross-references
-
-- `qa/_shared/security/SKILL.md` — the OWASP backbone + the scanner-blind-spot rationale; **load alongside**.
-- `qa/{dotnet,java}/skills/security-testing/permission-testing` — the NUnit / TestNG ports of this
-  canonical skill.
-- `qa/typescript/skills/test-login-tokens` — mint per-actor tokens (ROPG as a specific test user; M2M for
-  service roles), cached for their lifetime.
-- `qa/typescript/skills/api-client-writer` / `api-models` — the `{resource}Client` raw/typed overloads
-  and Zod schemas the matrix reuses.
-- `qa/typescript/skills/api-test-author/writer` — generic functional API tests (this skill is the
-  authorization slice of the same suite).
-- `qa/_shared/security-testing/api-fuzzing` — complementary spec-driven fuzzing (finds malformed-input bugs;
-  does **not** find BOLA).
-- `qa/manual/bug-report-writer` — write up a confirmed BOLA/BFLA with the caller, target object, and response.

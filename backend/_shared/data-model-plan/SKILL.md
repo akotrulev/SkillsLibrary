@@ -10,18 +10,6 @@ The plan altitude: **every table, every column, every key, every index — and w
 
 **Prerequisite:** an **approved** `blueprint.md`. Its Key entities column and its tenancy decision are the inputs. Do not run this on an unapproved blueprint.
 
-## When to use
-
-- Step 2 of a `solution-planner` run, after blueprint approval
-- A new functional area is being added to an existing planned system (`EXTEND` — model the delta, reuse the existing conventions)
-- An existing schema needs documenting as the baseline a plan will extend (`RESUME` — read it out of migrations and entities, mark everything `#observed` — repo-read facts are never `#confirmed`, that tier is human-stated only — then plan the delta)
-
-## When NOT to use
-
-- The blueprint is not approved → the model will be rewritten; wait
-- The question is *which engine*, or how to make one query fast, or whether to partition → `data-architect`
-- The output wanted is actual DDL or ORM entity classes → `be-<stack>`'s `database-code` skill, executed by the `be-<stack>` agent
-
 ## Output
 
 **`docs/plans/<NNN>-<initiative>/data-model.md`** in the initiative folder the blueprint established.
@@ -227,15 +215,6 @@ Rules:
 4. Every entity with a lifecycle has a state diagram, and every impossible transition is listed for `api-surface.md` to turn into a `409`.
 5. The migration order satisfies every FK dependency, and every migration maps to a delivery task.
 6. Nothing here is DDL, ORM code, or an index-tuning decision — those crossed the fence.
-
-## Handoffs
-
-- **→ `dev:plan-experience`** (Step 3, when the routing map names a frontend agent). The entity catalog is what the screens display; screens' data needs then feed the API surface.
-- **→ `dev:plan-api-surface`** (Step 4). Entities become resources; lifecycle transitions become state-conflict validations; unique constraints become `409 duplicate` rules; FKs become "referenced id must exist and be visible" rules.
-- **→ `data-architect`** for engine selection, index strategy that needs plan analysis, partitioning, RLS policies, and cross-engine migration. Everything in the "Routed to" table.
-- **→ `be-<stack>`'s `database-code` skill** (via the `be-<stack>` agent) to write the entities, configurations, and migrations.
-- **→ `qa-api-<stack>`'s `db-testing` skills** — this document is the seed/assert/clean basis.
-- **→ `qa-security`** whenever tenancy is app-enforced.
 
 ## Version policy
 

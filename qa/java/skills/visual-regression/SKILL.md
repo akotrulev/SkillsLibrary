@@ -78,13 +78,3 @@ diffs across many browsers stay noisy, or a page whose *content* changes must ke
 - **A hosted-tool test has no assertion.** The vendor's review is the verdict. TestNG records that
   exception in the test itself: `@Test(description = "No assertion: …")`, so a reader never mistakes it for a
   forgotten assertion.
-
-## Handoffs
-
-- `BaseTest`, page objects and the build → `qa/java/skills/ui-test-author/playwright`
-- Aria snapshots and the other web-first assertions → its `references/assertions.md`
-- Failure evidence and reading a trace → `qa/java/skills/evidence-capture`
-- Allure wiring → `qa/reporting/java/skills/test-reports`
-- The nightly job and artifact upload → `qa/cicd/java/skills/ci-pipelines`, `qa/cicd/ci-conventions`
-- TypeScript and .NET → `qa-typescript:visual-regression` (the runner's `toHaveScreenshot`),
-  `qa-dotnet:visual-regression` (screenshot plus a comparer, as here)

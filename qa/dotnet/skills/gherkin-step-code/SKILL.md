@@ -15,20 +15,6 @@ Parses `.feature` files (and the **Step Catalog** from `feature-file-writer`) in
 - Page objects from the existing UI/mobile project (`qa/dotnet/skills/ui-test-author/playwright` assets, `qa/dotnet/skills/page-object-design`) — `LoginPage`, `HomePage`, `LoginPage.Credentials`
 - `Microsoft.Playwright.Assertions` (web-first `Expect`) for `Then` steps, at the Playwright version in `qa/dotnet/skills/ui-test-author/playwright`'s **Versions** table
 
-## When to use
-
-- `.feature` files exist (from `feature-file-writer`) and need step definitions.
-- A scenario reports **undefined** or **ambiguous** steps and needs bindings written/fixed.
-- Implementing the bodies of generated step skeletons against page objects.
-
-## When NOT to use
-
-- Authoring/canonicalizing `.feature` files → `qa/_shared/bdd/feature-file-writer`
-- Project/DI/hooks scaffold → `qa/dotnet/skills/bdd-project-scaffold`
-- Building or extracting page objects → `qa/dotnet/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
-- Reviewing features + bindings → `qa/dotnet/skills/bdd-reviewer`
-- Java/TS step glue → `qa/{java,typescript}/skills/gherkin-step-code`
-
 ## Inputs needed
 
 Confirm at most 2–3.
@@ -202,11 +188,3 @@ public void WhenISignInWith(string email, string password) =>
 ## Rules
 
 The standards this skill's output must meet are the qa-dotnet rule files, not a list here: `bdd.md`, `automation.md`, `test-data.md` (reference data and pre-clean), and `page-objects.md` plus `web-ui.md` or `mobile-ui.md` for the page objects the steps call. Read the project's copy in `.claude/rules/qa-dotnet/`, or the plugin's in `qa/dotnet/skills/rules/` when the project has not installed them (`/qa-dotnet:rules` does). Where they and this skill's recipes disagree, the rule files win.
-
-## Handoffs
-
-- `.feature` files / Step Catalog → `qa/_shared/bdd/feature-file-writer`
-- Project/DI/hooks → `qa/dotnet/skills/bdd-project-scaffold`
-- Page objects → `qa/dotnet/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
-- Review features + bindings → `qa/dotnet/skills/bdd-reviewer`
-- Allure labels from tags → `qa/reporting/dotnet/skills/test-reports`

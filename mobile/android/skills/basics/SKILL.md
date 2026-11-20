@@ -25,23 +25,6 @@ Read the Kotlin version (`libs.versions.toml` / `kotlin` plugin), `languageVersi
 
 A down-level project is not flagged for lacking a 2.4 feature. Kotlin 2.0–2.3 modules migrate through `mobile-android:migration`.
 
-## When to use
-
-- Writing Kotlin in an app, a library module or an Expo native module
-- "Is `!!` OK here?", "data class or class?", "StateFlow or SharedFlow?", "which dispatcher?"
-- Choosing how a coroutine is launched and cancelled; fixing a swallowed `CancellationException`
-
-## When NOT to use
-
-- Gradle, AGP, version catalog, detekt / ktlint → `mobile-android:project-setup`
-- Screen ViewModel shape and DI → `mobile-android:architecture`
-- Composables → `mobile-android:ui-components`
-- Retrofit / Ktor clients → `mobile-android:networking`
-- Tests → `mobile-android:unit-testing`
-- Swift → `mobile-ios:concepts`
-
----
-
 ## Conventions
 
 The official Kotlin coding conventions are the floor; ktlint enforces the formatting, so this list is what formatting cannot.
@@ -160,12 +143,3 @@ class OrdersRepository(
 - **`SharedFlow` for UI events** — dropped when nothing collects; model it as state.
 - **`!!` on `findViewById` / `getSystemService`** — use ViewBinding or the typed `getSystemService<T>()` and handle null.
 - **Logging with string templates** — `Log.d("tag", "$token")`: log through the project's logger with no sensitive values; telemetry is `mobile-<stack>:observability`'s.
-
-## Handoffs
-
-- Scopes, cancellation, `runCatching`, test seams → [`references/concurrency.md`](references/concurrency.md)
-- Gradle, AGP 9, lint → `mobile-android:project-setup`
-- Screen ViewModel, DI → `mobile-android:architecture`
-- LiveData / RxJava → Flow, kapt → KSP → `mobile-android:migration`
-- Telemetry → `mobile-<stack>:observability`
-- Swift counterpart → `mobile-ios:concepts`

@@ -48,25 +48,6 @@ e2e/
 The assets are flat so they compile as one folder; spread over this layout, only their relative imports
 change. The config leaves `testDir` at its default, so it finds the specs either way.
 
-## When to use
-
-- A new `*.spec.ts`, page object, region or control component, or fixture.
-- A new or rewritten `playwright.config.ts`, setup project or signed-in state.
-- Scoping or fixing locators, replacing one-shot reads with web-first assertions.
-- Running the suite per device, viewport, colour scheme, locale or time.
-
-## When NOT to use
-
-- Native mobile apps → `qa/typescript/skills/ui-test-author/appium`
-- Selenium WebDriverJS → `qa/typescript/skills/ui-test-author/selenium`
-- Reviewing Playwright code → `qa/typescript/skills/ui-test-author/review`
-- Designing the page-object hierarchy → `qa/typescript/skills/page-object-design`
-- Extracting page objects and test ids from a live URL → `qa/typescript/skills/page-objects-from-url`
-- Screenshots, video, traces and HAR beyond the config defaults → `qa/typescript/skills/evidence-capture`
-- Visual regression, accessibility scans, network mocking → `visual-regression`, `accessibility-testing`,
-  `network-mocking`
-- A new project from zero (layout, pins, config loader, container) → `qa/typescript/skills/ui-project-setup`
-
 ## Inputs needed
 
 1. **Feature or page** under test (`Login`, `CheckoutCart`).
@@ -132,14 +113,3 @@ The standards this skill's output must meet are the qa-typescript rule files, no
 7. For signed-in journeys, make sure the setup project exists and the spec's project depends on it.
 8. Run the hallucination gate (generation checks §2) and report every `MISSING` test id. Run `npx playwright test` (0 failures) and check new locators in `npx playwright test --ui` before
    committing.
-
-## Handoffs
-
-- Page-object hierarchy → `qa/typescript/skills/page-object-design`
-- Page objects and test ids from a live URL → `qa/typescript/skills/page-objects-from-url`
-- Reviewing Playwright tests → `qa/typescript/skills/ui-test-author/review`
-- Screenshots, video, screencast, trace, HAR → `qa/typescript/skills/evidence-capture`
-- Test data builders → `qa/typescript/skills/test-data-builder`
-- Breakpoint matrices → `qa/typescript/skills/responsive-testing`
-- Real-device mobile web → `qa/typescript/skills/device-cloud`
-- Allure reporting and CI → `qa/reporting/typescript/skills/test-reports`, `qa/cicd/typescript/skills/ci-pipelines`

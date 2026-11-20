@@ -32,20 +32,6 @@ Detect before flagging: Kotlin (`gradle/libs.versions.toml`), AGP and Gradle (`g
 
 An API above the detected Kotlin, compileSdk or BOM is a finding, and so is a version move inside a feature diff: reject it, it is a [`migration`](../migration/SKILL.md) run.
 
-## When to use
-
-- A `.kt` / `.kts` / `.xml` / `AndroidManifest.xml` / `libs.versions.toml` / `proguard-rules.pro` diff, before merge
-- Step 5 of the agent: the whole change set, after the quality layers
-- "Why does this recompose forever / lose its state on rotation / crash after process death?"
-
-## When NOT to use
-
-- Whole codebase, saved re-runnable report → [`standards-audit`](../standards-audit/SKILL.md)
-- Explaining a concept → [`basics`](../basics/SKILL.md); writing code → the owning feature skill
-- Reviewing **E2E test code** (Appium / UiAutomator / Maestro) → peer `qa-mobile-java` / `qa-mobile-dotnet` / `qa-mobile-typescript`
-- Pen-test or runtime security → peer `qa-security` (`mobile-app-scan`, `mobile-runtime-testing`)
-- A spec-versus-code audit → `code-auditor`
-
 ## Inputs needed
 
 1. **The diff** (files or `git diff` range) and the screens it touches
@@ -81,12 +67,3 @@ adb exec-out screencap -p > android-<screen>.png
 ```
 
 Close with the lane line (`Kotlin 2.4 · AGP 9.4 · compile 37 / target 36 / min 24 · Compose · Hilt`), the screenshot-pass status, the finding counts by severity, and one line: `Rules: project .claude/rules/mobile-android/ | plugin copy (not installed)`.
-
-## Handoffs
-
-- Fix → the `mobile-android` agent (FIX or EXTEND), or the owning feature skill
-- A rule is missing or wrong → edit the project's `.claude/rules/mobile-android/`; for every project, the plugin's `mobile/android/skills/rules/`
-- Repo-wide → [`standards-audit`](../standards-audit/SKILL.md); version moves → [`migration`](../migration/SKILL.md)
-- Lock the fix with a test → [`unit-testing`](../unit-testing/SKILL.md)
-- Missing ids → [`test-ids`](../test-ids/SKILL.md); E2E review → peer `qa-mobile-java` / `qa-mobile-dotnet` / `qa-mobile-typescript`
-- Security proof → peer `qa-security`

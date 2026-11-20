@@ -96,12 +96,3 @@ Two filters stack: the **tool-presence probes** below (a section is N/A when its
 | N-mutation row | Stryker.NET configured (dotnet has the tool; TS does not) | `ls stryker-config.json`; `rg -l "dotnet-stryker" .` |
 
 A–D, G, I, K apply to every .NET test suite. Sections that are N/A must name the probe that decided it.
-
-## Handoffs
-
-- **Apply the fixes** → the owning agent per section: `qa-api-dotnet` (H, I) · `qa-ui-dotnet` / `qa-mobile-dotnet` (E, F, D) · `qa-reporting-dotnet` (L) · `qa-cicd-dotnet` (M) · the relevant authoring agent for A–C, G, J, K, N. The priority table is the handoff artifact.
-- **One file / one diff instead** → the family reviewer skills named in the fence table.
-- **Missing `data-testid`s the suite works around (section F)** → `missing-testids.md` to the `fe-blazor` / `fe-react` peer.
-- **Requirement-coverage gaps** (not suite-shape gaps) → **peer** `qa-test-case-designer`.
-- **Application findings noticed in passing** → name them in the handoff block and point at `be-dotnet:standards-audit` / the `fe-*` audit; never score them here.
-- **Security gates for the app** → **peer** `qa-security`.

@@ -59,21 +59,6 @@ HTTP transport changes; the discipline does not.
 If a DTO or client a test needs is missing, run the owner skill first — never call `ctx.get(...)` inline in a
 test to avoid creating a client.
 
-## When to use
-
-- The project already runs Playwright-Java for UI and wants API coverage without adding RestAssured
-- Hybrid suites where API setup/assertions and UI flows must share one Playwright installation, report, and
-  `storageState`
-- New `{Operation}{Resource}Test.java` under a Playwright-based API suite, or new scenarios on an existing one
-
-## When NOT to use
-
-- No Playwright in the project → `qa/java/skills/api-test-author/writer` (RestAssured + TestNG, the stack default)
-- API calls **inside a UI test** (seed data, then drive the browser) → the UI suite's arrange step; conventions in `qa/java/skills/ui-test-author/playwright`
-- Mocking/intercepting the browser's network traffic (`page.route`) → `qa/java/skills/network-mocking`
-- GraphQL / gRPC → the protocol siblings under `qa/java/skills/api-test-author/`
-- Reviewing existing tests → `qa/java/skills/api-test-author/review` (cross-stack checklist applies; add this skill's anti-patterns below)
-
 ## Base class template — the lifecycle lives here once
 
 API-only classes drive no browser, so they do not extend J1's `BaseTest`; `BaseApiTest` keeps its lifecycle
@@ -218,7 +203,6 @@ The standards this skill's output must meet are the qa-java rule files, not a li
 - On 1.63 an `APIRequestContext` has no cookie methods: seed cookies with `setStorageStatePath`, or use `page.request()`, which shares the browser context's cookies (`browserContext.addCookies`). From 1.64: `addCookies` / `cookies` / `clearCookies` on the request context.
 - JSON bodies are DTOs passed with `RequestOptions.create().setData(dto)` inside the client; deserialization lives in the client's typed overloads and `problem` method.
 
-
 ## Generation steps
 
 1. Confirm the project uses playwright-java (the `com.microsoft.playwright:playwright` dependency). If not,
@@ -232,16 +216,3 @@ The standards this skill's output must meet are the qa-java rule files, not a li
 5. Author one test class per operation from the scenario matrix, one client field per identity in `@BeforeClass`.
 6. Verify every test name follows `Should_X_When_Y` and every TC-ID maps to a test or is explicitly deferred.
 7. Run `./gradlew :apitests:test` — expect 0 failures.
-
-## Cross-references
-
-- `qa-java:api-tests` — the **stack default** (RestAssured + TestNG); this skill is the variant
-  for Playwright-first projects. Shared spine: DTO + Client + Test, dual raw/typed overloads, cleanup discipline.
-- `qa-typescript:api-tests-playwright` · `qa-dotnet:api-tests-playwright` — the sibling stacks
-  (@playwright/test `request` fixture · Microsoft.Playwright + NUnit); same four ideas, different bindings.
-- `qa-java:api-models` / `qa-java:api-client-writer` — DTOs / the client layer this skill consumes.
-- `qa-java:ui-tests-playwright` — the UI suite sharing the Playwright dependency.
-- `qa-java:network-mocking` — `page.route` mocking of browser traffic.
-- `qa-java:api-tests-review` — review; plus this skill's What-NOT-to-do list as Playwright-specific findings.
-- `qa-java:test-login-tokens` — the tokens `newContext(token)` injects.
-- `qa-java:test-reports` — Allure TestNG wiring shared with the UI suite.

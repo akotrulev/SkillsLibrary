@@ -17,22 +17,6 @@ How a WinUI app looks: **theme resources, never literals; light, dark and High C
 | Binding a theme resource from code | Experimental `SetThemeResourceBinding` (2.5.4-exp): **never** in production | — |
 | OS floor for Mica | Windows 11 (build 22000); below it the backdrop falls back to a solid colour | — |
 
-## When to use
-
-- Defining colours, brushes, typography, corner radius, spacing, icons
-- Dark mode and High Contrast; choosing Mica vs Acrylic
-- Motion, transitions, the animation-effects setting; DPI and adaptive layout
-
-## When NOT to use
-
-- Control choice, templates, `x:Bind`, dialogs → [`ui-components`](../ui-components/SKILL.md)
-- Titlebar, `AppWindow`, snap layouts → `desktop-windows:windows-and-navigation`
-- Labels, UI Automation, contrast ratios, text scaling → `desktop-windows:accessibility`
-- `.resw`, RTL → `desktop-windows:languages`
-- WPF theme details → `desktop-windows:wpf`
-
----
-
 ## Theme resources, not literals
 
 - **Colours and brushes come from the system theme resources** (`TextFillColorPrimaryBrush`, `LayerFillColorDefaultBrush`, `CardBackgroundFillColorDefaultBrush`, `AccentFillColorDefaultBrush`, `ControlStrokeColorDefaultBrush`). A hex literal or `Colors.White` in a page is a finding: it breaks dark mode and High Contrast.
@@ -140,12 +124,3 @@ How a WinUI app looks: **theme resources, never literals; light, dark and High C
 - **A custom `Storyboard` that ignores `AnimationsEnabled`.**
 - **Forgetting the `HighContrast` key** in a custom dictionary — falls back to `Default`, often a light colour on a dark theme.
 - **Experimental controls** (`TableView`, `Chart`) styled for a demo and left in a production build — never ship them.
-
-## Handoffs
-
-- Control structure, dialogs, `InfoBar` → [`ui-components`](../ui-components/SKILL.md)
-- Titlebar, window chrome, navigation → `desktop-windows:windows-and-navigation`
-- Contrast, scaling, UI Automation → `desktop-windows:accessibility`
-- Localised fonts, RTL, `FlowDirection` → `desktop-windows:languages`
-- WPF Fluent opt-in → `desktop-windows:wpf`; WinForms dark mode → `desktop-windows:winforms`
-- Startup cost of resources → `desktop-windows:performance`

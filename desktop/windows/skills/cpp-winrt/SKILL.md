@@ -21,21 +21,6 @@ How a C++/WinRT WinUI app owns objects, survives suspension points, reaches the 
 
 Detect the lane (`desktop-windows:concepts`): a `.vcxproj` with `Microsoft.Windows.CppWinRT`, `*.idl`, `winrt/` includes, `App.xaml` + `App.xaml.h`. A `.vcxproj` with no `winrt::` and no XAML is Win32/MFC: report it, do not guide it.
 
-## When to use
-
-- Authoring or changing C++ in a WinUI project: pages, runtime classes, handlers, coroutines
-- "Why does it crash after the await?", "wrong thread", "MIDL error", "how do I test this?"
-- Reviewing a `.cpp` / `.h` / `.idl` diff against the §5 rules
-
-## When NOT to use
-
-- C# WinUI, XAML structure, theming → `desktop-windows:ui-components`, `desktop-windows:styling`
-- Calling Win32 or COM from **C#** → `desktop-windows:interop`
-- A new app with no C++ requirement: C# is the default (Microsoft names no-GC, existing C++ libraries and WinRT components as the reasons for C++/WinRT)
-- WPF/WinForms → `desktop-windows:wpf`, `desktop-windows:winforms`
-
----
-
 ## Ownership
 
 | You hold | Use | Never |
@@ -162,10 +147,3 @@ Logs at decision points through the project's logging (not `OutputDebugString`),
 - **XAML property read on a background thread** — `resume_foreground` first; `hresult_wrong_thread`.
 - **`.get()` on the UI thread** — a freeze; await.
 - **Raising `/std:c++20` "for coroutines"** — the package already enables `/await`; a standard change is a decision, not a fix.
-
-## Handoffs
-
-- C# interop, HWND, P/Invoke → `desktop-windows:interop`; XAML pages and controls → `desktop-windows:ui-components`
-- Failed state and banner → `desktop-windows:error-handling`; test ids → `desktop-windows:test-ids`; unit-test overview → `desktop-windows:unit-testing`
-- Project, MSIX, TFM-equivalent settings → `desktop-windows:project-setup`
-- Native-boundary security → `desktop-shared:security`; hand-off to E2E → `qa-desktop-<lang>`

@@ -22,23 +22,6 @@ Owns how the outside world gets into the app: **push and local notifications** (
 
 Detect the sender first (the project's own backend through APNs directly, or a vendor SDK such as Firebase or OneSignal) and keep it — never add a second sender. Facts here are from long-standing APIs and not re-confirmed against Apple pages this session (plan D23); confirm a header value or key against the installed SDK before relying on it.
 
-## When to use
-
-- Registering for push, storing the device token, receiving and tapping a notification
-- Local reminders and scheduled notifications
-- Changing or decrypting a push before display (service extension)
-- A link from mail, SMS, the web or a QR code that must open an in-app screen
-- Setting up `apple-app-site-association` and the app side of it
-
-## When NOT to use
-
-- Routes, typed destinations, restoring a path → [`navigation`](../navigation/SKILL.md)
-- Camera, location, biometrics → [`device-features`](../device-features/SKILL.md)
-- Widgets, Live Activities, App Intents, background tasks → `mobile-ios:system-integration`
-- The sending service, the device-token table → the project's `be-*` agent
-- Store declarations (privacy manifest, entitlements as policy) → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Another stack → `mobile-react-native:push-and-deep-links`, `mobile-android:push-and-deep-links`
-
 ## Permission — the same lifecycle
 
 The pre-prompt, the denied-is-a-working-screen rule and the foreground recheck from [`device-features`](../device-features/SKILL.md) apply. Notification-specific:
@@ -166,14 +149,3 @@ The AASA `components` shape, path exclusions, caching and testing are in [`refer
 - `xcrun simctl openurl booted "https://example.com/orders/<id>"` opens the order screen on a build with the entitlement; the AASA URL returns 200, `application/json`, no redirect.
 - Sign out: the token is gone from the backend for the device.
 - Dev-side tests: `NotificationTarget(userInfo:)` and `DeepLink(url:)` against valid, malformed and hostile inputs; device journeys are `qa-mobile-<stack>`'s (peer).
-
-## Handoffs
-
-- URL → route, protected routes, restoration → [`navigation`](../navigation/SKILL.md)
-- Permission pattern, Settings route → [`device-features`](../device-features/SKILL.md)
-- Payload and link validation, lock-screen content, secrets → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
-- Guideline 4.5.x, entitlements, background modes as policy → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Live Activity push, widget refresh → `mobile-ios:system-integration`
-- Token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Push-sending service → the project's `be-*` agent
-- Link and push journeys on a device → `qa-mobile-<stack>` (peer)

@@ -8,21 +8,6 @@ disable-model-invocation: true
 
 The raw-text foundation a small LLM learns language from. Pretraining data is judged on three things: **volume** (enough tokens for the model size), **cleanliness** (text a human would recognize as real prose/code, not nav bars and cookie banners), and **composition** (the blend of sources decides what the model is good at). This skill owns collection → extraction → cleaning → filtering → dedup → sharding; it hands the dedup/filter *mechanics* to `training-data:data-quality` and the on-disk shape to `training-data:dataset-formats`.
 
-## When to use
-
-- Assembling a text corpus to pretrain (or continue-pretrain) a small language model
-- Extracting readable text from HTML, PDF, ePub, code repos, or a document dump
-- Deciding and documenting the source mixing blend
-- Sharding a large corpus for training and estimating its token count
-
-## When NOT to use
-
-- Chat/instruction data → `training-data:instruction-sft`
-- Preference/DPO data → `training-data:preference-data`
-- Held-out benchmarks → `training-data:eval-sets`
-- Image-text pretraining pairs → `training-data:vision-language-data`
-- The dedup/filter algorithms themselves → `training-data:data-quality` (this skill calls it)
-
 ## How much data — size the corpus to the model
 
 A small model does not need a trillion tokens, but it needs *enough*: the Chincherror-optimal rule of thumb is **~20 tokens per parameter**, and small models are usually trained past that (more tokens, since compute is cheap relative to a good small model). Ballpark targets:

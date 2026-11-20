@@ -18,22 +18,6 @@ Owns changing the **version lane or workflow** of an existing project. Every oth
 | Floor | 54 | Last SDK where the legacy architecture can be on — the bridge in [`new-architecture`](references/new-architecture.md) |
 | Below 54 | — | One SDK at a time up to 54, then the bridge, then onward |
 
-## When to use
-
-- The user names a target SDK, or the audit reports A1 (below the floor), A6, A7
-- An old project must reach the New Architecture ([`new-architecture`](references/new-architecture.md))
-- A bare React Native app should adopt Expo modules, the CLI, prebuild ([`bare-to-expo`](references/bare-to-expo.md))
-- React Native must live inside an existing iOS / Android app ([`embed-in-native-app`](references/embed-in-native-app.md))
-- A post-upgrade break: a dead gesture, a missing native module, `expo-doctor` complaints, a hand-edited `ios/` file wiped by `prebuild --clean`
-
-## When NOT to use
-
-- New app → [`project-setup`](../project-setup/SKILL.md)
-- A library major with no SDK change (FlashList, MMKV, RNTL) → the owning skill names the change; run it here only as its own change
-- Patch / minor bumps inside an SDK — dependency hygiene, `expo install --fix`
-- Feature work, a bug fix → the agent's FIX / EXTEND modes; they never up-level a lane
-- Native-side Swift / Kotlin modernization → the `mobile-ios` / `mobile-android` plugins
-
 ## Inputs needed
 
 1. **Current SDK, RN, React** (`package.json`), Expo Router or bare React Navigation, `ios/` and `android/` tracked or ignored
@@ -86,14 +70,3 @@ Owns changing the **version lane or workflow** of an existing project. Every oth
 - **Running `prebuild` inside a hand-maintained native host app** ([`embed-in-native-app`](references/embed-in-native-app.md)).
 - **Copying hook or API names from memory** for a package whose major changed — read the installed types.
 - **Bundling a feature into the upgrade commit.**
-
-## Handoffs
-
-- Concepts and the web-React map → [`basics`](../basics/SKILL.md)
-- Config plugins, Expo Modules → [`native-modules`](../native-modules/SKILL.md)
-- Project scaffold and config → [`project-setup`](../project-setup/SKILL.md)
-- Signing, runtime versions, OTA, EAS → `mobile-<stack>:release`
-- Review the migration diff → [`code-review`](../code-review/SKILL.md)
-- Conformance after the move → [`standards-audit`](../standards-audit/SKILL.md)
-- Dev-side tests that lock the move → [`component-testing`](../component-testing/SKILL.md)
-- Device journeys after an upgrade → peer `qa-mobile-typescript`

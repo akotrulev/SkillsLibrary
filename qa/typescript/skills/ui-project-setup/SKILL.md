@@ -12,19 +12,6 @@ This skill stands up a **runnable, empty web-UI test project from zero**: the la
 
 Default driver is **Playwright Test** (auto-waiting, trace viewer, one runner for UI and API specs). Use **Selenium WebDriverJS** only when the project mandates it (an existing grid, an org standard): keep this layout and the config loader, and follow `qa/typescript/skills/ui-test-author/selenium` for the driver factory, pages and runner.
 
-## When to use
-
-- A fresh repo with no TypeScript UI test project, and the user wants browser coverage.
-- The user asks which versions, layout, config or container a Playwright TypeScript suite should use.
-
-## When NOT to use
-
-- The project exists → author into it with `qa/typescript/skills/ui-test-author/playwright`.
-- API-only coverage with no Playwright → `qa/typescript/skills/api-project-setup`; API specs in this suite → `qa/typescript/skills/api-test-author/playwright`.
-- Native mobile or desktop apps → `mobile-project-setup` / `desktop-project-setup`.
-- A Gherkin suite → `qa/typescript/skills/bdd-project-scaffold`.
-- .NET / Java → `qa/dotnet/skills/ui-project-setup` / `qa/java/skills/ui-project-setup`.
-
 ## Tooling & versions
 
 The Playwright, Allure and image rows are the **Versions** table of `ui-test-author/playwright/SKILL.md`; `assets/package.json` holds the same exact pins, all dev dependencies.

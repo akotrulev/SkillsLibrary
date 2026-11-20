@@ -12,16 +12,6 @@ This skill stands up a **complete, runnable mobile test solution from zero**: di
 
 Mobile has the heaviest local setup of any module (Appium server, platform drivers, an emulator/simulator or real device). The structure follows the dotnet layout: **flat projects at the solution root**, a shared **`TestCore`**, and **Central Package Management (CPM)**. Screen-object and test-authoring conventions are owned by the `qa-mobile-dotnet` skills — this skill owns the **project shell** and the **environment**. The compilable project that drops into `AppiumTests/` is `qa/dotnet/skills/ui-test-author/appium/assets/`; this skill does not copy it.
 
-## When to use
-
-- A fresh repo with no .NET mobile test solution, and the user wants iOS/Android coverage.
-- The user asks which versions / structure / Appium setup a C# mobile framework should use.
-
-## When NOT to use
-
-- The solution already exists → author into it with the `qa-mobile-dotnet` skills.
-- Web-UI / API / performance scaffolding → use the matching `*-project-setup-dotnet` skill.
-
 ## Tooling & versions
 
 Versions are pinned **once** in `Directory.Packages.props` (CPM); csprojs reference packages **without** a `Version` attribute. The table is the **Versions** table of `ui-test-author/appium/SKILL.md`, and `assets/Directory.Packages.props` there holds the same pins.

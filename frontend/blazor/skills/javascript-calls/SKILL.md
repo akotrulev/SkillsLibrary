@@ -12,22 +12,6 @@ Owns the **mechanics** of the JS↔.NET boundary: how to call JavaScript from a 
 
 **Version rule:** the core pattern (collocated module + `IJSObjectReference` + `OnAfterRenderAsync` load + `IAsyncDisposable`) is **identical across net8/9/10**. Deltas: **net9+** adds `ComponentBase.RendererInfo.IsInteractive` to detect whether interop is even possible yet (cleaner than the old "did `OnAfterRenderAsync` fire" heuristic); **net10** adds constructing JS objects via a constructor function and reading/writing JS object properties directly from .NET (below). Never apply the net10 property/constructor APIs to a down-level project — use a wrapper function in the module instead.
 
-## When to use
-
-- Wrapping a browser API with no .NET equivalent (clipboard, geolocation, `matchMedia`, Web Share, File System Access)
-- Driving a JS library that has no Blazor port (a charting/maps/editor lib rendering into a `@ref`'d node)
-- Letting JS call back into C# (an observer callback, a resize handler, a third-party event)
-- Transferring binary data (upload/download, canvas pixels) across the boundary
-- Diagnosing "interop threw during prerender / static SSR"
-
-## When NOT to use
-
-- Anything C# can already do (formatting, state, navigation, HTTP) — **stay in C#**
-- Scroll reveals / entrance animation / view transitions → [`animation`](../animation/SKILL.md) (CSS first; interop only as its documented fallback)
-- SignalR hubs / server push / live streams → [`realtime`](../realtime/SKILL.md)
-- CSS isolation, `::deep`, focus-visible → [`styling`](../styling/SKILL.md)
-- Focus movement / live-region announcements → [`accessibility`](../accessibility/SKILL.md) (uses `ElementReference.FocusAsync`, minimal interop)
-
 ## The one correct shape: a collocated ES module behind `IJSObjectReference`
 
 **Never** register global JS functions or inline `<script>` — they pollute the global scope and can't be tree-shaken or scoped. Collocate a module next to the component (`Widget.razor` → `Widget.razor.js`), import it lazily, hold the handle, dispose it.
@@ -159,12 +143,3 @@ The standards this skill's output must meet are the fe-blazor rule files, not a 
 - Trigger the JS→.NET callback → the UI updates (it went through `InvokeAsync(StateHasChanged)`), no cross-thread render warning.
 - On WASM, a hot interop loop using `IJSInProcessObjectReference` → no per-call async overhead; still disposed on teardown.
 - Render the component **statically** (no render mode) → it degrades gracefully (interop simply doesn't run); nothing throws.
-
-## Handoffs
-
-- Whether interop is even needed / native alternatives → [`basics`](../basics/SKILL.md) + this skill's house rule
-- CSS animation, scroll reveals, view transitions (interop only as fallback) → [`animation`](../animation/SKILL.md)
-- SignalR client / server push / streaming → [`realtime`](../realtime/SKILL.md)
-- Focus + announcements (`ElementReference.FocusAsync`, minimal interop) → [`accessibility`](../accessibility/SKILL.md)
-- Which render mode a JS-dependent component needs → [`project-setup`](../project-setup/SKILL.md)
-- CSS isolation / `::deep` for a JS-library's injected DOM → [`styling`](../styling/SKILL.md)

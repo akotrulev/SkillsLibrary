@@ -36,18 +36,6 @@ The playwright.dev .NET pages already list 1.64 options that the 1.63 binding do
 | Screenshot comparison against baselines | `qa/dotnet/skills/visual-regression` |
 | HAR replay (`RouteFromHARAsync`) | `qa/dotnet/skills/network-mocking` |
 
-## When to use
-
-- A suite needs failure evidence, or its evidence is missing, too heavy or in the wrong place.
-- A test or a demo needs a deliberate recording: a bug repro, a walkthrough, an agent's "receipt".
-- An agent drives Playwright MCP or `playwright-cli` and must leave screenshots, a video or a trace behind.
-- A test failed and its trace must be read before anything changes.
-
-## When NOT to use
-
-Writing tests or `BaseTest`, Allure wiring, baselines, network replay or pipeline YAML — the owners in the
-table above.
-
 ## The three kinds of capture
 
 | Kind | Who starts it | API | Lands in |
@@ -202,12 +190,3 @@ uploaded), or from Allure's attachment.
 - Exploratory evidence uses explicit filenames under `evidence/<YYYY-MM-DD>-<topic>/`, never `bin/`.
 - A failure is read from its message, screenshot and trace before code changes.
 - Nothing captured is committed; nothing real is recorded.
-
-## Handoffs
-
-- `BaseTest`, the project, the runsettings and the show-trace / codegen commands → `qa/dotnet/skills/ui-test-author/playwright`
-- Reqnroll scenario hooks → `qa/dotnet/skills/bdd-project-scaffold`
-- Allure mapping of the evidence → `qa/reporting/dotnet/skills/test-reports`
-- Upload paths and retention → `qa/cicd/dotnet/skills/ci-pipelines`, `qa/cicd/ci-conventions`
-- Screenshot comparison and `AllureApi.AddScreenDiff` → `qa/dotnet/skills/visual-regression`
-- HAR replay → `qa/dotnet/skills/network-mocking`

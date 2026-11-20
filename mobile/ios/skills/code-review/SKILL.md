@@ -31,20 +31,6 @@ Detect before flagging: Xcode and Swift (`xcodebuild -version`, `swift-tools-ver
 
 `@Observable` on iOS 16, `Observations` below iOS 26, and a Swift 6.4-only construct on a 6.2 toolchain are **findings**; a `PreviewProvider` in new code is a minor.
 
-## When to use
-
-- A `.swift` / `Info.plist` / `.xcconfig` / `Package.swift` / `.xcprivacy` / `.entitlements` / `.xcstrings` diff, before merge
-- Step 5 of the agent: the whole change set, after the quality layers
-- "Why does this hang / crash on resume / lose its state?"
-
-## When NOT to use
-
-- Whole codebase, saved re-runnable report → [`standards-audit`](../standards-audit/SKILL.md)
-- Explaining a concept → [`basics`](../basics/SKILL.md); writing code → the owning feature skill
-- Reviewing **E2E test code** (XCUITest / Appium / Maestro) → peer `qa-mobile-java` / `qa-mobile-dotnet` / `qa-mobile-typescript`
-- Pen-test or runtime security → peer `qa-security` (`mobile-app-scan`, `mobile-runtime-testing`)
-- A spec-versus-code audit → `code-auditor`
-
 ## Inputs needed
 
 1. **The diff** (files or `git diff` range) and the screens it touches
@@ -80,12 +66,3 @@ xcrun simctl io booted screenshot ios-<screen>.png
 ```
 
 Close with the lane line (`Xcode 27 · Swift 6 mode · iOS 17 · SwiftUI · SPM`), the screenshot-pass status, the finding counts by severity, and one line: `Rules: project .claude/rules/mobile-ios/ | plugin copy (not installed)`.
-
-## Handoffs
-
-- Fix → the `mobile-ios` agent (FIX or EXTEND), or the owning feature skill
-- Repo-wide → [`standards-audit`](../standards-audit/SKILL.md); version moves → [`migration`](../migration/SKILL.md)
-- Lock the fix with a test → [`unit-testing`](../unit-testing/SKILL.md)
-- A rule is missing or wrong → edit the project's `.claude/rules/mobile-ios/`; for every project, the plugin's `mobile/ios/skills/rules/`
-- Missing ids → [`test-ids`](../test-ids/SKILL.md); E2E review → peer `qa-mobile-java` / `qa-mobile-dotnet` / `qa-mobile-typescript`
-- Security proof → peer `qa-security`

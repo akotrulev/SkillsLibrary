@@ -27,20 +27,6 @@ Two cross-cutting rules shape every example:
 - **Playwright for Java** (`com.microsoft.playwright`, at the pin in the **Versions** table of `qa/java/skills/ui-test-author/playwright/SKILL.md`) for the UI auth-state seeding — a `@BeforeSuite` `TokenAuthSetup` on J1's lifecycle
 - Gradle (Kotlin DSL); token plumbing under `src/test/java/.../support/auth/`; secrets via **env vars only**
 
-## When to use
-
-- An API-test suite (`qa/java/skills/api-test-author/writer`, RestAssured) needs a `Bearer` token to call protected endpoints → **M2M**
-- A UI suite needs to skip the login form by seeding an authenticated browser session → **ROPG** → storage state
-- You need a token *as a particular seeded test user* (with that user's roles/permissions) → **ROPG**
-- A CLI/headless tool or a device without a browser needs to authenticate → **device-code**
-- You're re-fetching a token on every test and want to cache it correctly
-
-## When NOT to use
-
-- Wiring Auth0 into the **application under test** (Spring Security resource server, JWT validation, login redirect) → `backend/java/skills/auth0`
-- Understanding the Auth0 entity/flow model conceptually → `auth/_shared/auth0-concepts`
-- TypeScript or .NET test suites → `qa/{typescript,dotnet}/skills/test-login-tokens`
-
 ## Decision matrix — which grant for which test
 
 | | **Client Credentials (M2M)** | **ROPG (`password-realm`)** | **Device Authorization** |
@@ -119,13 +105,3 @@ These sections live in `references/details.md` — **read it when the task touch
 3. Confirm the env vars are wired into the test environment (CI secret store / run config), **not** committed: `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `AUTH0_M2M_CLIENT_ID/SECRET`, and for ROPG `AUTH0_ROPG_CLIENT_ID`, `AUTH0_TEST_USERNAME/PASSWORD`, `AUTH0_REALM`.
 4. Generate `Auth0Config.java`, `CachedTokenProvider.java` + the two providers, `Tokens.java`, plus the consumer wiring (API client header and/or `TokenAuthSetup` listed in `testng.xml`, and the `contextOptions()` override on each signed-in class).
 5. Run the cache unit tests anywhere (offline); run the live token tests with the secrets present.
-
-## Cross-references
-
-- **`qa/typescript/skills/test-login-tokens`** (`auth0` npm `AuthenticationClient`), **`qa/dotnet/skills/test-login-tokens`** (`Auth0.AuthenticationApi` `GetTokenAsync`) — the sibling stacks; same three grants, same cache + stash shape.
-- **`auth/_shared/auth0-concepts`** — the entity/flow model (Tenant / Application / API / audience / grant types) this skill assumes.
-- **`backend/java/skills/auth0`** — the **app-side** login flow (Spring Security resource server) this skill complements. This skill never implements user-facing login; that does.
-- **`qa/java/skills/api-test-author/writer`** — the M2M consumer: where the `Bearer` header lands on the RestAssured client.
-- **`qa/java/skills/ui-test-author/playwright`** — the ROPG consumer: `BaseTest`, `contextOptions()` and the `AuthSetup` shape (`references/lifecycle.md` §3, §6) that `TokenAuthSetup` follows.
-- **`qa/java/skills/test-data-builder`** — provisioning/seeding the test users that ROPG authenticates as.
-- **`qa/cicd/java/skills/ci-pipelines`** — where the Auth0 secrets are sourced in CI (OIDC / encrypted secrets), never hardcoded.

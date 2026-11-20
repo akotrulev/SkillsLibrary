@@ -17,21 +17,6 @@ disable-model-invocation: true
 - **shadcn's generated `data-table` example still tracks the v8 shape** ([shadcn-ui/ui#11389](https://github.com/shadcn-ui/ui/issues/11389)). Take shadcn's `<Table>` **markup** and write the engine wiring yourself from this skill — do not paste its example wholesale into a v9 app.
 - Renames that bite: `sortingFn`→`sortFn`, `columnSizingInfo`→`columnResizing`, `columnPinning.left/right`→`.start/.end`, `table.getState()`→`table.state`.
 
-## When to use
-
-- Adding any table past a static list — anything that sorts, filters, pages, selects, or exports
-- Building the app's `<DataGrid>` for the first time, or extending it with a feature it lacks
-- Replacing MUI X DataGrid (paywall, or the styling authority moved to Tailwind)
-- Reviewing a grid: server-side contract, virtualization, a11y, testability
-
-## When NOT to use
-
-- Choosing the component library / styling authority → [`component-library`](../component-library/SKILL.md), [`styling`](../styling/SKILL.md)
-- The query itself — caching, keys, invalidation, streaming → [`data-fetching`](../data-fetching/SKILL.md)
-- Editable-cell *validation* rules → [`forms`](../forms/SKILL.md)
-- `data-testid` naming mechanics → [`test-ids`](../test-ids/SKILL.md)
-- Deterministic sort, empty-state copy, confirmation rules → [`ui-rules`](../ui-rules/SKILL.md)
-
 ## Feature surface — parity with MUI X, and who supplies it
 
 `Engine` = TanStack Table v9 core. `You` = markup/UX you write once into the house grid. Depth for every "You" row is in [`feature-recipes`](references/feature-recipes.md).
@@ -162,16 +147,3 @@ Each smell is the inverse of a rule above, or of the fe-react rule files `react.
 - `Orders.Grid` and stable per-row test ids resolve with zero collisions.
 - `tsc --noEmit` clean with no `any` in the column definitions.
 - Bundle: only declared features present (v9 tree-shaking) — check the grid chunk hasn't pulled `stockFeatures`.
-
-## Handoffs
-
-- Library choice + whether this lane applies at all → [`component-library`](../component-library/SKILL.md)
-- The query hook, caching, invalidation after a mutation → [`data-fetching`](../data-fetching/SKILL.md)
-- Tailwind tokens, sticky/print CSS, density classes → [`styling`](../styling/SKILL.md)
-- Editable-cell schemas + error mapping → [`forms`](../forms/SKILL.md)
-- Locator naming + the QA handshake → [`test-ids`](../test-ids/SKILL.md)
-- Deterministic sort, empty-state copy, destructive-action confirmation → [`ui-rules`](../ui-rules/SKILL.md)
-- Keyboard model, focus management, announcements → [`accessibility`](../accessibility/SKILL.md)
-- Row-render cost, memoization, virtualization budgets → [`performance`](../performance/SKILL.md)
-- Failure scoping + the notification surface → [`error-handling`](../error-handling/SKILL.md)
-- Breakpoint behaviour (grid → card list on narrow) → [`responsive-design`](../responsive-design/SKILL.md)

@@ -10,19 +10,6 @@ Every other `business-analysis/` skill reasons **against the whole project's bus
 
 The shape — read-all-first, update-on-trigger, stable-vs-dynamic tiers — is applied to a *business domain* model instead of a coding-agent's context.
 
-## When to use
-
-- At the **start** of any `business-analysis/*` task — read the KB before modeling or conflict reasoning (the other skills invoke this contract; it is not optional)
-- At the **end** of any analysis that changed the model — persist the changes
-- Initializing the KB in a project that doesn't have one yet
-- The user says "refresh / update the business model"
-
-## When NOT to use
-
-- Recording *how the code is built* (architecture, stack, conventions) → the project's own CLAUDE.md / docs
-- Recording *test* artifacts (test bases, cases, charters) → `qa/manual/*`
-- One-off analysis of a single story with no project KB and no desire for one → plain `qa/manual/requirements-breakdown`
-
 ## The KB layout
 
 Lives **in the target repo**, versioned with the code, diffable and PR-reviewable — i.e. under the project root of whatever repo the session is actually working in (resolve `docs/business-model/` against the current working directory), **never** under this skills-library checkout or a global config directory (`~/.claude/...`), unless the user explicitly asks for a shared/global copy:
@@ -178,14 +165,3 @@ Without it a generated `#inferred` line is indistinguishable from a business dec
 Bad: a session models a new refund feature, finds it collides with the loyalty-points flow, resolves it in chat — and writes nothing. The next session re-derives (or misses) the same conflict. The KB exists precisely to make that impossible.
 
 Also bad: dumping the full BRD into `flows/` verbatim. The KB is a distilled model with traceability links back to sources — not a copy of them.
-
-## Handoffs
-
-- Build/extend a flow → `business-analysis/skills/ba-process-flow-diagram`
-- Build/extend an entity state model → `business-analysis/skills/ba-entity-state-grid`
-- Build/extend a decision table → `business-analysis/skills/ba-decision-table`
-- Build/extend the triggers, reactions, shared data and invariants → `business-analysis/skills/ba-dependency-map`
-- Sweep a new/changed feature against the model → `business-analysis/skills/ba-feature-conflict-check`
-- Orchestrate the whole loop → `business-analysis/agents/business-analyst`
-- Populate the KB from an existing backend implementation (areas, system overview, and the evidence behind the flows/entities/decisions) → the `be-documenter` agent and `backend/_shared/business-documentation`
-- Distill one story for testing (consumes these artifacts as test basis) → `qa/manual/requirements-breakdown`

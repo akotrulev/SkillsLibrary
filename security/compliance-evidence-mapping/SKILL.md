@@ -59,13 +59,3 @@ Every row carries the **evidence artifact path** (the SARIF, the test report, th
 ## Rules
 
 The standards this skill's output must meet are the security-governance rule files, not a list here: `compliance.md` (the register and gap list) and `security-governance.md` (the edition pins, evidence read this session). Read the project's copy in `.claude/rules/security-governance/`, or the plugin's in `security/rules-security-governance/` when the project has not installed them (`/security-governance:rules` does). Where they and this skill's recipes disagree, the rule files win.
-
-## Cross-references
-
-- **`security-architect`** (`security/agents/security-architect.md`) — the roll-up agent that loads this skill; the evidence register + gap list are a layer of its CISO posture picture, framed in NIST CSF 2.0.
-- **`devops:controls-validation`** (`devops/infra-controls-validation/`) — proves a mapped control is **effective**, not just present; it converts a `#present` row into a validated one and a `#partial` into a `#gap` when the control fails its test.
-- **`qa-security`** (`qa/_shared/agents/qa-security.md`) + its scanners — the app-layer controls (SAST/DAST/SCA/secrets/authz/TLS) that populate most register rows; their reports are the evidence artifacts.
-- **`infra-security-tester`** (`devops/agents/infra-security-tester.md`) — the infra/cloud/K8s controls (CIS benchmarks, CSPM, RBAC/network-policy) that populate the infra rows.
-- **`security-governance:hardening`** / **`security-governance:secrets-hardening`** / **`security-governance:detection-engineering`** — the defensive controls whose *existence* this skill maps to evidence and whose *absence* becomes a gap routed back to them.
-- **`security/cloud-incident-response`** (`penetration-testing`/`security-governance` lane) — owns the **BCDR dimension** of this crosswalk. Availability/resilience (SOC 2 **A1.2/A1.3**, ISO 27001:2022 **A.5.29/A.5.30**, NIST CSF 2.0 **RECOVER**, 800-53 **CP**) is the one framework area no other skill covered; the control-to-cloud-evidence detail (BIA/RTO/RPO, DR patterns, drill records, verify-before-restore) lives in its `references/cloud-resilience.md`. Cloud-config benchmarks (CIS Foundations), ISO 27017/27018 and CSA CCM v4 extend this crosswalk to the cloud-control layer — add them as columns here, not as a new skill.
-- **`business-analysis:knowledge-base`** *(named, not loaded)* — where data-processing/PII facts about the system live; GDPR Art.30 records-of-processing evidence draws on the business model.

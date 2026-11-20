@@ -17,19 +17,6 @@ Wires **Auth0.Android** into a Compose app. **Universal Login in the system brow
 | Project lane | Kotlin 2.x, Compose, JDK 21 toolchain (CLAUDE.md); the Gradle dependency goes in the version catalog |
 | Application type | **Native** — no client secret |
 
-## When to use
-
-- New Auth0 sign-in / sign-out in a Kotlin app; calling a protected API
-- The Custom Tab stays open or never returns to the app
-- Session restore at launch, biometric-protected credentials, silent renewal
-
-## When NOT to use
-
-- Auth0 entities, `audience`, RBAC → `auth/_shared/auth0-concepts`
-- RN / Expo → `mobile-react-native:auth0`; Swift → `mobile-ios:auth0`
-- Keystore / storage rules in general → `mobile-<stack>:security`
-- Backend validation → `backend/*/auth0`
-
 ## Setup
 
 ```kotlin
@@ -160,9 +147,3 @@ Auth0.Android 4.x supports passkey sign-up/login through the Authentication API 
 4. Build `AuthRepository`, the `SecureCredentialsManager`, and the ViewModel `uiState`.
 5. Add biometric options if required; handle the no-lock-screen path.
 6. Smoke on a **device**: sign in, kill and relaunch (restores), call the API, sign out, confirm the next sign-in asks for credentials; verify the App Link with `adb shell pm get-app-links PACKAGE`.
-
-## Handoffs
-
-- Concepts → `auth/_shared/auth0-concepts`; storage rules → `mobile-<stack>:security`
-- Project / Gradle / manifest → `mobile-android:project-setup`; links → `mobile-android:push-and-deep-links`
-- Networking → `mobile-android:networking`; purchase user link → `mobile-<stack>:in-app-purchases`

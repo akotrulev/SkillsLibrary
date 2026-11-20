@@ -24,21 +24,6 @@ React 19 idioms are primary; React 18 equivalents are tagged fallbacks (not obso
 
 **Runner:** Vitest is the house default for React (Vite-native, ESM-first, `vi` mock API). Jest works too if the project already standardizes on it (`@testing-library/jest-dom` supports both) — don't fight an existing Jest setup. New projects use Vitest.
 
-## When to use
-
-- A component has **logic**: conditional rendering, computed/formatted display, an event handler that mutates state, validation, a derived enabled/disabled state, a reducer.
-- You want to prove a component reacts correctly to prop changes, context values, an injected service/fetch result, or a hook's return.
-- A **custom hook** with real logic (a reducer, a derived value, a subscription) — test it with `renderHook`.
-- Regression-locking a fixed component bug at the unit level (far cheaper than an E2E).
-
-## When NOT to use
-
-- **Markup-only components** (a static card, a layout shell with no branching) — asserting hand-written markup is a tautology. Test *logic-bearing* components only.
-- **Async Server Components** (an `async function` component that `await`s data) — **Vitest cannot render them** (React's RSC runtime isn't available in the test runner; the render throws the moment you `await`). Pull the data fetch into a plain async function and unit-test *that* (→ [Pure-logic tests](#pure-logic-tests-no-renderer)); render the resulting **synchronous** presentational component with RTL; hand the assembled async page to the `qa-ui-typescript` peer (E2E). This is the official Next.js guidance.
-- **End-to-end journeys / real navigation / real backend** → `qa-ui-typescript` (peer). RTL fakes nothing about routing — there is no route.
-- **Pure TS logic** with no rendering (a Zod schema, a formatter, a mapper, a store, an extracted fetch) → **not RTL, but still yours** — see [Pure-logic tests](#pure-logic-tests-no-renderer) below.
-- **Authoring `data-testid`s** → [`test-ids`](../test-ids/SKILL.md). Tests here *consume* testids as a last-resort selector — prefer role/label.
-
 ## Test what has behavior — the selection matrix
 
 | Component / unit shape | Test with Vitest+RTL? | What to assert |
@@ -242,13 +227,3 @@ it('should map a failed response to the failed state', async () => {
 ### Handoff
 
 Whether these assertions actually catch faults is a mutation-score question, and **StrykerJS has no skill in this library yet** — no TypeScript mutation-testing skill exists; the siblings `qa-java:test-quality-check` (PIT) and `qa-dotnet:test-quality-check` (Stryker.NET) do. Until it lands, treat mutation grading as unavailable on this stack rather than substituting a coverage number.
-
-## Handoffs
-
-- Non-rendering logic (schemas, formatters, mappers, stores, extracted fetches) → [Pure-logic tests](#pure-logic-tests-no-renderer), in this skill
-- `data-testid` authoring/audit → [`test-ids`](../test-ids/SKILL.md)
-- End-to-end / real-browser journeys, POM → **peer** `qa-ui-typescript`
-- Visual/pixel regression → **peer** `qa/typescript/skills/visual-regression`
-- Component code smells / rewrites → [`code-review`](../code-review/SKILL.md) / [`component-writer`](../component-writer/SKILL.md)
-- What a component *should* do (behavior spec) → the test-case suite from **peer** `qa-test-case-designer`
-- Async data fetch to extract & test → [`data-fetching`](../data-fetching/SKILL.md)

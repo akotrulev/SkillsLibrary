@@ -6,6 +6,8 @@
 
 **Status (2026-11-20):** only front doors are listed to the model. 550 of the 587 registered skill files carry `disable-model-invocation: true`; the 37 left are the `rules` skills, ten `dev` workflow skills and two QA orphans (`FRONT_DOORS` in `tools/plugin-surface-check.py`, which enforces it). A project enabling nine plugins went from 219 listed skills (~12,100 tok) to 21 (~1,100 tok). `tools/token-audit.py` now counts only listed skills as always-on and prints a `listed` column. Agent descriptions (~4,300 tok for the same project) are the largest always-on surface left.
 
+**Status (2026-11-20, second pass):** all 77 command files carry `disable-model-invocation: true` (~1,500 tok off every request for a nine-plugin project). The routing sections (`When to use`, `When NOT to use`, `Handoffs`, `Cross-references`, `Related`) were removed from 536 hidden skills: ~162k tok of skill text library-wide, 8–11% of each plugin's bodies. Six devops and security `Cross-references` sections were kept because they hold scanner-ownership rules. `Inputs needed` was kept everywhere: it feeds the procedure.
+
 **Current (2026-07-25) — the two plugins worked so far:**
 
 | Plugin | Skills | Always-on desc | Agents | Status |

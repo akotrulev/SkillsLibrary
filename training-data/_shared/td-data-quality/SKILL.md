@@ -8,22 +8,6 @@ disable-model-invocation: true
 
 The quality gate every dataset — pretraining, SFT, preference, eval, VLM — passes before it is trained on. Garbage, duplicates, and eval leakage are the three ways a training set silently ruins a model: garbage teaches noise, duplicates memorize and waste compute, and contamination inflates every eval number so you cannot tell whether the model learned or cheated. This skill owns the universal filters and the two dedup/decontamination passes; stage skills call it and add their own content checks.
 
-## When to use
-
-- Removing exact and near-duplicate records from any dataset
-- Checking a train split for contamination against the test/eval split (the non-negotiable pass)
-- Filtering by quality (heuristics, a trained classifier, or an LLM grader)
-- Scrubbing or redacting PII; filtering toxicity/unsafe content to the policy the model needs
-- Language identification and length/format filtering
-- Balancing/mixing a dataset so no topic, source, or template dominates
-
-## When NOT to use
-
-- The record schema and split boundaries → `training-data:dataset-formats`
-- Generating records → `training-data:synthetic-generation`
-- HTML/PDF extraction and boilerplate stripping → `training-data:pretraining-corpus`
-- Preference-pair validity (is `chosen` actually better) → `training-data:preference-data`
-
 ## The order of operations (do not reorder)
 
 Filtering is cheap and dedup is expensive, so filter first; decontamination must run on what actually ships, so it runs last, after splitting:

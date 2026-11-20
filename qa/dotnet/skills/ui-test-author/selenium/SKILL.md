@@ -16,20 +16,6 @@ Scaffolds Selenium 4 page objects, components and NUnit UI tests in C#, mirrorin
 - **Allure NUnit** for reporting
 - Constructor injection only, no static service locator
 
-## When to use
-
-- A new page object under `Pages/`, a region component (row, card, form) or a control component (dropdown, date picker, grid) under `Components/`
-- A new NUnit UI test under `Tests/`
-
-## When NOT to use
-
-- Selenium Java → `qa/java/skills/ui-test-author/selenium`
-- Selenium TypeScript → `qa/typescript/skills/ui-test-author/selenium`
-- Playwright .NET → `qa/dotnet/skills/ui-test-author/playwright`
-- Appium .NET → `qa/dotnet/skills/ui-test-author/appium`
-- Reviewing a page object → `qa/dotnet/skills/ui-test-author/review`
-- POM architecture → `qa/dotnet/skills/page-object-design`
-
 ## Inputs needed
 
 1. **Page name** (PascalCase, e.g. `Login`, `Products`, `Cart`)
@@ -293,10 +279,3 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 5. If a destination page does not exist yet, create a stub or generate it.
 6. Generate the test class inheriting `BaseTest`: pages built and the page reached in `[SetUp]`, one linear `[Test]` per scenario asserting a returned value.
 7. Run `dotnet test`: expect 0 failures.
-
-## Handoffs
-
-- POM architecture → `qa/dotnet/skills/page-object-design`
-- Test data builders → `qa/dotnet/skills/test-data-builder`
-- Reviewing a page object → `qa/dotnet/skills/ui-test-author/review`
-- Allure reporting → `qa/reporting/dotnet/skills/test-reports`

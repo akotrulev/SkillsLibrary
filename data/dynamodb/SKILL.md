@@ -30,23 +30,6 @@ The current data samples pinned .NET 8 + SDK v3. On **v4** (the .NET 10 default)
 
 Version-aware rule: on a project still on SDK v3 / .NET 8–9, keep the v3 shapes (single `AWSSDK.DynamoDBv2` package, `DynamoDBContext` ctor, `DynamoDBOperationConfig`). Never up-level a down-level project.
 
-## When to use
-
-- Single-table design driven by enumerated access patterns
-- Partition / sort key choice; GSI / LSI design
-- SDK setup (.NET v4 (v3 down-level) / Java v2 / Node v3) with the Document / Enhanced client
-- Capacity mode (on-demand vs provisioned + autoscaling)
-- DynamoDB Streams + Lambda for change capture
-- TTL, conditional writes, `TransactWriteItems`
-- Performance tuning (hot partition diagnosis, adaptive capacity, read consistency choice)
-
-## When NOT to use
-
-- Relational engines → `data/postgresql` / `data/sqlserver` / `data/mysql`
-- Document store with rich query → `data/mongodb`
-- Cache / KV / queue → `data/redis`
-- Azure-native NoSQL → `data/cosmosdb`
-
 ## Inputs needed
 
 1. **Enumerated access patterns** — every read/write the application must serve, with cardinality and latency targets
@@ -323,12 +306,3 @@ Streams give you Mongo-style change feeds; combine with Lambda for serverless re
 3. Generate IaC (CDK / Terraform) for the table — partition key, sort key, GSIs, billing mode, TTL, Streams settings, **PITR on, encryption tier (CMK where required), and the least-privilege IAM policy** (per-table/index ARNs, `LeadingKeys` for tenant isolation where applicable).
 4. Generate the typed client setup for the chosen stack + a thin repository per logical entity.
 5. Smoke locally with DynamoDB Local or LocalStack; replay the AP list against the schema; confirm every read is a `Query` or `GetItem` in the trace.
-
-## Handoffs
-
-- Cross-engine query patterns → `data/_shared/slow-query-fixes`
-- Caching layer → `data/_shared/caching-patterns` + `data/redis`
-- Schema evolution / migration patterns → `data/_shared/migrations`
-- AWS deployment of the table + IAM / Streams-driven Lambda handlers → cloud provisioning / IaC for the store itself has no owning skill in this library yet; out of this domain's scope
-- Verifying `LeadingKeys` tenant isolation actually holds (cross-tenant BOLA/IDOR matrix) → the `qa-security` peer + `qa/<stack>/skills/security-testing/permission-testing`
-- Observability — CloudWatch metrics for `ConsumedRead/WriteCapacityUnits`, `Throttled*` → `observability/*` skills (via the `observability-engineer-{dotnet,java,node}` peer bundled in the matching `be-*` plugin)

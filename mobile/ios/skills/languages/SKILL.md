@@ -21,22 +21,6 @@ Two jobs: **localization** (swap the text via catalogs) and **globalization** (f
 
 **New strings go in a String Catalog, never a new `.strings` file.** An existing `.strings` / `.stringsdict` file is migrated with Xcode's "Migrate to String Catalog" (right-click the file), not extended. Facts are long-standing API, not re-confirmed against Apple pages this session (plan D23).
 
-## When to use
-
-- Adding a language, or setting up localization from nothing
-- Plural, gendered or device-specific wording; interpolated strings
-- Dates, money, numbers and measurements that look wrong in another locale
-- An RTL language (Arabic, Hebrew, Persian, Urdu)
-- Purpose strings, the app name and notification copy per language
-
-## When NOT to use
-
-- Wording, tone, microcopy → [`design:ux-writing`](../../../../design/ux-writing/SKILL.md)
-- Dynamic Type, VoiceOver language → `mobile-ios:accessibility`
-- Layout mechanics, safe areas, size classes → [`styling`](../styling/SKILL.md)
-- App Store listing text per locale → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
-- The web app's locale routing → [`fe-react:i18n`](../../../../frontend/react/skills/languages/SKILL.md)
-
 ## String Catalogs
 
 - **`Localizable.xcstrings`** is the default table; other tables (`Errors.xcstrings`) are named in the call (`String(localized: "…", table: "Errors")`). **`InfoPlist.xcstrings`** localizes the `Info.plist` keys — `CFBundleDisplayName` and **every `NS…UsageDescription`** ([`device-features`](../device-features/SKILL.md)) — so an English-only purpose string in a Spanish app is a gap, and a review question.
@@ -116,13 +100,3 @@ let names = participants.formatted(.list(type: .and))
 - A device set to Arabic and a region with different separators: plurals read correctly, numbers and dates follow the region.
 - `rg 'Text\("[^"]*" *\+'` and `rg '\.(left|right)\b'` → none in shared views (P2, P5).
 - Dev-side tests: formatting helpers with a fixed `Locale` and `TimeZone` injected; no test depends on the machine's locale.
-
-## Handoffs
-
-- Wording and voice → [`design:ux-writing`](../../../../design/ux-writing/SKILL.md)
-- Dynamic Type, VoiceOver language, accessibility strings → `mobile-ios:accessibility`
-- Layout, size classes, mirrored icons in the design system → [`styling`](../styling/SKILL.md)
-- Purpose strings per resource → [`device-features`](../device-features/SKILL.md)
-- Notification copy by key → [`notifications-and-links`](../notifications-and-links/SKILL.md)
-- Store listing per locale, screenshots → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
-- Test ids that ignore language → [`test-ids`](../test-ids/SKILL.md)

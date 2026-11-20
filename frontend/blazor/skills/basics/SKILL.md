@@ -21,23 +21,6 @@ Conceptual reference for design patterns in Blazor on .NET 8, 9, and 10 — Stat
 | Reconnect UX | Template `ReconnectModal` component; `Blazor.pauseCircuit()` / `resumeCircuit()` | Hand-rolled `components-reconnect-modal` markup + CSS state classes |
 | Diagnostics | Built-in OTel meters (`Microsoft.AspNetCore.Components`, `.Lifecycle`, `.Server.Circuits`) | Custom `ActivitySource` / `Meter` instrumentation |
 
-## When to use
-
-- "What's the right state pattern for X in Blazor?"
-- "When should I use `@rendermode InteractiveServer` vs `InteractiveAuto`?"
-- "How do I share state without coupling components?"
-- Comparing two Blazor approaches conceptually
-
-## When NOT to use
-
-- Scaffolding → `frontend/blazor/skills/component-writer`
-- Reviewing → `frontend/blazor/skills/code-review`
-- Plain .NET back-end patterns → the `backend/dotnet` dev stack's reference, if installed
-- React → `frontend/react/skills/basics`
-- Auth0 in Blazor → `auth/auth0-blazor`
-
----
-
 ## Render modes (.NET 8+)
 
 Since .NET 8, components render Static (server-rendered HTML, no interactivity), Interactive Server (SignalR-backed), Interactive WebAssembly (downloaded to the browser), or **Interactive Auto** (Server first, then transparently swap to WASM once the runtime downloads).
@@ -310,10 +293,3 @@ Two-way binding: `@bind-Value` on `InputText`/`InputNumber`/`InputCheckbox` — 
 | Side effect | `OnInitializedAsync` / `OnAfterRenderAsync` | `useEffect` |
 | Memo | `ShouldRender` | `React.memo` / `useMemo` |
 | Context | `CascadingValue` / `CascadingParameter` | `React.createContext` + provider/hook |
-
-## Handoffs
-
-- Scaffolding Blazor components / patterns → `frontend/blazor/skills/component-writer`
-- Reviewing Blazor code → `frontend/blazor/skills/code-review`
-- Non-Blazor .NET patterns → the `backend/dotnet` dev stack's reference, if installed
-- Auth0 wiring in Blazor → `auth/auth0-blazor`

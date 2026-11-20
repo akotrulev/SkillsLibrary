@@ -23,23 +23,6 @@ Every capability follows one shape: **prefer the system picker that needs no per
 
 An API newer than the deployment target needs `#available`; never raise the target for a feature ([`project-setup`](../project-setup/SKILL.md)).
 
-## When to use
-
-- Reading photos, taking a picture, scanning a code, picking a file
-- Reading the user's location (once, or while the app is open)
-- Gating a screen or an action behind Face ID / Touch ID / passcode
-- Haptic feedback, sharing a link, image or file out of the app
-- A permission prompt that never appears, or a denied state that dead-ends
-
-## When NOT to use
-
-- APNs, `UNUserNotificationCenter`, universal links → `mobile-ios:push-and-deep-links`
-- Widgets, App Intents, Live Activities, background tasks → `mobile-ios:system-integration`
-- Storing the secret that biometrics unlock → [`offline-and-storage`](../offline-and-storage/SKILL.md) (`references/keychain.md`)
-- A custom native C / Objective-C bridge for React Native → `mobile-react-native:native-modules`
-- Permission declarations as store policy → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Another stack → `mobile-react-native:device-features`, `mobile-android:device-features`
-
 ## The permission recipe
 
 Every protected capability in order:
@@ -183,12 +166,3 @@ The standards this skill's output must meet are the mobile-ios rule files, not a
 - A camera screen popped mid-capture leaves the camera indicator off; location updates stop with the screen.
 - Face ID with no enrolment reaches the passcode path.
 - Dev-side tests: the status → state mapping and the pre-prompt flow behind a one-method fake; device journeys with permission dialogs are `qa-mobile-<stack>`'s (peer).
-
-## Handoffs
-
-- Notifications and links → `mobile-ios:push-and-deep-links` · system surfaces → `mobile-ios:system-integration`
-- Keychain behind biometrics → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Purpose strings and Required Reason entries as store policy → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Audit of what the app asks → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
-- UIKit controllers (document camera, pickers) → [`uikit`](../uikit/SKILL.md)
-- Accessibility of the pre-prompt → `mobile-ios:accessibility`

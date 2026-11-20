@@ -8,18 +8,6 @@ disable-model-invocation: true
 
 Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin quality / living documentation) and the TypeScript step definitions + support code (binding correctness, reuse, the **state model**, async, library rules). TypeScript has two frameworks, web (playwright-bdd) and mobile (CucumberJS + WebdriverIO); apply the rules for the one(s) the project uses. Returns findings in the standard table; does not rewrite code.
 
-## When to use
-
-- A `.feature` + `steps/` set exists and needs a critique.
-- Steps report undefined/ambiguous matches, or the suite is flaky/duplicative.
-- A PR adds BDD coverage and you want a hostile senior review.
-
-## When NOT to use
-
-- "Write feature files" → `qa/_shared/bdd/feature-file-writer`
-- "Generate / implement step definitions" → `qa/typescript/skills/gherkin-step-code`
-- Code is pseudocode / incomplete → ask for the real files.
-
 ## Procedure
 
 1. Identify the framework (web playwright-bdd vs mobile CucumberJS+WDIO — check `package.json`, `playwright.config.ts` vs `wdio.conf.ts`).

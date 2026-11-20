@@ -10,18 +10,6 @@ Stands up a **runnable Appium 3 desktop test project from zero**: the Gradle lay
 
 **Version rule:** Java 21 (17 minimum), Gradle Kotlin DSL for new projects; an existing Maven project stays on Maven with the same coordinates. Electron and Tauri apps are out of scope.
 
-## When to use
-
-- A fresh repo with no Java desktop test project and a native macOS or Windows app to cover.
-- The user asks which versions, drivers or OS setup a Java desktop suite needs.
-
-## When NOT to use
-
-- The project exists → `qa/java/skills/desktop-window-objects`, and `qa/java/skills/ui-test-author/appium` for the TestNG conventions.
-- Mobile apps → `qa/java/skills/mobile-project-setup`. Browser UI → `qa/java/skills/ui-test-author`.
-- A device cloud for desktop: none exists, see `qa/_shared/desktop-testing`.
-- TypeScript / .NET → `qa/typescript/skills/desktop-project-setup` / `qa/dotnet/skills/desktop-project-setup`.
-
 ## Versions
 
 Verified 2026-11-15; the Java pins are those of `mobile-project-setup` and `tools/qa-version-check.py`.
@@ -239,10 +227,3 @@ Desktop E2E runs on **owned hardware**: a self-hosted Windows agent in an intera
 - [ ] `.env.example` committed, `.env` ignored
 - [ ] `SmokeTest` launches the app and verifies the landing window
 - [ ] `./gradlew compileTestJava` clean; the smoke green on the host
-
-## Handoffs
-
-- Window discovery → `qa/java/skills/desktop-screen-explorer`; the window object classes → `qa/java/skills/desktop-window-objects`
-- TestNG spec conventions → `qa/java/skills/ui-test-author/appium`
-- Shared rules and CI facts → `qa/_shared/desktop-testing`
-- TypeScript / .NET siblings → `qa/typescript/skills/desktop-project-setup` / `qa/dotnet/skills/desktop-project-setup`

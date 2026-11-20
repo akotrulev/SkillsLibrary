@@ -22,21 +22,6 @@ Owns **frames, startup, ANRs, memory and shrinking**. The main thread has a fram
 
 Detect first: whether a `baselineprofile` / `macrobenchmark` module exists, the shrinker config (`isMinifyEnabled`, keep files), the crash reporter, and any `Application.onCreate` initialisation — extend, never duplicate.
 
-## When to use
-
-- A freeze, an ANR, a scroll hitch, a slow cold start, rising memory, a release build that crashes only when minified
-- Setting budgets; adding a Baseline Profile or a Macrobenchmark; trimming APK / AAB size
-- "Why does this composable recompose?", "is this `Application.onCreate` too heavy?"
-
-## When NOT to use
-
-- Crash-reporter and OTel setup, release-health thresholds → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md)
-- Animation design and the animator duration scale → [`animation`](../animation/SKILL.md)
-- Request timing, retries, caching → [`networking`](../networking/SKILL.md)
-- Lazy-list authoring, stability, side effects → [`ui-components`](../ui-components/SKILL.md)
-- Gradle and R8 baseline setup → [`project-setup`](../project-setup/SKILL.md)
-- Other stacks → `mobile-react-native:performance`, `mobile-ios:performance`
-
 ## Budgets — set them before measuring
 
 | Budget | Target | Measured with |
@@ -152,10 +137,3 @@ The standards this skill's output must meet are the mobile-android rule files, n
 - The minified release (or `benchmark`) build: launch, sign in, one list, one write — no `ClassNotFoundException`, no missing-serializer crash.
 - A navigate-and-back loop in the Memory Profiler: heap returns to a plateau; LeakCanary is silent.
 - Dev-side tests of any logic split out for speed: [`unit-testing`](../unit-testing/SKILL.md).
-
-## Handoffs
-
-- Crash reporter, vitals thresholds that halt a rollout → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md) · [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
-- Gradle, R8 baseline, version catalog → [`project-setup`](../project-setup/SKILL.md) · lazy lists, stability → [`ui-components`](../ui-components/SKILL.md)
-- Wake locks, foreground services → [`system-integration`](../system-integration/SKILL.md) · jank in animation → [`animation`](../animation/SKILL.md)
-- Device journeys under load → `qa-mobile-<stack>` (peer)

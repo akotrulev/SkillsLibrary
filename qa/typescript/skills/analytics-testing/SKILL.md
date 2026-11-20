@@ -23,20 +23,6 @@ the **test** measurement ID. Read **`references/playwright.md`** end to end befo
 This skill pins nothing; `@playwright/test` is in the **Versions** table of
 `qa/typescript/skills/ui-test-author/playwright/SKILL.md`.
 
-## When to use
-
-- A tracking plan names events and parameters, and a change must not drop or alter them
-- A consent banner, a consent-management platform or Google Consent Mode v2 must gate tags
-- The site must honour `Sec-GPC: 1` / `navigator.globalPrivacyControl`
-- A suite must stop leaking hits into a production property
-
-## When NOT to use
-
-- Mocking an application API or asserting a first-party call → `network-mocking`
-- Blocking analytics only to stabilise an unrelated suite → `network-mocking` (`MockApi.blockAnalytics`)
-- Server-side tagging or the Measurement Protocol called from the backend → `api-test-author`
-- The consent banner's accessibility → `accessibility-testing`
-
 ## Decision matrix
 
 | To prove | Read | Assert |
@@ -70,11 +56,3 @@ This skill pins nothing; `@playwright/test` is in the **Versions** table of
   `privacySignals`); a spec never calls `page.route` or `page.evaluate`.
 - Expected payloads come from the tracking plan as typed builders (`test-data-builder`), never inline literals
   repeated across specs.
-
-## Handoffs
-
-- Fixtures, page objects, config → `qa/typescript/skills/ui-test-author/playwright`
-- Routing details (`context.route`, `fulfill`, `page.requests()`) → `qa/typescript/skills/network-mocking`
-- Payload builders → `qa/typescript/skills/test-data-builder`
-- A tracking defect → `qa/manual/bug-report-writer`, with the captured hit attached
-- Java and .NET → `qa-java:analytics-testing`, `qa-dotnet:analytics-testing`

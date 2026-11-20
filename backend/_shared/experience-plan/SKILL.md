@@ -12,18 +12,6 @@ The plan altitude for the user's side of the system: **who uses it, what they ar
 
 **Discipline:** load [`design/ux-patterns`](../../../design/ux-patterns/SKILL.md) (`design:app-structure`) before writing — its task-inventory → IA method, shell decision table, page-type anatomy and responsiveness budget are the rules this artifact applies. This skill owns the *artifact and its place in the pack*; that skill owns the *UX rules*. Neither loads a `fe-*` stack skill.
 
-## When to use
-
-- Step 3 of a `solution-planner` run — after the data model, before the API surface — whenever the routing map names a frontend agent
-- A new user-facing area is added to a planned system (`EXTEND` — plan the delta screens, reuse the existing shell and nav)
-- An existing frontend needs its screens documented as the baseline a plan will extend (`RESUME` — read routes and nav out of the code, mark `#observed`, then plan the delta)
-
-## When NOT to use
-
-- The blueprint routes nothing to a frontend agent → skip the step and say so in the report (`Experience plan: skipped — no user-facing area`)
-- The blueprint is not approved → the screens will be rewritten; wait
-- The ask is to *build* the screens → `fe-<stack>`; to *review* a built UI → `design/ux-review`; to *draw* it → a design canvas, outside this pack
-
 ## Output
 
 **`docs/plans/<NNN>-<initiative>/experience-plan.md`** in the initiative folder.
@@ -190,14 +178,6 @@ A test id is not a component name: `Test ids:` lines name the elements a person 
 5. After the API step: the matrix covers every user-facing endpoint and every data need — the two Step-7 coverage lines read `n/n`.
 6. Web: every screen route has a `rendering_plan` entry with its signals, mode and cache; every non-`csr` route lists its `server_rendered_content`; no route shows an anti-pattern from `references/rendering-strategy.md`.
 7. No `[TBD]` without an owner; no colour, component or copy decision leaked in.
-
-## Handoffs
-
-- **→ `dev:plan-api-surface`** (next step) — §4's data-needed lines are its input; it returns to fill §5.
-- **→ `dev:plan-delivery`** — every frontend task binds `fe-react` / `fe-blazor` with `design:app-structure` in its skills, cites the screen ids it delivers, and inherits §6's budget and its routes' §4a entries as acceptance criteria; a capability's last task is worded from its journey.
-- **→ `fe-react` / `fe-blazor`** — takes §2–§4a as the IA and rendering decision in its Step 1 (validates, does not redesign; a route's `mode` changes only through a dated `D<n>` the planner rules on) and applies `design:app-structure` per page in Step 2.
-- **→ `design/ux-review`** — at build review, cites the screen id / nav-map row a finding contradicts.
-- **→ `qa-test-case-designer` / `qa-ui-<stack>`** — the journeys are their end-to-end test basis; §4a's server-rendered routes get raw-HTML and cache-header tests, its deferred sections fallback tests.
 
 ## Version policy
 

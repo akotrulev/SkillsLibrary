@@ -25,22 +25,6 @@ Read the `.xcodeproj` / `.xcworkspace` / `Project.swift` / `Package.swift`, `swi
 
 The Xcode template's `SWIFT_VERSION = 5.0` is the trap: strict-concurrency errors you expect are silent. **A project that is already Swift 5-mode is migrated one module at a time (`mobile-ios:migration`), never flipped wholesale.**
 
-## When to use
-
-- Creating an iOS app, or hardening one that has only the template's defaults
-- Splitting an app into local Swift packages
-- Adding an environment (dev / staging / prod), a formatter, a linter, a test plan
-- Adding a String Catalog or a privacy manifest
-
-## When NOT to use
-
-- Signing, provisioning, TestFlight, Xcode Cloud → `mobile-<stack>:release`
-- App architecture and state ownership → [`architecture`](../architecture/SKILL.md)
-- Writing screens → [`ui-components`](../ui-components/SKILL.md); routes → [`navigation`](../navigation/SKILL.md)
-- Required Reason APIs and the privacy questionnaire → `mobile-<stack>:store-compliance`
-- Auth → `auth0-ios`; CI YAML → `devops-engineer`
-- React Native / Expo project setup → `mobile-react-native:project-setup`; Android → `mobile-android:project-setup`
-
 ## Inputs needed
 
 - App name, bundle id, environments, minimum iOS (default 17)
@@ -152,13 +136,3 @@ The standards this skill's output must meet are the mobile-ios rule files, not a
 - [ ] `Unit` and `UI` test plans exist and the scheme references them
 - [ ] Launch screen and scene lifecycle in place; `Localizable.xcstrings` and `PrivacyInfo.xcprivacy` in the app target
 - [ ] No secret in any xcconfig or plist
-
-## Handoffs
-
-- Architecture and state → [`architecture`](../architecture/SKILL.md)
-- Swift standard, concurrency → [`basics`](../basics/SKILL.md)
-- Signing, CI, TestFlight → `mobile-<stack>:release`
-- Privacy manifest depth → `mobile-<stack>:store-compliance`
-- Swift 5 → 6, CocoaPods → SPM → [`migration`](../migration/SKILL.md)
-- Dependencies' security → `mobile-<stack>:security`
-- Test ids → [`test-ids`](../test-ids/SKILL.md)

@@ -17,23 +17,6 @@ to a `be-*` unit-test task. A function's logic is unit-tested by the `be-node` `
 database is a `db-testing/testcontainers` setup (`db-testcontainers`), which is lighter and lets the test own the
 app's wiring. Reach for this skill when the behaviour under test spans the services the compose file wires together.
 
-## When to use
-
-- The repo has a compose file (`compose.yaml`, `docker-compose.yml`) and the test must exercise two or more of its
-  services together: an API and its worker, an API and the email it sends, a web app and its backend.
-- The wiring itself is under test: service-to-service URLs, environment, health checks, start order.
-- Replacing a hand-run `docker compose up` + shell script harness with one that starts and stops with the suite.
-
-## When NOT to use
-
-- One API plus its database → `db-testing/testcontainers`
-- A unit of logic → `be-node` `unit-testing`
-- Broker, blob or email assertions against one service → `messaging-testing`, `file-storage-testing`,
-  `email-testing`
-- Load → `load-testing`; micro-benchmarks → `benchmarks`
-- A system with no compose file — write one as product infrastructure first (`devops`); never invent one inside the
-  test folder only to test with it
-
 ## Inputs needed
 
 1. The compose file(s) and the services the journey touches (names exactly as the file declares them), with the
@@ -308,13 +291,3 @@ Then: the services the setup waits for and how, the settings it overrides, and t
 - **`withWaitStrategy('api', ...)`** — a service name; the container is `api-1`, and the strategy silently never
   applies.
 - **Asserting a unit's branches through the whole system** — slow and imprecise; that is the `be-node` unit test.
-
-## Handoffs
-
-- Database seeding and row verification → `qa/typescript/skills/db-testing/verification-queries`
-- Mailpit client and email assertions → `email-testing`
-- Trace ids on requests → `api-client-writer` (`references/trace-context.md`); trace links on failures →
-  `qa/reporting/typescript/skills/test-reports`
-- The CI job (Docker and the Compose plugin on the agent, image builds and caching) →
-  `qa/cicd/typescript/skills/ci-pipelines`
-- Unit tests of the logic inside a service → `be-node` `unit-testing`

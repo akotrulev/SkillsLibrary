@@ -12,25 +12,6 @@ Owns the **URL → UI mapping**: which file makes a route, how routes nest and s
 
 **Version rule.** In **Next 15**, `params` and `searchParams` are **Promises** — `await` them (or `use()` them in a Client Component). In **Next 14** they are plain objects. This is the single most common upgrade break; check the Next major before writing either. Route groups, parallel/intercepting routes, `middleware.ts`, and `generateStaticParams` are stable on both. The **Vite SPA** lane uses **React Router 7** instead — the file conventions below do not exist there; see "The Vite / React Router lane".
 
-## When to use
-
-- Adding a route, a nested route, or shared chrome across a group of routes
-- Reading a dynamic segment (`[slug]`, `[...path]`) or a query string
-- Building a modal route (URL-addressable overlay that survives refresh + share)
-- Gating routes before render (auth, locale, A/B, redirects) via `middleware.ts`
-- Navigating programmatically, or reacting to the current path/query
-- Diagnosing "my layout remounts", "searchParams broke my static build", "params is a Promise"
-
-## When NOT to use
-
-- Choosing App Router vs Pages Router vs Vite at project setup → [`project-setup`](../project-setup/SKILL.md)
-- Fetching/mutating data inside a route → [`data-fetching`](../data-fetching/SKILL.md)
-- `metadata` / `generateMetadata` / `sitemap.ts` content → [`seo`](../seo/SKILL.md)
-- What the error / loading UI *looks like* → [`error-handling`](../error-handling/SKILL.md)
-- Locale-prefixed routing mechanics → [`languages`](../languages/SKILL.md) (it owns the `[locale]` segment; this skill owns the rest of the tree)
-- Auth *provider* wiring → `auth/auth0-react`; this skill only owns the middleware **gate**
-- Blazor → `frontend/blazor/skills/basics` (`@page` routing)
-
 ## The file conventions
 
 Inside `app/`, **the folder is the URL, the file is the role.** A folder only becomes a route when it contains a `page.tsx` (or `route.ts`).
@@ -241,12 +222,3 @@ Click-handler navigation, `'use client'` on a layout, `redirect()` inside `try`,
 | Parallel slot with no `default.tsx` | Hard navigation 404s the slot | Add `default.tsx` returning `null` |
 | Intercepting route without the real route | Refresh / share / crawler hits a dead URL | Always ship the non-intercepted `page.tsx` too |
 | `useSearchParams()` with no Suspense in a static route | Build error, or the whole route silently goes dynamic | Wrap in `<Suspense>`, or read `searchParams` on the server |
-
-## Related skills
-
-- [`project-setup`](../project-setup/SKILL.md) — render target + per-route rendering strategy (this skill builds inside that decision)
-- [`data-fetching`](../data-fetching/SKILL.md) — what a route fetches once matched
-- [`seo`](../seo/SKILL.md) — `metadata` per route, `sitemap.ts`, real 404 content
-- [`error-handling`](../error-handling/SKILL.md) — what `error.tsx` / `not-found.tsx` render
-- [`languages`](../languages/SKILL.md) — the `[locale]` segment and locale middleware
-- [`basics`](../basics/SKILL.md) — the RSC / `'use client'` boundary these files sit on

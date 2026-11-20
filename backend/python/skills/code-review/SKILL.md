@@ -21,18 +21,6 @@ Read `python.md`, plus each other file whose `paths:` match a file under review,
 
 Detect the interpreter (`requires-python`, `.python-version`, the Dockerfile base image) and the Pillow major from `uv.lock` first. Do not flag a 3.12 project for lacking a 3.13 feature, or a Pillow 11 project for a 12-only API. The rule file's "the codebase wins" line applies: a convention the project follows consistently is not a finding.
 
-## When to use
-
-- A diff or module submitted: validator, sanitiser, pipeline step, composition root, isolation layer, tests, the worker's Dockerfile or compose service
-- A pre-merge gate on anything under the worker's `src/` or `tests/`
-- "Is this safe to point at customer uploads"
-
-## When NOT to use
-
-- Conceptual questions → `pattern-guide`
-- Writing the fix → `pattern-writer` / `media-processing` / `sandboxed-worker`
-- Container scanning, DAST → `qa-security`
-
 ## Procedure
 
 1. Read the rule files, then each changed file end to end.
@@ -52,11 +40,3 @@ Detect the interpreter (`requires-python`, `.python-version`, the Dockerfile bas
 ```
 
 Blockers first. A review of upload-handling code with no row from the hostile-input and pipeline rules says explicitly that they were applied and passed. End with one line: `Rules: project .claude/rules/be-python/ | plugin copy (not installed)`.
-
-## Handoffs
-
-- Fixes → `pattern-writer` / `media-processing` / `sandboxed-worker`
-- Missing tests → `unit-testing`
-- A rule is missing or wrong → edit the project's `.claude/rules/be-python/`; for every project, the plugin's `backend/python/skills/rules/`
-- Cross-stack pattern concerns → `backend/_shared/code-review`
-- Container / image scan findings → `qa-security`, `devops/docker`

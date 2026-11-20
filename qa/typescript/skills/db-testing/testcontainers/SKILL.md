@@ -8,20 +8,6 @@ disable-model-invocation: true
 
 Scaffolds Vitest global-setup files that boot a real database container per test process, run migrations once, and reset row data between tests via `pg-truncate` / Prisma's `$executeRaw` / collection-drop for Mongo. Optimised for `vitest run` locally and in Azure Pipelines.
 
-## When to use
-
-- New `tests/integration/{feature}.int.test.ts` that hits a real DB
-- Replacing `pg-mem` / in-memory mocks with a real engine
-- API tests (Supertest / Nest's `INestApplication`) asserting DB side-effects
-- Cross-version checks (Postgres 16 vs 17 via Vitest projects)
-
-## When NOT to use
-
-- Pure unit tests with no SQL surface
-- .NET / JVM stacks — see siblings
-- Performance/load against the DB → `qa/typescript/skills/load-testing`
-- SQL safety review of assertion queries → `qa/typescript/skills/db-testing/verification-queries`
-
 ## Inputs needed
 
 Ask at most 2 questions.
@@ -228,10 +214,3 @@ const c = await new GenericContainer('ghcr.io/myco/legacy-app:1.4.0')
    - `package.json` updates: add `testcontainers`, `@testcontainers/postgresql` (or mongodb/mssql), `pg`, `supertest`, `vitest`, `@vitest/coverage-v8`.
 4. Add npm script: `"test:integration": "vitest run --config vitest.integration.config.ts"`.
 5. Run the script — expect green or a real assertion failure.
-
-## Cross-references
-
-- **`qa/typescript/skills/db-testing/verification-queries`** — assertion-query SQL guardrails.
-- **`qa/typescript/skills/test-data-builder`** — seed builders (preferred over inline literals).
-- **`qa/cicd/typescript/skills/ci-pipelines`** — DinD enablement and reporter wiring.
-- **`qa/reporting/typescript/skills/test-reports`** — attach container logs on failure.

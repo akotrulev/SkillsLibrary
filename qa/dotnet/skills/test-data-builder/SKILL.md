@@ -8,22 +8,6 @@ disable-model-invocation: true
 
 Eliminates repeated inline test data literals in .NET 8 test projects (NUnit primary) by generating fluent builders and ObjectMother factories. Required by `CLAUDE.md`: "Builder pattern for test data objects with 4+ fields" and "Test data via builders or ObjectMother, not inline literals duplicated across tests."
 
-## When to use
-
-- Two or more tests construct the "same" object with slightly different fields → extract a builder
-- One test sets 6 fields just to test one behavior → extract a builder that defaults the other 5
-- A complex aggregate (Order → Lines → Customer → Address) needs assembling for many tests
-- Reading a test is hard because half the body is data setup
-- API tests need a known-shape DTO with one varying field per scenario
-
-## When NOT to use
-
-- Java test data → `qa/java/skills/test-data-builder`
-- TypeScript test data → `qa/typescript/skills/test-data-builder`
-- Production-code builders → the `backend/dotnet` dev stack's generator, if installed
-- Test data for performance scenarios (volume) → `qa/dotnet/skills/load-testing`
-- An object with fewer than four fields → construct it in the test's setup; a builder starts at four fields, at first use
-
 ## Builder vs ObjectMother
 
 | Pattern | When to choose |
@@ -269,13 +253,3 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 4. Add an ObjectMother under `tests/<project>/Mothers/` with the canonical variants.
 5. Replace inline literals in 2–3 representative tests so the pattern is set; leave the rest as a follow-up sweep.
 6. Run `dotnet test` — every test still passes with the new defaults.
-
-## Handoffs
-
-- Java test data → `qa/java/skills/test-data-builder`
-- TypeScript test data → `qa/typescript/skills/test-data-builder`
-- API tests where these feed into request bodies → `qa/dotnet/skills/api-test-author/writer`
-- UI tests where they back page-object form fills → `qa/dotnet/skills/ui-test-author/playwright` / `qa/dotnet/skills/ui-test-author/selenium` / `qa/dotnet/skills/ui-test-author/appium`
-- Test reviewers (verify builders used, not literals) → `qa/dotnet/skills/api-test-author/review` / `qa/dotnet/skills/ui-test-author/review`
-- Test strategy / pyramid → `qa/manual/test-strategy`
-- Production-code builders → the `backend/dotnet` dev stack's generator, if installed

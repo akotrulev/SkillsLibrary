@@ -212,19 +212,3 @@ noise-sensitivity check asserts a pass-rate (parent idea #4), not a single sampl
 - **Inherit, don't repeat, the parent skill:** the four ideas, judge model-id pinning + gold-set calibration,
   regression-vs-stochastic (sample N≥3 for a rate), budgets-are-assertions, keys-via-env, no-PII all come from
   `qa-java:ai-feature-testing`. No `Thread.Sleep`; explicit waits only.
-
-## Cross-references
-
-- **`qa-java:ai-feature-testing`** — the **parent**: the four ideas, the assertion ladder, judge-pinning +
-  calibration, the spine choice (promptfoo/DeepEval) and their references. RAG testing is its specialization; read
-  it first.
-- `references/ragas.md` — the **RAG-native spine**: Ragas metrics + the corpus→test-set generator, invoked as a
-  subprocess (`ProcessBuilder` + Jackson), evaluator LLM pinned to Claude.
-- `qa-java:data-driven-testing` — the golden-set row mechanics (one row = one named case, loaded externally).
-- `qa-java:db-connection` / `…-testcontainers-java` — seed/assert/tear-down the **vector or hybrid index** the
-  retriever reads (the RAG "DB").
-- `qa-typescript:ai-answer-quality-testing` · `qa-dotnet:ai-answer-quality-testing` — the sibling stacks; same five ideas, Ragas/DeepEval driven
-  as a subprocess via `execa`/`Process`.
-- `qa-<stack>:quality-metrics` — track triad + recall@k **over time** (a declining recall is a silent index/embed
-  regression). `qa-java:test-reports` — each stage/case as a named result.
-- The `qa-llm-java` **agent** owns this skill alongside `ai-feature-testing` (RAG is a step of the LLM-eval run).

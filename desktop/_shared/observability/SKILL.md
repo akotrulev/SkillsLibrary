@@ -10,20 +10,6 @@ What a desktop app emits, how it leaves the machine, and what it must never carr
 
 **The desktop difference.** The client is untrusted, often offline (laptops sleep, networks change), long-lived (days of uptime, many windows) and its binary is public. So: batch and sample in process, send through a gateway you control, put **no backend credential in the app**, scrub PII before anything is written, and flush on sleep, window close and quit. A failure to export never blocks or crashes the UI thread (`CLAUDE.md` § Desktop code rules).
 
-## When to use
-
-- Adding or reviewing crash reporting, tracing, logging or app-performance metrics
-- Wiring the app to the Grafana stack, or choosing an OTel SDK per platform
-- Deciding sampling, batching, resource attributes, or what may be logged
-- Release-health signals: crash-free sessions, hang rate, startup time
-
-## When NOT to use
-
-- Collector pipelines, Loki / Tempo / Mimir storage, dashboards, LogQL → `observability-engineer-<stack>` and `observability/{logs-traces-setup,metrics-setup,queries,dashboards}`
-- Symbol upload, notarization, update rollout → `desktop/_shared/distribution`
-- Where tokens and secrets are stored; what `Authorization` data may be captured → `desktop/_shared/security`
-- Mac App Store privacy answers for the SDKs you add → the macOS `distribution` fragment
-
 ## Version lane (verified 2026-11-15)
 
 | Platform | Fact | Re-verify after |

@@ -21,23 +21,6 @@ A Mac form is a draft value, a pure validator, a focus order and a submit that c
 
 Design facts: `design/ui-ux-pro-max` `--stack swiftui`; HIG "Text fields", "Settings". The corpus wins.
 
-## When to use
-
-- A Settings pane, an inspector form, a sheet with inputs
-- Tab order wrong, Return or Escape doing nothing useful
-- Validation, a server `422` shown on a field
-- Autofill, password manager or passkey sign-in
-
-## When NOT to use
-
-- A single search field → `.searchable`
-- The request, timeouts, ProblemDetails → `networking`
-- Where the draft model lives → [`architecture`](../architecture/SKILL.md)
-- The settings window itself → [`windows-and-scenes`](../windows-and-scenes/SKILL.md)
-- A load/failed region around the form → [`ui-components`](../ui-components/SKILL.md)
-- Pickers for files → `sandbox-and-permissions`; document-backed forms → [`documents`](../documents/SKILL.md)
-- Another platform → `mobile-ios:forms`, `desktop-windows:forms`
-
 ## The shape: draft, validator, submit
 
 ```swift
@@ -138,11 +121,3 @@ Every field has a visible label (not a placeholder) and the control carries it a
 - **A custom `onTapGesture` row that edits**: unreachable by keyboard.
 - **A removed `.roundedBorder`**: on the 27 SDK use `.bordered` and `textInputBorderShape`.
 - **Sheet controls the wrong size**: re-apply `controlSize` inside the sheet.
-
-## Handoffs
-
-- Draft model placement → [`architecture`](../architecture/SKILL.md)
-- Settings window → [`windows-and-scenes`](../windows-and-scenes/SKILL.md)
-- Request and error shape → `networking`; the error banner → `error-handling`
-- AppKit field controllers → [`appkit`](../appkit/SKILL.md)
-- iOS counterpart → `mobile-ios:forms`

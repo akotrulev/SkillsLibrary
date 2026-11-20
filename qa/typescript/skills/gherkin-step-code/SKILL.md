@@ -56,15 +56,3 @@ The standards this skill's output must meet are the qa-typescript rule files, no
 6. For any missing page object/method, build it before binding the step.
 7. Ensure the Cleanup is implemented as teardown/`After` (scaffold layer), not as steps.
 8. Run the toolchain (web: `npx bddgen && npx playwright test`; mobile: `npx wdio run`): every step bound (no undefined/ambiguous), the smoke scenario green.
-
-## Cross-references
-
-Each `references/<framework>.md` carries its own templates and sibling cross-references. Route there after picking the framework.
-
-## Handoffs
-
-- `.feature` files / Step Catalog → `qa/_shared/bdd/feature-file-writer`
-- Project/lifecycle/state layer → `qa/typescript/skills/bdd-project-scaffold`
-- Page objects → `qa/typescript/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
-- Review features + bindings → `qa/typescript/skills/bdd-reviewer`
-- Allure labels from tags → `qa/reporting/typescript/skills/test-reports`

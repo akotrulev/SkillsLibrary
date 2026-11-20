@@ -8,24 +8,6 @@ disable-model-invocation: true
 
 Wires the **metrics** backend of the Grafana stack. This library's default ingest path is **OTel SDK → OTel Collector → metrics backend** (the same Collector that `observability/logs-traces-setup` stands up), so the metrics store is a sink for the Collector's `prometheusremotewrite` / OTLP exporter — not a scraper you bolt on separately. Choose **Prometheus** for a single cluster with operational (days-to-weeks) retention, or **Grafana Mimir** when you need multi-cluster aggregation, HA, multi-tenancy, or long-term retention on object storage. Both speak PromQL, both store exemplars, both load the same rule files.
 
-## When to use
-
-- New cluster / environment needs a metrics backend
-- Wiring the OTel Collector's metrics pipeline to a store (remote-write or OTLP)
-- Enabling **exemplar storage** so latency histograms link to traces in Tempo
-- Deploying recording / alerting **rules** (the rules themselves come from `observability/queries`)
-- Wiring **Alertmanager** — routing tree, grouping, inhibition, dead-man's-switch, on-call receivers
-- Outgrowing single-node Prometheus — retention, HA, or multi-cluster forces Mimir
-- Setting retention + per-tenant cardinality limits
-
-## When NOT to use
-
-- PromQL queries / recording-rule / alert expressions → `observability/queries`
-- Dashboard layout, panel exemplar config → `observability/dashboards`
-- Logs (Loki) + traces (Tempo) + the shared OTel Collector → `observability/logs-traces-setup`
-- App-side metric emission (`Meter` / `Counter` / `Histogram`) → `observability/opentelemetry-{dotnet,java,node}`
-- Alert rule *expressions* (the health-alert pack, burn rates) → `observability/queries`; this skill owns rule *deployment* + Alertmanager *routing*
-
 ## Inputs needed
 
 1. **Cluster**: AKS / EKS / GKE / VMs / managed (Grafana Cloud)
@@ -252,12 +234,3 @@ Grafana Cloud Metrics is hosted Mimir — same PromQL, same remote-write / OTLP 
 7a. Configure **Alertmanager**: routing by `severity`/`service`, inhibition, receivers, and the `Watchdog` dead-man's-switch to an external heartbeat.
 8. Wire the **Grafana data source** (Prometheus/Mimir) declaratively; confirm exemplars link to Tempo (see `observability/dashboards`).
 9. Smoke: emit a metric from an app, confirm it lands via PromQL, confirm a histogram shows exemplar dots that jump to a trace.
-
-## Handoffs
-
-- Query / recording-rule / alert syntax → `observability/queries`
-- Dashboards, panel + data-source exemplar config → `observability/dashboards`
-- Shared OTel Collector + logs (Loki) + traces (Tempo) → `observability/logs-traces-setup`
-- App metric emission → `observability/opentelemetry-{dotnet,java,node}`
-- Kubernetes manifests for the metrics stack → `devops/kubernetes`
-- Object-storage buckets + IAM (Mimir) → `devops/infrastructure-as-code`

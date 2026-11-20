@@ -25,8 +25,3 @@ Any host: [`references/fat-jar-and-container.md`](references/fat-jar-and-contain
 ## Rules
 
 The standards every tool shares are the qa-java rule file `qa-java-ci.md`, not a list here. Read the project's copy in `.claude/rules/qa-java/`, or the plugin's in `qa/java/skills/rules/` when the project has not installed them (`/qa-java:rules` does). Where it and a tool reference disagree, the rule file wins for anything both cover; each reference adds the rules specific to its tool. Cross-stack conventions live in `qa/cicd/ci-conventions`: load it alongside the tool reference.
-
-## Cross-references
-
-Each `references/<tool>.md` carries its own cross-references to sibling skills (DB verification,
-test environments, CI, chaos). Route there after picking the tool.

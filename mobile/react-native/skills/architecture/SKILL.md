@@ -21,23 +21,6 @@ Picks the right place for each piece of state and the folder shape around it. Ho
 
 On a React 18 project the classic equivalents (`useContext`, `forwardRef`) are correct — do not flag them.
 
-## When to use
-
-- A feature must share state across components or screens
-- Prop-drilling past ~2 levels
-- Choosing Context vs Zustand vs TanStack Query
-- Splitting server state from client state; persisting client state
-- Deciding the feature-first folder layout
-
-## When NOT to use
-
-- Fetch, cancel, retry, token refresh → [`networking`](../networking/SKILL.md)
-- Form state → [`forms`](../forms/SKILL.md)
-- Offline cache persistence, mutation queue → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Route params as routing → [`navigation`](../navigation/SKILL.md)
-- Concepts → [`basics`](../basics/SKILL.md)
-- React web → `fe-react:state-management`
-
 ## Feature-first layout
 
 ```
@@ -182,12 +165,3 @@ Constructor-injection's RN form is **props, then context**: pass collaborators (
 ## Rules
 
 The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `react-native.md` and `react-native-data.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
-
-## Handoffs
-
-- Fetch mechanics → [`networking`](../networking/SKILL.md)
-- Forms → [`forms`](../forms/SKILL.md)
-- Offline and persistence → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Route params → [`navigation`](../navigation/SKILL.md)
-- Performance of re-renders → [`performance`](../performance/SKILL.md)
-- Auth state → `auth0-react-native`

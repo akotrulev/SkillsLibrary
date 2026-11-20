@@ -12,21 +12,6 @@ Produces the container and the process-isolation layer for a Python worker that 
 
 Base image `python:3.13-slim-bookworm` (3.12 / 3.14 variants when the project pins them; `pattern-writer` says how to detect). `uv` from `ghcr.io/astral-sh/uv` pinned by tag. Model weights pinned by **sha256**, never by "latest". Never `python:3.x-alpine` for an ML worker — musl wheels for onnxruntime do not exist, and a source build pulls a compiler into the image.
 
-## When to use
-
-- The worker needs a Dockerfile, a compose service, or a Kubernetes-side security context
-- A model (rembg / onnxruntime) must be available with no network at runtime
-- A job must be bounded in memory, CPU, wall clock, or process count
-- Deciding how the TypeScript side hands a job in and gets a verdict out without giving the worker egress
-
-## When NOT to use
-
-- The image-processing functions themselves → `media-processing`
-- Package layout and settings → `pattern-writer`
-- A general service Dockerfile for a .NET / Java / Node app → `devops/docker`
-- Cluster-level policy (NetworkPolicy, PodSecurity, seccomp profiles beyond runtime default) → `devops/kubernetes` + `devops/k8s-security`
-- Runtime intrusion detection / scanning of the running container → `devops/container-runtime-security`
-
 ## Inputs needed
 
 1. How jobs arrive: **batch** (a job dir mounted per invocation, one process per job) or **long-lived** (one container, an internal-only HTTP endpoint the TypeScript service calls)
@@ -147,7 +132,6 @@ The container limit bounds the whole worker. A single decompression bomb or a pa
 import multiprocessing as mp
 import resource
 
-
 def _run_in_child(job: Job, settings: Settings, pipe: Connection) -> None:
     limits = Limits.from_settings(settings)
     resource.setrlimit(resource.RLIMIT_AS, (limits.job_memory_bytes, limits.job_memory_bytes))
@@ -156,7 +140,6 @@ def _run_in_child(job: Job, settings: Settings, pipe: Connection) -> None:
     resource.setrlimit(resource.RLIMIT_NPROC, (limits.job_max_procs, limits.job_max_procs))
     pipeline = build_pipeline(settings)
     pipe.send(pipeline.run(job))
-
 
 def run_job_isolated(job: Job, settings: Settings) -> Verdict:
     context = mp.get_context("spawn")
@@ -211,11 +194,3 @@ The standards this skill's output must meet are the be-python rule files, not a 
 - `docker run --rm --read-only <image> python -c "open('/app/x','w')"` fails with `OSError`
 - A header-only decompression bomb (from `unit-testing`'s fixture builders) fed as a job yields `Rejected("too-many-pixels")` and the worker process is still alive
 - Trivy / Grype scan per `devops/docker`: no critical findings in the runtime image
-
-## Handoffs
-
-- What runs inside the child → `media-processing`
-- Settings and logging shape → `pattern-writer`
-- Library-wide image conventions and scanning → `devops/docker`
-- Cluster policy objects → `devops/kubernetes`, `devops/k8s-security`
-- Tests that prove the limits hold → `unit-testing` (the in-process part) and the `qa-api-typescript` peer (the container-level contract the TypeScript side calls)

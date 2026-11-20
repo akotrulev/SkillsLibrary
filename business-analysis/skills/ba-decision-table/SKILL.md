@@ -13,19 +13,6 @@ Models each **shared decision point** — one question the business must answer 
 
 Overlap/completeness checking **is** conflict detection. That's the whole reason this skill exists.
 
-## When to use
-
-- Requirements contain ≥2 rules bearing on the same outcome (a decision node in a flow with multiple inputs; "if X then A, if Y then B" prose)
-- A new feature adds rules to a decision point another feature already touches (promos + loyalty + shipping all writing into "order price")
-- Benefits/penalties can combine and no one has said how (stacking)
-- A conflict sweep flagged contradictory rules and needs them tabled to localize
-
-## When NOT to use
-
-- Single-rule decisions with no foreseeable second contributor — a line in the flow's steps table suffices
-- Process paths → `business-analysis:process-flow`; lifecycles → `business-analysis:state-grid`
-- Deriving **test cases** from a decision table (rule coverage, collapsed tables) → `qa/manual/test-design-techniques` owns those mechanics; this skill produces the table they consume
-
 ## Contract with the KB
 
 Per `business-analysis/skills/ba-project-memory`: **read first** (`INDEX.md` + the existing `decisions/<point>.md` — new rules join the existing merged table; a second table for the same decision point is the anti-pattern), **update after** (decision file + INDEX + active-context).
@@ -97,11 +84,3 @@ The quality bar is the business-analysis rule files, not a list here: `business-
 Bad: promotions' spec says "promo code gives free shipping", shipping's spec says "orders over $100 ship free", and each keeps its own table. Both fire on a $120 order with a code — harmless here (both say $0), but the same structure with a *percentage discount* and a *loyalty discount* silently double-discounts, or worse, each spec assumes it wins. Merging into one table forces the question at authoring time: hit policy? operator? — and "nobody has decided" becomes a filed finding instead of a production incident.
 
 Also bad: noticing the overlap and quietly picking First-match order yourself. Precedence is a business decision; invent nothing.
-
-## Handoffs
-
-- Findings → severity + resolution recording → `business-analysis/skills/ba-feature-conflict-check`
-- The decision sits inside a process → `business-analysis/skills/ba-process-flow-diagram`
-- Rule guards touch entity states → `business-analysis/skills/ba-entity-state-grid`
-- KB mechanics → `business-analysis/skills/ba-project-memory`
-- Decision-table test design (rule coverage) from this table → `qa/manual/test-design-techniques`

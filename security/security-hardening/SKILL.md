@@ -78,13 +78,3 @@ The WAF is the edge control that blocks attack traffic before it reaches the app
 ## Rules
 
 The standards this skill's output must meet are the security-governance rule files, not a list here: `hardening.md` (CSP, the secure-headers baseline, CRS rollout) and `security-governance.md` (pins, "a policy that parses is not a policy that blocks"). Read the project's copy in `.claude/rules/security-governance/`, or the plugin's in `security/rules-security-governance/` when the project has not installed them (`/security-governance:rules` does). Where they and this skill's recipes disagree, the rule files win.
-
-## Cross-references
-
-- **`qa-<stack>:client-side-security`** (`qa/_shared/security-testing/client-side-security/`) — the **test half** of the handshake: it proves the CSP blocks (the `securitypolicyviolation` `disposition: "enforce"` proof), grades the deployed headers (MDN Observatory), and crawls the SPA. This skill writes what that one tests; a failing test routes back here.
-- **`security-architect`** (`security/agents/security-architect.md`) — the roll-up agent that loads this skill when the posture picture shows a missing/weak CSP, header gaps, or no WAF.
-- **`fe-react`** / **`fe-blazor`** *(peers, named not loaded)* — own the app-level wiring: emitting the per-request nonce, the framework middleware, sink-safe rendering. This skill hands them the policy + nonce contract; DOM-sink fixes route to their component writers.
-- **`devops-engineer`** (`devops/agents/devops-engineer.md`) — deploys the WAF at the edge (ingress/Envoy/Caddy) and sets headers at the reverse proxy when they belong there rather than in-app.
-- **`devops:controls-validation`** (`devops/infra-controls-validation/`) — validates the encryption-in-transit / header controls are present **and effective**; the HSTS/CSP this skill authors is what it retests.
-- **`security-governance:compliance-evidence-mapping`** — maps the authored CSP/headers/WAF to A02/ASVS V13-V14/PCI 6.4.3+11.6.1 evidence.
-- **`security-governance:detection-engineering`** — the tripwire counterpart: author a detection on CSP-violation reports and WAF blocks, so an attempted injection is *seen*, not just blocked silently.

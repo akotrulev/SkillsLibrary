@@ -25,19 +25,6 @@ Division of labour with [`networking`](../networking/SKILL.md): it **produces** 
 
 Detect first: the existing banner / snackbar host, the `LoadState` / `ApiError` types, the wired crash reporter — extend them, never add a second.
 
-## When to use
-
-- Rendering a region's loading / loaded / failed / stale / offline states and the three empty kinds
-- The persistent banner, a timeout, a `401` mid-session, a forced update, app resume, a killed process, a failed write or SDK, a full disk
-
-## When NOT to use
-
-- Producing the error, retries, `Retry-After`, token-refresh mechanics → [`networking`](../networking/SKILL.md)
-- Persisting data, the write queue, conflicts → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Field validation messages → [`forms`](../forms/SKILL.md)
-- Crash-reporter setup, mapping upload → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md)
-- Other stacks → `mobile-react-native:error-handling`, `mobile-ios:error-handling`
-
 ## The failure surfaces
 
 ```
@@ -164,11 +151,3 @@ The standards this skill's output must meet are the mobile-android rule files, n
 - `adb shell am kill <package>` from the home screen, then reopen → the filter and the open record are back, the data reloads, no blank screen.
 - Return from background after an expired token → one refresh, the screen current or the dialog shown, not a wall of failed regions.
 - Dev-side tests of the state transitions: [`unit-testing`](../unit-testing/SKILL.md); device journeys → `qa-mobile-<stack>` (peer).
-
-## Handoffs
-
-- The categorised error, timeouts, retries, token refresh → [`networking`](../networking/SKILL.md)
-- Persistence and the write queue → [`offline-and-storage`](../offline-and-storage/SKILL.md) · field errors → [`forms`](../forms/SKILL.md)
-- Ids → [`test-ids`](../test-ids/SKILL.md) · announcements → [`accessibility`](../accessibility/SKILL.md)
-- Crash reporter, mapping upload → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md) · min-version policy → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
-- Auth provider / Credential Manager → `mobile-android:auth0`

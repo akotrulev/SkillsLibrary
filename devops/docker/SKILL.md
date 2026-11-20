@@ -10,21 +10,6 @@ Authors production-grade Dockerfiles for the library's three backend stacks (.NE
 
 **Version policy:** .NET 10 is primary (noble-based images); .NET 8/9 remain supported — detect the project's `TargetFramework` and match the base-image channel (`8.0-jammy-*` / `9.0-*` / `10.0-noble-*`). Never put a project on a newer runtime image than its TFM. Node 20 is EOL (Apr 2026) — use 24 (active LTS) or 22.
 
-## When to use
-
-- New service needs a Dockerfile
-- Image is too large / slow to pull / slow to build
-- Refactoring to multi-stage / distroless
-- Adding `HEALTHCHECK`, non-root user, OCI labels
-- Setting up image scanning (Trivy / Grype / Snyk) in CI
-
-## When NOT to use
-
-- Kubernetes manifests / Helm → `devops/kubernetes`
-- Pipeline YAML → `devops/{github-actions,gitlab-ci,azure-pipelines}`
-- App deploy specifics → `devops/{aws,azure}-deployment`
-- Local docker-compose dev workflow → out of scope here (this skill is production-shaped images). **No skill owns this yet** — the only deliberately unowned fence in the domain; improvise from the Dockerfile guidance below rather than looking for a sibling skill. (Test-fixture containers are a different thing and *are* owned: `qa-<stack>:db-testcontainers`.)
-
 ## Inputs needed
 
 1. **Stack**: .NET 8/9/10 (match the TFM) / Java 21 + Gradle / Node 24 + pnpm / static SPA
@@ -335,11 +320,3 @@ The standards this skill's output must meet are the devops rule files, not a lis
 6. Wire health (HEALTHCHECK or platform probe), non-root user, OCI labels.
 7. Build locally; check size and scan for CVEs.
 8. Add the build + scan to the CI pipeline (`devops/{github-actions,gitlab-ci,azure-pipelines}`).
-
-## Handoffs
-
-- Kubernetes deployment manifests / Helm → `devops/kubernetes`
-- Pipelines that build / push / scan → `devops/{github-actions,gitlab-ci,azure-pipelines}`
-- Cloud deploy of the image → `devops/{aws,azure}-deployment`
-- App-side config / secrets → `devops/environment-config`
-- Observability instrumentation that runs inside the container → `observability/opentelemetry-{stack}`

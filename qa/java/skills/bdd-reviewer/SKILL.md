@@ -8,18 +8,6 @@ disable-model-invocation: true
 
 Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin quality / living documentation) and the Cucumber-JVM step definitions + support code (binding correctness, reuse, DI, lifecycle, library rules). Returns findings in the standard table; does not rewrite code.
 
-## When to use
-
-- A `.feature` + `steps/` set exists and needs a critique.
-- Steps report undefined/ambiguous matches, or the suite is flaky/duplicative.
-- A PR adds BDD coverage and you want a hostile senior review.
-
-## When NOT to use
-
-- "Write feature files" → `qa/_shared/bdd/feature-file-writer`
-- "Generate / implement step definitions" → `qa/java/skills/gherkin-step-code`
-- Code is pseudocode / incomplete → ask for the real files.
-
 ## The checklist is the rule file
 
 Every check, and the severity it reports, lives in one place: the qa-java rule files `qa-java-bdd.md` (feature files, glue, hooks) and `qa-java.md` (core), plus `qa-java-ui.md` and `qa-java-page-objects.md` when page objects are in scope, and `qa-java-data.md` when steps seed, pre-clean or read reference data.

@@ -293,20 +293,3 @@ covers the **known-signature** slice of A02/A03/A05 — never the access-control
 - Emit **SARIF → code-scanning** + attach the JSON report to **Allure** and CI artifact. Map gating templates
   to their OWASP item. A clean Nuclei run ≠ "secure" — run the full layer set and reserve business-logic /
   access-control to functional tests + manual pentest.
-
-## Cross-references
-
-- `qa-<stack>:security-foundations` — **load alongside.** OWASP map, authorization-to-scan rule, ticketed-triage
-  discipline, SARIF → code-scanning consolidation, the layer map placing Nuclei as the "Templates/CVE" row.
-- `qa-<stack>:active-scan` — the DAST **crawler** Nuclei is **not**: spiders + injects
-  into discovered params/forms. Run both — a matcher can't find what it isn't pointed at.
-- `qa-<stack>:api-fuzzing` — spec-driven OpenAPI/GraphQL property-level fuzzing; the other layer a
-  matcher can't reach.
-- `qa/<stack>/skills/security-testing/passive-scan` — passive header/cookie/info-leak gate (lightly overlaps
-  Nuclei's `misconfiguration/` exposure templates; different engine).
-- `qa/<stack>/skills/security-testing/dependency-scan` — **SCA** (build-graph CVEs); Nuclei detects an
-  *exposed/running* vulnerable component at the HTTP layer. Orthogonal — run both.
-- `qa/cicd/<stack>/skills/ci-pipelines/*` + `qa/cicd/ci-conventions` — wire the job, the jq gate, and the SARIF
-  upload.
-- `qa/reporting/<stack>/skills/test-reports` — attach the JSON report and a finding summary.
-- `qa/manual/bug-report-writer` — write up a confirmed Nuclei finding for the dev team.

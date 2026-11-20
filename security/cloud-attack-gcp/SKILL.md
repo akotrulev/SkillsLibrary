@@ -213,23 +213,3 @@ target:
   runs, per `penetration-testing:reporting`.
 - **Production is a separate, louder gate than lab.** Default target is **GCPGoat** or a non-production
   owned project; production needs the second sign-off.
-
-## Cross-references
-
-- **`penetration-testing:cloud-recon-enumeration`** — the upstream step: produces the credential,
-  principal/permission map, and reachable-SA leads this skill consumes. This skill never does its job
-  (anonymous/public discovery, OIDC-federation trust review).
-- **`devops:cloud-posture`** — the **defensive** sibling: Prowler/ScoutSuite already read GCP posture
-  (`roles/viewer`/`roles/cloudasset.viewer`, read-only). **This is the first skill that attacks GCP** — a
-  `cloud-posture` finding ("default Compute SA holds Editor", "bucket allows `allUsers`") is a lead here;
-  this skill proves it is reachable and chains it, then reports confirmed exploitability back as
-  validated posture. The handoff runs both ways.
-- **`cloud-attack-aws`** / **`cloud-attack-azure`** — the sibling provider skills under the same
-  `penetration-tester` step; same role, different provider, no shared files.
-- **`security/atomic-simulation`** — the purple-team sibling that *detonates* cloud ATT&CK techniques
-  (Stratus Red Team) against a lab to test whether SCC/Event Threat Detection fires; this skill performs
-  the exploitation those detonations model, but the two never substitute for each other.
-- **`penetration-testing:reporting`** — where every act is logged (action log) and every finding is
-  scored (CVSS) and mapped (ATT&CK Cloud).
-- **`security/cloud-incident-response`** — the defensive response peer: a confirmed GCP finding here
-  implies the GCP IR runbook (`references/gcp-ir.md`) that skill owns.

@@ -76,20 +76,6 @@ wave, then one batch per backend module, then one per frontend area. See Step 2.
 `epic-map.md` — whose lanes and waves this plan's streams and order are derived from, not re-decided.
 Sequencing without the detail pack produces task titles, not tasks; sequencing without the epic map
 produces a plan that is one lane wide.
-## When to use
-
-- Step 7 of a `solution-planner` run
-- `RESUME` — reconciling an existing plan against partially-built code and re-sequencing what remains
-- `EXTEND` — appending tasks for a new functional area
-
-## When NOT to use
-
-- Executing the plan → the named stack agent per task, one prompt block per session through Plan Queue
-- Deciding which epics run at the same time → `dev:plan-epic-map`, which this skill consumes
-- Sizing the tasks and writing `## Prompts — one per task` → `dev:plan-session-budget`, which runs on this skill's output
-- A generic non-backend multi-step task → `dev:plan-feature`
-- Auditing what got built against what was specified → `code-auditor`
-
 ## Output
 
 **One self-contained file: `docs/plans/<NNN>-<initiative>/delivery-plan.md`**, beside the rest of the pack. **The whole initiative folder moves to `docs/plans/implemented/<NNN>-<initiative>/` once every task has landed** — done by the task that deletes the last prompt block, per the format reference §8 — so `docs/plans/` lists what is in flight. `NNN`'s high-water mark spans both folders; a moved plan's number stays spent. It carries the context,
@@ -739,29 +725,6 @@ that lands anything.>
     and the delivery note, its prompt naming the environment or saying none, and its gate the doc lint; or the header says `Documentation task: none — <why>`. The gate task's
     `Files` name no product documentation.
 18. The prompt block that will delete the last block carries the filing duty — rewrite `Status:`, then move the whole initiative folder into `docs/plans/implemented/` — and this pack's `NNN` was taken from the high-water mark across `docs/plans/` **and** `docs/plans/implemented/`.
-
-## Handoffs
-
-- **← `dev:plan-epic-map`** — supplies the epics, the lanes and the waves. The streams table is its §2
-  at task altitude, and the order respects its §3.
-- **← `dev:plan-feature`** — owns the plan document format this skill writes in
-  (`engineering-practices/writing-plans/references/plan-format.md`). Where the two disagree on the
-  shape of the document, that reference wins; this skill owns only the additions above.
-- **→ `dev:plan-session-budget`** — sizes these tasks, writes the `Budget:` lines back onto them, and
-  authors `## Prompts — one per task` inside this document.
-- **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `be-rust` / `fe-react` / `fe-blazor`** — execute the
-  tasks bound to them, write the `As built` note and the `Status:` line, rewrite the prompt blocks below theirs,
-  and delete their own block in a follow-up commit once the work is committed.
-- **→ Mission Control** — paste the document, point at the repo.
-- **→ `be-documenter` / `be-feature-documenter`** — the plan's last task: the documentation updated from
-  the code that landed, the delivery note, and the plan filed.
-- **→ `qa-test-planner` / `qa-test-case-designer`** — the `TD` tasks: the test plan per epic, then the
-  test-case suites per story, read by the `Q` tasks and checked by the last task.
-- **→ `data-architect` / `tooling-engineer` / `devops-engineer` / `observability-engineer-<stack>` /
-  `qa-*`** — the tasks bound to them, run as peers.
-- **→ `code-auditor`** — when a reconcile finds systemic drift rather than a handful of divergences,
-  that is an audit, not a reconcile.
-
 
 ## Version policy
 

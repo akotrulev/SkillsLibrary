@@ -20,19 +20,6 @@ Wires Auth0 into a WinUI or WPF app with the **RFC 8252 native-app flow: the use
 
 Verify the Core package's current version and `Auth0ClientOptions.Browser` on nuget.org before writing code; this skill's API names are the shape, not a pinned copy.
 
-## When to use
-
-- New Auth0 sign-in / sign-out in WinUI or WPF; calling a protected API
-- Browser login finishes but the app never receives the result (activation / loopback)
-- Session restore at launch, silent refresh, secure token storage
-
-## When NOT to use
-
-- Concepts, RBAC, `audience` → `auth/_shared/auth0-concepts`
-- macOS → `auth/auth0-macos`; Blazor/web → `auth/auth0-blazor`
-- Token storage, IPC and URL-activation hardening in general → `desktop/_shared/security`
-- Backend validation → `backend/*/auth0`
-
 ## Choose the redirect (one per app)
 
 | | Loopback (`http://127.0.0.1:PORT/callback`) | Protocol activation (`com.yourco.app:/callback`) |
@@ -142,9 +129,3 @@ Never `appsettings.json`, `ApplicationData.LocalSettings`, the registry in clear
 3. Add `Auth0.OidcClient.Core`; write `SystemBrowser`, the listener or activation hook, `ITokenStore`.
 4. Build `AuthSession` and bind its states in the view model.
 5. Smoke on a built app: sign in, relaunch (restores), call the API, sign out, confirm the next sign-in asks for credentials and the vault entry is gone.
-
-## Handoffs
-
-- Concepts → `auth/_shared/auth0-concepts`; storage and activation hardening → `desktop/_shared/security`
-- Packaging manifest and signing → `desktop/_shared/distribution`
-- UI states, `InfoBar`, threading → the Windows desktop skills

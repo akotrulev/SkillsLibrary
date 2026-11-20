@@ -272,18 +272,3 @@ must hold); under interactive render modes, the live-resize test proves the inte
   objects and `Layout`.
 - Every fixture derives from `BaseTest`; parallelism stays `ParallelScope.Self`; test names `Should_X_When_Y`;
   test ids PascalCase dot-separated (`Nav.Desktop`, `ProductGrid.Card`).
-
-## Cross-references
-
-- `qa-typescript:responsive-testing` · `qa-java:responsive-testing` — sibling stacks; same four ideas.
-- `qa-dotnet:ui-tests-playwright` — `BaseTest`, `ContextOptions()` (`lifecycle.md` §4) and the emulation
-  reference (`emulation-and-mobile-web.md`: viewport per fixture, device profiles, media features).
-- `qa-dotnet:visual-regression` — the pixel complement: one baseline per viewport, after the structural checks
-  pass.
-- `qa-dotnet:accessibility-testing` — reflow/zoom (WCAG 1.4.10) and touch targets, at the same widths.
-- `qa-dotnet:data-driven-testing` — the row pattern; here rows are fixture parameters (each needs its own
-  context options).
-- `frontend/blazor/skills/responsive-design` (FE peer) — the dev-side skill that defines the breakpoint contract
-  this skill reads. Its variant-suffixed test ids are what make the swap assertable; in this library's
-  PascalCase form they are `Nav.Desktop` / `Nav.Hamburger` (CLAUDE.md). `frontend/react/skills/responsive-design`
-  is the React peer of the same contract.

@@ -8,20 +8,6 @@ disable-model-invocation: true
 
 Reviews Java UI test code (Playwright Java, Selenium Java, Appium Java) against the qa-java rule files. Produces a findings table in the format defined in `CLAUDE.md`. **Does not rewrite the code** — points to the fix and lets the human apply it.
 
-## When to use
-
-- A diff or file (page object, `@Test` class, fixture, `BaseTest`, `BasePage`) is submitted for review
-- Pre-merge gate on a PR touching `src/main/java/pom/`, `src/test/java/`, or any TestNG/JUnit UI test
-- Second opinion on whether a Java page object is well-structured
-
-## When NOT to use
-
-- Generating new code → `qa/java/skills/ui-test-author/playwright`, `qa/java/skills/ui-test-author/selenium`, `qa/java/skills/ui-test-author/appium`
-- Architecting the POM (sub-packages, base classes) → `qa/java/skills/page-object-design`
-- Reviewing API tests → `qa/java/skills/api-test-author/review`
-- Reviewing .NET UI code → `qa/dotnet/skills/ui-test-author/review`
-- Reviewing TypeScript UI code → `qa/typescript/skills/ui-test-author/review`
-
 ## Inputs needed
 
 1. **Stack** — Playwright Java, Selenium Java, or Appium Java
@@ -75,12 +61,3 @@ The severity is the tag on the rule, never a new judgment. End with one line: `R
 1. Identify the **stack** from imports and file location, and read each file end-to-end before writing findings.
 2. Walk the rule files, core first, then `qa-java-page-objects.md` and `qa-java-ui.md`; for Playwright, then the mechanics table above.
 3. For each finding: file path + line, issue, one-sentence fix. **Do not rewrite the code**; hand off to the matching generator.
-
-## Handoffs
-
-- Need to rewrite → `qa/java/skills/ui-test-author/playwright`, `qa/java/skills/ui-test-author/selenium`, or `qa/java/skills/ui-test-author/appium`
-- Architecture is the real problem (not the code) → `qa/java/skills/page-object-design`
-- Test data shape is wrong → `qa/java/skills/test-data-builder`
-- API tests in the same PR → `qa/java/skills/api-test-author/review`
-- Allure reporting questions → `qa/reporting/java/skills/test-reports`
-- A rule is missing or wrong → edit the project's `.claude/rules/qa-java/`; for every project, the plugin's `qa/java/skills/rules/`

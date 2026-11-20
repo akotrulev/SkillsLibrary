@@ -10,19 +10,6 @@ The middle of the **requirements → epics → stories** chain. Takes a scoped r
 
 **An epic is a capability, not a calendar unit.** Inside the delivery lane every initiative gets epics, however small — `E1..En` are what `solution-planner`'s epic map and delivery plan cite — so an initiative with one capability has one epic, never zero.
 
-## When to use
-
-- The requirements document is done and its capabilities (§4) need shaping into goals before stories are written
-- An existing "mega-story" needs splitting into epics + stories
-- A roadmap item needs to become refinement-ready
-- Several people or teams will touch the same goal — epics align them around a shared "done"
-
-## When NOT to use
-
-- Vague requirement, no scope yet → `business-analysis/skills/ba-scoping-writeup` first
-- Epics exist and stories are the ask → `business-analysis/skills/ba-story-writer`
-- Epics authored elsewhere need auditing, not shaping → `business-analysis/skills/ba-story-quality-review`
-
 ## Inputs needed
 
 1. **The requirements document** (`requirements.md` from `business-analysis:scoping`, ideally) — its §4 capabilities are what the epics cover, exactly once each
@@ -207,12 +194,3 @@ An epic is one capability a person gets. Size follows from that, not from a cale
 7. Surface epic-level risks and dependencies
 8. Write the Definition of Done as a binary checklist
 9. Hand off to `business-analysis/skills/ba-story-writer`
-
-## Handoffs
-
-- Inside the delivery lane → `requirements-author` (`/dev:refine`) runs this skill as its Step 3 and writes `docs/plans/<NNN>-<initiative>/epics.md`
-- Up-stream (vague requirement) → `business-analysis/skills/ba-scoping-writeup`
-- Down-stream (the stories) → `business-analysis/skills/ba-story-writer`
-- Epics/stories authored elsewhere need a readiness audit → `business-analysis/skills/ba-story-quality-review`
-- Testing → one test plan per epic (`qa-test-planner`, `/qa-<stack>:test-plan`), written once the epic's stories exist
-- Architecture, contracts, task plan → `solution-planner` (`/dev:plan-system`), a peer agent invoked separately

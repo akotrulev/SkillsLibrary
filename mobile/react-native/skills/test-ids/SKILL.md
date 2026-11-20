@@ -49,19 +49,6 @@ So **one `testID` serves Appium and Maestro**: Maestro `id: "Login.Email"`; Appi
 - **Built but unverified:** whether UiAutomator2's `id=` strategy prepends the app package to a bare name — QA confirms with `appium_get_page_source` on the real build and falls back to the UiSelector form, which is exact.
 - The page source of the **same build** is the final authority; the explorer records both `resource-id` and `name`.
 
-## When to use
-
-- Add `testID` to one or more `.tsx` screens or components
-- Audit a screen for missing, duplicated, label-derived or unstable ids
-- A `missing-testids.md` has been handed over by QA
-- An E2E flow cannot find an element on one platform but can on the other
-
-## When NOT to use
-
-- Writing page objects or device tests → `qa-mobile-typescript` (peer)
-- Labels and roles for screen readers → [`accessibility`](../accessibility/SKILL.md)
-- Choosing or building components → [`ui-components`](../ui-components/SKILL.md)
-
 ## Output format
 
 One prop only: `testID="…"`. **Never `accessibilityLabel` (or `aria-label`, `accessibilityHint`) as an identifier, and never a label copied into `testID`.** A label is for a person, is translated ([`languages`](../languages/SKILL.md)), changes with copy edits, and is read aloud; an id is for a machine, is never translated and never spoken. Do not mirror one into the other. Always PascalCase, dot-separated segments.
@@ -196,11 +183,3 @@ QA's `mobile-screen-explorer` writes, per screen:
 The standards every `testID` must meet are the mobile-react-native rule file `react-native-a11y.md`, not a list here; the sections above are how to meet them. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where it and this skill disagree, the rule file wins.
 
 Two fixes the rule file does not spell out: `accessibilityLabel={testID}` on a `Text` makes iOS read the id aloud (drop it, or keep it Android-only per *Output format*), and a locator that reaches a `testID` on Android uses `id=` / `resourceId`, never `~` / `content-desc`, which is the label.
-
-## Handoffs
-
-- Page objects, Appium and Maestro flows, device runs → `qa-mobile-typescript` (peer; plan 003)
-- Labels, roles, focus order, screen-reader text → [`accessibility`](../accessibility/SKILL.md)
-- Components that emit ids by default → [`ui-components`](../ui-components/SKILL.md)
-- Region states and banner ids → [`error-handling`](../error-handling/SKILL.md)
-- Hygiene as part of a broader review → [`code-review`](../code-review/SKILL.md)

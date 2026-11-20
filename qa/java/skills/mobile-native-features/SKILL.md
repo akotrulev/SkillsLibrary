@@ -41,22 +41,6 @@ Appium tests for the **OS-level capabilities** a mobile app touches but a page-o
 
 Appium 3 removed the old `/appium/*` routes; java-client 11's driver methods call only `mobile:` extensions, and geolocation is one of them.
 
-## When to use
-
-- A **deep or universal link** must open the right screen
-- Behavior **behind a runtime permission**, with the dialog handled or under test
-- **Biometric** login or step-up on an emulator or simulator, approve and reject
-- State that must survive **backgrounding**, a cold relaunch, or a push tap
-- **Geolocation**, **clipboard**, **picker** or **orientation** behavior
-
-## When NOT to use
-
-- The app's own screens → `qa/java/skills/ui-test-author/appium`
-- Real-device farm wiring and farm-side biometric/GPS injection → `qa/java/skills/device-cloud`
-- The requests an app makes → `qa/java/skills/network-mocking/*`
-- Token auth → `qa/java/skills/test-login-tokens`
-- TypeScript / .NET → `qa/{typescript,dotnet}/skills/mobile-native-features`
-
 ## The fixture
 
 `NativeFeatures` owns every OS-surface call, including the ones that touch OS UI, so no test holds a raw `findElement` or a wait. A test reads: *drive the OS surface, assert the effect on a page object.* The identifier is a package on Android and a bundle id on iOS, so one private method picks the key.
@@ -283,11 +267,3 @@ A camera, photo or file picker is an OS surface you cannot drive in CI. Seed the
 - **Lifecycle events assert restored state on a bounded wait.** No `Thread.sleep` anywhere.
 - **Clipboard content is base64** in both directions.
 - Tests are `Should_X_When_Y`, assert with AssertJ and a subject (`.as(...)`), and never use `try`/`catch`. App ids and device settings come from env through `Env`; no secrets in code.
-
-## Cross-references
-
-- **`qa/java/skills/ui-test-author/appium`** — the foundation: `BaseAppiumPage`, `AppiumDriverFactory`, `BaseMobileTest`, gestures, WebView switching, the failure evidence
-- **`qa/java/skills/device-cloud`** — where the tests run and how farm-side GPS, network and biometric are injected
-- **`qa/java/skills/evidence-capture`** — what a failed native flow keeps
-- **`qa/typescript/skills/mobile-native-features`**, **`qa/dotnet/skills/mobile-native-features`** — the sibling stacks
-- **`qa/java/skills/test-login-tokens`** — token auth, the boundary with biometric unlock

@@ -8,20 +8,6 @@ disable-model-invocation: true
 
 Turns a discovered element inventory into a **WebdriverIO window object**: a `BaseWindow` subclass under `src/windows/`. It consumes the element table and locator rungs from `qa/typescript/skills/desktop-screen-explorer` (or an inventory the user supplies) and emits or updates one window class. It owns **codegen, multi-window and dialog handling, waits, and the create/update diff**. The shared rules (id contract, window-object rules, window scoping) are `qa/_shared/desktop-testing`; the Mocha spec conventions are `qa/typescript/skills/ui-test-author/appium`. The mobile twin is `qa/typescript/skills/mobile-screen-objects`.
 
-## When to use
-
-- Elements for a window were discovered and now need a class.
-- An existing window object must be reconciled against a freshly explored window.
-- The user describes a window's elements and ids directly and wants the class emitted.
-
-## When NOT to use
-
-- Locators are not known yet → `qa/typescript/skills/desktop-screen-explorer` first. Never fabricate one.
-- Writing the tests that use the object → `qa/typescript/skills/ui-test-author/appium`.
-- Mobile screens → `qa/typescript/skills/mobile-screen-objects`; web pages → `qa/typescript/skills/page-objects-from-url`.
-- Reviewing an existing object → `qa/typescript/skills/ui-test-author/review`.
-- Java / .NET → `qa/java/skills/desktop-window-objects` / `qa/dotnet/skills/desktop-window-objects`.
-
 ## Inputs needed
 
 1. **Window name** (PascalCase: `LibraryWindow`, `SettingsWindow`, `ExportDialog`) and whether it is a main window, a document window, a sheet or a dialog.
@@ -172,13 +158,3 @@ private get exportButton() { return $(`name=${ExportDialog.EXPORT_BUTTON_FALLBAC
 - One class per window; update in place rather than creating a duplicate.
 - A window object takes no driver; `$` appears only in `BaseWindow` and components. The only assertion inside an object is `verifyWindowLoaded()`.
 - Everything else is the rule files named under Conventions; where they and this skill disagree, the rule files win.
-
-## Handoffs
-
-- Discovering the elements → `qa/typescript/skills/desktop-screen-explorer`
-- Scaffold and OS prerequisites → `qa/typescript/skills/desktop-project-setup`
-- Writing the tests → `qa/typescript/skills/ui-test-author/appium`
-- Object architecture (base classes, sub-folders) → `qa/typescript/skills/page-object-design`
-- Missing ids → the `desktop-macos` or `desktop-windows` agent
-- Shared rules → `qa/_shared/desktop-testing`
-- Java / .NET siblings → `qa/java/skills/desktop-window-objects` / `qa/dotnet/skills/desktop-window-objects`

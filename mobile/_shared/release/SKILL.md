@@ -10,22 +10,6 @@ Rules for getting a mobile build from a commit to users: **what number it carrie
 
 **The fence.** This skill states *what must be true*; it writes no pipeline. Workflow / pipeline YAML (GitHub Actions, Azure Pipelines, GitLab) is `devops-engineer`'s (`devops/github-actions`); the test-suite CI lane is `qa-cicd-<stack>`'s. Where a rule needs a pipeline step, name the step and hand it over — the EAS Workflows file in [`references/eas.md`](references/eas.md) is the one exception, because it is the build tool's own config.
 
-## When to use
-
-- Setting up or reviewing how an app is built, signed and uploaded
-- Choosing the version / build-number scheme, or a build number was rejected as a duplicate
-- Planning a rollout (TestFlight, Play tracks, phased / staged) or halting a bad one
-- Deciding whether a change can go over the air or needs a store build
-- Wiring crash-symbol upload (dSYM, R8 mapping, Hermes source maps)
-
-## When NOT to use
-
-- Writing the CI workflow / pipeline YAML → `devops-engineer` (`devops/github-actions`, `azure-pipelines`)
-- Test sharding, Allure, device-farm wiring → `qa-cicd-<stack>`
-- App Store / Play rules and deadlines → `mobile-<stack>:store-compliance`
-- Where tokens live at runtime → `mobile-<stack>:security`
-- Crash reporter choice and telemetry → `mobile-<stack>:observability`
-
 ## Version lane (verified 2026-10-10)
 
 | Fact | Value | Re-verify after |

@@ -231,21 +231,3 @@ Recipes and the comparison: [`references/de-flake.md`](references/de-flake.md).
 ## Rules
 
 The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `ci-tests.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
-
-## Cross-references
-
-- `qa-java:flaky-test-quarantine` — the **canonical** stack this is ported from: TestNG groups for quarantine
-  and the first-class `@Flaky` annotation. Same four moves.
-- `qa-dotnet:flaky-test-quarantine` — same four moves, NUnit: `[Category("Flaky")]` + `dotnet test --filter` for
-  the gate vs non-gating lane.
-- `qa-typescript:test-reports` — the **full** allure-playwright wiring this layers on: the reporter,
-  history/trends (required for auto-flaky detection), `categories.json`, CI publish. Base setup lives there.
-- `qa-<stack>:ci-conventions` — the retry policy this skill defers to.
-- `qa-<stack>:quality-metrics` — track **flaky-rate over time**; a `@flaky` tag set that grows is the metric
-  to watch.
-- `qa-typescript:ui-tests-playwright` — where the quarantined tests are authored and where the canonical
-  config lives; flakiness is best fixed at the source: auto-waiting locators, web-first assertions, **no
-  `waitForTimeout`**, intent-not-selectors page objects. Fix the wait and the test leaves quarantine.
-- `qa-typescript:evidence-capture` — the trace and video a flaky failure leaves behind, and how to read them.
-- `qa-typescript:ci-pipelines` (its GitHub Actions, Azure Pipelines and GitLab CI references) — the gate job,
-  the quarantine job (`continue-on-error` on the non-gating lane) and the nightly repeat lane.

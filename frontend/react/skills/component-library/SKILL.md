@@ -10,21 +10,6 @@ Picks and wires the UI component library that supplies your grids, dialogs, inpu
 
 **Version rule:** detect the React/Next major first (`package.json`). Libraries move fast against the RSC model — a library's App-Router story (which components are client-only, whether it ships a Next integration package, how the theme survives Server Components) differs by *library* major. Current majors: **MUI v7** ([MUI v7 is here](https://mui.com/blog/material-ui-v7-is-here/)), **Mantine v8/v9** ([Mantine v8.0.0](https://mantine.dev/changelog/8-0-0/)), **Chakra UI v3** (full rewrite on Ark UI — [Announcing v3](https://chakra-ui.com/blog/announcing-v3)), **shadcn/ui on Tailwind v4**. Pin the library major to your React/Next line and read the reference's version notes — never assume a v-latest App-Router fix exists in the major a React 18 app is pinned to.
 
-## When to use
-
-- Choosing a component library for a new React app (or justifying a change)
-- Wiring the chosen library's provider(s), theme, and services into an existing app
-- Adding a DataGrid, dialog, or toast/snackbar and needing the library-native way (building the grid itself → [`data-grid`](../data-grid/SKILL.md))
-- Diagnosing why library components throw or render dead in a Server Component
-
-## When NOT to use
-
-- Hand-written styling, CSS Modules, design tokens, dark-mode CSS → [`styling`](../styling/SKILL.md)
-- `data-testid` placement mechanics per library → [`test-ids`](../test-ids/SKILL.md) (its per-library attribute matrix is the companion to this one)
-- Atom/molecule/organism layering + when a molecule owns state → [`basics`](../basics/SKILL.md)
-- Forms + validation → [`forms`](../forms/SKILL.md)
-- Rendering-strategy / `'use client'` placement per route → [`project-setup`](../project-setup/SKILL.md)
-
 ## The decision
 
 ```
@@ -90,15 +75,3 @@ The smells (two libraries, a library control in a Server Component, a provider p
 - The DataGrid pages, sorts, and filters **server-side** (Network shows one page's rows, not the whole table).
 - Dark mode toggles from one control and follows system preference (`next-themes` / library color-mode API), with no light→dark flash on reload.
 - `data-testid` set inline on a library control appears on the rendered root in DevTools.
-
-## Handoffs
-
-- CSS Modules, design tokens as CSS vars, dark-mode CSS plumbing, Tailwind-vs-library → [`styling`](../styling/SKILL.md)
-- `data-testid` per-library mechanics → [`test-ids`](../test-ids/SKILL.md)
-- Component layering (atom/molecule/organism), prop-drilling limits, when a molecule owns state → [`basics`](../basics/SKILL.md)
-- `'use client'` boundary + rendering strategy per route, provider placement → [`project-setup`](../project-setup/SKILL.md)
-- Building the app's own grid (Tailwind/shadcn lane) + the full feature surface → [`data-grid`](../data-grid/SKILL.md)
-- The grid's data function (server-side paging/sort/filter) → [`data-fetching`](../data-fetching/SKILL.md)
-- Forms/validation with library inputs → [`forms`](../forms/SKILL.md)
-- Theme palette/fonts source → [`design/visual-identity`](../../../../design/visual-identity/SKILL.md) (primary), `design/theme-presets` (quick-start)
-- Breakpoint contract, grids, cross-breakpoint alignment → [`responsive-design`](../responsive-design/SKILL.md)

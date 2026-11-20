@@ -21,24 +21,6 @@ Two jobs: **localization** (swap the text via resources) and **globalization** (
 
 Source read 2026-10-10: developer.android.com/guide/topics/resources/app-languages. Facts on plurals, RTL and formatting below are long-standing platform behaviour not re-fetched this session; confirm a class or flag against the installed SDK before relying on an edge case.
 
-## When to use
-
-- Adding a language, or setting up localization from nothing
-- Plurals, quantities, positional arguments; strings that must not be translated
-- Dates, money, numbers and measurements that look wrong in another locale
-- An RTL language (Arabic, Hebrew, Persian, Urdu)
-- An in-app language picker, or appearing in the system per-app language list
-- The app name, shortcut labels, channel names and widget text per language
-
-## When NOT to use
-
-- Wording, tone, microcopy → [`design:ux-writing`](../../../../design/ux-writing/SKILL.md)
-- Font scale, TalkBack language → [`accessibility`](../accessibility/SKILL.md)
-- Layout mechanics, insets, window sizes → [`styling`](../styling/SKILL.md)
-- Play listing text per locale → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
-- The web app's locale routing → [`fe-react:i18n`](../../../../frontend/react/skills/languages/SKILL.md)
-- Another stack → `mobile-ios:i18n`, `mobile-react-native:i18n`
-
 ## String resources
 
 ```xml
@@ -126,13 +108,3 @@ German and Finnish run 30–40 % longer; CJK is shorter and taller. No fixed wid
 - [ ] A pseudo-locale and an RTL run show no truncation, no un-mirrored arrows, no left / right
 - [ ] No `String.format` money, no date pattern strings, no cached `NumberFormat`
 - [ ] Dev-side tests: formatters with fixed locales (`Locale.GERMANY`, `ar`), a plural-quantity test per language shipped
-
-## Handoffs
-
-- Wording, tone, error copy → [`design:ux-writing`](../../../../design/ux-writing/SKILL.md)
-- Font scale and TalkBack → [`accessibility`](../accessibility/SKILL.md)
-- Edge insets, RTL layout structure → [`styling`](../styling/SKILL.md)
-- Locale in requests → [`networking`](../networking/SKILL.md)
-- Number parsing in fields → [`forms`](../forms/SKILL.md)
-- Store listing localization → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
-- Locale and RTL screenshot tests → [`unit-testing`](../unit-testing/SKILL.md)

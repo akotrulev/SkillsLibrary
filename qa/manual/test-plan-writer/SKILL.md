@@ -10,21 +10,6 @@ Assembles and formats a **test plan**: one document that says which versions are
 
 This skill **owns the document**: its sections, tables, grammar, and quality bar. The *content* comes from elsewhere — the test basis from `requirements-breakdown` (or exploration), the risk register from `test-strategy`, technique choices from `test-design-techniques`, and the inventory of existing automation from reading the repo. The full feature→plan flow is orchestrated by the `qa/manual/agents/qa-test-planner` agent; load this skill to shape and quality-gate what that flow produced.
 
-## When to use
-
-- A feature (documented or not) needs a written plan before test effort starts
-- The team asks "what is needed to test this" — harness, environments, data, people/agents, artifacts
-- An existing plan must be revised after the spec, the harness, or the scope changed
-- The QA section of an RFC / PR description needs a real plan, not a paragraph
-
-## When NOT to use
-
-- Risk register / pyramid sizing / release quality gates **alone** → `qa/manual/test-strategy` (this plan *embeds* its outputs)
-- Step-by-step test cases → `qa/manual/test-case-writer` / the `qa-test-case-designer` agent (the plan's case inventory is scenario-level, deliberately without steps)
-- An exploratory session brief → `qa/manual/exploratory-charter-writer`; exploring the running app → the `qa-explorer` agent
-- Automation code → the stack agents (`qa-api-<stack>`, `qa-ui-<stack>`, …)
-- Measuring an existing process → `qa/manual/quality-metrics`
-
 ## Inputs needed
 
 1. **Test basis** — an epic and its stories (`epics.md` + `stories.md` in `docs/plans/<NNN>-<initiative>/`) distilled by `requirements-breakdown`, or a `requirements-breakdown` document from any other source, or an exploration/session report, or a stated description with its assumptions tagged
@@ -144,15 +129,3 @@ Test data strategy: <builders/ObjectMother · seeding · anonymized copy — and
 5. Build the scenarios: conditions × techniques → scenario rows; stamp coverage status from §7; assign executors
 6. Write the Definition of Ready and the Definition of Done as checklists; collect every assumption and TBD into §12
 7. Self-review against the Section rules; save to `docs/test-plans/`
-
-## Handoffs
-
-- Risk register & gates depth → `qa/manual/test-strategy`
-- Epics and stories the plan covers → the `requirements-author` agent (`/dev:refine`); a story not ready to test from → `business-analysis:story-review`
-- Basis document → `qa/manual/requirements-breakdown`
-- Technique selection depth → `qa/manual/test-design-techniques`
-- Step-by-step suites from the scenarios, one per story → `qa/manual/test-case-writer` / the `qa-test-case-designer` agent (`/qa-<stack>:test-cases`)
-- Automation of `extend`/`new` rows → `qa-api-<stack>` · `qa-ui-<stack>` · `qa-mobile-<stack>` · `qa-performance-<stack>` · `qa-llm-<stack>` · `qa-bdd-<stack>`
-- Security rows → the `qa-security` agent
-- CI & reporting artifacts → `qa-cicd-<stack>` · `qa-reporting-<stack>`
-- Exploratory rows → the `qa-explorer` agent (an agent explores the running build) or `qa/manual/exploratory-charter-writer` (a charter for a human's session)

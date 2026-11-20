@@ -29,23 +29,6 @@ That line is worth stating twice, because Spring's slice-test annotations are ro
 
 **First act: detect the Java release and the Spring Boot BOM version** (`build.gradle.kts` / `pom.xml`). **Java 21 + Spring Boot 3.x.** Let the Boot BOM manage JUnit/Mockito/AssertJ versions — **do not pin them independently**; a hand-pinned Mockito against a Boot-managed JUnit is the most common "works on my machine" break in this lane. `java.time.Clock` is JDK-native, so the time seam needs no dependency at all.
 
-## When to use
-
-- A class `pattern-writer` just generated has behavior: a strategy, a resolver, a decorator, a pipeline stage, a handler, a factory.
-- A domain rule, invariant, or guard clause needs pinning before a refactor.
-- A calculation: money (`BigDecimal`), rounding, proration, tax, date math.
-- A mapper, a sealed-type state transition, an exception-to-response translation.
-- A `jakarta.validation` constraint set (buildable without Spring — see below).
-- Reproducing a bug at the unit level before fixing it (`dev:debugging` RED).
-
-## When NOT to use
-
-- Anything that boots a context (`@SpringBootTest`, `@DataJpaTest`, `@WebMvcTest`, `@JsonTest`) → **peer** `qa-api-java`
-- Contract / integration / E2E, Testcontainers, real-DB seed-assert-clean → **peer** `qa-api-java` (`db-testing/*`)
-- Whether the tests actually catch faults (mutation score) → **peer** `qa-java:test-quality-check` (PIT/pitest)
-- Suite-scale builders / ObjectMother → **peer** `qa-java:test-data-builder`
-- **Records/DTOs with no behavior, entities, `@Configuration` classes, generated code** → don't test them at all
-
 ## Stack
 
 ```kotlin
@@ -286,14 +269,3 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 5. **Add the boundary cases** as `@ParameterizedTest` rows — nulls, empties, min/max, the rounding boundary, the refused transition.
 6. **Verify:** `./gradlew test` green, no `UnnecessaryStubbingException`, compiler warning-clean, branch coverage of the changed code ≥ 80% (*Coverage floor*). Report counts and the coverage figure. Inside a plan task, `Gate: own tests` runs this task's tests — step 4's red run, then green — and the *Coverage floor* measure over the files it wrote; the last runnable task runs everything else.
 7. **Sweep:** a strategy family with one tested member is a gap.
-
-## Handoffs
-
-- Anything that boots a Spring context, contract/integration/E2E → **peer** [`qa-api-java`](../../../../qa/java/agents/qa-api-java.md)
-- Real-DB verification, Testcontainers → **peer** `qa/java/skills/db-testing/*`
-- Do the tests actually catch faults? → **peer** `qa/java/skills/test-quality-check` (PIT)
-- Suite-scale builders / ObjectMother → **peer** `qa/java/skills/test-data-builder`
-- Flaky triage / quarantine → **peer** `qa/reporting/java/skills/flaky-test-quarantine`
-- The class needs a seam / a pattern → [`pattern-writer`](../pattern-writer/SKILL.md)
-- Reviewing the tests with the change → [`code-review`](../code-review/SKILL.md)
-- .NET equivalent → `backend/dotnet/skills/unit-testing` · TypeScript equivalent → `backend/node/skills/unit-testing`

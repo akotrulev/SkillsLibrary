@@ -277,16 +277,3 @@ assertion on the new variant has passed.
   live-resize tests. Tests reach the page only through page objects and `Layout`.
 - Every class extends `BaseTest`; no `@DataProvider(parallel = true)`; test names `Should_X_When_Y`; test ids
   PascalCase dot-separated (`Nav.Desktop`, `ProductGrid.Card`).
-
-## Cross-references
-
-- `qa-typescript:responsive-testing` · `qa-dotnet:responsive-testing` — sibling stacks; same four ideas.
-- `qa-java:ui-tests-playwright` — `BaseTest`, the hooks (`lifecycle.md` §3) and the emulation reference
-  (`emulation-and-mobile-web.md`: viewport per class, device profiles, media features).
-- `qa-java:visual-regression` — the pixel complement: one baseline per viewport, after the structural checks pass.
-- `qa-java:accessibility-testing` — reflow/zoom (WCAG 1.4.10) and touch targets; run them at the same widths.
-- `qa-java:data-driven-testing` — the row pattern; here the rows feed a `@Factory` because each row needs its own
-  context options.
-- `frontend/react/skills/responsive-design` (FE peer) — the dev-side skill that defines the breakpoint contract
-  this skill reads; its variant-suffixed test ids (`Nav.Desktop` / `Nav.Hamburger`) are what make the variant
-  swap assertable. `frontend/blazor/skills/responsive-design` is the Blazor peer of the same contract.

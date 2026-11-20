@@ -10,22 +10,6 @@ Drives the **currently running app on a connected device or emulator through the
 
 This is the mobile counterpart of the web `qa/java/skills/page-objects-from-url`: live extraction via MCP, a primary-locator contract with the dev team, and a `missing-testids.md` report for what the app fails to expose. One difference simplifies the mobile flow — the page-source XML **already contains the accessibility id** (`name` on iOS and the bare `resource-id` on Android carry the `testID`; `content-desc` is the `accessibilityLabel`), so a single page-source read inventories structure *and* ids; there is no separate "harvest the test ids" pass.
 
-## When to use
-
-- The app is open on a device/emulator and the user wants to know what's on the current screen
-- Locators must be discovered or verified against the live UI before a page object is built or fixed
-- The team wants an inventory of which on-screen elements lack a stable accessibility id (`testID`)
-- A flow must be walked on the device (tap/type/swipe) to reveal screens whose elements are then captured
-
-## When NOT to use
-
-- **Many screens / the whole app** — a systematic multi-screen walk with an accumulated screen map → `qa/java/skills/mobile-app-crawler` (it calls this skill once per screen; this skill stays single-screen)
-- Emitting / updating the Java page object class → `qa/java/skills/mobile-screen-objects`
-- Writing or tagging the TestNG tests → `qa/java/skills/ui-test-author/appium`
-- Designing where screen objects / components / flows live → `qa/java/skills/page-object-design`
-- Web pages driven in a browser → `qa/java/skills/page-objects-from-url`
-- OS-surface features (permission dialogs, push, deep links, biometrics) → `qa/java/skills/mobile-native-features`
-
 ## Prerequisites
 
 The **Appium MCP server** must be connected. If its tools (`mcp__appium-mcp__appium_session_management`, `mcp__appium-mcp__appium_get_page_source`, …) are not available, stop and tell the user to register it:
@@ -169,16 +153,6 @@ When reporting a screen:
 - Guessing what an icon button does from its class name instead of `appium_ai` / asking
 - Extracting from a stale page source after a tap (refresh first)
 - Writing the page object or tests in the same breath — that's the next skills' job
-
-## Handoffs
-
-- Crawl many screens and accumulate a persistent screen map → `qa/java/skills/mobile-app-crawler`
-- Emit / update the Java page object → `qa/java/skills/mobile-screen-objects`
-- Write / tag the TestNG tests → `qa/java/skills/ui-test-author/appium`
-- Screen-object architecture (base classes, sub-packages) → `qa/java/skills/page-object-design`
-- OS-surface features (permissions, push, deep links, biometrics) → `qa/java/skills/mobile-native-features`
-- Formal test cases the tests are written from → the `qa-test-case-designer` agent
-- Appium environment setup / doctor failures / driver-specific questions → `mcp__appium-mcp__appium_skills`, `mcp__appium-mcp__appium_documentation_query`
 
 ## Reference
 

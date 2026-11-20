@@ -204,19 +204,3 @@ noise-sensitivity check asserts a pass-rate (parent idea #4), not a single sampl
 - **Inherit, don't repeat, the parent skill:** the four ideas, judge model-id pinning + gold-set calibration,
   regression-vs-stochastic (sample N≥3 for a rate), budgets-are-assertions, keys-via-env, no-PII all come from
   `qa-dotnet:ai-feature-testing`. Async all the way; no `Thread.Sleep`.
-
-## Cross-references
-
-- **`qa-dotnet:ai-feature-testing`** — the **parent**: the four ideas, the assertion ladder, judge-pinning +
-  calibration, the spine choice (promptfoo/DeepEval) and their references. RAG testing is its specialization; read
-  it first.
-- `references/ragas.md` — the **RAG-native spine**: Ragas metrics + the corpus→test-set generator, invoked as a
-  subprocess (`Process` + `System.Text.Json`), evaluator LLM pinned to Claude.
-- `qa-dotnet:data-driven-testing` — the golden-set row mechanics (one row = one named case, loaded externally).
-- `qa-dotnet:db-connection` / `…-testcontainers-dotnet` — seed/assert/tear-down the **vector or hybrid index**
-  the retriever reads (the RAG "DB").
-- `qa-typescript:ai-answer-quality-testing` · `qa-java:ai-answer-quality-testing` — the sibling stacks; same five ideas, Ragas/DeepEval driven
-  as a subprocess via `execa`/`ProcessBuilder`.
-- `qa-<stack>:quality-metrics` — track triad + recall@k **over time** (a declining recall is a silent index/embed
-  regression). `qa-dotnet:test-reports` — each stage/case as a named result.
-- The `qa-llm-dotnet` **agent** owns this skill alongside `ai-feature-testing` (RAG is a step of the LLM-eval run).

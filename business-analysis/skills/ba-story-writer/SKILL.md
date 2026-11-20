@@ -10,19 +10,6 @@ A story describes **one feature that must be built**. It says what the goal is, 
 
 "Authentication" is a story. It includes login, reset password by email and register with confirmation, because the goal (people get into their own account, and only their own) is not reached until all three exist.
 
-## When to use
-
-- The requirements and epics are written and the features under them need describing
-- A feature is known by name only ("we need authentication") and nobody has written down what is in it
-- Existing stories lack acceptance criteria, or are fragments of one feature spread over several stories
-
-## When NOT to use
-
-- The requirement is still vague → `business-analysis/skills/ba-scoping-writeup` first
-- Stories were authored elsewhere and need a review-only readiness audit → `business-analysis/skills/ba-story-quality-review` (this skill *fixes* stories; that one only *finds*)
-- The user wants test cases → `qa/manual/test-case-writer`
-- The user wants a defect filed → `qa/manual/bug-report-writer`
-
 ## Inputs needed
 
 1. **The epics** (`epics.md` from `business-analysis:epics`, ideally) and the requirements document they cover
@@ -111,11 +98,3 @@ A complete story in this shape, three parts and sixteen criteria: [`references/e
 ## Standards
 
 What every story must meet (the `US<n>` id and parent epic, one whole feature with one goal, no layer stories, the sections in order, an approach that is a plan and not a design, every included part proven by criteria, met-or-not bullets with stable `AC` ids, validations with their violation outcome, no technology, per-story exclusions and dependencies) is the business-analysis rule file `backlog-stories.md`, not a list here. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win.
-
-## Handoffs
-
-- Inside the delivery lane → `requirements-author` (`/dev:refine`) runs this skill as its Step 4 and writes the output to `docs/plans/<NNN>-<initiative>/stories.md`; the `business-analyst` sweep follows when the stories change shared business rules
-- Tests next → the test plan for the epic first (`qa-test-planner`, `/qa-<stack>:test-plan`: versions, what is tested, harness, scenarios, Definition of Ready and Done), then one test-case suite per story (`qa-test-case-designer`, `/qa-<stack>:test-cases`). Both start from `qa/manual/requirements-breakdown`, which distills the stories' goals, included parts, rules and validations into the test basis
-- Architecture, contracts, task plan → `solution-planner` (`/dev:plan-system`)
-
-The `qa/*` peers and `solution-planner` belong to other plugins (`qa-<stack>`, `dev`): they are named here and invoked separately, never loaded by this skill.

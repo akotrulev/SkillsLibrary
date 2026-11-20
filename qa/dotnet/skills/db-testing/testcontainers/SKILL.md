@@ -8,20 +8,6 @@ disable-model-invocation: true
 
 Scaffolds NUnit fixtures that boot a real database container per fixture (or per assembly), run schema migrations once on startup, and reset row data between tests with Respawn. Optimised for `dotnet test` locally and in Azure Pipelines.
 
-## When to use
-
-- New `IntegrationTests/Fixtures/{Resource}IntegrationTests.cs` fixture that needs a real DB
-- Replacing `UseInMemoryDatabase` or hand-rolled SQL mocks with a real engine
-- API tests that need to assert DB side-effects (rows written, FKs respected, triggers fired)
-- Cross-engine compatibility checks (run the same suite against Postgres 16 and 17)
-
-## When NOT to use
-
-- Pure unit tests with no SQL surface — keep them mock-driven
-- Performance/load runs against the DB — use `qa/dotnet/skills/load-testing`
-- SQL safety review of assertion queries — use `qa/dotnet/skills/db-testing/verification-queries`
-- Non-.NET stacks — use `qa/{java,typescript}/skills/db-testing/testcontainers`
-
 ## Inputs needed
 
 Ask at most 2 questions; infer the rest.
@@ -257,10 +243,3 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
    - `IntegrationTests/IntegrationTests.csproj` updates: add `Testcontainers.PostgreSql` / `.MsSql` / `.MongoDb`, `Respawn`, `Microsoft.AspNetCore.Mvc.Testing` if HTTP surface is exercised.
 4. Run `dotnet test IntegrationTests/IntegrationTests.csproj --filter "FullyQualifiedName~{Resource}IntegrationTests"` — expect green or a real assertion failure (not a setup crash).
 5. Cross-link: in the fixture file's header comment, point to `qa/dotnet/skills/db-testing/verification-queries` for assertion-query rules and `qa/dotnet/skills/test-data-builder` for seed builders.
-
-## Cross-references
-
-- **`qa/dotnet/skills/db-testing/verification-queries`** — SQL guardrails for assertion queries inside these tests.
-- **`qa/dotnet/skills/test-data-builder`** — builders for seed data (preferred over inline literals).
-- **`qa/cicd/dotnet/skills/ci-pipelines`** — Docker-in-Docker enablement, container caching, and Allure publish for integration test stages.
-- **`qa/reporting/dotnet/skills/test-reports`** — attach container logs on failure.

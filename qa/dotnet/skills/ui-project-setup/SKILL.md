@@ -12,17 +12,6 @@ This skill stands up a **complete, runnable web-UI test solution from zero**: di
 
 Default driver is **Playwright** (auto-waiting, trace viewer, fastest to stand up); use **Selenium** only when the project mandates it or needs a Grid/browser Playwright doesn't support. The structure follows the dotnet layout: **flat projects at the solution root**, **per-project config** so each suite is independently configurable/dockerizable, a shared **`TestCore`**, and **Central Package Management (CPM)**. This skill owns the **project shell**. The Playwright project files themselves — `Directory.Packages.props`, `UiTests.csproj`, `ui.runsettings`, `BaseTest.cs`, `AuthSetup.cs` and a sample page and test — are the assets of [`ui-test-author/playwright`](../ui-test-author/playwright/SKILL.md); copy them, never re-type them here.
 
-## When to use
-
-- A fresh repo with no .NET UI test solution, and the user wants web-UI coverage.
-- The user asks which versions / structure / setup a C# UI test framework should use.
-
-## When NOT to use
-
-- The solution already exists → author into it with the `qa-ui-dotnet` skills.
-- API / mobile / performance scaffolding → use the matching `qa/dotnet/skills/<discipline>-project-setup` skill.
-- A Java or TypeScript UI suite → `qa/java/skills/ui-project-setup` / `qa/typescript/skills/ui-project-setup`.
-
 ## Tooling & versions
 
 Versions are pinned **once** in `Directory.Packages.props` (CPM); csprojs reference packages **without** a `Version` attribute (an inline version under CPM fails restore with `NU1008`). The Playwright rows below are the ones in `ui-test-author/playwright/assets/Directory.Packages.props`.

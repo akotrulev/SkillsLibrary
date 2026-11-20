@@ -191,19 +191,3 @@ vector store, assert state, tear down) reuses `qa-typescript:db-*` discipline fo
 ## Rules
 
 The standards this skill's output must meet are the qa-typescript rule files, not a list here: `llm-evals.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
-
-## Cross-references
-
-- **`qa-typescript:ai-feature-testing`** — the **parent**: the four ideas, the assertion ladder, judge-pinning +
-  calibration, the spine choice (promptfoo/DeepEval) and their references. RAG testing is its specialization; read
-  it first.
-- `references/ragas.md` — the **RAG-native spine**: Ragas metrics + the corpus→test-set generator, invoked as a
-  subprocess (`execa`), evaluator LLM pinned to Claude.
-- `qa-typescript:data-driven-testing` — the golden-set row mechanics (one row = one named case, loaded externally).
-- `qa-typescript:db-connection` / `…-testcontainers-typescript` — seed/assert/tear-down the **vector or hybrid
-  index** the retriever reads (the RAG "DB").
-- `qa-dotnet:ai-answer-quality-testing` · `qa-java:ai-answer-quality-testing` — the sibling stacks; same five ideas, Ragas/DeepEval driven as a
-  subprocess via `Process`/`ProcessBuilder`.
-- `qa-<stack>:quality-metrics` — track triad + recall@k **over time** (a declining recall is a silent index/embed
-  regression). `qa-typescript:test-reports` — each stage/case as a named result.
-- The `qa-llm-typescript` **agent** owns this skill alongside `ai-feature-testing` (RAG is a step of the LLM-eval run).

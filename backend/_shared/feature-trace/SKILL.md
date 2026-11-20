@@ -12,17 +12,6 @@ The discipline: **separate what the code does from what you think it means.** Ev
 
 **Prerequisite:** a confirmed area from `dev:doc-codebase-survey` or `be-feature-documenter`'s confirmed Step 1 scope table.
 
-## When to use
-
-- Step 2 of a `be-documenter` run (area split confirmed) or `be-feature-documenter` run (scope table confirmed); a `REFRESH` re-trace of moved code
-- Learning what a module enforces before changing it
-
-## When NOT to use
-
-- Areas not mapped yet → `dev:doc-codebase-survey`
-- Defect findings with severities → `dev:audit-feature` (it asks what is wrong, this asks what is true). A defect noticed while tracing is a finding to report — never switch to auditing
-- The readable write-up → `dev:doc-business-model`; this skill produces its evidence
-
 ## Output
 
 Per-area evidence for the documenter's write step (`be-documenter` Steps 3–4), never a KB artifact or content of `docs/business-model/`; it stays in the session (or scratchpad) unless it must survive it.
@@ -154,7 +143,6 @@ Load `references/trace-record.md` before writing the record or a persisted `.tra
 
 Header: `**Traced:** YYYY-MM-DD · **Depth:** full | shallow · **Profile:** full | guide · **Commit:** <sha>`.
 
-
 ## Self-check before handing off
 
 1. Tasks are built from the sources in order, each with its actor and entry points — not one per endpoint.
@@ -174,16 +162,6 @@ Header: `**Traced:** YYYY-MM-DD · **Depth:** full | shallow · **Profile:** ful
 15. `full`: tests and telemetry are inventoried with their gaps, or a negative search recorded.
 16. Client words are in `Client vocabulary`; every user-facing refusal quotes its exact text and source (or the search finding none).
 17. A purpose from a story or `#confirmed` entry carries its source and no question; every other purpose is `#inferred` with its question.
-
-## Handoffs
-
-- **→ `business-analysis:process-flow`** (`full`) — orchestration and failure paths become `FLOW-nnn` diagrams.
-- **→ `business-analysis:state-grid`** (`full`) — inventory 5 becomes `ENT-nnn` state × event grids; refused transitions are its `—` cells.
-- **→ `business-analysis:decision-table`** (`full`) — inventory 6 becomes `DEC-nnn` tables with a declared hit policy; completeness exposes combinations the code never handles.
-- **→ `business-analysis:dependency-map`** (`full`) — Edges become `events.md`, `shared-data.md`, `invariants.md`; `be-documenter` writes them, `be-feature-documenter` does not.
-- **→ `dev:doc-business-model`** — the guide: Tasks as the guide's tasks by actor (every role, administrators included); rules with where a person meets them (*Rules and limits*); calculations with inputs (*How it is calculated*); automatic work as what each person notices; statuses and whether the product shows them (state diagram only then); decisions; client vocabulary with screen paths; exact refusal text; stated purposes; Edges become only the guide's *See also*.
-- **→ `code-auditor`** — the findings list, through the run's report; never the guide.
-- **→ `qa-test-case-designer`** — tasks, rules and validations are a test basis; thresholds are BVA seeds.
 
 ## Version policy
 

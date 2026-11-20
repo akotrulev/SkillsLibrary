@@ -30,19 +30,6 @@ Writes Maestro flows: declarative YAML that drives a native or React Native app 
 
 One tool per project. Never mix both runners in one suite; a project that needs both keeps two folders and two pipelines.
 
-## When to use
-
-- A flow, a subflow, a `config.yaml` or a tag change under `.maestro/`
-- A Maestro step in EAS Workflows or a CI job, and its JUnit report
-- Reviewing a Maestro workspace
-
-## When NOT to use
-
-- Appium / WebdriverIO → `qa/typescript/skills/ui-test-author/appium`
-- Web UI → `qa/typescript/skills/ui-test-author/playwright`
-- Finding the ids on a live screen → `qa/typescript/skills/mobile-screen-explorer`
-- Adding `testID` to the app → the `mobile-react-native:test-ids` dev skill, through `missing-testids.md`
-
 ## The layout
 
 ```
@@ -196,12 +183,3 @@ jobs:
 ## Review rows
 
 A flow is judged by the Maestro rule in the qa-typescript rule file `mobile-tests.md` (the project's copy in `.claude/rules/qa-typescript/`, or `qa/typescript/skills/rules/`), not by the page-object rules. `ui-test-author/review` applies it in a review run.
-
-## Handoffs
-
-- Selectors on the live app → `qa/typescript/skills/mobile-screen-explorer` (`maestro hierarchy` for a Maestro project)
-- Failure evidence rules → `qa/typescript/skills/evidence-capture`
-- Pipelines and retention → `qa/cicd/typescript/skills/ci-pipelines`, `qa/cicd/ci-conventions`
-- Device farms → `qa/typescript/skills/device-cloud`
-- Test ids in the app → the matching `mobile-*` dev agent, through `missing-testids.md`
-- Review → `qa/typescript/skills/ui-test-author/review`

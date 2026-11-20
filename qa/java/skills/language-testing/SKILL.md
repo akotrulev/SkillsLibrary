@@ -255,15 +255,3 @@ locale-pinned tests pass, the coverage diff passes (there's no key at all), but 
 - **The supported-locale list comes from one constant** (`Catalog.SUPPORTED`); the locale matrix is a `@Factory`
   over it. One logical assertion per test; `Should_X_When_Y`; no `Thread.sleep`; tests reach the page only
   through page objects.
-
-## Cross-references
-
-- `qa-typescript:language-testing` · `qa-dotnet:language-testing` — the sibling stacks; same four ideas.
-- `qa-java:ui-tests-playwright` — `BaseTest`, `contextOptions()` (`lifecycle.md` §3) and the emulation
-  reference (`emulation-and-mobile-web.md` §5 locale/time zone, §6 `page.clock()`).
-- `qa-java:visual-regression` — pairs with the pseudo-loc **overflow** check: a pixel diff records *how* the
-  layout broke; this skill asserts *that* it didn't.
-- `qa-java:data-driven-testing` — the row pattern; the locale matrix feeds a `@Factory` because each locale needs
-  its own context options.
-- `qa-java:accessibility-testing` — `html[lang]` / `dir` a11y rules; run them together on the locale-pinned page.
-- `qa-java:test-reports` — name each locale in the report so a failure says *which* language broke.

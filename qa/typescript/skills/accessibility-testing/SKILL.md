@@ -57,11 +57,3 @@ reach `localhost` or a firewalled host.
   Allure-only call uses `import * as allure from 'allure-js-commons'` and is awaited.
 - Automation is the floor (roughly a third of WCAG). Keyboard, focus order and screen-reader behaviour still
   need manual testing (`qa-<stack>:exploratory-charter-writer`).
-
-## Handoffs
-
-- Page objects, fixtures, the canonical config → `qa/typescript/skills/ui-test-author/playwright`
-- Accessible-name, role and aria-snapshot assertions → its `references/assertions.md`
-- Failure evidence and traces → `qa/typescript/skills/evidence-capture`
-- The CI job and artifact upload → `qa/cicd/typescript/skills/ci-pipelines`
-- Java and .NET → `qa-java:accessibility-testing`, `qa-dotnet:accessibility-testing`

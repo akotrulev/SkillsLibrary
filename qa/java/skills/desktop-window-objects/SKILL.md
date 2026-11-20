@@ -8,20 +8,6 @@ disable-model-invocation: true
 
 Turns a discovered element inventory into a **Java Appium window object**: a `BaseWindow` subclass under `windows/`. It consumes the element table and locator rungs from `qa/java/skills/desktop-screen-explorer` (or an inventory the user supplies) and emits or updates one window class. It owns **codegen, multi-window and dialog handling, waits, and the create/update diff**. The shared rules (id contract, window-object rules, window scoping) are `qa/_shared/desktop-testing`; the TestNG spec conventions are `qa/java/skills/ui-test-author/appium`. The mobile twin is `qa/java/skills/mobile-screen-objects`.
 
-## When to use
-
-- Elements for a window were discovered and now need a class.
-- An existing window object must be reconciled against a freshly explored window.
-- The user describes a window's elements and ids directly and wants the class emitted.
-
-## When NOT to use
-
-- Locators are not known yet → `qa/java/skills/desktop-screen-explorer` first. Never fabricate one.
-- Writing the tests that use the object → `qa/java/skills/ui-test-author/appium`.
-- Mobile screens → `qa/java/skills/mobile-screen-objects`; web pages → `qa/java/skills/page-objects-from-url`.
-- Reviewing an existing object → `qa/java/skills/ui-test-author/review`.
-- TypeScript / .NET → `qa/typescript/skills/desktop-window-objects` / `qa/dotnet/skills/desktop-window-objects`.
-
 ## Inputs needed
 
 1. **Window name** (PascalCase: `LibraryWindow`, `SettingsWindow`, `ExportDialog`) and whether it is a main window, a document window, a sheet or a dialog.
@@ -217,13 +203,3 @@ driver.findElement(AppiumBy.name(EXPORT_BUTTON_FALLBACK));
 - One class per window; update in place rather than creating a duplicate.
 - A window object takes the driver and nothing else; the only assertion inside one is `verifyWindowLoaded()`. No business logic, API calls or test code.
 - Everything else is the rule files named under Conventions; where they and this skill disagree, the rule files win.
-
-## Handoffs
-
-- Discovering the elements → `qa/java/skills/desktop-screen-explorer`
-- Scaffold and OS prerequisites → `qa/java/skills/desktop-project-setup`
-- Writing the tests → `qa/java/skills/ui-test-author/appium`
-- Object architecture (base classes, sub-packages) → `qa/java/skills/page-object-design`
-- Missing ids → the `desktop-macos` or `desktop-windows` agent
-- Shared rules → `qa/_shared/desktop-testing`
-- TypeScript / .NET siblings → `qa/typescript/skills/desktop-window-objects` / `qa/dotnet/skills/desktop-window-objects`

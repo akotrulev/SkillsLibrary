@@ -52,21 +52,6 @@ version it shipped in.
 
 If a schema or client a spec needs is missing, run the owner skill first — never call `request.get(...)` inline.
 
-## When to use
-
-- The project already runs Playwright for UI and wants API coverage in the same suite/report
-- Hybrid suites where API specs and UI specs share config, projects, tracing, and signed-in state
-- New `{operation}{Resource}.spec.ts` under `tests/api/`, or new scenarios on an existing one
-
-## When NOT to use
-
-- No Playwright in the project → `qa/typescript/skills/api-test-author/writer` (Vitest + fetch + Zod)
-- API calls **inside a UI test** (seed, then drive the browser) → the UI suite's arrange step
-  (`qa/typescript/skills/ui-test-author/playwright`)
-- Mocking the browser's network traffic → `qa/typescript/skills/network-mocking`
-- GraphQL / gRPC → the protocol siblings under `qa/typescript/skills/api-test-author/`
-- Reviewing existing tests → `qa/typescript/skills/api-test-author/review`
-
 ## Fixtures template — identities as contexts, cleanup as teardown
 
 `userClient` is the standard identity, `adminClient` the elevated one, `anonymousClient` sends no
@@ -225,15 +210,3 @@ The standards this skill's output must meet are the qa-typescript rule files, no
 6. Author one spec file per operation from the scenario matrix.
 7. Run the project's own typecheck script, then `npx playwright test --project=api` — expect 0 type errors, 0
    failures.
-
-## Cross-references
-
-- `qa-typescript:api-tests` — the **stack default** (Vitest + fetch + Zod); same Schema + Client + Spec
-  spine.
-- `qa-java:api-tests-playwright` · `qa-dotnet:api-tests-playwright` — the sibling stacks; same four ideas.
-- `qa-typescript:api-models` / `qa-typescript:api-client-writer` — schemas / the client layer.
-- `qa-typescript:ui-tests-playwright` — the UI suite this skill shares a runner with.
-- `qa-typescript:network-mocking` — `page.route` mocking of browser traffic (not API testing).
-- `qa-typescript:api-tests-review` — review; plus this skill's What-NOT-to-do list.
-- `qa-typescript:test-login-tokens` — the tokens and signed-in state the identity fixtures inject.
-- `qa-typescript:test-reports` — `allure-playwright` wiring so API and UI results land in one report.

@@ -26,21 +26,6 @@ Wires an Amazon Cognito **user pool** into a Spring Boot 3 service using the **S
 - Outbound M2M: `OAuth2AuthorizedClientManager` + `WebClient`
 - Config via `application.yml` + env vars / Secrets Manager / Vault — never hardcoded
 
-## When to use
-
-- Protecting a Spring Boot REST API with Cognito user-pool access tokens
-- `@PreAuthorize("hasAuthority('SCOPE_https://api.yourco.com/orders.read')")` or `hasAuthority('GROUP_Admins')`
-- Calling another Cognito-protected API with Client Credentials
-
-## When NOT to use
-
-- React SPA → `auth/cognito-react`
-- .NET → `backend/dotnet/skills/cognito`
-- Blazor → `auth/cognito-blazor`
-- Auth0 → `backend/java/skills/auth0`
-- Cognito **identity pools** → out of scope
-- Concepts → `auth/_shared/oidc-concepts`
-
 ## Inputs needed
 
 1. **Region** + **`userPoolId`** per env
@@ -228,12 +213,3 @@ Simpler than the Auth0 sibling — Cognito uses `scope` on the token request, so
 4. Guard handlers with `@PreAuthorize("hasAuthority('SCOPE_…')")` / `hasAuthority('GROUP_…')`.
 5. For outbound M2M: add the `client_credentials` registration (`token-uri` = hosted domain, `scope`) + the `OAuth2AuthorizedClientManager`/`WebClient` beans.
 6. Smoke: `curl /me` with a fresh access token → confirm `scope`/`groups`; present an ID token → expect 401 (`token_use`).
-
-## Handoffs
-
-- Blazor / React / .NET siblings → `auth/cognito-blazor`, `auth/cognito-react`, `backend/dotnet/skills/cognito`
-- Auth0 equivalent → `backend/java/skills/auth0`
-- Concepts → `auth/_shared/oidc-concepts`
-- Pattern/persistence scaffolding for the rest of the service → `backend/java/skills/{generator,persistence}`
-- Storing secrets → `devops/environment-config` + Vault / Secrets Manager
-- API tests with auth → `qa/java/skills/api-test-author/writer` + `qa/java/skills/test-login-tokens`

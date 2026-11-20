@@ -25,21 +25,6 @@ Owns **every dev-side test in an Expo app**, at two altitudes: **component tests
 
 Detect first: RNTL major in `package.json`, the preset (`jest-expo`), React major, and any existing `renderWithProviders` helper — extend it.
 
-## When to use
-
-- A component has **logic**: conditional render, formatted display, a handler that changes state, a derived disabled state, a reducer
-- A hook with real logic (reducer, derived value, subscription, `AppState` handling)
-- The region states from [`error-handling`](../error-handling/SKILL.md): failed keeps the filters, stale keeps the rows, offline is not failed
-- A Zod schema, formatter, mapper, `parseRetryAfter`, store, query-key builder — plain Jest
-
-## When NOT to use
-
-- Device journeys, gestures, permission dialogs, deep links, push → `qa-mobile-typescript` (peer: Appium, or Maestro on Expo — plan 003)
-- Markup-only components with no branches — a snapshot of hand-written markup is a tautology
-- Writing `testID`s → [`test-ids`](../test-ids/SKILL.md); tests here **consume** them as the last-resort query
-- Request behaviour against a real API → `qa-api-typescript`
-- Native Swift / Kotlin → `mobile-ios:unit-testing` / `mobile-android:unit-testing`
-
 ## Test what has behaviour
 
 | Unit | Test? | Assert |
@@ -207,10 +192,3 @@ Inside a plan task, `Gate: own tests` runs this task's tests — the red run, th
 - Branch coverage of the changed code ≥ 80% (*Coverage floor*), reported as a figure.
 - Break the implementation (flip a branch) → exactly the test for that behaviour fails.
 - No test imports `vitest`, `vi`, or touches the network.
-
-## Handoffs
-
-- Device journeys, gestures, permission dialogs → `qa-mobile-typescript` (peer)
-- Ids to query → [`test-ids`](../test-ids/SKILL.md) · roles and labels → [`accessibility`](../accessibility/SKILL.md)
-- States under test → [`error-handling`](../error-handling/SKILL.md) · client under test → [`networking`](../networking/SKILL.md)
-- RNTL / SDK upgrade → [`migration`](../migration/SKILL.md)

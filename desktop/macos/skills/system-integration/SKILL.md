@@ -23,24 +23,6 @@ How the app shows up outside its windows and how the system reaches in: **App In
 
 Detect first: the deployment target, SwiftUI vs AppKit, and which of these the app already has. **Add the smallest surface the product needs**; every intent is public API the user scripts against.
 
-## When to use
-
-- A Shortcuts action, a Spotlight result, a Siri phrase, an App Shortcut
-- A widget or a control on the Mac
-- A local notification, a notification action
-- `myapp://` or a universal link that must open the right window
-- A Services entry, copy and paste of rich content, drag in and out of a table
-
-## When NOT to use
-
-- The permission to notify or to read dropped folders → [`sandbox-and-permissions`](../sandbox-and-permissions/SKILL.md)
-- Login items, XPC → [`background-and-helpers`](../background-and-helpers/SKILL.md)
-- Window placement for a routed URL, `openWindow` → `windows-and-scenes`
-- The menu items themselves → `menus-and-commands`
-- Document types and open-with → [`documents`](../documents/SKILL.md)
-- Push (APNs) registration → `desktop/_shared/security` plus the server; local notifications only here
-- Windows → `desktop-windows:activation-and-notifications`; iOS → `mobile-ios:system-integration`
-
 ## App Intents
 
 One intent per user-facing action, a small entity per noun, and the **same model call the UI makes** — an intent never owns logic.
@@ -201,13 +183,3 @@ Standards come from `.claude/rules/desktop-macos/` (`/desktop-macos:rules` insta
 - **A system notification for a foreground failure**: use the inline banner.
 - **A hover-only drop zone**: no click path for touch.
 - **A path from the pasteboard opened as-is**: validate, and the sandbox will refuse it anyway.
-
-## Handoffs
-
-- Permissions and Settings links → [`sandbox-and-permissions`](../sandbox-and-permissions/SKILL.md)
-- Helpers, login items → [`background-and-helpers`](../background-and-helpers/SKILL.md)
-- Shared store, app group → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Window placement and `openWindow` → `windows-and-scenes`; Services and Edit menu → `menus-and-commands`
-- Document types → [`documents`](../documents/SKILL.md)
-- Sign-in redirects → `auth0-macos`; input validation policy → `desktop/_shared/security`
-- iOS counterpart → `mobile-ios:system-integration`

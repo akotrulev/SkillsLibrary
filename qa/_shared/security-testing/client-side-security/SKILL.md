@@ -165,24 +165,3 @@ npm i -g retire@5.4.3
   not harvested cookies/tokens; nothing sensitive committed under `docs/`.
 - **Pin versions** (Dalfox v3.2.1, ZAP 2.17.0, `csp_evaluator` 1.1.8, `@mdn/mdn-http-observatory` 1.6.3,
   Retire.js 5.4.3, Nuclei 3.11.1) and state the renames. No secrets in tool config.
-
-## Cross-references
-
-- `qa-<stack>:security-foundations` — the OWASP backbone (A05 Injection, A02 Misconfiguration, A03 supply chain), the
-  authorization rule, triage, SARIF consolidation. **Load alongside.**
-- `qa-<stack>:active-scan` — the **server-side** DAST sibling (headers, injection through HTTP). This skill
-  owns the **client/browser** layer it is blind to. Run both.
-- `qa-<stack>:exploit-validation` — the exploitation sibling for **server-side** injection classes (SQLi,
-  SSRF, SSTI…). A confirmed DOM XSS that needs chaining hands off there / to `penetration-testing`.
-- `qa/<stack>/skills/security-testing/dependency-scan` — **application** SCA (lockfile CVEs); Retire.js here
-  catches vulnerable libs in the **shipped browser bundle** (a different surface). Boundary partners.
-- **`security-hardening`** + **`fe-react`** / **`fe-blazor`** — the **authoring half
-  of the handshake**: they write the strict nonce CSP, `Reporting-Endpoints`, and sink-safe rendering; this
-  skill proves the header blocks and the report lands. Sink findings route to their component writers.
-- `qa/manual/bug-report-writer` — write up a confirmed DOM XSS / CSP-bypass with the WSTG id, the PoC URL,
-  and the browser evidence (no-execution + violation event + report body).
-- `qa/_shared/agents/qa-security.md` — the step-by-step orchestrator that runs this in **Step 4b** dynamic lane.
-- Deep dives: **`references/dom-xss.md`** (Dalfox v3.2.1 · DOM Invader · source→sink taint · Retire.js) ·
-  **`references/csp-validation.md`** (CSP Evaluator · MDN Observatory · the `securitypolicyviolation`
-  dynamic-block recipe · `report-to`) · **`references/spa-dast.md`** (ZAP Client Spider · the
-  Playwright→proxy pattern · Nuclei headless · Burp SPA crawl).

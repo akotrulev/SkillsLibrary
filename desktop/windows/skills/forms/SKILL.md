@@ -18,20 +18,6 @@ How a form is built in WinUI: **the right input control per value, `ObservableVa
 | Binding | `x:Bind … Mode=TwoWay` | `UpdateSourceTrigger` is explicit (below) |
 | WPF / WinForms | `Binding` + `IDataErrorInfo` / `ErrorProvider` | → `desktop-windows:wpf`, `:winforms` |
 
-## When to use
-
-- Any screen that edits a value: sign-in, settings, create/edit, search filters
-- "Validate this field", "show the server's error under the input", "what is the tab order?"
-
-## When NOT to use
-
-- Confirm / destructive dialogs, `InfoBar`, `ContentDialog` → [`ui-components`](../ui-components/SKILL.md)
-- State ownership, DI → [`architecture`](../architecture/SKILL.md)
-- Sending the form over HTTP, ProblemDetails → `desktop-windows:networking`
-- Narrator and labels audit → `desktop-windows:accessibility`; ids → `desktop-windows:test-ids`
-
----
-
 ## Pick the control by the value
 
 | Value | Control | Never |
@@ -158,11 +144,3 @@ A submit adds a `form.submitted` metric with the form name and outcome (`ok`, `i
 - **Placeholder used as the label** — it disappears and Narrator may not read it.
 - **`TabIndex` set on half the form** — the unset half sorts after the set half.
 - **Server error dropped when the field is unknown** — surface it in the banner.
-
-## Handoffs
-
-- Dialog and `InfoBar` rules → [`ui-components`](../ui-components/SKILL.md); view-model shape → [`architecture`](../architecture/SKILL.md)
-- Windows, access keys, accelerators → `desktop-windows:windows-and-navigation`
-- ProblemDetails, retry → `desktop-windows:networking`; localized messages → `desktop-windows:languages`
-- Labels, Narrator, High Contrast → `desktop-windows:accessibility`; `AutomationId` → `desktop-windows:test-ids`
-- Mac counterpart → `desktop-macos:forms`

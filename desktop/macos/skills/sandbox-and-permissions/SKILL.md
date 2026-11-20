@@ -20,24 +20,6 @@ How a Mac app gets to the things it does not own: the user's files, the camera, 
 
 Detect first: the entitlements file, `ENABLE_APP_SANDBOX`, and whether the build is MAS or Developer ID. **Never turn the sandbox off, or add an entitlement, as a side effect.**
 
-## When to use
-
-- Adding an entitlement, or finding why a call is blocked in the sandbox
-- Opening, saving or re-opening a file the user chose; remembering a folder
-- Camera, microphone, screen recording, accessibility, input monitoring, Desktop/Documents/Downloads, Automation
-- A feature that "needs Full Disk Access"
-- A permission denied and the user is stuck
-
-## When NOT to use
-
-- The app's own container paths, Keychain → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Document open/save, autosave, versions → [`documents`](../documents/SKILL.md)
-- Login items, XPC helpers → [`background-and-helpers`](../background-and-helpers/SKILL.md)
-- Notifications permission, App Intents → [`system-integration`](../system-integration/SKILL.md)
-- The outgoing-network entitlement → [`networking`](../networking/SKILL.md)
-- Notarization, signing, App Store rules → `desktop/_shared/distribution`
-- iOS permissions → `mobile-ios:device-features`; Windows → `desktop-windows:platform-integration`
-
 ## Entitlements — least privilege, every one with a reason
 
 | Entitlement | Grants | Add when |
@@ -195,14 +177,3 @@ Standards come from `.claude/rules/desktop-macos/` (`/desktop-macos:rules` insta
 - **Stale bookmark ignored**: works once more, then the folder "forgets" the grant.
 - **Asking for Accessibility at launch** to enable one rarely used feature.
 - **Opening `Privacy_AllFiles` as the first run step** for an app that could run without it.
-
-## Handoffs
-
-- Container paths, Keychain → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Documents and their panels → [`documents`](../documents/SKILL.md)
-- Helpers receiving a bookmark → [`background-and-helpers`](../background-and-helpers/SKILL.md)
-- Notifications, App Intents → [`system-integration`](../system-integration/SKILL.md)
-- Network entitlement → [`networking`](../networking/SKILL.md)
-- Signing, notarization, App Review → `desktop/_shared/distribution`; secrets → `desktop/_shared/security`
-- Settings-link screen states → `error-handling`; test ids → `test-ids`
-- iOS counterpart → `mobile-ios:device-features`

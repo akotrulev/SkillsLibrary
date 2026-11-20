@@ -15,21 +15,6 @@ Wires Auth0 into a Spring Boot 3 service using the **Spring Security OAuth2 Reso
 - For outbound M2M: Spring Security's `OAuth2AuthorizedClientManager` (or a thin handwritten cache around `WebClient`)
 - Configuration via `application.yml` + env vars / Vault — never hardcoded
 
-## When to use
-
-- Protecting a Spring Boot REST API with Auth0 JWTs
-- Adding method-level `@PreAuthorize("hasAuthority('SCOPE_orders:read')")` or `hasAuthority('PERM_orders:read')`
-- Calling another API with Client Credentials
-- Mapping Auth0 custom claims into a `JwtAuthenticationToken`
-
-## When NOT to use
-
-- React SPA → `auth/auth0-react`
-- .NET → `backend/dotnet/skills/auth0`
-- Blazor → `auth/auth0-blazor`
-- AWS Cognito instead of Auth0 → `backend/java/skills/cognito`
-- Concepts → `auth/_shared/auth0-concepts`
-
 ## Inputs needed
 
 1. **Auth0 tenant domain** per env
@@ -233,14 +218,3 @@ public class OrdersDownstream {
 5. Decorate handlers with `@PreAuthorize("hasAuthority('PERM_<name>')")`.
 6. For outbound M2M: add `oauth2.client.registration.<name>` config and the `OAuth2AuthorizedClientManager` bean with the audience mapper; create a typed `WebClient`.
 7. Smoke flow: `curl` `/me` with a fresh access token, confirm `perms` array; revoke a role, confirm 403.
-
-## Handoffs
-
-- Concepts → `auth/_shared/auth0-concepts`
-- React SPA → `auth/auth0-react`
-- .NET equivalent → `backend/dotnet/skills/auth0`
-- Blazor → `auth/auth0-blazor`
-- AWS Cognito equivalent → `backend/java/skills/cognito`
-- Pattern/persistence scaffolding for the rest of the service → `backend/java/skills/{generator,persistence}`
-- Storing secrets → `devops/environment-config` + Vault
-- API tests with auth → `qa/java/skills/api-test-author/writer` + `qa/java/skills/test-login-tokens`

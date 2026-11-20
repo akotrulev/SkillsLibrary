@@ -19,20 +19,6 @@ Wires **Auth0.swift** into a SwiftUI (or AppKit) Mac app. **Universal Login in t
 
 Source: github.com/auth0/Auth0.swift (README, macOS section).
 
-## When to use
-
-- New Auth0 sign-in / sign-out in a Mac app; calling a protected API with the token
-- The browser closes but the app never receives the result
-- Session restore at launch, silent renewal, sign-out across windows
-- Sign in with Apple exchanged for Auth0 tokens
-
-## When NOT to use
-
-- Concepts, RBAC, `audience` → `auth/_shared/auth0-concepts`
-- iOS → `auth/auth0-ios`; Windows → `auth/auth0-windows`
-- Keychain, sandbox and entitlement rules in general → `desktop/_shared/security`
-- Backend validation → `backend/*/auth0`
-
 ## Setup
 
 `Auth0.plist` (`ClientId`, `Domain`) or values in code. Both are public; a Native application has no secret.
@@ -141,9 +127,3 @@ Offer it when third-party login is the primary sign-in on a Mac App Store build.
 3. Add the package and `Auth0.plist`; build `AuthSession`.
 4. Render `restoring / signedOut / signedIn / failed` in SwiftUI.
 5. Smoke on a signed build: sign in, quit and relaunch (restores), call the API, sign out, confirm the next sign-in asks for credentials.
-
-## Handoffs
-
-- Concepts → `auth/_shared/auth0-concepts`; storage and entitlement rules → `desktop/_shared/security`
-- Signing and notarization → `desktop/_shared/distribution`
-- Crash and telemetry without tokens → `desktop/_shared/observability`

@@ -17,22 +17,6 @@ Owns changing the **runtime, SDK, UI framework, project format or packaging** of
 | Dated | **.NET 8 and 9 are out of support since 2026-11-10** · **Windows App SDK 1.8 left maintenance 2026-09-24; 1.7 and older are out of support** · the 2.0 line is serviced to 2027-04-29 | Deadlines, not preferences: [`dotnet-8-9-to-10`](references/dotnet-8-9-to-10.md), [`windows-app-sdk-1-to-2`](references/windows-app-sdk-1-to-2.md) |
 | Floor | Windows 10 1809 (17763) is the Windows App SDK API floor; Windows 10 consumer ESU runs to 2027-10-12 | `TargetPlatformMinVersion` stays unless the owner raises it |
 
-## When to use
-
-- The user names a move: .NET 10, Windows App SDK 2.x, UWP to WinUI, WPF or WinForms to WinUI, .NET Framework to .NET 10, modernizing WPF or WinForms in place
-- The audit reports A1–A7 ([`standards-audit`](../standards-audit/SKILL.md) section A)
-- A post-migration break: a window that lost its state, a package that no longer installs, a toast that stopped arriving
-
-## When NOT to use
-
-- New app → [`project-setup`](../project-setup/SKILL.md)
-- Feature work, a bug fix → the agent's FIX / EXTEND modes; they never up-level a lane
-- A patch or minor dependency bump, or a package major with no lane change: dependency hygiene
-- Signing, MSIX or update-channel setup that is not a move → `desktop/_shared/distribution`
-- macOS → `desktop-macos:migration`; iOS → `mobile-ios:migration`
-- **Xamarin.Forms / MAUI → WinUI** is a rewrite, not a migration: MAUI is detected and named, not taught ([`basics`](../basics/SKILL.md)). Say so, point to [`project-setup`](../project-setup/SKILL.md) and the plan skills, and offer to plan it as new work
-- **Win32 / MFC → C++/WinRT** is new work in the [`cpp-winrt`](../cpp-winrt/SKILL.md) lane, not a move this skill owns
-
 ## Inputs needed
 
 1. **The move**: one of the six below. A request for two is two runs, in the order the table gives
@@ -90,13 +74,3 @@ Order 0 moves first when its date is near; the numbered ones follow by dependenc
 - **Rewriting a window and redesigning it in the same commit**: the diff cannot be reviewed.
 - **Deleting `packages.config` or the `.NET Framework` project before the new project builds and tests green.**
 - **Bundling a feature into the migration commit.**
-
-## Handoffs
-
-- The C# and XAML standard → [`basics`](../basics/SKILL.md); project, props and manifest layout → [`project-setup`](../project-setup/SKILL.md)
-- State ownership after the move → [`architecture`](../architecture/SKILL.md); WPF and WinForms lanes → [`wpf`](../wpf/SKILL.md), [`winforms`](../winforms/SKILL.md)
-- Hosting, P/Invoke, COM, CsWinRT → [`interop`](../interop/SKILL.md); the C++ lane → [`cpp-winrt`](../cpp-winrt/SKILL.md)
-- Store model migrations (EF Core) → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Signing, MSIX, updates → `desktop/_shared/distribution`
-- Review the migration diff → [`code-review`](../code-review/SKILL.md); conformance after the move → [`standards-audit`](../standards-audit/SKILL.md)
-- Tests that lock the move → [`unit-testing`](../unit-testing/SKILL.md); window journeys → peer `qa-desktop-java` / `qa-desktop-dotnet` / `qa-desktop-typescript`

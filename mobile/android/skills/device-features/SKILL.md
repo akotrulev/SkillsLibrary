@@ -22,24 +22,6 @@ Owns **asking the user for a capability and using it well**: the permission reci
 | Local network | `ACCESS_LOCAL_NETWORK` runtime permission at **API 37** | Below 37 no permission — nothing to detect |
 | Contacts | Android Contact Picker for apps without broad contact needs (Play policy 2027-01-27) | `READ_CONTACTS` only for core contact functionality |
 
-## When to use
-
-- Asking for a permission, handling "don't ask again", building the denied screen
-- Picking a photo, video or document; saving a file
-- A camera preview, a scan, a capture
-- "Where is the user", a map centred on them, geofencing as a feature
-- Biometric unlock or re-auth; passkeys; saved passwords
-- Reaching a device on the LAN at API 37
-
-## When NOT to use
-
-- Push, notification permission, App Links → `mobile-android:push-and-deep-links`
-- WorkManager, foreground services, widgets, exact alarms → `mobile-android:system-integration`
-- Where secrets are stored, Keystore key setup → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Sign-in provider setup (Auth0 Universal Login) → `mobile-android:auth0`
-- Store declaration forms and policy dates → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Another stack → `mobile-ios:device-features`, `mobile-react-native:device-features`
-
 ## The permission recipe
 
 Permissions are **asked in context, at the moment of use, after a pre-prompt; the denied path is a working screen.** A permission is requested from the screen that needs it — never at launch.
@@ -176,12 +158,3 @@ The standards this skill's output must meet are the mobile-android rule files, n
 - Biometrics with none enrolled and with a lockout: a working screen each time.
 - The photo picker works on an emulator without Play services; no storage permission is requested.
 - Dev-side tests: [`mobile-android:unit-testing`](../unit-testing/SKILL.md); device journeys belong to `qa-mobile-<stack>`.
-
-## Handoffs
-
-- Push permission, deep links → `mobile-android:push-and-deep-links`
-- Foreground-service types, widgets, exact alarms → `mobile-android:system-integration`
-- Keystore keys, secrets → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Permission declarations, Data safety → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Manifest, FileProvider, WebView hardening → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
-- Sign-in form → [`forms`](../forms/SKILL.md) · TalkBack, 48 dp → `mobile-android:accessibility`

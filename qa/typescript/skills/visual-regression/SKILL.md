@@ -55,14 +55,3 @@ many browsers stay noisy, or a page whose *content* changes must keep its *struc
 - **A hosted-tool test has no `expect`.** The vendor's review is the assertion. That exception is recorded
   in the test as an annotation (`references/percy.md` shows it), so a reader never mistakes it for a
   forgotten assertion.
-
-## Handoffs
-
-- Page objects, fixtures and the canonical config → `qa/typescript/skills/ui-test-author/playwright`
-- Aria snapshots and the other web-first assertions →
-  `qa/typescript/skills/ui-test-author/playwright/references/assertions.md`
-- Failure evidence and reading a trace → `qa/typescript/skills/evidence-capture`
-- Allure mapping of diffs → `qa/reporting/typescript/skills/test-reports`
-- The nightly job and artifact upload → `qa/cicd/typescript/skills/ci-pipelines`, `qa/cicd/ci-conventions`
-- Java and .NET → `qa-java:visual-regression`, `qa-dotnet:visual-regression` (no screenshot assertion in
-  those bindings; they compare `screenshot()` output)

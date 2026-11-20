@@ -168,23 +168,3 @@ finding, correctly demoted. Add a VEX `not_affected / vulnerable_code_not_in_exe
 - **Honest tooling:** Grype consumes VEX (doesn't compute reachability); Falco/Tetragon are not de-noisers;
   Semgrep SC is proprietary + no transitive reachability; Kubescape is the only OSS runtime option. No secrets
   in feed/config; the feeds need no auth.
-
-## Cross-references
-
-- `qa-<stack>:security-foundations` — the OWASP backbone (**A03:2025 Software Supply Chain**), the triage discipline
-  (ticketed suppressions, gate NEW) this skill sharpens. **Load alongside.**
-- `qa/<stack>/skills/security-testing/dependency-scan` (npm audit · OWASP DC · `dotnet list --vulnerable`) ·
-  `qa-<stack>:image-infra-scan` (Trivy) · `qa-<stack>:code-scan` (Opengrep/Semgrep) — the **detection
-  gates** whose output this skill enriches. It re-scans none of them; it re-decides their verdicts. This is
-  the single biggest quality-of-life win for those gates.
-- `qa-<stack>:exploit-validation` — the sibling that *proves* a reachable CVE is exploitable. Reachability
-  says "the code is on the execute path"; exploit-validation fires the payload. This skill prioritizes what
-  that one then proves.
-- `qa/manual/bug-report-writer` — an ACT/ATTEND verdict on a real CVE is written up with its KEV/EPSS/VEX
-  evidence and feed versions.
-- `qa/_shared/agents/qa-security.md` — the orchestrator; this skill runs as the **reachability-weighting
-  step inside Step 2** (static gates), reprioritizing SCA/SAST output before the gate decision.
-- Deep dives: **`references/epss-kev.md`** (both feeds, the API traps, thresholds, Vulnrichment/SSVC) ·
-  **`references/vex-reachability.md`** (OpenVEX + govulncheck/osv-scanner/dep-scan/Grype/Kubescape, the
-  myth-busters) · **`references/enrichment-gate.md`** (the join, the decide function, the three output paths,
-  ordering & caching, the Dependency-Track server alternative).

@@ -10,20 +10,6 @@ Review-only intake audit for stories and epics **authored elsewhere**. Produces 
 
 The chain assumption "we write the stories" often doesn't hold: backlogs arrive from clients, other teams, or an existing tracker. This skill is the entry point for that case, sitting in front of refinement and of the QA pipeline (`qa/manual/requirements-breakdown` consumes only stories that pass here, or proceeds with the gaps explicitly flagged).
 
-## When to use
-
-- Stories/epics arrive from outside the team and must be assessed before anyone commits to them
-- A planning or refinement session needs a Definition-of-Ready check on candidate stories
-- QA asks "can we design tests from these?" — testability audit before `qa/manual/requirements-breakdown`
-- A backlog has grown organically and needs a batch hygiene pass (duplicates, god stories, dependency knots)
-
-## When NOT to use
-
-- You're writing or repairing the stories → `business-analysis/skills/ba-story-writer` (it fixes; this skill only finds)
-- The "story" is really an unscoped initiative → `business-analysis/skills/ba-scoping-writeup`
-- Epic shape needs *designing*, not auditing → `business-analysis/skills/ba-epic-writer`
-- You want the testable distillation of the stories → `qa/manual/requirements-breakdown` (run this review first)
-
 ## Inputs needed
 
 Ask only what's missing, at most 2–3 questions:
@@ -113,12 +99,3 @@ Story and epic ids are quoted as the source backlog writes them; where the backl
 - **AC by screenshot** — "works like the design" with no behavioral criteria
 - **The eternal blocked story** — dependency named but no owner or date
 - **Tracker archaeology** — stories whose AC contradict the current epic because they predate a pivot
-
-## Handoffs
-
-- Findings need applying → `business-analysis/skills/ba-story-writer` (story repair) or `business-analysis/skills/ba-epic-writer` (epic shape)
-- Story is really an unscoped initiative → `business-analysis/skills/ba-scoping-writeup`
-- Ready stories, QA next → `qa/manual/requirements-breakdown`, or `qa/manual/agents/qa-test-case-designer` for the full basis → suite flow
-- Review uncovered a live defect reference → `qa/manual/bug-report-writer`
-
-The `qa/*` peers belong to other plugins (`qa-<stack>`): they are named here and invoked separately, never loaded by this skill.

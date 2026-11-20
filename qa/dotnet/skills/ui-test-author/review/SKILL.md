@@ -8,18 +8,6 @@ disable-model-invocation: true
 
 Reviews .NET UI test code (Playwright .NET, Selenium .NET, Appium .NET) and its page objects against the qa-dotnet rule files. Produces a findings table in the format defined in `CLAUDE.md`. **Does not rewrite the code** — points to the fix and lets the human apply it.
 
-## When to use
-
-- A diff or file (page object, `[Test]` class, fixture, `BaseTest`, `BasePage`, `.runsettings`, `.csproj`) is submitted for review
-- Pre-merge gate on a PR touching `Pages/`, `Tests/`, `AppiumTests/Pages/`, or any NUnit/xUnit UI test
-
-## When NOT to use
-
-- Generating new code → `qa/dotnet/skills/ui-test-author/playwright`, `qa/dotnet/skills/ui-test-author/selenium`, `qa/dotnet/skills/ui-test-author/appium`
-- Architecting the POM → `qa/dotnet/skills/page-object-design`
-- Reviewing API tests → `qa/dotnet/skills/api-test-author/review`
-- Reviewing Java or TypeScript UI code → `qa/java/skills/ui-test-author/review`, `qa/typescript/skills/ui-test-author/review`
-
 ## Inputs needed
 
 1. **Stack** — Playwright .NET, Selenium .NET, or Appium .NET
@@ -59,12 +47,3 @@ Detect the TFM, NUnit major, `Microsoft.Playwright` (1.63 lane) or `Selenium.Web
 1. Identify the stack from imports and file location; read the rule files, then each file under review end to end.
 2. Walk the rules in this order: async and waiting, errors and cleanup, assertions, lifecycle (`BaseTest`, driver, parallelism), locators, then the rest. Most blockers live there.
 3. Per finding: file and line, the rule broken, a one-sentence fix. The severity is the tag on the rule, never a new judgment. **Do not rewrite the code**; hand off to the matching generator.
-
-## Handoffs
-
-- A rule is missing or wrong → edit the project's `.claude/rules/qa-dotnet/`; for every project, the plugin's `qa/dotnet/skills/rules/`
-- Need to rewrite → the matching generator under `qa/dotnet/skills/ui-test-author/`
-- Architecture is the real problem → `qa/dotnet/skills/page-object-design`
-- Test data shape is wrong → `qa/dotnet/skills/test-data-builder`
-- API tests in the same PR → `qa/dotnet/skills/api-test-author/review`
-- Allure reporting questions → `qa/reporting/dotnet/skills/test-reports`

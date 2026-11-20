@@ -14,23 +14,6 @@ Standardizes **authoring** accessible Blazor UIs. Targets **WCAG 2.2 AA** as the
 
 **Version rule:** the accessibility *concepts* are version-agnostic. The **net-sensitive** bits are navigation-side: `FocusOnNavigate` (net6+, but the default Blazor Web App template wires it in the `Routes.razor` from net8), and **enhanced navigation** (net8+, default in static SSR) — which swaps DOM without a full reload, so a screen reader is *not* told the page changed unless you manage focus/announcement yourself. net10 keeps the same APIs; the enhanced-nav focus gap is the same across net8/9/10.
 
-## When to use
-
-- Designing a custom interactive widget (menu, combobox, tabs, tree) with correct semantics + keyboard
-- Focus after navigation / focus trap in a dialog / restore-focus on close
-- Announcing route changes and async results (save done, N rows loaded) to a screen reader
-- Adding a skip-to-content link
-- Labeling icon-only buttons (row actions in a shared grid renderer especially)
-- Reviewing a component for keyboard-only and screen-reader usability
-
-## When NOT to use
-
-- Scanning/auditing for violations (axe / Lighthouse / Pa11y CI gate) → qa `accessibility-testing` (peer, not loaded)
-- Form input labels + validation-message a11y → [`forms`](../forms/SKILL.md)
-- Contrast *token* setup / `focus-visible` styling mechanics → [`styling`](../styling/SKILL.md) (this skill owns *whether* contrast passes; styling owns *how* the tokens are defined)
-- Component-library primitives that already ship a11y (MudBlazor dialog, Fluent tabs) → [`component-library`](../component-library/SKILL.md) (use them instead of hand-rolling)
-- React → `frontend/react/skills/accessibility`
-
 ## Lean on the platform
 
 Most a11y bugs come from re-implementing in `<div>` what the browser gives free. The browser does focus, keyboard, ARIA mapping, and form submission correctly — the moment you replace them, you own them.
@@ -136,13 +119,3 @@ The standards this skill's output must meet are the fe-blazor rule files, not a 
 - **Trigger an async result**: the polite region announces it once, without stealing focus.
 - Every **icon-only button** has an audible label; toggle a **state** — it's conveyed by text, not color alone.
 - Then hand off to qa `accessibility-testing` for the automated WCAG scan gate.
-
-## Handoffs
-
-- Automated axe/Lighthouse WCAG scan + CI gate → qa `accessibility-testing` (**peer**, not loaded)
-- WCAG 2.2 **design-time** criteria (target size, drag alternative, accessible auth, redundant entry, consistent help, focus not obscured), cognitive/neurodiversity design, and layout-for-translation → `design/accessible-by-design`
-- Contrast **token** definition + `:focus-visible` styling → [`styling`](../styling/SKILL.md)
-- Form-input labels + validation-message a11y → [`forms`](../forms/SKILL.md)
-- Accessible library primitives (dialog/tabs/menu that ship a11y) → [`component-library`](../component-library/SKILL.md)
-- `data-testid` on the same elements (separate attribute) → [`test-ids`](../test-ids/SKILL.md)
-- Icon-button labels / color-not-alone as a *display-correctness* concern → [`ui-rules`](../ui-rules/SKILL.md) (owns the convention; this skill owns the a11y mechanics)

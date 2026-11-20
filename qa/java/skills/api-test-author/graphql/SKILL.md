@@ -259,15 +259,3 @@ the error shape, don't settle for a status" discipline, different envelope.
 - **TestNG + RestAssured + Jackson + AssertJ**; `HttpStatus.SC_*` constants, never raw ints. Subscriptions →
   `qa-java:realtime-stream-testing`. Endpoint + token via `Env`, lazy, never logged. No
   `Thread.sleep`.
-
-## Cross-references
-
-- `qa-typescript:api-tests-graphql` — **the canonical file**: same four ideas, Vitest + native `fetch` +
-  Zod (`GetUserDataSchema.parse` / `GraphQLErrorsSchema`). Read it for the family rationale.
-- `qa-dotnet:api-tests-graphql` — the .NET sibling (NUnit + `HttpClient` + `System.Text.Json` records);
-  same four ideas, different libs.
-- `qa-java:api-tests` — the **REST sibling** this extends: the Action + POJO + Test layering,
-  `RequestSpecBuilder`, `response.as(...)`, `Env`, and the cleanup discipline.
-- `qa-java:realtime-stream-testing` — **GraphQL subscriptions** (graphql-ws over WebSocket) live here.
-- `qa-java:api-models` — generate the typed `data` POJOs / operation models in isolation.
-- `qa-java:test-login-tokens` — obtain the bearer token for authenticated operations.

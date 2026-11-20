@@ -8,19 +8,6 @@ disable-model-invocation: true
 
 Automates the case forms `qa/manual/test-case-writer` writes under **Temporal** and **Concurrency**: a schedule run on demand, the clock set to an instant, N requests released together, a message or webhook delivered twice. The manual lane names the *Environment needs* in a case's Setup or Preconditions; this skill turns each need into a seam, or into a named deferral.
 
-## When to use
-
-- A case's technique is temporal or concurrency, or its Setup names *Environment needs* (a way to run `<schedule>` on demand, a clock set to `<instant>` in `<timezone>`).
-- "Run the monthly posting in a test", "cancel one second after the cut-off", "two members book the last seat", "the event is delivered twice".
-
-## When NOT to use
-
-- Waiting for an async effect (`within <budget>, <observable>`) — use the suite's poller, `DbWaits.waitForRow` in `qa/java/skills/db-testing/verification-queries` (Awaitility), with the case's budget as its timeout.
-- Broker setup, topics, consumers, DLQ → `qa/java/skills/messaging-testing`.
-- A dependency fault or a retry after a fault → `qa/java/skills/failure-injection-testing`.
-- Flag state → `qa/java/skills/feature-flag-testing`.
-- Load and capacity → `qa-performance-java`.
-
 ## Inputs needed
 
 1. **The case's technique and its *Environment needs*** — from the test-case document. No document: ask which job, which instant and timezone, which invariant.
@@ -87,13 +74,11 @@ The test is the in-process one with `postingJob.post()` replaced by `adminClient
 
 `adminClient` is a typed `{Resource}Client` over the test-only trigger (`api-client-writer`). For a Kubernetes `CronJob`, `CronJobRunner.runNow(cronJob, namespace)` in `references/clock-race-cronjob.md` runs `kubectl create job --from=cronjob/…` and waits; a failure fails loudly with the command's output and is never caught.
 
-
 Register the returned job name and delete it in `@AfterMethod(alwaysRun = true)`.
 
 #### Clock boundary
 
 The application injects a `java.time.Clock` bean and never calls `Instant.now()`, `LocalDateTime.now()` or `System.currentTimeMillis()` directly. **In-process**, add a movable clock (`MutableClock`, in `references/clock-race-cronjob.md`) as a `@Primary` bean through a `@TestConfiguration`, the way `feature-flag-testing` swaps its provider, and seed relative to the controlled "now":
-
 
 `IntegrationTestBase` carries `@Import(ControlledClockConfig.class)`, autowires the `MutableClock`, and resets it in `@BeforeMethod` (the cached context otherwise keeps it moved). One row per instant, one expected value each; the `Z` or offset carries the timezone:
 
@@ -130,7 +115,6 @@ DST change and month end: the same pattern, instants either side of the transiti
 
 Release N requests together behind a start gate (`Race.startTogether`, in `references/clock-race-cronjob.md`: a ready latch, a start latch, futures), wait for all to settle, assert the **invariant**, never which request won. Repetition comes from TestNG's `invocationCount`.
 
-
 - `invocationCount = 20` runs the method 20 times, and `@BeforeMethod` / `@AfterMethod` run around every invocation, so seed inside the test or in `@BeforeMethod` and each repetition starts clean. Leave `successPercentage` at its default 100: lowering it hides the race.
 - **Not** `threadPoolSize`: it runs invocations in parallel on shared fixtures and does not align requests at the same instant. The latch pair does.
 - The refusal gets its own test naming the one expected refusal (`409`), never `409 or 422`.
@@ -166,7 +150,6 @@ public record CreditsQueueSeeder(SqsClient sqs, String queueUrl) {
 }
 ```
 
-
 - **Message** — publish through the project's `messaging-testing` reference (its producer / seeder), with a **new broker message id and the same business id**. Broker deduplication swallows an identical publish before the consumer sees it — SQS FIFO (`messageDeduplicationId`, `ContentBasedDeduplication`), Service Bus duplicate detection, Kafka's idempotent producer — and such a test proves nothing about the consumer's idempotency. Vary the dedup id (or use a standard queue) so two deliveries reach the consumer.
 - **Wait on a positive signal, never a sleep:** an inbox / processed-messages row per delivery through `DbWaits.waitForRow`, then assert the effect count. SQS queue-depth attributes are approximate, so they are not the signal.
 - **Webhook** — replay the request with the same delivery id through the typed client twice; assert one effect and, if the contract says so, the same response both times.
@@ -200,15 +183,6 @@ A `db-testing/verification-queries` query asserting the invariant's statement (`
 - A duplicate-delivery test uses a new broker message id with the same business id, and waits on a positive processed signal.
 - A missing seam is a **deferral**: named in the report with the hook, handed to `be-java`, with no test body committed.
 - Cleanup runs in `@BeforeMethod` / `@AfterMethod(alwaysRun = true)`; failure messages carry the evidence (ids, the instant, the response body).
-
-## Handoffs
-
-- A missing job trigger, clock seam or test endpoint → `be-java`, as a product change.
-- Broker producers / seeders, DLQ → `qa/java/skills/messaging-testing`.
-- Verification queries, the poller and the teardown registry → `qa/java/skills/db-testing/verification-queries`, `…/db-testing/connection`.
-- A retry or recovery after a fault → `qa/java/skills/failure-injection-testing`.
-- Typed clients for the trigger or clock endpoint → `qa/java/skills/api-client-writer`.
-- The plain tests → `qa/java/skills/api-test-author/writer`; review → `…/api-test-author/review`.
 
 ## APIs checked (2026-10-11)
 

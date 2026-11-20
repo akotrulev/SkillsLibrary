@@ -12,20 +12,6 @@ Conceptual reference for design patterns as applied in C# / .NET. **.NET 10 is p
 
 Detect the project's `<TargetFramework>` (`net8.0` / `net9.0` / `net10.0`) before answering — never up-level a down-level project's examples, and never flag a down-level project for lacking a net10-only API. Primary constructors, `required`/`init`, keyed DI services, and `sealed` defaults apply across 8/9/10; nothing in this file below is net10-exclusive.
 
-## When to use
-
-- The user asks "what is pattern X in .NET"
-- The user wants a comparison between two patterns
-- The user wants a small canonical example, not scaffolding into their repo
-
-## When NOT to use
-
-- The user wants code generated into their project — use `backend/dotnet/skills/pattern-writer`
-- The user wants their code critiqued — use `backend/dotnet/skills/code-review`
-- The user wants the language-agnostic "what & when" of a pattern, not the C# code — use `backend/_shared/pattern-guide`
-
----
-
 ## Strategy
 
 **Intent**: Encapsulate interchangeable algorithms behind a common interface so the caller can swap them without changing call-site code.

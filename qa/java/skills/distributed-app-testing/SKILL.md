@@ -15,21 +15,6 @@ bean or reach a class. It belongs to the `qa-api-java` lane, never to a `be-*` u
 `be-java` `unit-testing`; one service with its database is `db-testing/testcontainers`, which is lighter and lets
 the test replace beans. Reach for this skill when the behaviour spans the services the compose file wires together.
 
-## When to use
-
-- The repo has a compose file (`compose.yaml`, `docker-compose.yml`) that runs the system, and the test must
-  exercise two or more of its services together: an API and its worker, an API and the email it sends, a gateway
-  and the services behind it.
-- The wiring itself is under test: service-to-service URLs, broker topology, health checks.
-
-## When NOT to use
-
-- One service plus its database → `db-testing/testcontainers`
-- A unit of logic → `be-java` `unit-testing`
-- Broker, blob or email assertions on one service → `messaging-testing`, `file-storage-testing`, `email-testing`
-- A deployed environment the suite only calls → the suite's configured base URL, no containers
-- Load → `load-testing`; microbenchmarks → `benchmarks`
-
 ## Inputs needed
 
 1. The compose file and the service names the journey touches, and which are built from this repo (`build:`).
@@ -336,12 +321,3 @@ Then: the services waited for and how, the overrides set, and the `./gradlew tes
   override and resolve ports from the container.
 - **`docker compose up` in a CI step before `./gradlew test`** — nothing tears it down when the suite fails.
 - **A retry filter on the test client** — it hides the first failure the test exists to see.
-
-## Handoffs
-
-- Database seeding and row verification → `db-testing/verification-queries`
-- Mailpit client and email assertions → `email-testing`
-- Typed clients and the `traceparent` filter → `api-client-writer`
-- Trace links on failed results → `qa/reporting/java/skills/test-reports`
-- The CI job (Docker and the Compose plugin on the agent, image builds) → `qa/cicd/java/skills/ci-pipelines`
-- Unit tests of the logic inside a service → `be-java` `unit-testing`

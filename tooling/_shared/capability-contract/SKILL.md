@@ -12,19 +12,6 @@ This skill produces the **one document both builders consume**. `tooling:mcp-bui
 
 **Read `references/output-contract.md` before writing any capability block.** It fixes the envelope, pagination, error body, and token budget that every capability inherits; the per-capability blocks are only meaningful as deltas against it.
 
-## When to use
-
-- Step 1 of a `tooling-engineer` run, before any MCP or CLI code exists
-- An existing MCP/CLI is being extended and the delta needs a contract (`EXTEND` — inherit the existing envelope and naming, spec only the new capabilities)
-- An existing MCP/CLI has no written contract and is about to be changed (`RESUME` — recover the contract from the code, mark recovered rows `#confirmed`, then spec the delta)
-
-## When NOT to use
-
-- The ask is to write the server or the CLI → `tooling:mcp-builder` / `tooling:cli-builder`
-- The ask is to design a REST API for human/browser clients → `dev:plan-api-surface` owns that; this skill *consumes* its output when one exists
-- The ask is to explain a feature to a person → `dev:doc-feature-trace` / `dev:doc-business-model`
-- The target is a third-party HTTP API with no local project → the vendor `ai-development/mcp-builder` skill owns the API-wrapping lane; this one derives from a codebase
-
 ## Output
 
 **`docs/specs/<NNN>-<surface>-tool-contract.md`**, where `<surface>` names the thing being exposed (`orders`, `deploy`, `test-data`).

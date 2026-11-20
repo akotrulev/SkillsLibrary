@@ -21,21 +21,6 @@ Read `Cargo.lock`. **sqlx 0.9 is current (May 2026) and needs Rust 1.94.** A pro
 | Opt-in `sqlx.toml` (feature `sqlx-toml`) | Renames `DATABASE_URL`, sets type overrides, renames the migrations table |
 | Repo moved to `transact-rs` | Same crate name on crates.io |
 
-## When to use
-
-- Adding a table's queries, a migration, or a transaction
-- `query!` failing in CI, or a nullability mismatch after an upgrade
-- Slow endpoints caused by N+1 or row-by-row inserts
-- Lost updates (optimistic concurrency)
-- Choosing between sqlx, diesel and sea-orm for a new service
-
-## When NOT to use
-
-- Table, index and constraint design, engine tuning, RLS → `data/postgresql` (the `data-architect` agent); this skill owns the Rust side of the queries
-- Cross-engine migration strategy → `data/_shared/migrations`
-- Caching → `data/_shared/caching-patterns`
-- Pool exhaustion caused by tasks holding connections across slow work → also read `async-concurrency`
-
 ## Setup
 
 ```toml
@@ -209,10 +194,3 @@ The standards this skill's output must meet are the be-rust rule files, not a li
 4. Run `cargo sqlx prepare` and commit `.sqlx/`.
 5. Unit-test the logic around the queries (`unit-testing`); write `#[sqlx::test]` tests only when the task asks for them (see *Testing the queries*).
 6. Validate: `cargo clippy`, `cargo sqlx prepare --check`, the tests.
-
-## Handoffs
-
-- Schema, indexes, engine specifics → `data/postgresql` via `data-architect`
-- The outbox relay task, pool exhaustion under load → `async-concurrency`
-- A slow query → `data/_shared/slow-query-fixes`, then `performance` if the cost is in Rust
-- Review → `code-review`

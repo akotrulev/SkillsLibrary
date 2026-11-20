@@ -27,18 +27,6 @@ Scaffolds WebdriverIO + Appium page objects and Mocha mobile UI tests in TypeScr
 - Install the drivers once: `appium driver install uiautomator2`, `appium driver install xcuitest`, then `appium driver doctor uiautomator2`.
 - Mocha (`@wdio/mocha-framework`) is the runner; Cucumber is the BDD alternative (`gherkin-step-code/references/cucumberjs-appium.md`). WDIO's runner has no Vitest framework.
 
-## When to use
-
-- A page object under `src/pages/mobile/`, a scoped component, or a Mocha test under `test/specs/`
-- Gestures, WebView switching, app lifecycle or failure evidence in a WDIO mobile suite
-
-## When NOT to use
-
-- Appium .NET / Java → `qa/dotnet/skills/ui-test-author/appium` / `qa/java/skills/ui-test-author/appium`
-- Web TS → `qa/typescript/skills/ui-test-author/playwright` or `…/selenium`
-- Reviewing a page object → `qa/typescript/skills/ui-test-author/review`
-- POM architecture → `qa/typescript/skills/page-object-design`
-
 ## Inputs needed
 
 1. **Screen name** (PascalCase) and **platform** — Android, iOS or both
@@ -148,14 +136,3 @@ A visible element missing from the page source is usually an accessibility, app-
 Never use `appium_generate_tests`: it records the scenario through MCP calls and emits one flat test with the
 locators inline (its code templates are Java PageFactory), bypassing the screen objects. Locators come from
 `mobile-screen-explorer`; the code comes from this skill's assets.
-
-## Handoffs
-
-- Selectors on the live app → `qa/typescript/skills/mobile-screen-explorer`
-- A class from an inventory → `qa/typescript/skills/mobile-screen-objects`
-- POM architecture → `qa/typescript/skills/page-object-design`
-- Test data → `qa/typescript/skills/test-data-builder`
-- Failure evidence → `qa/typescript/skills/evidence-capture`
-- Allure → `qa/reporting/typescript/skills/test-reports`
-- Cloud farms → `qa/typescript/skills/device-cloud`
-- Review → `qa/typescript/skills/ui-test-author/review`

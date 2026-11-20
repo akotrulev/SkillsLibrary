@@ -256,17 +256,3 @@ jobs:
 - **No secrets in scan config** — env vars read lazily; the target host is config, not a secret.
 - A clean TLS scan covers **only** the transport layer — pair with the ZAP header baseline, DAST, SCA,
   and the rest of the layer map (`qa-<stack>:security-foundations`). Green TLS ≠ "secure."
-
-## Cross-references
-
-- `qa-<stack>:security-foundations` — the spine: OWASP map (A04/A02), the ticketed-triage discipline, SARIF
-  consolidation, the layer map. **Load alongside this skill.**
-- `qa-<stack>:passive-scan` — the **HTTP security-header** gate
-  (HSTS, CSP, cookie flags) — the **adjacent** layer *above* the handshake; ZAP owns headers, this owns
-  the TLS handshake/cipher layer. Coordinate on HSTS.
-- `qa-<stack>:active-scan` — the app-layer **active** DAST scan (payloads, never
-  prod). Contrast: the TLS scan never sends a payload and is prod-safe.
-- `qa/<stack>/skills/security-testing/dependency-scan` — SCA (A03); orthogonal layer.
-- `qa/reporting/<stack>/skills/test-reports` — attach the sslyze JSON / testssl.sh HTML report.
-- `qa/cicd/<stack>/skills/ci-pipelines/*` + `qa/cicd/ci-conventions` — wire the scheduled/PR job and
-  artifact upload.

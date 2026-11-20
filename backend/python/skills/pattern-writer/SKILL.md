@@ -12,23 +12,6 @@ Scaffolds idiomatic Python (3.13 primary; 3.12 and 3.14 supported) into the acti
 
 Detect the interpreter first: `requires-python` in `pyproject.toml`, `.python-version`, then the Dockerfile base image. **3.13 is the default for an ML worker** because `onnxruntime` / `rembg` / `vtracer` wheels lag a new interpreter; move to 3.14 only when `uv lock` resolves every dependency to a wheel for it. Never up-level an existing project's `requires-python`. Never use the 3.12 `type X = ...` statement or PEP 695 generics in a project pinned below 3.12.
 
-## When to use
-
-- A new package or worker needs its skeleton (`pyproject.toml`, `src/` layout, tooling)
-- Replacing `if`/`elif` chains or a class hierarchy with a tagged union + `match`
-- Introducing a domain `Result` where callers currently catch exceptions to branch
-- Extracting a `Protocol` so a collaborator (time, randomness, model session, storage) can be injected and faked
-- Replacing scattered `os.environ` reads with one settings object
-- Adding structured logging to a process that prints
-
-## When NOT to use
-
-- Explanations → `pattern-guide`
-- Reviewing → `code-review`
-- Anything that opens an image, parses SVG, or runs a model → `media-processing`
-- Dockerfile, compose, runtime hardening → `sandboxed-worker`
-- Tests for what you generate → `unit-testing` (you still write them; that skill owns the conventions)
-
 ## Inputs needed
 
 1. Which pattern, and the concrete variants or collaborators
@@ -114,23 +97,19 @@ tests/
 from dataclasses import dataclass
 from typing import Literal
 
-
 @dataclass(frozen=True, slots=True)
 class Ok[T]:
     value: T
-
 
 @dataclass(frozen=True, slots=True)
 class Rejected:
     reason: RejectionReason
     detail: str
 
-
 type RejectionReason = Literal[
     "unsupported-format", "polyglot", "too-large", "too-many-pixels", "truncated",
     "unsafe-svg", "animated", "timeout", "resource-exceeded",
 ]
-
 
 type Result[T] = Ok[T] | Rejected
 ```
@@ -155,14 +134,11 @@ Declare the protocol beside the consumer, with only the methods the consumer use
 ```python
 from typing import Protocol
 
-
 class BackgroundRemover(Protocol):
     def remove(self, rgba: Image.Image) -> Image.Image: ...
 
-
 class Clock(Protocol):
     def now(self) -> datetime: ...
-
 
 @dataclass(frozen=True, slots=True)
 class Pipeline:
@@ -179,7 +155,6 @@ The real implementation (`RembgRemover` in `media-processing`) never imports `Ba
 ```python
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="WORKER_", frozen=True)
@@ -205,7 +180,6 @@ def build_pipeline(settings: Settings) -> Pipeline:
         limits=Limits.from_settings(settings),
     )
 
-
 def main(argv: Sequence[str]) -> int:
     settings = Settings()
     configure_logging(settings.log_level)
@@ -226,7 +200,6 @@ The sandboxed worker has no network, so logs on stdout are its whole telemetry. 
 import logging
 import json
 
-
 class JsonFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         payload = {
@@ -240,12 +213,10 @@ class JsonFormatter(logging.Formatter):
             payload["exc"] = self.formatException(record.exc_info)
         return json.dumps(payload, default=str)
 
-
 def configure_logging(level: str) -> None:
     handler = logging.StreamHandler()
     handler.setFormatter(JsonFormatter())
     logging.basicConfig(level=level, handlers=[handler], force=True)
-
 
 log = logging.getLogger(__name__)
 log.info("job rejected", extra={"fields": {"job_id": job.id, "reason": reason}})
@@ -290,10 +261,3 @@ Run the checks below:
 - `uv run mypy src tests` — clean
 - `uv run pytest` — green
 - Old call sites swept: the `if`/`elif` chain or `try/except` branching the new pattern replaced is gone
-
-## Handoffs
-
-- Image, SVG, EXIF, rembg, VTracer, DPI, colours, resize → `media-processing`
-- Dockerfile + runtime limits → `sandboxed-worker`
-- Tests → `unit-testing`
-- Review → `code-review`

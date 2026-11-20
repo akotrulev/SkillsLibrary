@@ -21,22 +21,6 @@ One styling authority: **the system plus an asset-catalog token layer.** System 
 
 A project built with an older SDK keeps its look until it moves; **never advise opting a project out of Liquid Glass once it links the iOS 27 SDK**, and never raise a deployment target to reach a glass API.
 
-## When to use
-
-- Defining colours, type and spacing; theming dark mode
-- A bar, sheet or button looks wrong after the SDK change
-- Adding a custom glass surface
-- Making a screen work at accessibility text sizes, on iPad and in a resizable window
-
-## When NOT to use
-
-- Structure, states, lists → [`ui-components`](../ui-components/SKILL.md)
-- Route containers, tabs, sheets → [`navigation`](../navigation/SKILL.md)
-- Motion and transitions → `mobile-ios:animation`
-- VoiceOver and Differentiate Without Color mechanics → `mobile-ios:accessibility`
-- Brand identity from scratch → `design/visual-identity`
-- Android Material → `mobile-android:styling`; RN → `mobile-react-native:styling`
-
 ## Inputs needed
 
 - Brand palette (light and dark) and any custom font
@@ -110,12 +94,3 @@ The standards this skill's output must meet are the mobile-ios rule files, not a
 - [ ] Each screen is checked at an AX3 size, in dark mode, with Increase Contrast and Reduce Transparency
 - [ ] iPad: the screen reflows in a narrow and a wide window; no idiom checks
 - [ ] Custom glass is grouped in a `GlassEffectContainer` and has a fallback where the target is below iOS 26
-
-## Handoffs
-
-- Views and states → [`ui-components`](../ui-components/SKILL.md)
-- Tabs, split view, sheets → [`navigation`](../navigation/SKILL.md)
-- Transitions, Reduce Motion → `mobile-ios:animation`
-- VoiceOver, Differentiate Without Color → `mobile-ios:accessibility`
-- Brand, tokens, palettes → `design/visual-identity`, `design/design-tokens`
-- UIKit appearance → [`uikit`](../uikit/SKILL.md)

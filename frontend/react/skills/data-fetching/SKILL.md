@@ -28,23 +28,6 @@ A surface often uses both: fetch the initial state here, then hand off to `realt
 
 **Version rule:** detect React/Next major first. **Next 15 changed the `fetch` default to uncached** (`cache: 'no-store'`) — you opt *into* caching; Next 14 cached by default and you opted out. Server Actions + `useActionState` are React-19/Next-15 primary; the Vite SPA lane has no RSC or Server Actions and uses TanStack Query throughout.
 
-## When to use
-
-- Deciding how a route/component loads or writes data
-- Fetching in a Server Component (with caching/revalidation) vs a client TanStack Query hook
-- Writing a Server Action mutation and revalidating the affected data
-- Mapping API errors (ProblemDetails) to UI without leaking raw detail
-- Streaming a slow query below a shell; cancelling an in-flight request
-
-## When NOT to use
-
-- Live/server-pushed data → [`realtime`](../realtime/SKILL.md)
-- Form submit UX, validation, field errors → [`forms`](../forms/SKILL.md)
-- The token-attaching auth layer itself → `auth/auth0-react` (this skill *consumes* it)
-- Where state should live after fetch → [`state-management`](../state-management/SKILL.md)
-- Three-state loading/failed regions + retry UX → [`error-handling`](../error-handling/SKILL.md)
-- Writing the API/DTOs or contract tests → `qa/typescript/skills/{api-models,api-contract-testing}` (peers)
-
 ## The core decision: fetch on the server by default
 
 Where the component runs fixes how it should reach data:
@@ -250,12 +233,3 @@ Beyond the rule files, this skill's own rules:
 - Fail one *optional* endpoint on a page → its section shows a failed body, the rest of the page renders normally; fail the *critical* one → the page's own failed state. Fail a parent in a dependent chain → the child shows unavailable, not an endless skeleton.
 - Delay an endpoint past its budget → the call rejects with a `TimeoutError` at the deadline (not the browser's ~300s), and the consumer renders the timeout failed state.
 - Contract test green against the OpenAPI spec.
-
-## Handoffs
-
-- Live/push updates after first paint → [`realtime`](../realtime/SKILL.md) (shares this routing matrix)
-- Render the failed/loading states, retry UX → [`error-handling`](../error-handling/SKILL.md)
-- Where fetched state lives → [`state-management`](../state-management/SKILL.md)
-- Forms/submit UX → [`forms`](../forms/SKILL.md)
-- Token layer (Auth0 / Cognito) → `auth/auth0-react`
-- DTOs + contract tests → `qa/typescript/skills/{api-models,api-contract-testing}` (peers)

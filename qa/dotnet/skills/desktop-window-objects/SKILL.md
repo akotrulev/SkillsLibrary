@@ -10,20 +10,6 @@ Turns a discovered element inventory into a **C# window object**: a `BaseWindow`
 
 **One lane per suite, never mixed.** Read `DesktopTests.csproj`: `Appium.WebDriver` means the Appium lane, `FlaUI.UIA3` the FlaUI lane. Both packages present is a defect to report.
 
-## When to use
-
-- Elements for a window were discovered and now need a class.
-- An existing window object must be reconciled against a freshly explored window.
-- The user describes a window's elements and ids directly and wants the class emitted.
-
-## When NOT to use
-
-- Locators are not known yet → `qa/dotnet/skills/desktop-screen-explorer` first. Never fabricate one.
-- Writing the tests that use the object → `qa/dotnet/skills/ui-test-author/appium`.
-- Mobile screens → `qa/dotnet/skills/mobile-screen-objects`; web pages → `qa/dotnet/skills/page-objects-from-url`.
-- Reviewing an existing object → `qa/dotnet/skills/ui-test-author/review`.
-- Java / TypeScript → `qa/java/skills/desktop-window-objects` / `qa/typescript/skills/desktop-window-objects`.
-
 ## Inputs needed
 
 1. **Window name** (PascalCase: `LibraryWindow`, `SettingsWindow`, `ExportDialog`) and whether it is a main window, a document window, a sheet or a dialog.
@@ -238,13 +224,3 @@ public sealed class LibraryWindow : BaseWindow
 - One class per window; update in place rather than creating a duplicate.
 - A window object never calls `Driver.FindElement` or `FindFirstDescendant` outside `BaseWindow`'s finders and scoped components. The only assertion inside an object is `VerifyWindowLoaded()`.
 - Everything else is the rule files named under Conventions; where they and this skill disagree, the rule files win.
-
-## Handoffs
-
-- Discovering the elements → `qa/dotnet/skills/desktop-screen-explorer`
-- Scaffold and OS prerequisites → `qa/dotnet/skills/desktop-project-setup`
-- Writing the tests → `qa/dotnet/skills/ui-test-author/appium`
-- Object architecture → `qa/dotnet/skills/page-object-design`
-- Missing ids → the `desktop-macos` or `desktop-windows` agent
-- Shared rules → `qa/_shared/desktop-testing`
-- Java / TypeScript siblings → `qa/java/skills/desktop-window-objects` / `qa/typescript/skills/desktop-window-objects`

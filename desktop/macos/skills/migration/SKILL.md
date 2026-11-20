@@ -17,21 +17,6 @@ Owns changing the **language mode, framework, dependency manager, SDK, deploymen
 | Dated | **Developer ID CA expires 2027-02-01** (`.pkg` re-signed with a G2 certificate) · **CocoaPods trunk read-only 2026-12-02** · macOS 26 Tahoe is the last macOS for Intel; Intel software stops running on macOS 28 | Deadlines, not preferences: [`apple-silicon-and-developer-id`](references/apple-silicon-and-developer-id.md), [`sdk-and-targets`](references/sdk-and-targets.md) |
 | Below macOS 13 | Xcode 27's hard floor is macOS 12 | The AppKit lane only ([`appkit`](../appkit/SKILL.md)); a finding plus a deployment-target run, never a SwiftUI migration |
 
-## When to use
-
-- The user names a move: Swift 6, `@Observable`, async, SwiftUI, SPM, a deployment target, the macOS 27 SDK, Apple silicon only, `Document`
-- The audit reports A1–A9 ([`standards-audit`](../standards-audit/SKILL.md) section A) or L3 / L11 from the distribution fragment
-- A post-migration break: a runtime isolation crash, a window that lost its state, a `.pkg` that no longer installs
-
-## When NOT to use
-
-- New app → [`project-setup`](../project-setup/SKILL.md)
-- Feature work, a bug fix → the agent's FIX / EXTEND modes; they never up-level a lane
-- A patch or minor dependency bump, or a package major with no lane change: dependency hygiene
-- A Sparkle or notarization setup that is not a move → `desktop/_shared/distribution`
-- iOS → `mobile-ios:migration`; Windows → `desktop-windows:migration`
-- **Electron → native** is a rewrite, not a migration: say so, point to [`project-setup`](../project-setup/SKILL.md) and the plan skills, and offer to plan it as new work
-
 ## Inputs needed
 
 1. **The move**: one of the eight below. A request for two is two runs, in the order the table gives
@@ -93,15 +78,3 @@ Order 0 moves first when its date is near; the numbered ones follow by dependenc
 - **Raising the deployment target to use one API**: gate it with `#available` instead, until the target move is its own run.
 - **Re-signing the app and forgetting the installer**: the `.pkg` certificate is the one the 2027-02-01 expiry stops.
 - **Bundling a feature into the migration commit.**
-
-## Handoffs
-
-- The Swift standard and the concurrency reference → [`basics`](../basics/SKILL.md)
-- Project, package and xcconfig layout → [`project-setup`](../project-setup/SKILL.md)
-- AppKit lane, hosting seams → [`appkit`](../appkit/SKILL.md)
-- State ownership after the move → [`architecture`](../architecture/SKILL.md)
-- Document types and the 27 SDK `Document` → [`documents`](../documents/SKILL.md)
-- Store model migrations (SwiftData `VersionedSchema`) → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Signing, notarization, `.pkg`, Sparkle, architectures → `desktop/_shared/distribution`
-- Review the migration diff → [`code-review`](../code-review/SKILL.md); conformance after the move → [`standards-audit`](../standards-audit/SKILL.md)
-- Tests that lock the move → [`unit-testing`](../unit-testing/SKILL.md); window journeys → peer `qa-desktop-java` / `qa-desktop-dotnet` / `qa-desktop-typescript`

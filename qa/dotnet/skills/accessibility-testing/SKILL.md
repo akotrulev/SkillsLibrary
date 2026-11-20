@@ -70,11 +70,3 @@ reach `localhost` or a firewalled host.
 - **No `try`/`catch`/`finally` in a test; no `if` or `Console.WriteLine` deciding what a test reports.**
 - An automated scan is the **floor, not proof**: keyboard traps, focus order and screen-reader comprehension
   need manual and assistive-technology testing (`qa-<stack>:exploratory-charter-writer`).
-
-## Handoffs
-
-- `BaseTest`, page objects, `Directory.Packages.props` → `qa/dotnet/skills/ui-test-author/playwright`
-- Accessible-name, role and aria-snapshot assertions → its `references/assertions.md`
-- Failure evidence beside the scans → `qa/dotnet/skills/evidence-capture`
-- The UI job and the Lighthouse step → `qa/cicd/dotnet/skills/ci-pipelines`
-- TypeScript and Java → `qa-typescript:accessibility-testing`, `qa-java:accessibility-testing`

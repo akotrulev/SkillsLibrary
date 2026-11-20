@@ -10,20 +10,6 @@ This skill stands up a **runnable, empty API test project from zero**: the Gradl
 
 **Version rule:** new projects use Java 21 (17 is the minimum) and Gradle with the Kotlin DSL. An existing Maven project stays on Maven with the same coordinates; an existing suite is authored into, never re-scaffolded.
 
-## When to use
-
-- A fresh repo with no Java API test project, and the user wants REST API coverage.
-- The user asks which versions, layout or configuration a Java API test framework should use.
-- You are about to author API tests and there is no project to put them in.
-
-## When NOT to use
-
-- The project exists → author into it with `qa/java/skills/api-test-author/writer`, `api-client-writer`, `api-models`.
-- API tests on Playwright's `APIRequestContext` → `qa/java/skills/api-test-author/playwright`.
-- Web-UI, mobile or desktop scaffolding → `qa/java/skills/ui-project-setup`, `mobile-project-setup`, `desktop-project-setup`.
-- BDD (Cucumber-JVM) → `qa/java/skills/bdd-project-scaffold`.
-- .NET / TypeScript → `qa/dotnet/skills/api-project-setup` / `qa/typescript/skills/api-project-setup`.
-
 ## Tooling & versions
 
 `assets/build.gradle.kts` holds exactly these pins. The Allure rows are the one pin set of `qa/reporting/java/skills/test-reports`; TestNG and AssertJ match the other Java scaffolds.

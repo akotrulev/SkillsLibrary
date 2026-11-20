@@ -12,20 +12,6 @@ Rust is fast by default, and most slow Rust is slow for one of a handful of reas
 
 Detect the toolchain and the existing bench setup (`benches/`, `[[bench]]`, `criterion`/`divan`/`gungraun` in `[dev-dependencies]`). The repo's harness wins. The facts below hold on stable as of Rust 1.99 (2026-10). Cranelift, `-Zthreads` and branch coverage are nightly-only; never make a project depend on them.
 
-## When to use
-
-- A request, a job, or a loop is slower than its budget
-- Memory grows or allocations dominate a profile
-- Choosing release-profile settings or a global allocator
-- Async latency spikes with an idle CPU (runtime starvation)
-- Build or CI times are too long
-
-## When NOT to use
-
-- The time is in the database → `database-code` (N+1, bulk) and `data/_shared/slow-query-fixes`
-- Correctness or locking bugs → `async-concurrency`, `code-review`
-- Load-testing the deployed service → the `qa-*` performance peers
-
 ## The loop
 
 1. **State the budget and reproduce it**: a benchmark for a function, `hyperfine` for a CLI, a load test for an endpoint (`oha` / `k6`) at a fixed rate.
@@ -167,11 +153,3 @@ Measure it — allocator wins are workload-specific, and jemalloc can raise RSS.
 ## Rules
 
 The standards this skill's output must meet are the be-rust rule files, not a list here: `rust.md` (Performance, `unsafe`) and `cargo.md` (release profile, allocator, `panic`, `target-cpu`), plus `rust-tests.md` for benchmarks. Read the project's copy in `.claude/rules/be-rust/`, or the plugin's in `backend/rust/skills/rules/` when the project has not installed them (`/be-rust:rules` does). Where they and this skill's recipes disagree, the rule files win.
-
-## Handoffs
-
-- The time is SQL → `database-code`, `data/_shared/slow-query-fixes`
-- Runtime starvation, locks, backpressure → `async-concurrency`
-- Tracing the request path → `observability/opentelemetry-rust`
-- Reviewing the change → `code-review`
-- Load-testing the deployed service → the `qa-*` performance peer of the stack driving the load

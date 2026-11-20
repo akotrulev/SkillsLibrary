@@ -30,21 +30,6 @@ The primary lane is java-client 11 on Appium 3. java-client 11 needs an Appium 3
 3. `driver.getCapabilities()` on the started session shows what the vendor actually granted.
 4. AWS Device Farm takes its Appium version from the test spec and the host image; read the spec before the bump.
 
-## When to use
-
-- Uploading a build (`.apk`/`.aab`/`.xapk`/`.ipa`) to the farm and referencing it from the `app` capability (by `bs://…` id or `custom_id`)
-- Running the same Appium test across a **matrix of real devices / OS versions**
-- Testing a feature that needs a **real device**: biometric login, GPS-based behavior, a specific network condition, app permissions, a localized build
-- Driving **AWS Device Farm**'s upload → schedule → poll lifecycle (the suite runs on the farm, you collect the result)
-- Choosing between a **live-session** farm (BrowserStack/Sauce — your test drives a remote device in real time) and a **remote-run** farm (Device Farm — you ship the test package and poll for the verdict)
-
-## When NOT to use
-
-- The connect / capability-block / parallelism / tunnel / session-status wiring → `qa/java/skills/browser-cloud-setup` (this skill assumes it)
-- The TypeScript / .NET device-farm stacks → `qa/{typescript,dotnet}/skills/device-cloud`
-- Writing the mobile page objects / tests → `qa/java/skills/ui-test-author/appium`
-- CI shard/worker mechanics (matrix fan-out, sharding props, Allure merge) → `qa/cicd/java/skills/ci-pipelines/*` — cross-link, don't duplicate
-
 ## Pick a paradigm — the choice that shapes everything
 
 A device farm is one of two fundamentally different shapes. Get this right first — it decides whether your test code drives the device or whether you ship the test code to the farm.
@@ -168,13 +153,3 @@ public final class FarmCredentials {
 4. **Remote-run**: add `DeviceFarmRunner` from `references/aws-device-farm.md`.
 5. Reuse `browser-cloud-setup`'s session-status + dashboard-URL teardown; map concurrency onto the plan cap per its rules.
 6. Run **one** device/session first to confirm the upload + caps + features before fanning the matrix out; confirm the session/run appears on the dashboard with the right build/project tags.
-
-## Cross-references
-
-- **`qa/java/skills/browser-cloud-setup`** — the **prerequisite wiring** this skill builds on: connect, capability-block schemas, parallelism → `thread-count`, tunnels, session pass/fail + dashboard URL. This skill adds the app/device/feature/remote-run layer; that one owns the connection plumbing.
-- **`qa/typescript/skills/device-cloud`** + **`qa/dotnet/skills/device-cloud`** — sibling device-farm stacks. Same four moves (app lifecycle → device selection → real-device features → remote-run), different SDKs. Structure ported, not code.
-- **`qa/java/skills/ui-test-author/appium`** — writes the mobile page objects / tests that run **unchanged** on the farm; this skill only swaps the local session for a farm one.
-- **`qa/java/skills/data-driven-testing`** — the `@DataProvider` mechanics (one independent case per row); this skill supplies the device list, that one the data-driven discipline.
-- **`qa/cicd/java/skills/ci-pipelines`** — build-then-upload job, OIDC for AWS, sharding the matrix across runners (cross-link; don't duplicate).
-- **`qa/java/skills/evidence-capture/references/appium.md`** — what a failed Appium run keeps locally, and the vendor video and pass/fail marking on a farm.
-- **`qa/reporting/java/skills/test-reports`** — attach the session/run dashboard URL + device name to the report so a farm failure is one click from the replay.

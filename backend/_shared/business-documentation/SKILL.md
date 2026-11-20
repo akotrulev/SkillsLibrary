@@ -28,16 +28,6 @@ Six disciplines:
 
 **The golden example** — the `workshop-booking` toy system as an inherited codebase, one area: [`references/example-area.md`](references/example-area.md). Shape, tone, example and screenshot discipline are normative; the domain content is an illustration, never a source. Every fact, number, currency, message, actor and screenshot in a guide comes from this run's trace and capture; a claim the trace did not find (a currency symbol, who sets a rate, a message text) becomes an open question.
 
-## When to use
-
-- Steps 4–5 of a `be-documenter` run, Step 3 of a `be-feature-documenter` run, or refreshing a traced area's guide after the code moved
-
-## When NOT to use
-
-- The code has not been traced yet → `dev:doc-feature-trace`
-- The deliverable is requirements for work *to be done* → `requirements-author`
-- The deliverable is defects → `dev:audit-feature`
-
 ## Output — into the KB, under its contract
 
 Everything lands in **`docs/business-model/`**, per `business-analysis:knowledge-base`. A standalone feature (`be-feature-documenter`) writes one guide under `docs/features/<NNN>-<slug>.md`, its screenshots in `docs/features/screenshots/<NNN>-<slug>/`.
@@ -219,14 +209,6 @@ uv run ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/rend
 uv run ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/render-html.py --out <dir> docs/features/<NNN>-<slug>.md
 uv run ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/render-html.py --out <dir> --dir docs/deliveries
 ```
-
-## Handoffs
-
-- **→ `business-analyst`** — the open questions, the answers folded, the terminology drift, any contradiction between two areas' rules. It resolves conflicts and records precedence; you never invent it.
-- **→ `requirements-author`** — turns confirmed guides into epics and stories once the questions are answered; *Rules and limits* and *How it is calculated* are its acceptance-criteria source.
-- **→ `qa-test-case-designer`** — tasks, refusals, *Rules and limits* rows, formulas and worked examples are a test basis.
-- **→ `solution-planner`** — the area map and the KB models are the inputs to an EXTEND run.
-- **→ `code-auditor`** — the defects the trace found, from the run's report.
 
 ## Version policy
 

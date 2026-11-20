@@ -256,22 +256,3 @@ differ.
 ## Rules
 
 The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md`, `api-tests.md` and `test-data.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
-
-## Cross-references
-
-- `qa-java:api-tests-grpc` — **the canonical file**: same four ideas, grpc-java + TestNG +
-  `GrpcCallResult`/`StatusRuntimeException`. Read it for the family rationale.
-- `qa-dotnet:api-tests-grpc` — the .NET sibling (`Grpc.Net.Client` + `Grpc.Tools`); same four ideas,
-  different codegen/client libs.
-- `qa-typescript:api-tests` · `qa-typescript:api-tests-graphql` — the **protocol-trio
-  siblings**: REST (HTTP+JSON status-driven) and GraphQL (HTTP 200 `{ data, errors }` envelope). Three protocols,
-  three result-location conventions, one `api-test-author` family + shared Client + Spec spine.
-- `qa-typescript:realtime-stream-testing` — gRPC **streaming** reuses its
-  drain-then-assert-on-a-bounded-condition discipline; cross-link for deep stream-lifecycle assertions, don't
-  duplicate.
-- `qa-typescript:api-models` — generate/type the proto messages (the DTO analogue) in isolation; this skill
-  consumes them.
-- `qa-typescript:api-contract-testing` — the **Protobuf contract** boundary vs the functional test this skill
-  writes. `qa-typescript:load-testing` — gRPC **load**.
-- `qa-typescript:test-login-tokens` — obtain the per-call **bearer** carried in leading metadata.
-- `qa-typescript:test-reports` — each RPC renders as a named result.

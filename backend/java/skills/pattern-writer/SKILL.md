@@ -12,21 +12,6 @@ Scaffolds pattern implementations into a Java 21 + Spring Boot 3.x codebase. Con
 
 **First act: detect the project's Java release and Spring Boot major** (`build.gradle(.kts)` toolchain / `pom.xml` `<java.version>`, and the Spring Boot BOM version) before scaffolding. Sealed types + pattern-matching switch and virtual threads assume Java 21+; if the project is on Java 17 / Spring Boot 2.x, fall back to `if`/`instanceof` chains and thread-pool `@Async` and say so rather than generating code that won't compile.
 
-## When to use
-
-- Replacing an `if`/`else` or `switch` chain with a strategy
-- Wrapping a service with a decorator (logging, retry, caching, validation)
-- Extracting CQRS for a slice with real read/write asymmetry
-- Repository / Specification when there's a genuine abstraction need
-- Factory / Abstract Factory when construction is non-trivial and reused
-- Type-safe `@ConfigurationProperties` to replace scattered `@Value`
-
-## When NOT to use
-
-- Explanations → `backend/java/skills/pattern-guide`
-- Reviewing existing code → `backend/java/skills/code-review`
-- Scaffolding tests against the generated code → `backend/java/skills/unit-testing` for the class-level tests (JUnit 5, no Spring context); `qa/java/skills/api-test-author/writer` (peer) once it's reachable over HTTP
-
 ## Inputs needed
 
 1. **Pattern** (Strategy, Decorator, Repository, Specification, Factory, Command/Query handler, Options, Pipeline, sealed-state-machine)
@@ -281,13 +266,3 @@ After scaffolding, run the checks below:
 - `./gradlew test` — generated tests pass
 - `./gradlew checkstyleMain spotlessCheck` — formatting clean
 - Sweep old call sites that the new pattern replaces; remove dead code
-
-## Handoffs
-
-- Conceptual lookup → `backend/java/skills/pattern-guide`
-- Reviewing the result → `backend/java/skills/code-review`
-- Unit-testing the generated classes → `backend/java/skills/unit-testing`
-- Tests for new API (contract/integration) → **peer** `qa/java/skills/api-test-author/writer`
-- POJOs/records → `qa/java/skills/api-models`
-- .NET equivalent → `backend/dotnet/skills/pattern-writer`
-- TypeScript equivalent → `backend/node/skills/pattern-writer`

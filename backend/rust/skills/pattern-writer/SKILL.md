@@ -22,21 +22,6 @@ Detect before writing: `rust-toolchain.toml`, `Cargo.toml` `edition` + `rust-ver
 
 A **new service** pins `rust-toolchain.toml` to a specific stable and sets `rust-version` to the same value. A **library** sets `rust-version` to the oldest toolchain it supports and tests it in CI — edition 2024's resolver 3 then prefers dependency versions that build on it.
 
-## When to use
-
-- A new Rust service or crate
-- Adding an endpoint, an extractor, an error variant, a newtype, a module
-- Replacing `String`/`Uuid`/`i64` ids, `unwrap()`s, or scattered `std::env::var` reads
-- Splitting a growing crate along module boundaries
-
-## When NOT to use
-
-- Explaining a pattern → `pattern-guide`
-- Queries, migrations, transactions → `database-code`
-- Spawning, cancellation, locks, shutdown internals → `async-concurrency`
-- Telemetry wiring → `observability/opentelemetry-rust` (via `observability-engineer-rust`)
-- Tests → `unit-testing`
-
 ## Inputs needed
 
 1. Service or library; binary name
@@ -453,12 +438,3 @@ Run:
 - `cargo clippy --all-targets --all-features --locked` with warnings as errors. Use `CARGO_BUILD_WARNINGS=deny` on 1.97+: it does not invalidate the build cache the way `-D warnings` in `RUSTFLAGS` does. On older toolchains, use `-- -D warnings`.
 - `cargo nextest run` (or `cargo test`) plus `cargo test --doc` — nextest does not run doctests
 - Sweep the old call sites the new type replaces
-
-## Handoffs
-
-- Concepts → `pattern-guide`
-- Queries, pool, migrations → `database-code`
-- Tasks, shutdown, locks → `async-concurrency`
-- Telemetry init, `TraceLayer` span functions, metrics → `observability/opentelemetry-rust`
-- Tests → `unit-testing`
-- Review → `code-review`

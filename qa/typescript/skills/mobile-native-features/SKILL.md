@@ -41,22 +41,6 @@ Appium tests for the **OS-level capabilities** a mobile app touches but a page-o
 
 WDIO 10 sends every one of these commands through a `mobile:` extension, because Appium 3 removed the old `/appium/*` routes. Never hand-roll an HTTP call to one.
 
-## When to use
-
-- A **deep or universal link** must open the right screen
-- Behavior **behind a runtime permission**, with the dialog handled or under test
-- **Biometric** login or step-up on an emulator or simulator, approve and reject
-- State that must survive **backgrounding**, a cold relaunch, or a push tap
-- **Clipboard**, **picker** or **orientation** behavior
-
-## When NOT to use
-
-- The app's own screens → `qa/typescript/skills/ui-test-author/appium`
-- Real-device farm wiring and farm-side biometric/GPS injection → `qa/typescript/skills/device-cloud`
-- The requests an app makes → `qa/typescript/skills/network-mocking/*`
-- Token auth → `qa/typescript/skills/test-login-tokens`
-- Java / .NET → `qa/{java,dotnet}/skills/mobile-native-features`
-
 ## The `NativeFeatures` object
 
 `NativeFeatures` owns every OS-surface call. A test reads: *drive the OS surface, assert the effect on a page object.* The id argument is a package on Android and a bundle id on iOS, so one private method builds the arguments.
@@ -255,13 +239,3 @@ A camera, photo or file picker is an OS surface you cannot drive in CI. Seed the
 - **Push tests assert the app's reaction**, not the send.
 - **Clipboard content is base64** in both directions.
 - `NativeFeatures` lives in `src/support/nativefeatures/`; no `any`, strict TypeScript, no secrets in code.
-
-## Cross-references
-
-- **`qa/typescript/skills/ui-test-author/appium`** — the foundation: `BasePage`, `wdio.conf.ts`, gestures, WebView switching, the `BaseTest.ts` failure evidence
-- **`qa/typescript/skills/device-cloud`** — where the tests run and how farm-side GPS, network and biometric are injected
-- **`qa/typescript/skills/evidence-capture`** — what a failed native flow keeps
-- **`qa/java/skills/mobile-native-features`**, **`qa/dotnet/skills/mobile-native-features`** — the sibling stacks
-- **`qa/typescript/skills/network-mocking/*`** — the requests an app makes
-- **`qa/typescript/skills/data-driven-testing`** — a device, permission or locale matrix as one `it` per row
-- **`qa/typescript/skills/test-login-tokens`** — token auth, the boundary with biometric unlock

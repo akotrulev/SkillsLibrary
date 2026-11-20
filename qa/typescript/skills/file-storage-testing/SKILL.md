@@ -42,8 +42,3 @@ azure-blob. *A queue with no object?* → messaging. *A row with no object?* →
 - Local emulator (LocalStack / Azurite) via Testcontainers — never a real cloud bucket in tests.
 - Unique bucket/container or key prefix per test, plus cleanup.
 - Condition-wait for async object processing; assert content and metadata, not listing timing.
-
-## Cross-references
-
-Each `references/<tool>.md` carries its own cross-references to sibling skills (DB verification,
-test environments, CI, chaos). Route there after picking the tool.

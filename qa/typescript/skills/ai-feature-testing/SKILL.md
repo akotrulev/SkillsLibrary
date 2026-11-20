@@ -145,7 +145,6 @@ npx promptfoo@latest eval -c evals/promptfooconfig.yaml -o results.json
 # exit code is non-zero when any assertion fails → the CI gate. View locally with: npx promptfoo view
 ```
 
-
 ## Choosing the spine — promptfoo (default) vs DeepEval
 
 **promptfoo is the default spine** (above): declarative YAML, deterministic-first, provider-matrixing,
@@ -171,15 +170,3 @@ The full anti-pattern catalog (exact-string asserts, unpinned judges, quarantine
 ## Rules
 
 The standards this skill's output must meet are the qa-typescript rule files, not a list here: `llm-evals.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win. Vitest specs on the SDK path also meet `qa-typescript.md`.
-
-## Cross-references
-
-- `qa-{dotnet,java}:ai-feature-testing` — sibling stacks (promptfoo as a subprocess + provider-SDK-in-test). Same four ideas.
-- `qa-typescript:data-driven-testing` — an eval IS a data-driven test; reuse its row-binding mechanics.
-- `qa-typescript:flaky-test-quarantine` — the boundary: model non-determinism (assert a rate) is NOT test flakiness (retry/quarantine).
-- `qa-typescript:api-models` — the Zod schema the `is-json` rung / SDK `safeParse` validates.
-- `ai-development/*` — build-vs-test boundary: they build the AI feature, this tests it.
-- `qa-typescript:test-login-tokens` — env + secret-store discipline for `ANTHROPIC_API_KEY`.
-- `qa-<stack>:quality-metrics` — track eval pass-rate over time. `qa-typescript:test-reports` — named results.
-- `qa-typescript:load-testing` — LLM load/latency under concurrency (out of scope here; latency is a per-case budget).
-- `qa-<stack>:webmcp-testing` — the deterministic side of WebMCP tools a page registers (schema, `execute()` contract, annotations); this skill keeps the agent evals over them.

@@ -23,21 +23,6 @@ The App Router lane is **not** the SPA lane with extra steps. A Server Component
 - Refresh token rotation enabled in the Auth0 SPA Application
 - **Next.js App Router → use the `@auth0/nextjs-auth0` lane below instead**
 
-## When to use
-
-- A new React SPA that needs Auth0 sign-in / sign-out
-- Protecting routes (`react-router` or similar)
-- Attaching the access token to `fetch` calls to a backend API
-- Reading user profile / permissions in components
-- Adding organization support (B2B)
-
-## When NOT to use
-
-- Backend JWT validation → `backend/dotnet/skills/auth0` / `backend/java/skills/auth0`
-- Blazor Server / WASM → `auth/auth0-blazor`
-- Concepts (audience, RBAC, organizations) → `auth/_shared/auth0-concepts`
-- Cognito instead of Auth0 → `auth/cognito-react`
-
 ## Inputs needed
 
 1. **Auth0 tenant domain** + **SPA Application client_id** + **API audience** (per env, injected at build time as env vars)
@@ -379,12 +364,3 @@ Fetch on the **server** and pass serializable data down as props. Sending the ac
 | `router.push('/auth/login')` | Client-side push to a server route | A real `<a href="/auth/login">` |
 | Access token handed to the client | Cookie-session model exists to avoid that | Fetch server-side, pass data as props |
 | Skipping `audience` | You get an opaque token, not a JWT your API can validate | Set `audience` in `authorizationParameters` |
-
-## Handoffs
-
-- Concepts → `auth/_shared/auth0-concepts`
-- Backend validation → `backend/dotnet/skills/auth0` or `backend/java/skills/auth0`
-- Blazor → `auth/auth0-blazor`
-- Route topology + middleware mechanics → `frontend/react/skills/routing`
-- React patterns (custom hooks, providers) → `frontend/react/skills/component-writer`
-- E2E with auth → `qa/typescript/skills/ui-test-author/playwright` (use `storageState` for an authenticated session)

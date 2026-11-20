@@ -18,16 +18,6 @@ python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<brief>"
 
 This skill owns the tier discipline — primitive → semantic → component, naming by purpose, dark mode as a semantic swap. The corpus owns what the values are.
 
-## When to use
-
-- Standing up a token system on a new app, or refactoring a flat pile of `--color-*` variables into tiers.
-- Deciding whether a project needs two tiers or three, and where a given token belongs.
-- Naming tokens, or reviewing a set for value-named smells (`--color-red`, `--blue-500` used directly in components).
-- Designing dark mode / brand variants as a swap set rather than a per-component override.
-- Choosing the delivery shape: CSS custom properties vs W3C DTCG JSON.
-
-Do **not** use it to *choose* the palette or type pairing (that decision is `visual-identity`), to write the actual CSS that consumes tokens (the stack's `styling`), or to pull a preset theme (`theme-presets`).
-
 ## Native apps
 
 On a mobile or desktop app the discipline holds: the tier model, components read semantic tokens only, names by purpose, the status set disjoint from brand, bounded scales, theming as a semantic swap, contrast re-verified per theme. What does not transfer is the web delivery — CSS custom properties, `:root[data-theme]`, `clamp()`, CSS breakpoints. The platform's theme system is the semantic tier: iOS and macOS semantic colours, Material 3 tokens and `colorScheme` on Android (corpus `--stack jetpack-compose`: *Design system*, *Dark mode support*), `ThemeResource` on WinUI and resource dictionaries on WPF (`--stack winui` / `wpf`), typed tokens on React Native; Windows adds High Contrast as a third theme. Type steps are the platform's text styles; breakpoints are its size or window-size classes. A product shipping web and native from one source is the pipeline case *Delivery shape* names. Facts: those `--stack` rows, `--domain web` *Light/Dark Contrast*, `references/pro-rules.md` *Light/Dark Mode Contrast*, and the stack's `styling`.
@@ -101,11 +91,3 @@ Numbered because audit finding ids cite the numbers: new checks are appended, an
 5. Each category is a **bounded scale**, not ad-hoc values (spacing off one base, radius/shadow/motion from a small set).
 6. Theming is a **semantic remap**; primitives don't fork; no component CSS changes per theme; no `invert()`.
 7. Delivery is **CSS custom properties** unless a real multi-platform / Figma-sync pipeline justifies DTCG JSON.
-
-## Related
-
-- [`design/visual-identity`](../visual-identity/SKILL.md) — the taste that *chooses* the palette/type values this system gives structure to (primary theming authority; its per-brief token system feeds this skill's tiers).
-- [`design/brand-import`](../brand-import/SKILL.md) — the brownfield path: an existing brand book normalized into this tier model.
-- [`design/theme-presets`](../theme-presets/SKILL.md) — preset themes; their palettes are **primitive-tier starting values** you assign semantic roles to.
-- A stack's `styling` ([Blazor](../../frontend/blazor/skills/styling/SKILL.md) · [React](../../frontend/react/skills/styling/SKILL.md)) — consumes this structure and owns the CSS mechanics (isolation, `clamp()` type sizing, `var(--token)` application). It defers the tier/naming rules here.
-- [`design:corpus`](../ui-ux-pro-max/SKILL.md) — `--design-system` emits the concrete `--color-*` / `--space-*` values these tiers encode.

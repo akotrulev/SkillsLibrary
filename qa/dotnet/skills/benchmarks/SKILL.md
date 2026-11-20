@@ -22,13 +22,6 @@ answers "is implementation B faster or leaner than A?" and "did this change make
 
 A microbenchmark result is a ratio between alternatives on one machine, never a production latency number.
 
-## When NOT to use
-
-- Endpoint latency, throughput, soak, spike → `load-testing`
-- Fault tolerance under slow dependencies → `failure-injection-testing`
-- Correctness of the code being measured → unit tests first (`be-dotnet` `unit-testing`); benchmark only code that
-  is already tested
-
 ## Inputs needed
 
 1. The method(s) to measure and the alternative or baseline to compare against.
@@ -171,7 +164,6 @@ import glob
 import json
 import sys
 
-
 def load(directory):
     results = {}
     for path in glob.glob(f"{directory}/*-report-brief.json"):
@@ -183,7 +175,6 @@ def load(directory):
                     memory.get("BytesAllocatedPerOperation"),
                 )
     return results
-
 
 baseline, current, threshold = load(sys.argv[1]), load(sys.argv[2]), float(sys.argv[3])
 failures = []
@@ -229,9 +220,3 @@ reading ("`LoopSum` is 0.31× the baseline at 1,000 lines and allocates 0 B vs 3
 - **A benchmark that returns nothing** — the JIT is free to delete the work; the result is a few nanoseconds of
   nothing.
 - **Gating on time on shared CI runners** — the gate fails on noise and gets disabled; gate allocations there.
-
-## Handoffs
-
-- Endpoint load and SLOs → `load-testing`, `qa/_shared/performance`
-- The CI job and artifact upload → `qa/cicd/dotnet/skills/ci-pipelines`
-- Making the benchmarked code testable / tested → `be-dotnet` `unit-testing`

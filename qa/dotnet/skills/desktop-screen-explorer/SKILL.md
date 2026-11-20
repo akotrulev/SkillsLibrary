@@ -15,21 +15,6 @@ Reads the **running native app** (an Appium page source, or the UIA tree under F
 | C# selector | `MobileBy.AccessibilityId("Library.SearchField")` | `MobileBy.AccessibilityId("Library.SearchField")` | `cf.ByAutomationId("Library.SearchField")` |
 | Tree read | `Driver.PageSource` | `Driver.PageSource` | `window.FindAllDescendants()` |
 
-## When to use
-
-- The app is open and the user wants to know what is in the current window.
-- Locators must be discovered or verified before a window object is built or fixed.
-- The team wants an inventory of elements that lack a stable test id.
-- A flow must be walked (click, type) to reveal windows, sheets or dialogs whose elements are then captured.
-
-## When NOT to use
-
-- Emitting the window object class → `qa/dotnet/skills/desktop-window-objects`.
-- Writing the NUnit tests → `qa/dotnet/skills/ui-test-author/appium`.
-- Mobile apps → `qa/dotnet/skills/mobile-screen-explorer`; browser pages → `qa/dotnet/skills/page-objects-from-url`.
-- Adding the missing ids to the app → the `desktop-macos` or `desktop-windows` agent, with `missing-testids.md`.
-- Java / TypeScript → `qa/java/skills/desktop-screen-explorer` / `qa/typescript/skills/desktop-screen-explorer`.
-
 ## Prerequisites
 
 Use the first route available and say which.
@@ -162,14 +147,6 @@ Interact, then **re-read**: the previous tree is stale after any change. Record 
 - Searching from the desktop root instead of the app window.
 - Dumping every node into the report; extracting from a stale tree after a click.
 - Writing the window object in the same breath.
-
-## Handoffs
-
-- Window object → `qa/dotnet/skills/desktop-window-objects`; scaffold → `qa/dotnet/skills/desktop-project-setup`
-- Write the tests → `qa/dotnet/skills/ui-test-author/appium`
-- Missing ids → the `desktop-macos` or `desktop-windows` agent
-- Shared rules → `qa/_shared/desktop-testing`
-- Java / TypeScript siblings → `qa/java/skills/desktop-screen-explorer` / `qa/typescript/skills/desktop-screen-explorer`
 
 ## Reference
 

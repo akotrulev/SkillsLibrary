@@ -10,22 +10,6 @@ The dev-side half of desktop security: the rules an agent follows **while writin
 
 **The fence.** Scanning and attacking a **built** app, binary hardening checks, runtime hooking and traffic interception are `qa-security`'s. This skill reads **source and config** and writes the fix. It never runs a debugger, a proxy, a scanner or an installer. A rule whose truth only shows at run time is written **requires dynamic test → `qa-security`** and reported *unverified*, never *passed*.
 
-## When to use
-
-- Choosing where a token, key, PII or cache lives
-- Adding a network call, a WebView, a URL scheme, file or protocol activation, an XPC service, a named pipe or a helper process
-- Loading a plug-in, a native library or a framework; adding an entitlement or a manifest capability
-- Wiring an update channel
-- Reviewing or auditing desktop code for section K of the conformance checklist
-
-## When NOT to use
-
-- Signing, notarization, MSIX, Sparkle / Velopack mechanics, SmartScreen → `desktop/_shared/distribution` (section L)
-- Auth0 flows, PKCE, loopback redirect → `auth0-macos` / `auth0-windows`
-- A built `.app` / `.msix` / `.exe` needs scanning, or a control must be *proven* → `qa-security` (peer, not loaded)
-- Server-side authn / authz, rate limits → the `be-*` stack
-- Telemetry scrubbing and crash reporters → `desktop/_shared/observability`
-
 ## Version lane (verified 2026-11-15)
 
 | Standard / fact | Version | Note |

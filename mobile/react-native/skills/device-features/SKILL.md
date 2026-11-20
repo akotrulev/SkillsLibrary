@@ -20,21 +20,6 @@ Owns the code that touches the camera, library, location, biometrics, haptics, s
 
 Detect the installed SDK from `expo` in `package.json`; never add a module the project's SDK does not pin.
 
-## When to use
-
-- Capturing, scanning, picking or saving media
-- Reading the device position, once or while the screen is open
-- Gating a screen or a sensitive action behind Face ID / Touch ID / fingerprint
-- Haptic feedback, the system share sheet, reading and writing app files
-- Periodic work while the app is not foregrounded
-
-## When NOT to use
-
-- Push tokens, notification permission, universal links → [`notifications-and-links`](../notifications-and-links/SKILL.md)
-- A capability no SDK or community module covers → [`native-modules`](../native-modules/SKILL.md)
-- Tokens, credentials, encrypted records → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- The store-side declaration rules (purpose strings, Play declarations) → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-
 ## The permission lifecycle (hard rules)
 
 Every permission-bearing feature has **four states**, and each is a screen, not an `if`:
@@ -163,14 +148,3 @@ export function ScannerGate({ children }: { children: React.ReactNode }) {
 - Choose approximate location: the feature works or says exactly what it cannot do.
 - Leave the screen: the camera, watcher or listener is released.
 - `rg` for `request.*Async` outside a handler or primer → none (J14).
-
-## Handoffs
-
-- Push permission, channels, tokens, deep links → [`notifications-and-links`](../notifications-and-links/SKILL.md)
-- Config plugins for a native change, a custom module → [`native-modules`](../native-modules/SKILL.md)
-- Secure storage, queued writes → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Purpose strings, Play declarations, data-safety → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Untrusted scan / file input, Keychain, pinning → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
-- Failure UI for a full disk or a failed capture → [`error-handling`](../error-handling/SKILL.md)
-- Test ids on the primer and denied screens → [`test-ids`](../test-ids/SKILL.md)
-- Permission dialogs in a device journey → `qa-mobile-typescript` (peer)

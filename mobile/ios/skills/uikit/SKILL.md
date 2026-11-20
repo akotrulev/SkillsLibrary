@@ -21,23 +21,6 @@ The lane for apps where UIKit **is** the codebase. **A UIKit codebase is not a d
 
 Detect first: storyboards, `AppDelegate`/`SceneDelegate`, Objective-C, third-party layout or binding libraries, the existing navigation owner (coordinator, router, plain `UINavigationController`). **Match what is there.**
 
-## When to use
-
-- Adding or changing a screen in a UIKit app
-- Embedding a SwiftUI view in UIKit, or a UIKit view in SwiftUI
-- A collection view or table view with diffable data
-- "Migrate to scenes", a missing `SceneDelegate`, a launch crash on the iOS 27 SDK
-- Auto Layout breakage, a screen that does not rotate or resize on iPad
-
-## When NOT to use
-
-- A new SwiftUI screen in an app that is mostly SwiftUI → [`ui-components`](../ui-components/SKILL.md)
-- Rewriting UIKit to SwiftUI, Objective-C → Swift, storyboard removal → [`migration`](../migration/SKILL.md)
-- State ownership of `@Observable` models → [`architecture`](../architecture/SKILL.md)
-- Routes and universal links → [`navigation`](../navigation/SKILL.md), `mobile-ios:push-and-deep-links`
-- Colour, type, Liquid Glass → [`styling`](../styling/SKILL.md)
-- Another stack → `mobile-react-native:native-modules`, `mobile-android:views-interop`
-
 ## View controllers — small, owned, cancelled
 
 ```swift
@@ -205,11 +188,3 @@ The standards this skill's output must meet are the mobile-ios rule files, not a
 - Leaving a screen mid-load cancels the request; Instruments (Leaks, Memory Graph) shows the controller deallocated after pop.
 - A scene-based app launches, restores its state and handles a universal link in cold and warm start.
 - Dev-side tests: logic extracted to models and tested with Swift Testing; view-controller journeys are `qa-mobile-<stack>`'s (peer).
-
-## Handoffs
-
-- Rewrites, Objective-C, storyboard removal → [`migration`](../migration/SKILL.md)
-- Models, injection → [`architecture`](../architecture/SKILL.md) · views → [`ui-components`](../ui-components/SKILL.md)
-- Links and push routing → [`navigation`](../navigation/SKILL.md), `mobile-ios:push-and-deep-links`
-- Test ids → [`mobile-ios:test-ids`](../test-ids/SKILL.md) · accessibility → `mobile-ios:accessibility`
-- Pickers, camera, location → [`device-features`](../device-features/SKILL.md)

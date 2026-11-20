@@ -166,9 +166,3 @@ None. An id is not a metric and carries no data.
 - **A `ContentDialog` and a `Flyout` live in their own popup tree** — the id is set inside, and the suite searches from the window root, not the page.
 - **WinForms controls left as `button1`** — ids that mean nothing and collide.
 - **Uno left without `IsUiAutomationMappingEnabled`** — every id is ignored.
-
-## Handoffs
-
-- Names and Narrator → `desktop-windows:accessibility`; dialogs and lists → `desktop-windows:ui-components`
-- The explorer, the drivers and the suites → `qa-desktop-typescript`, `qa-desktop-java`, `qa-desktop-dotnet` (E1–E3)
-- Dev-side tests of view models → `desktop-windows:unit-testing`; the macOS twin → `desktop-macos:test-ids`

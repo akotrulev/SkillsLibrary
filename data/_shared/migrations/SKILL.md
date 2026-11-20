@@ -8,20 +8,6 @@ disable-model-invocation: true
 
 Tool selection, repo layout, naming, and online-safe DDL / data change recipes that apply across PostgreSQL / SQL Server / MySQL / MongoDB / DynamoDB / Cosmos DB. Engine-specific syntax lives in the per-DB skills (`data/<db>`).
 
-## When to use
-
-- Picking a migration tool per stack
-- Structuring a repo's migration directory
-- Authoring an online-safe DDL change (rename, type change, NOT NULL add, drop)
-- Backfill planning (batched, idempotent, resumable)
-- Coordinating schema changes across services touching the same DB
-- Versioning and rollback strategy
-
-## When NOT to use
-
-- Engine-specific schema design → `data/<db>`
-- One-off DML in prod — use a script, not a migration
-
 ## Tool selection per stack
 
 | Stack | Primary | Secondary | Notes |
@@ -154,10 +140,3 @@ The standards this skill's output must meet are the data rule files, not a list 
 4. Write the migration file in the project's tool's naming convention.
 5. If a backfill is needed, write it as a separate file or, for large backfills, as a job that the pipeline triggers post-deploy.
 6. Verify locally against a representative dataset; check the execution plan / row count.
-
-## Handoffs
-
-- Engine-specific syntax → `data/<db>`
-- Cross-engine query optimization → `data/_shared/slow-query-fixes`
-- Caching layer (often affected by schema changes) → `data/_shared/caching-patterns`
-- Pipeline integration (running the migration as a pre-deploy step) → `qa-cicd-{java,dotnet,typescript}` (`qa/cicd/<stack>/skills/ci-pipelines`), which owns the CI wiring the "migrations run from the pipeline" rule requires

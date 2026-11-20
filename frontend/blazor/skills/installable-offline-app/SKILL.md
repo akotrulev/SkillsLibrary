@@ -12,21 +12,6 @@ Owns making a Blazor **WebAssembly** app **installable** (a PWA the OS treats li
 
 **Version rule:** the template mechanics (two service workers, the assets manifest, cache-first) are **stable across net8/9/10**. The one real delta is a **net10 Blazor-Web-App + PWA setup friction** (the unified template doesn't wire PWA as cleanly as standalone WASM did; see the dotnet/aspnetcore tracking issue) — prefer a **standalone WASM** project for a serious offline app, or wire the `.Client` deliberately. No net-version changes the service-worker contract itself.
 
-## When to use
-
-- Making the app installable (Add to Home Screen / install icon): manifest + icons
-- Caching the app shell so it launches offline: the published service worker
-- Fixing "my PWA won't update after I deploy" (the #1 PWA support ticket)
-- Offline UX: detecting connectivity, an offline banner, deferring writes
-- Deciding what offline actually requires for *data*, not just the app shell
-
-## When NOT to use
-
-- Interactive-Server offline — impossible; the circuit needs the network. Reconnection UX for a dropped circuit → [`error-handling`](../error-handling/SKILL.md)
-- Server-side/distributed caching of API responses → [`data-fetching`](../data-fetching/SKILL.md) (`HybridCache`) — that's server memory, not client offline
-- Live/push data and its disconnect handling → [`realtime`](../realtime/SKILL.md)
-- WASM startup size/trimming (offline caching makes payload size matter *more*) → [`performance`](../performance/SKILL.md)
-
 ## Installable: the web app manifest
 
 `wwwroot/manifest.webmanifest`, linked from the host page. Installability needs a manifest, HTTPS, and a registered service worker.
@@ -111,13 +96,3 @@ The standards this skill's output must meet are the fe-blazor rule files, not a 
 - Deploy a new build, reload once → you correctly see *either* the update prompt *or* the documented next-launch behavior — never a silent stale app with no path forward.
 - Lighthouse PWA audit passes (manifest, installable, offline start).
 - DevTools → Application → Service Workers shows the published worker controlling the page in prod, and no caching worker in dev.
-
-## Handoffs
-
-- Which surfaces are WASM (a prerequisite for offline) → [`project-setup`](../project-setup/SKILL.md)
-- Reconnection UX for a dropped Server circuit (a different problem) → [`error-handling`](../error-handling/SKILL.md)
-- Server/distributed response caching (not client offline) → [`data-fetching`](../data-fetching/SKILL.md)
-- WASM payload/startup budget the precache depends on → [`performance`](../performance/SKILL.md)
-- `navigator.onLine` bridge + any SW messaging interop → [`javascript-calls`](../javascript-calls/SKILL.md)
-- Icon/manifest asset craft (sizes, maskable safe zone) → [`design/iconography`](../../../../design/iconography/SKILL.md)
-- Offline banner / deferred-action labeling conventions → [`ui-rules`](../ui-rules/SKILL.md) + [`design/ux-writing`](../../../../design/ux-writing/SKILL.md)

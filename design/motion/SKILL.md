@@ -18,15 +18,6 @@ Owns the **motion catalog**: which of the seven motion categories a surface need
 | **What** the motion is — category, tier, duration, easing, the do/don't | the catalog | **this skill** |
 | **How** it is built in the codebase | the mechanics | a stack's `animation` ([Blazor](../../frontend/blazor/skills/animation/SKILL.md) · [React](../../frontend/react/skills/animation/SKILL.md)) |
 
-## When to use
-
-- A surface needs motion and nobody has said *which* motion — pick the category and tier here.
-- The animations across a product feel arbitrary (one 800ms hover next to a 100ms modal) — this is a tier problem, not a code problem.
-- A brief carries a motion dial (`--motion 1-10` on the design-system generator) and it has to become concrete presets.
-- A scroll, stagger, parallax, page-transition, skeleton, or carousel behavior is being specified.
-
-Do **not** use it to decide whether the page should animate at all (`design:visual-identity`), or to write the animation code (the stack's `animation`).
-
 ## Native apps
 
 On a mobile or desktop app the product-wide tier (Subtle for an application), the categories as triggers, and the non-negotiables' intent all hold: Reduce Motion renders the static final state, motion never carries meaning alone, loops and listeners are torn down, auto-advance is stoppable, nothing parallaxes text or controls. What does not transfer is the web catalog's technique and numbers — GSAP snippets, `matchMedia`, ScrollTrigger and SplitText, IntersectionObserver, the no-JS fallback. Take native timing from the corpus instead: `search.py "<trigger>" --domain web` (*Duration & Easing*: micro-interactions 150–300 ms, ease-out to enter, ease-in to exit; *Respect Reduced Motion*; *Limited Continuous Motion*: loops only for loaders and live data), `--stack swiftui | jetpack-compose | react-native | winui | wpf`, and `references/pro-rules.md` (*Interaction (App)*: shared, platform-appropriate timing tokens). The mechanics are the stack's `animation` on mobile and its `styling` on macOS and Windows.
@@ -101,11 +92,3 @@ Numbered because audit finding ids cite the numbers: new checks are appended, an
 7. Exit/route animation is **≤250ms** and never blocks navigation; sub-300ms waits get no loader.
 8. Auto-rotating content has **prev/next + play/pause**, pauses on hover and focus, and stops under reduced motion.
 9. **No parallax on body copy or controls**; reveal-hidden content has a no-JS fallback.
-
-## Related
-
-- [`design:corpus`](../ui-ux-pro-max/SKILL.md) — the `gsap` domain that is this skill's catalog, and the `--motion` dial that resolves the tier.
-- [`design:visual-identity`](../visual-identity/SKILL.md) — decides whether motion serves the brief and what the one orchestrated moment is.
-- [`design:accessibility`](../accessible-by-design/SKILL.md) — the WCAG 2.2 side of pause/stop, focus, and non-motion alternatives.
-- [`design:landing-patterns`](../landing-patterns/SKILL.md) — the landing patterns whose "recommended effects" column names the motion a section expects.
-- A stack's `animation` ([Blazor](../../frontend/blazor/skills/animation/SKILL.md) · [React](../../frontend/react/skills/animation/SKILL.md)) — builds the chosen preset.

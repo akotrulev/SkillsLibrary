@@ -18,14 +18,6 @@ python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<what yo
 
 Read `design/ui-ux-pro-max/references/quick-reference.md` §1–§3 (CRITICAL + HIGH) as a final pass, and `references/pro-rules.md` when the surface is a native/mobile app or the UI "doesn't look professional" and the cause isn't obvious. Cite the guideline in the finding.
 
-## When to use
-
-- Reviewing a design plan, a mockup, or a built UI for usability before it ships.
-- A flow "feels clunky" and you need to locate *where* and *why*, not just sense it.
-- Deciding whether an interaction is over-guarded (a confirm where undo fits) or under-guarded (a destructive action with no safety).
-- Auditing information architecture: nav is too deep, labels don't predict what's behind them, users can't tell where they are.
-- Running a heuristic evaluation as a structured pass rather than an ad-hoc "does this look right".
-
 ## The review contract
 
 Same as the rest of the library: **you find and locate problems; you do not rewrite the design.** Output is a findings table. Point to the fix, let the human apply it.
@@ -106,14 +98,3 @@ Perceived speed is part of the experience; the budget is [`design/ux-patterns`](
 6. **IA checked:** nav shallow and scannable, labels predict destinations, one-name-one-concept holds, you-are-here always shown.
 7. **Output is a findings table** (severity / location / heuristic / suggested fix) on the **house severity scale** — **no rewrites**, each finding ranked by user-task impact.
 8. **Scope respected:** code-level audit left to `ui-code-audit`, a11y *scanning* to `accessibility-testing`, *bug* hunting to `exploratory-charter-writer`, copy *wording* to `ux-writing`, visual *taste* to `visual-identity` — this skill flags the *experience*.
-
-## Related
-
-- [`design/ux-patterns`](../ux-patterns/SKILL.md) — the **generative** counterpart: the IA, shell, page-anatomy and responsiveness decisions this review judges a build against; `dev:plan-experience` carries them per initiative.
-- [`design/ui-code-audit`](../ui-code-audit/SKILL.md) — the **code-level** UI audit one layer below this; this reviews the experience, that reviews the implementation.
-- [`design/ux-writing`](../ux-writing/SKILL.md) — owns the **wording** of labels, errors, and confirmations this review judges the *structure* of; shares the one-name-one-concept rule.
-- [`design/visual-identity`](../visual-identity/SKILL.md) — owns **visual taste**; heuristic #8 (minimalism) is the usability face of its restraint discipline.
-- A stack's `ui-rules` ([Blazor](../../frontend/blazor/skills/ui-rules/SKILL.md) · [React](../../frontend/react/skills/ui-rules/SKILL.md)) — owns the confirmation-by-object-name and empty-state *mechanics* this review defers to.
-- A stack's / qa `accessibility-testing` — runs the **automated** a11y scans; this only flags usability heuristics a scanner can't see.
-- qa `app-exploration` (the `qa-explorer` agent) explores a running build to find **defects**, and `exploratory-charter-writer` charters a human's session; this judges the **experience** of a build that already works.
-- [`design:corpus`](../ui-ux-pro-max/SKILL.md) — the guideline corpus findings are cited against, plus `references/quick-reference.md` and `references/pro-rules.md`.

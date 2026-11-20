@@ -8,21 +8,6 @@ disable-model-invocation: true
 
 Wires Node 24 + TypeScript Vitest tests to talk to a **real** database — seed fixtures via factories, run read-only assertion queries via `node-postgres` / Knex / Prisma, wait for eventual consistency, and clean state safely. Pairs with `qa/typescript/skills/db-testing/testcontainers` for the container lifecycle and `qa/typescript/skills/db-testing/verification-queries` for SQL safety.
 
-## When to use
-
-- A test must verify a row was written, an FK held, a trigger fired, or a soft-delete column was set.
-- Test setup needs to seed reference data (currencies, countries, plan tiers) that production reads.
-- Async write flows need a "wait until the projection catches up" wait condition.
-- Test suite leaks data between tests and needs a deterministic cleanup strategy.
-
-## When NOT to use
-
-- Production data-access code → the `backend/node` dev stack's generator, if installed.
-- Container booting itself → `qa/typescript/skills/db-testing/testcontainers`.
-- SQL guardrails (parameterization, no `SELECT *` in assertions) → `qa/typescript/skills/db-testing/verification-queries`.
-- Pure unit tests with no SQL surface — keep them mock-driven.
-- .NET / Java stacks → `qa/{dotnet,java}/skills/db-testing/connection`.
-
 ## Stack
 
 - **Runtime**: Node 24 (LTS)
@@ -274,14 +259,3 @@ Order the deletes by FK dependency.
 5. Pick a cleanup strategy (`TRUNCATE … CASCADE` default); wire `beforeEach`.
 6. Run the project's own test script with the package manager `packageManager` names — every test passes; no leaks between specs.
 7. Run `tsc --noEmit` — strict TS green.
-
-## Handoffs
-
-- Container lifecycle → `qa/typescript/skills/db-testing/testcontainers`
-- SQL guardrails on assertion queries → `qa/typescript/skills/db-testing/verification-queries`
-- Test data factories feeding seeders → `qa/typescript/skills/test-data-builder`
-- .NET DB testing client → `qa/dotnet/skills/db-testing/connection`
-- Java DB testing client → `qa/java/skills/db-testing/connection`
-- API tests that own the SUT call → `qa/typescript/skills/api-test-author/writer`
-- Test strategy where DB tests fit → `qa/manual/test-strategy`
-- Production data access patterns → the `backend/node` dev stack's generator, if installed

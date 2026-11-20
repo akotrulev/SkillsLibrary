@@ -26,18 +26,6 @@ Scaffolds Appium page objects and TestNG mobile UI tests in Java, mirroring the 
 - **Migrating a 10.x project:** run the OpenRewrite recipe `io.appium.java_client.MigrateToV11` **before** raising the version (it fixes most imports), then `FindV11Breakages` to mark the rest. Driver methods such as `installApp` and `lockDevice` now call only `mobile:` extensions, so an `UnsupportedCommandException` is no longer swallowed.
 - Capabilities go through `UiAutomator2Options` (Android) and `XCUITestOptions` (iOS); `MobileCapabilityType`, `MobileBy` and `MobileElement` are long gone.
 
-## When to use
-
-- New page object under `src/main/java/pom/mobile/`, a region component (list row, card, sheet), a control component (picker, date picker, segmented control), or a TestNG test under `src/test/java/`
-- Gestures, WebView switching, app state or failure evidence in an Appium Java suite
-
-## When NOT to use
-
-- Appium .NET → `qa/dotnet/skills/ui-test-author/appium`; TypeScript → `qa/typescript/skills/ui-test-author/appium`
-- Selenium / web → `qa/java/skills/ui-test-author/selenium` or `…/playwright`
-- Reviewing an existing page object → `qa/java/skills/ui-test-author/review`
-- Designing the whole POM architecture → `qa/java/skills/page-object-design`
-
 ## Inputs needed
 
 1. **Screen name** (PascalCase) and **platform** — Android, iOS or both
@@ -166,14 +154,3 @@ A visible element missing from the page source is usually an accessibility, app-
 Never use `appium_generate_tests`: it records the scenario through MCP calls and emits one flat test with the
 locators inline (its code templates are Java PageFactory), bypassing the screen objects. Locators come from
 `mobile-screen-explorer`; the code comes from this skill's assets.
-
-## Handoffs
-
-- Selectors on the live app → `qa/java/skills/mobile-screen-explorer`
-- A class from an inventory → `qa/java/skills/mobile-screen-objects`
-- POM architecture → `qa/java/skills/page-object-design`
-- Test data → `qa/java/skills/test-data-builder`
-- Failure evidence → `qa/java/skills/evidence-capture`
-- Allure → `qa/reporting/java/skills/test-reports`
-- Cloud farms → `qa/java/skills/device-cloud`
-- Review → `qa/java/skills/ui-test-author/review`

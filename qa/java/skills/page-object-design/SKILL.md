@@ -8,23 +8,6 @@ disable-model-invocation: true
 
 Designs the **shape** of a Page Object Model in a Java UI test project (Gradle Kotlin DSL + TestNG by default): which of the four kinds each piece is (page, region component, control component, flow), the base-class hierarchy, where locators live, and how to split when one page gets too big. Output is an architecture sketch — package tree + class responsibilities + decision rationale — not concrete page code.
 
-## When to use
-
-- Greenfield UI test suite — first POM layout in `pom/`
-- Existing suite has grown to 30+ pages and patterns are diverging
-- Multi-platform app (web + mobile via Appium Java) needs shared abstractions
-- One page object has grown past ~250 lines (Java explicit-accessor style runs longer than .NET/TS) and feels wrong
-- Tests are slow / brittle and the root cause is structural
-
-## When NOT to use
-
-- Writing the page object code itself → `qa/java/skills/ui-test-author/playwright`, `qa/java/skills/ui-test-author/selenium`, or `qa/java/skills/ui-test-author/appium`
-- Reviewing a single existing page object → `qa/java/skills/ui-test-author/review`
-- Designing test data / fixtures → `qa/java/skills/test-data-builder`
-- Designing the entire test strategy → `qa/manual/test-strategy`
-- .NET POM architecture → `qa/dotnet/skills/page-object-design`
-- TypeScript POM architecture → `qa/typescript/skills/page-object-design`
-
 ## Inputs needed
 
 1. **App shape** — single web app, mobile, or web + mobile
@@ -188,10 +171,3 @@ The standards a page-object tree must meet are the qa-java rule files, not a lis
 4. Decide whether a Playwright `BasePage` is warranted: only when a third page shares real behaviour. Pick the multi-platform strategy if relevant.
 5. Produce the output: package tree, responsibilities table, base hierarchy, migration plan (smallest refactor first).
 6. Hand off code generation to the matching generator skill.
-
-## Handoffs
-
-- Implementing the design → `qa/java/skills/ui-test-author/playwright`, `qa/java/skills/ui-test-author/selenium`, or `qa/java/skills/ui-test-author/appium`
-- Reviewing existing pages → `qa/java/skills/ui-test-author/review`
-- Test data / builders → `qa/java/skills/test-data-builder`
-- Higher-level strategy → `qa/manual/test-strategy`

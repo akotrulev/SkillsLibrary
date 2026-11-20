@@ -21,20 +21,6 @@ Read `blazor.md`, plus each other file whose `paths:` match a file under review,
 
 Identify the project's `TargetFramework` before flagging. Manual `PersistentComponentState` boilerplate is a finding only on net10 (where `[PersistentState]` replaces it); on net8/net9 it's the correct pattern. Same for `NotFoundPage`, `AddValidation()`, and `ReconnectModal` — never flag a down-level project for not using a net10-only API. For tests, detect the bUnit major: v1 patterns are a finding, the TFM is not. The rule files' "the codebase wins" line applies: a convention the project follows consistently is not a finding.
 
-## When to use
-
-- A `.razor` / `.razor.cs` / `.razor.css` / `.razor.js` diff submitted
-- Pre-merge gate on PRs touching `Components/` / `Pages/` / `App.razor`
-- "Why does this page fetch twice?" / "Why does my event not re-render?"
-- Audit JS interop / dispose hygiene
-
-## When NOT to use
-
-- Conceptual lookup → `frontend/blazor/skills/basics`
-- Generating new code → `frontend/blazor/skills/component-writer`
-- Non-Blazor .NET review → the `backend/dotnet` dev stack's reviewer, if installed
-- Auth wiring review → `auth/auth0-blazor` + general code review
-
 ## Procedure
 
 1. Read the rule files, then each changed file end to end.
@@ -55,11 +41,3 @@ Identify the project's `TargetFramework` before flagging. Manual `PersistentComp
 ```
 
 End with one line: `Rules: project .claude/rules/fe-blazor/ | plugin copy (not installed)`.
-
-## Handoffs
-
-- Rewrite → `frontend/blazor/skills/component-writer`
-- Conceptual lookup → `frontend/blazor/skills/basics`
-- Non-Blazor .NET review → the `backend/dotnet` dev stack's reviewer, if installed
-- Auth0 wiring review → `auth/auth0-blazor`
-- A rule is missing or wrong → edit the project's `.claude/rules/fe-blazor/`; for every project, the plugin's `frontend/blazor/skills/rules/`

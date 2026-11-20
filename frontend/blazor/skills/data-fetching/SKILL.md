@@ -28,23 +28,6 @@ A surface often uses both: fetch the initial state here, then hand off to `realt
 
 **Version rule:** detect the `TargetFramework` first. `[PersistentState]`, `HybridCache`, and streaming-rendering ergonomics are net10 primary; net8/net9 fallbacks are tagged. Never emit a net10-only API into a down-level project.
 
-## When to use
-
-- Deciding how a component loads/writes data under its render mode
-- Building the render-mode-agnostic data interface + its two implementations
-- Killing the prerender double-fetch (`[PersistentState]`)
-- Mapping API errors (ProblemDetails) to UI without leaking raw detail
-- Streaming a slow query into the first paint; caching with `HybridCache`; cancelling on navigation
-
-## When NOT to use
-
-- Live/server-pushed data → [`realtime`](../realtime/SKILL.md)
-- Forms + validation + submit UX → [`forms`](../forms/SKILL.md)
-- The token-attaching auth handler itself → `auth/auth0-blazor` (this skill *consumes* it)
-- Where state should live after fetch → [`state-management`](../state-management/SKILL.md)
-- Three-state loading/failed regions + retry UX → [`error-handling`](../error-handling/SKILL.md)
-- Writing the API, its DTOs, or contract tests → `qa/dotnet/skills/{api-models,api-contract-testing}` (peers)
-
 ## The core decision: one interface, two implementations
 
 The render mode fixes *where the component runs*, which fixes *how it can reach data*:
@@ -247,12 +230,3 @@ The standards this skill's output must meet are the fe-blazor rule files, not a 
 - Server lane: no `DbContext` lives longer than one operation (no injected context in any component/circuit service).
 - Kill a slow request by navigating away → the fetch cancels (no post-dispose exception).
 - Contract test green against the OpenAPI spec.
-
-## Handoffs
-
-- Live/push updates after first paint → [`realtime`](../realtime/SKILL.md) (shares this routing matrix)
-- Render the failed/loading states, retry UX → [`error-handling`](../error-handling/SKILL.md)
-- Where fetched state lives → [`state-management`](../state-management/SKILL.md)
-- Forms/submit → [`forms`](../forms/SKILL.md)
-- Token handler (Auth0 / Cognito) → `auth/auth0-blazor` · `auth/cognito-blazor`
-- DTOs + contract tests → `qa/dotnet/skills/{api-models,api-contract-testing}` (peers)

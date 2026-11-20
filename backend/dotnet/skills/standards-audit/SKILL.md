@@ -62,13 +62,3 @@ Then read 2–3 representative files (a controller/endpoint, a service, the `DbC
 | B-CQRS rows | MediatR referenced | `grep -rl MediatR --include=*.csproj .` |
 
 A–F, J, K, M, N apply to every .NET service. Sections that are N/A must name the probe that decided it.
-
-## Handoffs
-
-- **Apply the fixes** → the `be-dotnet` agent, Mode FIX (a defect) or EXTEND (a missing capability). The priority table is the handoff artifact.
-- **One file / one diff instead** → [`code-review`](../code-review/SKILL.md); cross-stack/architecture altitude → `backend/_shared/code-review`.
-- **Missing contract tests (section M)** → **peer** `qa-api-dotnet` writes them; this audit only reports their absence.
-- **Security-flavoured findings (I2–I6, K1)** → **peer** `qa-security` owns proving exploitability.
-- **Schema/index/migration strategy beyond EF mechanics (section G)** → **peer** `data-architect`.
-- **Observability gaps (section L)** → the `observability-engineer-dotnet` sibling agent in this plugin.
-- **Code vs a spec, or a feature trace** → `dev:audit-spec` / `dev:audit-feature` / the `code-auditor` agent.

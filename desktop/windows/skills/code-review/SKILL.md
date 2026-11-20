@@ -33,20 +33,6 @@ Detect before flagging: the TFM and the Windows App SDK major (`*.csproj`, `Dire
 | C++/WinRT | `cppwinrt.md` applies to `*.cpp`, `*.h`, `*.idl`, `*.vcxproj`; coverage is lines unless `llvm-cov` reports branches |
 | **[unpackaged]** | No package identity: `ApplicationData.Current`, toasts and background tasks need the unpackaged path |
 
-## When to use
-
-- A `.cs` / `.xaml` / `.cpp` / `.h` / `.idl` / `.resw` / `.csproj` / `.vcxproj` / `Package.appxmanifest` diff, before merge
-- Step 5 of the agent: the whole change set, after the quality layers
-- "Why does this crash after the await / lose its window / fail signing?"
-
-## When NOT to use
-
-- Whole codebase, saved re-runnable report → [`standards-audit`](../standards-audit/SKILL.md)
-- Explaining a concept → [`basics`](../basics/SKILL.md); writing code → the owning feature skill
-- Reviewing **E2E test code** (WinCore, FlaUI) → peer `qa-desktop-java` / `qa-desktop-dotnet` / `qa-desktop-typescript`
-- Pen-test or runtime security → peer `qa-security`
-- A spec-versus-code audit → `code-auditor`
-
 ## Inputs needed
 
 1. **The diff** (files or `git diff` range) and the windows and commands it touches
@@ -82,12 +68,3 @@ winapp ui screenshot -a <AppName> -o win-<window>.png
 ```
 
 Close with the lane line (`.NET 10 · Windows App SDK 2.6 · WinUI · packaged`, one per lane covered), the screenshot-pass status, the finding counts by severity, and one line: `Rules: project .claude/rules/desktop-windows/ | plugin copy (not installed)`.
-
-## Handoffs
-
-- Fix → the `desktop-windows` agent (FIX or EXTEND), or the owning feature skill
-- Repo-wide → [`standards-audit`](../standards-audit/SKILL.md); version moves → [`migration`](../migration/SKILL.md)
-- Lock the fix with a test → [`unit-testing`](../unit-testing/SKILL.md)
-- A rule is missing or wrong → edit the project's `.claude/rules/desktop-windows/`; for every project, the plugin's `desktop/windows/skills/rules/`
-- Missing ids → [`test-ids`](../test-ids/SKILL.md); E2E review → peer `qa-desktop-java` / `qa-desktop-dotnet` / `qa-desktop-typescript`
-- Security proof → peer `qa-security`

@@ -30,20 +30,6 @@ Detect before flagging: Expo SDK and RN (`package.json`), Expo Router or bare Re
 
 A manual `useMemo` / `useCallback` is a finding only when the React Compiler is on; a `forwardRef` only on React 19; an `estimatedItemSize` only on FlashList 2.
 
-## When to use
-
-- A `.ts` / `.tsx` / `app.json` / `app.config.*` / config-plugin diff, before merge
-- Step 5 of the agent: the whole change set, after the quality layers
-- "Why does this jank / crash on Android only / lose its state?"
-
-## When NOT to use
-
-- Whole codebase, saved re-runnable report → [`standards-audit`](../standards-audit/SKILL.md)
-- Explaining a concept → [`basics`](../basics/SKILL.md); writing code → the owning feature skill
-- Reviewing **E2E test code** (Appium / Maestro) → peer `qa-mobile-typescript`
-- Pen-test or runtime security → peer `qa-security` (`mobile-app-scan`, `mobile-runtime-testing`)
-- A spec-versus-code audit → `code-auditor`
-
 ## Inputs needed
 
 1. **The diff** (files or `git diff` range) and the screens it touches
@@ -79,12 +65,3 @@ adb exec-out screencap -p > android-<screen>.png
 ```
 
 Close with the lane line (`SDK 57 · Expo Router · Compiler on · CNG`), the screenshot-pass status, the finding counts by severity, and one line: `Rules: project .claude/rules/mobile-react-native/ | plugin copy (not installed)`.
-
-## Handoffs
-
-- Fix → the `mobile-react-native` agent (FIX or EXTEND), or the owning feature skill
-- Repo-wide → [`standards-audit`](../standards-audit/SKILL.md); version moves → [`migration`](../migration/SKILL.md)
-- Lock the fix with a test → [`component-testing`](../component-testing/SKILL.md)
-- Missing ids → [`test-ids`](../test-ids/SKILL.md); E2E review → peer `qa-mobile-typescript`
-- Security proof → peer `qa-security`
-- A rule is missing or wrong → edit the project's `.claude/rules/mobile-react-native/`; for every project, the plugin's `mobile/react-native/skills/rules/`

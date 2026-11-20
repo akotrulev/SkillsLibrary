@@ -330,20 +330,3 @@ data-driven fault matrix (toxic × parameter) binds cleanly via `qa-typescript:d
   live-cluster chaos (Gremlin/Litmus/Chaos Mesh) elsewhere.
 - **Wrap all toxic wiring in `ChaosProxy`** with intent names — no raw `proxy.addToxic({...})` in `it(...)`.
   Vitest + toxiproxy-node-client + Testcontainers + cockatiel.
-
-## Cross-references
-
-- `qa-java:failure-injection-testing` · `qa-dotnet:failure-injection-testing` — the sibling stacks (`toxiproxy-java` + resilience4j ·
-  `Toxiproxy.Net` + Polly); same four ideas, same lifecycle, different client lib + resilience library.
-- `qa-typescript:network-mocking` — the **closest neighbor and the inverse**: that stands up a MITM
-  proxy to **observe/mock** out-of-browser requests; this stands up Toxiproxy to **inject transport faults**.
-  Observe vs break. Read it for the proxy-in-the-middle model; draw the boundary cleanly.
-- `qa-typescript:data-driven-testing` — drive a **fault matrix** (toxic × parameter × expected pattern) via
-  `it.each` instead of copy-pasted tests.
-- `qa-typescript:db-testcontainers` · `qa-typescript:messaging-testing` —
-  the dependencies you fault (DB / broker connections through the proxy); they cover the happy path this inverts.
-- `qa-typescript:realtime-stream-testing` — shares the **lifecycle discipline** (steady → perturb → assert →
-  recover) and bounded-condition waits (`vi.waitFor`, never sleep).
-- `qa-typescript:load-testing` — behaviour under **load/volume** vs behaviour under **fault** (this skill); they
-  answer different questions.
-- `qa-typescript:test-reports` — render each fault scenario as a named result.

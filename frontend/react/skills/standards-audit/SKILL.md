@@ -185,16 +185,6 @@ Report: docs/audits/<file>.md
 Highest-leverage remaining: <one line>
 ```
 
-## Handoffs
-
-- **Apply the fixes** → the `fe-react` agent, Mode FIX (a defect) or EXTEND (a missing capability). The priority table is the handoff artifact.
-- **One file / one diff instead** → [`fe-react:conventions-review`](../code-review/SKILL.md).
-- **Code vs a spec or story set** → `dev:audit-spec` / the `code-auditor` agent (SPEC lane).
-- **"What does this feature actually do"** → `dev:audit-feature`.
-- **Prove the a11y / perf / security findings dynamically** → peers `qa-ui-typescript` (axe, E2E), `qa-security` (DAST/SCA/access control), `qa-cicd-typescript` (gate the conformance run in CI).
-- **Design-craft altitude** (is it *good*, not just conforming) → `design/ui-code-audit` (code-level) and `design/ux-review` (experience-level), run by the `fe-react` agent's Step 5.
-- **Section M findings** double as the `missing-testids.md` handshake input for `qa-ui-typescript` / [`test-ids`](../test-ids/SKILL.md).
-
 ## When uncertain
 
 - A check is ambiguous → read the owning skill's `SKILL.md` before verdicting. Don't guess a rule you can look up.

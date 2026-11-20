@@ -21,23 +21,6 @@ A SwiftUI view is a function of its state, and `@Observable` models plus value-t
 
 A `[mac13]` project is not flagged for lacking `@Observable`; migration is [`migration`](../migration/SKILL.md)'s. Isolation rules (`MainActor` default in an app module, `nonisolated` in packages) are [`basics`](../basics/SKILL.md).
 
-## When to use
-
-- State is shared across views or windows
-- "Do I need a view model?", "where does this service live?"
-- Injecting a client, clock or store into a view
-- A menu command or a utility window must act on the focused window's selection
-
-## When NOT to use
-
-- `URLSession` clients, retries, token refresh → `networking`
-- SwiftData / Keychain / `UserDefaults` → `offline-and-storage`
-- Declaring scenes, placement, restoration → `windows-and-scenes`; menus → `menus-and-commands`
-- Form state → `forms`; document models → `documents`
-- Concurrency rules → [`basics`](../basics/SKILL.md)
-- Existing AppKit controllers → [`appkit`](../appkit/SKILL.md)
-- Another platform → `mobile-ios:architecture`, `desktop-windows:architecture`
-
 ## Inputs needed
 
 - Deployment target (14+ or 13) and whether the codebase has a view-model or TCA convention
@@ -190,11 +173,3 @@ Output must meet the desktop-macos rule files (`swift.md`): `.claude/rules/deskt
 - [ ] Every menu command that depends on a window reads `@FocusedValue` and is disabled when it is nil
 - [ ] Models take dependencies through the initializer; no singleton or locator
 - [ ] No view model that only forwards to one service
-
-## Handoffs
-
-- Isolation and Swift rules → [`basics`](../basics/SKILL.md)
-- Scenes, placement → `windows-and-scenes`; menus → `menus-and-commands`
-- Clients, retries → `networking`; persistence → `offline-and-storage`
-- Document models → [`documents`](../documents/SKILL.md)
-- `ObservableObject` → `@Observable` → [`migration`](../migration/SKILL.md)

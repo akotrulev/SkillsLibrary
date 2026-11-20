@@ -20,23 +20,6 @@ The app is not always on screen. Widgets, Siri and Shortcuts, Live Activities an
 
 Facts below are long-standing API shapes from prior knowledge, not re-confirmed against Apple pages this session (plan D23); where a number is a budget, treat it as "small and system-controlled" and measure on a device.
 
-## When to use
-
-- A Home Screen, Lock Screen or StandBy widget; a Control Center control
-- An action Siri, Spotlight, Shortcuts or the Action button can run
-- A Live Activity for something with a clear start and end (a delivery, a game, a timer)
-- Refreshing data while the app is closed; finishing an upload after the user leaves
-- A long user-started export that should continue in the background
-
-## When NOT to use
-
-- Registering for push, universal links → `mobile-ios:push-and-deep-links`
-- Foreground requests, timeouts, retries → [`networking`](../networking/SKILL.md)
-- The store the widget reads → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Camera, location, biometrics → [`device-features`](../device-features/SKILL.md)
-- Entitlements and background modes as store policy → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Another stack → `mobile-android:system-integration` (widgets, WorkManager)
-
 ## Sharing with an extension
 
 A widget, an intent extension and a Live Activity UI are **separate targets and processes**. They share code through a **local Swift package** and data through an **App Group container** (a SwiftData store or a file there) or a shared Keychain access group — never a singleton.
@@ -173,13 +156,3 @@ Detail, entitlement list and per-surface checklists: [`references/background-and
 - A BG task fired from the debugger completes with `setTaskCompleted`; expiring it saves progress.
 - A background upload continues after the app is swiped away from the switcher's background (not force-quit) and relaunches the app on completion.
 - Dev-side tests: the snapshot store, the timeline policy, intent `perform()` with a fake service, the BG task's work function — all fakes, no extension process.
-
-## Handoffs
-
-- Push registration, universal links, widget and activity deep links → `mobile-ios:push-and-deep-links`
-- Request policy for background transfers → [`networking`](../networking/SKILL.md)
-- The shared store → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Resume revalidation, offline states → [`error-handling`](../error-handling/SKILL.md)
-- Entitlements, background modes, 4.5.3, privacy manifest → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Extension signing and targets in the build → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
-- Widget and intent journeys on a device → `qa-mobile-<stack>` (peer)

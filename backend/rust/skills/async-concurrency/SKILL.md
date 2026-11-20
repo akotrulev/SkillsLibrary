@@ -12,22 +12,6 @@ Owns the rules that keep async Rust correct under load: who owns a task, how it 
 
 Detect the runtime from `Cargo.lock`: **tokio 1.x** — 1.54 current as of 2026-10; the LTS lines are **1.51.x (to March 2027)** and **1.53.x (to September 2027)**, which suit services that upgrade slowly (1.47.x reached end of support in September 2026). Keep the project's minor; never bump it as a side effect. Use `tokio-util` 0.7 for `CancellationToken` / `TaskTracker`. A project on `async-std` or `smol` keeps its runtime — `async-std` is discontinued, so flag it and recommend migrating, but never migrate as a side effect. Native `async fn` in traits needs Rust 1.75; async closures need 1.85.
 
-## When to use
-
-- Spawning background work, a worker loop, a consumer, a scheduled job
-- Graceful shutdown of a server and its background tasks
-- A compile error about `Send`, `'static`, or a future that "cannot be sent between threads"
-- Choosing a lock, a channel, or an actor for shared state
-- A hang, a deadlock, a latency spike, a runtime that stops accepting connections
-- Calling blocking or CPU-heavy code from async code
-
-## When NOT to use
-
-- Ownership and type design in general → `pattern-guide`
-- The router, handlers, `AppState` wiring → `pattern-writer`
-- sqlx pools and transactions → `database-code`
-- "It's slow" without a known cause → `performance` (measure first)
-
 ## The runtime rule — never block a worker thread
 
 A tokio worker thread runs many tasks by switching between them only at `.await` points. Code that does not yield stalls every other task on that thread. As a rule of thumb, a task should not go more than **10–100 µs** between `.await`s.
@@ -197,11 +181,3 @@ Order: stop accepting → drain in-flight requests (axum does this) → cancel a
 ## Rules
 
 The standards this skill's output must meet are the be-rust rule file `rust.md` (Async on tokio), not a list here. Read the project's copy in `.claude/rules/be-rust/`, or the plugin's in `backend/rust/skills/rules/` when the project has not installed them (`/be-rust:rules` does). Where it and this skill's recipes disagree, the rule file wins.
-
-## Handoffs
-
-- Wiring the shutdown into `main` and the router → `pattern-writer`
-- Pool timeouts and transactions → `database-code`
-- Latency or throughput that needs a profile → `performance` (`tokio-console` for task-level stalls)
-- Testing the timing logic → `unit-testing`
-- Reviewing → `code-review`

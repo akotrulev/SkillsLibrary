@@ -49,27 +49,6 @@ UiTests/
 Namespaces follow the folders under one root (`Example.UiTests.Pages`, `Example.UiTests.Components.Controls`). `AuthSetup` sits in the root
 namespace itself, because NUnit runs a `[SetUpFixture]` only for the namespace it is declared in.
 
-## When to use
-
-- A new test class, page object, region or control component, or the `BaseTest` itself.
-- A new or rewritten `UiTests.csproj`, `Directory.Packages.props`, `.runsettings` or signed-in state.
-- Scoping or fixing locators, replacing one-shot reads with web-first assertions.
-- Running a fixture per device, viewport, colour scheme, locale or time.
-
-## When NOT to use
-
-- Native mobile apps → `qa/dotnet/skills/ui-test-author/appium`
-- Selenium → `qa/dotnet/skills/ui-test-author/selenium`
-- Reviewing Playwright code → `qa/dotnet/skills/ui-test-author/review`
-- Designing the page-object hierarchy → `qa/dotnet/skills/page-object-design`
-- Extracting page objects and test ids from a live URL → `qa/dotnet/skills/page-objects-from-url`
-- A new solution from zero (SDK, solution layout, Docker) → `qa/dotnet/skills/ui-project-setup`
-- Screenshots, video, traces and HAR beyond the `BaseTest` defaults → `qa/dotnet/skills/evidence-capture`
-- Visual regression, accessibility scans, network mocking → `visual-regression`, `accessibility-testing`,
-  `network-mocking`
-- Playwright TypeScript or Java → `qa/typescript/skills/ui-test-author/playwright`,
-  `qa/java/skills/ui-test-author/playwright`
-
 ## Inputs needed
 
 1. **Feature or page** under test (`Login`, `CheckoutCart`).
@@ -139,12 +118,3 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
    `StorageStatePath`; for devices, amend it from `Playwright.Devices[...]`.
 7. Run the hallucination gate (generation checks §2) and report every `MISSING` test id. Build, install the browser with `pwsh bin/Debug/net10.0/playwright.ps1 install chromium`, and run
    `dotnet test` (0 failures); debug with `HEADED=1` or `PWDEBUG=1`.
-
-## Handoffs
-
-Besides the skills under "When NOT to use":
-
-- Test data builders → `qa/dotnet/skills/test-data-builder`
-- Breakpoint matrices → `qa/dotnet/skills/responsive-testing`
-- Real-device mobile web → `qa/dotnet/skills/device-cloud`
-- Allure reporting and CI → `qa/reporting/dotnet/skills/test-reports`, `qa/cicd/dotnet/skills/ci-pipelines`

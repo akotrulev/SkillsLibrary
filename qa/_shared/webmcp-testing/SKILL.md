@@ -13,21 +13,6 @@ mirrors. This skill holds the stack-neutral facts, the checklist and the securit
 reference holds the calls. Facts are as of 2026-10-10 — the spec changed shape several times in 2026, so
 re-check a detail before a gate depends on it.
 
-## When to use
-
-- The app under test registers WebMCP tools, and the suite must cover them.
-- Reviewing WebMCP tests, or deciding which WebMCP behaviours to test.
-- An agent explores a WebMCP site through Playwright MCP or `playwright-cli` and needs the rules for
-  page-provided tools.
-
-## When NOT to use
-
-- Whether an LLM agent picks the right tool and arguments → `qa-<stack>:ai-feature-testing`. Those evals
-  are probabilistic and stay out of this deterministic gate.
-- Building an MCP server for a project → the `tooling` plugin's `tooling:mcp-builder`.
-- Attacking tool descriptions or outputs (prompt injection, hostile UGC) → `qa-security`.
-- The UI journey itself → `qa-<stack>:ui-tests-playwright`.
-
 ## The API (spec IDL, matching Chromium main)
 
 A Draft Community Group Report of the W3C Web Machine Learning CG, not on the Standards Track. The entry
@@ -219,10 +204,3 @@ The assets test one example contract — adapt the names to the app: `/products/
 `add_to_cart` with input `{ sku: string, quantity: integer }` (both required) and `consequentialHint: true`;
 a valid call sets the `Cart.Badge` test id to the quantity; a negative quantity returns `isError: true`;
 leaving the page drops the tool.
-
-## Handoffs
-
-- The base test or config these assets extend, and the UI half of the parity check →
-  `qa-<stack>:ui-tests-playwright`; failure evidence → `qa-<stack>:evidence-capture`.
-- Agent evals → `qa-<stack>:ai-feature-testing`; the MCP server side → `tooling:mcp-builder`; attacks →
-  `qa-security`.

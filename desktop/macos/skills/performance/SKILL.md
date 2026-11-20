@@ -21,21 +21,6 @@ Owns **hangs, hitches, launch, memory, large data and energy** on the Mac. The m
 
 Detect first: the deployment target (decides the MetricKit branch), whether a crash reporter already forwards hangs, and any signposts or performance test plan; extend, never duplicate. Sentry on macOS has **no automatic app-start or screen-load transactions**: launch is measured with Instruments and signposts, not assumed from the reporter.
 
-## When to use
-
-- A beach ball, a scroll hitch, a slow window open, a slow cold start, rising memory, high energy impact
-- A `Table` or `List` with thousands of rows
-- Setting budgets; wiring MetricKit; trimming app size
-- "Why does this view re-render?", "is this `body` too heavy?"
-
-## When NOT to use
-
-- Crash-reporter and OTel setup → [`desktop/_shared/observability`](../../../_shared/observability/SKILL.md)
-- Animation design and Reduce Motion → [`styling`](../styling/SKILL.md)
-- Request timing, retries, cache policy → [`networking`](../networking/SKILL.md)
-- View and table authoring → [`ui-components`](../ui-components/SKILL.md)
-- Windows apps → `desktop-windows:performance`; iOS → `mobile-ios:performance`
-
 ## Budgets: set them before measuring
 
 | Budget | Target | Measured with |
@@ -167,9 +152,3 @@ Standards come from the desktop-macos rule files `swift.md` and `swiftui-mac.md`
 - Ten open-and-close cycles of a window leave no extra instances in the Memory Graph.
 - A before-and-after launch figure from the App Launch template; an idle app with no window shows near-zero wakeups in Energy Log.
 - Dev-side tests for the logic moved off the main actor use injected seams: [`unit-testing`](../unit-testing/SKILL.md); XCTest `measure` and launch metrics belong to the XCTest lane named there.
-
-## Handoffs
-
-- Crash reporter, OTel, symbols → [`desktop/_shared/observability`](../../../_shared/observability/SKILL.md) · signing and size of the artifact → [`desktop/_shared/distribution`](../../../_shared/distribution/SKILL.md)
-- Views and tables → [`ui-components`](../ui-components/SKILL.md) · state ownership → [`architecture`](../architecture/SKILL.md)
-- Background scheduling, helpers → [`background-and-helpers`](../background-and-helpers/SKILL.md) · persistence cost → [`offline-and-storage`](../offline-and-storage/SKILL.md)

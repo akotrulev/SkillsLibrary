@@ -17,20 +17,6 @@ Wires **Auth0.swift** into a SwiftUI (or UIKit) app. **Universal Login in `ASWeb
 | Universal-link callback | iOS **17.4+** (Xcode 15.3+); older systems fall back to a custom URL scheme |
 | Install | Swift Package Manager `https://github.com/auth0/Auth0.swift` (CocoaPods/Carthage are the legacy lane) |
 
-## When to use
-
-- New Auth0 sign-in / sign-out in a Swift app; calling a protected API with the token
-- The web login closes but the app never gets the result
-- Session restore at launch, biometric unlock, silent renewal
-- Native Sign in with Apple exchanged for Auth0 tokens
-
-## When NOT to use
-
-- Concepts, RBAC, `audience` → `auth/_shared/auth0-concepts`
-- RN / Expo → `mobile-react-native:auth0`; Kotlin → `mobile-android:auth0`
-- Keychain / ATS rules in general → `mobile-<stack>:security`
-- Backend validation → `backend/*/auth0`
-
 ## Setup
 
 Config in `Auth0.plist` (`ClientId`, `Domain`) or passed in code. Both are public; the secret does not exist for a Native application.
@@ -169,9 +155,3 @@ Auth0.swift supports passkey sign-up/login with the Authentication API; it needs
 4. Render `restoring / signedOut / signedIn / failed` in SwiftUI.
 5. Add biometrics if required; wire Sign in with Apple if 4.8 applies.
 6. Smoke on a **device**: sign in, relaunch (restores), call the API, sign out, confirm the next sign-in asks for credentials.
-
-## Handoffs
-
-- Concepts → `auth/_shared/auth0-concepts`; storage rules → `mobile-<stack>:security`
-- Project / SPM / entitlements → `mobile-ios:project-setup`; links → `mobile-ios:push-and-deep-links`
-- Networking → `mobile-ios:networking`; purchase user link → `mobile-<stack>:in-app-purchases`

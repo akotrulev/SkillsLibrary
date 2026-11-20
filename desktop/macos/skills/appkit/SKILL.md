@@ -22,21 +22,6 @@ The lane for apps where AppKit **is** the codebase. **An AppKit codebase is not 
 
 Detect first: storyboards and XIBs, `NSApplicationDelegate`, Objective-C, the existing navigation owner (window controllers, a coordinator), third-party binding libraries. **Match what is there.**
 
-## When to use
-
-- Adding or changing a view or window controller in an AppKit app
-- Embedding SwiftUI in AppKit, or an AppKit view in SwiftUI
-- Input handling, key-view loop, menus, state restoration in AppKit
-- Observation in AppKit views
-
-## When NOT to use
-
-- A new SwiftUI window in a mostly-SwiftUI app → [`windows-and-scenes`](../windows-and-scenes/SKILL.md), [`ui-components`](../ui-components/SKILL.md)
-- Rewrites, Catalyst → native, Objective-C → Swift → `migration`
-- State ownership → [`architecture`](../architecture/SKILL.md)
-- Colour, glass → `styling`
-- iOS UIKit → `mobile-ios:uikit`; Windows → `desktop-windows:wpf`
-
 ## View controllers — small, owned, cancelled
 
 ```swift
@@ -129,11 +114,3 @@ Commands are `@IBAction` on the responder chain, enabled through `validateMenuIt
 - **Encoding records in restoration state**: stale or huge; ids only.
 - **A force-unwrapped delegate or window**: guard it; outlets are the exception.
 - **Menu item hidden in `validateMenuItem`**: disable it.
-
-## Handoffs
-
-- AppKit → SwiftUI, Catalyst → native → `migration`
-- State and injection → [`architecture`](../architecture/SKILL.md)
-- Windows and scenes → [`windows-and-scenes`](../windows-and-scenes/SKILL.md)
-- Menus → [`menus-and-commands`](../menus-and-commands/SKILL.md)
-- iOS counterpart → `mobile-ios:uikit`

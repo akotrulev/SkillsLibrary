@@ -14,20 +14,6 @@ Owns **dev-side unit tests of worker and backend logic**: call the function, pas
 
 Detect `requires-python` and the Pillow major from `uv.lock` first. pytest 8.x; `hypothesis` optional. Tests run under the same `mypy --strict` as `src` — an untyped test file hides the API's real signatures.
 
-## When to use
-
-- A function `media-processing` or `pattern-writer` produced has behaviour: a sniff, a sanitiser, a strip, a verdict, a ladder, a `match` over a `Result`
-- A rejection reason needs pinning before a refactor
-- A Pillow behaviour the pipeline depends on must stay pinned across upgrades (metadata fallbacks, `exif_transpose`, `thumbnail` never upscaling)
-- Reproducing a defect at the unit level before fixing it (`dev:debugging` RED)
-
-## When NOT to use
-
-- Running the container, egress / rootfs / capability checks, HTTP contract → **peer** `qa-api-typescript` and CI
-- Image vulnerability scanning → **peer** `qa-security`
-- Mutation score, suite-scale builders → the `qa-*-typescript` peers (the repo's QA stack is TypeScript)
-- Pure type aliases, `Literal` sets, the `Settings` class's field list → don't test them
-
 ## Stack
 
 ```toml
@@ -81,7 +67,6 @@ def jpeg_with_gps(size: tuple[int, int] = (64, 48)) -> bytes:
     image.save(buffer, "JPEG", exif=exif.tobytes(), xmp=XMP_WITH_LOCATION, comment=b"camera serial 1234")
     return buffer.getvalue()
 
-
 def test_jpeg_with_gps_fixture_carries_gps_xmp_and_comment() -> None:
     with Image.open(io.BytesIO(jpeg_with_gps())) as image:
         gps = image.getexif().get_ifd(ExifTags.IFD.GPSInfo)
@@ -95,15 +80,12 @@ def png_header_only_bomb(width: int = 100_000, height: int = 100_000) -> bytes:
     ihdr = struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)
     return b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", ihdr) + chunk(b"IDAT", zlib.compress(b"\x00")) + chunk(b"IEND", b"")
 
-
 def polyglot_png_svg() -> bytes:
     return tiny_png() + b"<svg xmlns='http://www.w3.org/2000/svg'><script>alert(1)</script></svg>"
-
 
 def truncated_jpeg() -> bytes:
     whole = jpeg_plain((256, 256))
     return whole[: len(whole) // 2]
-
 
 def svg_with(vector: str) -> bytes:
     return f"<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>{vector}</svg>".encode()
@@ -187,10 +169,3 @@ Inside a plan task, `Gate: own tests` runs this task's tests — the red run, th
 - `uv run pytest -m model` green in the CI job that has `U2NET_HOME`
 - `uv run mypy src tests` clean
 - Every `Rejected.reason` literal appears in at least one test's expected value — a rejection nobody can produce is dead contract
-
-## Handoffs
-
-- Seams that block a test → `pattern-writer`
-- The function under test is wrong → `media-processing`
-- Container-level checks → `sandboxed-worker` validation list, executed by CI / `qa-api-typescript`
-- Review of the tests → `code-review`

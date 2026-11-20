@@ -15,21 +15,6 @@ Reads the **running native app through an Appium page source**, lists what is in
 | WebdriverIO selector | `$('~Library.SearchField')` | `$('~Library.SearchField')` |
 | Page source | `driver.getPageSource()` | `driver.getPageSource()` |
 
-## When to use
-
-- The app is open and the user wants to know what is in the current window.
-- Locators must be discovered or verified before a window object is built or fixed.
-- The team wants an inventory of elements that lack a stable test id.
-- A flow must be walked (click, type) to reveal windows, sheets or dialogs whose elements are then captured.
-
-## When NOT to use
-
-- Emitting the window object class → `qa/typescript/skills/desktop-window-objects`.
-- Writing or tagging the Mocha tests → `qa/typescript/skills/ui-test-author/appium`.
-- Mobile apps → `qa/typescript/skills/mobile-screen-explorer`; browser pages → `qa/typescript/skills/page-objects-from-url`.
-- Adding the missing ids to the app → the `desktop-macos` or `desktop-windows` agent, with `missing-testids.md`.
-- Java / .NET → `qa/java/skills/desktop-screen-explorer` / `qa/dotnet/skills/desktop-screen-explorer`.
-
 ## Prerequisites
 
 Two routes; use the first that is available and say which.
@@ -162,15 +147,6 @@ Write or update `missing-testids.md` at the **test project root**: one file, one
 - Dumping every XML node into the report.
 - Extracting from a stale source after a click.
 - Writing the window object in the same breath.
-
-## Handoffs
-
-- Emit or update the window object → `qa/typescript/skills/desktop-window-objects`
-- Scaffold and the OS prerequisites → `qa/typescript/skills/desktop-project-setup`
-- Write the tests → `qa/typescript/skills/ui-test-author/appium`
-- Missing ids → the `desktop-macos` or `desktop-windows` agent
-- Shared rules → `qa/_shared/desktop-testing`
-- Java / .NET siblings → `qa/java/skills/desktop-screen-explorer` / `qa/dotnet/skills/desktop-screen-explorer`
 
 ## Reference
 

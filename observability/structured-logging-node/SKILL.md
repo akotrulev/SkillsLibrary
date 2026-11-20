@@ -23,22 +23,6 @@ First act on an existing project: check `engines.node` in `package.json` and the
 
 Winston is acceptable when an upstream framework already configures it (NestJS without `nestjs-pino`); the rules below port over with different syntax.
 
-## When to use
-
-- New Node service needs logging
-- Replacing `console.log` / unstructured prints with JSON logs
-- Adding request-scoped correlation IDs without threading them through every function
-- Wiring OTel trace context into log lines
-- Masking PII / secrets in log output
-
-## When NOT to use
-
-- .NET service → `observability/structured-logging-dotnet`
-- Java / Spring Boot service → `observability/structured-logging-java`
-- Distributed tracing or metrics → `observability/opentelemetry-node`
-- LogQL query authoring → `observability/queries`
-- Dashboard layout → `observability/dashboards`
-
 ## Inputs needed
 
 1. **Framework** — NestJS, Express, Fastify, bare Node
@@ -290,11 +274,3 @@ Loki labels are categorical (`service`, `environment`, `level`). `orderId`, `req
 5. If OTel is registered, install pino instrumentation so `trace_id` / `span_id` ride every log.
 6. Lint-ban `console.log` and sweep the codebase to replace existing prints.
 7. Smoke locally — hit a few endpoints, confirm JSON includes `requestId`, `trace_id`, `service.name`.
-
-## Handoffs
-
-- Distributed tracing + metrics → `observability/opentelemetry-node`
-- LogQL queries against Loki → `observability/queries`
-- Dashboard layout → `observability/dashboards`
-- .NET equivalent → `observability/structured-logging-dotnet`
-- Java equivalent → `observability/structured-logging-java`

@@ -32,20 +32,6 @@ Detect before flagging: Xcode and Swift (`xcodebuild -version`, `swift-tools-ver
 | **[MAS]** / **[DevID]** | Mac App Store builds: no updater, no licence keys, sandboxed; Developer ID: Hardened Runtime, notarization, a Sparkle EdDSA feed |
 | Below macOS 13 | One finding plus a [`migration`](../migration/SKILL.md) run |
 
-## When to use
-
-- A `.swift` / `Info.plist` / `.entitlements` / `.xcconfig` / `Package.swift` / `.xcprivacy` / `.xcstrings` diff, before merge
-- Step 5 of the agent: the whole change set, after the quality layers
-- "Why does this hang on wake / lose its window / get rejected by notarization?"
-
-## When NOT to use
-
-- Whole codebase, saved re-runnable report → [`standards-audit`](../standards-audit/SKILL.md)
-- Explaining a concept → [`basics`](../basics/SKILL.md); writing code → the owning feature skill
-- Reviewing **E2E test code** (Mac2, XCUITest) → peer `qa-desktop-java` / `qa-desktop-dotnet` / `qa-desktop-typescript`
-- Pen-test or runtime security → peer `qa-security`
-- A spec-versus-code audit → `code-auditor`
-
 ## Inputs needed
 
 1. **The diff** (files or `git diff` range) and the windows and commands it touches
@@ -81,12 +67,3 @@ screencapture -l <windowid> mac-<window>.png
 ```
 
 Close with the lane line (`Xcode 27 · Swift 6 mode · macOS 15 · SwiftUI · SPM · Developer ID`), the screenshot-pass status, the finding counts by severity, and one line: `Rules: project .claude/rules/desktop-macos/ | plugin copy (not installed)`.
-
-## Handoffs
-
-- Fix → the `desktop-macos` agent (FIX or EXTEND), or the owning feature skill
-- Repo-wide → [`standards-audit`](../standards-audit/SKILL.md); version moves → [`migration`](../migration/SKILL.md)
-- Lock the fix with a test → [`unit-testing`](../unit-testing/SKILL.md)
-- A rule is missing or wrong → edit the project's `.claude/rules/desktop-macos/`; for every project, the plugin's `desktop/macos/skills/rules/`
-- Missing ids → [`test-ids`](../test-ids/SKILL.md); E2E review → peer `qa-desktop-java` / `qa-desktop-dotnet` / `qa-desktop-typescript`
-- Security proof → peer `qa-security`

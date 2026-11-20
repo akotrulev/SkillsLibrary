@@ -22,23 +22,6 @@ Owns **what is written to the device, where, and how it syncs back**: the storag
 
 Detect first: `react-native-mmkv` major (3 → `new MMKV()` is correct for v3; never flag a v3 project for lacking `createMMKV`, and say a v4 move is the migration skill's), the SQLite library, any persister, and whether the app already has a sync backend.
 
-## When to use
-
-- "Where do I store this?" — token, preference, draft, cache, relational data
-- Persisting the Query cache; showing data while offline
-- An offline write queue; sync after reconnect; conflicts
-- Choosing `expo-sqlite` vs `op-sqlite` vs MMKV
-
-## When NOT to use
-
-- Calling the API, timeouts, retries → [`networking`](../networking/SKILL.md)
-- The disk-full banner, memory fallback, offline indicator → [`error-handling`](../error-handling/SKILL.md)
-- Zustand store shape → [`architecture`](../architecture/SKILL.md)
-- Auth provider and credentials manager → `auth0-react-native`
-- Privacy manifest, backup exclusion rules → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md); encryption policy → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
-- Native Swift / Kotlin storage → `mobile-ios:offline-and-storage` / `mobile-android:offline-and-storage`
-- Web `localStorage` / IndexedDB → `fe-react:pwa`
-
 ## The storage ladder
 
 | Data | Store | Never |
@@ -193,10 +176,3 @@ The standards this skill's output must meet are the mobile-react-native rule fil
 - Sign out → secure-store, MMKV user keys, SQLite user tables and the persisted cache are empty.
 - Fill the disk (or force the typed error) → the write fails without a crash; behaviour is `error-handling`'s.
 - Dev-side tests with fakes for the native modules: `mobile-react-native:component-testing`.
-
-## Handoffs
-
-- Request layer, retries, idempotency → [`networking`](../networking/SKILL.md) · degradation, banner, stale → [`error-handling`](../error-handling/SKILL.md)
-- Store shape → [`architecture`](../architecture/SKILL.md) · biometrics, file picking → [`device-features`](../device-features/SKILL.md)
-- Threat model, backups → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md), [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Native module for a storage gap → [`native-modules`](../native-modules/SKILL.md)

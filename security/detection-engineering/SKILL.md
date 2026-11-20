@@ -99,14 +99,3 @@ Detections are software artifacts. The lifecycle, in a Git repo with CI (GitHub 
 ## Rules
 
 The standards this skill's output must meet are the security-governance rule files, not a list here: `detections.md` (rule anatomy, tests, the pipeline) and `security-governance.md` (the ATT&CK and tooling pins, fixture redaction). Read the project's copy in `.claude/rules/security-governance/`, or the plugin's in `security/rules-security-governance/` when the project has not installed them (`/security-governance:rules` does). Where they and this skill's recipes disagree, the rule files win.
-
-## Cross-references
-
-- **`security-architect`** (`security/agents/security-architect.md`) — the roll-up agent that loads this skill: an ATT&CK coverage gap in the posture picture becomes a detection to author here.
-- **`purple-team-engineer`** (`security/agents/purple-team-engineer.md`, `penetration-testing` plugin) — the **validation** half: `atomic-simulation` runs the technique, `detection-validation` asserts this rule fired. You author; it proves. Shared ATT&CK spine.
-- **`penetration-tester`** (`security/agents/penetration-tester.md`) — offensive **input**: a chain that reached impact undetected is the exact hypothesis for a new detection ("author the rule that would have caught the LSASS dump → lateral hop").
-- **`devops:threat-modeling`** (`devops/threat-modeling/`) — the threat register scopes *which* techniques to write detections for first; it routes threats to the lanes that test them, this authors the standing detections.
-- **`observability-engineer-*`** + **`be-<stack>:queries`** *(peers, named not loaded)* — own the telemetry substrate (Loki/Prometheus/Tempo, the log/metric pipeline) your detections query, and the query-language mechanics. A missing `logsource` is a handoff to them. This lane authors the **security** analytics; they own the app-health RED/USE dashboards.
-- **`qa-security`** (`qa/_shared/agents/qa-security.md`) — the fence partner: it detects the *vulnerability in the code/config*; this detects the *attacker behavior in the logs at runtime*. A SAST finding is a fix; a detection is a tripwire for when the fix is missed.
-- **`security-governance:hardening`** / **`security-governance:secrets-hardening`** — the other defensive-engineering siblings in this plugin: hardening *prevents*, detection *catches what prevention missed* — defense in depth, authored together.
-- **`security/cloud-incident-response`** — the cloud IR/forensics skill **consumes** this lane: the cloud detections it responds to (CloudTrail/Activity-Log/Audit-Log analytics, ATT&CK IaaS techniques) are authored and unit-tested here, then validated by `purple-team-engineer`. A cloud incident with no detection behind it is a hypothesis routed back to this skill to author the Sigma/analytics rule.

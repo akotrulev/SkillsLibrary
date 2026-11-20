@@ -36,22 +36,6 @@ The playwright.dev Java pages already list 1.64 options that the 1.63 binding do
 | Screenshot comparison against baselines | `qa/java/skills/visual-regression` |
 | HAR replay (`routeFromHAR`) | `qa/java/skills/network-mocking` |
 
-## When to use
-
-- A suite needs failure evidence, or its evidence is missing, too heavy or in the wrong place.
-- A test or a demo needs a deliberate recording: a bug repro, a walkthrough, an agent's "receipt" of what it
-  did.
-- An agent drives Playwright MCP or `playwright-cli` and must leave screenshots, a video or a trace behind.
-- A test failed and its trace must be read before anything changes.
-
-## When NOT to use
-
-- Writing tests, page objects, `BaseTest` or the build → `qa/java/skills/ui-test-author/playwright`
-- Allure adapter, steps, history, publish → `qa/reporting/java/skills/test-reports`
-- Screenshot baselines and diffs → `qa/java/skills/visual-regression`
-- Mocking or replaying network → `qa/java/skills/network-mocking`
-- Pipeline YAML → `qa/cicd/java/skills/ci-pipelines`
-
 ## The three kinds of capture
 
 | Kind | Who starts it | API | Lands in |
@@ -207,12 +191,3 @@ in the browser without uploading it; Allure also opens the attached trace in the
 - Exploratory evidence uses explicit filenames under `evidence/<YYYY-MM-DD>-<topic>/`, never `build/`.
 - A failure is read from its message, screenshot and trace before code changes.
 - Nothing captured is committed; nothing real is recorded.
-
-## Handoffs
-
-- `BaseTest`, the build and the show-trace / codegen commands → `qa/java/skills/ui-test-author/playwright`
-- Cucumber scenario hooks → `qa/java/skills/bdd-project-scaffold`
-- Allure mapping of the evidence → `qa/reporting/java/skills/test-reports`
-- Upload paths and retention → `qa/cicd/java/skills/ci-pipelines`, `qa/cicd/ci-conventions`
-- Screenshot comparison → `qa/java/skills/visual-regression`
-- HAR replay → `qa/java/skills/network-mocking`

@@ -21,22 +21,6 @@ Detect the Expo SDK / RN / React majors (`package.json`, `app.json`) first.
 
 Never up-level a project's SDK as a side effect of setup work. The New Architecture is on; never scaffold the legacy one.
 
-## When to use
-
-- Creating an Expo app; deciding Expo Go vs development build vs bare
-- Adding or fixing a config plugin, `app.config.ts`, a custom font, a permission string
-- Setting up strict TS, flat ESLint, `expo-doctor`, env handling
-- A pnpm / Turborepo monorepo that contains an Expo app
-
-## When NOT to use
-
-- Versioning, signing, store tracks, OTA policy → `mobile-<stack>:release`
-- Pipeline YAML → `devops-engineer`
-- Route tree, deep links → [`navigation`](../navigation/SKILL.md)
-- Component kit or theme → [`component-library`](../component-library/SKILL.md), [`styling`](../styling/SKILL.md)
-- Concepts (threads, primitives) → [`basics`](../basics/SKILL.md)
-- Auth → `auth0-react-native`
-
 ## Inputs needed
 
 1. **SDK** — 57 unless the project says otherwise.
@@ -141,13 +125,3 @@ Keep **native dependencies in the app package** (`bundled/.../rules/monorepo-nat
 ## Rules
 
 The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `expo-config.md` and `react-native.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
-
-## Handoffs
-
-- Routes and links → [`navigation`](../navigation/SKILL.md)
-- Kit and theme → [`component-library`](../component-library/SKILL.md), [`styling`](../styling/SKILL.md)
-- State layout → [`architecture`](../architecture/SKILL.md)
-- Native modules, Expo Modules API → [`native-modules`](../native-modules/SKILL.md)
-- Signing, tracks, OTA → `mobile-<stack>:release`
-- SDK upgrade, bare → Expo → [`migration`](../migration/SKILL.md)
-- `testID` hand-off → [`test-ids`](../test-ids/SKILL.md)

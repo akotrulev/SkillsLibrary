@@ -23,22 +23,6 @@ One styling authority: **the system plus an asset-catalog token layer.** System 
 
 Never advise opting a project out of Liquid Glass once it links the macOS 27 SDK, and never raise a deployment target to reach a glass API.
 
-## When to use
-
-- Defining colours, type, spacing, dark mode; applying a brand
-- A toolbar, sidebar or sheet looks wrong after the SDK change
-- Adding a custom glass surface
-- Density: control size, compact vs regular rows
-- Adding animation, or making animation respect Reduce Motion
-
-## When NOT to use
-
-- Structure, states, lists → [`ui-components`](../ui-components/SKILL.md)
-- Window placement, toolbars at window level → `windows-and-scenes`
-- VoiceOver, Full Keyboard Access mechanics → `accessibility`
-- Brand identity from scratch → `design/visual-identity`
-- iOS Dynamic Type and iPad classes → `mobile-ios:styling`; Windows Fluent → `desktop-windows:styling`
-
 ## Inputs needed
 
 - Brand palette (light and dark) and any custom font
@@ -157,11 +141,3 @@ Test with **System Settings → Accessibility → Display → Reduce motion** on
 - [ ] Reduce Transparency, Increase Contrast and Reduce Motion are each handled and checked
 - [ ] The window has a tested minimum size; no state is shown by colour alone
 - [ ] Glass APIs below macOS 26 are availability-gated with a fallback
-
-## Handoffs
-
-- Structure and states → [`ui-components`](../ui-components/SKILL.md)
-- Windows, toolbars, placement → `windows-and-scenes`
-- VoiceOver, keyboard → `accessibility`
-- Brand, tokens → `design/visual-identity`, `design/design-tokens`
-- AppKit styling → [`appkit`](../appkit/SKILL.md)

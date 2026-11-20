@@ -14,24 +14,6 @@ Standardizes **authoring** accessible React UIs. Targets **WCAG 2.2 AA** as the 
 
 **Version rule:** the accessibility *concepts* are version-agnostic. React 19's `ref`-as-prop (no `forwardRef`) is how you attach refs for focus management; on React 18 wrap with `forwardRef` (tagged below). The **navigation-focus gap** is the same across App Router (`<Link>` client navigation) and the Vite SPA lane (React Router) — both swap the DOM without a full reload, so nothing is announced unless you manage it.
 
-## When to use
-
-- Designing a custom interactive widget (menu, combobox, tabs, tree, dialog) with correct semantics + keyboard
-- Focus after navigation / focus trap in a dialog / restore-focus on close
-- Announcing route changes and async results (save done, N rows loaded) to a screen reader
-- Adding a skip-to-content link
-- Labeling icon-only buttons (row actions in a shared grid especially)
-- Reviewing a component for keyboard-only and screen-reader usability
-
-## When NOT to use
-
-- Scanning/auditing for violations (axe / Lighthouse / Pa11y CI gate) → qa `accessibility-testing` (peer, not loaded)
-- Form input labels + validation-message a11y → [`forms`](../forms/SKILL.md)
-- Contrast *token* setup / `:focus-visible` styling mechanics → [`styling`](../styling/SKILL.md) (this skill owns *whether* contrast passes; styling owns *how* the tokens are defined)
-- `prefers-reduced-motion` mechanics on animations → [`animation`](../animation/SKILL.md) (this skill owns *that* motion must respect it; motion owns the how)
-- Component-library primitives that already ship a11y (MUI Dialog, Mantine Tabs) → [`component-library`](../component-library/SKILL.md) (use them instead of hand-rolling)
-- Blazor → `frontend/blazor/skills/accessibility`
-
 ## Lean on the platform
 
 Most a11y bugs come from re-implementing in `<div>` what the browser gives free. The browser does focus, keyboard, ARIA mapping, and form submission correctly — the moment you replace them, you own them.
@@ -201,14 +183,3 @@ Beyond the rule files, this skill's own rules:
 - **Zoom to 200%** — layout stays usable, no clipped content, no horizontal scroll trap.
 - **High-contrast / forced-colors mode** — the page stays readable (borders/focus rings don't vanish when custom colors are overridden).
 - Then hand off to qa `accessibility-testing` for the automated WCAG scan gate.
-
-## Handoffs
-
-- Automated axe/Lighthouse WCAG scan + CI gate → qa `accessibility-testing` (**peer**, not loaded)
-- WCAG 2.2 **design-time** criteria (target size, drag alternative, accessible auth, redundant entry, consistent help, focus not obscured), cognitive/neurodiversity design, and layout-for-translation → `design/accessible-by-design`
-- Contrast **token** definition + `:focus-visible` styling → [`styling`](../styling/SKILL.md)
-- Form-input labels + validation-message a11y → [`forms`](../forms/SKILL.md)
-- `prefers-reduced-motion` animation mechanics → [`animation`](../animation/SKILL.md)
-- Accessible library primitives (dialog/tabs/menu that ship a11y) → [`component-library`](../component-library/SKILL.md)
-- `data-testid` on the same elements (separate attribute) → [`test-ids`](../test-ids/SKILL.md)
-- Icon-button labels / color-not-alone as a *display-correctness* concern → [`ui-rules`](../ui-rules/SKILL.md) (owns the convention; this skill owns the a11y mechanics)

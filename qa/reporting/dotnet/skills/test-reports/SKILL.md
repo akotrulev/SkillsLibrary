@@ -10,22 +10,6 @@ Wires Allure into a .NET test project (NUnit primary, xUnit secondary) — the `
 `allureConfig.json`, failure-path attachments, the behavior-first hierarchy (`AllureFeature` / `AllureStory` /
 `AllureSeverity`), history, triage categories and the report CLI.
 
-## When to use
-
-- A new .NET test project needs a reporting story
-- An existing NUnit / xUnit suite emits TRX or plain test output and the team wants richer reports with attachments + history
-- CI does not publish reports; PRs have no test artifacts
-
-## When NOT to use
-
-- Java reporting → `qa/reporting/java/skills/test-reports`
-- TypeScript reporting → `qa/reporting/typescript/skills/test-reports`
-- Writing tests → `qa/dotnet/skills/api-test-author/writer` / `qa/dotnet/skills/ui-test-author/<tool>`
-- What Playwright evidence a UI run keeps, and how it is read → `qa/dotnet/skills/evidence-capture`
-- Pipeline YAML, including the Allure publish job → `qa/cicd/dotnet/skills/ci-pipelines`
-- Test strategy → `qa/manual/test-strategy`
-- Quality metrics dashboards → `qa/manual/quality-metrics`
-
 ## Versions
 
 | Artifact | Version |
@@ -305,15 +289,3 @@ known-flaky is `qa/reporting/dotnet/skills/flaky-test-quarantine`'s.
    Selenium: the `[TearDown]` above.
 6. Wire CI per `qa/cicd/dotnet/skills/ci-pipelines` for the team's CI platform; configure history retention.
 7. Smoke a green build + a deliberate failing test; confirm trend, categories, attachments populate.
-
-## Handoffs
-
-- Java Allure → `qa/reporting/java/skills/test-reports`
-- TypeScript Allure → `qa/reporting/typescript/skills/test-reports`
-- API test generation → `qa/dotnet/skills/api-test-author/writer`
-- UI test generation and `BaseTest` → `qa/dotnet/skills/ui-test-author/playwright` / `qa/dotnet/skills/ui-test-author/selenium` / `qa/dotnet/skills/ui-test-author/appium`
-- Playwright evidence (what is kept, deliberate recordings, reading a trace) → `qa/dotnet/skills/evidence-capture`
-- Flaky detection and the quarantine lane → `qa/reporting/dotnet/skills/flaky-test-quarantine`
-- Test strategy → `qa/manual/test-strategy`
-- Quality metrics dashboards → `qa/manual/quality-metrics`
-- CI pipeline syntax and the Allure publish job → `qa/cicd/dotnet/skills/ci-pipelines` (its `references/<ci>.md`) or `devops/<ci>`

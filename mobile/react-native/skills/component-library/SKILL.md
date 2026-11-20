@@ -19,20 +19,6 @@ Picks the UI layer that supplies buttons, inputs, sheets and (sometimes) the sty
 
 Detect the SDK first. A kit without New Architecture support is a blocker on SDK 55+, not a warning.
 
-## When to use
-
-- Choosing a UI layer for a new app, or justifying a change
-- Wiring the chosen option's provider, theme and dark mode
-- A kit breaks under the New Architecture or in a development build
-
-## When NOT to use
-
-- Hand-written `StyleSheet`, tokens, dark-mode swap, responsive layout → [`styling`](../styling/SKILL.md)
-- Screens, `Pressable`, `expo-image`, lists, menus → [`ui-components`](../ui-components/SKILL.md)
-- `testID` placement → [`test-ids`](../test-ids/SKILL.md)
-- Forms → [`forms`](../forms/SKILL.md)
-- React web → `fe-react:component-library`
-
 ## The decision
 
 ```
@@ -74,12 +60,3 @@ Two facts the rule files leave to this skill: the provider goes above every cons
 3. Install with `npx expo install`; wire the provider at the root.
 4. Theme from the palette via [`styling`](../styling/SKILL.md); wire dark mode off `useColorScheme()`.
 5. Verify: a themed screen on both platforms, dark mode flips with no per-component edit, `expo-doctor` clean, `testID` lands on the native view.
-
-## Handoffs
-
-- Tokens, dark mode, adaptive layout → [`styling`](../styling/SKILL.md)
-- Screens and native patterns → [`ui-components`](../ui-components/SKILL.md)
-- `testID` per option → [`test-ids`](../test-ids/SKILL.md)
-- Development build, provider placement → [`project-setup`](../project-setup/SKILL.md)
-- Forms with kit inputs → [`forms`](../forms/SKILL.md)
-- Palette and fonts → `design/visual-identity`, `design/theme-presets`

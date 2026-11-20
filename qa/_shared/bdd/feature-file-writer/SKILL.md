@@ -10,19 +10,6 @@ Framework-agnostic engine that transforms a **manual test-case suite** (the `qa/
 
 This skill owns the **Gherkin**, not the code. It decides scenario shape, Background factoring, Scenario Outline vs separate scenarios, tags, and the canonical phrasing of every step. It never writes `[Binding]`/glue.
 
-## When to use
-
-- A `qa-test-case-designer` suite (TC-IDs, steps, expected results, test data) needs to become `.feature` files.
-- Acceptance criteria / a story needs feature files and no test-case suite exists yet (derive scenarios directly, but prefer running `qa/manual/test-case-writer` first).
-- Existing `.feature` files have inconsistent, imperative, or duplicated steps and need canonicalizing.
-
-## When NOT to use
-
-- Generating step definitions / glue code → the stack's `gherkin-step-code` (Reqnroll / Cucumber-JVM / playwright-bdd|CucumberJS).
-- Wiring the BDD framework into a project → the stack's `bdd-project-scaffold`.
-- Designing test cases / applying ISTQB techniques → `qa/manual/test-case-writer` + `qa/manual/test-design-techniques`.
-- Deciding which page objects exist → `qa/{stack}/skills/page-object-design`.
-
 ## Inputs needed
 
 Confirm at most 2–3; infer the rest from the suite.
@@ -155,11 +142,3 @@ Feature: Login
 - Assertions or test data in a `Background`.
 - Cleanup expressed as Gherkin steps — it belongs in an `After` hook. A pre-clean precondition (`Given … does not exist`) is not cleanup.
 - Lost traceability — a scenario with no `@AC-<n>` when the suite mapped one.
-
-## Handoffs
-
-- Step definitions / glue + POM wiring → `qa/{stack}/skills/gherkin-step-code`.
-- Project wiring (packages, runner, features dir) → `qa/{stack}/skills/bdd-project-scaffold`.
-- Reviewing existing `.feature` files → `qa/{stack}/skills/bdd-reviewer`.
-- Deep Gherkin style reference → `references/gherkin-style-guide.md`.
-- Source test cases → `qa/manual/test-case-writer` (run `qa-test-case-designer` first if none exist).

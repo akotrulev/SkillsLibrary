@@ -273,15 +273,3 @@ for a status" discipline, different envelope.
 - **NUnit + `System.Text.Json` only** (no FluentAssertions, no Newtonsoft, no `var`). Subscriptions →
   `qa-dotnet:realtime-stream-testing`. Endpoint + token via `ConfigurationLoader`/env, lazy, never logged. No
   `Thread.Sleep`.
-
-## Cross-references
-
-- `qa-typescript:api-tests-graphql` — **the canonical file**: same four ideas, Vitest + native `fetch` +
-  Zod (`GetUserDataSchema.parse` / `GraphQLErrorsSchema`). Read it for the family rationale.
-- `qa-java:api-tests-graphql` — the Java sibling (RestAssured + TestNG treating `/graphql` as a POST,
-  Jackson POJOs); same four ideas, different libs.
-- `qa-dotnet:api-tests` — the **REST sibling** this extends: the Client + Model + Test layering,
-  NUnit conventions, `ProblemDetailsDto` (the REST analogue of `GraphQLError`), and the cleanup discipline.
-- `qa-dotnet:realtime-stream-testing` — **GraphQL subscriptions** (graphql-ws over WebSocket) live here.
-- `qa-dotnet:api-models` — generate the typed `Data` records / operation models in isolation.
-- `qa-dotnet:test-login-tokens` — obtain the bearer token for authenticated operations.

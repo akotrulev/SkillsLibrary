@@ -42,8 +42,3 @@ Pick **sendgrid-sandbox** to prove the SUT's send request is **valid and accepte
 - Condition-wait for arrival — never a sleep.
 - Assert parsed content (links, codes, recipients), not raw MIME string equality.
 - Clean the sink/inbox per test or use per-test addresses.
-
-## Cross-references
-
-Each `references/<tool>.md` carries its own cross-references to sibling skills (DB verification,
-test environments, CI, chaos). Route there after picking the tool.

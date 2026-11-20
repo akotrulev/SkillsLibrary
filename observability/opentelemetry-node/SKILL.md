@@ -20,21 +20,6 @@ First act on an existing project: check `engines.node` in `package.json` and the
 - **`@opentelemetry/instrumentation-pino`** — bridges OTel context → pino logs (see `observability/structured-logging-node`)
 - Resource attributes via `@opentelemetry/resources` and `@opentelemetry/semantic-conventions`
 
-## When to use
-
-- New Node service needs OTel
-- Adding auto-instrumentation to an existing NestJS / Express / Fastify service
-- Adding custom spans to a worker / consumer / background job
-- Adding a custom counter / histogram (request count, queue depth, processing time)
-- Wiring OTLP export to a Collector
-
-## When NOT to use
-
-- .NET service → `observability/opentelemetry-dotnet`
-- Java service → `observability/opentelemetry-java`
-- Log shape / sinks → `observability/structured-logging-node`
-- Dashboards / queries → `observability/dashboards` + `observability/queries`
-
 ## Inputs needed
 
 1. **Service name + version + environment**
@@ -262,11 +247,3 @@ context.with(parentCtx, () => {
 5. Add 3-5 custom spans where domain logic lives (worker job, message handler, complex orchestration).
 6. Add the counter / histogram / up-down-counter trio for the service's core domain object.
 7. Local smoke with docker-compose (Collector + Tempo + Prometheus + Grafana); hit endpoints, confirm spans, metrics, and log-trace correlation.
-
-## Handoffs
-
-- Log shape and sinks → `observability/structured-logging-node`
-- LogQL / PromQL query patterns → `observability/queries`
-- Dashboard layout → `observability/dashboards`
-- .NET equivalent → `observability/opentelemetry-dotnet`
-- Java equivalent → `observability/opentelemetry-java`

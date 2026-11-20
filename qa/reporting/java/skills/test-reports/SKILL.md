@@ -10,22 +10,6 @@ Wires Allure into a Java 21 test project (TestNG primary, JUnit Jupiter secondar
 adapter, `@Step` weaving, attachments, the `@Feature` / `@Story` / `@Severity` hierarchy, CI publish, history,
 triage categories. Playwright's failure evidence is not wired here: J1's `BaseTest` keeps and attaches it.
 
-## When to use
-
-- A new Java test project (Gradle Kotlin DSL preferred) needs a reporting story
-- A suite emits plain test XML and the team wants attachments + history
-- An existing suite moves from allure-java 2.x to 3.0
-- CI does not publish reports; PRs have no test artifacts
-
-## When NOT to use
-
-- .NET reporting → `qa/reporting/dotnet/skills/test-reports`
-- TypeScript reporting → `qa/reporting/typescript/skills/test-reports`
-- Playwright screenshots, traces, video, HAR → `qa/java/skills/evidence-capture` (owned by `BaseTest`)
-- Writing tests → `qa/java/skills/api-test-author/writer` / `qa/java/skills/ui-test-author/<tool>`
-- Test strategy → `qa/manual/test-strategy`
-- Quality metrics dashboards → `qa/manual/quality-metrics`
-
 ## Versions
 
 One pin set. Every Allure coordinate in this skill, and in every Java skill, uses these.
@@ -315,12 +299,3 @@ The standards this skill's output must meet are the qa-java rule files, not a li
 6. Drop `categories.json` into `src/test/resources/`.
 7. Wire CI per the snippet for the team's CI platform; configure history retention.
 8. Smoke a green build + a deliberate failing test; confirm trend, categories, attachments populate.
-
-## Handoffs
-
-- Playwright failure evidence, recordings, reading a trace → `qa/java/skills/evidence-capture`
-- .NET Allure → `qa/reporting/dotnet/skills/test-reports`
-- TypeScript Allure → `qa/reporting/typescript/skills/test-reports`
-- Flaky detection and quarantine → `qa/reporting/java/skills/flaky-test-quarantine`
-- UI test generation → `qa/java/skills/ui-test-author/playwright` / `qa/java/skills/ui-test-author/selenium` / `qa/java/skills/ui-test-author/appium`
-- CI pipeline syntax → `qa/cicd/java/skills/ci-pipelines` (its `references/<ci>.md`) or `devops/<ci>`

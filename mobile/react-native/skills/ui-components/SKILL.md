@@ -23,24 +23,6 @@ Design facts (type scale, spacing, touch target, platform convention) come from 
 
 Detect first: `@shopify/flash-list` major, `@legendapp/list`, `expo-image`, `reactCompiler` in `app.json`. On a project still on FlashList 1, say so and hand to [`migration`](../migration/SKILL.md) — never flag it for lacking v2.
 
-## When to use
-
-- Building a screen, a row, a card, a header or a reusable component
-- A list that drops frames, shows blank cells or jumps on update
-- Choosing between `Pressable`, native menu, native modal, JS sheet
-- Images in lists and avatars; galleries
-- Rendering the loading / loaded / failed / empty region
-
-## When NOT to use
-
-- Which file is a route, tabs, modal *routes*, params → [`navigation`](../navigation/SKILL.md)
-- Reanimated, gestures, layout animation → [`animation`](../animation/SKILL.md)
-- Tokens, dark mode, safe-area policy, breakpoints → [`styling`](../styling/SKILL.md); kit choice → [`component-library`](../component-library/SKILL.md)
-- What the failed region shows, the banner, retry, stale marker → [`error-handling`](../error-handling/SKILL.md)
-- Inputs and validation → [`forms`](../forms/SKILL.md); test ids → [`test-ids`](../test-ids/SKILL.md); labels and roles → [`accessibility`](../accessibility/SKILL.md)
-- Fetching → [`networking`](../networking/SKILL.md)
-- Next.js components → `fe-react:component-writer`
-
 ## Inputs needed
 
 The screen's data source (a hook that returns `{ data, status }`), its three outcomes (loaded, empty, failed), the primitives the project's component kit already supplies, and whether the Compiler is on.
@@ -168,12 +150,3 @@ The standards this skill's output must meet are the mobile-react-native rule fil
 - On a simulator and an emulator: scroll the list fast — no blank cells; rotate; turn text size to maximum — nothing clips.
 - Throttle the network and force an error: header and filters stay, the rows body swaps to the failed slot.
 - Dev-side component tests: `mobile-react-native:component-testing`.
-
-## Handoffs
-
-- Routes, modals as routes → [`navigation`](../navigation/SKILL.md) · motion → [`animation`](../animation/SKILL.md)
-- Tokens and theme → [`styling`](../styling/SKILL.md) · kit → [`component-library`](../component-library/SKILL.md)
-- Failed region, banner, stale → [`error-handling`](../error-handling/SKILL.md)
-- Lists at scale, profiling → [`performance`](../performance/SKILL.md)
-- Labels, roles, focus → [`accessibility`](../accessibility/SKILL.md) · ids → [`test-ids`](../test-ids/SKILL.md)
-- Data → [`networking`](../networking/SKILL.md) · inputs → [`forms`](../forms/SKILL.md)

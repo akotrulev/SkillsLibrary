@@ -21,24 +21,6 @@ Owns the **request-level half** of resilience: how a call is made, cancelled, ti
 
 Detect `@tanstack/react-query` major and whether a client (`ky`, Axios, a generated SDK) already exists — match it; do not add a second HTTP layer.
 
-## When to use
-
-- Writing the API client, a query or mutation hook, an upload
-- A request hangs on a bad cell link; a retry storm; a duplicate write
-- Token attach, 401 refresh, replay
-- Refetch on foreground and on reconnect
-- A WebSocket or SSE connection that must pause in the background
-
-## When NOT to use
-
-- Rendering failure, the banner, offline indicator, OTA-skew prompt → [`error-handling`](../error-handling/SKILL.md)
-- Persisting the cache, the offline mutation queue, sync and conflicts → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Where server vs client state lives → [`architecture`](../architecture/SKILL.md)
-- Form submit UX and `setError` → [`forms`](../forms/SKILL.md)
-- Auth provider setup → `auth0-react-native`; token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Push registration with the server → [`notifications-and-links`](../notifications-and-links/SKILL.md)
-- Next.js fetch / caching → `fe-react:data-fetching`
-
 ## The client — one module, one place for the budget
 
 ```ts
@@ -168,11 +150,3 @@ The standards this skill's output must meet are the mobile-react-native rule fil
 - Airplane mode: no retry attempts appear in the network log; reconnect refetches stale queries.
 - A `503` with `Retry-After: 5` is retried after 5 s, not sooner; an expired access token causes exactly one refresh for N concurrent calls.
 - Dev-side tests (fake `fetch`, fake timers): `mobile-react-native:component-testing`.
-
-## Handoffs
-
-- Failed region, banner, stale, OTA skew → [`error-handling`](../error-handling/SKILL.md)
-- Persisted cache, mutation queue, token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- State ownership → [`architecture`](../architecture/SKILL.md) · field errors → [`forms`](../forms/SKILL.md)
-- Cleartext, pinning, secrets → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
-- API contract tests → `qa-api-typescript` (peer)

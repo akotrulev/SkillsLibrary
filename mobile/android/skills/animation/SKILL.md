@@ -24,22 +24,6 @@ Motion in Compose is **state-driven**: the UI is a function of state, and an ani
 
 Sources read 2026-10-10: developer.android.com/develop/ui/compose/animation/{introduction,shared-elements}, /develop/ui/compose/system/predictive-back (overview only). An animation API newer than the project's Compose BOM is not used; never raise the BOM for a flourish ([`project-setup`](../project-setup/SKILL.md)).
 
-## When to use
-
-- Animating a state change: expand, reveal, toggle, loading → loaded
-- A list item moving, appearing or disappearing; a number or content swap
-- A hero / container-transform transition between two screens; a custom back animation
-- A drag, swipe-to-dismiss, long-press or pinch
-- Respecting the user's "Remove animations"
-
-## When NOT to use
-
-- Which screens exist and how back works → [`navigation`](../navigation/SKILL.md)
-- Choosing a motion style or timing language → design (`design/ui-ux-pro-max`)
-- Spinners and skeletons as a loading state → [`error-handling`](../error-handling/SKILL.md) (the region states) and [`ui-components`](../ui-components/SKILL.md)
-- XML animators → [`views-interop`](../views-interop/SKILL.md)
-- Another stack → `mobile-ios:animation`, `mobile-react-native:animation`
-
 ## Choosing the API
 
 | Need | Use |
@@ -162,12 +146,3 @@ fun rememberAnimationsEnabled(): Boolean {
 - [ ] Back previews and completes; no `onBackPressed` override
 - [ ] Shared-element keys are unique data classes; the transition degrades to a crossfade where unsupported
 - [ ] Macrobenchmark `FrameTimingMetric` shows no new jank on the animated screen
-
-## Handoffs
-
-- Route, back stack, scene transitions → [`navigation`](../navigation/SKILL.md)
-- Frame budget, tracing, Macrobenchmark → [`performance`](../performance/SKILL.md)
-- Semantics, custom actions, touch targets → [`accessibility`](../accessibility/SKILL.md)
-- Motion styles and timing rows → design (`design/ui-ux-pro-max`)
-- Loading, failed and offline regions → [`error-handling`](../error-handling/SKILL.md)
-- Tests of animated state → [`unit-testing`](../unit-testing/SKILL.md)

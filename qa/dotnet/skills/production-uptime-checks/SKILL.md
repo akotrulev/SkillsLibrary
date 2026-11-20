@@ -228,17 +228,3 @@ the probe runs them against the live env (the monitor).
 - **The probe reuses the UI suite's page objects** and resolves them against `SYNTHETIC_BASE_URL`.
 - **Wait on a condition, never a sleep.** Async all the way; constructor injection; structured logging
   (message templates); secrets from env / Key Vault, never logged.
-
-## Cross-references
-
-- `qa-typescript:production-uptime-checks` — the **canonical** stack (Checkly); prefer it if your team writes TS.
-- `qa-java:production-uptime-checks` — Grafana Cloud Synthetic Monitoring and the `@Scheduled` Playwright-Java
-  probe; the same evidence shape.
-- `qa-dotnet:ui-tests-playwright` — the page objects the probe reuses, and `BaseTest`'s evidence order.
-- `qa-dotnet:evidence-capture` — reading a kept trace (`trace open` / `show-trace`, trace.playwright.dev).
-- `qa-dotnet:load-testing` — throughput, not uptime.
-- `qa-dotnet:ci-pipelines` — the pre-merge gate, and where `az deployment` / `terraform apply` and the probe
-  image build are wired.
-- `qa-dotnet:test-login-tokens` — M2M / test-user tokens for probes hitting an authenticated endpoint.
-- `qa-dotnet:flaky-test-quarantine` — a probe that needs the alert window widened to stay green is flaky; fix
-  the cause.

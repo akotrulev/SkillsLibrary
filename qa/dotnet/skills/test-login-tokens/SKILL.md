@@ -27,20 +27,6 @@ Two cross-cutting rules shape every example:
 - **Microsoft.Playwright.NUnit** for the UI auth-state seeding, at the pins in the **Versions** table of `qa/dotnet/skills/ui-test-author/playwright/SKILL.md` (this skill pins nothing)
 - Token plumbing under `Tests/Support/Auth/`; secrets and every tenant/API URL via **env vars only**
 
-## When to use
-
-- An API-test suite (`qa/dotnet/skills/api-test-author/writer`) needs a `Bearer` token to call protected endpoints → **M2M**
-- A UI suite needs to skip the login form by seeding an authenticated browser session → **ROPG** → `StorageState`
-- You need a token *as a particular seeded test user* (with that user's roles/permissions) → **ROPG**
-- A CLI/headless tool or a device without a browser needs to authenticate → **device-code**
-- You're re-fetching a token on every test and want to cache it correctly
-
-## When NOT to use
-
-- Wiring Auth0 into the **application under test** (auth middleware, JWT validation, login redirect) → `backend/dotnet/skills/auth0` / `auth/auth0-blazor`
-- Understanding the Auth0 entity/flow model conceptually → `auth/_shared/auth0-concepts`
-- TypeScript or JVM test suites → `qa/{typescript,java}/skills/test-login-tokens`
-
 ## Decision matrix — which grant for which test
 
 | | **Client Credentials (M2M)** | **ROPG (`password-realm`)** | **Device Authorization** |
@@ -125,13 +111,3 @@ These sections live in `references/details.md` — **read it when the task touch
 3. Confirm the env vars are wired into the test environment (CI secret store / launch profile), **not** committed: `AUTH0_DOMAIN`, `AUTH0_AUDIENCE`, `AUTH0_M2M_CLIENT_ID/SECRET`, for ROPG `AUTH0_ROPG_CLIENT_ID`, `AUTH0_TEST_USERNAME/PASSWORD`, `AUTH0_REALM`, for device-code `AUTH0_DEVICE_CLIENT_ID`, and `BASE_URL` for UI seeding.
 4. Generate `Auth0Config.cs`, `CachedTokenProvider.cs`, `Tokens.cs`, plus the consumer wiring (API client header and/or the token body of `AuthSetup`).
 5. Run the cache unit tests anywhere (offline); run the live token tests with the secrets present.
-
-## Cross-references
-
-- **`qa/typescript/skills/test-login-tokens`** (`auth0` npm `AuthenticationClient`), **`qa/java/skills/test-login-tokens`** (`com.auth0:auth0` `AuthAPI`) — the sibling stacks; same three grants, same cache + stash shape.
-- **`auth/_shared/auth0-concepts`** — the entity/flow model (Tenant / Application / API / audience / grant types) this skill assumes.
-- **`backend/dotnet/skills/auth0`**, **`auth/auth0-blazor`** — the **app-side** login flows this skill complements. This skill never implements user-facing login; those do.
-- **`qa/dotnet/skills/api-test-author/writer`** — the M2M consumer: where the `Bearer` header lands on the API client.
-- **`qa/dotnet/skills/ui-test-author/playwright`** — the ROPG consumer: `StorageState` / fixture patterns for seeding auth without the login UI.
-- **`qa/dotnet/skills/test-data-builder`** — provisioning/seeding the test users that ROPG authenticates as.
-- **`qa/cicd/dotnet/skills/ci-pipelines`** — where the Auth0 secrets are sourced in CI (OIDC / encrypted secrets), never hardcoded.

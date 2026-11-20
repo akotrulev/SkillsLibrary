@@ -8,23 +8,6 @@ disable-model-invocation: true
 
 Produces a stack-agnostic test strategy for a feature, release, or whole service. Outputs: a **risk register**, a **test pyramid sized to the risk**, a **coverage matrix**, **quality gates**, and **handoffs** to the generator skills that actually scaffold the tests. Does **not** write individual tests; that's the per-topic skills.
 
-## When to use
-
-- New feature or service — sizing the test investment before building it
-- Release-level test plan ("what must be green to ship")
-- Migration / refactor — picking which tests retire, which earn an upgrade
-- A team-level question: "are we testing the right things at the right level"
-- Building the QA section of a PR description or RFC
-
-## When NOT to use
-
-- A full feature **test plan** — harness & tooling looked up from the repo, environments, artifacts, a gap-analyzed case inventory → `qa/manual/test-plan-writer` / the `qa-test-planner` agent (which *embeds* this skill's risk register and scope call)
-- Writing the actual tests → `qa/<stack>/skills/api-test-author/writer` / `qa/<stack>/skills/ui-test-author/<tool>` / `qa/manual/test-case-writer`
-- Reviewing existing tests → `qa/<stack>/skills/api-test-author/review` / `qa/<stack>/skills/ui-test-author/review`
-- Bug reports → `qa/manual/bug-report-writer`
-- Quality metrics dashboard → `qa/manual/quality-metrics`
-- Performance plan → `qa/<stack>/skills/load-testing` + `qa/_shared/performance`
-
 ## Inputs needed
 
 1. **Scope** — feature / release / service; what's in and what's out
@@ -197,14 +180,3 @@ Avoid testing the *same* thing at three layers — that's not safety, that's tax
 5. Define quantitative quality gates and exit criteria
 6. List deferred items with rationale
 7. Hand off to per-topic skills (`qa/<stack>/skills/api-test-author/...`, `qa/<stack>/skills/ui-test-author/...`, `qa/<stack>/skills/test-data-builder`, `qa/manual/exploratory-charter-writer`) for the actual scaffolding
-
-## Handoffs
-
-- API test generation → `qa/<stack>/skills/api-test-author/writer`
-- UI test generation → `qa/<stack>/skills/ui-test-author/<tool>`
-- Test data → `qa/<stack>/skills/test-data-builder`
-- Contract testing → `qa/<stack>/skills/api-contract-testing`
-- Exploration of a running build → the `qa-explorer` agent; a charter for a human's session → `qa/manual/exploratory-charter-writer`
-- Bug intake → `qa/manual/bug-report-writer`
-- Allure reporting → `qa/reporting/<stack>/skills/test-reports`
-- Metrics & dashboards → `qa/manual/quality-metrics`

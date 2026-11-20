@@ -21,22 +21,6 @@ First act on an existing project: confirm the Java release (`java -version` / th
 - **`io.opentelemetry.instrumentation:opentelemetry-logback-mdc-1.0`** to bridge OTel trace context → MDC
 - Shipping: stdout JSON → container runtime → Alloy / Fluent Bit / Vector → Loki. Direct Loki appenders exist (`com.github.loki4j:loki-logback-appender`) but stdout-first is the portable default.
 
-## When to use
-
-- New Spring Boot service needs logging
-- Replacing `System.out.println` / plain `logger.info("text " + var)` with structured logs
-- Adding MDC correlation IDs / trace propagation
-- Wiring logs to Loki
-- Masking PII / secrets in log output
-
-## When NOT to use
-
-- .NET service → `observability/structured-logging-dotnet`
-- Node service → `observability/structured-logging-node`
-- Distributed tracing or metrics → `observability/opentelemetry-java`
-- LogQL query authoring → `observability/queries`
-- Dashboard layout → `observability/dashboards`
-
 ## Inputs needed
 
 1. **Target environment(s)** + sink per env (stdout JSON everywhere by default; direct Loki only if no log forwarder is available)
@@ -267,11 +251,3 @@ Or filter at the source — pass DTO projections to the logger, never the entity
 5. If OTel is in the project, the `OpenTelemetryAppender` wrapper appender is mandatory.
 6. Sweep the codebase for `+` concatenation in log calls and `e.toString()`; convert to placeholders + exception arg.
 7. Smoke locally — `curl` a few endpoints, confirm JSON includes `trace_id`, `span_id`, `requestId`, `service.name`.
-
-## Handoffs
-
-- Distributed tracing + metrics → `observability/opentelemetry-java`
-- LogQL queries against Loki → `observability/queries`
-- Dashboard layout → `observability/dashboards`
-- .NET equivalent → `observability/structured-logging-dotnet`
-- Node equivalent → `observability/structured-logging-node`

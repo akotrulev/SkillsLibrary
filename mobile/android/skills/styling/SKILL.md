@@ -21,21 +21,6 @@ One theme, tokens instead of literals: `MaterialTheme` colour scheme, typography
 
 Never raise the Compose BOM or opt into Expressive as a side effect of a styling task. A 1.5 beta dependency is a recorded decision.
 
-## When to use
-
-- Setting up or changing the theme, colours, typography, shapes
-- Dark mode, dynamic colour, a brand palette
-- Phones vs tablets / foldables / desktop windowing; list-detail layouts
-- Status bar or keyboard overlapping content
-
-## When NOT to use
-
-- Composable structure, state, lists → [`ui-components`](../ui-components/SKILL.md)
-- Motion → [`animation`](../animation/SKILL.md); contrast and TalkBack → [`accessibility`](../accessibility/SKILL.md)
-- Navigation containers' behaviour → [`navigation`](../navigation/SKILL.md)
-- String resources, RTL, locale formatting → `mobile-android:i18n`
-- iOS / RN theming → `mobile-ios:styling`, `mobile-react-native:styling`
-
 ## Inputs needed
 
 - Compose BOM / material3 version; brand colours and fonts, if any
@@ -123,12 +108,3 @@ The standards this skill's output must meet are the mobile-android rule files, n
 - [ ] Layout checked at 200% font scale, dark theme, compact and expanded widths
 - [ ] No orientation / resizability lock in the manifest; resizable emulator pass
 - [ ] `innerPadding` applied; no status-bar or keyboard overlap
-
-## Handoffs
-
-- Components and state → [`ui-components`](../ui-components/SKILL.md)
-- Navigation suite and panes → [`navigation`](../navigation/SKILL.md)
-- Contrast, scaling, TalkBack → [`accessibility`](../accessibility/SKILL.md)
-- Motion scheme → [`animation`](../animation/SKILL.md)
-- Dark-mode preference storage → `mobile-android:offline-and-storage`
-- M2 → M3, XML theme → [`migration`](../migration/SKILL.md), [`views-interop`](../views-interop/SKILL.md)

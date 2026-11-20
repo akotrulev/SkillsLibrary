@@ -181,11 +181,3 @@ QA's `mobile-screen-explorer` writes, per screen, a table of `| Element | Type |
 ## Rules
 
 The standards a tag must meet are the mobile-android rule files, not a list here: `android-ui-a11y.md` (its Test ids section) and `android-views.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them (`/mobile-android:rules` does). Where they and this skill's recipes disagree, the rule files win. The tagging rules above are how they are met.
-
-## Handoffs
-
-- Page objects, Appium and Maestro flows, device runs → `qa-mobile-*` (peer; plan 003)
-- Labels, roles, merged semantics, TalkBack order → [`accessibility`](../accessibility/SKILL.md)
-- Components that take a `modifier` and emit ids → [`ui-components`](../ui-components/SKILL.md)
-- Region states and banner ids → [`error-handling`](../error-handling/SKILL.md)
-- Test-id hygiene as part of a broader review → [`code-review`](../code-review/SKILL.md)

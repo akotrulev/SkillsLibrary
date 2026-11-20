@@ -8,19 +8,6 @@ disable-model-invocation: true
 
 Turns a rough defect observation into a high-signal bug report that a developer can reproduce, triage, and fix without needing follow-up questions.
 
-## When to use
-
-- The user describes a bug they observed and wants it written up formally
-- The user has a draft bug report and wants it sharpened
-- The user wants the same bug written for different audiences (engineering vs product)
-- An exploration finding of Major or worse needs its full report (`qa/manual/app-exploration`)
-
-## When NOT to use
-
-- The user wants to derive test cases from requirements → `qa/manual/test-case-writer`
-- The user wants an exploratory session charter → `qa/manual/exploratory-charter-writer`
-- The user wants to triage / prioritize a backlog of bugs → out of scope
-
 ## Inputs needed
 
 Ask only what's missing:

@@ -14,19 +14,6 @@ It exists as its own document because it is the thing that actually gets checked
 
 **Prerequisites:** `epics.md` and `stories.md` (from `requirements-author`), and the approved `blueprint.md` — its functional areas and routing map are what tell you which file trees each epic lands in. Mapping epics without knowing where their code goes produces a wave table with no evidence behind it.
 
-## When to use
-
-- Step 6 of a `solution-planner` run — after the detail pack, before the delivery plan
-- When an epic is added, split, or re-scoped and the waves have to be re-derived
-- When a wave completes and the next one needs checking against what actually got built
-
-## When NOT to use
-
-- Writing the epics themselves → `business-analysis:epics`, via `requirements-author`
-- Ordering tasks and binding them to agents → `dev:plan-delivery`
-- Sizing tasks or writing the prompts → `dev:plan-session-budget`
-- Deciding which of two concurrent *tasks* is safe → `dev:plan-delivery`'s streams table, which applies the same rule one level down
-
 ## Output
 
 **`docs/plans/<NNN>-<initiative>/epic-map.md`**. A filled golden example is at `references/example-epic-map.md` (the shared `001-workshop-booking` pack — shapes normative, domain content illustrative).
@@ -172,14 +159,6 @@ Where the operator will run the plan alone, back to back, say that too — the w
 6. Every wave carries its lane count, and every lane's row says why it is internally sequential.
 7. The critical path is stated in waves, with the dependency whose removal would shorten it most.
 8. Nothing here contradicts `delivery-plan.md`'s streams table — the same file sets, one level apart.
-
-## Handoffs
-
-- **← `requirements-author`** — supplies `epics.md` and `stories.md`. Their ids are read, never rewritten.
-- **← `dev:plan-blueprint`** — supplies the functional areas and the routing map that place each epic in a file tree.
-- **→ `dev:plan-delivery`** — consumes the lanes and the waves: the streams table is this document's lanes at task altitude, and the task order respects the wave order.
-- **→ `dev:plan-session-budget`** — the lanes and the wave order are what its prompt blocks in the plan's `## Prompts — one per task` section are ordered by.
-- **→ `business-analysis:epics`** (back upstream) — when Step 3 finds two epics that are genuinely intertwined, the slicing is the defect and it is fixed there, not here.
 
 ## Version policy
 

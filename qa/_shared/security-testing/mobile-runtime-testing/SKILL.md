@@ -93,17 +93,3 @@ where it sharpens the label, the **MASWE v1.0.0** id. Every line: `MASVS: <ids>`
   cleartext tokens.
 - **Pinning bypass is a test technique here, not an exploit** — the goal is to *see the traffic to test it*,
   then report the pin's efficacy. Chaining a foothold into network access is `penetration-testing`.
-
-## Related skills & peers
-
-- **`mobile-app-scan`** — the static sibling; its findings ("cleartext declared for host X", "pinning
-  declared") are this skill's runtime hypotheses to confirm or refute.
-- **`qa/_shared/security`** — OWASP/MAS backbone (load alongside).
-- **`client-side-security`** — the web analog for a mobile app's embedded WebView / hybrid content; if the app
-  is a WebView shell, the DOM-XSS/CSP checks there apply to its web layer.
-- **`qa-mobile-<stack>`, `mobile-app-crawler`, `mobile-screen-explorer`** *(peers, not loaded)* — own the
-  functional mobile suite and live-app screen mapping; a confirmed vuln becomes a bug report via
-  `qa-test-case-designer`'s `bug-report-writer`; the fix goes to `mobile-react-native` / `mobile-ios` / `mobile-android`. For a native desktop app the fix goes to `desktop-macos` / `desktop-windows`. The crawler's device/emulator setup is reusable here.
-- **`penetration-testing`** *(peer plugin)* — if a runtime finding is to be chained into network-altitude
-  access (a foothold, lateral movement), that is its `initial-access` lane under its scope-file gates; this
-  skill stops at single-app runtime proof and hands off.

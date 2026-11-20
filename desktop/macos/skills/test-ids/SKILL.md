@@ -39,20 +39,6 @@ The accessibility **label** (`accessibilityLabel`) is for people: translated, sp
 
 Facts QA needs from the same pages: Mac2 runs **one session at a time** (parallel Mac2 instances are highly discouraged); finding, clicking and typing need no Accessibility permission, but moving or resizing windows does; `useDomIdAsAccessibilityId` maps `WKWebView` DOM ids and needs that permission. The page source of the **same build** is the final authority; the explorer records both `identifier` and `label`.
 
-## When to use
-
-- Add identifiers to one or more SwiftUI views / AppKit controllers
-- Audit a window for missing, duplicated, label-derived or unstable ids
-- A `missing-testids.md` has been handed over by QA
-- An E2E flow finds a control by title but not by id
-
-## When NOT to use
-
-- Writing window objects or desktop tests → `qa-desktop-<lang>` (peer)
-- Labels, rotors, keyboard order → [`accessibility`](../accessibility/SKILL.md)
-- Choosing or building components → [`ui-components`](../ui-components/SKILL.md)
-- Windows apps → `desktop-windows:test-ids`; iOS → `mobile-ios:test-ids`
-
 ## Output format
 
 One modifier only: `.accessibilityIdentifier("…")` (`setAccessibilityIdentifier` in AppKit). **Never `accessibilityLabel` as the identifier, and never label text copied into the id.** PascalCase, dot-separated segments.
@@ -190,10 +176,3 @@ QA's explorer writes, per window, a table of `Element | Type | Visible text / la
 ## Rule file
 
 The review form of these rules, with severities, is the desktop-macos rule file `mac-accessibility.md` (Test ids) in `.claude/rules/desktop-macos/` (`/desktop-macos:rules` installs it), or the plugin's copy when the project has none. Where it and this skill disagree, the rule file wins.
-
-## Handoffs
-
-- Window objects, Mac2 sessions, desktop runs → `qa-desktop-<lang>` (peer)
-- Labels, rotors, keyboard → [`accessibility`](../accessibility/SKILL.md) · region states and banner ids → [`error-handling`](../error-handling/SKILL.md)
-- Components that emit ids by default → [`ui-components`](../ui-components/SKILL.md)
-- Hygiene as part of a broader review → `desktop-macos:code-review`

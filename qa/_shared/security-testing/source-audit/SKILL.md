@@ -47,12 +47,3 @@ the workflow's shape.
 Full audit mode reads source and runs target code only in the sandbox, against dummy fixtures, so it needs no
 `#volatile` authorization line. The moment a lead needs a running deployment, it leaves this skill — the bundled
 workflow already forbids live probing.
-
-## Handoffs
-
-- A `needs_validation` record whose blocker is runtime or deployment behaviour → `exploit-validation` on an
-  authorized throwaway env, under `qa-security`'s authorization rule.
-- A `confirmed` access-control finding → a regression row in `<stack>:permission-testing`.
-- The fix → the owning `be-*` / `fe-*` / `mobile-*` agent, from the record's smallest-fix and regression-test
-  fields. This skill never edits target source.
-- A pattern worth catching on every PR → a custom rule in `code-scan`.

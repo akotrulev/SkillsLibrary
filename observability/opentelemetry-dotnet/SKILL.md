@@ -20,21 +20,6 @@ First act on an existing project: read the `TargetFramework` from the `.csproj` 
 - Resource attributes follow **OTel semantic conventions** (`service.name`, `service.version`, `deployment.environment`)
 - Sampler default: `ParentBased(TraceIdRatioBased)` — head-based sampling at the edge, tail-based at the Collector if needed
 
-## When to use
-
-- New service needs OTel from day one
-- Existing service has ad-hoc tracing/metrics and needs OTel as the single pipeline
-- Adding a custom span / counter / histogram to existing code
-- Wiring OTLP export to a Collector (or directly to Tempo/Prometheus for dev)
-- Diagnosing why a span isn't showing up in Tempo
-
-## When NOT to use
-
-- Java service → `observability/opentelemetry-java`
-- Node service → `observability/opentelemetry-node`
-- Log shape / sinks → `observability/structured-logging-dotnet`
-- Dashboards / queries → `observability/dashboards` + `observability/queries`
-
 ## Inputs needed
 
 1. **Service name + version + environment** — these become the OTel resource attributes
@@ -235,11 +220,3 @@ Propagators.DefaultTextMapPropagator.Inject(new PropagationContext(ctx ?? defaul
 5. Create one `ActivitySource` + one `Meter` per business subsystem; wire instrumentation into the code that should emit spans/metrics.
 6. Configure the Collector (separate concern) to receive OTLP and route to Tempo / Prometheus / Loki.
 7. Smoke locally with a docker-compose stack (Collector + Tempo + Prometheus + Grafana). Confirm `traceparent` rides outbound HTTP, spans appear in Tempo, metrics appear in Prometheus.
-
-## Handoffs
-
-- Log shape and sinks → `observability/structured-logging-dotnet`
-- LogQL / PromQL query patterns → `observability/queries`
-- Dashboard layout → `observability/dashboards`
-- Java equivalent → `observability/opentelemetry-java`
-- Node equivalent → `observability/opentelemetry-node`

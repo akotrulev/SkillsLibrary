@@ -8,20 +8,6 @@ disable-model-invocation: true
 
 Generator skill. Scaffolds a single DTO file in the Java `apitests` module.
 
-## When to use
-
-- A new endpoint needs request/response models for the matching RestAssured client.
-- An existing DTO needs to add fields after an API change.
-- A response envelope (pagination, wrapper) is needed.
-
-## When NOT to use
-
-- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa-<stack>:api-spec-assets`: it replaces the stored spec asset in place, derives the changed-DTO work list from `git diff`, and comes back here for only the files that list names. Do not re-generate every DTO because the spec moved.
-
-- C# or TypeScript DTOs — use `qa-dotnet:api-models` / `qa-typescript:api-models`.
-- Production domain models — these DTOs are test-project-only.
-- Writing the client itself — use `qa-java:api-client-writer`.
-
 ## Folder & naming convention
 
 Mirrors the .NET layout, translated to Gradle conventions:

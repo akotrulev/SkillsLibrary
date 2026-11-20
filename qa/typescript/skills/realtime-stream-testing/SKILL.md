@@ -226,15 +226,3 @@ and assert through the protocol client (`references/details.md`), or drive the b
 - **Auth tokens from env, read lazily, never logged.** WS upgrade tests need the SUT on a **real server**.
 - Test names `Should_X_When_Y`; one logical assertion per test; cleanup in teardown; no inline comments;
   builders for 4+-field payloads; `strict: true`.
-
-## Cross-references
-
-- `qa-dotnet:realtime-stream-testing` (**the canonical file**) · `qa-java:realtime-stream-testing` — the
-  sibling stacks; same four ideas.
-- `qa-typescript:messaging-testing` — the **eventual-consistency lineage** and the **boundary**: messaging =
-  discrete queue/topic messages; this skill = an open WS/SSE stream.
-- `qa-typescript:network-mocking` — **plain HTTP** mocking (`route.fulfill`, HAR, offline) and the "register
-  before the action" rule; it routes WebSocket and SSE here.
-- `qa-typescript:ui-tests-playwright` — the page-object fixtures the **browser-surface** tests extend.
-- `qa-typescript:evidence-capture` — reading a failed browser test's trace, which carries WebSocket frames.
-- `qa-typescript:test-login-tokens` — tokens for an authenticated socket, read from env, never logged.

@@ -12,23 +12,6 @@ The library's default persistence layer for Java 21 + Spring Boot 3.x. JPA via H
 
 Confirm the project's Java release and Spring Boot / Hibernate major before generating or reviewing. Records-as-DTOs and pattern-matching switch assume Java 21; Hibernate 6.x ships with Spring Boot 3.x (Spring Boot 2.x pairs with Hibernate 5.x, which has different `@Type` / naming-strategy defaults) — don't apply Boot-3-only config keys to a Boot 2.x project.
 
-## When to use
-
-- New Spring Boot service needs persistence
-- Adding an entity / aggregate to an existing schema
-- Tuning a slow query / fixing an N+1
-- Wiring optimistic locking on a contested resource
-- Deciding between JPA, Spring Data JDBC, and raw JdbcTemplate
-
-## When NOT to use
-
-- Schema / DDL / engine-specific → `data/postgresql` / `data/sqlserver` / `data/mysql`
-- Cross-engine migrations → `data/_shared/migrations`
-- Cross-engine query optimization → `data/_shared/slow-query-fixes`
-- Reads where JPA's overhead isn't worth it — `JdbcTemplate` or Spring Data JDBC for reporting / projections
-- .NET → `backend/dotnet/skills/database-code`
-- Node → `backend/node/skills/database-code`
-
 ## Stack
 
 - Java 21 + Spring Boot 3.x
@@ -341,13 +324,3 @@ The standards this skill's output must meet are the be-java rule files, not a li
 6. Configure `application.yml` with `ddl-auto: validate` and HikariCP sizing.
 7. Add OTel instrumentation + structured logging for DB observability.
 8. Smoke test repository methods (`@DataJpaTest`).
-
-## Handoffs
-
-- DB engine specifics → `data/postgresql` / `data/sqlserver` / `data/mysql`
-- Migrations across engines → `data/_shared/migrations`
-- Query optimization principles → `data/_shared/slow-query-fixes`
-- Caching → `data/_shared/caching-patterns` + `data/redis`
-- API DTOs / POJOs the layer exposes → `qa/java/skills/api-models`
-- .NET equivalent → `backend/dotnet/skills/database-code`
-- Node equivalent → `backend/node/skills/database-code`

@@ -24,20 +24,6 @@ a test body. Read the reference for the layer you are writing before any code.
 | `references/webhooks.md` | The SUT's webhook handler: signed test events, duplicate delivery, bad signature, `stripe listen` / `stripe trigger` in local runs and CI |
 | `references/checkout-ui.md` | Playwright .NET 1.63 checkout: card entry in Stripe's iframe, completing or failing the 3DS2 test challenge through nested frames |
 
-## When to use
-
-- A checkout, a pay endpoint or a subscription must be proven against Stripe's sandbox, not a stub
-- Decline handling, 3DS/SCA, refunds or partial refunds must reach the right order state
-- The SUT's webhook handler must verify signatures and apply each event once
-- A renewal, trial end or dunning path needs simulated time (test clocks)
-
-## When NOT to use
-
-- The provider is replaced by a canned response to test UI states → `network-mocking`
-- Load on the pay endpoint → `load-testing` (never against a provider sandbox: it rate-limits)
-- Purchase events sent to GA4 or a pixel → `analytics-testing`
-- The provider SDK itself — test what the SUT does with it
-
 ## Decision matrix
 
 | To prove | Drive | Assert |
@@ -80,11 +66,3 @@ challenge cards are on Adyen's test-card page; webhooks are verified with the HM
 **PayPal**: sandbox REST base URL `api-m.sandbox.paypal.com` with sandbox app credentials and sandbox buyer
 accounts; guard on the base URL; webhooks are verified through the verify-webhook-signature API. Look up each
 provider's current test data at the time of writing; never copy it from an old suite.
-
-## Handoffs
-
-- `BaseApiTest`, clients, `ProblemDetails` → `qa/dotnet/skills/api-test-author/writer`, `api-client-writer`
-- `BaseTest`, page objects, `Directory.Packages.props` → `qa/dotnet/skills/ui-test-author/playwright`
-- Builders → `qa/dotnet/skills/test-data-builder`; order-state probes → `qa/dotnet/skills/db-testing`
-- CI secrets and the `stripe listen` step → `qa/cicd/dotnet/skills/ci-pipelines`
-- TypeScript and Java → `qa-typescript:payment-testing`, `qa-java:payment-testing`

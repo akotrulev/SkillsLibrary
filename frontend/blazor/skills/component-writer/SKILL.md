@@ -10,23 +10,6 @@ Scaffolds Blazor components, services, and patterns into the active repo (.NET 8
 
 **Version rule:** detect the project's `TargetFramework` first. net10 idioms are the primary recipes; every net8/net9 fallback is tagged. Never emit a net10-only API into a net8/net9 project.
 
-## When to use
-
-- New page / route component
-- Reusable component (form input, table, dialog, compound widget)
-- Scoped state container for shared UI state
-- `CascadingValue` for app-wide concerns (theme, current user, feature flags)
-- JS interop for a small browser-side capability
-- Switching a static page to interactive
-
-## When NOT to use
-
-- Explanation → `frontend/blazor/skills/basics`
-- Review → `frontend/blazor/skills/code-review`
-- Plain .NET backend patterns → the `backend/dotnet` dev stack's generator, if installed
-- React → `frontend/react/skills/component-writer`
-- Auth0 in Blazor → `auth/auth0-blazor`
-
 ## Inputs needed
 
 0. **TargetFramework** — net8.0 / net9.0 / net10.0 (drives which recipe variant is emitted)
@@ -383,11 +366,3 @@ For every component:
 - `dotnet build` — 0 warnings
 - `dotnet test` — bUnit tests pass
 - Smoke in browser: confirm no double fetch on prerender, confirm `Dispose` is invoked on navigation (DevTools network panel)
-
-## Handoffs
-
-- Conceptual lookup → `frontend/blazor/skills/basics`
-- Reviewing the result → `frontend/blazor/skills/code-review`
-- Auth wiring → `auth/auth0-blazor`
-- Non-component .NET patterns → the `backend/dotnet` dev stack's generator, if installed
-- API DTOs the components consume → `qa/dotnet/skills/api-models`

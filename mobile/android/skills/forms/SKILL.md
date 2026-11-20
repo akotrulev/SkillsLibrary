@@ -19,23 +19,6 @@ A form is **a draft, a validator and a submit**, all behind the screen ViewModel
 
 Confirm the BOM and whether the screen already uses `TextFieldState` before choosing; **match the screen — never mix both APIs in one form.** The state-based API's availability on a given material3 version is re-checked against the release notes before it is written as fact.
 
-## When to use
-
-- A sign-up, sign-in, checkout, profile or search form
-- "The keyboard covers the field", "Next should go to the next field", "autofill isn't offered"
-- Field-level validation and a server `422` that must mark the offending field
-- A wizard whose draft survives rotation and process death
-
-## When NOT to use
-
-- The HTTP call, retries, timeouts → [`networking`](../networking/SKILL.md)
-- Where the draft is owned, `SavedStateHandle` → [`architecture`](../architecture/SKILL.md)
-- Failure banner and the failed region → `mobile-android:error-handling`
-- Stateless composable structure, previews → [`ui-components`](../ui-components/SKILL.md)
-- XML `TextInputLayout` forms → [`views-interop`](../views-interop/SKILL.md)
-- Passkey and Credential Manager *wiring* → [`device-features`](../device-features/SKILL.md)
-- Another stack → `mobile-ios:forms`, `mobile-react-native:forms`
-
 ## Inputs needed
 
 - Value-based or state-based text fields already in the project
@@ -236,12 +219,3 @@ The standards this skill's output must meet are the mobile-android rule files, n
 - A `422` marks the named field; a timeout keeps the typed values and shows the banner; rotation and process death keep the e-mail and drop the password.
 - TalkBack reads label, value and error together; autofill offers a saved credential.
 - Dev-side tests (validator, ViewModel with a fake, Compose UI test v2): [`unit-testing`](../unit-testing/SKILL.md).
-
-## Handoffs
-
-- Request, budgets, ProblemDetails parsing → [`networking`](../networking/SKILL.md)
-- Draft persistence, secrets storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Credential Manager, passkeys, biometrics → [`device-features`](../device-features/SKILL.md)
-- Failure banner, failed region → `mobile-android:error-handling`
-- Labels, 48 dp, TalkBack → `mobile-android:accessibility`
-- Test ids → [`test-ids`](../test-ids/SKILL.md)

@@ -18,22 +18,6 @@ its database is a `WebApplicationFactory` + Testcontainers fixture (`db-testing/
 lighter and lets the test replace services. Reach for this skill when the behaviour under test spans the
 resources the AppHost wires together.
 
-## When to use
-
-- The solution has an AppHost (`*.AppHost.csproj`, `Aspire.AppHost.Sdk`) and the test must exercise two or more
-  of its resources together: an API and its worker, an API and the email it sends, a frontend and its backend.
-- The AppHost's wiring itself is under test: connection strings, references, environment, health checks.
-- Replacing a hand-written docker-compose test harness in an Aspire solution.
-
-## When NOT to use
-
-- One API host plus its database → `db-testing/testcontainers` with `WebApplicationFactory`
-- A unit of logic → `be-dotnet` `unit-testing`
-- Broker, blob or email assertions without an AppHost → `messaging-testing`, `file-storage-testing`,
-  `email-testing`
-- Load → `load-testing`; microbenchmarks → `benchmarks`
-- A solution without an AppHost — do not add one only to test with it
-
 ## Inputs needed
 
 1. The AppHost project and the resources the journey touches (names exactly as the AppHost declares them).
@@ -238,10 +222,3 @@ Then: the resources the fixture waits for, the configuration it overrides, and t
 - **`await Task.Delay(...)` until the API answers** — wait with `WaitForResourceHealthyAsync`.
 - **Asserting a unit's branches through the AppHost** — slow and imprecise; that is the `be-dotnet` unit test.
 - **A resilience handler on the test client** — it hides the first failure the test exists to see.
-
-## Handoffs
-
-- Database seeding and row verification → `db-testing/verification-queries`
-- Mailpit client and email assertions → `email-testing`
-- The CI job (Docker on the agent, image pulls) → `qa/cicd/dotnet/skills/ci-pipelines`
-- Unit tests of the logic inside a resource → `be-dotnet` `unit-testing`

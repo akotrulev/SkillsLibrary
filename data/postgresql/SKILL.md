@@ -128,12 +128,3 @@ Connection and operations rules no file carries:
 3. New schema → DDL + one initial migration in the project's tool (+ RLS policies if multi-tenant).
 4. Slow query → `EXPLAIN (ANALYZE, BUFFERS)`, smallest fix first (`references/performance.md`).
 5. Validate with `psql` + `EXPLAIN ANALYZE`; smoke a representative query against seeded data in CI.
-
-## Handoffs
-
-- Cross-engine modeling decisions (id strategy, money, soft-delete, tenancy pattern *choice*) → `data/_shared/schema-design`
-- Expand-contract pattern + migration tool selection → `data/_shared/migrations`
-- Cache-aside/stampede/TTL pattern catalog → `data/_shared/caching-patterns` + `data/redis`
-- Universal query triage (ESR, N+1, pagination) → `data/_shared/slow-query-fixes`
-- Testing the schema/queries (seed/assert/clean, Testcontainers, safe SQL) → `qa/{java,dotnet,typescript}/skills/db-testing/*`
-- Tenant/user claims feeding the RLS session context → `auth/auth0-{stack}` + `auth/_shared/auth0-concepts`

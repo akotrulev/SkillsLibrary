@@ -21,22 +21,6 @@ There is **no CSS cascade, no `@media`, no inheritance.** Styles are plain objec
 
 Design facts (palette, type, spacing, platform convention) come from `design/ui-ux-pro-max` (`--stack react-native`); where it disagrees with this skill, the corpus wins.
 
-## When to use
-
-- Structuring a component's styles; setting up tokens and a type scale
-- Dark mode; fonts; modern shadow / gradient / spacing patterns
-- Content under the notch, home indicator, keyboard or system bars
-- A layout that must work on phones, tablets, foldables and rotation
-- Deciding the styling authority
-
-## When NOT to use
-
-- A kit's theme (Paper MD3, Tamagui, Unistyles config) → [`component-library`](../component-library/SKILL.md)
-- Choosing the palette and fonts → `design/visual-identity`, `design/theme-presets`; token tier discipline → `design/design-tokens`
-- Contrast, font scaling, touch targets audit → [`accessibility`](../accessibility/SKILL.md)
-- Screens, `Pressable`, lists → [`ui-components`](../ui-components/SKILL.md)
-- React web CSS → `fe-react:styling`
-
 ## The styling authority
 
 One per app, set by the choice in [`component-library`](../component-library/SKILL.md):
@@ -197,13 +181,3 @@ The standards this skill's output must meet are the mobile-react-native rule fil
 - No bare strings outside `<Text>`; no inline style literals in a list `renderItem`.
 - A screen renders without clipping on a notched phone, an iPad split view and a foldable, at the largest font scale.
 - Corners use `borderCurve: 'continuous'`; shadows use `boxShadow`.
-
-## Handoffs
-
-- Kit theme or Tailwind / Unistyles authority → [`component-library`](../component-library/SKILL.md)
-- Palette and type direction → `design/visual-identity`, `design/theme-presets`, `design/design-tokens`
-- Contrast, font scale, touch targets → [`accessibility`](../accessibility/SKILL.md)
-- Screens and native patterns → [`ui-components`](../ui-components/SKILL.md)
-- List and inline-style cost → [`performance`](../performance/SKILL.md)
-- Keyboard avoidance → [`forms`](../forms/SKILL.md)
-- Font config plugin → [`project-setup`](../project-setup/SKILL.md)

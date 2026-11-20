@@ -12,20 +12,6 @@ changes, and marks each one **Covered**, **Partial** or **Missing** by the tests
 suite, with `file:line` evidence on both sides. It then lists the **testability smells** in the changed production
 code that make the missing tests hard to write. It reports; it never writes or edits a test or production file.
 
-## When to use
-
-- A PR or a branch is ready for review and someone asks whether its changes are tested
-- A reviewer wants a test-gap list to attach to the PR before approving
-- A plan task's gate needs evidence that the code it wrote is pinned, beyond a coverage number
-
-## When NOT to use
-
-- Ranking a whole existing suite by upkeep and pruning it → `test-audit` (`qa/_shared/test-audit`)
-- Proving the tests catch faults → `test-quality-check` (mutation testing, .NET and Java)
-- A codebase-wide or spec-vs-code audit with versioned rounds → the `code-auditor` agent (`engineering-practices`)
-- Writing the missing tests → the stack's `qa-api-<stack>` / `qa-ui-<stack>` agent, or the `be-*` / `fe-*` agent
-  for unit tests of the code it owns
-
 ## Inputs needed
 
 1. **The diff**: a PR number, a branch, or a base ref. Default: `git diff --merge-base <default-branch>`.
@@ -131,11 +117,3 @@ The diff adds `Should_CancelOrder_When_NotShipped` only.
   test covers the old not-shipped path. **major**.
 - Smell: `OrderService.cs:74` reads `DateTime.UtcNow` to compute "under an hour" — **major**, suggest
   `TimeProvider`; without it the boundary (59 min / 60 min) cannot be tested.
-
-## Handoffs
-
-- Whole-suite pruning → `test-audit`; fault-detection strength → `test-quality-check`
-- Writing the missing API or UI tests → the `qa-api-<stack>` / `qa-ui-<stack>` agent; unit tests → the `be-*` /
-  `fe-*` agent that owns the code
-- Behaviours from a story, not a diff → `qa/manual/test-case-writer`
-- Codebase-wide audit rounds → the `code-auditor` agent

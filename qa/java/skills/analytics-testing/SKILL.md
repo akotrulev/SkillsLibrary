@@ -23,20 +23,6 @@ the **test** measurement ID. Read **`references/playwright.md`** end to end befo
 The Playwright pin is in the **Versions** table of `qa/java/skills/ui-test-author/playwright/SKILL.md`; every
 sample extends `com.example.uitests.support.BaseTest`.
 
-## When to use
-
-- A tracking plan names events and parameters, and a change must not drop or alter them
-- A consent banner, a consent-management platform or Google Consent Mode v2 must gate tags
-- The site must honour `Sec-GPC: 1` / `navigator.globalPrivacyControl`
-- A suite must stop leaking hits into a production property
-
-## When NOT to use
-
-- Mocking an application API or asserting a first-party call → `network-mocking`
-- Blocking analytics only to stabilise an unrelated suite → `network-mocking` (`MockApi.blockAnalytics`)
-- Server-side tagging or the Measurement Protocol called from the backend → `api-test-author`
-- The consent banner's accessibility → `accessibility-testing`
-
 ## Decision matrix
 
 | To prove | Read | Assert |
@@ -69,11 +55,3 @@ sample extends `com.example.uitests.support.BaseTest`.
   `PrivacySignals`) built in the class's `@BeforeMethod`; a test never calls `page.route` or `page.evaluate`.
 - Expected payloads are records from the tracking plan; one with four or more fields gets a builder
   (`test-data-builder`).
-
-## Handoffs
-
-- `BaseTest`, page objects, Gradle → `qa/java/skills/ui-test-author/playwright`
-- Routing details (`route`, `fulfill`, `page.requests()`) → `qa/java/skills/network-mocking`
-- Payload builders → `qa/java/skills/test-data-builder`
-- A tracking defect → `qa/manual/bug-report-writer`, with the captured hit attached
-- TypeScript and .NET → `qa-typescript:analytics-testing`, `qa-dotnet:analytics-testing`

@@ -10,20 +10,6 @@ Turns requirements into a **business-flow model that forces the questions the pr
 
 The notation is a **Mermaid flowchart** (text-based, diffable, token-cheap, renders in GitHub/artifacts) with **BPMN's discipline borrowed as authoring rules** — not BPMN XML.
 
-## When to use
-
-- Requirements describe a multi-step process (an order, an approval, an onboarding) and the paths need to be made explicit
-- A new feature adds steps/branches to an existing flow in the KB
-- A conflict sweep flagged a finding that needs the flow drawn to localize it
-- The user wants "all the ways this can go" including failures
-
-## When NOT to use
-
-- The question is "what may happen to this *entity* over its life" → `business-analysis:state-grid`
-- The question is "what outcome for every input combination" → `business-analysis:decision-table`
-- The question is timing/interleaving between two features/systems → a Mermaid `sequenceDiagram` of the specific boundary scenario (an investigation tool inside `business-analysis:conflict-check`, not a default artifact)
-- Distilling a story into a testable breakdown → `qa/manual/requirements-breakdown`
-
 ## Contract with the KB
 
 Per `business-analysis/skills/ba-project-memory`: **read first** (`INDEX.md` + any existing flow files this feature touches + `glossary.md` for the terms it uses), **update after** (the flow file, `INDEX.md`, `active-context.md`). Extending an existing flow beats creating a near-duplicate — check the INDEX before authoring `flows/<new>.md`.
@@ -101,12 +87,3 @@ Order Placed → Stock Reserved → Payment Captured *(pivotal — hands to fulf
 Bad: a happy-path-only flowchart — `Submit → Validate → Pay → Done` — with no actors, no failure exits, drawn in chat and never persisted. That's an illustration of the requirements, not a model of them; it answers no question the prose didn't.
 
 Good: the same flow with the declined/timeout/abandon paths forced into the open, three of them flagged `[TBD]` because the requirements are genuinely silent — those flags are the deliverable.
-
-## Handoffs
-
-- The flow exposes entity states → `business-analysis/skills/ba-entity-state-grid`
-- A decision node hides a rule set ("eligible?" with 4 inputs) → `business-analysis/skills/ba-decision-table`
-- "Who else reacts" answers become reactions → `business-analysis/skills/ba-dependency-map`
-- Flow done, feature needs the conflict pass → `business-analysis/skills/ba-feature-conflict-check`
-- KB mechanics → `business-analysis/skills/ba-project-memory`
-- Testing this flow → `qa/manual/requirements-breakdown` consumes the flow file as test basis

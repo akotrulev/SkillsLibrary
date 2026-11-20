@@ -10,18 +10,6 @@ Stands up a **runnable Appium 3 desktop test project from zero**: package layout
 
 **Version rule:** Node 24 (22 maintenance), TypeScript strict. WebdriverIO 10 needs Node ≥ 22.19 and an Appium 3 server. Node 20 is end-of-life: never target it. Electron and Tauri apps are out of scope.
 
-## When to use
-
-- A fresh repo with no TypeScript desktop test project and a native macOS or Windows app to cover.
-- The user asks which versions, drivers or OS setup a desktop WebdriverIO suite needs.
-
-## When NOT to use
-
-- The project exists → `qa/typescript/skills/desktop-window-objects`, and `qa/typescript/skills/ui-test-author/appium` for the Mocha conventions.
-- Mobile apps → `qa/typescript/skills/mobile-project-setup`. Browser UI → `qa/typescript/skills/ui-test-author`.
-- A device cloud for desktop: none exists, see `qa/_shared/desktop-testing`.
-- Java / .NET → `qa/java/skills/desktop-project-setup` / `qa/dotnet/skills/desktop-project-setup`.
-
 ## Versions
 
 Verified 2026-11-15; the pins are those of `mobile-project-setup` and `tools/qa-version-check.py`.
@@ -207,10 +195,3 @@ Desktop E2E runs on **owned hardware**: a self-hosted Windows agent in an intera
 - [ ] `.env.example` committed, `.env` ignored
 - [ ] `smoke.spec.ts` launches the app and verifies the landing window
 - [ ] `npm run typecheck` clean; the smoke green on the host
-
-## Handoffs
-
-- Window discovery → `qa/typescript/skills/desktop-screen-explorer`; the window object classes → `qa/typescript/skills/desktop-window-objects`
-- Mocha spec conventions → `qa/typescript/skills/ui-test-author/appium`
-- Shared rules and CI facts → `qa/_shared/desktop-testing`
-- Java / .NET siblings → `qa/java/skills/desktop-project-setup` / `qa/dotnet/skills/desktop-project-setup`

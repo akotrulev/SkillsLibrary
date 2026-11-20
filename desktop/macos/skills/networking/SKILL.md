@@ -22,24 +22,6 @@ Owns the **request-level half** of resilience on the Mac: how a call is made, ca
 
 Detect an existing client first (Alamofire, Moya, a generated OpenAPI client, an in-house wrapper). **Match it; never add a second HTTP layer.**
 
-## When to use
-
-- Writing the API client, a call, an upload, a download
-- A request hangs after the Mac wakes; a retry storm; a duplicate write
-- Attaching a token, handling `401`, replaying once
-- A call fails only in the sandboxed build ("The operation couldn't be completed", `-1003`)
-- A `URLSessionWebSocketTask` or SSE stream that must survive sleep
-
-## When NOT to use
-
-- The failed region, banner, offline indicator, forced-update prompt → `error-handling`
-- Persisting responses, an offline write queue, token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Where server data lives in the view tree → [`architecture`](../architecture/SKILL.md)
-- Form submit UX and field errors → [`forms`](../forms/SKILL.md)
-- Auth provider setup → `auth0-macos`; ATS pinning policy, secrets → `desktop/_shared/security`
-- A helper that talks to the network on the app's behalf → [`background-and-helpers`](../background-and-helpers/SKILL.md)
-- iOS → `mobile-ios:networking`; Windows → `desktop-windows:networking`
-
 ## The sandbox entitlement comes first
 
 A sandboxed app that makes **any** outgoing connection needs `com.apple.security.network.client` in the entitlements file. Without it every request fails at connect time and nothing in the response says why. Add it with the first call, record the reason beside the key in the entitlements review, and add `network.server` only for an app that listens. An XPC helper with its own sandbox profile needs its own entitlement; it does not inherit the app's.
@@ -216,13 +198,3 @@ Standards come from the desktop-macos rule files in `.claude/rules/desktop-macos
 - **`NSAllowsArbitraryLoads` to fix one HTTP host**: a per-domain exception with a reason instead.
 - **Retrying in the view model** on top of the client: attempts multiply.
 - **`try?` around decode**: drift becomes an empty table.
-
-## Handoffs
-
-- Failed region, banner, stale, forced update → `error-handling`
-- Cache, write queue, token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- State ownership → [`architecture`](../architecture/SKILL.md) · field errors → [`forms`](../forms/SKILL.md)
-- Entitlements, permissions → [`sandbox-and-permissions`](../sandbox-and-permissions/SKILL.md)
-- ATS, pinning, secrets → `desktop/_shared/security`
-- API contract tests → `qa-api-typescript` / `qa-api-dotnet` / `qa-api-java`
-- iOS counterpart → `mobile-ios:networking`

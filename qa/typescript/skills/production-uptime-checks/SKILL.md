@@ -260,17 +260,3 @@ after deploy) `checkly deploy --force` — the workflow steps are in `references
 - **Browser checks reuse the suite's fixtures and page objects** — this skill never authors a journey.
 - **Secrets from env, never logged.** Test names `Should_X_When_Y`; one logical assertion; no conditional logic;
   no inline comments in the code.
-
-## Cross-references
-
-- `qa-dotnet:production-uptime-checks` (Application Insights availability tests) · `qa-java:production-uptime-checks`
-  (Grafana Cloud Synthetic Monitoring) — the discipline ported, not the code.
-- `qa-typescript:ui-tests-playwright` — the fixtures, page objects and journeys the **browser checks
-  reuse**.
-- `qa-typescript:evidence-capture` — the evidence modes the browser-check spec sets, and how a failed run's
-  trace is read.
-- `qa-typescript:load-testing` — throughput, not uptime.
-- `qa-typescript:ci-pipelines` — the pre-merge gate against ephemeral envs; where `checkly test --record` and
-  `checkly deploy` are wired.
-- `qa-typescript:test-login-tokens` — M2M / test-user tokens for checks that hit an **authenticated** endpoint.
-- `qa-typescript:flaky-test-quarantine` — a synthetic that needs `maxRetries` cranked to stay green is flaky.

@@ -12,22 +12,6 @@ Turns the App Store and Google Play rules that **code or config can satisfy** in
 
 **Dated rules.** Store rules move every quarter. Every row below carries a `Source` and a `Re-verify after` date; a row past its date is re-checked at the source before it is relied on, and a fact that has changed is corrected here, not worked around.
 
-## When to use
-
-- Before every release candidate, as the last gate before upload
-- Adding a permission, a third-party SDK, an account system, analytics / tracking, or anything that sells
-- A store deadline is near (target API, SDK upload floor, 16 KB pages, developer verification)
-- A rejection or a Play pre-launch warning has arrived and its cause must be located in code
-- Brownfield intake — what would a store reviewer find today?
-
-## When NOT to use
-
-- Signing, build numbers, tracks, phased rollout, OTA rules → `mobile-<stack>:release`
-- StoreKit / Play Billing mechanics and guideline 3.1.1 implementation → `mobile-<stack>:in-app-purchases`
-- Secure-coding rules (storage, TLS, WebView) → `mobile-<stack>:security`
-- Scanning a built APK/AAB/IPA → qa `mobile-app-scan` (peer, not loaded)
-- Accessibility implementation → the stack's `accessibility` skill (this skill only lists the store-facing label)
-
 ## Version lane (verified 2026-10-10)
 
 | Fact | Value |
@@ -103,11 +87,3 @@ Inventory: Expo SDK 57 app, Auth0 login with Google + email, Firebase Analytics,
 - A reason code, date or deadline not re-read at its source this session is written with its `Re-verify after` date and flagged **unverified today** when that date has passed.
 - Never write another vendor's privacy manifest; update the SDK.
 - Never raise `targetSdk` or a deployment target as a side effect — report it.
-
-## Related skills & peers
-
-- `mobile-<stack>:security` — secure-coding rules; MASVS-PRIVACY overlaps here (permission minimisation, tracking domains)
-- `mobile-<stack>:release` — signing, tracks, OTA mechanics
-- `mobile-<stack>:in-app-purchases` — 3.1.1 and Play payments policy implementation
-- `design/ethical-patterns` — permission priming, consent symmetry
-- qa `mobile-app-scan` *(peer, not loaded)* — scans the built binary for what the store scanner will also find

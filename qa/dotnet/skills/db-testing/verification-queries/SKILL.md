@@ -8,22 +8,6 @@ disable-model-invocation: true
 
 Guardrails for the **SQL string itself** when a .NET 8 integration test reaches into the database to verify behaviour. The connection, seeder, and probe scaffolding live in `qa/dotnet/skills/db-testing/connection`; this skill owns *what the SQL is allowed to look like* — parameter-only binding, explicit column lists, safe `LIKE`, type-correct parsing, exists / not-exists / count assertions, a poller that re-runs the same safe query, and a hard refusal list for destructive verbs outside cleanup.
 
-## When to use
-
-- A test is about to embed a SQL string (Dapper `QuerySingleAsync<>` / `ExecuteAsync` / raw `DbCommand`) and you need it reviewed or generated.
-- An existing probe / seeder uses string interpolation, `SELECT *`, or unbounded `DELETE` and needs a rewrite.
-- A test needs an "assert exactly one row matches these columns" or "assert no row matches" assertion.
-- An async flow needs a wait-for-eventual-consistency poll that re-runs the verification query.
-
-## When NOT to use
-
-- Opening connections / fixture lifecycle / Respawn cleanup → `qa/dotnet/skills/db-testing/connection`.
-- Container boot, schema migrations on startup → `qa/dotnet/skills/db-testing/testcontainers`.
-- Production data-access SQL → the `backend/dotnet` dev stack's generator, if installed.
-- Java SQL guardrails → `qa/java/skills/db-testing/verification-queries`.
-- TypeScript SQL guardrails → `qa/typescript/skills/db-testing/verification-queries`.
-- Pure unit tests with no SQL surface — keep them mock-driven.
-
 ## Inputs needed (≤2 questions)
 
 1. **Engine + client**: Postgres + Dapper/Npgsql (default), SQL Server + Dapper/`Microsoft.Data.SqlClient`, or SQLite?
@@ -309,13 +293,3 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 
 - `LIKE` patterns are built in C# with `EscapeLike` before binding, with `ESCAPE '\'`; an `IN` list binds an array (`ANY (@ids)` on Postgres, a TVP on SQL Server).
 - Probe classes take `ILogger<T>` by constructor; log the probe name and ids already trusted, with message templates (`{OrderId}`), and thread a `CancellationToken` through every call.
-
-## Handoffs
-
-- Connection / fixture / Respawn cleanup → `qa/dotnet/skills/db-testing/connection`
-- Container lifecycle → `qa/dotnet/skills/db-testing/testcontainers`
-- Test data builders feeding seeders → `qa/dotnet/skills/test-data-builder`
-- Java SQL guardrails → `qa/java/skills/db-testing/verification-queries`
-- TypeScript SQL guardrails → `qa/typescript/skills/db-testing/verification-queries`
-- Production data access SQL → the `backend/dotnet` dev stack's generator, if installed
-- Test strategy where DB tests fit → `qa/manual/test-strategy`

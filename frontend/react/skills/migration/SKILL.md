@@ -12,20 +12,6 @@ Owns getting an **existing** codebase from one major to the next: what breaks, w
 
 **Order of operations:** React 18→19 → Next 14→15 → (optionally) Pages→App Router. Each step ships and is verified before the next starts. Never run two majors in one PR — when something breaks you won't know which upgrade caused it.
 
-## When to use
-
-- Upgrading React across 18→19, or Next across 14→15
-- Adopting the App Router in a Pages Router codebase
-- Diagnosing a post-upgrade break: `params` undefined, `defaultProps` ignored, data suddenly stale-or-not, `useFormState` gone
-- Deciding whether an upgrade is worth doing at all right now
-
-## When NOT to use
-
-- New project on current versions → [`project-setup`](../project-setup/SKILL.md)
-- Refactoring one component without changing versions → [`component-writer`](../component-writer/SKILL.md) / [`code-review`](../code-review/SKILL.md)
-- Minor/patch bumps — those are dependency hygiene, not migration
-- Component-library majors (MUI 5→6, etc.) → [`component-library`](../component-library/SKILL.md)
-
 ## Before you start — the gate
 
 1. **Clean tree, green build.** `tsc --noEmit` 0 errors, lint 0 warnings, tests green *before* you touch a version. You cannot attribute a new failure otherwise.
@@ -153,11 +139,3 @@ Per [`dev:verify`](../../../../engineering-practices/verify-before-done/SKILL.md
 | Big-bang `pages/` → `app/` rewrite | Both routers coexist; a rewrite is all risk, no need | Route by route, ship each |
 | Enabling React Compiler in the same PR as the React 19 bump | Two variables, one experiment | Ship 19, stabilize, then evaluate the Compiler |
 | Leaving `params` un-awaited because "it still renders" | It's a Promise — you're reading `undefined` or relying on a deprecation shim | `await params` (or `use(params)` client-side) |
-
-## Related skills
-
-- [`routing`](../routing/SKILL.md) — the async `params`/`searchParams` model you migrate *to*
-- [`basics`](../basics/SKILL.md) — the RSC boundary a Pages→App migration has to get right
-- [`data-fetching`](../data-fetching/SKILL.md) — caching/`revalidate` semantics the Next 15 defaults changed
-- [`performance`](../performance/SKILL.md) — verifying the upgrade didn't regress bundle/render cost
-- [`component-testing`](../component-testing/SKILL.md) — the suite that proves the migration held

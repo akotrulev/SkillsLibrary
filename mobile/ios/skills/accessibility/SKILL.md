@@ -24,21 +24,6 @@ Standardises **authoring** accessible iOS screens against **WCAG 2.2 AA** and Vo
 
 Detect first: SwiftUI or UIKit per screen, any in-house component library that already sets traits (use it), and whether any `.font(.system(size:))` or `.dynamicTypeSize(...)` clamp exists.
 
-## When to use
-
-- Labelling a control, grouping a row into one stop, marking headings, exposing a value
-- Focus and announcements after navigation, a sheet, an async result or an error
-- Large text, touch targets, contrast, Reduce Motion, Differentiate Without Color
-- A swipe or drag action that needs a non-gesture alternative; readiness for Accessibility Nutrition Labels
-
-## When NOT to use
-
-- Scanning, VoiceOver journeys, audits in CI → `qa-mobile-<stack>` (peer)
-- Validation messages on fields → [`forms`](../forms/SKILL.md) · banner and failed regions → [`error-handling`](../error-handling/SKILL.md)
-- `withAnimation` / Reduce Motion mechanics → [`animation`](../animation/SKILL.md) · semantic colours and type tokens → [`styling`](../styling/SKILL.md)
-- `accessibilityIdentifier` → [`test-ids`](../test-ids/SKILL.md) (an identifier is never a label)
-- Other stacks → `mobile-react-native:accessibility`, `mobile-android:accessibility`
-
 ## Lean on the platform
 
 | Want | Use — not |
@@ -137,10 +122,3 @@ The standards this skill's output must meet are the mobile-ios rule files, not a
 - A VoiceOver pass at `accessibility5`: each row is one stop, each action reachable, the error announced once.
 - Settings → Accessibility with Increase Contrast, Reduce Transparency, Reduce Motion and Differentiate Without Color on: nothing disappears, nothing relies on colour.
 - Dev-side tests of the logic that picks a layout or label: [`unit-testing`](../unit-testing/SKILL.md); device journeys → `qa-mobile-<stack>`.
-
-## Handoffs
-
-- Field-level error wiring → [`forms`](../forms/SKILL.md) · failure surfaces → [`error-handling`](../error-handling/SKILL.md)
-- Reduce Motion mechanics → [`animation`](../animation/SKILL.md) · tokens and Liquid Glass → [`styling`](../styling/SKILL.md)
-- Identifiers → [`test-ids`](../test-ids/SKILL.md) · localized labels → [`languages`](../languages/SKILL.md)
-- Store declarations → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)

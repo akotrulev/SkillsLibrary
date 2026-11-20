@@ -16,20 +16,6 @@ Parses `.feature` files (and the **Step Catalog** from `feature-file-writer`) in
   `ui-test-author/playwright` page objects, whose constructor takes a `Page`
 - Playwright `assertThat` (web-first) or AssertJ for `Then` steps — match the existing UI project
 
-## When to use
-
-- `.feature` files exist (from `feature-file-writer`) and need step definitions.
-- A scenario reports **undefined** or **ambiguous** steps and needs bindings written/fixed.
-- Implementing the bodies of generated step skeletons against page objects.
-
-## When NOT to use
-
-- Authoring/canonicalizing `.feature` files → `qa/_shared/bdd/feature-file-writer`
-- Project/DI/hooks scaffold → `qa/java/skills/bdd-project-scaffold`
-- Building or extracting page objects → `qa/java/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
-- Reviewing features + bindings → `qa/java/skills/bdd-reviewer`
-- .NET/TS step glue → `qa/{dotnet,typescript}/skills/gherkin-step-code`
-
 ## Inputs needed
 
 Confirm at most 2–3.
@@ -212,11 +198,3 @@ public void iSignInWith(String email, String password) {
 5. For any missing page object/method, build it (`page-object-design`/`page-objects-from-url`) before binding the step.
 6. Ensure the Cleanup is implemented as the `@After` hook (scaffold layer), not as steps.
 7. `./gradlew test`, then run the features: every step bound (no undefined/ambiguous), the smoke scenario green.
-
-## Handoffs
-
-- `.feature` files / Step Catalog → `qa/_shared/bdd/feature-file-writer`
-- Project/DI/hooks → `qa/java/skills/bdd-project-scaffold`
-- Page objects → `qa/java/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
-- Review features + bindings → `qa/java/skills/bdd-reviewer`
-- Allure labels from tags → `qa/reporting/java/skills/test-reports`

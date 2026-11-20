@@ -187,25 +187,3 @@ lives in `references/details.md`. Read it before reviewing an eval suite.
   In-code path via `Microsoft.Extensions.AI` `IChatClient`, injected (constructor injection — global rule).
 - **Budgets are assertions** — `cost`/`latency` ceilings, capped `MaxOutputTokens`. **Keys via env**, read lazily,
   never in config/code. **No real PII** in committed cases. Nullable reference types on.
-
-## Cross-references
-
-- `qa-typescript:ai-feature-testing` — **the canonical**: promptfoo + `@anthropic-ai/sdk`, the four ideas, the
-  assertion ladder, the config the spine here parses. Read it for the family rationale.
-- `qa-java:ai-feature-testing` — the Java sibling: promptfoo via `ProcessBuilder` + Jackson, the Anthropic Java SDK /
-  LangChain4j in-test. Same four ideas.
-- `qa-dotnet:data-driven-testing` — **the closest-discipline sibling**: an eval IS a data-driven test
-  (`[TestCaseSource]`, one named case per row). Reuse its mechanics for the dataset.
-- `qa-dotnet:flaky-test-quarantine` — **the boundary**: model non-determinism (assert a rate) vs *test*
-  flakiness (retry/quarantine). Don't quarantine a model regression.
-- `qa-dotnet:api-models` — the **structured-output** record + `System.Text.Json` the `is-json` rung / SDK
-  deserialize validates.
-- `qa-dotnet:passive-scan` / `qa-dotnet:accessibility-testing` — the
-  **CLI-from-.NET port-shape precedent**: a Node/CLI tool invoked via `Process`, report parsed as JSON.
-- `ai-development/*` (`claude-api`, `mcp-builder`) — **build-vs-test boundary**: those *build* the AI feature; this
-  *tests* it. `qa-dotnet:test-login-tokens` — env/secret-store discipline for `ANTHROPIC_API_KEY`.
-- `qa-<stack>:quality-metrics` — eval **pass-rate over time**. `qa-dotnet:test-reports` — each case as a named
-  result. `qa-dotnet:load-testing` — LLM **load/latency under concurrency** (here latency is a per-case
-  *budget*, not a load profile).
-- `qa-<stack>:webmcp-testing` — the deterministic side of WebMCP tools a page registers (schema, `execute()`
-  contract, annotations); this skill keeps the agent evals over them.

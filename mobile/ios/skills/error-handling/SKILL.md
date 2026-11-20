@@ -24,19 +24,6 @@ Division of labour with [`networking`](../networking/SKILL.md): it **produces** 
 
 Detect first: the existing banner or toast host, the `LoadState` / `AppError` types, the wired crash reporter — extend them, never add a second.
 
-## When to use
-
-- Rendering a region's loading / loaded / failed / stale / offline states and the three empty kinds
-- The persistent banner, a timeout, a 401 mid-session, a forced update, app resume, a failed write or SDK, a full disk
-
-## When NOT to use
-
-- Producing the error, retries, `Retry-After`, token-refresh mechanics → [`networking`](../networking/SKILL.md)
-- Persisting data, the write queue, conflicts → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Field validation messages → [`forms`](../forms/SKILL.md)
-- Crash-reporter setup, symbols → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md)
-- Other stacks → `mobile-react-native:error-handling`, `mobile-android:error-handling`
-
 ## The failure surfaces
 
 ```
@@ -160,11 +147,3 @@ The standards this skill's output must meet are the mobile-ios rule files, not a
 - Airplane mode → offline or stale, never "failed", no retry attempts; hang the endpoint (Network Link Conditioner, 100% loss) → the timeout body at the deadline.
 - Return from background after an expired token → one refresh, the screen current or the sheet shown, not a wall of failed regions.
 - Dev-side tests of the state transitions: [`unit-testing`](../unit-testing/SKILL.md); device journeys → `qa-mobile-<stack>` (peer).
-
-## Handoffs
-
-- The categorised error, timeouts, retries, token refresh → [`networking`](../networking/SKILL.md)
-- Persistence and the write queue → [`offline-and-storage`](../offline-and-storage/SKILL.md) · field errors → [`forms`](../forms/SKILL.md)
-- Ids → [`test-ids`](../test-ids/SKILL.md) · announcements → [`accessibility`](../accessibility/SKILL.md)
-- Crash reporter, symbols → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md) · min-version policy → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
-- Auth provider / credentials manager → `mobile-ios:auth0`

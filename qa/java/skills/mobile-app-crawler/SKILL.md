@@ -12,25 +12,6 @@ This is the multi-screen layer above `qa/java/skills/mobile-screen-explorer`. Th
 
 **It writes no code.** The map is an input to `page-object-design` (structure) and `mobile-screen-objects` (per-screen classes). A crawl that emits a `*Page.java` has overstepped.
 
-## When to use
-
-- The user wants the whole app — or a whole feature area — inventoried before any page objects exist
-- A greenfield mobile suite needs a screen map to design `src/main/java/pom/mobile/` from
-- **Screens were already captured but never built into page objects** — a map (or loose `mobile-screen-explorer` inventories) is sitting unused and the backlog needs reconciling and driving to page objects → **PROCESS mode**, no re-crawl
-- An existing suite must be reconciled against the app as it ships today (which screens have no page object; which page objects point at screens that are gone)
-- The team wants one consolidated `missing-testids.md` covering every reachable screen, not one screen at a time
-
-## When NOT to use
-
-- **One screen** → `qa/java/skills/mobile-screen-explorer` (don't spin up a crawl for a single extraction)
-- Emitting / updating a page-object class → `qa/java/skills/mobile-screen-objects`
-- Designing where screens/components/flows live → `qa/java/skills/page-object-design`
-- Writing or tagging the TestNG tests → `qa/java/skills/ui-test-author/appium`
-- Web apps in a browser → `qa/java/skills/page-objects-from-url`
-- OS-surface features (permission dialogs, push, deep links, biometrics) → `qa/java/skills/mobile-native-features`
-- **Fuzzing / monkey-testing for crashes** — this is a *structured inventory* crawl, not a stability sweep. Random-input robustness belongs to `qa/java/skills/failure-injection-testing` and the platform monkey tools
-- .NET / TypeScript stacks → `qa/dotnet/skills/mobile-app-crawler` / `qa/typescript/skills/mobile-app-crawler`
-
 ## Modes
 
 Decide the mode **before** touching the device — the first act is always to look for `docs/app-map/screen-map.md` and the existing `src/main/java/pom/mobile/`.
@@ -180,17 +161,6 @@ A crawl **will** be interrupted (session drop, device sleep, a screen needing ma
 - Writing page objects during the crawl, before the structure is designed from the completed map
 - Presenting a map that stopped at `maxScreens` as complete coverage
 - Crawling a real user's account "just to see the screens"
-
-## Handoffs
-
-- Per-screen extraction, locator ladder, `missing-testids.md` format → `qa/java/skills/mobile-screen-explorer` **(load this first)**
-- Folder tree / page vs component vs flow, fed by the map → `qa/java/skills/page-object-design`
-- One page-object class per mapped screen → `qa/java/skills/mobile-screen-objects`
-- Tests against those screen objects → `qa/java/skills/ui-test-author/appium`
-- Screens gated behind permissions, push, deep links, biometrics → `qa/java/skills/mobile-native-features`
-- Turning the map into formal test cases → the `qa-test-case-designer` agent
-- Appium environment setup / doctor failures / driver questions → the `@appium/mcp-documentation` server (`appium_skills`, `appium_documentation_query`)
-- .NET / TypeScript siblings → `qa/dotnet/skills/mobile-app-crawler` / `qa/typescript/skills/mobile-app-crawler`
 
 ## Reference
 

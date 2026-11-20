@@ -12,17 +12,6 @@ This skill stands up a **complete, runnable load-test solution from zero**: dire
 
 NBomber runs as a **console application**, not an NUnit test project — it has its own runner, scenario model, and HTML/CSV report output. In the flat solution it sits alongside the test projects but simply **does not reference NUnit / `Microsoft.NET.Test.Sdk`** (CPM lists those versions, but only the test projects reference them). Scenario design, thresholds, and the perf-suite review checklist are owned by the `qa-performance-dotnet` skills + `qa/_shared/performance` — this skill owns the **project shell**.
 
-## When to use
-
-- A fresh repo with no .NET load-test project, and the user wants performance coverage.
-- The user asks which versions / structure / setup an NBomber framework should use.
-
-## When NOT to use
-
-- The solution already exists → author scenarios into it with the `qa-performance-dotnet` skills.
-- API / UI / mobile scaffolding → use the matching `*-project-setup-dotnet` skill.
-- Functional API/UI tests → those are NUnit projects, not this console-app shape.
-
 ## Tooling & versions
 
 Versions are pinned **once** in `Directory.Packages.props` (CPM); csprojs reference packages **without** a `Version` attribute.

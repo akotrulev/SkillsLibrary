@@ -8,21 +8,6 @@ disable-model-invocation: true
 
 The held-out data that answers "did the model actually get better?" An eval set is only trustworthy if it is **isolated from training** (contamination makes every number a lie), **representative** of what the model must do, and **scored the same way every time** (a drifting judge is a drifting ruler). This skill owns building the eval *data*; the harness that runs it and asserts on results is the QA domain's `ai-feature-testing` / `ai-answer-quality-testing` (named as peers, not loaded here).
 
-## When to use
-
-- Building a golden/held-out test set to measure a trained or fine-tuned model
-- Designing multiple-choice, exact-match, or generative eval items
-- Building rubric or LLM-judge eval data for open-ended outputs
-- Setting up contamination checks and canary strings so eval integrity is provable
-- Assembling a domain-specific eval when public benchmarks don't fit the product
-
-## When NOT to use
-
-- Training data of any stage → the stage skills
-- Running the eval / asserting pass-rates / red-teaming → qa `ai-feature-testing`, `ai-answer-quality-testing` (peers)
-- Preference *training* data → `training-data:preference-data`
-- VLM-specific eval item content → `training-data:vision-language-data`
-
 ## The cardinal rule: the eval set is sacred and isolated
 
 Everything about an eval set follows from one requirement — **nothing the model trained on may appear in it, and nothing in it may leak back into training**:

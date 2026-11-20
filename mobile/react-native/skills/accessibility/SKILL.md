@@ -25,20 +25,6 @@ Design facts (type scale, contrast, touch target) come from `design/ui-ux-pro-ma
 
 Detect first: the prop family in use (`role` vs `accessibilityRole`), the component library (React Native Paper, Tamagui, gluestack set roles themselves — use their props, don't layer a second), and whether any screen locks font scaling.
 
-## When to use
-
-- Labelling a control, giving it a role and state, grouping related content into one stop
-- Focus and announcements after navigation, a modal, an async result or an error
-- Touch targets, hit slop, large text, contrast, Reduce Motion
-- Custom gestures that need an accessible alternative; reviewing a screen for screen-reader use
-
-## When NOT to use
-
-- Scanning, device screen-reader journeys, audits in CI → `qa-mobile-typescript` (peer)
-- Validation message wiring on fields → [`forms`](../forms/SKILL.md) · the banner and failed regions → [`error-handling`](../error-handling/SKILL.md)
-- Reanimated Reduce Motion mechanics → [`animation`](../animation/SKILL.md) · tokens and font loading → [`styling`](../styling/SKILL.md)
-- Native Swift / Kotlin → `mobile-ios:accessibility` / `mobile-android:accessibility`
-
 ## Lean on the platform
 
 Native controls already carry semantics. The moment you replace them you own them.
@@ -135,11 +121,3 @@ The standards this skill's output must meet are the mobile-react-native rule fil
 - Dev-side: `getByRole('button', { name })` finds each control; `toBeDisabled`, `toHaveAccessibleName` and `accessibilityState` assertions hold ([`component-testing`](../component-testing/SKILL.md)).
 - On devices (peer): VoiceOver and TalkBack read each screen in order with sensible names; the largest text size clips nothing; Reduce Motion removes decorative motion — `qa-mobile-typescript`.
 - Lint: `eslint-plugin-react-native-a11y` through the project's ESLint config catches missing roles and labels as you type.
-
-## Handoffs
-
-- Scanning, screen-reader journeys, audits → `qa-mobile-typescript` (peer)
-- Field-level errors → [`forms`](../forms/SKILL.md) · region states, banner → [`error-handling`](../error-handling/SKILL.md)
-- Motion mechanics → [`animation`](../animation/SKILL.md) · tokens, font scale, contrast tokens → [`styling`](../styling/SKILL.md)
-- Native menus and modals → [`ui-components`](../ui-components/SKILL.md) · ids → [`test-ids`](../test-ids/SKILL.md)
-- WCAG 2.2 design decisions → `design/accessible-by-design`

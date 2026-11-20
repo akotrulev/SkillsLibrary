@@ -10,18 +10,6 @@ Stands up a **runnable native-desktop test solution from zero**: layout, exact v
 
 **Version rule:** net10.0 primary; net8/9 only to match an existing solution's TFM, never up-levelled. FlaUI 5.0.0 targets `net8.0-windows`, `net6.0-windows` and `net48`, so a FlaUI suite targets `net10.0-windows` or the repo's `-windows` TFM. Electron and Tauri apps are out of scope.
 
-## When to use
-
-- A fresh repo with no .NET desktop test project and a native macOS or Windows app to cover.
-- The user asks which versions, drivers or OS setup a C# desktop suite needs, or whether to use FlaUI.
-
-## When NOT to use
-
-- The project exists → `qa/dotnet/skills/desktop-window-objects`, and `qa/dotnet/skills/ui-test-author/appium` for the NUnit conventions.
-- Mobile → `qa/dotnet/skills/mobile-project-setup`. Browser UI → `qa/dotnet/skills/ui-project-setup`.
-- A device cloud for desktop: none exists, see `qa/_shared/desktop-testing`.
-- Java / TypeScript → `qa/java/skills/desktop-project-setup` / `qa/typescript/skills/desktop-project-setup`.
-
 ## Which lane
 
 | | Appium lane (default) | FlaUI lane |
@@ -202,10 +190,3 @@ Owned hardware: a self-hosted Windows agent in an interactive autologon session 
 - [ ] `PLATFORM` and `APP_ID` come from the environment; `NumberOfTestWorkers` is 1; `.env.example` committed
 - [ ] Interactive autologon session (Windows) or Xcode and both Accessibility grants (macOS)
 - [ ] `dotnet build` clean; the smoke green on the host
-
-## Handoffs
-
-- Window discovery → `qa/dotnet/skills/desktop-screen-explorer`; window objects → `qa/dotnet/skills/desktop-window-objects`
-- NUnit conventions → `qa/dotnet/skills/ui-test-author/appium`
-- Shared rules and CI facts → `qa/_shared/desktop-testing`
-- Java / TypeScript siblings → `qa/java/skills/desktop-project-setup` / `qa/typescript/skills/desktop-project-setup`

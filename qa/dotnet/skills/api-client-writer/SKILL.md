@@ -8,22 +8,6 @@ disable-model-invocation: true
 
 Generator skill. Scaffolds a single `{Resource}Client.cs` file in the Accelerator `ApiTests` project, following the conventions below.
 
-## When to use
-
-- The user asks to add a new client class under `ApiTests/Clients/`.
-- A new endpoint group has been added to the API under test and needs a typed wrapper for tests to call.
-- The user is adding endpoints to an existing resource and wants the client extended in the same style.
-
-## When NOT to use
-
-- Writing the test fixture or test cases — that's `qa/dotnet/skills/api-test-author/writer`.
-- Reviewing an existing client for convention drift — that's a reviewer skill.
-- Authoring DTOs the client returns — use `qa/dotnet/skills/api-models` first, then come back here.
-- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa/_shared/api-spec-assets` (`qa-<stack>:api-spec-assets`): it replaces the stored spec asset in place and derives from `git diff` exactly which client methods changed. Come back here for those methods only.
-- Java stack (RestAssured) — use `qa/java/skills/api-client-writer`.
-- TypeScript stack (native `fetch` + Zod) — use `qa/typescript/skills/api-client-writer`.
-- Any non-.NET / non-RestSharp stack not covered by the siblings above.
-
 ## Folder & naming convention
 
 Clients are organized by API group. **No Public/Management subfolders, no `P`/`M` suffix** — one client per resource holds both user-facing and admin endpoints when both exist.

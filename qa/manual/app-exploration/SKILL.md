@@ -10,22 +10,6 @@ Explores a running program the way a sharp tester does on day one: reach every s
 
 **It owns** the walk (which screens, in what order, when to stop), the safe-action floor, the seven check classes and their oracles, the confirm step and the exploration report. **It writes no test code and fixes nothing.** The run belongs to the `qa-explorer` agent; `qa-test-case-designer`'s Exploration mode runs the same session and then distills the report into a test basis.
 
-## When to use
-
-- A site, web app or mobile app is running and nobody has looked at it end to end: "explore this", "click through it and tell me what is broken"
-- A release candidate needs a broad sweep before sign-off: links, content, layout, numbers, the main journeys
-- The documentation is thin and the test basis has to come from the program itself
-- A fixed finding needs a retest, and its neighbours a look
-
-## When NOT to use
-
-- A charter for a human tester's session → `qa/manual/exploratory-charter-writer`
-- A screen or locator inventory for page objects → `qa/<stack>/skills/page-objects-from-url`, `mobile-app-crawler` (they map structure; this judges behaviour)
-- An experience review (heuristics, flow friction, IA) → `design:ux-review`
-- A standards-grade accessibility audit, visual baselines or a breakpoint matrix → `qa/<stack>/skills/accessibility-testing`, `visual-regression`, `responsive-testing`. This skill runs only the cheap first pass and hands the rest over
-- Security testing beyond input hygiene → the `qa-security` agent
-- Scripted cases or automation → `qa/manual/test-case-writer`, the `qa-ui-<stack>` / `qa-mobile-<stack>` agents
-
 ## Inputs needed
 
 Exploring acts on someone's system, so **ask, never guess**. At most three questions; the rest is inferred and stated in the report.
@@ -175,12 +159,3 @@ All three finding sections are always present; an empty one says `None.` Minor a
 - Never raise a finding from a screenshot alone when the structure can be read: act on the snapshot or the page source, and use the screenshot as evidence and for what only eyes can judge (alignment, overlap, legibility).
 - No fixed waits: wait on a condition (the text appears, the request settles).
 - The same defect found again on a rerun is "still open", with its earlier id, not a new finding.
-
-## Handoffs
-
-- A full bug report for a finding → `qa/manual/bug-report-writer`
-- The report as a test basis, and its candidates as cases → `qa/manual/requirements-breakdown`, then the `qa-test-case-designer` agent
-- A charter for a human's follow-up session on an area this run could not finish → `qa/manual/exploratory-charter-writer`
-- Flow and IA findings that are not defects → `design:ux-review`
-- First-pass accessibility, visual and security signals worth a real pass → `qa/<stack>/skills/accessibility-testing`, `visual-regression`, the `qa-security` agent
-- Automating a journey this run walked → `qa-ui-<stack>` / `qa-mobile-<stack>`

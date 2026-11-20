@@ -23,22 +23,6 @@ Owns how the outside world gets into the app: **push and local notifications** (
 
 Detect the sender first (FCM, or a vendor SDK that wraps it) and keep it — never add a second sender.
 
-## When to use
-
-- Registering for push, sending the registration id to the server, receiving and tapping a notification
-- Notification channels, local reminders, grouping, actions, the denied-permission path
-- A link from mail, SMS, web or QR that must open an in-app screen — manifest filters, `assetlinks.json`, verification
-- A `PendingIntent` anywhere (notification, widget, alarm)
-
-## When NOT to use
-
-- Mapping a URI to a back stack, restoring, signed-out replay → [`navigation`](../navigation/SKILL.md)
-- Camera, location, the generic permission pattern → [`device-features`](../device-features/SKILL.md)
-- WorkManager, foreground services, widgets, alarms → [`system-integration`](../system-integration/SKILL.md)
-- The sending service and the registration table → the project's `be-*` agent
-- Play declarations as policy → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Another stack → `mobile-ios:push-and-deep-links`, `mobile-react-native:push-and-deep-links`
-
 ## Permission — the same lifecycle
 
 The pre-prompt, denied-is-a-working-screen and resume-recheck from [`device-features`](../device-features/SKILL.md) apply.
@@ -181,14 +165,3 @@ The file's shape, per-variant fingerprints and the `adb` verification commands a
 - [ ] `adb shell am start -a android.intent.action.VIEW -d "https://app.example.com/orders/<id>"` opens the order with a back stack
 - [ ] Sign out removes the registration server-side
 - [ ] Dev-side tests: `PushTarget.from` against valid, malformed and hostile maps; device journeys are `qa-mobile-*`'s
-
-## Handoffs
-
-- URI → keys, restore, signed-out replay → [`navigation`](../navigation/SKILL.md)
-- Permission pattern, Settings route → [`device-features`](../device-features/SKILL.md)
-- Upload job, widgets, alarms, foreground services → [`system-integration`](../system-integration/SKILL.md)
-- Payload and link validation, lock-screen content, `PendingIntent`, exported components → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
-- Full-screen intent and exported-component policy → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Token and registration storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Push-sending service → the project's `be-*` agent
-- Link and push journeys on a device → `qa-mobile-*` (peer)

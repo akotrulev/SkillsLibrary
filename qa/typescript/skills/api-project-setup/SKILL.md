@@ -12,20 +12,6 @@ This skill stands up a **runnable, empty API test project from zero**: the layou
 
 The stack default is **Vitest + native `fetch` + Zod** with `{resource}Client` factories that have a raw and a typed method. A project that already runs Playwright Test puts its API specs in that suite instead, through the `request` fixture: `qa/typescript/skills/api-test-author/playwright`, and the shell is `qa/typescript/skills/ui-project-setup`.
 
-## When to use
-
-- A fresh repo with no TypeScript API test project, and the user wants REST API coverage.
-- The user asks which versions, layout or config a TypeScript API test framework should use.
-- You are about to author API tests and there is no project to put them in.
-
-## When NOT to use
-
-- The project exists → author into it with `qa/typescript/skills/api-test-author/writer`.
-- The repo already runs Playwright Test → `qa/typescript/skills/api-test-author/playwright` in that suite.
-- Web-UI, mobile or desktop scaffolding → the matching `*-project-setup` skill.
-- GraphQL or gRPC → the protocol siblings under `qa/typescript/skills/api-test-author/`; they reuse this shell.
-- .NET / Java → `qa/dotnet/skills/api-project-setup` / `qa/java/skills/api-project-setup`.
-
 ## Tooling & versions
 
 `assets/package.json` holds these exact pins (`npm i -D -E`, no ranges). Every one is a dev dependency: a test project ships nothing.

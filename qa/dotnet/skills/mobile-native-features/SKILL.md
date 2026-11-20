@@ -40,21 +40,6 @@ Appium tests for the **OS-level capabilities** a mobile app touches but a page-o
 - Appium 3 removed the old `/appium/*` routes and Appium.WebDriver 8.0 removed `ToggleWifi`, `ToggleData`, `ToggleAirplaneMode` and `SetConnectionType`. Network state is `mobile: setConnectivity` (`wifi`, `data`, `airplaneMode`); there is no client method to call
 - `AppiumDriver` has `BackgroundApp`, `ActivateApp`, `TerminateApp`, `PushFile`, `FingerPrint(int)` and `Orientation`. `GetAppState`, the clipboard methods and `OpenNotifications()` sit on `AndroidDriver` / `IOSDriver`, which is why `NativeFeatures` uses the `mobile:` form for the clipboard and a `switch` for the state
 
-## When to use
-
-- A **deep or universal link** must open the right screen
-- Behavior **behind a runtime permission**, with the dialog handled or under test
-- **Biometric** login or step-up on an emulator or simulator, approve and reject
-- State that must survive **backgrounding**, a cold relaunch, or a push tap
-- **Geolocation**, **clipboard**, **picker** or **orientation** behavior
-
-## When NOT to use
-
-- The app's own screens → `qa/dotnet/skills/ui-test-author/appium`
-- Real-device farm wiring and farm-side biometric/GPS injection → `qa/dotnet/skills/device-cloud`
-- The requests an app makes → `qa/dotnet/skills/network-mocking/*`
-- Token auth → `qa/dotnet/skills/test-login-tokens`
-
 ## The OS-surface client
 
 `NativeFeatures` owns every OS-surface call, including the ones that touch OS UI, so no test holds a raw `FindElement` or a wait. A test reads: *drive the OS surface, assert the effect on a page object.* The identifier is a package on Android and a bundle id on iOS; `IsIos` picks the key.
@@ -269,10 +254,3 @@ A camera, photo or file picker is an OS surface you cannot drive in CI. Seed the
 - **Lifecycle events assert restored state on a bounded wait.** No `Thread.Sleep` anywhere.
 - **Clipboard content is base64** in both directions.
 - Tests are `Should_X_When_Y`, assert with NUnit and a subject, and never use `try`/`catch`. App ids and device settings come from env through `Env`; no secrets in code.
-
-## Cross-references
-
-- **`qa/dotnet/skills/ui-test-author/appium`** — the foundation: `BaseAppiumPage`, `AppiumDriverFactory`, `BaseMobileTest`, gestures, WebView switching
-- **`qa/dotnet/skills/device-cloud`** — where the tests run and how farm-side GPS, network and biometric are injected
-- **`qa/dotnet/skills/data-driven-testing`** — a device, permission or locale matrix via `[TestCaseSource]`, one case per row
-- **`qa/dotnet/skills/test-login-tokens`** — token auth, the boundary with biometric unlock

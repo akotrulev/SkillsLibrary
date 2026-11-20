@@ -132,15 +132,3 @@ Connection and operations rules no file carries:
 3. New schema → DDL + one initial migration in the project's tool; choose the clustered index deliberately (+ RLS security policy if multi-tenant).
 4. Slow query → capture the **actual** plan + Query Store history, smallest fix first (`references/performance.md`).
 5. Validate with SSMS + `SET STATISTICS IO, TIME ON`; in CI, smoke a representative query against a seeded DB.
-
-## Handoffs
-
-- Cross-engine modeling decisions (id strategy, money, soft-delete, tenancy pattern *choice*) → `data/_shared/schema-design`
-- Expand-contract pattern + migration tool selection → `data/_shared/migrations`
-- Cache-aside/stampede/TTL pattern catalog → `data/_shared/caching-patterns` + `data/redis`
-- Universal query triage (ESR, N+1, pagination) → `data/_shared/slow-query-fixes`
-- Testing the schema/queries → `qa/{java,dotnet,typescript}/skills/db-testing/*`
-- Tenant/user claims feeding the RLS `SESSION_CONTEXT` → `auth/auth0-{stack}` + `auth/_shared/auth0-concepts`
-- Azure deployment of the DB itself → cloud provisioning / IaC for the store itself has no owning skill in this library yet; out of this domain's scope
-- Query-latency telemetry → `observability/*` skills (via the `observability-engineer-{dotnet,java,node}` peer bundled in the matching `be-*` plugin)
-- Postgres / MySQL equivalents → `data/postgresql` · `data/mysql`

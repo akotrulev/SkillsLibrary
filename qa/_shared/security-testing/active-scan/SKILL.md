@@ -253,17 +253,3 @@ Emit **two** reports from the AF `report` jobs (shown in the plan): a **SARIF** 
 - **No secrets in the plan/context** — `${ENV}` placeholders, read lazily; secrets via CI → container env.
 - **SARIF → code scanning**; HTML/JSON → Allure + CI artifact. A clean active scan ≠ "secure" — pair with
   SCA, functional access-control tests, and manual pentest. Map findings to OWASP (A05/A02/A07 · API8).
-
-## Cross-references
-
-- `qa-<stack>:security-foundations` — **load alongside**: the OWASP map, the authorization-to-scan rule, the ticketed
-  triage discipline, and SARIF → code-scanning consolidation this skill defers to (does not repeat).
-- `qa-<stack>:passive-scan` — the **passive**, every-PR sibling
-  (`passive-scan.py`, no payloads, safe). This skill is the active/AF counterpart; run both, different layers.
-- `qa-<stack>:api-fuzzing` — Schemathesis schema-driven property fuzzing (generate cases from the
-  spec) — complementary to ZAP's attack-rule DAST.
-- `qa-<stack>:known-vuln-scan` — template/known-CVE host scanning — a different layer again.
-- `qa-<stack>:test-login-tokens` — acquire the bearer/user tokens the `replacer` job injects.
-- `qa-<stack>:ci-pipelines` + `qa-<stack>:security-foundations` — the `zaproxy/action-af`
-  job, SARIF upload, artifact, slower cadence (nightly/pre-release, not per-PR).
-- `qa-<stack>:test-reports` — attach the HTML/JSON report + alert summary.

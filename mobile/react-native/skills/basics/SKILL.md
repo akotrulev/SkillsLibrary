@@ -32,23 +32,6 @@ Detect the Expo SDK, React Native and React majors from `package.json` first; ke
 - `EXPO_PUBLIC_*` is inlined in plain text — public, never a secret.
 - Jest is the only runner (`jest-expo`); Vitest is not viable.
 
-## When to use
-
-- "What is the RN equivalent of `<div>` / `<a>` / CSS / `useMediaQuery`?"
-- "Why is there no Server Component / `'use client'` here?"
-- "What runs on the JS thread vs the UI thread?"
-- "Expo Go vs development build vs bare — which am I on?"
-- Confirming a recipe matches the detected lane before another skill applies it.
-
-## When NOT to use
-
-- Standing up a project, EAS, config plugins → [`project-setup`](../project-setup/SKILL.md)
-- Routes, navigators, deep links → [`navigation`](../navigation/SKILL.md)
-- Screens and components → [`ui-components`](../ui-components/SKILL.md)
-- State library choice → [`architecture`](../architecture/SKILL.md)
-- Animation → [`animation`](../animation/SKILL.md); lists and profiling → [`performance`](../performance/SKILL.md)
-- React **web** → `fe-react:concepts`
-
 ## No server render
 
 Every component runs on the device, always. There is:
@@ -138,12 +121,3 @@ Atom (one primitive, no domain) → molecule (a few atoms, one job) → organism
 ## Rules
 
 The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `react-native.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
-
-## Handoffs
-
-- Project scaffold, EAS → [`project-setup`](../project-setup/SKILL.md)
-- Routing → [`navigation`](../navigation/SKILL.md)
-- State → [`architecture`](../architecture/SKILL.md)
-- Styling and adaptive layout → [`styling`](../styling/SKILL.md)
-- SDK upgrades → [`migration`](../migration/SKILL.md)
-- Review → [`code-review`](../code-review/SKILL.md)

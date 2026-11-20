@@ -299,12 +299,3 @@ public async Task Should_ListEveryPushedNotification_When_TheFeedDeliversThem()
 - **Browser fixtures derive from `BaseTest`** and reach the page through page objects, probes and stubs built in
   `[SetUp]`; no `Playwright.CreateAsync()`, no `try`/`catch`/`finally` in a test.
 - **Auth tokens from env, never logged**; async all the way; `Should_X_When_Y` names; PascalCase test ids.
-
-## Cross-references
-
-- `qa-java:realtime-stream-testing` · `qa-typescript:realtime-stream-testing` — the sibling stacks; same four
-  ideas, their own protocol clients and await primitives.
-- `qa-dotnet:messaging-testing` — discrete messages on a queue, not an open stream.
-- `qa-dotnet:network-mocking` — plain HTTP mocking and the "register before the action" rule.
-- `qa-dotnet:ui-tests-playwright` — `BaseTest` and page objects the browser surface builds on.
-- `qa-dotnet:test-login-tokens` — tokens for an authenticated socket, read from env, never logged.

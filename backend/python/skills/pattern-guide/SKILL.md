@@ -8,19 +8,6 @@ disable-model-invocation: true
 
 Answers "which idiom, and is it earned" for Python 3.13 / 3.14 backend code and workers. Explains; never writes into the repo. Loads `backend/_shared/pattern-guide` for the language-agnostic pattern cards and layers the Python judgment on top.
 
-## When to use
-
-- Choosing between two Python idioms for the same need
-- Deciding whether a GoF pattern is earned or is Java-in-Python
-- Explaining why an existing structure is a smell (ABC with one subclass, class with only `__init__` and one method, module-level mutable state)
-
-## When NOT to use
-
-- Scaffolding → `backend/python/skills/pattern-writer`
-- Reviewing → `backend/python/skills/code-review`
-- Image / SVG / model-inference questions → `backend/python/skills/media-processing`
-- Container hardening → `backend/python/skills/sandboxed-worker`
-
 ## The Python translation table
 
 Most GoF patterns already exist as language features. Reach for the feature; the class-shaped version is a smell.
@@ -84,9 +71,3 @@ Most GoF patterns already exist as language features. Reach for the feature; the
 - *Shape* — `multiprocessing` / `subprocess` child with `resource.setrlimit` (address space, CPU seconds) and a wall-clock timeout; the parent maps a killed child to a `Rejected` outcome.
 - *Earned when* — the input is user-supplied bytes. That is the whole reason `sandboxed-worker` exists.
 - *Failure mode* — a `signal.alarm` in the same process, which cannot interrupt C code inside Pillow or onnxruntime.
-
-## Handoffs
-
-- Concept settled, now write it → `backend/python/skills/pattern-writer`
-- Concept settled, now check existing code against it → `backend/python/skills/code-review`
-- Cross-stack pattern cards → `backend/_shared/pattern-guide`

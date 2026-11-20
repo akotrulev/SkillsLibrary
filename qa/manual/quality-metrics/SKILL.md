@@ -8,22 +8,6 @@ disable-model-invocation: true
 
 Names the metrics worth tracking, defines each precisely, and prescribes a dashboard / alerting shape that turns them into decisions. The framing: **measure outcomes (delivery + reliability), use coverage and flake as diagnostic signals, never as goals**.
 
-## When to use
-
-- Setting up the team's quality dashboard for the first time
-- Auditing existing metrics — which are useful, which are vanity
-- Designing SLOs / SLIs for a service
-- Diagnosing why "tests are green but bugs keep escaping"
-- Reporting quality to leadership
-
-## When NOT to use
-
-- Writing tests → `qa/manual/test-case-writer`, `qa/<stack>/skills/api-test-author/...` / `ui-test-author/...`
-- Strategy / what-to-test → `qa/manual/test-strategy`
-- Building the panels themselves → `observability/dashboards`
-- LogQL / PromQL syntax for the queries → `observability/queries`
-- Stakeholder narrative around metrics → `communication/stakeholder-updates`
-
 ## The metric pyramid
 
 | Tier | Question | Examples |
@@ -201,11 +185,3 @@ Build with `observability/dashboards` patterns. Use the **trend** view as the pr
 7. Add burn-rate alerts on the SLOs
 8. Establish the reporting cadence; align to `communication/stakeholder-updates`
 9. Iterate after one release; drop metrics that didn't drive a decision
-
-## Handoffs
-
-- Dashboards → `observability/dashboards`
-- Queries → `observability/queries`
-- Test strategy that the metrics inform → `qa/manual/test-strategy`
-- Stakeholder narrative → `communication/stakeholder-updates`
-- SLO-tied alerts (Prometheus rules) → `observability/queries`

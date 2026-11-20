@@ -12,19 +12,6 @@ Conceptual reference for design patterns as applied in Java 21 + Spring Boot 3.x
 
 Confirm the project's Java release (`sourceCompatibility` / `java.toolchain` in `build.gradle(.kts)` or `<java.version>` in `pom.xml`) and Spring Boot major before answering. This file targets Java 21 + Spring Boot 3.x; if the project sits on an older Java (17) or Spring Boot 2.x, note which recipes below need a fallback (sealed types and virtual threads are Java 21+; records are Java 16+) rather than applying them unmodified.
 
-## When to use
-
-- The user asks "what is pattern X in Java"
-- The user wants a comparison between two patterns
-- The user wants a small canonical example, not scaffolding
-
-## When NOT to use
-
-- Scaffolding into a project → `backend/java/skills/pattern-writer`
-- Reviewing code → `backend/java/skills/code-review`
-
----
-
 ## Strategy
 
 **Intent**: Encapsulate interchangeable algorithms behind a common interface so the caller can swap them without changing call-site code.
@@ -310,11 +297,3 @@ public record OrderDto(UUID id, UUID customerId, String status, long totalMinor,
 - Immutable by default; canonical constructor; `equals` / `hashCode` / `toString` generated
 - Jackson serializes records natively
 - Use for DTOs, value objects, immutable domain events; not for behavior-bearing services
-
-## Handoffs
-
-- Scaffolding patterns into a project → `backend/java/skills/pattern-writer`
-- Reviewing code for misuse → `backend/java/skills/code-review`
-- .NET equivalents → `backend/dotnet/skills/pattern-guide`
-- TypeScript equivalents → `backend/node/skills/pattern-guide`
-- API DTO scaffolding → `qa/java/skills/api-models`

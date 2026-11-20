@@ -14,21 +14,6 @@ Owns the **mechanics** of running a React UI in multiple languages and cultures:
 
 **Version rule.** next-intl's App Router APIs are stable across **Next 14/15** and **React 18/19** (the RSC split is a Next.js reality, not a React-version one). Two moving pieces to detect, not assume: next-intl **v4** is current (v3 had a different `getRequestConfig`/plugin shape); and **Next.js 16** renames the `middleware.ts` file to `proxy.ts` (the `createMiddleware`/`createProxy` function is otherwise the same) — on Next 15 it is still `middleware.ts`. Match the project's installed versions.
 
-## When to use
-
-- Standing up multi-language support (message catalogs, translation-function injection, `t("key")`)
-- Establishing the current locale correctly (App Router routing/middleware, or SPA startup)
-- A language switcher users can operate, persisted across visits
-- Culture-correct number/date/currency display and input parsing
-- Right-to-left layout enablement
-
-## When NOT to use
-
-- The app's canonical format-per-data-type policy, humanized enums, id→name → [`ui-rules`](../ui-rules/SKILL.md) (localization supplies the locale; ui-rules owns the policy)
-- RTL styling mechanics (logical properties, mirrored icons) beyond setting `dir` → [`styling`](../styling/SKILL.md) + [`responsive-design`](../responsive-design/SKILL.md)
-- Validation-message wording/voice → [`design/ux-writing`](../../../../design/ux-writing/SKILL.md); the *plumbing* of localized validation messages is here + [`forms`](../forms/SKILL.md)
-- Asserting translations/locale behavior in tests → the qa **`language-testing`** peer (locale-pinned assertions, pseudo-loc, RTL) — a peer, not loaded here
-
 ## The shared half: message catalogs + the translation function
 
 Same idea in every setup. Keys map to translated text, one catalog per locale, resolved through a `t` function. **Keys are stable identifiers, not English sentences** — a literal in JSX is invisible to translation, exactly like a hardcoded string.
@@ -159,13 +144,3 @@ The general standards (no browser reads in render, logical properties for RTL) a
 - Form validation messages appear in the active language.
 - A date renders identically on the server and after hydration (explicit `timeZone`, no mismatch warning).
 - An RTL locale flips layout direction with `<html dir="rtl" lang="ar">` and no broken alignment (logical properties held); hreflang alternates present in the page head.
-
-## Handoffs
-
-- Canonical format-per-type policy, humanized enums, id→name → [`ui-rules`](../ui-rules/SKILL.md)
-- Localized validation-message plumbing → [`forms`](../forms/SKILL.md); their wording/voice → [`design/ux-writing`](../../../../design/ux-writing/SKILL.md)
-- RTL/logical-property styling, mirrored components → [`styling`](../styling/SKILL.md) + [`responsive-design`](../responsive-design/SKILL.md)
-- `lang`/hreflang alternates, per-locale canonical URLs → [`seo`](../seo/SKILL.md)
-- Server vs Client boundary (drives `getTranslations` vs `useTranslations`) and the hydration-mismatch trap → [`basics`](../basics/SKILL.md)
-- Lazy-loading message bundles, keeping locale data off the critical path → [`performance`](../performance/SKILL.md)
-- Locale-pinned test assertions, pseudo-localization, RTL testing → the qa **`language-testing`** peer (invoke separately)

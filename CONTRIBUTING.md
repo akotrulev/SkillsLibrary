@@ -38,12 +38,12 @@ qa/test-case-writer/
 Every skill follows the same outline. Copy the right file from `.skill-template/`.
 
 1. **YAML frontmatter** — `name`, `description`, and `disable-model-invocation: true` unless the skill is a front door (see "Front doors"). A front door's description is what Claude uses to decide whether to load it.
-2. **When to use** — concrete trigger phrases.
-3. **When NOT to use** — explicit disambiguation from sibling skills.
-4. **Inputs needed** — what Claude should know before generating output.
-5. **Procedure** — numbered steps Claude follows.
-6. **Output format** — exact shape of what gets produced.
-7. **Examples** — at least one good example, ideally one bad example with rationale.
+2. **Inputs needed** — what Claude should know before generating output.
+3. **Procedure** — numbered steps Claude follows.
+4. **Output format** — exact shape of what gets produced.
+5. **Examples** — at least one good example, ideally one bad example with rationale.
+
+**No routing sections in a hidden skill.** `When to use`, `When NOT to use`, `Handoffs`, `Cross-references` and `Related` existed to help a model pick a skill and find its siblings. A hidden skill is picked by its agent's Steps table, so those sections are read on every load and decide nothing; they were removed from all of them on 2026-11-20 (about 8% of the skill text). The description still carries the one "Use when" and "Not for" line. Only a front door keeps `When to use` and `When NOT to use`. A rule about who owns what between two skills (which scanner gates a class, which side owns a file) is content, not routing: it goes in `Rules`, or stays in a `Cross-references` section that says so.
 
 ## Agent structure
 
@@ -131,9 +131,9 @@ Bad:
 
 Before merging:
 
-1. Use the skill in a real conversation with Claude Code or Claude Desktop.
-2. Try at least three different trigger phrases.
-3. Try one phrase that should NOT trigger it — make sure it doesn't.
+1. Use the skill in a real conversation with Claude Code or Claude Desktop: a hidden skill through its agent or by typing `/<plugin>:<name>`, a front door by description.
+2. For a front door, try at least three different trigger phrases.
+3. For a front door, try one phrase that should NOT trigger it — make sure it doesn't.
 4. If it's a generator, run the generated code.
 5. If it's a reviewer, point it at code with known issues and verify it catches them.
 
@@ -146,7 +146,8 @@ Skills are versioned via git. If you make a breaking change to a skill's output 
 - [ ] New skill follows the template
 - [ ] Description is ≤ 200 characters, starts with "Use when..." and ends with a "Not for..." clause
 - [ ] At least one full example in the skill
-- [ ] Tested with 3+ trigger phrases
+- [ ] Tested through its agent or typed name; a front door with 3+ trigger phrases
+- [ ] No `When to use`, `When NOT to use`, `Handoffs`, `Cross-references` or `Related` section in a hidden skill
 - [ ] Listed in the appropriate section of the root `README.md` status table
 - [ ] `disable-model-invocation: true` is set, unless the skill is a front door added to `FRONT_DOORS`
 - [ ] `name:` is the topic only and `python3 tools/plugin-surface-check.py` prints `OK`

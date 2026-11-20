@@ -10,21 +10,6 @@ Standardizes how services across the library load configuration and secrets per 
 
 **Version policy:** detect the project's versions (TFM / `engines` / toolchain) and match — never assume. .NET 10 is primary, 8/9 supported (8 LTS ends Nov 2026). Node 20 is EOL (Apr 2026) — 24 is active LTS, 22 maintenance. Java 21 LTS is the default. The config patterns below are version-neutral; only the SDK/package surface differs.
 
-## When to use
-
-- New service needs a config story
-- Existing service has `process.env.X` / `IConfiguration["X"]` reads scattered everywhere
-- Migrating client secrets to Workload Identity / Managed Identity
-- Adding per-environment overrides (dev / staging / prod)
-- Setting up Key Vault / Secrets Manager / Vault integration
-
-## When NOT to use
-
-- Pipeline YAML → `devops/{github-actions,gitlab-ci,azure-pipelines}`
-- Cloud-specific deploy → `devops/{aws,azure}-deployment`
-- Auth0 client secrets in particular → `auth/auth0-{stack}`
-- App-level options pattern within code → `backend/{dotnet,java,node}/skills/{reference,generator}`
-
 ## The three-layer model
 
 Every service loads config from three layers, in this order, last wins:
@@ -241,11 +226,3 @@ These hold in the service's source, where the backend plugins' rule files also c
 5. Add `ValidateOnStart` / `@Validated` / `ConfigSchema.parse` so misconfig crashes startup.
 6. Document the per-env files / settings and the local-dev fallback path.
 7. Smoke locally with the dev config; smoke in staging confirming the secret store binding fires.
-
-## Handoffs
-
-- Pipeline YAML setup → `devops/{github-actions,gitlab-ci,azure-pipelines}`
-- Cloud deploy specifics → `devops/{aws,azure}-deployment`
-- IaC for the secret store + identity → `devops/infrastructure-as-code`
-- App-level Options pattern → `backend/{dotnet,java,node}/skills/generator`
-- Auth0 client secrets specifically → `auth/auth0-{stack}`

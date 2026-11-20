@@ -281,13 +281,3 @@ transform and the `en-XA` fixture) · **4b. Translation-key coverage** (the stat
   parameter** applied by amending `base.ContextOptions()`. The supported list is `SupportedLocales.All`.
 - Tests reach the page through page objects; one logical assertion per test; `Should_X_When_Y` names; async
   all the way; no `WaitForTimeoutAsync`.
-
-## Cross-references
-
-- `qa-typescript:language-testing` (canonical) · `qa-java:language-testing` — the sibling stacks; same four ideas.
-- `qa-dotnet:ui-tests-playwright` — `BaseTest`, `ContextOptions()` and the emulation reference (locale,
-  time zone, `Page.Clock`).
-- `qa-dotnet:visual-regression` — the pixel record that pairs with the pseudo-loc overflow check.
-- `qa-dotnet:data-driven-testing` — the row pattern; here the rows are fixture parameters.
-- `qa-dotnet:accessibility-testing` — `html[lang]` / `dir` rules; run them on the culture-pinned page.
-- `qa-dotnet:test-reports` — each culture as a named result, so a failure says which language broke.

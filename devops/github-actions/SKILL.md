@@ -10,21 +10,6 @@ Authors GitHub Actions workflows for build, test, and deploy across the project'
 
 **Version policy:** detect the project's versions (TFM / `engines` / toolchain) and match — never assume. .NET 10 is primary, 8/9 supported (8 LTS ends Nov 2026). Node 20 is EOL (Apr 2026) — 24 is active LTS, 22 maintenance.
 
-## When to use
-
-- New repo needs CI in `.github/workflows/`
-- Add a deploy stage to an existing CI workflow
-- Add a scheduled / release-triggered workflow
-- Refactor copy-pasted workflows into reusable workflows + composite actions
-
-## When NOT to use
-
-- GitLab CI/CD → `devops/gitlab-ci`
-- Azure DevOps Pipelines → `devops/azure-pipelines`
-- Bicep / Terraform authoring → `devops/infrastructure-as-code`
-- App-level env config → `devops/environment-config`
-
-- Test-suite CI lane (shard matrix, Allure publish, perf gate, flake quarantine) → `qa/cicd/agents/qa-cicd-{java,dotnet,typescript}`
 ## Inputs needed
 
 1. **Stack(s)**: .NET 8/9/10 / Java 21+Gradle / Node 22/24 + which package manager (pnpm/npm/yarn)
@@ -302,14 +287,3 @@ The standards this skill's output must meet are the devops rule files, not a lis
 4. Insert the cloud deploy job for the target. Gate via `environment:`. Use OIDC.
 5. If multiple repos need the same pipeline, extract a reusable workflow and call it from `ci.yml`.
 6. Validate locally with `actionlint` (`brew install actionlint`) before committing.
-
-## Handoffs
-
-- GitLab equivalent → `devops/gitlab-ci`
-- Azure DevOps equivalent → `devops/azure-pipelines`
-- IaC for the underlying cloud resources → `devops/infrastructure-as-code`
-- Per-env secrets/config → `devops/environment-config`
-- AWS-specific deploy details → `devops/aws-deployment`
-- Azure-specific deploy details → `devops/azure-deployment`
-
-- Test-suite CI lane — shard matrix, Allure publish, perf gate, quarantine → `qa-cicd-{java,dotnet,typescript}`

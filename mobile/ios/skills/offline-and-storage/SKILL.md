@@ -21,25 +21,6 @@ Decides **where each kind of data lives, how it survives an app update, and how 
 
 Detect first: `import SwiftData`, `.xcdatamodeld`, `GRDB` in `Package.resolved`. **Never add a second store beside the one in use.** CloudKit sync (`ModelConfiguration(cloudKitDatabase:)`) adds constraints (no unique attributes, all properties optional or defaulted) — read them before enabling.
 
-## When to use
-
-- Choosing storage for a new piece of data; adding a model or a field
-- A schema change that must migrate existing installs
-- Storing a token, key or credential
-- Caching responses, images or files; clearing on logout
-- "Works offline", an offline write queue, sync and conflicts
-- A full disk, a failed store open, or a corrupted database
-
-## When NOT to use
-
-- The request, retry, cache headers → [`networking`](../networking/SKILL.md)
-- The offline indicator, stale marker, banner → `mobile-ios:error-handling`
-- Where state lives in the view tree → [`architecture`](../architecture/SKILL.md)
-- Keychain misuse as a security finding, backup rules → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md) (this skill writes the correct code; that one audits it)
-- Privacy manifest declarations → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Widgets and extensions reading shared data → `mobile-ios:system-integration`
-- Another stack → `mobile-react-native:offline-and-storage`, `mobile-android:offline-and-storage`
-
 ## Where does it go?
 
 ```
@@ -213,12 +194,3 @@ The standards this skill's output must meet are the mobile-ios rule files, not a
 - Archive → Generate Privacy Report lists `UserDefaults` with the declared reason.
 - Airplane mode: a write shows pending, survives a force-quit, and replays once on reconnect.
 - Dev-side tests: in-memory `ModelContainer` / `DatabaseQueue`, migration test, queue replay with a fake client — [`mobile-ios:unit-testing`](../unit-testing/SKILL.md). Whether the Keychain item is really protected → **requires dynamic test → `qa-security`**.
-
-## Handoffs
-
-- Requests, retry, token refresh → [`networking`](../networking/SKILL.md)
-- Offline UI and degraded notice → `mobile-ios:error-handling`
-- Keychain / backup audit rules → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
-- Required Reason declarations → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Core Data → SwiftData, Realm exits → [`mobile-ios:migration`](../migration/SKILL.md)
-- Background transfers and tasks → `mobile-ios:system-integration`

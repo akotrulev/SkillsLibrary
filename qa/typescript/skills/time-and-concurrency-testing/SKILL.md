@@ -8,20 +8,6 @@ disable-model-invocation: true
 
 Automates the case forms `qa/manual/test-case-writer` writes under **Temporal** and **Concurrency**: a schedule run on demand, the clock set to an instant, N requests released together, a message or webhook delivered twice. The manual lane names the *Environment needs* in a case's Setup or Preconditions; this skill turns each need into a seam, or into a named deferral.
 
-## When to use
-
-- A case's technique is temporal or concurrency, or its Setup names *Environment needs* (a way to run `<schedule>` on demand, a clock set to `<instant>` in `<timezone>`).
-- "Run the monthly posting in a test", "cancel one second after the cut-off", "two members book the last seat", "the event is delivered twice".
-
-## When NOT to use
-
-- Waiting for an async effect (`within <budget>, <observable>`) — use the probe's named wait condition (`qa/typescript/skills/db-testing/connection`), or `vi.waitFor` / `expect.poll`, with the case's budget as its timeout.
-- Broker setup, topics, consumers, DLQ → `qa/typescript/skills/messaging-testing`.
-- A dependency fault or a retry after a fault → `qa/typescript/skills/failure-injection-testing`.
-- Flag state → `qa/typescript/skills/feature-flag-testing`.
-- Writing the plain endpoint tests → `qa/typescript/skills/api-test-author/writer`.
-- Load and capacity → `qa-performance-typescript`. Java / .NET → the same-named skill in `qa-java` / `qa-dotnet`.
-
 ## Inputs needed
 
 1. **The case's technique and its *Environment needs*** — from the test-case document. No document: ask which job, which instant and timezone, which invariant.
@@ -234,15 +220,6 @@ A `db-testing/verification-queries` query asserting the invariant's statement (`
 - A missing seam is a **deferral**: named in the report with the hook, handed to `be-node`, with no test body committed.
 - Cleanup (reset clock, delete the created job, created rows) is registered in `afterEach`; the tests are independent and run in any order.
 - Failure messages name the subject and carry the evidence (ids, the instant, the response body).
-
-## Handoffs
-
-- A missing job trigger, clock seam or test endpoint → `be-node`, as a product change.
-- Broker producers / seeders, DLQ → `qa/typescript/skills/messaging-testing`.
-- Verification queries and the poller → `qa/typescript/skills/db-testing/verification-queries`, `…/db-testing/connection`.
-- A retry or recovery after a fault → `qa/typescript/skills/failure-injection-testing`.
-- Typed clients for the trigger or clock endpoint → `qa/typescript/skills/api-client-writer`.
-- The plain specs → `qa/typescript/skills/api-test-author/writer`; review → `…/api-test-author/review`.
 
 ## APIs checked (2026-10-11)
 

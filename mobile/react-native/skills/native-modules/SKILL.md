@@ -23,24 +23,6 @@ Owns **going native**: deciding whether to, which rung of the ladder, how an Exp
 
 Detect first: `ios/` and `android/` tracked in git (**bare**) or ignored (**CNG**); `expo` in `package.json`; `app.json` / `app.config.ts` `plugins`; `expo-dev-client`. A bare project without `expo` has the TurboModule rung and no config-plugin rung until `install-expo-modules` ([`migration`](../migration/SKILL.md)).
 
-## When to use
-
-- "Is there a library for…?", "can Expo do…?", "I need to call a native API"
-- Writing or reviewing a local Expo module (Swift / Kotlin)
-- Changing `Info.plist`, `AndroidManifest.xml`, entitlements, Gradle or Podfile properties
-- Putting a SwiftUI or Compose control into the app (Expo UI)
-- Reaching for a Nitro or TurboModule in a bare app
-
-## When NOT to use
-
-- Camera, photo picker, location, biometrics, haptics → [`device-features`](../device-features/SKILL.md)
-- Push and links → [`notifications-and-links`](../notifications-and-links/SKILL.md)
-- Scaffold, EAS, `app.config.ts` basics → [`project-setup`](../project-setup/SKILL.md)
-- A UI kit choice → [`component-library`](../component-library/SKILL.md)
-- Upgrading SDK, bare → Expo → [`migration`](../migration/SKILL.md)
-- A fully native app → `mobile-ios` / `mobile-android`
-- Pinning, RASP libraries, manifest hardening → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
-
 ## The ladder — climb only as far as needed
 
 1. **An Expo SDK module** (`expo-camera`, `expo-secure-store`, `expo-sensors`, …) — versioned with the SDK, config plugin included. Check `docs.expo.dev/versions/latest` first.
@@ -144,11 +126,3 @@ The standards this skill's output must meet are the mobile-react-native rule fil
 - `npx expo-doctor` clean; development build launches; the module is callable on iOS **and** Android.
 - The generated `AndroidManifest.xml` and `Info.plist` hold no unreviewed `exported`, cleartext or ATS flag.
 - Jest tests for the plugin and the TypeScript wrapper; native logic tests per the native unit-testing skills.
-
-## Handoffs
-
-- Features built on SDK modules → [`device-features`](../device-features/SKILL.md), [`notifications-and-links`](../notifications-and-links/SKILL.md)
-- Kit and Expo UI components → [`component-library`](../component-library/SKILL.md) · scaffold, EAS → [`project-setup`](../project-setup/SKILL.md)
-- Bare ↔ Expo, SDK upgrades → [`migration`](../migration/SKILL.md)
-- Swift standard → [`mobile-ios:concepts`](../../../ios/skills/basics/SKILL.md) · Kotlin standard → [`mobile-android:concepts`](../../../android/skills/basics/SKILL.md)
-- Manifest, pinning, WebView → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md) · permissions, privacy manifest → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)

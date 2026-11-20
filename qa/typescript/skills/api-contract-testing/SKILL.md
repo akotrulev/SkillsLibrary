@@ -8,20 +8,6 @@ disable-model-invocation: true
 
 Wires Pact V3+ into a Node 24 + TypeScript service via `@pact-foundation/pact` for consumer-driven contract testing with Vitest. Covers the consumer test, provider verification, state handlers, and CI publish. Load `qa/_shared/contract-testing-pact` for the Broker model, matchers reference, and `can-i-deploy` gate that are shared across all stacks.
 
-## When to use
-
-- A Node 24 / TypeScript service consumes or produces an HTTP API and needs contract coverage.
-- Replacing brittle multi-service E2E tests with Pact-JS verification.
-- Catching breaking changes at the Node producer side before they ship.
-- Pairing with `qa/_shared/contract-testing-pact` for Broker / `can-i-deploy` wiring.
-
-## When NOT to use
-
-- .NET consumer or provider → `qa/dotnet/skills/api-contract-testing`
-- Java consumer or provider → `qa/java/skills/api-contract-testing`
-- Live-service API tests (no contract) → `qa/typescript/skills/api-test-author/writer`
-- OpenAPI-only validation with no consumer-driven aspect → schema validation libraries
-
 ## Stack
 
 - **Runtime**: Node 24
@@ -246,13 +232,3 @@ See `qa/_shared/contract-testing-pact` for the shared `can-i-deploy` and `record
 5. Wire provider CI: Vitest with `PACT_BROKER_*` and `GIT_SHA` / `BRANCH_NAME` env vars exported.
 6. Add `can-i-deploy` and `record-deployment` to both deploy pipelines (see `_shared`).
 7. Smoke a full cycle: change the contract on the consumer → fail provider verification → fix → success.
-
-## Handoffs
-
-- Cross-stack Broker / `can-i-deploy` / matchers concepts → `qa/_shared/contract-testing-pact`
-- .NET consumer/provider → `qa/dotnet/skills/api-contract-testing`
-- Java consumer/provider → `qa/java/skills/api-contract-testing`
-- Live-service API tests → `qa/typescript/skills/api-test-author/writer`
-- DTOs / Zod schemas → `qa/typescript/skills/api-models`
-- CI pipeline syntax → `qa/cicd/typescript/skills/ci-pipelines` (its `references/<host>.md`) or `devops/<ci>`
-- Allure publishing for contract test results → `qa/reporting/typescript/skills/test-reports`

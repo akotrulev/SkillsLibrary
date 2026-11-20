@@ -20,21 +20,6 @@ How the app reaches the rest of Windows without breaking least privilege: **the 
 | Windows AI | `Microsoft.Windows.AI.*` | readiness + consent + LAF → reference |
 | Identity | notifications, background tasks, associations, share target need packaged identity | an unpackaged app has none of them |
 
-## When to use
-
-- "Open or save a file", "paste an image", "drop files on the window", "share this"
-- A task that runs when the app is closed, a widget, an embedded web page
-- On-device AI features
-
-## When NOT to use
-
-- Toasts, push, protocol/file activation, startup task → `desktop-windows:activation-and-notifications`
-- Window and navigation shell → `desktop-windows:windows-and-navigation`
-- Local storage, `PasswordVault`, SQLite → `desktop-windows:offline-and-storage`
-- HTTP calls → `desktop-windows:networking`; P/Invoke, COM → `desktop-windows:interop`
-
----
-
 ## Pickers — the Windows App SDK ones
 
 ```csharp
@@ -124,12 +109,3 @@ Phi Silica, text recognition, image description, super resolution, segmentation 
 - **Devtools left on** — a release-build finding.
 - **A path assumed after a restart** — the user may have moved the file; re-pick.
 - **Elevated app, broken drag-drop and no notifications** — drop elevation.
-
-## Handoffs
-
-- Activation, toasts, startup, push → `desktop-windows:activation-and-notifications`
-- Storage, secrets → `desktop-windows:offline-and-storage`; HTTP → `desktop-windows:networking`
-- COM, `HWND`, P/Invoke → `desktop-windows:interop`
-- WebView2 and bridge security rows, signing → `desktop/_shared/security`, `desktop/_shared/distribution`
-- Banner and failed states → [`ui-components`](../ui-components/SKILL.md), `desktop-windows:error-handling`
-- Mac counterpart → `desktop-macos:sandbox-and-permissions`, `desktop-macos:system-integration`

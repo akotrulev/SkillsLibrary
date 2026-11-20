@@ -21,22 +21,6 @@ A Mac app is a set of windows over shared data. Scenes are declared once in the 
 
 Detect the deployment target first; never raise it for a scene API. Design facts: `design/ui-ux-pro-max` `--stack swiftui`; HIG "Windows". The corpus wins.
 
-## When to use
-
-- Declaring the scenes of a new app, or adding a window kind
-- Opening a window from a command, a button or a URL
-- Window size, placement, restoration, full screen, toolbars
-- A menu-bar-only app, a floating inspector, a Settings window
-
-## When NOT to use
-
-- Menu bar commands and shortcuts → [`menus-and-commands`](../menus-and-commands/SKILL.md)
-- Document windows, autosave → [`documents`](../documents/SKILL.md)
-- State shared across windows → [`architecture`](../architecture/SKILL.md)
-- Sidebar, `Table`, inspector content → [`ui-components`](../ui-components/SKILL.md)
-- URL schemes routed to windows → `system-integration`
-- An AppKit-owned window → [`appkit`](../appkit/SKILL.md); Windows → `desktop-windows:windows-and-navigation`
-
 ## Pick the scene
 
 | Need | Scene |
@@ -130,11 +114,3 @@ Restored state holds **ids and layout only** — `@SceneStorage` carries selecti
 - **A fixed-size window**: breaks on small displays and DPI changes.
 - **Records in `@SceneStorage`**: store ids.
 - **Commands only in toolbar buttons**: add them to the menu bar.
-
-## Handoffs
-
-- Menus and shortcuts → [`menus-and-commands`](../menus-and-commands/SKILL.md)
-- Documents → [`documents`](../documents/SKILL.md)
-- State shape → [`architecture`](../architecture/SKILL.md)
-- AppKit windows, `NSHostingSceneRepresentation` → [`appkit`](../appkit/SKILL.md)
-- Test ids → `test-ids`; accessibility → `accessibility`

@@ -10,20 +10,6 @@ What a mobile app emits, how it leaves the device, and what it must never carry.
 
 **The mobile difference.** The client is untrusted, intermittently offline, battery- and data-metered, and its binary is public. So: batch and sample on device, send through a gateway you control, put **no backend credential in the app**, and scrub PII before anything is written, not after.
 
-## When to use
-
-- Adding or reviewing crash reporting, tracing, logging or app-performance metrics
-- Wiring the app to the Grafana stack, or choosing an OTel SDK per stack
-- Deciding sampling, batching, resource attributes, or what may be logged
-- Release-health signals that gate a rollout (crash-free users, ANR / hang rate)
-
-## When NOT to use
-
-- Collector pipelines, Loki / Tempo / Mimir storage, dashboards, LogQL → `observability-engineer-<stack>` and `observability/{logs-traces-setup,metrics-setup,queries,dashboards}`
-- Symbol and source-map upload, rollout halting → `mobile-<stack>:release`
-- Where tokens and secrets are stored → `mobile-<stack>:security`
-- Store privacy declarations for the SDKs you add → `mobile-<stack>:store-compliance`
-
 ## Version lane (verified 2026-10-10)
 
 | Stack | Fact | Re-verify after |

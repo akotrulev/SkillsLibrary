@@ -12,30 +12,6 @@ Division of labor with [`data-fetching`](../data-fetching/SKILL.md): data-fetchi
 
 **Version rule:** detect the React/Next major first. Error boundaries, `react-error-boundary`, and TanStack Query retry are 18+. The **App Router** deltas are file conventions: `error.tsx` (per-segment boundary, must be a Client Component), `global-error.tsx` (wraps the root layout, its own `<html>`/`<body>`), and `not-found.tsx`. **React 19** adds root-level `onCaughtError`/`onUncaughtError` hooks for centralized reporting. The **Vite SPA** lane has no `error.tsx` — use `react-error-boundary` at the router/route level throughout (tagged below).
 
-## When to use
-
-- Placing error boundaries so an exception degrades one region, not the app
-- Reporting caught render exceptions with a correlation id (not console-only)
-- Retry/backoff on transient fetch faults; TanStack Query retry config
-- Live-connection-drop / offline UX (kept consistent with the live-data status)
-- Rendering the states of a data region (loading / loaded / failed / stale) + actionable empty states
-- Setting request timeout budgets so a hung call fails instead of spinning; the slow-request affordance
-- Deciding what a *refetch* failure does to data already on screen (keep it, mark it stale)
-- Recovering from a mid-session 401 without discarding the user's unsaved work
-- Surviving a deploy in an open tab (`ChunkLoadError`, RSC payload skew, the reload prompt)
-- Write-failure semantics — double-submit, idempotency keys, optimistic rollback, 409 conflicts, partial bulk failure
-- Keeping an outage from becoming a wall of toasts (rate-limit backoff, retry circuit, notification roll-up)
-- Scoping a failure so only the response-dependent part degrades (rows fail, search/filters keep working)
-- The app-wide persistent error notification (top-right, close-button-only) and what raises it
-
-## When NOT to use
-
-- Producing the categorized error from a fetch/Server Action → [`data-fetching`](../data-fetching/SKILL.md)
-- Per-field form validation messages → [`forms`](../forms/SKILL.md)
-- The live WS/SSE client + its reconnect handlers as a *feature* → [`realtime`](../realtime/SKILL.md) (this skill owns the *UX* of a dropped connection; realtime owns the socket)
-- Render/bundle *performance* → [`performance`](../performance/SKILL.md)
-- The token/refresh *mechanics* (SDK config, rotation, reuse detection) → `auth/auth0-react` — **this skill owns what the UI does when a call comes back 401** ([`references/session-and-deploy.md`](references/session-and-deploy.md))
-
 ## The failure surfaces
 
 ```
@@ -366,17 +342,3 @@ Beyond the rule files, this skill's own rules:
 - Open the app in two tabs, sign out in one → the other stops rendering as signed-in.
 - Leave a tab backgrounded past `staleTime` and return → it revalidates rather than showing yesterday's numbers as current.
 - Delete a record in another tab, then act on its detail page → "no longer exists" with a way out, and the list no longer shows the row.
-
-## Handoffs
-
-- The categorized error this skill renders → [`data-fetching`](../data-fetching/SKILL.md) (produces it via `problemError`)
-- Live WS/SSE socket + its reconnect/backoff + connection status → [`realtime`](../realtime/SKILL.md)
-- Render/bundle performance → [`performance`](../performance/SKILL.md)
-- Field-level validation errors → [`forms`](../forms/SKILL.md)
-- Renderer unification (bind loading/failed once on the shared grid) → [`ui-rules`](../ui-rules/SKILL.md)
-- Mounting the notification provider/portal in the library's idiom → [`component-library`](../component-library/SKILL.md)
-- Test ids for the notification + failed regions → [`test-ids`](../test-ids/SKILL.md); E2E proof that the chrome survives → `qa-ui-typescript` (peer)
-- Keeping filter/search state above the failing region (or in the URL) → [`state-management`](../state-management/SKILL.md)
-- Token/refresh mechanics + the login surface the re-auth ladder calls into → `auth/auth0-react`
-- Dirty-form state (`formState.isDirty`) that gates rung 4 of the ladder → [`forms`](../forms/SKILL.md)
-- Client/server error export to Grafana → `observability/opentelemetry-node`

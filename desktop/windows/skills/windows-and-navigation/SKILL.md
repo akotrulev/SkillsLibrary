@@ -20,22 +20,6 @@ How a WinUI app opens, sizes, remembers and navigates its windows: **`Window.App
 
 Detect the lane from `basics` (`desktop-windows:concepts`) first. A TFM, SDK or framework change is never a side effect of this work.
 
-## When to use
-
-- Opening, sizing, restoring, closing a window; a second window on the same data
-- A custom title bar, a `NavigationView` shell, tabs, back navigation
-- Commands: menu, toolbar, keyboard accelerators, access keys, context menu
-
-## When NOT to use
-
-- Single instance, protocol and file activation, toasts → `desktop-windows:activation-and-notifications`
-- Pickers, share, drag and drop, WebView2 → `desktop-windows:platform-integration`
-- Control choice, `InfoBar`, `ContentDialog` → [`ui-components`](../ui-components/SKILL.md)
-- Backdrop, theme, caption-button colour → [`styling`](../styling/SKILL.md)
-- Narrator, UIA peers → `desktop-windows:accessibility`
-
----
-
 ## The window rules (CLAUDE.md § Desktop code rules)
 
 1. **Resizable, with a stated minimum.** Set the minimum through `OverlappedPresenter.PreferredMinimumWidth` / `PreferredMinimumHeight` (effective pixels), never by a fixed page `Width`.
@@ -173,13 +157,3 @@ The handlers only forward to a navigation service or call `ContentFrame.Navigate
 - **An accelerator on a collapsed element does not fire** — put global shortcuts on the root, not on a hidden flyout item.
 - **A second window per document opened every time** — look it up first.
 - **`NavigationView` selection set in code re-navigates** — guard `SelectionChanged` against the programmatic change.
-
-## Handoffs
-
-- Activation arguments, single instance, restart → `desktop-windows:activation-and-notifications`
-- Controls, dialogs, `InfoBar` → [`ui-components`](../ui-components/SKILL.md); backdrop, theme → [`styling`](../styling/SKILL.md)
-- View-model commands, DI → [`architecture`](../architecture/SKILL.md)
-- Form fields and validation → `desktop-windows:forms`
-- Narrator, access keys audit → `desktop-windows:accessibility`; ids → `desktop-windows:test-ids`
-- WPF / WinForms windows → `desktop-windows:wpf`, `:winforms`
-- Mac counterpart → `desktop-macos:windows-and-scenes`

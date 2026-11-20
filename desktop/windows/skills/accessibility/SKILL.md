@@ -22,19 +22,6 @@ How a Windows app is made usable without a mouse or a screen: **every interactiv
 
 Detect first: custom controls (`OnCreateAutomationPeer`), `AutomationProperties` use, `HighContrast` theme dictionaries, and whether a keyboard-accelerator layer exists. Extend them; never rewrite a working peer.
 
-## When to use
-
-- A new screen or control; "Narrator reads nothing here"; a High Contrast bug; "tab order is wrong"
-- Reviewing a screen against the §8 accessibility rows
-
-## When NOT to use
-
-- `AutomationId` for E2E → `desktop-windows:test-ids` (the id is never the name)
-- Accelerators and access keys as *commands* → `desktop-windows:windows-and-navigation`
-- Theme dictionaries and the type ramp → `desktop-windows:styling`
-
----
-
 ## The five rules
 
 1. **Name every interactive element.** The name is for people: short, localized, no role word (`Delete order`, not `Delete button`).
@@ -191,10 +178,3 @@ None for the properties. A metric `app.accessibility_setting` (high contrast on/
 - **Focus lost after a `ListView` item is removed** — the window gets focus; set it to the neighbour.
 - **Mica over a custom translucent panel** — in High Contrast the text sits on the system window colour only if the brush is a theme resource.
 - **A hard-coded 12 px font** — it ignores the text-size setting.
-
-## Handoffs
-
-- Ids are separate and never names → `desktop-windows:test-ids`; translations of names → `desktop-windows:languages`
-- Accelerators, access keys, window commands → `desktop-windows:windows-and-navigation`
-- Theme and motion → `desktop-windows:styling`; failure region and `InfoBar` → `desktop-windows:error-handling`
-- Mac counterpart → `desktop-macos:accessibility`

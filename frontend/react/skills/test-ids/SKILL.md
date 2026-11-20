@@ -10,21 +10,6 @@ Adds and audits `data-testid` attributes on React components so automated UI sui
 
 **Version rule:** version-agnostic across React 18/19 and Next 14/15 — a `data-testid` is a plain JSX attribute and behaves identically in Server and Client Components. The only React-specific note: an RSC can carry testids on presentational markup, but the elements a test actually *drives* (click/type) live under a `'use client'` boundary — tag both.
 
-## When to use
-
-- Add `data-testid` attributes to one or more `.tsx` files for automated UI testing
-- Audit an existing page for missing / inconsistent / colliding testids
-- Apply the convention to newly written pages or components
-- A `missing-testids.md` report has been handed over by QA
-- Decide where the attribute goes on a specific component-library control
-
-## When NOT to use
-
-- Writing UI tests / page objects → the QA stack agent (`qa-ui-typescript`)
-- Component scaffolding at large → [`component-writer`](../component-writer/SKILL.md) (which already emits testids per this convention)
-- Choosing/wiring the component library → [`component-library`](../component-library/SKILL.md)
-- Blazor → `frontend/blazor/skills/test-ids`
-
 ## Output format
 
 Single attribute only: `data-testid="..."`. No `aria-label` mirroring the value, no second attribute. Always PascalCase, dot-separated segments. (Accessible labels are an accessibility concern, owned by [`accessibility`](../accessibility/SKILL.md) — never conflate the two.)
@@ -247,12 +232,3 @@ Each smell is the inverse of rules 1–7 above, and the review severities are in
 ## Out of scope
 
 Non-React surfaces (a static-HTML admin tool, a jQuery-era template UI, a raw `innerHTML` widget) are **not** covered here — this skill owns `.tsx` component markup only. A React app renders everything through React, so there is no in-app hybrid surface to address (this is the deliberate delta from `frontend/blazor/skills/test-ids`, whose `references/static-html.md` exists because a Blazor app can ship a non-Blazor page beside it). If a project genuinely mixes a non-React island in, apply the same rules — naming (Rule 2), const prefix (Rule 3), static row locators (Rule 6), data derivation (Rule 7) — with a plain inline `data-testid` attribute and a hardcoded parent-locator `const` for JS-rendered rows.
-
-## Handoffs
-
-- Page objects / UI tests against these locators → `qa-ui-typescript` (peer agent; `page-objects-from-url` locates data-testid-first)
-- Scaffolding new components (testids emitted by default) → [`component-writer`](../component-writer/SKILL.md)
-- Per-library control mechanics / choosing the library → [`component-library`](../component-library/SKILL.md)
-- Responsive variant-suffixed testids (visible vs hidden layout) → [`responsive-design`](../responsive-design/SKILL.md)
-- Reviewing testid hygiene as part of a broader review → [`code-review`](../code-review/SKILL.md)
-- Accessible labels (not the same as testids) → [`accessibility`](../accessibility/SKILL.md)

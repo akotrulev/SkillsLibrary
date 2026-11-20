@@ -8,22 +8,6 @@ disable-model-invocation: true
 
 Authors Gatling 3.11+ simulations using the **Java DSL** against deployed services. Gatling is the right tool when the team strongly prefers a JVM-native author experience (shared DTOs / clients with the production Spring Boot project) and wants Gatling's expressive injection / scenario combinators. For all other cases default to k6 (`qa/typescript/skills/load-testing`).
 
-## When to use
-
-- JVM-heavy teams that want to share DTOs / clients with the production Spring Boot project.
-- Perf tests that need rich scenario combinators (looped flows, conditional steps, dynamic feeders).
-- Teams already familiar with the JVM build / IDE story who would rather not learn k6's JS API.
-
-## When NOT to use
-
-- New perf work without a strong JVM preference → `qa/typescript/skills/load-testing`
-- .NET-native author experience → `qa/dotnet/skills/load-testing`
-- Functional behavior tests → `qa/java/skills/api-test-author/writer`
-- Microbenchmarks (loop bodies, parsing speed) → JMH (`openjdk-jmh`)
-- Defining the SLO itself → `qa/manual/quality-metrics`
-
-Load `qa/_shared/performance` for workload models, open-loop vs closed-loop guidance, environment policy, and the reporting template.
-
 ## Stack
 
 - **Runtime**: Java 21
@@ -338,14 +322,3 @@ The standards a simulation must meet are the qa-java rule files, not a list here
 6. Add CI step (smoke on PR; full on release). Publish `build/reports/gatling/` as a CI artifact.
 7. Run locally with `./gradlew gatlingRun-<FQN>`; confirm per-route assertions; confirm the test fails when an SLO is breached.
 8. Add the report to the release / change notes (see `_shared` template).
-
-## Handoffs
-
-- Workload models, environment policy, reporting → `qa/_shared/performance`
-- k6 (TypeScript) → `qa/typescript/skills/load-testing`
-- NBomber (.NET) → `qa/dotnet/skills/load-testing`
-- SLO targets the test validates → `qa/manual/quality-metrics`
-- Grafana dashboards for server-side correlation → `observability/dashboards`
-- Pipeline integration → `qa/cicd/java/skills/ci-pipelines` (its `references/<host>.md`) or `devops/<ci>`
-- Allure publishing for perf reports → `qa/reporting/java/skills/test-reports`
-- Bug filings discovered during perf → `qa/manual/bug-report-writer`

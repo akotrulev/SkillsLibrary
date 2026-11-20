@@ -12,20 +12,6 @@ Turns raw, scattered or partial inputs — a user story, BRD section, acceptance
 
 This is the **ISTQB test-analysis step**: the inputs are the *test basis*; this skill distills them into a testable feature breakdown that **precedes** test design. It does not enumerate cases, pick techniques, or assign coverage — it produces the single source of truth those steps consume. It backs **Steps 1–2 of the `qa/manual/agents/qa-test-case-designer` agent** ("Analyze the test basis" and "Map the connections").
 
-## When to use
-
-- The user provides a story / spec / contract / description and wants it distilled before test cases exist
-- Inputs are scattered or partial and need one testable view with the gaps explicit
-- A team wants a reviewable "this is what we understood" document to confirm with the PO/dev before test design
-
-## When NOT to use
-
-- The user wants the actual test cases → `qa/manual/test-case-writer`
-- The user wants partitions / boundaries / decision-table rules derived → `qa/manual/test-design-techniques`
-- The user wants release-level risk register + quality gates → `qa/manual/test-strategy`
-- The user wants an unscripted exploratory charter → `qa/manual/exploratory-charter-writer`
-- No docs exist and the program is running → `qa-explorer` (`qa/manual/app-exploration`) explores first; this skill then distills its **exploration report**
-
 ## Core principle — distill, don't invent
 
 The inputs are the source of truth. **Every line of the output traces back to an input** (cite it). Where the inputs are silent, contradictory or untestable, that is a **finding**, not something to fill in from intuition:
@@ -198,15 +184,3 @@ Bad response: a list of test cases (TC-001, TC-002…). That's `test-case-writer
 Also bad: re-typing the spec into prose, a full data dictionary with no journey or calculation, or writing as fact what the spec left undefined.
 
 Good response: the structured document of the example — concise, sourced, genuine gaps flagged.
-
-## Handoffs
-
-- Derive the techniques / coverage items from this basis → `qa/manual/test-design-techniques`
-- Turn §8 Connections into coverage items → `qa/manual/cross-feature-test-design`
-- Format the cases into a Setup → Cases → Cleanup suite → `qa/manual/test-case-writer`
-- Orchestrate the full doc → basis → suite flow → `qa/manual/agents/qa-test-case-designer`
-- Risk-rank the conditions before designing → `qa/manual/test-strategy`
-- Build the basis from a live app when docs are thin → the `qa-explorer` agent (`qa/manual/app-exploration`), whose report this skill distills
-- File defects noticed while analyzing → `qa/manual/bug-report-writer`
-- Building the connections into the KB (this skill only reads it) → `business-analysis/skills/ba-dependency-map`; cross-feature conflicts / the whole-project business model → `business-analysis/skills/ba-feature-conflict-check` + `business-analysis/agents/business-analyst`
-- The doc is a vague initiative that needs scoping (not testing) → `business-analysis/skills/ba-scoping-writeup` + `business-analysis/agents/requirements-author`

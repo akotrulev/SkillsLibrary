@@ -49,12 +49,3 @@ and Chromium-only. The proxy is for when there is no `Page` at all.
 - Mocked payloads come from records, builders or fixture files, not inline blobs repeated across tests.
 - Recording a HAR as evidence (`tracing().startHar(...)` [1.60], `setRecordHarPath`) is
   `qa/java/skills/evidence-capture` §5; this skill replays one.
-
-## Handoffs
-
-- `BaseTest`, page objects and the build → `qa/java/skills/ui-test-author/playwright`
-- HAR recording and other evidence → `qa/java/skills/evidence-capture`
-- WebSocket and SSE → `qa/java/skills/realtime-stream-testing`
-- API tests without a browser → `qa/java/skills/api-test-author`
-- The CI job → `qa/cicd/java/skills/ci-pipelines`
-- TypeScript and .NET → `qa-typescript:network-mocking`, `qa-dotnet:network-mocking`

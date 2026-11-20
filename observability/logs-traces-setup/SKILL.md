@@ -8,22 +8,6 @@ disable-model-invocation: true
 
 Wires the **log and trace** halves of the Grafana stack — Loki for logs, Tempo for traces. Standardizes on: **stdout JSON from apps → log forwarder (Grafana Alloy / Vector / Fluent Bit) → Loki → object storage**; **OTel SDKs → OTel Collector → Tempo (OTLP gRPC) → object storage**; **exemplars + Loki derived fields** to make navigation between logs, metrics, and traces seamless.
 
-## When to use
-
-- New cluster / environment needs the Grafana stack
-- Migrating from a vendor (Datadog / Splunk / New Relic) to self-hosted Grafana
-- Designing log retention / cardinality strategy
-- Wiring a log forwarder (Grafana Alloy / Vector / Fluent Bit)
-- Setting up multi-tenant Loki / Tempo (one cluster, many teams)
-
-## When NOT to use
-
-- LogQL / PromQL queries → `observability/queries`
-- Dashboard layout → `observability/dashboards`
-- App-side log shape → `observability/structured-logging-{dotnet,java,node}`
-- App-side instrumentation → `observability/opentelemetry-{stack}`
-- Prometheus / Mimir for metrics → `observability/metrics-setup`
-
 ## Inputs needed
 
 1. **Cluster**: AKS / EKS / GKE / VMs / managed (Grafana Cloud)
@@ -417,12 +401,3 @@ The skill's recipes work against self-hosted or Grafana Cloud — only the endpo
 6. Wire **Grafana data sources** (Loki, Tempo, Prometheus); set up **exemplars** on Prom→Tempo, **derived fields** (canonical cross-stack regex) on Loki→Tempo, and **`tracesToLogsV2`** on Tempo→Loki.
 7. Smoke the full loop: hit an app, find its logs in Loki by `{service=..., env=...}`, click the trace id to jump to Tempo, jump from a span back to its logs, see metrics with exemplars.
 8. Add **retention monitoring** + **cardinality monitoring** queries to a "stack health" dashboard.
-
-## Handoffs
-
-- Query syntax → `observability/queries`
-- Dashboards → `observability/dashboards`
-- App log shape → `observability/structured-logging-{stack}`
-- App instrumentation → `observability/opentelemetry-{stack}`
-- IaC for the storage buckets + IAM → `devops/infrastructure-as-code`
-- Kubernetes manifests for the Loki / Tempo / Collector stack → `devops/kubernetes`

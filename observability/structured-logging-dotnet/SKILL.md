@@ -21,22 +21,6 @@ First act on an existing project: read the `TargetFramework` from the `.csproj`.
 - **Schema**: `Microsoft.Extensions.Logging.ILogger<T>` everywhere in app code — Serilog is wired up underneath; the static `Log` class is for the host only
 - Levels per env: dev `Debug`, staging `Information`, prod `Information` with `Warning` overrides for chatty namespaces
 
-## When to use
-
-- New .NET service needs logging
-- Logs are unstructured (`Console.WriteLine`, `_logger.LogInformation($"...")`) and need to become structured
-- Adding correlation IDs / trace propagation to logs
-- Pointing logs at Loki / Seq / Application Insights
-- Masking sensitive data (PII, tokens) in log output
-
-## When NOT to use
-
-- Java service → `observability/structured-logging-java`
-- Node / TypeScript service → `observability/structured-logging-node`
-- Distributed tracing or metrics (different concern) → `observability/opentelemetry-dotnet`
-- LogQL/PromQL query authoring → `observability/queries`
-- Dashboard layout → `observability/dashboards`
-
 ## Inputs needed
 
 1. **Target environment(s)** — local, dev, staging, prod, and the sink per env
@@ -228,11 +212,3 @@ Cardinality rule: **Loki labels are not log fields.** Labels are coarse (service
 6. If OTel is configured, add `Enrich.WithSpan()`; otherwise add it later when adding `observability/opentelemetry-dotnet`.
 7. Sweep the codebase for `$"..."` inside `Log*` calls; replace with message templates.
 8. Smoke locally — run the service, hit a few endpoints, confirm Seq shows structured fields with `TraceId`/`SpanId`.
-
-## Handoffs
-
-- Distributed tracing + metrics → `observability/opentelemetry-dotnet`
-- LogQL queries against Loki → `observability/queries`
-- Dashboard layout → `observability/dashboards`
-- Java equivalent → `observability/structured-logging-java`
-- Node equivalent → `observability/structured-logging-node`

@@ -12,21 +12,6 @@ Conceptual reference for design patterns as applied in TypeScript (strict mode) 
 
 Detect the project's Node major from `package.json` `engines` / `.nvmrc` / lockfile before answering. None of the patterns below are Node-version-gated — they apply equally on 22 and 24 — but flag Node 20 as EOL if encountered rather than silently targeting it.
 
-## When to use
-
-- The user asks "what is pattern X in TypeScript"
-- The user wants a comparison between idiomatic TS approaches (tagged union vs class hierarchy)
-- The user wants a small canonical example, not scaffolding
-
-## When NOT to use
-
-- Scaffolding → `backend/node/skills/pattern-writer`
-- Reviewing code → `backend/node/skills/code-review`
-- React patterns → `frontend/react/skills/basics`
-- React Native → `mobile/react-native` (the `mobile-react-native` agent)
-
----
-
 ## Strategy
 
 Classical OO version (works fine in TS):
@@ -323,12 +308,3 @@ type RouteKey = keyof typeof routes;   // "home" | "login"
 - **Template literal types** for typed URLs / event names
 - **`const` assertions** (`as const`) for literal-narrow inference
 - **Conditional + mapped types** for advanced library APIs; resist over-engineering in app code
-
-## Handoffs
-
-- Scaffolding patterns → `backend/node/skills/pattern-writer`
-- Reviewing code → `backend/node/skills/code-review`
-- React-specific patterns → `frontend/react/skills/basics`
-- API DTO scaffolding → `qa/typescript/skills/api-models`
-- .NET equivalent → `backend/dotnet/skills/pattern-guide`
-- Java equivalent → `backend/java/skills/pattern-guide`

@@ -21,21 +21,6 @@ disable-model-invocation: true
 
 Design facts: HIG "The menu bar" via `design/ui-ux-pro-max` `--stack swiftui`. The corpus wins.
 
-## When to use
-
-- A new command, shortcut or menu; renaming or moving one
-- Replacing a standard group (New, Undo, Pasteboard)
-- A command that acts on the focused window's selection
-- A context menu; a menu item that vanishes
-
-## When NOT to use
-
-- Scenes and `openWindow` → [`windows-and-scenes`](../windows-and-scenes/SKILL.md)
-- Document commands (Save, Revert) → [`documents`](../documents/SKILL.md)
-- Shared state ownership → [`architecture`](../architecture/SKILL.md)
-- Keyboard accessibility of controls → `accessibility`
-- AppKit `NSMenu` / responder chain → [`appkit`](../appkit/SKILL.md); Windows → `desktop-windows:windows-and-navigation`
-
 ## The standard menu order
 
 App · File · Edit · Format · View · *app-specific menus* · Window · Help.
@@ -133,10 +118,3 @@ Menus hide symbol images by default. Keep the default — text-only menus are th
 - **A toolbar button with no menu item**: add the command.
 - **Icons expected on the 27 SDK**: set `.titleAndIcon` explicitly.
 - **A second Settings entry**: `Settings` already adds it.
-
-## Handoffs
-
-- Window opening → [`windows-and-scenes`](../windows-and-scenes/SKILL.md)
-- Document menu items → [`documents`](../documents/SKILL.md)
-- `NSMenu`, `NSHostingMenu`, responder chain → [`appkit`](../appkit/SKILL.md)
-- Test ids on menu items → `test-ids`

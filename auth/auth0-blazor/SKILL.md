@@ -15,20 +15,6 @@ Wires Auth0 into Blazor Server and Blazor WebAssembly. Server uses Authorization
 - **Blazor WASM**: `Microsoft.AspNetCore.Components.WebAssembly.Authentication` (acts like a SPA in Auth0)
 - Backend Web API (if separate) uses `backend/dotnet/skills/auth0`
 
-## When to use
-
-- Adding Auth0 sign-in to a Blazor Server app
-- Adding Auth0 sign-in to a Blazor WASM app
-- Protecting `<AuthorizeView>` / `[Authorize]`-routed components
-- Calling a protected backend API from Blazor (token attached automatically)
-
-## When NOT to use
-
-- Plain ASP.NET Core API → `backend/dotnet/skills/auth0`
-- React SPA → `auth/auth0-react`
-- Java backend → `backend/java/skills/auth0`
-- Concepts → `auth/_shared/auth0-concepts`
-
 ## Inputs needed
 
 1. **Blazor hosting model** (Server, WASM, or Interactive Auto — .NET 8+)
@@ -347,12 +333,3 @@ public class CustomAuthorizationMessageHandler : AuthorizationMessageHandler
 5. Wire the API HttpClient (Server: typed client with token from context; WASM: `AuthorizationMessageHandler`).
 6. Add `[Authorize(Policy = "...")]` / `<AuthorizeView>` where access is gated.
 7. Smoke flow: visit a protected page → redirect to Auth0 → sign in → land back, call the API, sign out, verify Auth0 SSO session cleared.
-
-## Handoffs
-
-- Concepts → `auth/_shared/auth0-concepts`
-- Backend API validation → `backend/dotnet/skills/auth0`
-- React equivalent → `auth/auth0-react`
-- Java backend → `backend/java/skills/auth0`
-- Storing secrets → `devops/environment-config` + Key Vault
-- E2E auth with Playwright → `qa/dotnet/skills/ui-test-author/playwright`

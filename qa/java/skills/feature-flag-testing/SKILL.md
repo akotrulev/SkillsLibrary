@@ -175,18 +175,3 @@ degradation assertion borders `qa-java:failure-injection-testing` (flag flip vs 
   `OpenFeatureAPI` singleton is shared state), `LDClient.close()` in teardown. Tests run alone, in any order.
 - **The flag client is constructor-injected** into the code under test — never a static lookup. TestNG +
   AssertJ; `setProviderAndWait` (not the non-blocking set) so the first evaluation never races initialization.
-
-## Cross-references
-
-- `qa-dotnet:feature-flag-testing` · `qa-typescript:feature-flag-testing` — the sibling stacks (`OpenFeature`
-  NuGet + `LaunchDarkly.ServerSdk` `TestData` + NUnit · `@openfeature/server-sdk` + `@launchdarkly/node-server-sdk`
-  `TestData` + Vitest); same four ideas, same fixtures, different SDK surface.
-- `qa-java:data-driven-testing` — the **matrix mechanics** the on/off/variation table binds through
-  (`@DataProvider` row-binding); this skill defines *what* the rows are, that one defines *how* rows drive tests.
-- `qa-java:failure-injection-testing` — the **kill-switch boundary**: the off-path of a flag flip is this skill; a
-  faulted dependency behind the feature is chaos. The lifecycle shape (steady → perturb → assert-degraded) is shared.
-- `qa-java:api-tests` · `qa-java:ui-tests-playwright` — the branch under test is usually an
-  API or UI behavior; those skills own the assertion style inside each pinned branch.
-- `qa-java:test-login-tokens` — the same "test fixture over live service" posture applied to auth; pairs
-  when targeting rules key off claims-derived attributes.
-- `qa-java:test-reports` — render the flag matrix as named results (one per variation row).

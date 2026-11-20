@@ -19,20 +19,6 @@ Deploys services to Azure using the right primitive for the workload. Default fo
 - IaC via Bicep (preferred for Azure-only stacks) or Terraform — see `devops/infrastructure-as-code`
 - Pipelines via Azure Pipelines / GitHub Actions / GitLab CI with **Workload Identity Federation** — no client secrets
 
-## When to use
-
-- New service needs a deploy target on Azure
-- Migrating a workload between targets (App Service → Container Apps, VM → Container Apps, AKS → Container Apps for small services)
-- Setting up the deploy pipeline's destination
-- Choosing among Azure primitives for a specific workload
-
-## When NOT to use
-
-- AWS → `devops/aws-deployment`
-- IaC syntax → `devops/infrastructure-as-code`
-- Pipeline YAML → `devops/github-actions` / `devops/gitlab-ci` / `devops/azure-pipelines`
-- App-level config / secrets injection → `devops/environment-config`
-
 ## Picking the right target
 
 | Workload | Default target | Use because |
@@ -233,12 +219,3 @@ The standards this skill's output must meet are the devops rule files, not a lis
 3. Produce the deployable artifact: Dockerfile + image push (Container Apps), Function code (Functions), zip / code (App Service), SPA build output (Static Web Apps).
 4. Wire the pipeline (`devops/azure-pipelines` / `devops/github-actions` / `devops/gitlab-ci`) with WIF + the deploy step (`az containerapp update`, `func azure functionapp publish`, `swa deploy`, slot swap).
 5. Smoke: hit `/health` after deploy; confirm Log Analytics receives logs; confirm Application Insights or OTel Collector receives traces/metrics.
-
-## Handoffs
-
-- IaC (Bicep / Terraform) → `devops/infrastructure-as-code`
-- Pipelines → `devops/azure-pipelines` / `devops/github-actions` / `devops/gitlab-ci`
-- App-level config & secrets injection → `devops/environment-config`
-- Logging → `observability/structured-logging-{dotnet,java,node}`
-- Tracing/metrics → `observability/opentelemetry-{dotnet,java,node}`
-- AWS equivalent → `devops/aws-deployment`

@@ -14,20 +14,6 @@ Owns **dev-side unit tests of Rust logic**: call a function or method directly, 
 
 Detect the toolchain and the test tooling already present: `cargo-nextest` (0.9.x), `rstest`, `proptest`, `mockall`, `insta` in `[dev-dependencies]`. **The repo's choice wins.** `assert_matches!` is stable from Rust 1.96 (`use std::assert_matches::assert_matches;` — it is not in the prelude). Below 1.96, use `matches!` inside `assert!` with a message.
 
-## When to use
-
-- A function or type `pattern-writer` produced has behaviour: a constructor that validates, a strategy `match`, a state transition, a calculation, a mapper, the `From<DomainError> for ApiError` mapping
-- Pinning a rule before a refactor
-- Reproducing a bug at unit level before fixing it (`dev:debugging`)
-- Time-dependent async logic (retry, timeout, debounce) under paused time
-
-## When NOT to use
-
-- Queries, migrations, transactions → integration lane (`database-code` → Testing the queries)
-- The router, extractors, middleware, status codes → integration lane / `qa-api-typescript` (black-box)
-- Benchmarks → `performance`
-- Types with no behaviour (DTOs, `Config` fields, derived impls) → don't test them
-
 ## Stack
 
 | Concern | Tool | Notes |
@@ -200,12 +186,3 @@ The standards a test must meet are the be-rust rule file `rust-tests.md`, not a 
 4. **Write the failing test**, watch it fail for the right reason (a `Gate: own tests` task may make that run), then make it pass.
 5. **Add the boundary cases** with `rstest`: zero, one, max, overflow, empty, every error variant.
 6. **Verify:** the tests pass, `cargo clippy --all-targets` is clean, and branch coverage of the change is ≥ 80%; report the counts and the figure. In a plan, `Gate: own tests` runs this task's tests and the coverage measure over its files; the last runnable task runs everything else.
-
-## Handoffs
-
-- A seam or type change → `pattern-writer`
-- Query and router tests → `database-code` → Testing the queries; black-box HTTP → `qa-api-typescript`
-- Timing semantics → `async-concurrency`
-- Benchmarks → `performance`
-- Review → `code-review`
-- .NET / Java / Node equivalents → `backend/{dotnet,java,node}/skills/unit-testing`

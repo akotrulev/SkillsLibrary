@@ -22,23 +22,6 @@ Owns the **route tree**: which file makes a screen, how screens nest and share c
 
 Detect: `expo-router` in `package.json` → this lane; `@react-navigation/native` without it → bare `[bare]`.
 
-## When to use
-
-- Adding a screen, a group, shared layout chrome, a tab bar
-- Reading typed params; navigating programmatically
-- Gating routes behind sign-in; modals and sheets
-- Configuring `scheme` and the linking surface
-- Diagnosing "layout remounts", "params are strings", "tab bar not native"
-
-## When NOT to use
-
-- Handling a push tap or system link payload → [`notifications-and-links`](../notifications-and-links/SKILL.md)
-- Scaffold, `app.config.ts` → [`project-setup`](../project-setup/SKILL.md)
-- What a route fetches → [`networking`](../networking/SKILL.md)
-- What an error route looks like → [`error-handling`](../error-handling/SKILL.md)
-- Auth provider wiring → `auth0-react-native`
-- Next.js routing → `fe-react:routing`
-
 ## File conventions
 
 Inside `src/app/`, **the file is the route**:
@@ -177,13 +160,3 @@ Only where Expo Router is not installed: `@react-navigation/native` + `@react-na
 ## Rules
 
 The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `react-native-routes.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
-
-## Handoffs
-
-- Push and system links → [`notifications-and-links`](../notifications-and-links/SKILL.md)
-- Screens and native patterns → [`ui-components`](../ui-components/SKILL.md)
-- Route-scoped state → [`architecture`](../architecture/SKILL.md)
-- Failure and not-found UI → [`error-handling`](../error-handling/SKILL.md)
-- `scheme`, plugins → [`project-setup`](../project-setup/SKILL.md)
-- `testID` on links and tabs → [`test-ids`](../test-ids/SKILL.md)
-- Router upgrade, bare → Expo → [`migration`](../migration/SKILL.md)

@@ -19,20 +19,6 @@ Wires Pact V4 into a Java 21 + Spring Boot 3 service via **Pact-JVM** for consum
 
 CDCT (HTTP + message) is the default and the strongest guarantee — the provider replays the consumer's real expectations. BDCT is the fallback when you cannot add Pact verification to the provider but it has an OpenAPI spec. The async path pairs with `qa/java/skills/messaging-testing` (which owns broker plumbing); Pact owns only the **message shape** contract, never the transport.
 
-## When to use
-
-- A Java 21 / Spring Boot 3 service consumes or produces an HTTP API and needs contract coverage.
-- Replacing brittle multi-service E2E tests with Pact-JVM verification.
-- Catching breaking changes at the Java producer side before they ship.
-- Pairing with `qa/_shared/contract-testing-pact` for Broker / `can-i-deploy` wiring.
-
-## When NOT to use
-
-- .NET consumer or provider → `qa/dotnet/skills/api-contract-testing`
-- TypeScript / Node consumer or provider → `qa/typescript/skills/api-contract-testing`
-- Live-service API tests (no contract) → `qa/java/skills/api-test-author/writer`
-- OpenAPI-only validation with no consumer-driven aspect → schema validation library
-
 ## Stack
 
 - **Runtime**: Java 21
@@ -445,15 +431,3 @@ GraphQL rides on HTTP — contract it as a CDCT HTTP interaction: `POST /graphql
 6. Wire provider CI: `./gradlew :{provider}-contract-tests:test` with `PACT_BROKER_*` / `GIT_SHA` / `BRANCH_NAME` env vars.
 7. Add `can-i-deploy` and `record-deployment` to both deploy pipelines (see `_shared`).
 8. Smoke a full cycle: change the contract on the consumer → fail provider verification → fix → success.
-
-## Handoffs
-
-- Cross-stack Broker / `can-i-deploy` / matchers concepts → `qa/_shared/contract-testing-pact`
-- .NET consumer/provider → `qa/dotnet/skills/api-contract-testing`
-- TypeScript consumer/provider → `qa/typescript/skills/api-contract-testing`
-- Live-service API tests → `qa/java/skills/api-test-author/writer`
-- Broker plumbing for async tests (produce/consume/assert against Kafka/SQS/RabbitMQ) → `qa/java/skills/messaging-testing`
-- GraphQL request/response envelope conventions → `qa/java/skills/api-test-author/graphql`
-- DTOs → `qa/java/skills/api-models`
-- CI pipeline syntax → `qa/cicd/java/skills/ci-pipelines` (its `references/<host>.md`) or `devops/<ci>`
-- Allure publishing for contract test results → `qa/reporting/java/skills/test-reports`

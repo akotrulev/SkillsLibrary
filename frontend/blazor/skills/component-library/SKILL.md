@@ -10,21 +10,6 @@ Picks and wires the UI component library that supplies your grids, dialogs, inpu
 
 **Version rule:** detect the `TargetFramework` first. Component libraries move fast against the Blazor render model — a library's static-SSR support and interactive-registration story differ by *library* version, and some capabilities (e.g. system-preference dark-mode watching, static-SSR-safe rendering) only exist in recent majors. Pin the library major to your `net8/net9/net10` target and read the reference's version notes. Never assume a net10 render-mode fix backported to the library version a net8 app is pinned to.
 
-## When to use
-
-- Choosing a component library for a new Blazor Web App (or justifying a change)
-- Wiring the chosen library's provider(s), theme, and services into an existing app
-- Adding a DataGrid, dialog, or snackbar/toast and needing the library-native way
-- Diagnosing why library components render dead under static SSR or don't survive prerender
-
-## When NOT to use
-
-- Hand-rolled styling, CSS isolation, `::deep`, design tokens → [`styling`](../styling/SKILL.md)
-- `data-testid` placement mechanics per library → [`test-ids`](../test-ids/SKILL.md) (its per-library attribute matrix is the companion to this one)
-- Atom/molecule/organism layering + when a molecule owns state → [`basics`](../basics/SKILL.md)
-- Forms + validation → [`forms`](../forms/SKILL.md)
-- Render-mode selection per surface → [`project-setup`](../project-setup/SKILL.md)
-
 ## The decision
 
 ```
@@ -83,12 +68,3 @@ The standards this skill's output must meet are the fe-blazor rule files, not a 
 - The DataGrid pages, sorts, and filters **server-side** (Network shows one page's rows, not the whole table).
 - Dark mode toggles from one control and follows system preference where supported.
 - `data-testid` set inline on a library control appears on the rendered root in DevTools.
-
-## Handoffs
-
-- CSS isolation, `::deep`, design tokens, dark-mode CSS plumbing, Tailwind-vs-isolation → [`styling`](../styling/SKILL.md)
-- `data-testid` per-library mechanics → [`test-ids`](../test-ids/SKILL.md)
-- Component layering (atom/molecule/organism), prop-drilling limits, when a molecule owns state → [`basics`](../basics/SKILL.md)
-- Render-mode selection per surface, provider placement in the layout → [`project-setup`](../project-setup/SKILL.md)
-- Forms/validation with library inputs → [`forms`](../forms/SKILL.md)
-- Theme palette/fonts source → `design/theme-presets` (loaded in agent Step 1)

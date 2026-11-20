@@ -12,20 +12,6 @@ In Rust, **`tracing` is the logging API**: an event (`info!`, `warn!`, `error!`)
 
 Read `Cargo.lock`: `tracing` 0.1 and `tracing-subscriber` 0.3 have had a stable API for years (0.1.44 / 0.3.23 as of 2026-10). A project on `env_logger`, `slog` or `log4rs` keeps it unless the task is the migration. Flag it, because none of those carry span context to OpenTelemetry.
 
-## When to use
-
-- A service printing with `println!` or logging unstructured text
-- Choosing fields, levels, and messages for new code
-- Logs reaching Loki without `trace_id`, or with secrets in them
-- Configuring verbosity per module with `RUST_LOG`
-- Panics that vanish without a log line
-
-## When NOT to use
-
-- Spans, metrics, OTLP export, the registry → `observability/opentelemetry-rust`
-- Loki, Collector pipelines → `observability/logs-traces-setup`
-- LogQL → `observability/queries`
-
 ## The stdout layer — `src/logging.rs`
 
 ```rust
@@ -144,10 +130,3 @@ Tests do not assert on logs (`unit-testing`). To see logs while debugging a test
 3. Add `skip_all` to every existing `#[instrument]` and name the fields.
 4. Install the panic hook in `main`.
 5. Check one request's log lines in Loki carry `trace_id`, and that no secret appears in a sample of lines.
-
-## Handoffs
-
-- Registry, spans, OTLP export → `observability/opentelemetry-rust`
-- Shipping logs to Loki → `observability/logs-traces-setup`
-- LogQL → `observability/queries`
-- .NET / Java / Node equivalents → `observability/structured-logging-{dotnet,java,node}`

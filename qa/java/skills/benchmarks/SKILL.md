@@ -23,13 +23,6 @@ faster or leaner than A?" and "did this change make the hot path slower?".
 A microbenchmark result is a ratio between alternatives on one machine and one JDK, never a production latency
 number.
 
-## When NOT to use
-
-- Endpoint latency, throughput, soak, spike → `load-testing`
-- Fault tolerance under slow dependencies → `failure-injection-testing`
-- Correctness of the code being measured → unit tests first (`be-java` `unit-testing`); benchmark only code that
-  is already tested
-
 ## Inputs needed
 
 1. The method(s) to measure and the alternative or baseline to compare against.
@@ -217,7 +210,6 @@ python3 ci/compare-benchmarks.py "$BASELINE_DIR/jmh-results.json" "$RUNNER_TEMP/
 import json
 import sys
 
-
 def load(path):
     with open(path, encoding="utf-8") as report:
         runs = json.load(report)
@@ -227,7 +219,6 @@ def load(path):
         allocated = run["secondaryMetrics"].get("gc.alloc.rate.norm", {"score": 0.0})["score"]
         results[f"{run['benchmark']}({params})"] = (run["primaryMetric"]["scorePercentiles"]["50.0"], round(allocated))
     return results
-
 
 baseline, current, threshold = load(sys.argv[1]), load(sys.argv[2]), float(sys.argv[3])
 failures = []
@@ -294,10 +285,3 @@ reading ("`loopSum` is 0.53× `streamSum` at 1,000 lines and allocates 168 B les
   few nanoseconds of nothing.
 - **`@Fork(0)` to make it faster** — one polluted JVM; the numbers do not transfer.
 - **Gating on time on shared CI runners** — the gate fails on noise and gets disabled; gate allocations there.
-
-## Handoffs
-
-- Endpoint load and SLOs → `load-testing`, `qa/_shared/performance`
-- Where the time goes → `qa/_shared/performance/references/profiling.md`
-- The CI job and artifact upload → `qa/cicd/java/skills/ci-pipelines`
-- Making the benchmarked code testable / tested → `be-java` `unit-testing`

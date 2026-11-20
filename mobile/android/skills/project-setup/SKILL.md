@@ -32,23 +32,6 @@ Read `gradle/libs.versions.toml`, `gradle/wrapper/gradle-wrapper.properties`, ev
 
 Targeting 36 turns on predictive back and ignores orientation / resizability locks on ≥ sw600dp (no opt-out at 37). An existing app that targets 35 keeps working; raising it is [`mobile-android:migration`](../migration/SKILL.md)'s, one level at a time.
 
-## When to use
-
-- Creating an Android app, or hardening one that has only the template's defaults
-- "Kapt fails after the AGP upgrade", "which plugin do I apply?", "set up the version catalog"
-- Adding detekt / ktlint, R8 full mode, a second module or a convention plugin
-- Making the activity edge-to-edge and the back gesture predictive
-
-## When NOT to use
-
-- Signing, Play track upload, CI YAML → `mobile-<stack>:release`, `devops-engineer`
-- State ownership, ViewModels, DI → [`architecture`](../architecture/SKILL.md)
-- Composables → [`ui-components`](../ui-components/SKILL.md); routes → [`navigation`](../navigation/SKILL.md)
-- AGP 8 → 9, kapt → KSP, targetSdk raises → [`migration`](../migration/SKILL.md)
-- Baseline Profiles, Macrobenchmark → [`performance`](../performance/SKILL.md)
-- Kotlin Multiplatform modules → [`kotlin-multiplatform`](../kotlin-multiplatform/SKILL.md)
-- iOS or React Native setup → `mobile-ios:project-setup`, `mobile-react-native:project-setup`
-
 ## Inputs needed
 
 - Application id, flavors / environments, `minSdk` (default 24)
@@ -195,13 +178,3 @@ The standards this skill's output must meet are the mobile-android rule files, n
 - [ ] Release type: minify + shrink on, no blanket keep rule
 - [ ] `.editorconfig`, `detekt.yml`, `lint.xml` committed
 - [ ] `enableEdgeToEdge()` and `enableOnBackInvokedCallback` present; no orientation lock
-
-## Handoffs
-
-- State, ViewModels, DI, modules → [`architecture`](../architecture/SKILL.md)
-- Kotlin standard → [`basics`](../basics/SKILL.md)
-- Signing, Play, CI → `mobile-<stack>:release`
-- AGP 8 → 9, kapt → KSP → [`migration`](../migration/SKILL.md)
-- Startup and R8 verification → [`performance`](../performance/SKILL.md)
-- Dependency and manifest security → `mobile-<stack>:security`
-- Test ids → [`test-ids`](../test-ids/SKILL.md)

@@ -15,19 +15,6 @@ Two jobs, both about the boundary between a plan and the sessions that run it.
 
 **Prerequisites:** a task list from `dev:plan-delivery` with `Files` filled in, and `epic-map.md` for the lane structure. Sizing a task whose files are vague produces a number with nothing behind it.
 
-## When to use
-
-- Step 8 of a `solution-planner` run — sizing the authored tasks and writing the prompt blocks
-- Whenever a task is added, split, or re-scoped and its estimate needs re-deriving
-- After a task completes — the plan's `## Close-out — every task` (plan format §7) is the procedure; Step 5 says what this skill adds to it
-- From `dev:plan-feature`, for the same sizing question on a non-`solution-planner` plan
-
-## When NOT to use
-
-- Deciding the order tasks run in → `dev:plan-delivery`
-- Deciding which epics run at the same time → `dev:plan-epic-map`
-- Actually running a task → the named stack agent, one prompt block per session through Plan Queue
-
 ## Output
 
 Two things, both **inside the plan document** — `docs/plans/<NNN>-<initiative>/delivery-plan.md`, or the single-file plan an `dev:plan-feature` run produced:
@@ -229,15 +216,6 @@ The standards the `**Budget:**` lines and the prompt blocks must meet (drivers i
 7. `## Close-out — every task` sits directly above `## Prompts — one per task`, verbatim from plan format §7; every block names it last in its reading list and ends with its close-out line; and the block that will delete the **last** one is the one the filing falls to.
 8. Blocked tasks appear with their blocker and its owner.
 9. A plan that serves stories has its `TD` blocks (the test plan, then the test cases) above the `Q` blocks, each `Gate: none` with its reason; the last block is `DOC1`, the documenter agent, with the doc lint as its gate, or the header says why there is none.
-
-## Handoffs
-
-- **← `dev:plan-feature`** — owns the plan document format these prompts live in (`engineering-practices/writing-plans/references/plan-format.md` §6). Where the two disagree on the shape, that reference wins.
-- **← `dev:plan-delivery`** — supplies the tasks, their files, their streams and their order. Sizing feeds straight back into how those tasks are written.
-- **← `dev:plan-epic-map`** — supplies the lanes and the current wave, which is what decides who gets a prompt block.
-- **→ `be-dotnet` / `be-java` / `be-node` / `be-python` / `be-rust` / `fe-react` / `fe-blazor`** — consume the prompt blocks and run the plan's `## Close-out — every task` when their task lands.
-- **→ plan format §7** — the `## Close-out — every task` section every plan carries, copied verbatim by Step 5.
-- **→ `dev:plan-feature`** — uses Step 1 and Step 2 for the same sizing question on plans that never went through `solution-planner`.
 
 ## Version policy
 

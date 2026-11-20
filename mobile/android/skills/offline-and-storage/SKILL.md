@@ -22,23 +22,6 @@ Owns **where data lives on the device and how it syncs**: the database, preferen
 
 **A project with `androidx.room` imports is a Room 2.8 project — do not rewrite it to Room 3 as a side effect.** `kapt` is never added for Room; Room 2.8 on KSP is the lane.
 
-## When to use
-
-- Choosing where a value goes; adding a table, DAO or migration
-- Storing a token, a key or other secret
-- "It must work offline", an outbox of pending writes, sync on reconnect
-- Caching responses, images, a draft
-- Replacing `EncryptedSharedPreferences`
-
-## When NOT to use
-
-- The HTTP call, retries, refresh logic → [`networking`](../networking/SKILL.md)
-- Offline indicator, stale marker, banner → `mobile-android:error-handling`
-- State ownership → [`architecture`](../architecture/SKILL.md)
-- Long-running, foreground, exact-time work → `mobile-android:system-integration`
-- Room 2 → 3, `EncryptedSharedPreferences` migration steps → `mobile-android:migration`
-- Another stack → `mobile-ios:offline-and-storage`, `mobile-react-native:offline-and-storage`
-
 ## Where does it go?
 
 | Data | Home | Notes |
@@ -204,13 +187,3 @@ The standards this skill's output must meet are the mobile-android rule files, n
 - Airplane mode: the screen shows cached rows marked stale; a queued write drains after reconnect exactly once; the process killed mid-write leaves a consistent database.
 - `adb shell run-as <package>` shows no plaintext token in `shared_prefs` or `databases`; a backup/restore dry run (`bmgr`) excludes them.
 - Dev-side tests: [`mobile-android:unit-testing`](../unit-testing/SKILL.md).
-
-## Handoffs
-
-- Request, refresh, retries → [`networking`](../networking/SKILL.md)
-- Stale marker, banner, storage-degraded copy → `mobile-android:error-handling`
-- Biometric-bound keys → [`device-features`](../device-features/SKILL.md)
-- Foreground services, exact work → `mobile-android:system-integration`
-- Keystore, backup, WebView data rules → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
-- Room 2 → 3, `EncryptedSharedPreferences` replacement → `mobile-android:migration`
-- Account deletion data purge → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)

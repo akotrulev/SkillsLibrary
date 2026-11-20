@@ -8,19 +8,6 @@ disable-model-invocation: true
 
 Generator skill. Scaffolds a single DTO file in the Accelerator `ApiTests` project.
 
-## When to use
-
-- A new endpoint needs request/response models for the matching client.
-- An existing endpoint added/changed fields and the DTO must be extended.
-- A response envelope (pagination, wrapper) is needed.
-
-## When NOT to use
-
-- Java or TypeScript DTOs — use `qa-java:api-models` / `qa-typescript:api-models`.
-- Production domain models — DTOs here exist only for the test project.
-- Writing the client itself — use `qa-dotnet:api-client-writer`.
-- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa-<stack>:api-spec-assets`: it replaces the stored spec asset in place, derives the changed-DTO work list from `git diff`, and comes back here for only the files that list names. Do not re-generate every DTO because the spec moved.
-
 ## Folder & naming convention
 
 ```

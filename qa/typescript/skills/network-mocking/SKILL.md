@@ -53,10 +53,3 @@ with no compile-time check, and the layer is Chromium-only. Use the proxy only w
 - Mock payloads are typed and come from builders or fixture files (`qa/typescript/skills/test-data-builder`),
   not inline blobs repeated across tests.
 - Every handler promise is awaited or returned.
-
-## Handoffs
-
-- Page objects, fixtures and the canonical config → `qa/typescript/skills/ui-test-author/playwright`
-- Streams → `qa/typescript/skills/realtime-stream-testing`; HAR recording → `qa/typescript/skills/evidence-capture`
-- No browser at all → `qa/typescript/skills/api-test-author/writer`
-- Java and .NET → `qa-java:network-mocking`, `qa-dotnet:network-mocking`

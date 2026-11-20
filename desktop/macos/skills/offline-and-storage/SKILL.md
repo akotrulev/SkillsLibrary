@@ -23,23 +23,6 @@ macOS 27: access to **other teams'** app containers and app-group containers is 
 
 Detect the existing persistence first (SwiftData, Core Data, GRDB, a JSON file). **Match it; never add a second store.**
 
-## When to use
-
-- Choosing where a value, a cache or a file goes
-- A SwiftData or GRDB model, a migration, a store that will not open
-- Storing a token or key, `UserDefaults` for a preference
-- An offline write queue; a full disk; a database in the wrong folder
-
-## When NOT to use
-
-- A user-visible file document, autosave, versions, iCloud documents → [`documents`](../documents/SKILL.md)
-- Access to files the user owns outside the container → [`sandbox-and-permissions`](../sandbox-and-permissions/SKILL.md)
-- The request, retry, token refresh → [`networking`](../networking/SKILL.md)
-- Rendering the stale or failed state → `error-handling`
-- State ownership in views → [`architecture`](../architecture/SKILL.md)
-- Secrets policy, encryption choices → `desktop/_shared/security`
-- iOS → `mobile-ios:offline-and-storage`; Windows → `desktop-windows:offline-and-storage`
-
 ## Where does it go?
 
 | Data | Home | Why |
@@ -182,12 +165,3 @@ Standards come from `.claude/rules/desktop-macos/` (`/desktop-macos:rules` insta
 - **A `@Model` passed to a background actor**: use identifiers.
 - **A token "temporarily" in `UserDefaults`**: it ships.
 - **Reading another app's container on 27**: denied with no prompt; use an app group.
-
-## Handoffs
-
-- Documents, autosave, iCloud files → [`documents`](../documents/SKILL.md)
-- Files outside the container → [`sandbox-and-permissions`](../sandbox-and-permissions/SKILL.md)
-- Requests and idempotency keys → [`networking`](../networking/SKILL.md)
-- Stale and failed states, the banner → `error-handling`
-- Encryption and secrets policy → `desktop/_shared/security`
-- iOS counterpart → `mobile-ios:offline-and-storage`

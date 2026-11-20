@@ -21,21 +21,6 @@ Owns the work the app does **when its UI is not the thing running**: deferrable 
 
 Sources read 2026-10-10: developer.android.com/jetpack/androidx/releases/{work,glance}, /develop/background-work/services/fgs/service-types, /about/versions/17/behavior-changes-17, /about/versions/17/changes/bg-audio. **Not verified:** the Glance widget refresh API details beyond the stable version — read the Glance release page and sample before quoting a signature.
 
-## When to use
-
-- Syncing, uploading, cleaning up — work that must survive the process
-- A task the user started that must continue visibly (a download, a recording, a call, playback)
-- A home-screen widget, an app shortcut, a pinned shortcut
-- A reminder or an alarm at a time
-
-## When NOT to use
-
-- Push registration, channels, tap routing, `PendingIntent` rules → [`notifications-and-links`](../notifications-and-links/SKILL.md)
-- What is stored and how it is synced → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Camera, location, microphone permissions → [`device-features`](../device-features/SKILL.md)
-- Play declarations as policy → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Another stack → `mobile-ios:system-integration`, `mobile-react-native:device-features`
-
 ## Choosing the mechanism
 
 | Need | Use | Not |
@@ -163,12 +148,3 @@ Compose-style widgets with Glance (`glance-appwidget` 1.2.0, `glance-material3` 
 - [ ] `canScheduleExactAlarms()` is false in a test: the reminder falls back, the UI explains
 - [ ] The widget shows loading, loaded and failed; bitmaps are under the combined budget
 - [ ] Dev-side tests: workers with `TestListenableWorkerBuilder` and fakes; device journeys are `qa-mobile-*`'s
-
-## Handoffs
-
-- Push, channels, tap routing, immutable `PendingIntent` → [`notifications-and-links`](../notifications-and-links/SKILL.md)
-- Offline-first repositories the worker calls → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Location, camera, microphone permission flows → [`device-features`](../device-features/SKILL.md)
-- Play declarations and restricted permissions → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Wake locks, vitals, tracing → [`performance`](../performance/SKILL.md)
-- Dev-side worker tests → [`unit-testing`](../unit-testing/SKILL.md)

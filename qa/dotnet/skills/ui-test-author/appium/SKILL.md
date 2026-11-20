@@ -25,18 +25,6 @@ Scaffolds Appium page objects and NUnit mobile UI tests in C#, mirroring the Jav
 - **NUnit stays 4.x (D18).** NUnit 5 changes `Assert.ThrowsAsync` to return a `Task` that must be awaited, and `Allure.NUnit` 2.15 on NUnit 5 is unverified. Do not move a project to NUnit 5 as a side effect.
 - A device cloud that still runs Appium 2 keeps the project on the supported lane; `device-cloud` says how to check.
 
-## When to use
-
-- New page object under `AppiumTests/Pages/`, a scoped component (list row, card, sheet), or an NUnit test under `AppiumTests/Tests/`
-- Gestures, WebView switching, app state or failure evidence in an Appium C# suite
-
-## When NOT to use
-
-- Appium Java → `qa/java/skills/ui-test-author/appium`; TypeScript → `qa/typescript/skills/ui-test-author/appium`
-- Selenium / web → `qa/dotnet/skills/ui-test-author/selenium` or `…/playwright`
-- Reviewing an existing page object → `qa/dotnet/skills/ui-test-author/review`
-- Designing the whole POM architecture → `qa/dotnet/skills/page-object-design`
-
 ## Inputs needed
 
 1. **Screen name** (PascalCase) and **platform** — Android, iOS or both
@@ -124,23 +112,3 @@ A visible element missing from the page source is usually an accessibility, app-
 Never use `appium_generate_tests`: it records the scenario through MCP calls and emits one flat test with the
 locators inline (its code templates are Java PageFactory), bypassing the screen objects. Locators come from
 `mobile-screen-explorer`; the code comes from this skill's assets.
-
-## Handoffs
-
-- Selectors on the live app → `qa/dotnet/skills/mobile-screen-explorer`
-- A class from an inventory → `qa/dotnet/skills/mobile-screen-objects`
-- POM architecture → `qa/dotnet/skills/page-object-design`
-- Test data → `qa/dotnet/skills/test-data-builder`
-- Failure evidence → `qa/dotnet/skills/evidence-capture`
-- Allure → `qa/reporting/dotnet/skills/test-reports`
-- Cloud farms → `qa/dotnet/skills/device-cloud`
-- Review → `qa/dotnet/skills/ui-test-author/review`
-- Formal test cases → the `qa-test-case-designer` agent
-
-## Cross-references
-
-- Java sibling (TestNG + `io.appium:java-client` 11) → `qa/java/skills/ui-test-author/appium`
-- TypeScript sibling (WebdriverIO 10 + `@wdio/appium-service`) → `qa/typescript/skills/ui-test-author/appium`
-- Web UI (.NET) → `qa/dotnet/skills/ui-test-author/selenium`, `qa/dotnet/skills/ui-test-author/playwright`
-- Cloud device grid (BrowserStack / Sauce / Device Farm) → `qa/dotnet/skills/device-cloud`
-- Network capture for non-Playwright stacks → `qa/dotnet/skills/network-mocking`

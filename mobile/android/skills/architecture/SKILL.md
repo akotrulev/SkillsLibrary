@@ -21,22 +21,6 @@ Google's recommended architecture (2026-10-05), applied with the house rules: a 
 
 A down-level project is not flagged for lacking 2.4's backing field. Kotlin standard and Flow rules are [`basics`](../basics/SKILL.md).
 
-## When to use
-
-- A feature must hold state, survive rotation or process death, or share state across screens
-- "Do I need a ViewModel?", "where does this repository live?", "how do I show a snackbar?"
-- Choosing Hilt vs manual DI; deciding whether a module or use case is earned
-
-## When NOT to use
-
-- Retrofit / Ktor clients, retries, token refresh → `mobile-android:networking`
-- Room / DataStore / Keystore → `mobile-android:offline-and-storage`
-- Route types and back stack → [`navigation`](../navigation/SKILL.md)
-- Composable structure → [`ui-components`](../ui-components/SKILL.md)
-- Form state and validation → `mobile-android:forms`
-- Gradle and modules' build files → [`project-setup`](../project-setup/SKILL.md)
-- Another stack → `mobile-ios:architecture`, `mobile-react-native:architecture`
-
 ## Inputs needed
 
 - Compose or Views (Views → [`views-interop`](../views-interop/SKILL.md)); Hilt / Koin / manual already in place
@@ -156,13 +140,3 @@ The standards this skill's output must meet are the mobile-android rule files, n
 - [ ] `rg -n "collectAsState\(\)|SharedFlow|Channel<" -g '*.kt'` finds nothing in ViewModel-to-UI position
 - [ ] Process-death restore tried: kill the process, return, state reloads
 - [ ] No `lateinit` dependency, no `.shared`, no locator; Hilt (if any) uses `ksp`
-
-## Handoffs
-
-- Flow and coroutine rules → [`basics`](../basics/SKILL.md)
-- Composables and state hoisting → [`ui-components`](../ui-components/SKILL.md)
-- Routes, entry-scoped ViewModels → [`navigation`](../navigation/SKILL.md)
-- Persistence and sync → `mobile-android:offline-and-storage`
-- Failure rendering, process-death restore tests → `mobile-android:error-handling`
-- Fakes and `runTest` → [`unit-testing`](../unit-testing/SKILL.md)
-- LiveData → Flow, Dagger → Hilt → [`migration`](../migration/SKILL.md)

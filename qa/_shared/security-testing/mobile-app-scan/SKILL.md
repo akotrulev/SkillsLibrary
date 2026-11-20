@@ -94,18 +94,3 @@ Every report line carries `MASVS: <control-ids>` + `MASTG: <test-ids>`, the way 
   value, and the decompiled tree (which contains the recovered strings) is not committed under `docs/`.
 - **This is a SAFE gate** — no device, no network, no payloads — so it wires into CI like `code-scan`. It
   carries **no** authorization gate (that is `mobile-runtime-testing`'s, for the device half).
-
-## Related skills & peers
-
-- **`mobile-runtime-testing`** — the dynamic/device half; the AUTH/NETWORK/RESILIENCE controls this skill
-  carves out. Static findings ("the manifest claims cleartext is allowed for `api.example.com`") become
-  runtime hypotheses to prove there ("and here is the intercepted cleartext request").
-- **`qa/_shared/security`** — the OWASP/MAS backbone (load alongside).
-- **`qa-mobile-<stack>`** *(peer, not loaded)* — owns the functional mobile suite + page/screen objects; a
-  confirmed vuln becomes a bug report through `qa-test-case-designer`'s `bug-report-writer`; the fix goes to `mobile-react-native` / `mobile-ios` / `mobile-android`. For a native desktop app the fix goes to `desktop-macos` / `desktop-windows`.
-- **`mobile-app-crawler` / `mobile-screen-explorer`** *(peers)* — drive the live app to enumerate screens;
-  they map *functionality*, this maps *security posture* of the binary.
-- **`dependency-scan` (`<stack>`)** — mobile third-party library CVEs from the build graph; this skill owns
-  the binary/manifest, not the lockfile.
-- **CI owner** — the static gate rides the **build pipeline** (`devops/{github-actions,gitlab-ci,azure-pipelines}`
-  or `qa/cicd/<stack>` per the existing fence), not a device farm.

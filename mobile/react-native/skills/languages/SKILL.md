@@ -21,21 +21,6 @@ Two jobs: **localization** (swap the text via catalogs) and **globalization** (f
 
 Detect the installed i18n library first; never add a second.
 
-## When to use
-
-- Adding a language, or setting up localization from nothing
-- Dates, money, numbers and plurals that look wrong in another locale
-- An RTL language (Arabic, Hebrew, Persian, Urdu)
-- A language switcher, or following the device / per-app language
-- Purpose strings, app name and store listing text per language
-
-## When NOT to use
-
-- Wording, tone, microcopy → [`design:ux-writing`](../../../../design/ux-writing/SKILL.md)
-- Font scaling, dynamic type, screen-reader language → [`accessibility`](../accessibility/SKILL.md)
-- Layout mirroring mechanics, logical styles → [`styling`](../styling/SKILL.md)
-- The web app's locale routing → [`fe-react:i18n`](../../../../frontend/react/skills/languages/SKILL.md)
-
 ## The shared half: catalogs and the translate function
 
 - **Catalogs are the source of truth**: `locales/<lng>/<namespace>.json` (i18next) or `.po` / compiled catalogs (Lingui). Keys are **stable ids** (`orders.empty.title`), never the English sentence in i18next; Lingui's message-id-from-source is acceptable because the macro compiles it — pick one and keep it.
@@ -143,13 +128,3 @@ The standards this skill's output must meet are the mobile-react-native rule fil
 - An RTL language mirrors layout, back arrows and the swipe-back direction; logos do not mirror; no `marginLeft` hits (`rg`, P6).
 - A list of 500 priced rows scrolls without constructing a formatter per row.
 - Plural forms read correctly for 0, 1, 2, 5 in a language with several categories.
-
-## Handoffs
-
-- Wording and tone of source copy → [`design:ux-writing`](../../../../design/ux-writing/SKILL.md)
-- Logical properties, mirrored styles → [`styling`](../styling/SKILL.md)
-- Dynamic type, screen-reader language → [`accessibility`](../accessibility/SKILL.md)
-- Persisting the choice → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Localized permission strings → [`device-features`](../device-features/SKILL.md)
-- Store listings per locale → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
-- Catalog and hoisting checks in review → [`code-review`](../code-review/SKILL.md)

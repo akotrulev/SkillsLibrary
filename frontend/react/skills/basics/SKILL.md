@@ -24,25 +24,6 @@ React 19 idioms are the primary recipes; React 18 equivalents are kept as explic
 
 Next.js: 15 (App Router, async request APIs, `cache` semantics) is primary; 14 is the tagged fallback. The Pages Router is legacy — the App Router recipes below assume `app/`.
 
-## When to use
-
-- "What's the right state pattern for X in React?"
-- "Should this be a Server or a Client Component?"
-- "Where does the `'use client'` boundary go?"
-- "What does `use()` / `useActionState` / `useOptimistic` do?"
-- Comparing two React approaches conceptually
-
-## When NOT to use
-
-- Scaffolding a component/hook → [`component-writer`](../component-writer/SKILL.md)
-- Reviewing → [`code-review`](../code-review/SKILL.md)
-- Where files live on disk → [`project-setup`](../project-setup/SKILL.md)
-- Picking a state library in depth → [`state-management`](../state-management/SKILL.md)
-- Blazor → `frontend/blazor/skills/basics`
-- Auth0 in React → `auth/auth0-react`
-
----
-
 ## The rendering model — Server vs Client Components
 
 On the App Router, **components are Server Components by default.** They run on the server (at build or per request), never ship to the browser, can be `async` and `await` data directly, and hold no state or effects. A component becomes a **Client Component** only when a file (or one it's imported from) carries the `'use client'` directive — then it and everything it imports ship to the browser and hydrate.
@@ -212,12 +193,3 @@ A Client Component renders **on the server (prerender)** and **again in the brow
 ## Common gotchas
 
 The gotchas a beginner hits (defensive `'use client'`, `await` in a Client Component, browser reads in render, index keys, effect-synced state, missing cleanup, server data in a client store, a Client Component importing a Server Component) are rules in the fe-react core rule file `react.md`, with their severities. Read the project's copy in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does).
-
-## Handoffs
-
-- Scaffolding components/hooks/pages → [`component-writer`](../component-writer/SKILL.md)
-- Reviewing React code → [`code-review`](../code-review/SKILL.md)
-- Picking a state library → [`state-management`](../state-management/SKILL.md)
-- Data fetching / Server Actions → [`data-fetching`](../data-fetching/SKILL.md); forms → [`forms`](../forms/SKILL.md)
-- Where files live → [`project-setup`](../project-setup/SKILL.md)
-- Auth0 wiring → `auth/auth0-react`

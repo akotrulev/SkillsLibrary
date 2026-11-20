@@ -22,20 +22,6 @@ Owns how the outside world gets into the app: **push and local notifications** (
 
 Detect whether the project sends through Expo Push or straight APNs / FCM; keep it — do not add a second sender.
 
-## When to use
-
-- Registering for push, storing the token, receiving and tapping a notification
-- Local reminders and scheduled notifications
-- A link from mail, SMS, the web or a QR code that must open an in-app screen
-- Setting up `apple-app-site-association` / `assetlinks.json` and the app side of both
-
-## When NOT to use
-
-- Camera, location, biometrics → [`device-features`](../device-features/SKILL.md)
-- The route tree, protected routes, typed `href` → [`navigation`](../navigation/SKILL.md)
-- Sending from a backend → the project's `be-*` agent; this skill owns the token's lifecycle on the device and the receive side
-- Store declarations → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-
 ## Notification permission — the same lifecycle, plus Android 13+
 
 The pre-prompt, the four states and the denied screen from [`device-features`](../device-features/SKILL.md#the-permission-lifecycle-hard-rules) apply. Notification-specific traps:
@@ -143,13 +129,3 @@ Expo Router turns a URL into a route: `https://example.com/orders/42` opens `app
 - A payload with an unknown `screen` or a non-UUID id lands on home, with nothing opened.
 - `xcrun simctl openurl booted "https://example.com/orders/<id>"` and the `adb` command open the order screen on a release-signed build.
 - Sign out: the token no longer appears on the backend for the device.
-
-## Handoffs
-
-- Hardware permission pattern, location, camera → [`device-features`](../device-features/SKILL.md)
-- Routes, protected layouts, typed `href`, `+native-intent` placement → [`navigation`](../navigation/SKILL.md)
-- Payload / link validation rules, allow-lists, WebView → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
-- Exact alarms, notification disclosures, Data safety → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)
-- Token storage on the device → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Push-sending service, device-token table → the project's `be-*` agent
-- Link and push journeys on a device → `qa-mobile-typescript` (peer)

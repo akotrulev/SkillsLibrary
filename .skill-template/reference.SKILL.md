@@ -8,17 +8,6 @@ disable-model-invocation: true
 
 # <Skill Title>
 
-## When to use
-
-- The user asks for an explanation of a concept
-- The user wants to compare two patterns
-- The user wants canonical example code, not scaffolding into their repo
-
-## When NOT to use
-
-- The user wants code generated into their project — defer to the generator skill
-- The user wants their code critiqued — defer to the reviewer skill
-
 ## Pattern card format
 
 For each concept covered, use this structure:

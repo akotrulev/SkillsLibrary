@@ -21,19 +21,6 @@ Read `dotnet.md`, plus each other file whose `paths:` match a file under review,
 
 Detect every reviewed project's `<TargetFramework>` first. Do not flag a net8/net9 project for lacking a net10-only API; do flag a net10 project that ignores one available to it, at the severity its rule carries. The rule file's "the codebase wins" line applies: a convention the project follows consistently is not a finding.
 
-## When to use
-
-- A diff or file submitted for review: a service, handler, DI registration, decorator, repository, endpoint
-- A pre-merge gate on a change touching `Application/`, `Infrastructure/`, `Program.cs` or a `*Module.cs`
-- A second opinion on whether a pattern earns its complexity, or a smell that needs naming
-
-## When NOT to use
-
-- Conceptual lookup → `backend/dotnet/skills/pattern-guide`
-- Generating new code → `backend/dotnet/skills/pattern-writer`
-- A whole service, saved as a re-runnable report → `backend/dotnet/skills/standards-audit`
-- Test-suite review → `qa-dotnet:api-tests-review` / `qa-dotnet:ui-tests-review`
-
 ## Procedure
 
 1. Read the rule files, then each changed file end to end.
@@ -53,10 +40,3 @@ Detect every reviewed project's `<TargetFramework>` first. Do not flag a net8/ne
 ```
 
 End with one line: `Rules: project .claude/rules/be-dotnet/ | plugin copy (not installed)`.
-
-## Handoffs
-
-- Need a rewrite → `backend/dotnet/skills/pattern-writer`
-- Conceptual lookup → `backend/dotnet/skills/pattern-guide`
-- A rule is missing or wrong → edit the project's `.claude/rules/be-dotnet/`; for every project, the plugin's `backend/dotnet/skills/rules/`
-- Cross-stack architecture critique → `backend/_shared/code-review`

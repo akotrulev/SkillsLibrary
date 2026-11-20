@@ -31,22 +31,6 @@ shipped in; on an older project, check the tag before teaching the API.
 | Visual baselines and screenshot assertions | `qa/typescript/skills/visual-regression` |
 | HAR replay (`routeFromHAR`) | `qa/typescript/skills/network-mocking` |
 
-## When to use
-
-- A suite needs failure evidence, or its evidence is missing, too heavy or in the wrong place.
-- A test or a demo needs a deliberate recording: a bug repro, a walkthrough, an agent's "receipt" of what
-  it did.
-- An agent drives Playwright MCP or `playwright-cli` and must leave screenshots, a video or a trace behind.
-- A test failed and its trace must be read before anything changes.
-
-## When NOT to use
-
-- Writing specs, page objects, fixtures or the config → `qa/typescript/skills/ui-test-author/playwright`
-- Allure adapter, labels, history, publish → `qa/reporting/typescript/skills/test-reports`
-- `toHaveScreenshot` baselines → `qa/typescript/skills/visual-regression`
-- Mocking or replaying network → `qa/typescript/skills/network-mocking`
-- Pipeline YAML → `qa/cicd/typescript/skills/ci-pipelines`
-
 ## The three kinds of capture
 
 | Kind | Who starts it | API | Lands in |
@@ -197,11 +181,3 @@ the browser without uploading it.
 - The Appium evidence lives in `BaseTest.ts` only; a recording is never kept for a passing test or recorded
   locally on a device farm.
 - Nothing captured is committed; nothing real is recorded.
-
-## Handoffs
-
-- The config and the base fixtures → `qa/typescript/skills/ui-test-author/playwright`; the mobile base test → `qa/typescript/skills/ui-test-author/appium`
-- Allure mapping of the evidence → `qa/reporting/typescript/skills/test-reports`
-- Upload paths and retention → `qa/cicd/typescript/skills/ci-pipelines`, `qa/cicd/ci-conventions`
-- Visual diffs → `qa/typescript/skills/visual-regression`
-- HAR replay → `qa/typescript/skills/network-mocking`

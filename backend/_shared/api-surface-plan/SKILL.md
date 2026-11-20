@@ -14,18 +14,6 @@ The document has two audiences and both matter: the `be-<stack>` agent that impl
 
 **Read `references/validation-catalog.md` before writing any endpoint block.** It is the standard set every endpoint inherits, and the per-endpoint blocks are only meaningful as deltas against it.
 
-## When to use
-
-- Step 4 of a `solution-planner` run (after the experience plan, which is skipped when nothing is user-facing)
-- A new functional area adds endpoints to an existing API (`EXTEND` — plan the delta, inherit the existing envelope and conventions)
-- An existing API needs its contract documented as the baseline for planned changes (`RESUME` — read routes and DTOs out of the code, mark `#confirmed`, then plan the delta)
-
-## When NOT to use
-
-- The project already keeps a committed OpenAPI/Swagger asset and the ask is to update from a newer spec → `qa/_shared/api-spec-assets` owns that diff-driven lane
-- The ask is to implement or to test the endpoints → `be-<stack>` / `qa-api-<stack>`
-- The protocol is GraphQL or gRPC → the three-level table still works (service → type/service → operation), but the envelope rules differ; note it and keep the error semantics native to the protocol (`{data,errors}` / gRPC status codes), not HTTP status codes translated badly
-
 ## Output
 
 **`docs/plans/<NNN>-<initiative>/api-surface.md`** in the initiative folder.
@@ -208,16 +196,6 @@ The per-endpoint blocks then carry deltas only.
 8. Every table in `data-model.md` is written or read by at least one endpoint, background job, or integration — list any orphans; a deliberately internal table counts, named as such.
 9. When `experience-plan.md` exists: every §4 data need resolves to a response field, and §5 is filled — every user-facing endpoint on at least one screen, or named machine-to-machine.
 9. The validation catalog is copied into the initiative folder and the plan cites the copy, not the skill's `references/` path.
-
-## Handoffs
-
-- **→ `dev:plan-experience`** — hand back its §5 screen ↔ endpoint matrix, filled.
-- **→ `dev:plan-integrations`** (Step 5). Any endpoint that calls out to a third party names it there.
-- **→ `be-<stack>` agents** — `api-models` equivalents and controllers/handlers come from these tables.
-- **→ `qa-api-<stack>`** — this is the contract-test basis. The standard validation set is the negative-test matrix; the endpoint table is the positive one.
-- **→ `qa-security`** — the Auth column is the BOLA/IDOR/BFLA permission matrix.
-- **→ `fe-react` / `fe-blazor`** — the response shapes and the error envelope are what their data-fetching and error-handling layers bind to.
-- **→ `qa/_shared/api-spec-assets`** — once a real OpenAPI document exists in the repo, that skill owns it and its diff-driven updates; this plan becomes the design record, not the source of truth. On a greenfield build, `dev:plan-delivery` schedules a standard task (after the last endpoint task) for the `be-<stack>` agent to generate and commit that asset from the implemented surface — the plan does not write it itself.
 
 ## Version policy
 

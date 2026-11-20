@@ -8,21 +8,6 @@ disable-model-invocation: true
 
 Wires .NET 8 NUnit tests to talk to a **real** database — seed fixtures via builders (no inline raw SQL inserts duplicated across tests), run read-only assertion queries, wait for eventual consistency where it matters, and clean state safely. Pairs with `qa/dotnet/skills/db-testing/testcontainers` for the container lifecycle and `qa/dotnet/skills/db-testing/verification-queries` for SQL safety.
 
-## When to use
-
-- A test must verify a row was written, an FK held, a trigger fired, or a soft-delete column was set.
-- Test setup needs to seed reference data (currencies, countries, plan tiers) that production reads.
-- Async write flows need a "wait until the projection catches up" wait condition.
-- Test suite leaks data between tests and needs a deterministic cleanup strategy.
-
-## When NOT to use
-
-- Production data-access code → the `backend/dotnet` dev stack's generator, if installed (Repository / EF Core / Dapper patterns).
-- Container booting itself → `qa/dotnet/skills/db-testing/testcontainers`.
-- SQL guardrails (parameterization, no `SELECT *` in assertions) → `qa/dotnet/skills/db-testing/verification-queries`.
-- Pure unit tests with no SQL surface — keep them mock-driven.
-- Java / TypeScript stacks → `qa/{java,typescript}/skills/db-testing/connection`.
-
 ## Stack
 
 - **Runtime**: .NET 8
@@ -245,14 +230,3 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 4. Add the `WaitForAsync` wait condition if the SUT involves async projections.
 5. Pick a cleanup strategy (Respawn default); wire `[OneTimeSetUp]` / `[TearDown]`.
 6. Run `dotnet test` — every test passes; no leaks between fixtures.
-
-## Handoffs
-
-- Container lifecycle → `qa/dotnet/skills/db-testing/testcontainers`
-- SQL guardrails on assertion queries → `qa/dotnet/skills/db-testing/verification-queries`
-- Test data builders feeding seeders → `qa/dotnet/skills/test-data-builder`
-- Java DB testing client → `qa/java/skills/db-testing/connection`
-- TypeScript DB testing client → `qa/typescript/skills/db-testing/connection`
-- API tests that own the SUT call → `qa/dotnet/skills/api-test-author/writer`
-- Test strategy where DB tests fit → `qa/manual/test-strategy`
-- Production data access patterns → the `backend/dotnet` dev stack's generator, if installed

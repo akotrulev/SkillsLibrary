@@ -14,23 +14,6 @@ Load `backend/_shared/pattern-guide` for the language-agnostic card (intent, whe
 
 Detect the toolchain before answering: `rust-toolchain.toml` (`channel`), `Cargo.toml` `edition` and `rust-version` (the MSRV), the CI image. **Edition 2024 primary, 2021 supported.** Never recommend an API newer than the declared `rust-version`, and never flag a 2021-edition crate for lacking a 2024-only form. The forms below that need a minimum toolchain say so.
 
-## When to use
-
-- "What is pattern X in Rust", "is this idiomatic"
-- Choosing between an `enum`, a generic `T: Trait`, and a `Box<dyn Trait>` / `Arc<dyn Trait>`
-- Deciding how a function should take and return data (owned, borrowed, `Cow`, `impl Trait`)
-- Choosing an error strategy for a crate
-- Sharing state between tasks or threads
-
-## When NOT to use
-
-- Scaffolding code into a repo → `pattern-writer`
-- Reviewing a diff → `code-review`
-- Tokio rules, cancellation, blocking, locks across `.await` → `async-concurrency`
-- Making it faster → `performance`
-
----
-
 ## Ownership in signatures — the first design decision
 
 | The function… | Takes | Why |
@@ -228,11 +211,3 @@ A trait in front of a collaborator is earned by a **second implementation** or a
 ## `unsafe`
 
 Application and service code contains **no `unsafe`**. Where a crate genuinely needs it (FFI, a measured hot path), every `unsafe` block carries a `// SAFETY:` comment stating the invariant that makes it sound — the one comment form the house comment rule permits inside a body, because clippy's `undocumented_unsafe_blocks` lint requires it — the block is as small as possible, it is wrapped in a safe function whose signature upholds the invariant, and it is tested under Miri. Each `unsafe fn` documents its contract in a `# Safety` doc section.
-
-## Handoffs
-
-- Scaffolding any of the above → `pattern-writer`
-- Async and concurrency rules → `async-concurrency`
-- Measuring and fixing slowness → `performance`
-- Reviewing for misuse → `code-review`
-- Language-agnostic pattern cards → `backend/_shared/pattern-guide`

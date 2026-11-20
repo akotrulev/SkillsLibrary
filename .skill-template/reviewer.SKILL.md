@@ -8,18 +8,6 @@ disable-model-invocation: true
 
 # <Skill Title>
 
-## When to use
-
-- The user shares existing code and asks for a critique
-- The user asks whether their code follows a pattern correctly
-- The user asks for an audit or code review
-
-## When NOT to use
-
-- The user asks "what is X" — defer to reference
-- The user asks "create X" — defer to generator
-- The code is incomplete or pseudocode — ask the user to share the real file
-
 ## Procedure
 
 1. Read the file(s) under review. Do not skim.

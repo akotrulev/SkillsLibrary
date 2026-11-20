@@ -25,21 +25,6 @@ Standardises **authoring** accessible Android screens against **WCAG 2.2 AA** an
 
 Detect first: Compose or Views per screen, any in-house component library that already sets semantics (use it), and any `fontScale` or `sp`-locking in the theme or the manifest.
 
-## When to use
-
-- Naming a control, merging a row into one TalkBack stop, marking headings, exposing state and a value
-- Focus and announcements after navigation, a dialog, an async result or an error
-- Large text, touch targets, contrast, motion settings, state not by colour alone
-- A swipe, long-press or drag that needs a non-gesture alternative
-
-## When NOT to use
-
-- Scanning, TalkBack journeys, audits in CI → `qa-mobile-<stack>` (peer)
-- Validation messages on fields → [`forms`](../forms/SKILL.md) · banner and failed regions → [`error-handling`](../error-handling/SKILL.md)
-- Reduce-motion mechanics → [`animation`](../animation/SKILL.md) · colour and type tokens → [`styling`](../styling/SKILL.md)
-- `testTag` / resource ids → [`test-ids`](../test-ids/SKILL.md) (an id is never a description)
-- Other stacks → `mobile-react-native:accessibility`, `mobile-ios:accessibility`
-
 ## Lean on the platform
 
 | Want | Use — not |
@@ -144,10 +129,3 @@ The standards this skill's output must meet are the mobile-android rule files, n
 - Accessibility Scanner on each screen; a TalkBack pass at the largest font: each row is one stop, each action reachable, the error announced once.
 - Settings → Accessibility with bold text, colour correction, remove animations and the largest display size on: nothing clips, nothing disappears.
 - Device journeys with a screen reader → `qa-mobile-<stack>`.
-
-## Handoffs
-
-- Field-level error wiring → [`forms`](../forms/SKILL.md) · failure surfaces → [`error-handling`](../error-handling/SKILL.md)
-- Motion setting → [`animation`](../animation/SKILL.md) · tokens and dynamic colour → [`styling`](../styling/SKILL.md)
-- Ids → [`test-ids`](../test-ids/SKILL.md) · localized descriptions → [`languages`](../languages/SKILL.md)
-- Accessibility declarations and store rules → [`mobile-<stack>:store-compliance`](../../../_shared/store-compliance/SKILL.md)

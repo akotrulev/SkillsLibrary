@@ -12,21 +12,6 @@ Scaffolds pattern implementations into a .NET codebase — **.NET 10 primary, 8/
 
 **First act: detect the target project's `<TargetFramework>`** (check the `.csproj`) and key generated code to what's detected — never up-level a net8/net9 project to a net10-only API, and never flag a down-level project for lacking one. Everything in this file (primary constructors, keyed DI, records, `required`/`init`) works unmodified on 8, 9, and 10 unless noted otherwise.
 
-## When to use
-
-- Replacing an `if`/`else` or `switch` chain with a strategy
-- Wrapping a service with a decorator (logging, retry, caching, validation)
-- Introducing CQRS with MediatR for a slice that has earned the complexity
-- Adding a repository or specification pattern when there is a genuine abstraction need
-- Building a factory / abstract factory when construction is non-trivial and reused
-- Extracting an Options pattern from scattered configuration reads
-
-## When NOT to use
-
-- Explaining a pattern → `backend/dotnet/skills/pattern-guide`
-- Critiquing existing code → `backend/dotnet/skills/code-review`
-- Scaffolding tests against a generated pattern → `backend/dotnet/skills/unit-testing` for the class-level tests; `qa/dotnet/skills/api-test-author/writer` (peer) once it's reachable over HTTP
-
 ## Inputs needed
 
 1. **Pattern** to scaffold (Strategy, Decorator, Repository, Specification, Factory, Mediator/Handler, Options, Pipeline/Chain)
@@ -230,13 +215,3 @@ After scaffolding, run the checks below:
 - `dotnet test` — the generated tests must pass
 - `dotnet format --verify-no-changes` — no style drift
 - Sweep call sites that the new pattern was supposed to replace; if any old `if`/`else` / `switch` chains remain, finish the refactor
-
-## Handoffs
-
-- Conceptual explanation → `backend/dotnet/skills/pattern-guide`
-- Reviewing the result → `backend/dotnet/skills/code-review`
-- Unit-testing the generated classes → `backend/dotnet/skills/unit-testing`
-- Generating tests for the new API (contract/integration) → **peer** `qa/dotnet/skills/api-test-author/writer`
-- DTOs for new endpoints → `qa/dotnet/skills/api-models`
-- Java equivalent → `backend/java/skills/pattern-writer`
-- TypeScript equivalent → `backend/node/skills/pattern-writer`

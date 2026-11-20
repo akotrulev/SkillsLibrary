@@ -12,23 +12,6 @@ Owns making **public, crawlable** pages rank and preview correctly: the render m
 
 **Version rule:** `<PageTitle>`/`<HeadContent>`/`<HeadOutlet>` and static-SSR prerendering are net8+. The **net-sensitive** delta is the 404: **net10** ships `NotFoundPage` on the `Router` + programmatic `NavigationManager.NotFound()` that returns a real **HTTP 404** and re-executes to the page; **net8/9** only has the `Router`'s `NotFound` render fragment, which renders content but returns **HTTP 200** — an SEO defect (soft-404). The net8/9 workaround (status-code re-execution middleware) is tagged below.
 
-## When to use
-
-- Deciding the render mode for a public/marketing/content route (crawlability)
-- Setting per-page `title` + `meta description` + Open Graph/Twitter tags from route data
-- Making streamed content visible to crawlers
-- Returning a correct 404 (status code + page)
-- Adding canonical URLs, `sitemap.xml`, `robots.txt`
-- Adding JSON-LD structured data (Article, Product, BreadcrumbList, Organization)
-
-## When NOT to use
-
-- The `<PageTitle>` tab-title **convention** → [`ui-rules`](../ui-rules/SKILL.md); its **emission** in scaffolds → [`component-writer`](../component-writer/SKILL.md)
-- Choosing render modes for the app generally → [`project-setup`](../project-setup/SKILL.md) (this skill applies the *public-page* corollary)
-- WASM startup performance of a public page → [`performance`](../performance/SKILL.md)
-- Internal/authenticated screens (no crawler ever sees them) — skip SEO entirely
-- React → its own stack
-
 ## Crawlability = render mode. Public pages default to static SSR
 
 A crawler reads the **HTTP response body**. Whatever a page needs interactivity/JS to render **is not in that body** on first paint — so an Interactive Server or WASM page whose content loads *after* the circuit/runtime starts is blank to a crawler and to a social unfurl bot (which never runs JS at all).
@@ -118,11 +101,3 @@ The standards this skill's output must meet are the fe-blazor rule file `blazor-
 - Hit a non-existent URL → **HTTP 404** (check the status, not just the page), and it's `noindex`.
 - `sitemap.xml` returns valid XML of canonical public URLs; `robots.txt` allows public paths, disallows app/auth, links the sitemap.
 - Run a URL through a rich-results / OG-preview checker → title/description/image/structured-data render correctly.
-
-## Handoffs
-
-- `<PageTitle>` tab-title convention → [`ui-rules`](../ui-rules/SKILL.md); its emission in scaffolds → [`component-writer`](../component-writer/SKILL.md)
-- Render-mode selection across the app → [`project-setup`](../project-setup/SKILL.md)
-- Public-page load performance (WASM startup, prerender cost) → [`performance`](../performance/SKILL.md)
-- Configured base-host / no-localhost-fallback for absolute URLs → [`project-setup`](../project-setup/SKILL.md)
-- Automated Lighthouse SEO/score gate in CI → qa `accessibility-testing`/CI peers (Lighthouse covers SEO + a11y + perf categories)

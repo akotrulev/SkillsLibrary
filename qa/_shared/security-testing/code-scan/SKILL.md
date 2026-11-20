@@ -302,22 +302,3 @@ map in `qa-<stack>:security-foundations`.
   JSON/SARIF); reach for Semgrep proper only on its AppSec platform. **Track the OSS license trajectory.**
 - **SAST-clean ≠ secure** — it's the source-pattern layer only. Run **DAST + SCA + functional
   access-control**; reserve business-logic abuse for a manual pentest. Map every finding to an OWASP item.
-
-## Cross-references
-
-- `qa-<stack>:security-foundations` — **load alongside**: the OWASP Top-10 map, the automatable-vs-manual boundary, the
-  ticketed-suppression triage discipline, SARIF → code-scanning consolidation, and the scan-authorization
-  rules this skill defers to.
-- `qa-<stack>:dependency-scan` — **SCA**: scans the **dependency tree**
-  for known CVEs (build graph, not source). Orthogonal layer — run both.
-- `qa-<stack>:active-scan` / `qa-<stack>:passive-scan` — **DAST**:
-  probes the **running app** over HTTP. SAST never runs the app; orthogonal — run both.
-- `qa-<stack>:secrets-scan` — finds **leaked credentials** in source + git history (a different
-  source concern from insecure-code-pattern SAST).
-- `qa/<stack>/skills/security-testing/permission-testing` — the **functional** BOLA/IDOR/BFLA matrix for
-  A01, the access-control flaw SAST is blind to.
-- `qa/cicd/<stack>/skills/ci-pipelines` (its `references/<host>.md`) + `qa/cicd/ci-conventions` —
-  wire the gate step, SARIF upload, and artifact.
-- `qa/reporting/<stack>/skills/test-reports` — attach the parsed JSON finding summary to the run.
-- `qa/_shared/agents/qa-security.md` — the step-by-step orchestrator that runs SAST in the per-PR static-gates
-  step (Step 2) alongside secrets + SCA.

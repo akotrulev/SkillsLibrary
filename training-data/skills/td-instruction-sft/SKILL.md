@@ -8,21 +8,6 @@ disable-model-invocation: true
 
 The data that turns a base model into one that follows instructions and holds a conversation. SFT quality beats SFT quantity by a wide margin for small models — **a few thousand excellent, diverse, correctly-formatted examples outperform a hundred thousand mediocre ones** (the LIMA result). This skill owns instruction/chat data end-to-end: task taxonomy → sourcing (curate and/or synthesize) → formatting → quality gate → split. It leans on `training-data:synthetic-generation` for the teacher-model path, `training-data:data-quality` for the gate, and `training-data:dataset-formats` for the `messages` shape.
 
-## When to use
-
-- Building an instruction-tuning / chat SFT set for a small model
-- Curating real conversations (support logs, docs Q&A, existing transcripts) into training shape
-- Synthesizing instruction/response pairs with a teacher model
-- Creating tool-use / function-calling training traces
-- Designing the system-prompt distribution the model will learn
-
-## When NOT to use
-
-- Raw pretraining text → `training-data:pretraining-corpus`
-- chosen/rejected preference data → `training-data:preference-data`
-- Benchmarks / held-out eval → `training-data:eval-sets`
-- Multimodal instruction data → `training-data:vision-language-data`
-
 ## Start from the task taxonomy, not the data you happen to have
 
 An SFT set teaches a *distribution of tasks*. Decide that distribution first, then fill it — otherwise you tune a model that is great at the three things your logs happened to contain and helpless at everything else. Enumerate the capabilities the model must have and target a coverage per bucket:

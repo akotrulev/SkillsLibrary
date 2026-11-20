@@ -334,18 +334,3 @@ The builder supplies the unchanging defaults; the row drives only what **varies*
 ## Rules
 
 The standards this skill's output must meet are the qa-typescript rule files, not a list here: `qa-typescript.md` and `test-data.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win. The anti-patterns above are this skill's know-how for loading rows: each carries its fix.
-
-## Cross-references
-
-- `qa-java:data-driven-testing` (**the canonical file**: TestNG `@DataProvider`, OpenCSV, Jackson, POI) ·
-  `qa-dotnet:data-driven-testing` (NUnit `[TestCaseSource]`, CsvHelper, `System.Text.Json`, ClosedXML) — the
-  sibling stacks; same four ideas.
-- `qa-typescript:test-data-builder` — the **boundary**: a builder constructs **one** complex object in code
-  with defaults; data-driven feeds **many** rows from a file. They **compose** — a row drives a builder's
-  varying fields (see the last example).
-- `qa-typescript:db-verification-queries` — when rows come from a **live database** at test time rather
-  than a static file; the assertion-query counterpart to file-sourced data.
-- `qa-typescript:browser-cloud-setup` — parameterizing the **environment** (browser/device matrix) via
-  Playwright projects rather than the **data**; orthogonal matrices that can multiply.
-- `qa-typescript:ui-tests-playwright` — the fixtures and page objects the data-driven journey reuses.
-  `qa-typescript:test-reports` — each row renders as a separate, named result.

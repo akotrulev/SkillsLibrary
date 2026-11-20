@@ -21,21 +21,6 @@ service's real telemetry. It answers a different question from the in-process fa
 If the request is "prove the circuit breaker opens", that is the per-lane skill. If it is "fail over the region",
 that is the DR drill. Everything between — "what happens to checkout when one of three `payments` pods dies" — is here.
 
-## When to use
-
-- Design, run or review a chaos experiment against a Kubernetes cluster, AWS or Azure environment
-- Write the steady-state hypothesis and abort conditions as Prometheus queries
-- Choose between Chaos Mesh, LitmusChaos, AWS FIS and Azure Chaos Studio
-- Write up an experiment's record and its follow-ups
-
-## When NOT to use
-
-- A deterministic fault in a test → `qa-<stack>:failure-injection-testing`
-- Load generation or SLO thresholds for a load test → `performance-foundations` (`qa/_shared/performance`); a chaos
-  experiment may run *under* a smoke-level load from that skill, never a stress test
-- Region failover, backup restore, ransomware recovery drills → `security/cloud-incident-response`
-- Writing the SLO itself → `qa/manual/quality-metrics`; PromQL idioms → `observability/queries`
-
 ## Hard rules
 
 1. **Never in production without an approved, reversible plan.** Production needs: a written experiment record
@@ -143,11 +128,3 @@ Report findings in the library's review table; point to the fix.
   threshold equal to the SLO (it aborts every run) or absent; a one-way fault with no rehearsed restore; a stress
   load run alongside the fault (two variables at once).
 - **minor** — no recovery budget; no dashboard link for the run window; follow-ups with no owner.
-
-## Handoffs
-
-- In-test fault injection → `qa-dotnet:failure-injection-testing`, `qa-java:failure-injection-testing`, `qa-typescript:failure-injection-testing`
-- Background load during the run → `qa/_shared/performance` and the lane's `load-testing`
-- SLO definitions → `qa/manual/quality-metrics`; PromQL → `observability/queries`; dashboards → `observability/dashboards`
-- DR drills and region failover → `security/cloud-incident-response` (`references/cloud-resilience.md`)
-- A disproved hypothesis → `qa/manual/bug-report-writer`

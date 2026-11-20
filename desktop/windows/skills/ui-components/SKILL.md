@@ -18,23 +18,6 @@ How pages and controls are written: **`x:Bind` to a view model, thin code-behind
 | **Experimental only** | `TableView` (2.5.4-exp; not a DataGrid replacement), `Chart` (line/area/bar, closed source), `InkCanvas` / `InkToolbar` (2.4.1-exp) | **Never in a production build or recipe.** For tables use `ListView` with a header row, or the Windows Community Toolkit `DataGrid` only if the project already ships it |
 | XAML Designer | Not available for WinUI in Visual Studio (no date) — use Hot Reload and `winapp ui inspect` | — |
 
-## When to use
-
-- Writing or refactoring a page, a user control, a template or a list
-- "Why is the list slow?", "`x:Bind` or `{Binding}`?", "where does the error show?", "dialog or `InfoBar`?"
-- Choosing a control
-
-## When NOT to use
-
-- View-model shape, state types, DI → [`architecture`](../architecture/SKILL.md)
-- Theme, colour, type ramp, Mica, motion → [`styling`](../styling/SKILL.md)
-- Windows, titlebar, `NavigationView` + `Frame`, commands, access keys → `desktop-windows:windows-and-navigation`
-- Text input, validation, `NumberBox`, focus order → `desktop-windows:forms`
-- UI Automation labels → `desktop-windows:accessibility`; automation ids → `desktop-windows:test-ids`
-- WPF / WinForms controls → `desktop-windows:wpf`, `:winforms`
-
----
-
 ## A page
 
 ```xml
@@ -159,14 +142,3 @@ A response-dependent region renders from the view model's sealed state ([`archit
 - **Using `TableView` or `Chart`** — experimental channel; never ships.
 - **A control manipulated from a worker thread** — dispatcher rule in [`basics`](../basics/SKILL.md).
 - **Hex colours and `FontSize` literals** — [`styling`](../styling/SKILL.md).
-
-## Handoffs
-
-- State types, view models, host → [`architecture`](../architecture/SKILL.md)
-- Theme, type ramp, Mica, icons, motion, DPI → [`styling`](../styling/SKILL.md)
-- Navigation, `AppWindow`, titlebar, commands → `desktop-windows:windows-and-navigation`
-- Forms and validation → `desktop-windows:forms`
-- Labels, UIA, High Contrast, text scaling → `desktop-windows:accessibility`
-- Automation ids → `desktop-windows:test-ids`
-- Startup, virtualization measurement → `desktop-windows:performance`
-- WPF / WinForms lanes → `desktop-windows:wpf`, `:winforms`

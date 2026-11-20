@@ -8,25 +8,6 @@ disable-model-invocation: true
 
 First-pass schema decisions that apply across SQL and document engines. Identifiers, timestamps, money, enums, multi-tenancy, soft delete, audit trails. Engine specifics live in the per-DB skills.
 
-## When to use
-
-- **Engine selection** — which database fits this workload (or whether Postgres already suffices) before committing to one
-- New entity model before picking engine DDL
-- Identifier choice (surrogate vs natural; autoincrement vs UUID vs ULID/UUIDv7)
-- Timestamp conventions (`created_at`, `updated_at`, time zones, event time vs ingest time)
-- Soft delete vs hard delete trade-offs
-- Multi-tenant strategy (shared schema + tenant column, schema-per-tenant, db-per-tenant)
-- Audit trails (event-sourced, change tables, application-managed)
-- Money, decimal, bool conventions
-- Embed vs reference for document stores
-
-## When NOT to use
-
-- Engine-specific DDL → `data/<db>`
-- Migration mechanics → `data/_shared/migrations`
-- Query tuning → `data/_shared/slow-query-fixes`
-- Caching → `data/_shared/caching-patterns`
-
 ## Engine selection
 
 Before any DDL, confirm the **engine fits the workload** — this is the cross-engine *decision* the scope fence puts here (the engine skill owns the mechanics once the engine is picked). The rule the `data-architect` agent enforces: **justify the engine against the workload shape; never silently default to Postgres — but know when Postgres genuinely suffices.** Adding a second store is a real operational tax (backups, failover, another on-call surface); earn it.
@@ -205,11 +186,3 @@ The standards this skill's output must meet on SQL, schema and migration files a
 6. Decide audit strategy; design the outbox table if external sinks are involved.
 7. For document stores, decide embed-vs-reference per relationship.
 8. Hand off to `data/<db>` for the actual DDL.
-
-## Handoffs
-
-- Engine DDL → `data/<db>`
-- Migration shape (expand-contract, online-safe) → `data/_shared/migrations`
-- Query patterns / indexing → `data/_shared/slow-query-fixes`
-- Caching layer in front of the schema → `data/_shared/caching-patterns`
-- Tenant identity in tokens → `auth/_shared/auth0-concepts`

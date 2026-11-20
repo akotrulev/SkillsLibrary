@@ -10,21 +10,6 @@ Owns how a Blazor app is styled with **CSS you write**: component-scoped isolati
 
 **Version rule:** CSS isolation, `::deep`, and `.razor.css` bundling behave the same across net8/net9/net10 — this skill is largely version-agnostic. The one delta: net10's fingerprinted/precompressed static assets change how the bundled `{Project}.styles.css` is served (perf, not authoring) — see [`performance`](../performance/SKILL.md).
 
-## When to use
-
-- Scoping a component's CSS so it can't leak or collide
-- Reaching a child element's DOM from scoped CSS (`::deep`)
-- Setting up design tokens (CSS custom properties) from a `design/theme-presets` palette
-- Dark mode, responsive breakpoints
-- Deciding CSS isolation vs Tailwind (or how they coexist)
-
-## When NOT to use
-
-- A component library's theme/token system (MudBlazor `MudTheme`, Fluent tokens, Radzen `--rz-*`) → [`component-library`](../component-library/SKILL.md)
-- Picking the palette, fonts, visual direction, type *treatment* → [`design/visual-identity`](../../../../design/visual-identity/SKILL.md) (primary theming authority), `design/theme-presets` (optional quick-start)
-- Contrast/WCAG auditing of the colors you chose → [`accessibility`](../accessibility/SKILL.md)
-- Layout *component* structure (templates, slots) → [`basics`](../basics/SKILL.md) layering
-
 ## The styling authority decision
 
 Pick **one** primary styling authority per app. Mixing them uncontrolled is the top cause of specificity wars and dark-mode drift.
@@ -185,12 +170,3 @@ The standards this skill's output must meet are the fe-blazor rule file `blazor-
 - Grep isolated `.razor.css` files for hex literals and `px` colors → none (all `var(--token)`).
 - No component-specific rules in the global stylesheet (only tokens + reset).
 - Resize to mobile width → layout reflows via `min-width` queries, no horizontal scroll.
-
-## Handoffs
-
-- Component library's own theme (MudTheme, Fluent tokens, Radzen themes) → [`component-library`](../component-library/SKILL.md)
-- Palette, fonts, visual direction, the *type treatment* (which faces, what personality) → [`design/visual-identity`](../../../../design/visual-identity/SKILL.md) (primary), `design/theme-presets` (quick-start)
-- Contrast/WCAG check of chosen colors, focus-visible styling → [`accessibility`](../accessibility/SKILL.md)
-- Breakpoint contract, grids, cross-breakpoint alignment, container queries → [`responsive-design`](../responsive-design/SKILL.md)
-- Static-asset fingerprinting/compression of the styles bundle → [`performance`](../performance/SKILL.md)
-- Component/layout structure (templates, slots) → [`basics`](../basics/SKILL.md)

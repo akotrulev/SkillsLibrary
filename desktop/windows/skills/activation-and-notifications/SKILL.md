@@ -18,20 +18,6 @@ How the OS starts and re-enters the app, and how the app talks back: **`AppInsta
 | Identity-gated | file and protocol associations, startup task, background tasks, share target need **package identity** | an unpackaged app registers associations another way and records why |
 | WPF / WinForms | same `AppInstance` API, from `Main` | → `desktop-windows:wpf`, `:winforms` |
 
-## When to use
-
-- "Only one copy of my app", "open this file in the running window", `myapp://` links
-- Launch at sign-in, relaunch after update or crash
-- Toasts with actions, push from a server
-
-## When NOT to use
-
-- Window creation, navigation, accelerators → `desktop-windows:windows-and-navigation`
-- Pickers, share, drag and drop, WebView2, background tasks → `desktop-windows:platform-integration`
-- Token storage, signing → `desktop/_shared/security`, `desktop/_shared/distribution`
-
----
-
 ## Single instancing — `AppInstance`, never a mutex
 
 A named mutex cannot hand the second launch's arguments to the first. `AppInstance` can.
@@ -182,12 +168,3 @@ Each entry point adds a log at the decision, a span around the route and a metri
 - **`DisabledByUser` ignored** — `RequestEnableAsync` returns the same state; explain and link to Settings.
 - **Admin-run app with silent notification failure** — it never shows; drop elevation.
 - **Expired WNS channel** — pushes silently stop; renew at launch.
-
-## Handoffs
-
-- Windows, navigation, accelerators → `desktop-windows:windows-and-navigation`
-- Pickers, share target, background tasks, WebView2 → `desktop-windows:platform-integration`
-- Secrets, signing, updates → `desktop/_shared/security`, `desktop/_shared/distribution`; telemetry → `desktop/_shared/observability`
-- Failure banners → `desktop-windows:error-handling`
-- Win32 restart registration → `desktop-windows:interop`
-- Mac counterpart → `desktop-macos:system-integration`

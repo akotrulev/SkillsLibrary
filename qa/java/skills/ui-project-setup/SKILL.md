@@ -12,18 +12,6 @@ This skill stands up a **runnable, empty web-UI test project from zero**: the Gr
 
 Default driver is **Playwright** (auto-waiting, trace viewer, browsers pinned with the library). **Selenium** is the lane for a project that mandates it or needs a Grid; it is authored with `qa/java/skills/ui-test-author/selenium`.
 
-## When to use
-
-- A fresh repo with no Java web-UI test project, and the user wants browser coverage.
-- The user asks which versions, layout or setup a Java UI test framework should use.
-
-## When NOT to use
-
-- The project exists → author into it with `qa/java/skills/ui-test-author/playwright` (or `selenium`), `page-object-design`, `page-objects-from-url`.
-- API, mobile or desktop scaffolding → `qa/java/skills/api-project-setup`, `mobile-project-setup`, `desktop-project-setup`.
-- BDD (Cucumber-JVM) → `qa/java/skills/bdd-project-scaffold`.
-- .NET / TypeScript → `qa/dotnet/skills/ui-project-setup` / `qa/typescript/skills/ui-project-setup`.
-
 ## Tooling & versions
 
 The Playwright rows are the **Versions** table of `ui-test-author/playwright/SKILL.md`, and its `assets/build.gradle.kts` holds them; `tools/qa-version-check.py` enforces the Playwright and Allure pins.

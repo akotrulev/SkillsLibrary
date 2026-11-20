@@ -19,15 +19,6 @@ python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<brand m
 
 The brand's own values always win over the corpus for the slots the brand actually defines — the corpus fills the silence, in the brand's voice.
 
-## When to use
-
-- A client or product hands you a brand book / PDF style guide / Figma library and you need a web token system that matches it.
-- The only brand input is informal ("primary is our blue #1a56db, headings are Poppins") and you must build a full system around it.
-- The brand exists for print or a logo and is missing everything an app needs (states, a type *scale*, spacing, dark mode, sufficient contrast pairs).
-- You need to decide, and state, how strictly the app must match the brand.
-
-Do **not** use it to invent a palette/voice from nothing (`visual-identity`), to grab a ready-made theme (`theme-presets`), or as a substitute for the tier/naming rules — those live in `design:tokens` and this skill *feeds* them.
-
 ## The pipeline: extract → normalize → gap-fill
 
 ### 1. Extract — inventory what the brand actually gives you
@@ -101,12 +92,3 @@ Numbered because audit finding ids cite the numbers: new checks are appended, an
 6. **Contrast failures** on brand pairs are flagged for the owner, not fixed by recoloring the brand.
 7. The **fidelity mode is stated**, and gap-fill latitude matches it.
 8. The output notes that **composition/signature/hero remain per-brief** (`visual-identity`).
-
-## Related
-
-- [`design/design-tokens`](../design-tokens/SKILL.md) — the tier model, naming, categories, and theming discipline this skill fills in. **Read it first**; this skill is its brownfield input path.
-- [`design/visual-identity`](../visual-identity/SKILL.md) — the greenfield counterpart (invents identity) and the still-open owner of composition/signature/hero under a fixed brand.
-- [`design/theme-presets`](../theme-presets/SKILL.md) — preset themes; use it when there is *no* brand and you want a fast starting point, not when a real brand must be matched.
-- [`design/ux-writing`](../ux-writing/SKILL.md) — a brand's **voice/tone** guidance (if the book includes it) feeds microcopy here.
-- A stack's `styling` / `accessibility` — render the resulting tokens as CSS and verify the flagged contrast pairs.
-- [`design:corpus`](../ui-ux-pro-max/SKILL.md) — the 192-palette / 74-pairing corpus the gap-fill draws from.

@@ -49,13 +49,3 @@ and Chromium-only. The proxy is for when there is no `IPage` at all.
 - Mocked payloads come from records, builders or fixture files, not inline blobs repeated across tests.
 - Recording a HAR as evidence (`Context.Tracing.StartHarAsync(...)` [1.60], `RecordHarPath`) is
   `qa/dotnet/skills/evidence-capture` §5; this skill replays one.
-
-## Handoffs
-
-- `BaseTest`, page objects, `Directory.Packages.props` → `qa/dotnet/skills/ui-test-author/playwright`
-- HAR recording and other evidence → `qa/dotnet/skills/evidence-capture`
-- WebSocket and SSE → `qa/dotnet/skills/realtime-stream-testing`
-- API tests without a browser → `qa/dotnet/skills/api-test-author`
-- Payload builders → `qa/dotnet/skills/test-data-builder`
-- The CI job → `qa/cicd/dotnet/skills/ci-pipelines`
-- TypeScript and Java → `qa-typescript:network-mocking`, `qa-java:network-mocking`

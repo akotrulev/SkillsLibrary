@@ -21,21 +21,6 @@ First act on an existing project: confirm the Java release (`java -version` / th
 - Log correlation via the SLF4J/Logback bridge from `observability/structured-logging-java`
 - Resource attributes follow OTel semantic conventions
 
-## When to use
-
-- New Spring Boot service needs OTel
-- Existing service has Micrometer + Spring Cloud Sleuth; migrating to OTel
-- Adding `@WithSpan` to a domain method
-- Adding a custom `Counter` / `Histogram` / gauge
-- Wiring the Java agent in a Dockerfile / Kubernetes manifest
-
-## When NOT to use
-
-- .NET service → `observability/opentelemetry-dotnet`
-- Node service → `observability/opentelemetry-node`
-- Log shape / sinks → `observability/structured-logging-java`
-- Dashboards / queries → `observability/dashboards` + `observability/queries`
-
 ## Inputs needed
 
 1. **Service name + version + environment** — resource attributes
@@ -211,11 +196,3 @@ For SDK-only, use `io.opentelemetry:opentelemetry-sdk-extension-autoconfigure` a
 4. Add `@WithSpan` to ~5 high-value domain methods (the ones you'd want to debug in prod first).
 5. Confirm `observability/structured-logging-java` is in place; the `OpenTelemetryAppender` wrapper appender (see `observability/structured-logging-java`) provides `trace_id`/`span_id` MDC.
 6. Local smoke: docker-compose with the app + Collector + Tempo + Prometheus + Grafana; hit a few endpoints; confirm spans in Tempo, metrics in Prometheus, logs linked by trace ID in Grafana.
-
-## Handoffs
-
-- Log shape and sinks → `observability/structured-logging-java`
-- LogQL / PromQL query patterns → `observability/queries`
-- Dashboard layout → `observability/dashboards`
-- .NET equivalent → `observability/opentelemetry-dotnet`
-- Node equivalent → `observability/opentelemetry-node`

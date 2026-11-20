@@ -19,23 +19,6 @@ Container & partition key design, client setup, migrations, queries, and RU/s tu
 - Consistency: **Session** is the default; bump to **Bounded Staleness** for multi-region writes, **Strong** rarely
 - Partition keys: single key by default; **hierarchical (subpartition) keys** — now GA, up to 3 levels, new containers only — when one attribute can't be both high-cardinality and the hot filter
 
-## When to use
-
-- Container & partition-key design driven by access patterns and RU economics
-- API choice — NoSQL (Core), MongoDB API (Mongo wire-compat), Cassandra API — and the trade-offs
-- SDK setup with the singleton client + connection mode
-- Capacity mode (autoscale vs provisioned vs serverless)
-- Change feed + Azure Functions for downstream pipelines
-- Consistency levels (Strong / Bounded staleness / Session / Consistent prefix / Eventual)
-- Performance tuning (RU per query, hot partition, indexing policy customization)
-
-## When NOT to use
-
-- Relational engines → `data/postgresql` / `data/sqlserver` / `data/mysql`
-- Mongo Atlas / self-hosted Mongo → `data/mongodb`
-- Cache / KV → `data/redis`
-- AWS-native NoSQL → `data/dynamodb`
-
 ## Inputs needed
 
 1. **API** — NoSQL (default), MongoDB API (only when wire-protocol compat is required), Cassandra (rare)
@@ -326,11 +309,3 @@ Session consistency is the right default. Bump to Strong only when you've measur
 3. Generate IaC (Bicep / Terraform) for the database + container with autoscale RU, partition key (hierarchical where the levels are natural), indexing policy, TTL, change feed, **`disableLocalAuth = true`, the data-plane role assignment for the app identity, a private endpoint, and CMK if key custody is required** (CMK + API + hierarchical keys are all creation-time).
 4. Generate the singleton client setup and a typed repository per logical entity.
 5. Smoke locally with the Cosmos emulator; replay access patterns; confirm queries are single-partition and within RU budget.
-
-## Handoffs
-
-- Cross-engine query patterns → `data/_shared/slow-query-fixes`
-- Caching → `data/_shared/caching-patterns` + `data/redis`
-- Schema evolution → `data/_shared/migrations`
-- Azure deployment for the account / change-feed-driven Azure Functions → cloud provisioning / IaC for the store itself has no owning skill in this library yet; out of this domain's scope
-- Observability — diagnostic settings → Log Analytics; Cosmos metrics in Azure Monitor → `observability/*` skills (via the `observability-engineer-{dotnet,java,node}` peer bundled in the matching `be-*` plugin)

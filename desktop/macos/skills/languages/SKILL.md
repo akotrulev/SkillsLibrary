@@ -21,22 +21,6 @@ Two jobs: **localization** (swap the text via catalogs) and **globalization** (f
 
 **New strings go in a String Catalog, never a new `.strings` file.** An existing `.strings` / `.stringsdict` file is migrated with Xcode's "Migrate to String Catalog". Facts are long-standing API, not re-confirmed against Apple pages this session.
 
-## When to use
-
-- Adding a language, or setting up localization from nothing
-- Plural, gendered or device-specific wording; interpolated strings
-- Dates, money, numbers and measurements that look wrong in another locale
-- An RTL language (Arabic, Hebrew, Persian, Urdu) in a Mac window with sidebar, toolbar and inspector
-- Menu titles, window titles, toolbar labels, purpose strings and the app name per language
-
-## When NOT to use
-
-- Wording, tone, microcopy → [`design:ux-writing`](../../../../design/ux-writing/SKILL.md)
-- VoiceOver language, label rules → [`accessibility`](../accessibility/SKILL.md)
-- Layout mechanics, density, materials → [`styling`](../styling/SKILL.md)
-- Store listing text per locale → [`desktop/_shared/distribution`](../../../_shared/distribution/SKILL.md)
-- Windows apps → `desktop-windows:languages` (`.resw`); iOS → `mobile-ios:i18n`
-
 ## String Catalogs
 
 - **`Localizable.xcstrings`** is the default table; other tables (`Menus.xcstrings`) are named in the call. **`InfoPlist.xcstrings`** localizes `CFBundleDisplayName` and **every `NS…UsageDescription`** ([`sandbox-and-permissions`](../sandbox-and-permissions/SKILL.md)): an English-only purpose string in a Spanish app is a gap.
@@ -119,12 +103,3 @@ Standards come from the desktop-macos rule file `mac-localization.md` in `.claud
 - A Mac set to Arabic and a region with different separators: plurals read correctly, numbers and dates follow the region.
 - `rg 'Text\("[^"]*" *\+'` and `rg '\.(left|right)\b'` → none in shared views (P2, P6).
 - Dev-side tests: formatting helpers with a fixed `Locale` and `TimeZone` injected ([`unit-testing`](../unit-testing/SKILL.md)); no test depends on the machine's locale.
-
-## Handoffs
-
-- Wording and voice → [`design:ux-writing`](../../../../design/ux-writing/SKILL.md)
-- Labels and VoiceOver language → [`accessibility`](../accessibility/SKILL.md)
-- Layout, density, mirrored icons → [`styling`](../styling/SKILL.md)
-- Menu titles and commands → [`menus-and-commands`](../menus-and-commands/SKILL.md)
-- Purpose strings per resource → [`sandbox-and-permissions`](../sandbox-and-permissions/SKILL.md)
-- Test ids that ignore language → [`test-ids`](../test-ids/SKILL.md)

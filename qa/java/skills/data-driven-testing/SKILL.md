@@ -389,23 +389,3 @@ public void Should_ApplyDiscount_When_OrderMatchesTheRow(OrderCase row) {
   `data-provider-thread-count` for independent rows **only where no browser or device is driven** — a
   Playwright or Appium class keeps its rows sequential (`parallel="classes"`, plan D8). No `Thread.sleep`;
   structured logging; constructor injection.
-
-## Cross-references
-
-- `qa-dotnet:data-driven-testing` — same four ideas, NUnit: `[TestCaseSource]` (a static method/property
-  returning `IEnumerable<TestCaseData>`, named via `.SetName(...)`), CsvHelper `GetRecords<T>()`,
-  `System.Text.Json` for JSON, ClosedXML for Excel. Structure ported, not code.
-- `qa-typescript:data-driven-testing` — same four ideas, Vitest `test.for` / `describe.each` and a
-  test-per-row loop in Playwright (read the file at module scope), `csv-parse/sync` + `JSON.parse` + the
-  `xlsx` (SheetJS) lib, **Zod** to validate/coerce parsed rows into a typed object.
-- `qa-java:test-data-builder` — the **boundary**: a builder/ObjectMother constructs **one** complex object in
-  code with defaults; data-driven feeds **many** rows from a file. They **compose** — a row drives a builder's
-  varying fields (see the last example).
-- `qa-java:db-verification-queries` — when the rows come from a **live database** at test time rather
-  than a static file; the safe assertion-SQL counterpart to file-sourced data.
-- `qa-java:browser-cloud-setup` — parameterizing the **environment** (browser/device matrix) rather than
-  the **data**; the two matrices are orthogonal and can multiply.
-- `qa-java:api-tests` / `qa-java:ui-tests-playwright` — where the data-driven test
-  *bodies* are authored; this skill supplies their rows.
-- `qa-java:test-reports` — each row renders as a separate, named Allure result; parameters show the
-  per-row input. `qa-<stack>:quality-metrics` — coverage that scales by rows, not methods.

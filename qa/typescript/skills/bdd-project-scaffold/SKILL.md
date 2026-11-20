@@ -42,18 +42,6 @@ The two paths never share a runner. A project that tests **both** scaffolds both
 - ⚠️ **Version-compat check:** `@wdio/cucumber-framework` pins a `@cucumber/cucumber` peer range (`^13.2.1` for 10.0.1) — keep inside it. Verify the peer range before locking the lockfile.
 - Reporting via `@wdio/allure-reporter`; standalone CucumberJS HTML formatter is bundled in `@cucumber/cucumber`
 
-## When to use
-
-- A TS UI/mobile project needs a BDD layer added (packages, config, lifecycle).
-- Starting a Gherkin suite from zero.
-
-## When NOT to use
-
-- Writing `.feature` files → `qa/_shared/bdd/feature-file-writer`
-- Generating step definitions → `qa/typescript/skills/gherkin-step-code`
-- Building page objects → `qa/typescript/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
-- BDD in .NET/Java → `qa/{dotnet,java}/skills/bdd-project-scaffold` (Reqnroll / Cucumber-JVM)
-
 ## Inputs needed
 
 Confirm at most 2–3.
@@ -298,11 +286,3 @@ Feature: BDD rig smoke
 ## Rules
 
 The standards this skill's output must meet are the qa-typescript rule files, not a list here: `bdd.md`, `qa-typescript.md`, `test-data.md` for seeding fixtures and, for the page objects the steps call, `page-objects.md`. Read the project's copy in `.claude/rules/qa-typescript/`, or the plugin's in `qa/typescript/skills/rules/` when the project has not installed them (`/qa-typescript:rules` does). Where they and this skill's recipes disagree, the rule files win.
-
-## Handoffs
-
-- Feature files → `qa/_shared/bdd/feature-file-writer`
-- Step definitions + POM wiring → `qa/typescript/skills/gherkin-step-code`
-- Page objects → `qa/typescript/skills/page-object-design` / `page-objects-from-url` / `mobile-screen-objects`
-- Allure reporting → `qa/reporting/typescript/skills/test-reports`
-- CI (feature shard, publish report) → `qa/cicd/typescript/skills/ci-pipelines`

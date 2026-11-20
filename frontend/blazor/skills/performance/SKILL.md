@@ -10,23 +10,6 @@ Owns making a Blazor app fast and keeping it fast across three cost centers that
 
 **Version rule:** detect the `TargetFramework` first. `@key`/`ShouldRender`/`Virtualize`/`CascadingValue IsFixed` and lazy-loading behave the same across net8/net9/net10. The **net10** deltas are asset-side: fingerprinted + precompressed `blazor.web.js` (~76% smaller), WASM asset fingerprinting (`<OverrideHtmlAssetPlaceholders>`), `<LinkPreload>`, and the three component OTel meters. Never emit a net10-only knob into a down-level project — the down-level equivalents are tagged below.
 
-## When to use
-
-- A component re-renders more than it should; a parent update repaints a whole subtree
-- A list/grid renders thousands of rows; scrolling janks
-- The WASM app's first paint / first interactivity is slow
-- Deciding trimming / lazy-loading / AOT for WASM
-- Interactive Server memory grows with users; sizing circuits
-- Wiring perf diagnostics (OTel meters) and setting budgets
-
-## When NOT to use
-
-- Writing the CSS / bundling static assets → [`styling`](../styling/SKILL.md) (its static-asset note points *here* for the perf side)
-- SignalR as a *feature* (live push, hubs, streams) → [`realtime`](../realtime/SKILL.md); this skill owns SignalR only as a *scale* concern
-- Server-side query/DB tuning → `data/*`, the `backend/dotnet` dev stack's persistence skill if installed
-- Caching read-heavy fetches (`HybridCache`) → [`data-fetching`](../data-fetching/SKILL.md)
-- Load/stress/soak testing the deployed app → `qa/dotnet/skills/load-testing` (peer)
-
 ## Cost-center routing — where is my slowness?
 
 ```
@@ -212,12 +195,3 @@ The standards this skill's output must meet are the fe-blazor rule files, not a 
 - Toggle `IsFixed`/`ShouldRender`/`@key` off→on and confirm the render-count meter drops on the target interaction.
 - Under simulated concurrency (nbomber peer), circuit memory/CPU stay within the Server budget; no unbounded growth.
 - Lighthouse FCP/TTI within budget on a throttled profile.
-
-## Handoffs
-
-- Static-asset bundling/serving mechanics → [`styling`](../styling/SKILL.md)
-- SignalR as a live-data feature (not scale) → [`realtime`](../realtime/SKILL.md)
-- Caching slow reads (`HybridCache`) → [`data-fetching`](../data-fetching/SKILL.md)
-- Server-side query/DB tuning → `data/*`, the `backend/dotnet` dev stack's persistence skill if installed
-- OTel meter export to Grafana → `observability/opentelemetry-dotnet`, `observability/dashboards`
-- Load/stress/soak of the deployed app → `qa/dotnet/skills/load-testing` (peer)

@@ -316,22 +316,3 @@ differ.
   `qa-dotnet:realtime-stream-testing`.
 - **One `GrpcChannel` per fixture** (`[OneTimeSetUp]` open, `[OneTimeTearDown]` shutdown + dispose); service stood
   up via Testcontainers. **Target + token via env**, lazy, never logged. NUnit + Grpc.Net.Client.
-
-## Cross-references
-
-- `qa-java:api-tests-grpc` — **the canonical file**: same four ideas, grpc-java + TestNG +
-  `GrpcCallResult`/`StatusRuntimeException`. Read it for the family rationale.
-- `qa-typescript:api-tests-grpc` — the TypeScript sibling (`@grpc/grpc-js` + `@grpc/proto-loader`); same four
-  ideas, different codegen/client libs.
-- `qa-dotnet:api-tests` · `qa-dotnet:api-tests-graphql` — the **protocol-trio siblings**:
-  REST (HTTP+JSON status-driven) and GraphQL (HTTP 200 `{ data, errors }` envelope). Three protocols, three
-  result-location conventions, one `api-test-author` family + shared Action + Test spine.
-- `qa-dotnet:realtime-stream-testing` — gRPC **streaming** reuses its
-  drain-then-assert-on-a-bounded-condition discipline; cross-link for deep stream-lifecycle assertions, don't
-  duplicate.
-- `qa-dotnet:api-models` — generate/model the proto messages (the DTO analogue) in isolation; this skill
-  consumes them.
-- `qa-dotnet:api-contract-testing` — the **Protobuf contract** boundary vs the functional test this skill writes.
-  `qa-dotnet:load-testing` — gRPC **load**.
-- `qa-dotnet:test-login-tokens` — obtain the per-call **bearer** carried in leading metadata.
-- `qa-dotnet:test-reports` — each RPC renders as a named result.

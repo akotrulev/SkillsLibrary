@@ -19,21 +19,6 @@ How C# desktop code crosses into native code safely: **WinRT through CsWinRT, Wi
 | Native AOT | Supported with `LibraryImport`, CsWinRT and `x:Bind`; not with runtime IL stubs or reflection-based COM | `PublishAot` makes a `DllImport` with non-blittable types a warning to fix |
 | Windows App SDK | 2.6.x (`desktop-windows:project-setup`) | Never add it to a WPF/WinForms app as a side effect (`A6`) |
 
-## When to use
-
-- A Win32 API has no managed equivalent: monitors, DWM, shell, power, a window message
-- A WinRT API is wanted from WPF or WinForms; a WinUI control inside WPF/WinForms
-- "Get the HWND", "wrap this COM object", "why does the picker need a window?", "find the API for X"
-
-## When NOT to use
-
-- A C++ project, IDL, `winrt::` → `desktop-windows:cpp-winrt`
-- Pickers, share, WebView2 setup → `desktop-windows:platform-integration`
-- Moving a WPF app to WinUI → `desktop-windows:migration`
-- Secret storage → `desktop-windows:offline-and-storage`
-
----
-
 ## Prefer the managed route first
 
 In order, before any P/Invoke: (1) a .NET BCL API; (2) a WinRT API through the TFM projection; (3) a Windows App SDK API; (4) a CsWin32-generated Win32 call; (5) a hand-written `LibraryImport`. Where installed, `winapp find-api "<what you need>"` searches Windows APIs and the Windows App SDK for the match; never required.
@@ -120,11 +105,3 @@ A log at each failed native call (API name, `GetLastError` code, never buffers o
 - **A `SafeHandle` replaced by `nint`** — a leak on every error path.
 - **A delegate passed to native and collected** — a crash minutes later.
 - **WinUI added to WPF "just for one control"** — a lane change; it is a migration.
-
-## Handoffs
-
-- C++ lane → `desktop-windows:cpp-winrt`; lane moves → `desktop-windows:migration`
-- Pickers, WebView2, share → `desktop-windows:platform-integration`
-- Package identity and TFM → `desktop-windows:project-setup`
-- WPF / WinForms lanes → `desktop-windows:wpf`, `desktop-windows:winforms`
-- Secure native calls → `desktop-shared:security`

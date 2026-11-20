@@ -8,13 +8,6 @@ disable-model-invocation: true
 
 HyperFrames (HeyGen, open source) renders HTML by seeking a paused timeline frame by frame, so each render is identical. It is an actively developed framework with skills of its own; this skill **routes to them** and carries only the fallback needed to get started.
 
-## When to use
-
-- A demo, walkthrough or motion-graphic asset must exist as a video file, and it is authored as markup.
-- `design:motion` has chosen *what* the motion is and a rendered file is now the deliverable.
-
-Do **not** use it to pick the motion (`design:motion`) or to animate the running app (a stack's `animation`).
-
 ## Step 1 — is HyperFrames installed?
 
 If `/hyperframes` is available (it comes with `/hyperframes-cli`), **stop here and follow it.** It holds the render contract, the work loop and the CLI by job; nothing below overrides it, and where it disagrees with this file, it wins.
@@ -49,7 +42,3 @@ Confirm the output file is non-empty and its duration matches the root `data-dur
 ## Stop here
 
 This skill does not teach Studio, the block registry, hosted or Lambda rendering, media generation or Remotion migration. Those are HyperFrames' own skills (`/hyperframes-cli`, `/hyperframes-registry`, `/media-use`, `/remotion-to-hyperframes`) — install and use them.
-
-## Related
-
-- [`design:motion`](../motion/SKILL.md) — chooses the motion this skill renders.

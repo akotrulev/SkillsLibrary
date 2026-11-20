@@ -47,8 +47,3 @@ siblings share the **same eventual-consistency condition-wait discipline** — o
 - Unique per-test topics/queues (or a test-run prefix) plus cleanup; any test runs alone, in any order.
 - Assert message content and observable side-effects, never broker internals or timing.
 - Local broker via Testcontainers/LocalStack — never a shared environment's broker.
-
-## Cross-references
-
-Each `references/<tool>.md` carries its own cross-references to sibling skills (DB verification,
-test environments, CI, chaos). Route there after picking the tool.

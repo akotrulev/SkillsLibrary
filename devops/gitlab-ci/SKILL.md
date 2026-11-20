@@ -10,21 +10,6 @@ Authors `.gitlab-ci.yml` pipelines for build, test, and deploy across the projec
 
 **Version policy:** detect the project's versions (TFM / `engines` / toolchain) and match — never assume. .NET 10 is primary, 8/9 supported (8 LTS ends Nov 2026). Node 20 is EOL (Apr 2026) — 24 is active LTS, 22 maintenance. Java 21 LTS is the default. Never put a job on a newer SDK/runtime than the project targets.
 
-## When to use
-
-- New GitLab project needs CI in `.gitlab-ci.yml`
-- Add a deploy stage to an existing pipeline
-- Refactor copy-pasted job definitions into `extends:` + `include:`
-- Migrate from another CI to GitLab CI/CD
-
-## When NOT to use
-
-- GitHub Actions → `devops/github-actions`
-- Azure DevOps Pipelines → `devops/azure-pipelines`
-- Bicep / Terraform authoring → `devops/infrastructure-as-code`
-- App-level env config → `devops/environment-config`
-
-- Test-suite CI lane (shard matrix, Allure publish, perf gate, flake quarantine) → `qa/cicd/agents/qa-cicd-{java,dotnet,typescript}`
 ## Inputs needed
 
 1. **Stack(s)**: .NET 10 (8/9 supported) / Java 21 + Gradle / Node 24 (22 maintenance) + which package manager
@@ -324,13 +309,3 @@ The standards this skill's output must meet are the devops rule files, not a lis
 4. Add `environment:` to every deploy job; mark prod environment as protected in the UI.
 5. If multiple repos share patterns, extract templates into a `ci-templates` project and `include:` them with a pinned `ref:`.
 6. Validate locally with the CI Lint endpoint (`Pipelines → CI lint`) or `glab ci lint`.
-
-## Handoffs
-
-- GitHub equivalent → `devops/github-actions`
-- Azure DevOps equivalent → `devops/azure-pipelines`
-- IaC for the underlying resources → `devops/infrastructure-as-code`
-- Per-env secrets/config → `devops/environment-config`
-- Cloud deploy specifics → `devops/aws-deployment` / `devops/azure-deployment`
-
-- Test-suite CI lane — shard matrix, Allure publish, perf gate, quarantine → `qa-cicd-{java,dotnet,typescript}`

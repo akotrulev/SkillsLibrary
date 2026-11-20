@@ -77,13 +77,3 @@ Then read 2–3 representative artifacts (one Sigma rule with its fixtures, the 
 | M (redaction) | Anything exists under `docs/security/` or `detections/` | `ls -d docs/security detections 2>/dev/null` |
 
 A and H apply to every repo — A is the gate, and every repo has a config surface. N applies whenever any of B–M does. **A section marked N/A names the probe that decided it**, and its absence is recorded as a coverage note per the absence rule, never as a finding.
-
-## Handoffs
-
-- **Apply the fixes** → the **`security-architect`** agent. The artifacts this audit sweeps are exactly the ones inside its write fence (`docs/security/**`, `detections/**`), so a nonconforming rule, policy, runbook, or register is fixed there — loading the owning `security-governance:*` skill for the rule. The priority table is the handoff artifact.
-- **App / infra wiring** (per-request nonce emission, framework middleware, ESO manifests, edge WAF deploy, the pre-commit hook and CI secret gate) → `fe-*` / `be-*` / `devops-engineer`. This audit reports the policy defect; they wire the fix.
-- **A `logsource` the stack never ships (D2)** → `observability-engineer-*` own the telemetry substrate. A rule with no data behind it is a telemetry gap, not a rule gap.
-- **"Authored but never validated" (D9)** → `purple-team-engineer` runs the validation. That is a missing proof, not a defect to fix.
-- **A vulnerability or committed secret found while reading (H2, H7)** → report it here at its severity **and** name `qa-security` for the scan lane and `security-governance:secrets-hardening` for the rotation. Do not start rotating.
-- **Whether a control should exist at all, and what risk its absence carries** → `security-architect`'s posture picture. That is the coverage note, not a finding.
-- **The maintainer, not the audited repo** → any place a `security-governance` skill's own cited standard version conflicts with the checklist's verified table. An open question, never a finding against the user's code.

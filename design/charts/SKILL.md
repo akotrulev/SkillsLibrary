@@ -18,15 +18,6 @@ python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<the que
 
 Query it before choosing a chart type; the selection table below is the reasoning the result is applied with.
 
-## When to use
-
-- Designing a product dashboard, analytics view, or report screen.
-- Choosing the chart type for a given question, or fixing a chart that reads wrong (a pie with 11 slices, a bar chart whose axis starts at 40).
-- Picking chart colors — deciding categorical vs sequential vs diverging, and keeping the series palette from colliding with brand or status colors.
-- Laying out a KPI row / stat tile, or deciding the hierarchy of a dense dashboard.
-
-Do **not** use it to write the charting-library code, to design an **ops** dashboard (`observability/dashboards`), or to *define* what a metric means (`quality-metrics`).
-
 ## Chart-type selection
 
 Pick the chart from the **question**, not from what looks impressive. Every chart answers exactly one of these; naming the question first eliminates most bad choices.
@@ -96,13 +87,3 @@ Numbered because audit finding ids cite the numbers: new checks are appended, an
 6. Stat tiles carry **label + value + comparison** (up-is-good made explicit), not a bare number.
 7. Every data region has **loading / loaded / empty / error** states; empty ≠ zero.
 8. **Direct labels** where they fit; axes labeled with units; values not hidden only in tooltips.
-
-## Related
-
-- [`design/design-tokens`](../design-tokens/SKILL.md) — owns the token tier/naming mechanics; the viz palette is a **separate semantic token group** whose *contents* this skill specifies.
-- [`design/visual-identity`](../visual-identity/SKILL.md) — the brief-level taste (the brand accent that this skill keeps *out* of the data-series palette).
-- [`design/ux-writing`](../ux-writing/SKILL.md) — the microcopy for empty/error states, stat-tile labels, and annotations.
-- [`observability/dashboards`](../../observability/dashboards/SKILL.md) — **ops/service** dashboards (RED / USE / golden signals). This skill owns *product* dashboards; that one owns operational ones.
-- [`qa/manual/quality-metrics`](../../qa/manual/quality-metrics/SKILL.md) — *defines* the metrics and SLO targets a dashboard then visualizes.
-- A stack's `error-handling` ([Blazor](../../frontend/blazor/skills/error-handling/SKILL.md) · [React](../../frontend/react/skills/error-handling/SKILL.md)) — the loading/empty/error state *structure* this skill's composition rule depends on.
-- [`design:corpus`](../ui-ux-pro-max/SKILL.md) — the 25-chart `chart` domain with per-type accessibility grades and library notes.

@@ -8,21 +8,6 @@ disable-model-invocation: true
 
 Authors Kubernetes manifests, Helm charts, and Kustomize overlays for the library's services on managed Kubernetes (AKS / EKS / GKE). Standardizes on **Helm charts per service** with **Kustomize overlays per environment** when needed, **Workload Identity / IRSA** for cloud access (no static keys), HPA + PDB for resilience, NetworkPolicy for isolation, and probe + resource discipline.
 
-## When to use
-
-- Service needs to run on Kubernetes
-- Adding HPA / PDB / NetworkPolicy / ServiceMonitor to an existing workload
-- Wiring Workload Identity (Azure) / IRSA (AWS) / Workload Identity (GKE) so pods can access cloud resources without secrets
-- Splitting per-env config via Helm values or Kustomize overlays
-- Standardizing the team's chart conventions
-
-## When NOT to use
-
-- ECS Fargate / Lambda / Container Apps / Static Web Apps → `devops/{aws,azure}-deployment`
-- Container build / Dockerfile → `devops/docker`
-- Pipeline YAML → `devops/{github-actions,gitlab-ci,azure-pipelines}`
-- IaC for the cluster itself → `devops/infrastructure-as-code`
-
 ## Inputs needed
 
 1. **Cluster**: AKS / EKS / GKE; version
@@ -411,12 +396,3 @@ The standards this skill's output must meet are the devops rule files, not a lis
 6. Add per-env values / overlays.
 7. If GitOps is in scope, register the service with Argo / Flux.
 8. Smoke against a cluster: `kubectl rollout status`; `kubectl describe pod` for events; check logs via Loki.
-
-## Handoffs
-
-- Container image build → `devops/docker`
-- IaC for the cluster itself → `devops/infrastructure-as-code`
-- Pipeline that builds + pushes + reconciles → `devops/{github-actions,gitlab-ci,azure-pipelines}`
-- Cloud deploy alternatives (Container Apps / ECS / App Service / Static Web Apps) → `devops/{aws,azure}-deployment`
-- App-side config / secrets → `devops/environment-config`
-- Observability inside pods → `observability/opentelemetry-{stack}` + `observability/structured-logging-{stack}`

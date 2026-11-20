@@ -12,18 +12,6 @@ This skill stands up a **complete, runnable API test solution from zero**: direc
 
 The structure follows the established dotnet layout: **flat projects at the solution root** (no `src/`/`tests/` nesting), **per-project config** so each suite is independently configurable/dockerizable, a shared **`TestCore`**, and **Central Package Management (CPM)** so versions are pinned once. Authoring conventions (DTOs, typed clients, test bodies, builders, deep verification) live in the `qa-api-dotnet` skills — this skill owns the **project shell**.
 
-## When to use
-
-- A fresh repo with no .NET test solution yet, and the user wants API coverage.
-- The user asks which versions / structure / setup a C# API test framework should use.
-- You are about to author API tests and there is no solution to put them in.
-
-## When NOT to use
-
-- The solution already exists → author into it with the `qa-api-dotnet` skills, don't re-scaffold.
-- UI / mobile / performance scaffolding → use the matching `qa/dotnet/skills/<discipline>-project-setup` skill.
-- A Java or TypeScript API suite → `qa/java/skills/api-project-setup` / `qa/typescript/skills/api-project-setup`.
-
 ## Tooling & versions
 
 Versions are pinned **once** in `Directory.Packages.props` (CPM) — each `.csproj` references packages **without** a `Version` attribute. Do not put `<PackageReference Version=…>` in project files (that triggers `NU1008` under CPM).

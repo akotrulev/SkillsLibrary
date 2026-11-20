@@ -143,14 +143,3 @@ Mongo has no native migration engine, so pick one tool per stack and use it cons
 3. New collection → design the document (embed vs reference **mechanics** here; the *choice* is `_shared/schema-design`), draft the `$jsonSchema` validator, list indexes by the ESR rule, write the idempotent migration.
 4. Slow op → `.explain('executionStats')` on representative data; identify COLLSCAN / over-fetch / in-memory SORT; smallest fix first (`references/performance.md`).
 5. Validate against a seeded dataset; smoke the hot queries via the matching `qa/<stack>/skills/db-testing` peer.
-
-## Handoffs
-
-- Cross-engine modeling decisions (embed-vs-reference *choice*, id strategy, money, soft-delete, tenancy pattern) → `data/_shared/schema-design`
-- Expand-contract pattern + migration tool selection → `data/_shared/migrations`
-- Cache-aside/stampede/TTL pattern catalog → `data/_shared/caching-patterns` + `data/redis`
-- Universal query triage (ESR, N+1, pagination) → `data/_shared/slow-query-fixes`
-- Testing the schema/queries (seed/assert/clean, Testcontainers, safe queries) → `qa/{java,dotnet,typescript}/skills/db-testing/*`
-- Tenant/user claims feeding access control → `auth/auth0-{stack}` + `auth/_shared/auth0-concepts`
-- Query-latency telemetry → `observability/*` skills (via the `observability-engineer-{dotnet,java,node}` peer bundled in the matching `be-*` plugin)
-- Relational / KV equivalents → `data/postgresql` · `data/sqlserver` · `data/mysql` · `data/redis`

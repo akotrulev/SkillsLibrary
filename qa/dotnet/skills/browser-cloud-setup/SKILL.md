@@ -19,22 +19,6 @@ Wires .NET tests to a **hosted device/browser grid** — BrowserStack, Sauce Lab
 - Grid code under `Support/Grid/`, grid fixtures in their own namespace (`Example.UiTests.Grid`); credentials via **env vars only** (`BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY`, `SAUCE_USERNAME` / `SAUCE_ACCESS_KEY` / `SAUCE_REGION`, `LT_USERNAME` / `LT_ACCESS_KEY`, `BUILD_NAME`)
 - These suites run in CI under `qa/cicd/dotnet/skills/ci-pipelines` — secrets via the runner's secret store / OIDC
 
-## When to use
-
-- Running existing Playwright .NET web tests on a cloud browser matrix instead of local Chromium/Firefox/WebKit
-- Running existing Appium.WebDriver mobile tests on cloud real devices / emulators
-- Picking and wiring the **right vendor capability block** (`bstack:options` vs `sauce:options` vs `LT:Options`)
-- Capping concurrent sessions to the plan and mapping that onto NUnit's worker count
-- Surfacing the **session dashboard URL** on failure, and marking the session pass/fail back to the vendor
-- Reaching a private/staging URL from the grid via a **local tunnel**
-
-## When NOT to use
-
-- The TypeScript / Java grid stacks → `qa/{typescript,java}/skills/browser-cloud-setup`
-- Writing the page objects / tests → `qa/dotnet/skills/ui-test-author/playwright`, `qa/dotnet/skills/ui-test-author/appium`
-- CI shard/worker mechanics (class filters, artifact upload) → `qa/cicd/dotnet/skills/ci-pipelines` — this skill maps the cap *onto* those, it doesn't re-derive them
-- Deep AWS Device Farm device-pool / ARN orchestration → `qa/dotnet/skills/device-cloud`
-
 ## Pick a vendor — quick orientation
 
 | Vendor | Web (Playwright .NET) connect | Mobile (Appium) hub | Vendor cap block | Tunnel binary |
@@ -133,12 +117,3 @@ blocks**, **parallelism**, the **tunnel**, **AWS Device Farm**, and **BrowserSta
 4. Wire the run: `dotnet test --filter TestCategory=grid -- NUnit.NumberOfTestWorkers=$GRID_CONCURRENCY`, and `TestCategory!=grid` on the local/PR run; note `shards × workers ≤ cap` and cross-link `qa/cicd/dotnet/skills/ci-pipelines`.
 5. If the target is private, add `GridTunnel` and its `[SetUpFixture]` in `Example.UiTests.Grid`.
 6. Run a single grid fixture first (`NUnit.NumberOfTestWorkers=1`) to confirm the connection + caps before fanning out; confirm the session appears on the dashboard with the right build/project tags.
-
-## Cross-references
-
-- **`qa/typescript/skills/browser-cloud-setup`** + **`qa/java/skills/browser-cloud-setup`** — sibling grid stacks. Same five moves (connect → caps → parallelism → artifacts/status → tunnel), different SDKs (`use.connectOptions` / a worker-scoped `browser`; Java's `BaseTest.newBrowser` override). Structure ported, not code.
-- **`qa/dotnet/skills/ui-test-author/playwright`** — `BaseTest`, the per-worker browser (`references/lifecycle.md` §2–§4) and the test classes a grid fixture reruns.
-- **`qa/dotnet/skills/ui-test-author/appium`** — writes the mobile tests/page objects; this skill swaps the local Appium session for a grid one.
-- **`qa/cicd/dotnet/skills/ci-pipelines`** — class-filter sharding + OIDC secret injection; this skill maps the plan cap onto those shards.
-- **`qa/dotnet/skills/device-cloud`** — deeper cloud-Appium / device-pool specifics; this node is config/wiring, that one is the farm.
-- **`qa/dotnet/skills/network-mocking`** — when a grid run also needs out-of-browser traffic capture (the proxy + tunnel combine).

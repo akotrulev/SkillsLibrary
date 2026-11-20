@@ -8,23 +8,6 @@ disable-model-invocation: true
 
 Authors k6 scripts against deployed services. k6 ships as a single Go binary and accepts JS (or TS via the `xk6-ts` bundler / esbuild) scripts; this skill defaults to **plain ESM JavaScript** because it runs unmodified in `grafana/k6`. For TS authoring, bundle to JS before running.
 
-## When to use
-
-- Default tool for new perf work in any stack — k6 is language-independent at runtime.
-- Smoke / average / stress / spike / soak / capacity tests of HTTP, gRPC, or WebSocket endpoints.
-- Browser-level perf via `k6/browser` (Chromium-driven) where Playwright would be overkill.
-- CI smoke perf gate on PRs.
-
-## When NOT to use
-
-- NBomber (.NET-native author experience) → `qa/dotnet/skills/load-testing`
-- Gatling (JVM-native author experience) → `qa/java/skills/load-testing`
-- Functional behavior tests → `qa/typescript/skills/api-test-author/writer` / `qa/typescript/skills/ui-test-author/<tool>`
-- Unit benchmarks → Vitest bench / `tinybench`
-- Defining the SLO itself → `qa/manual/quality-metrics`
-
-Load `qa/_shared/performance` for workload models, open-loop vs closed-loop guidance, environment policy, and the reporting template.
-
 ## Layout
 
 ```
@@ -294,15 +277,3 @@ The standards this skill's output must meet are the qa-typescript rule files, no
 7. Add CI step (smoke on PR; full on release). Pin `grafana/k6:<version>`.
 8. Run locally; review per-route thresholds; confirm the test fails when an SLO is breached.
 9. Add the report to the release / change notes (see `_shared` template).
-
-## Handoffs
-
-- Workload models, environment policy, reporting → `qa/_shared/performance`
-- NBomber (.NET) → `qa/dotnet/skills/load-testing`
-- Gatling (Java) → `qa/java/skills/load-testing`
-- SLO targets the test validates → `qa/manual/quality-metrics`
-- Grafana dashboards for server-side correlation → `observability/dashboards`
-- LogQL / PromQL for queries → `observability/queries`
-- Pipeline integration → `qa/cicd/typescript/skills/ci-pipelines` (its `references/<host>.md`) or `devops/<ci>`
-- Allure publishing for perf reports → `qa/reporting/typescript/skills/test-reports`
-- Bug filings discovered during perf → `qa/manual/bug-report-writer`

@@ -8,22 +8,6 @@ disable-model-invocation: true
 
 Authors NBomber 6.x scenarios in C# against deployed services. NBomber is the right tool when the team strongly prefers writing perf tests in C# (shared DTOs / clients with the production code) and wants full .NET DSL access. For all other cases default to k6 (`qa/typescript/skills/load-testing`).
 
-## When to use
-
-- .NET-resident teams that want to share DTOs / API clients with the production project.
-- Perf tests that need rich step types (HTTP + SQL + message broker in one scenario).
-- Teams already familiar with C# and NUnit / xUnit who would rather not learn k6's JS API.
-
-## When NOT to use
-
-- New perf work without a strong C# preference → `qa/typescript/skills/load-testing`
-- JVM-native author experience → `qa/java/skills/load-testing`
-- Functional behavior tests → `qa/dotnet/skills/api-test-author/writer`
-- Microbenchmarks (loop bodies, parsing speed, allocations) → `qa/dotnet/skills/benchmarks` (BenchmarkDotNet)
-- Defining the SLO itself → `qa/manual/quality-metrics`
-
-Load `qa/_shared/performance` for workload models, open-loop vs closed-loop guidance, environment policy, and the reporting template.
-
 ## Stack
 
 - **Runtime**: .NET 8
@@ -348,14 +332,3 @@ The standards this skill's output must meet are the qa-dotnet rule files, not a 
 5. Add CI step (smoke on PR; full on release). Publish `PerfTests/perf-reports/` as a CI artifact.
 6. Run locally; review per-step latencies; confirm the test fails when an SLO is breached.
 7. Add the report to the release / change notes (see `_shared` template).
-
-## Handoffs
-
-- Workload models, environment policy, reporting → `qa/_shared/performance`
-- k6 (TypeScript) → `qa/typescript/skills/load-testing`
-- Gatling (Java) → `qa/java/skills/load-testing`
-- SLO targets the test validates → `qa/manual/quality-metrics`
-- Grafana dashboards for server-side correlation → `observability/dashboards`
-- Pipeline integration → `qa/cicd/dotnet/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
-- Allure publishing for perf reports → `qa/reporting/dotnet/skills/test-reports`
-- Bug filings discovered during perf → `qa/manual/bug-report-writer`

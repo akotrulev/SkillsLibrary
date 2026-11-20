@@ -19,20 +19,6 @@ A document app gets New, Open, Open Recent, Save, Duplicate, Revert, the edited 
 
 The 27 changes that break conformers: `DocumentReader.read` and `DocumentWriter.write` are `@concurrent` (a `nonisolated` conformer must switch; under default MainActor isolation they would otherwise run on the main actor); `makeDocument` closures are `@MainActor`; `URLDocumentConfiguration` is `@MainActor @Observable`, no longer `Sendable`; `FileWrapperDocumentWriter.makeFileWrapper` gets `previous:` — mutate it to write only the changed package children. Detect the SDK and deployment target before writing; never raise either for these APIs.
 
-## When to use
-
-- A document-based app, or opening/saving one user file kind
-- A bundle (file package) with many parts
-- Autosave, versions, Revert, edited indicator, unsaved-work prompts
-- iCloud documents, open from Finder, Recent documents
-
-## When NOT to use
-
-- App-owned databases, caches → `offline-and-storage`
-- Panels, security-scoped bookmarks, entitlements → `sandbox-and-permissions`
-- Window placement → [`windows-and-scenes`](../windows-and-scenes/SKILL.md); Save/Revert menu items → [`menus-and-commands`](../menus-and-commands/SKILL.md)
-- UIKit document browser → `mobile-ios`; Windows → `desktop-windows:offline-and-storage`
-
 ## Declare the document type
 
 Declare the UTI (`UTExportedTypeDeclarations`, `CFBundleDocumentTypes`) in the app's `Info.plist`: a stable reverse-DNS identifier, `conformsTo` `public.data` or `com.apple.package`, one extension. The `UTType` constant lives next to the document type. A type the app only reads is declared as Viewer, not Editor.
@@ -102,11 +88,3 @@ Turn on the iCloud container and the `ubiquity` document capability; coordinated
 - **A custom autosave timer** fighting the system's.
 - **`Save As` menu** instead of Duplicate.
 - **Reading on the main actor** in a `FileDocument` reader.
-
-## Handoffs
-
-- Panels and bookmarks → `sandbox-and-permissions`
-- Window and launch scene → [`windows-and-scenes`](../windows-and-scenes/SKILL.md)
-- Menu items → [`menus-and-commands`](../menus-and-commands/SKILL.md)
-- `FileDocument` → `Document` → `migration`
-- App databases → `offline-and-storage`

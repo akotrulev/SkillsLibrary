@@ -84,13 +84,3 @@ diffs across many browsers stay noisy, or a page whose *content* changes must ke
   on the test itself: `[Description("No assertion: …")]`, so a reader never mistakes it for a forgotten
   assertion.
 - **No `try`/`catch`/`finally` in a test.** Cleanup and gates live in `[TearDown]` / `[OneTimeTearDown]`.
-
-## Handoffs
-
-- `BaseTest`, page objects, `Directory.Packages.props` → `qa/dotnet/skills/ui-test-author/playwright`
-- Aria snapshots and the other web-first assertions → its `references/assertions.md`
-- Failure evidence, `AddScreenDiff`, reading a trace → `qa/dotnet/skills/evidence-capture`
-- Allure wiring → `qa/reporting/dotnet/skills/test-reports`
-- The nightly job and artifact upload → `qa/cicd/dotnet/skills/ci-pipelines`, `qa/cicd/ci-conventions`
-- TypeScript and Java → `qa-typescript:visual-regression` (the runner's `toHaveScreenshot`),
-  `qa-java:visual-regression` (screenshot plus a comparator, as here)

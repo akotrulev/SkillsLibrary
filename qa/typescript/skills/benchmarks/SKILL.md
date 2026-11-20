@@ -22,13 +22,6 @@ A?" and "did this change make the hot path slower?".
 
 A benchmark result is a ratio between alternatives on one machine, never a production latency number.
 
-## When NOT to use
-
-- Endpoint latency, throughput, soak, spike → `load-testing`
-- Fault tolerance under slow dependencies → `failure-injection-testing`
-- Correctness of the code being measured → unit tests first (`be-node` `unit-testing`); benchmark only code that is
-  already tested, including a test that the alternatives return the same value — a fast wrong answer is not a win
-
 ## Inputs needed
 
 1. The function(s) to measure and the alternative or baseline to compare against.
@@ -289,10 +282,3 @@ Then the comparison table (ops/sec, median, rme per input size), the environment
 - **Gating on time on shared CI runners** — the gate fails on noise and gets disabled; report time there.
 - **Benchmarking `src/` through the module runner** — the import getters dominate the number; measure the built
   output.
-
-## Handoffs
-
-- Endpoint load and SLOs → `load-testing`, `qa/_shared/performance`
-- CPU and heap profiles → `qa/_shared/performance/references/profiling.md`
-- The CI job and artifact upload → `qa/cicd/typescript/skills/ci-pipelines`
-- Making the benchmarked code testable / tested → `be-node` `unit-testing`

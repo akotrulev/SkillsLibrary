@@ -12,23 +12,6 @@ Division of labor with [`data-fetching`](../data-fetching/SKILL.md): data-fetchi
 
 **Version rule:** detect the `TargetFramework` first. `ErrorBoundary`, `OnErrorAsync`, and Polly are net8+. The **net10** deltas are reconnection-side: the customizable `ReconnectModal` component (source shipped in the template), `Blazor.pauseCircuit()`/`resumeCircuit()`, and circuit-eviction state persistence. net8/net9 fallbacks (the default reconnect UI + JS reconnection handlers) are tagged below.
 
-## When to use
-
-- Placing `ErrorBoundary` so an exception degrades one region, not the app
-- Logging caught render exceptions with a correlation id
-- Reconnection UX for interactive Server (drop → reconnecting → resumed / failed)
-- Retry/timeout/circuit-breaker on outbound `HttpClient` calls
-- Shipping WASM client errors to the server log
-- Rendering the three states of a data region (loading / loaded / failed) + actionable empty states
-
-## When NOT to use
-
-- Producing the categorized error `Result` from an API call → [`data-fetching`](../data-fetching/SKILL.md)
-- Per-field form validation messages → [`forms`](../forms/SKILL.md)
-- The SignalR live-data client + its reconnect handlers as a *feature* → [`realtime`](../realtime/SKILL.md) (this skill owns the *UX* of a dropped circuit; realtime owns the hub connection)
-- Circuit/SignalR *scale* (memory, backplane) → [`performance`](../performance/SKILL.md)
-- Auth token-expiry mid-session → `auth/auth0-blazor` (session lifecycle)
-
 ## The three failure surfaces
 
 ```
@@ -191,13 +174,3 @@ The standards this skill's output must meet are the fe-blazor rule files, not a 
 - Make an API call 500 → the region shows the **failed** state inline with a working retry, not a blank grid; the retry recovers on the next success.
 - Empty each way (no records / no filter / filtered-out) → three distinct actionable messages.
 - Throw in WASM → the error reaches the server log (not just the browser console).
-
-## Handoffs
-
-- The categorized `Result` this skill renders → [`data-fetching`](../data-fetching/SKILL.md) (produces it)
-- Live-data hub reconnect handlers + connection-status affordance → [`realtime`](../realtime/SKILL.md)
-- Circuit/SignalR memory + retained-circuit sizing → [`performance`](../performance/SKILL.md)
-- Field-level validation errors → [`forms`](../forms/SKILL.md)
-- Renderer unification (bind loading/failed once on the shared grid) → [`ui-rules`](../ui-rules/SKILL.md)
-- Auth token-expiry mid-session → `auth/auth0-blazor`
-- Client/server error export to Grafana → `observability/opentelemetry-dotnet`

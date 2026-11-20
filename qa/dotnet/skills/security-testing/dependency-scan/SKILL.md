@@ -313,19 +313,3 @@ These sections live in `references/details.md` — **read it when the task touch
   code-scanning.
 - Pair the **gate** with **remediation** (Dependabot/Renovate) and the **`dependency-review-action`**
   PR-diff gate. A clean SCA ≠ "secure" — **run DAST too**: orthogonal layers.
-
-## Cross-references
-
-- `qa-java:dependency-scan` — same skill, Java / **OWASP Dependency-Check Gradle
-  plugin** (`failBuildOnCVSS`, suppression XML with `until=`); the **canonical** sibling and the cross-stack
-  throughline.
-- `qa-typescript:dependency-scan` — same skill, TS / `npm audit` (`--audit-level`,
-  `--json`, `overrides`/`.nsprc`).
-- `qa-dotnet:passive-scan` — the **DAST** sibling that opened the `security-testing`
-  family: ZAP probes the **running app's HTTP surface**; SCA reads your **build graph**. Orthogonal layers
-  — **run both** (together they close Step 2).
-- `qa-dotnet:accessibility-testing` — the **ticketed-baseline triage** discipline
-  reused here for the suppression list (gate new findings, document every suppression with a ticket).
-- `qa-dotnet:ci-pipelines` — the gate step, `dependency-review-action`, artifact upload.
-- `qa-dotnet:test-reports` — attach the `dotnet list package --vulnerable --format json` report to the
-  run.

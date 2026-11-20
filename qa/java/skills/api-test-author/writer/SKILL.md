@@ -28,21 +28,6 @@ Authors `*Test` classes on top of the **DTO + Client + Test** layering: record D
 
 This skill writes **only the test classes**. If a DTO or client a test needs is missing, run the owner skill first — never hand-roll HTTP calls or inline `RestAssured.given()` to avoid creating a client.
 
-## When to use
-
-- New `{Operation}{Resource}Test.java` class for an endpoint that has (or will get) a client
-- Adding test methods for additional scenarios on an existing resource
-- Automating cases from a `qa/manual/test-case-writer` document or an OpenAPI/Swagger spec
-
-## When NOT to use
-
-- UI / Selenium tests → `qa/java/skills/ui-test-author/selenium`
-- .NET API tests → `qa/dotnet/skills/api-test-author/writer`
-- DTO-only scaffolding → `qa/java/skills/api-models`
-- Client-only scaffolding → `qa/java/skills/api-client-writer`
-- A new project from zero → `qa/java/skills/api-project-setup`
-- Reviewing existing tests → `qa/java/skills/api-test-author/review`
-
 ## Inputs needed
 
 1. **Source of truth** — one of: an OpenAPI/Swagger spec, a formal test-case document (TC-IDs), or a verbal scenario list. When a spec or test-case document is provided, derive resources, endpoints, body shapes, and scenarios from it — do not re-ask.
@@ -240,12 +225,3 @@ The standards this skill's output must meet are the qa-java rule files, not a li
 5. Verify every test name follows `Should_X_When_Y` and asserts one behavior; verify every TC-ID (when given) maps to a test or is explicitly deferred.
 6. Run the hallucination gate (`references/generation-checks.md` §2); report every `MISSING` endpoint and write no test against it.
 7. Run `./gradlew :apitests:test` — expect 0 failures.
-
-## Handoffs
-
-- DTO scaffolding → `qa/java/skills/api-models`
-- Client scaffolding → `qa/java/skills/api-client-writer`
-- Test data builders → `qa/java/skills/test-data-builder`
-- Parameterized matrices → `qa/java/skills/data-driven-testing`
-- Reviewing tests → `qa/java/skills/api-test-author/review`
-- Allure reporting setup → `qa/reporting/java/skills/test-reports`

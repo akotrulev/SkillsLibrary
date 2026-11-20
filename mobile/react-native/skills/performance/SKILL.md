@@ -27,22 +27,6 @@ Detect first: whether the compiler is on (`app.json` / `babel.config.js`), which
 
 **Measure on a release build on a real, mid-range device.** Dev mode, a simulator and an M-series laptop all lie. No optimisation lands without a before-and-after number.
 
-## When to use
-
-- A list, feed or grid janks, blanks, or uses too much memory
-- Cold-start or time-to-interactive is slow; setting a startup budget
-- The bundle or store download is large; finding what is in it
-- "Do I still need `useMemo` / `useCallback` / `memo`?"
-- A screen re-renders on every keystroke
-
-## When NOT to use
-
-- Reanimated, gestures, UI-thread animation → [`animation`](../animation/SKILL.md)
-- Which list library and how rows are authored → [`ui-components`](../ui-components/SKILL.md)
-- Request timing, caching → [`networking`](../networking/SKILL.md)
-- Crash reporting, release-health thresholds → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md)
-- Native Swift / Kotlin → `mobile-ios:performance` / `mobile-android:performance`
-
 ## List rules — the bundled set
 
 Authority: `mobile/react-native/bundled/react-native-guidelines/rules/`. Skills point in by filename; the bundled rule set is loaded by path.
@@ -149,10 +133,3 @@ The standards this skill's output must meet are the mobile-react-native rule fil
 - Atlas export shows no duplicate large module and a delta against the previous export.
 - Cold start to interactive is within the recorded budget in `expo-observe`.
 - Dev-side: a row component's render count is stable across a parent update (RNTL + a render counter) — [`component-testing`](../component-testing/SKILL.md).
-
-## Handoffs
-
-- Animation and gestures → [`animation`](../animation/SKILL.md) · list authoring → [`ui-components`](../ui-components/SKILL.md)
-- Crash reporter, release-health thresholds → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md), [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
-- State placement → [`architecture`](../architecture/SKILL.md) · fonts and assets → [`styling`](../styling/SKILL.md)
-- Device-level profiling and load → `qa-mobile-typescript` (peer)

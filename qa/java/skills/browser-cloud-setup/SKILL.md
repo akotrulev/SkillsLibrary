@@ -20,22 +20,6 @@ Wires Java tests to a **hosted device/browser grid** — BrowserStack, Sauce Lab
 - Grid config under `src/test/java/.../support/grid/`; credentials via **env vars only** (`BROWSERSTACK_USERNAME` / `BROWSERSTACK_ACCESS_KEY`, `SAUCE_USERNAME` / `SAUCE_ACCESS_KEY`, `LT_USERNAME` / `LT_ACCESS_KEY`)
 - These suites run in CI under `qa/cicd/java/skills/ci-pipelines` — secrets injected via the runner's secret store / OIDC, sharding driven by the runner (see § Parallelism)
 
-## When to use
-
-- Running existing Playwright Java web tests on a cloud browser matrix instead of local Chromium/Firefox/WebKit
-- Running existing Appium java-client mobile tests on cloud real devices / emulators
-- Picking and wiring the **right vendor capability block** (`bstack:options` vs `sauce:options` vs `LT:Options`) for a Java stack
-- Capping concurrent sessions to the plan and mapping that onto TestNG `thread-count`
-- Surfacing the **session dashboard URL** + video/logs on failure, and marking the session pass/fail back to the vendor
-- Reaching a private/staging URL from the grid via a **local tunnel**
-
-## When NOT to use
-
-- The TypeScript / .NET grid stacks → `qa/{typescript,dotnet}/skills/browser-cloud-setup`
-- Writing the page objects / tests → `qa/java/skills/ui-test-author/playwright`, `qa/java/skills/ui-test-author/appium`
-- CI shard/worker mechanics (matrix, sharding props, artifact upload) → `qa/cicd/java/skills/ci-pipelines/*` — this skill maps the cap *onto* those, it doesn't re-derive them
-- Deep AWS Device Farm device-pool / ARN orchestration → `qa/java/skills/device-cloud`; this node covers the wiring, that one the farm specifics
-
 ## Pick a vendor — quick orientation
 
 | Vendor | Web (Playwright Java) connect | Mobile (Appium) hub | Vendor cap block | Tunnel binary |
@@ -139,12 +123,3 @@ that needs it.
 5. Mark each session once and attach its dashboard URL — `GridSession.markOutcome` in the grid class's `@AfterClass` (web), `SessionStatus.mark…` in the driver teardown (mobile).
 6. If the target is private, add the tunnel lifecycle (`GridTunnel` in a `@BeforeSuite`/`@AfterSuite` class listed in `testng-grid.xml`) and tie sessions via the cap.
 7. Run a single test against the grid first (one thread) to confirm the connection + caps before fanning out. Confirm the session appears on the dashboard with the right build/project tags.
-
-## Cross-references
-
-- **`qa/typescript/skills/browser-cloud-setup`** + **`qa/dotnet/skills/browser-cloud-setup`** — sibling grid stacks. Same five moves (connect → caps → parallelism → artifacts/status → tunnel), different SDKs (`chromium.connect`/`@wdio/*-service`; Playwright .NET `ConnectAsync`/`AppiumOptions`). Structure ported, not code.
-- **`qa/java/skills/ui-test-author/playwright`** — writes the web tests/page objects this skill runs on a grid, and owns `BaseTest`, whose `newBrowser(playwright)` hook a grid class overrides.
-- **`qa/java/skills/ui-test-author/appium`** — writes the mobile tests/page objects; this skill swaps the local Appium session for a grid one (same driver-factory discipline).
-- **`qa/cicd/java/skills/ci-pipelines`** — sharding/`-PshardIndex` + OIDC secret injection; this skill maps the plan cap onto those shards (don't duplicate the mechanics).
-- **`qa/java/skills/device-cloud`** — deeper cloud-Appium / device-pool specifics; this node is config/wiring, that one is the farm.
-- **`qa/java/skills/network-mocking`** — when a grid run also needs out-of-browser traffic capture (the proxy + tunnel combine).

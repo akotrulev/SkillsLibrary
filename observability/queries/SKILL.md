@@ -8,19 +8,6 @@ disable-model-invocation: true
 
 The query layer of the Loki + Prometheus + Tempo stack. Covers PromQL for metrics, LogQL for logs, common idioms, and the cross-store pattern (log → trace via `trace_id`, metric → trace via exemplars). Targets dashboards (`observability/dashboards`), alert rules, and on-call investigation.
 
-## When to use
-
-- Authoring panel queries for a Grafana dashboard
-- Authoring Prometheus / Mimir alert rules
-- Ad-hoc on-call investigation (`{service="orders",level="error"} |~ "timeout"`)
-- Tuning a slow query (cardinality issues, missing label, wrong function)
-
-## When NOT to use
-
-- Dashboard layout / panel design → `observability/dashboards`
-- Generating metrics in code → `observability/opentelemetry-{dotnet,java,node}`
-- Designing SLI/SLO targets (the math, not the query) → `qa/manual/quality-metrics`
-
 ## Inputs needed
 
 1. **Data source** (Prometheus / Mimir / Loki / Tempo)
@@ -370,11 +357,3 @@ The log itself carries `user_id`, `tenant_id`, etc. as JSON fields:
 6. For frequent queries, promote to a recording rule (Prometheus rule file).
 7. For alerts, add `for:`, `severity`, `summary`, `runbook`.
 8. Validate by running against the live time series; sanity-check the magnitude.
-
-## Handoffs
-
-- Metrics backend setup + recording/alerting-rule deployment → `observability/metrics-setup`
-- Dashboard layout → `observability/dashboards`
-- What's in the metrics / log streams → `observability/opentelemetry-{stack}` + `observability/structured-logging-{stack}`
-- SLO math / KPI definitions → `qa/manual/quality-metrics`
-- Adding new metrics / fields needed for a query → instrumentation skill for the stack

@@ -24,19 +24,6 @@ Division of labour with [`networking`](../networking/SKILL.md): it **produces** 
 
 Detect first: `expo-updates`, the wired crash reporter, TanStack Query, and any existing banner or toast provider — extend it, never add a second.
 
-## When to use
-
-- Placing boundaries; rendering a region's loading / loaded / failed / stale / offline states and empty kinds
-- The persistent banner, a timeout, a 401 mid-session, OTA skew, app resume, a failed write or SDK, a full disk
-
-## When NOT to use
-
-- Producing the error, retries, `Retry-After`, token refresh mechanics → [`networking`](../networking/SKILL.md)
-- Persisting data, the mutation queue, conflicts → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Field validation messages → [`forms`](../forms/SKILL.md)
-- Crash-reporter setup, symbols → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md)
-- Native Swift / Kotlin → `mobile-ios:error-handling` / `mobile-android:error-handling`
-
 ## The failure surfaces
 
 ```
@@ -178,12 +165,3 @@ The standards this skill's output must meet are the mobile-react-native rule fil
 - Fail a pull-to-refresh after a load → rows remain, stale marker with an age, one banner.
 - Airplane mode → offline or stale, never "failed", no retry attempts; hang the endpoint → the timeout body at the deadline.
 - Dev-side tests: [`component-testing`](../component-testing/SKILL.md); device journeys → `qa-mobile-typescript` (peer).
-
-## Handoffs
-
-- The categorised error, timeouts, retries, token refresh → [`networking`](../networking/SKILL.md)
-- Persistence and the mutation queue → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Field errors → [`forms`](../forms/SKILL.md) · list slots → [`ui-components`](../ui-components/SKILL.md)
-- Ids → [`test-ids`](../test-ids/SKILL.md) · roles, announcements → [`accessibility`](../accessibility/SKILL.md)
-- Crash reporter, symbols → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md) · OTA release channels → `mobile-<stack>:release`
-- Auth provider / credentials manager → `auth0-react-native`

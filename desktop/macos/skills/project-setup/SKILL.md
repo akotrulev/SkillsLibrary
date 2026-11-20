@@ -27,21 +27,6 @@ Read the `.xcodeproj` / `Project.swift` / `Package.swift`, `swift --version`, `M
 
 **The deployment target and architecture choice is a recommendation (D4) derived from API availability, not an Apple rule.** An architecture that drops Intel is a product decision: say so in the PR, because Intel software stops running on macOS 28 and macOS 26 Tahoe is the last release for Intel Macs. The template's `SWIFT_VERSION = 5.0` is the trap: a project already in Swift 5 mode is migrated one module at a time, never flipped wholesale.
 
-## When to use
-
-- Creating a Mac app, or hardening one that has only the template's defaults
-- Turning on the sandbox, Hardened Runtime or an entitlements file
-- Splitting an app into local Swift packages
-- Adding an environment, a formatter, a linter, a test plan, a String Catalog or a privacy manifest
-
-## When NOT to use
-
-- Signing, notarization, Sparkle, Mac App Store review → `desktop/_shared/distribution`
-- State ownership → [`architecture`](../architecture/SKILL.md); screens → [`ui-components`](../ui-components/SKILL.md)
-- Which entitlement or TCC permission a feature needs → `sandbox-and-permissions`
-- Auth → `auth0-macos`; CI YAML → `devops-engineer`
-- iOS → `mobile-ios:project-setup`; Windows → `desktop-windows:project-setup`
-
 ## Inputs needed
 
 - App name, bundle id, environments, deployment target (default 15), whether Intel is in scope
@@ -153,12 +138,3 @@ The standards this skill's output must meet are the desktop-macos rule files (`x
 - [ ] Each environment has an xcconfig, a configuration and a shared scheme
 - [ ] `.swift-format` and `.swiftlint.yml` committed and passing; `Unit` and `UI` plans exist
 - [ ] `Localizable.xcstrings` and `PrivacyInfo.xcprivacy` in the app target; no secret in any xcconfig or plist
-
-## Handoffs
-
-- Architecture and state → [`architecture`](../architecture/SKILL.md)
-- Swift standard, concurrency → [`basics`](../basics/SKILL.md)
-- Signing, notarization, Sparkle, store → `desktop/_shared/distribution`
-- Entitlements and TCC per feature → `sandbox-and-permissions`
-- Swift 5 → 6, CocoaPods → SPM, Intel → arm64 → [`migration`](../migration/SKILL.md)
-- Test ids → `test-ids`

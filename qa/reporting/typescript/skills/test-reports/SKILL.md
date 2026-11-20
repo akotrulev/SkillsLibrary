@@ -10,21 +10,6 @@ Wires Allure into a Node 24 + TypeScript test project — `allure-vitest`, `allu
 
 **Native Playwright evidence is not configured here.** Trace, video and screenshot modes and reading a trace belong to `qa/typescript/skills/evidence-capture`; the config that carries them is `qa/typescript/skills/ui-test-author/playwright/assets/playwright.config.ts`. This skill only maps that evidence into Allure.
 
-## When to use
-
-- A new TS test project needs a reporting story
-- An existing Vitest / Playwright / WebdriverIO suite emits JUnit XML and the team wants richer reports with attachments + history
-- CI does not publish reports; PRs have no test artifacts
-
-## When NOT to use
-
-- .NET reporting → `qa/reporting/dotnet/skills/test-reports`
-- Java reporting → `qa/reporting/java/skills/test-reports`
-- Writing tests → `qa/typescript/skills/api-test-author/writer` / `qa/typescript/skills/ui-test-author/<tool>`
-- Trace / video / screenshot modes, screencasts, HAR → `qa/typescript/skills/evidence-capture`
-- Test strategy → `qa/manual/test-strategy`
-- Quality metrics dashboards → `qa/manual/quality-metrics`
-
 ## Versions
 
 | Artifact | Version | Note |
@@ -301,14 +286,3 @@ Place at the project root and copy it into `allure-results/` before `allure gene
 6. Drop `categories.json` at the project root.
 7. Wire CI per the snippet for the team's CI platform; configure history retention.
 8. Smoke a green build + a deliberate failing test; confirm trend, categories, attachments populate.
-
-## Handoffs
-
-- .NET Allure → `qa/reporting/dotnet/skills/test-reports`
-- Java Allure → `qa/reporting/java/skills/test-reports`
-- Native Playwright evidence → `qa/typescript/skills/evidence-capture`
-- API test generation → `qa/typescript/skills/api-test-author/writer`
-- UI test generation → `qa/typescript/skills/ui-test-author/playwright` / `qa/typescript/skills/ui-test-author/selenium` / `qa/typescript/skills/ui-test-author/appium`
-- Test strategy → `qa/manual/test-strategy`
-- Quality metrics dashboards → `qa/manual/quality-metrics`
-- CI pipeline syntax → `qa/cicd/typescript/skills/ci-pipelines` (its `references/<ci>.md`) or `devops/<ci>`

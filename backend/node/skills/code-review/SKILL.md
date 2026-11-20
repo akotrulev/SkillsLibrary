@@ -21,20 +21,6 @@ Read `node.md`, plus each other file that applies to a file under review, in ful
 
 Detect the Node major (`engines`, `.nvmrc`, the lockfile), the TypeScript version and its `strict` settings, and the framework first. Do not flag a Node 22 project for lacking a Node 24 feature. The rule file's "the codebase wins" line applies: a convention the project follows consistently is not a finding.
 
-## When to use
-
-- A diff or file submitted for review: a service, handler, repository, config loader, decorator
-- A pre-merge gate on a change touching backend feature, shared or API code
-- An audit for type-safety leaks (`any`, `as`, `!`)
-- A second opinion on whether a repository, CQRS or another pattern earns its cost
-
-## When NOT to use
-
-- Conceptual lookup → `backend/node/skills/pattern-guide`
-- Generating code → `backend/node/skills/pattern-writer`
-- React code → `fe-react:conventions-review`
-- Test-suite review → `qa-typescript:api-tests-review` / `qa-typescript:ui-tests-review`
-
 ## Procedure
 
 1. Read the rule files, then each changed file end to end.
@@ -54,10 +40,3 @@ Detect the Node major (`engines`, `.nvmrc`, the lockfile), the TypeScript versio
 ```
 
 End with one line: `Rules: project .claude/rules/be-node/ | plugin copy (not installed)`.
-
-## Handoffs
-
-- Need a rewrite → `backend/node/skills/pattern-writer`
-- Conceptual lookup → `backend/node/skills/pattern-guide`
-- A rule is missing or wrong → edit the project's `.claude/rules/be-node/`; for every project, the plugin's `backend/node/skills/rules/`
-- Cross-stack architecture critique → `backend/_shared/code-review`

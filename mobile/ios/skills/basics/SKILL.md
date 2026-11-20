@@ -31,23 +31,6 @@ These are **three separate switches**; a rule below that needs one says which. S
 
 Swift 5-mode modules are migrated **one module at a time** (`mobile-ios:migration`). Below Swift 6.2, `@MainActor` is annotated explicitly and `@concurrent` does not exist — a down-level project is not flagged for lacking them.
 
-## When to use
-
-- Writing Swift in an app, a local package or an Expo native module
-- "Should this be a struct or a class?", "may I force-unwrap here?", "which error type?"
-- Choosing isolation for a new module; fixing a `Sendable` diagnostic
-
-## When NOT to use
-
-- Creating the project, targets, xcconfig, SwiftLint → `mobile-ios:project-setup`
-- Choosing app architecture or state ownership → `mobile-ios:architecture`
-- SwiftUI views and previews → `mobile-ios:ui-components`
-- `URLSession` clients and retries → `mobile-ios:networking`
-- Tests → `mobile-ios:unit-testing`
-- Kotlin → `mobile-android:concepts`
-
----
-
 ## Naming — the API Design Guidelines
 
 The call site is the unit of design. A name is right when the line reading `cart.add(item, quantity: 2)` is a sentence.
@@ -207,12 +190,3 @@ Logger.sync.info("Synced \(count, privacy: .public) orders for \(accountID, priv
 - **A `static var`** — mutable global state; make it `let`, an actor, or inject it.
 - **`try?` swallowing a failure the user must see** — surface it as the `failed` state.
 - **`Task { }` in `onAppear`** with no cancellation — use `.task`.
-
-## Handoffs
-
-- Concurrency depth, escape-hatch justifications → [`references/concurrency.md`](references/concurrency.md)
-- Project, targets, Swift 6 mode, lint → `mobile-ios:project-setup`
-- State ownership and architecture → `mobile-ios:architecture`
-- Swift 5 → 6, `ObservableObject` → `@Observable` → `mobile-ios:migration`
-- Telemetry and crash export → `mobile-<stack>:observability`
-- Kotlin counterpart → `mobile-android:concepts`

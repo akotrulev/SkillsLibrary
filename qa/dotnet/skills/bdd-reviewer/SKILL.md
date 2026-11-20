@@ -8,18 +8,6 @@ disable-model-invocation: true
 
 Audits a BDD layer across **two surfaces** — the `.feature` files (Gherkin quality / living documentation) and the Reqnroll step definitions + support code (binding correctness, reuse, DI, async, library rules). Returns findings in the standard table; does not rewrite code.
 
-## When to use
-
-- A `.feature` + `StepDefinitions/` set exists and needs a critique.
-- Steps report undefined/ambiguous matches, or the suite is flaky/duplicative.
-- A PR adds BDD coverage and you want a hostile senior review.
-
-## When NOT to use
-
-- "Write feature files" → `qa/_shared/bdd/feature-file-writer`
-- "Generate / implement step definitions" → `qa/dotnet/skills/gherkin-step-code`
-- Code is pseudocode / incomplete → ask for the real files.
-
 ## The checklist is the rule file
 
 Every check, and the severity it reports, lives in one place: the qa-dotnet rule files `bdd.md` (feature files, step definitions, hooks), `automation.md` (core: assertions, async, errors, waits, comments) and `page-objects.md` plus `web-ui.md` or `mobile-ui.md` for the page objects the steps call.

@@ -8,19 +8,6 @@ disable-model-invocation: true
 
 Automates the case forms `qa/manual/test-case-writer` writes under **Temporal** and **Concurrency**: a schedule run on demand, the clock set to an instant, N requests released together, a message or webhook delivered twice. The manual lane names the *Environment needs* in a case's Setup or Preconditions; this skill turns each need into a seam, or into a named deferral.
 
-## When to use
-
-- A case's technique is temporal or concurrency, or its Setup names *Environment needs* (a way to run `<schedule>` on demand, a clock set to `<instant>` in `<timezone>`).
-- "Run the monthly posting in a test", "cancel one second after the cut-off", "two members book the last seat", "the event is delivered twice".
-
-## When NOT to use
-
-- Waiting for an async effect (`within <budget>, <observable>`) — use the suite's poller, `DbWaits.WaitForRowAsync` in `qa/dotnet/skills/db-testing/verification-queries`, with the case's budget as its timeout.
-- Broker setup, topics, consumers, DLQ → `qa/dotnet/skills/messaging-testing`.
-- A dependency fault or a retry after a fault → `qa/dotnet/skills/failure-injection-testing`.
-- Flag state → `qa/dotnet/skills/feature-flag-testing`.
-- Load and capacity → `qa-performance-dotnet`.
-
 ## Inputs needed
 
 1. **The case's technique and its *Environment needs*** — from the test-case document. No document: ask which job, which instant and timezone, which invariant.
@@ -181,15 +168,6 @@ A `db-testing/verification-queries` query asserting the invariant's statement (`
 - A duplicate-delivery test uses a new broker message id with the same business id, and waits on a positive processed signal.
 - A missing seam is a **deferral**: named in the report with the hook, handed to `be-dotnet`, with no test body committed.
 - Cleanup runs in `[TearDown]`; failure messages carry the evidence (ids, the instant, the response body).
-
-## Handoffs
-
-- A missing job trigger, `TimeProvider` seam or test endpoint → `be-dotnet`, as a product change.
-- Broker producers / seeders, DLQ → `qa/dotnet/skills/messaging-testing`.
-- Verification queries, the poller and the teardown registry → `qa/dotnet/skills/db-testing/verification-queries`, `…/db-testing/connection`.
-- A retry or recovery after a fault → `qa/dotnet/skills/failure-injection-testing`.
-- Typed clients for the trigger or clock endpoint → `qa/dotnet/skills/api-client-writer`.
-- The plain tests → `qa/dotnet/skills/api-test-author/writer`; review → `…/api-test-author/review`.
 
 ## APIs checked (2026-10-11)
 

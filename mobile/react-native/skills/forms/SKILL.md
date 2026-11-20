@@ -21,23 +21,6 @@ Owns **input**: the schema, the form state, the keyboard, native input affordanc
 
 There is no `useActionState` lane — there is no server action in a native app. A submit is an async function that calls the API client ([`networking`](../networking/SKILL.md)).
 
-## When to use
-
-- Building or fixing a form: sign-in, sign-up, checkout, edit profile, search with filters
-- Keyboard covers an input; `Done` / `Next` do not move focus
-- Autofill, password managers, one-time codes
-- Server validation errors landing on the wrong place
-- Multi-step wizards
-
-## When NOT to use
-
-- The request itself, retries, token refresh → [`networking`](../networking/SKILL.md)
-- Where draft state lives across screens → [`architecture`](../architecture/SKILL.md); persisting a draft → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- The persistent error banner, mutation-failure UX → [`error-handling`](../error-handling/SKILL.md)
-- Camera, photo picker, file picking → [`device-features`](../device-features/SKILL.md)
-- Labels, hints, focus order in depth → [`accessibility`](../accessibility/SKILL.md)
-- Next.js forms → `fe-react:forms`
-
 ## The schema — one per form
 
 ```ts
@@ -201,10 +184,3 @@ The standards this skill's output must meet are the mobile-react-native rule fil
 - Simulator and emulator: open the keyboard on the last field — it is visible and the submit control reachable; chain fields with `Next`; autofill a password.
 - Submit invalid → first invalid field focused, errors announced; submit with a `400 errors` body → errors on the right fields; submit twice quickly → one request.
 - Dev-side tests (RNTL 14, async `render` / `fireEvent`): `mobile-react-native:component-testing`; assert schema errors on `issues[].path` and `code`.
-
-## Handoffs
-
-- Client, retries, idempotency → [`networking`](../networking/SKILL.md) · banner, conflicts → [`error-handling`](../error-handling/SKILL.md)
-- Components inside the form → [`ui-components`](../ui-components/SKILL.md) · labels → [`accessibility`](../accessibility/SKILL.md)
-- Locale numbers and dates → [`languages`](../languages/SKILL.md) · ids → [`test-ids`](../test-ids/SKILL.md)
-- Secrets and storage → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)

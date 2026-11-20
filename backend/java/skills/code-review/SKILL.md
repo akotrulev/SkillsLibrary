@@ -21,18 +21,6 @@ Read `java.md`, plus each other file whose `paths:` match a file under review, i
 
 Detect the Java release and Spring Boot major first. Do not flag a Java 17 / Spring Boot 2.x project for lacking sealed types, record patterns or virtual threads. The rule file's "the codebase wins" line applies: a convention the project follows consistently is not a finding.
 
-## When to use
-
-- A diff or file submitted for review: a service, repository, handler, DI configuration, decorator
-- A pre-merge gate on a change touching `domain`, `application` or `infrastructure` code
-- A second opinion on whether a pattern earns its complexity
-
-## When NOT to use
-
-- Conceptual lookup → `backend/java/skills/pattern-guide`
-- Generating new code → `backend/java/skills/pattern-writer`
-- Test-suite review → `qa-java:api-tests-review` / `qa-java:ui-tests-review`
-
 ## Procedure
 
 1. Read the rule file, then each changed file end to end.
@@ -52,10 +40,3 @@ Detect the Java release and Spring Boot major first. Do not flag a Java 17 / Spr
 ```
 
 End with one line: `Rules: project .claude/rules/be-java/ | plugin copy (not installed)`.
-
-## Handoffs
-
-- Need a rewrite → `backend/java/skills/pattern-writer`
-- Conceptual lookup → `backend/java/skills/pattern-guide`
-- A rule is missing or wrong → edit the project's `.claude/rules/be-java/`; for every project, the plugin's `backend/java/skills/rules/`
-- Cross-stack architecture critique → `backend/_shared/code-review`

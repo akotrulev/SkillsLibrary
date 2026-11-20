@@ -8,21 +8,6 @@ disable-model-invocation: true
 
 Decision frame for caching in front of any system of record (Postgres / Mongo / SQL Server / etc.). Picks the right pattern, names keys, sizes TTLs, defends against stampedes, and chooses invalidation. Engine details (Redis commands, in-memory specifics) live in `data/redis`.
 
-## When to use
-
-- Picking among cache-aside / read-through / write-through / write-back / refresh-ahead
-- Designing key namespace and versioning
-- TTL strategy per entity tier
-- Invalidation: explicit, TTL-based, event-driven (CDC / change streams / Outbox)
-- Stampede protection (request coalescing, jittered TTLs, soft TTLs)
-- Multi-level caching (in-process + Redis)
-- Negative caching (cache the "not found")
-
-## When NOT to use
-
-- Redis commands / data types / clients → `data/redis`
-- Engine-specific perf → `data/postgresql` / `data/mongodb` / etc.
-
 ## Decision matrix — which pattern?
 
 | Pattern | Reads | Writes | Consistency | Complexity | When to choose |
@@ -196,10 +181,3 @@ Always invalidate **both** layers when invalidating; the in-process layer is the
 6. Implement single-flight if the miss path is expensive.
 7. Add negative cache if "not found" lookups are a workload.
 8. Instrument hit ratio and key cardinality from day one.
-
-## Handoffs
-
-- Redis commands & data types → `data/redis`
-- Engine-specific perf → `data/postgresql` / `data/mongodb` / `data/sqlserver` / etc.
-- Migration of cache key shape → bump version prefix; the rest follows TTL
-- Observability for hit ratio / latency → `observability/dashboards` + `observability/queries`

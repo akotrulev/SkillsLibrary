@@ -14,22 +14,6 @@ Owns making a React app **installable** (a PWA the OS treats like a native app) 
 
 **Version rule.** The service-worker contract (precache manifest, cache-first, the update lifecycle) is a **browser/Workbox** concern — identical across React 18/19 and Next 14/15. Serwist replaces `next-pwa` specifically because `next-pwa` stalled on newer Next versions; on a brownfield project you may find `@ducanh2912/next-pwa` (a maintained fork) — prefer Serwist for new work. `manifest.ts` (typed, file-convention) is App-Router-native; a static `manifest.webmanifest` works everywhere.
 
-## When to use
-
-- Making the app installable (Add to Home Screen / install icon): manifest + icons
-- Caching the app shell so it launches offline: the Serwist/vite-plugin-pwa service worker
-- Fixing "my PWA won't update after I deploy" (the #1 PWA support ticket)
-- Offline UX: detecting connectivity, an offline banner, deferring writes
-- Deciding what offline actually requires for *data*, not just the app shell
-
-## When NOT to use
-
-- Server-side/distributed caching of API responses, RSC `fetch` cache, `revalidateTag` → [`data-fetching`](../data-fetching/SKILL.md) — that's server cache, not client offline
-- Live/push data and its disconnect handling → [`realtime`](../realtime/SKILL.md)
-- The failed/offline UI states themselves (three-state regions, retry) → [`error-handling`](../error-handling/SKILL.md) (this skill wires the SW; that skill owns the states)
-- Bundle/startup budget the precache size depends on → [`performance`](../performance/SKILL.md)
-- Icon/OG asset craft (sizes, maskable safe zones) → [`design/iconography`](../../../../design/iconography/SKILL.md)
-
 ## Installable: the web app manifest
 
 On the App Router, prefer the typed **`app/manifest.ts`** file convention (Next generates `/manifest.webmanifest` and links it); on Vite, a static `public/manifest.webmanifest` linked from `index.html`. Installability needs a manifest, HTTPS, and a registered service worker.
@@ -167,14 +151,3 @@ The general standards are the fe-react rule files (`react.md`, `react-data.md`).
 - `next dev` → DevTools shows **no** controlling service worker (dev disable held); production shows the Serwist worker controlling the page.
 - Lighthouse PWA audit passes (manifest, installable, offline start).
 - No hydration warning from the offline banner (SSR default held).
-
-## Handoffs
-
-- Which routes are static vs dynamic (a prerequisite for offline) → [`project-setup`](../project-setup/SKILL.md)
-- Server/RSC response caching, `revalidateTag`, optimistic-concurrency tokens (not client offline) → [`data-fetching`](../data-fetching/SKILL.md)
-- Live/push data and reconnection UX (a different problem) → [`realtime`](../realtime/SKILL.md)
-- The offline/failed/loading UI states themselves (three-state regions, retry) → [`error-handling`](../error-handling/SKILL.md)
-- Bundle/startup budget the precache depends on → [`performance`](../performance/SKILL.md)
-- `theme-color` meta, manifest linkage from metadata → [`seo`](../seo/SKILL.md)
-- Icon/manifest asset craft (sizes, maskable safe zone) → [`design/iconography`](../../../../design/iconography/SKILL.md)
-- Offline banner / deferred-action labeling conventions → [`ui-rules`](../ui-rules/SKILL.md) + [`design/ux-writing`](../../../../design/ux-writing/SKILL.md)

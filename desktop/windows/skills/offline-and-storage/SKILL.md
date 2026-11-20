@@ -22,20 +22,6 @@ Where a Windows desktop app keeps its data: **settings and files in the right pl
 - **`PasswordVault` without package identity.** Microsoft's Credential Locker page says the WinRT APIs "can be used in WinUI as well as other desktop apps, such as WPF and WinForms" and lists no packaging requirement; it does not say the unpackaged case was tested. **Rule:** probe it once at startup behind a typed result, and fall back to DPAPI (`ProtectedData`, `DataProtectionScope.CurrentUser`) when `new PasswordVault()` throws. Record which one the app uses.
 - **`GetForUnpackaged` semantics** on Windows App SDK 2.6: it exists in the API reference; the general "store and retrieve app data" guide still tells unpackaged apps to use plain file I/O or the registry. If the API is in doubt, use the file path.
 
-## When to use
-
-- Any value that must survive a restart: preferences, window state, a cache, a local database, a token
-- "Where do I save this?", "add a migration", "work offline", "store the refresh token"
-
-## When NOT to use
-
-- Fetching and retrying → `desktop-windows:networking`
-- Window size and position restore mechanics → `desktop-windows:windows-and-navigation`
-- Sign-in flows → `auth0-winui` / `auth0-wpf`
-- Server database design → the `data` plugin
-
----
-
 ## Pick the store by the data
 
 | Data | Store | Never |
@@ -152,11 +138,3 @@ Spans around migration and large queries; a log at each fallback decision (vault
 - **A singleton `DbContext`** — stale tracking, thread-safety bugs.
 - **A half-written settings file** — write temp then `File.Replace`.
 - **Roaming settings for secrets** — never.
-
-## Handoffs
-
-- Fetching, retry, token refresh → `desktop-windows:networking`
-- Window state, close-with-unsaved → `desktop-windows:windows-and-navigation`
-- Pickers and picked files → `desktop-windows:platform-integration`
-- View-model state types → [`architecture`](../architecture/SKILL.md); secure coding rules → `desktop-shared:security`
-- Mac counterpart → `desktop-macos:offline-and-storage`

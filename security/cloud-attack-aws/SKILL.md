@@ -234,25 +234,3 @@ to teach.
   runs, per `penetration-testing:reporting`.
 - **Production is a separate, louder gate than lab.** Default target is **CloudGoat** / **flaws.cloud** /
   **IAM Vulnerable** or a non-production owned account; production needs the second sign-off.
-
-## Cross-references
-
-- **`penetration-testing:cloud-recon-enumeration`** — the upstream step: produces the credential,
-  principal/permission map, metadata-service leads, and OIDC-trust findings this skill consumes. This skill
-  never does its job (anonymous/public discovery, OIDC-federation trust review).
-- **`devops:cloud-posture`** — the **defensive** sibling: Prowler/ScoutSuite already read AWS posture
-  (read-only CSPM). A `cloud-posture` finding ("bucket public", "role trusts `*`", "IMDSv1 allowed") is a
-  lead here; this skill proves it is reachable and chains it, then reports confirmed exploitability back as
-  validated posture. The handoff runs both ways.
-- **`cloud-attack-azure`** / **`cloud-attack-gcp`** — the sibling provider skills under the same
-  `penetration-tester` step; same role, different provider, no shared files.
-- **`penetration-testing:initial-access`** — the network/application-foothold sibling; it lands the foothold
-  (e.g. an SSRF) that this skill chains into IMDS credential theft, but does not itself abuse the cloud API.
-- **`security/atomic-simulation`** — the purple-team sibling that *detonates* cloud ATT&CK techniques
-  (Stratus Red Team) against a lab to test whether CloudTrail/GuardDuty fires; this skill performs the
-  exploitation those detonations model, but the two never substitute for each other.
-- **`penetration-testing:reporting`** — where every act is logged (action log) and every finding is scored
-  (CVSS) and mapped (ATT&CK Cloud).
-- **`security/cloud-incident-response`** — the defensive response peer: a confirmed AWS finding here implies
-  the AWS IR runbook (`references/aws-ir.md`) and detection authoring (`security/detection-engineering`)
-  that respond to it — each finding carries the detection it should have tripped.

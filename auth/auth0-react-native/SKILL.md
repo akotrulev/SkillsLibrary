@@ -17,20 +17,6 @@ Wires `react-native-auth0` into an Expo (development build / CNG) or bare React 
 | Native layers | wraps Auth0.swift (iOS) and Auth0.Android; the README states iOS deployment target 14 and an Android platform minimum — read the installed README for the current floors, never lower a project's targets |
 | Detect from | `package.json` (`react-native-auth0`, `expo`), `app.json` / `app.config.*` plugins, `android/app/build.gradle` for a bare app |
 
-## When to use
-
-- New sign-in / sign-out in an RN or Expo app against Auth0
-- The browser returns but the app never receives the callback
-- Silent re-login, session restore at launch, biometric unlock of stored credentials
-- Calling a protected API with the access token
-
-## When NOT to use
-
-- Auth0 entity model, `audience`, RBAC → `auth/_shared/auth0-concepts`; generic OAuth/OIDC → `auth/_shared/oidc-concepts`
-- Native Swift app → `mobile-ios:auth0`; Kotlin app → `mobile-android:auth0`
-- Backend token validation → `backend/*/auth0` skills
-- Where else secrets and tokens may live → `mobile-<stack>:security`
-
 ## Inputs needed
 
 1. Auth0 tenant domain and a **Native** Application's client id (no secret), per environment
@@ -188,11 +174,3 @@ Rotation is a tenant setting and the SDK stores the rotated token for you. Two p
 4. Wrap the app in `Auth0Provider`; add the session controls and the API client.
 5. Add biometric options if the product needs them; handle the no-biometrics path.
 6. Smoke flow on a **device**: sign in, kill and relaunch (session restores), call the API, sign out, confirm the next sign-in prompts for credentials.
-
-## Handoffs
-
-- Concepts → `auth/_shared/auth0-concepts`, `auth/_shared/oidc-concepts`
-- Token storage rules → `mobile-<stack>:security`; purchase user link → `mobile-<stack>:in-app-purchases`
-- Expo project, config plugins, builds → `mobile-react-native:project-setup`; deep links → `mobile-react-native:push-and-deep-links`
-- Server state / API client → `mobile-react-native:networking`
-- Backend validation → `backend/dotnet/skills/auth0` / `backend/java/skills/auth0`

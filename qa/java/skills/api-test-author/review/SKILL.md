@@ -8,21 +8,6 @@ disable-model-invocation: true
 
 Reviews Java API test code against the qa-java rule files and the patterns enforced by `qa/java/skills/api-test-author/writer`, `qa/java/skills/api-client-writer`, and `qa/java/skills/api-models` (the DTO-records + `{Resource}Client` dual-overload layering). Produces a findings table in the `CLAUDE.md` review format. Does **not** rewrite — points to the fix and lets the human apply it.
 
-## When to use
-
-- A diff or file is submitted for review (TestNG class, `{Resource}Client`, record DTO)
-- Pre-merge gate on a PR that touches `src/test/java/`
-- The user wants a second opinion on assertion strategy or error-body coverage
-
-## When NOT to use
-
-- Generating new Java tests → `qa/java/skills/api-test-author/writer`
-- .NET reviews → `qa/dotnet/skills/api-test-author/review`
-- TypeScript reviews → `qa/typescript/skills/api-test-author/review`
-- DTO scaffolding → `qa/java/skills/api-models`
-- UI tests → `qa/java/skills/ui-test-author/review`
-- Reviewing the overall test strategy / pyramid → `qa/manual/test-strategy`
-
 ## Inputs needed
 
 1. **Files** under review — TestNG test class, `{Resource}Client`, record DTOs
@@ -60,13 +45,3 @@ Read `qa-java.md`, plus each other file whose `paths:` match a file under review
 ```
 
 End with one line: `Rules: project .claude/rules/qa-java/ | plugin copy (not installed)`.
-
-## Handoffs
-
-- Need a rewrite → `qa/java/skills/api-test-author/writer`
-- DTO is wrong → `qa/java/skills/api-models`
-- Client layer needs refactor → `qa/java/skills/api-client-writer`
-- Whole test pyramid is the issue → `qa/manual/test-strategy`
-- .NET sibling → `qa/dotnet/skills/api-test-author/review`
-- TypeScript sibling → `qa/typescript/skills/api-test-author/review`
-- A rule is missing or wrong → edit the project's `.claude/rules/qa-java/`; for every project, the plugin's `qa/java/skills/rules/`

@@ -17,20 +17,6 @@ Scaffolds Selenium 4 page objects, components and TestNG UI tests in Java, on th
 - **TestNG** for tests (the global default for Java test runners)
 - **Allure TestNG** for reporting
 
-## When to use
-
-- New page object under `src/main/java/pom/`
-- A region component (a card, a row) scoped to its root `WebElement`, or a control component (a dropdown, a date picker, a grid) under `pom/components/controls/`
-- New TestNG UI test under `src/test/java/`
-
-## When NOT to use
-
-- Playwright / Node / .NET → `qa/java/skills/ui-test-author/playwright`
-- Appium mobile → `qa/java/skills/ui-test-author/appium`
-- A new project from zero → `qa/java/skills/ui-project-setup` (its Selenium lane)
-- Reviewing a page object → `qa/java/skills/ui-test-author/review`
-- Designing the whole POM architecture → `qa/java/skills/page-object-design`
-
 ## Inputs needed
 
 1. **Page name** (PascalCase, e.g. `Login`, `Inventory`, `Cart`)
@@ -282,10 +268,3 @@ The standards this skill's output must meet are the qa-java rule files, not a li
 5. If a destination page doesn't exist yet, create a stub or recursively generate it.
 6. Generate the test class extending `BaseTest`: setup in `@BeforeMethod(alwaysRun = true)`, one `@Test` per scenario with a `Should_X_When_Y` name, assertions on user-visible values.
 7. Run `./gradlew test` — expect 0 failures. If browser drivers fail to download, check the `WebDriverManager` version and the `BROWSER` variable.
-
-## Handoffs
-
-- Architecting the POM structure (sub-packages, base classes) → `qa/java/skills/page-object-design`
-- Test data builders → `qa/java/skills/test-data-builder`
-- Reviewing a page object → `qa/java/skills/ui-test-author/review`
-- Allure reporting → `qa/reporting/java/skills/test-reports`

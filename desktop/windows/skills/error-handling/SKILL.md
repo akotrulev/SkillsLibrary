@@ -22,17 +22,6 @@ How a Windows app fails well: **every data region has loading, loaded, failed, s
 
 Detect first: an existing error type or result type, an `InfoBar` host, handler registration in `App`, and the telemetry exporter. Extend them.
 
-## When to use
-
-- A screen loads, saves or deletes; "what shows when the call fails?"; a crash report with no stack
-- Reviewing a window against the §8 error rows
-
-## When NOT to use
-
-- Retry, backoff, `Retry-After`, ProblemDetails mapping → `desktop-windows:networking`
-- Field-level validation → `desktop-windows:forms`
-- Speed of loading → `desktop-windows:performance`
-
 ## The failure surfaces
 
 | Surface | Where it shows | Dismissal |
@@ -208,11 +197,3 @@ A log at each decision point (`FailureKind`, operation name, status code, never 
 - **A 401 shown as a generic error** — it is a sign-in prompt.
 - **Closing with a pending write** — no `Closing` handler.
 - **A stowed exception read as the cause** — the cause is its inner HRESULT.
-
-## Handoffs
-
-- Retry, ProblemDetails, token refresh → `desktop-windows:networking`; field errors → `desktop-windows:forms`
-- `InfoBar` markup and the three-state template → `desktop-windows:ui-components`
-- Autosave, atomic writes, revoked permissions → `desktop-windows:offline-and-storage`
-- Crash reporting and spans → `desktop-shared:observability`; accessibility of the banner → `desktop-windows:accessibility`
-- Mac counterpart → `desktop-macos:error-handling`

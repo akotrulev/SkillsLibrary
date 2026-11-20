@@ -224,24 +224,3 @@ Recipes and the comparison: [`references/de-flake.md`](references/de-flake.md).
 - **No `Thread.Sleep` / `Task.Delay`-as-wait** — replace with condition-waits; async all the way. Test names
   `Should_X_When_Y`; one logical assertion; no conditional logic in tests; builders for 4+-field test data;
   structured logging.
-
-## Cross-references
-
-- `qa-java:flaky-test-quarantine` — the **canonical** stack this is ported from: a TestNG `flaky` group,
-  `@Flaky`, and the same history-based detection.
-- `qa-typescript:flaky-test-quarantine` — same four moves, Playwright: `{ tag: '@flaky' }` +
-  `--grep-invert @flaky` on the gate, a separate `--grep @flaky` job, and a nightly `--repeat-each` lane.
-- `qa-dotnet:test-reports` — the **full** Allure.NUnit wiring this layers on: the adapter, history/trends
-  (required for auto-flaky detection), `categories.json`, the report CLI.
-- `qa-<stack>:ci-conventions` — the retry policy this skill defers to.
-- `qa-dotnet:evidence-capture` — the trace, video and screenshot a flaky UI failure leaves behind, and how
-  to read them.
-- `qa-<stack>:quality-metrics` — track **flaky-rate over time**; a quarantine category that grows is the
-  metric to watch.
-- `qa-dotnet:db-connection` / `qa-dotnet:messaging-testing` — the `WaitForAsync` **condition-wait** that
-  *prevents* the eventual-consistency flakiness this skill quarantines.
-- `qa-dotnet:ui-tests-playwright` / `qa-dotnet:api-tests` — where the quarantined tests are
-  authored and where `BaseTest` lives; flakiness is best fixed at the source (stable locators, web-first
-  assertions).
-- `qa-dotnet:ci-pipelines` (its GitHub Actions, Azure Pipelines and GitLab CI references) — the gate job, the
-  shard filter and the non-gating quarantine job.

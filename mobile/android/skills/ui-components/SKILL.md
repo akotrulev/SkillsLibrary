@@ -22,22 +22,6 @@ How composables are written here: **stateless by default, state hoisted, `modifi
 
 Views are in maintenance mode (I/O 2026): new screens are Compose. A Views codebase is extended in Views unless asked otherwise.
 
-## When to use
-
-- Writing or refactoring a composable, screen or list
-- "Why does this recompose?", "what keys for `LaunchedEffect`?", "where does this state go?"
-- Choosing a Material 3 component; building the loading / failed / empty views
-
-## When NOT to use
-
-- Screen ViewModel, `uiState` design, DI → [`architecture`](../architecture/SKILL.md)
-- Theme, colour, typography, insets, window size classes → [`styling`](../styling/SKILL.md)
-- Routes and back stack → [`navigation`](../navigation/SKILL.md)
-- Text fields and validation → `mobile-android:forms`
-- Animation APIs → [`animation`](../animation/SKILL.md); labels and TalkBack → [`accessibility`](../accessibility/SKILL.md)
-- Test tags → [`test-ids`](../test-ids/SKILL.md)
-- iOS / RN components → `mobile-ios:ui-components`, `mobile-react-native:ui-components`
-
 ## Inputs needed
 
 - Compose BOM and Material 3 version; whether the app is Compose-only or has Views
@@ -157,12 +141,3 @@ The standards this skill's output must meet are the mobile-android rule files, n
 - [ ] Every `items { }` has a `key`; no `LaunchedEffect(Unit)` without a reason
 - [ ] Failed region shows a retry and a persistent banner; offline separated; no raw exception text
 - [ ] Previews cover the states and use no live data
-
-## Handoffs
-
-- ViewModel, `uiState` → [`architecture`](../architecture/SKILL.md)
-- Theme and windows → [`styling`](../styling/SKILL.md); routes → [`navigation`](../navigation/SKILL.md)
-- Forms → `mobile-android:forms`; labels → [`accessibility`](../accessibility/SKILL.md); test ids → [`test-ids`](../test-ids/SKILL.md)
-- Recomposition profiling → [`performance`](../performance/SKILL.md)
-- Compose UI tests → [`unit-testing`](../unit-testing/SKILL.md)
-- Existing XML screens → [`views-interop`](../views-interop/SKILL.md)

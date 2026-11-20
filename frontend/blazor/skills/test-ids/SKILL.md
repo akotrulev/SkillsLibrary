@@ -8,19 +8,6 @@ disable-model-invocation: true
 
 Adds and audits `data-testid` attributes on Blazor components so automated UI suites target the app by stable, intention-revealing locators. This is the dev-side half of a loop QA owns: `qa/{stack}/skills/page-objects-from-url` and `mobile-screen-explorer` locate **data-testid-first** and file a `missing-testids.md` report for elements that lack one — this skill consumes that report.
 
-## When to use
-
-- Add `data-testid` attributes to one or more `.razor` files for automated UI testing
-- Audit an existing page for missing / inconsistent / colliding testids
-- Apply the convention to newly written pages or components
-- A `missing-testids.md` report has been handed over by QA
-
-## When NOT to use
-
-- Writing UI tests / page objects → the QA stack agents (`qa-ui-dotnet`)
-- Hybrid static-HTML/JS surfaces → same rules, mechanics in `references/static-html.md`
-- Component scaffolding at large → `frontend/blazor/skills/component-writer` (which already emits testids per this convention)
-
 ## Output format
 
 Single attribute only: `data-testid="..."`. No `aria-label` mirroring the value, no second attribute. Always PascalCase, dot-separated segments. (Accessible labels are an accessibility concern, owned separately — never conflate the two.)
@@ -261,9 +248,3 @@ The standards this skill's output must meet are the fe-blazor rule file `blazor-
 ## References
 
 - `references/static-html.md` — the same rules applied to non-Blazor surfaces in hybrid apps (static HTML pages, JS string-template rendering).
-
-## Handoffs
-
-- Page objects / UI tests against these locators → `qa-ui-dotnet` (peer agent; `page-objects-from-url` locates data-testid-first)
-- Scaffolding new components (testids emitted by default) → `frontend/blazor/skills/component-writer`
-- Reviewing testid hygiene as part of a broader review → `frontend/blazor/skills/code-review`

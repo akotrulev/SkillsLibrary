@@ -8,21 +8,6 @@ disable-model-invocation: true
 
 The data that tunes a model's *behavior* after SFT — which of two responses is better, so DPO/ORPO/KTO can push the model toward the preferred one. Preference data has one job and one failure mode: it must encode a **real, consistent preference with a meaningful margin**, and it fails when the two responses differ by noise (the model learns nothing) or when the "preferred" one isn't actually better (the model learns the wrong thing). This skill owns pair construction; it uses `training-data:synthetic-generation` for sampling+judging and `training-data:dataset-formats` for the `chosen`/`rejected` shape.
 
-## When to use
-
-- Building chosen/rejected pairs for DPO or ORPO
-- Building single-response + label data for KTO
-- Producing ranking data (n responses ordered)
-- Generating on-policy preference data against the model you are training
-- Constitutional / self-critique preference pairs (revise-against-a-principle)
-
-## When NOT to use
-
-- Instruction/SFT data → `training-data:instruction-sft`
-- Held-out eval / benchmarks → `training-data:eval-sets`
-- The pairwise-judge prompt and bias controls → `training-data:synthetic-generation` (this skill calls it)
-- Multimodal preference data → `training-data:vision-language-data`
-
 ## Pick the format first — it constrains everything
 
 | Trainer | Record shape | When |

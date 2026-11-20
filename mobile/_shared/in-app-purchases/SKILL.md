@@ -12,23 +12,6 @@ Owns **the money path**: what is bought, who decides the user is entitled, how a
 
 **The server owns entitlements. The client never decides access from a local receipt, a `Transaction`, a `Purchase` or an SDK flag alone.** The client reports a purchase; the server verifies it with the store, writes the entitlement, and the app reads its access from the server. A local check is allowed only as a display hint (instant unlock while the server round-trip completes) and it expires.
 
-## When to use
-
-- Adding, changing or reviewing a paywall, subscription, consumable, or non-consumable
-- "Restore purchases", family sharing, account switching, multi-device entitlement
-- A refund, chargeback, grace period, billing retry or revocation is not reaching the app
-- A review rejection citing guideline 3.1.1 / 3.1.2 or a Play payments-policy warning
-- Brownfield intake — where does this app decide access today?
-
-## When NOT to use
-
-- Signing, tracks, rollout → `mobile-<stack>:release`
-- Privacy manifest, Data safety, account deletion → `mobile-<stack>:store-compliance`
-- Secrets and token storage rules → `mobile-<stack>:security`
-- Auth sign-in → `mobile-react-native:auth0` / `mobile-ios:auth0` / `mobile-android:auth0`
-- Paywall layout, copy and consent design → `design:dark-patterns`, `design:ux-writing` (corpus-led)
-- The backend that stores entitlements → the `be-*` agent for that stack (this skill defines the contract it must meet)
-
 ## Version lane (verified 2026-10-10)
 
 | Fact | Value | Source |
@@ -119,10 +102,3 @@ Per `design:dark-patterns` (symmetry; FTC click-to-cancel; DSA Art. 25): the pat
 - No custom payment form for digital goods
 - No mixing the sandbox/test environment into production verification (check the environment field)
 - No re-implementing StoreKit on top of RevenueCat or vice-versa — one purchase library per app
-
-## Handoffs
-
-- Store forms and privacy → `mobile-<stack>:store-compliance`
-- Test-only purchase flows, sandbox accounts, E2E → qa `mobile-*` peers (not loaded)
-- Backend webhook implementation → `be-dotnet` / `be-java` / `be-node`
-- Auth of the purchasing user → the stack's `mobile-<stack>:auth0`

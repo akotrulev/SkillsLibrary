@@ -10,25 +10,6 @@ Scaffolds React components, hooks, pages, and patterns into the active repo. Eve
 
 **Version rule:** detect the React/Next major first (`package.json`). React 19 idioms are primary — `use()`, Actions + `useActionState`, `useOptimistic`, **ref-as-prop** (no `forwardRef`), `<title>`/`<meta>` hoisting. React 18 fallbacks (`forwardRef`, `useFormState`, `react-helmet`, manual data hooks) are tagged. Never emit a React-19-only API into an 18 project. Next.js 15 primary / 14 fallback tracks alongside; the Vite + React Router 7 SPA lane is the tagged fallback where a recipe is rendering-sensitive.
 
-## When to use
-
-- New page / route (App Router `page.tsx` or SPA route element)
-- Reusable component (input, table, dialog, compound widget)
-- Extracting a custom hook from inline `useState`/`useEffect` logic
-- Replacing prop drilling with a context provider + consumer hook
-- Converting coupled components into a compound component
-- Splitting a fat component into container + presentation
-- Wrapping a feature with an error boundary / a Suspense + lazy boundary
-
-## When NOT to use
-
-- Explaining a pattern → [`basics`](../basics/SKILL.md)
-- Reviewing existing code → [`code-review`](../code-review/SKILL.md)
-- Form validation / RHF+Zod / Server-Action forms depth → [`forms`](../forms/SKILL.md)
-- Fetch / caching / mutation mechanics → [`data-fetching`](../data-fetching/SKILL.md)
-- Auth UI (login/signup) → `auth/auth0-react`
-- Blazor → `frontend/blazor/skills/component-writer`
-
 ## Inputs needed
 
 1. **React / Next major** — React 19 vs 18, Next 15 vs 14, or Vite SPA (drives which recipe variant is emitted)
@@ -327,15 +308,3 @@ Run the project's own typecheck, lint and test scripts with the package manager 
 - lint — 0 warnings (React Hooks + a11y rules included)
 - test — generated tests pass
 - Smoke in the dev server: interactivity behaves, no console/hydration errors, no double fetch across the RSC → client boundary, links navigate same-tab
-
-## Handoffs
-
-- Conceptual lookup → [`basics`](../basics/SKILL.md)
-- Reviewing the result → [`code-review`](../code-review/SKILL.md)
-- Form validation / RHF+Zod / Server-Action forms → [`forms`](../forms/SKILL.md)
-- Fetch / caching / mutation mechanics → [`data-fetching`](../data-fetching/SKILL.md)
-- `data-testid` placement rules → [`test-ids`](../test-ids/SKILL.md)
-- Display / table / CRUD / confirmation / IA correctness → [`ui-rules`](../ui-rules/SKILL.md)
-- Styling / theme / CSS Modules → [`styling`](../styling/SKILL.md)
-- Auth wiring → `auth/auth0-react`
-- E2E tests against these locators → `qa-ui-typescript` (peer)

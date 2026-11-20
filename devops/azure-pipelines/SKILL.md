@@ -10,22 +10,6 @@ Authors Azure DevOps YAML pipelines for build, test, and deploy across the proje
 
 **Version policy:** detect the project's versions (TFM / `engines` / toolchain) and match — never assume. .NET 10 is primary, 8/9 supported (8 LTS ends Nov 2026). Node 20 is EOL (Apr 2026) — 24 is active LTS, 22 maintenance. Java 21 LTS is the default. Never put a job on a newer SDK/runtime than the project targets.
 
-## When to use
-
-- New Azure DevOps project needs `azure-pipelines.yml`
-- Add a deploy stage to an existing pipeline
-- Migrate a classic UI build to YAML
-- Extract repeated job logic into pipeline templates
-- Add Environment-gated approvals or checks
-
-## When NOT to use
-
-- GitHub Actions → `devops/github-actions`
-- GitLab CI/CD → `devops/gitlab-ci`
-- Bicep / Terraform authoring → `devops/infrastructure-as-code`
-- App-level env config → `devops/environment-config`
-
-- Test-suite CI lane (shard matrix, Allure publish, perf gate, flake quarantine) → `qa/cicd/agents/qa-cicd-{java,dotnet,typescript}`
 ## Inputs needed
 
 1. **Stack(s)**: .NET 10 (8/9 supported) / Java 21 + Gradle / Node 24 (22 maintenance) + which package manager
@@ -359,14 +343,3 @@ The standards this skill's output must meet are the devops rule files, not a lis
 5. Add `Deploy_<Env>` stages using `deployment:` jobs and Environments. Wire WIF service connections.
 6. If multiple pipelines share logic, extract templates and `resources: repositories:` them in.
 7. Validate with `az pipelines validate` or the **Validate** button in the YAML editor before merging.
-
-## Handoffs
-
-- GitHub equivalent → `devops/github-actions`
-- GitLab equivalent → `devops/gitlab-ci`
-- IaC for underlying resources → `devops/infrastructure-as-code`
-- Per-env secrets/config → `devops/environment-config`
-- Azure-specific deploy details → `devops/azure-deployment`
-- AWS-specific deploy details → `devops/aws-deployment`
-
-- Test-suite CI lane — shard matrix, Allure publish, perf gate, quarantine → `qa-cicd-{java,dotnet,typescript}`

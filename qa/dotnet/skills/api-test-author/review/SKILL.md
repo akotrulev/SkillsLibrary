@@ -8,21 +8,6 @@ disable-model-invocation: true
 
 Reviews .NET API test code (tests, clients, DTOs) against the qa-dotnet rule files. Produces a findings table in the `CLAUDE.md` review format. Does **not** rewrite — points to the fix and lets the human apply it.
 
-## When to use
-
-- A diff or file is submitted for review (test fixture, RestSharp client, DTO)
-- Pre-merge gate on a PR that touches `ApiTests/`
-- The user wants a second opinion on assertion strategy or `ProblemDetails` coverage
-
-## When NOT to use
-
-- Generating new .NET tests → `qa/dotnet/skills/api-test-author/writer`
-- Java reviews → `qa/java/skills/api-test-author/review`
-- TypeScript reviews → `qa/typescript/skills/api-test-author/review`
-- DTO scaffolding → `qa/dotnet/skills/api-models`
-- UI tests → `qa/dotnet/skills/ui-test-author/review`
-- Reviewing the overall test strategy / pyramid → `qa/manual/test-strategy`
-
 ## Inputs needed
 
 1. **Files** under review — test fixture, RestSharp client, DTO
@@ -61,13 +46,3 @@ Detect the TFM, NUnit major and client library first (`RestSharp`, `Microsoft.Pl
 ```
 
 End with one line: `Rules: project .claude/rules/qa-dotnet/ | plugin copy (not installed)`.
-
-## Handoffs
-
-- A rule is missing or wrong → edit the project's `.claude/rules/qa-dotnet/`; for every project, the plugin's `qa/dotnet/skills/rules/`
-- Need a rewrite → `qa/dotnet/skills/api-test-author/writer`
-- DTO is wrong → `qa/dotnet/skills/api-models`
-- Client layer needs refactor → `qa/dotnet/skills/api-client-writer`
-- Whole test pyramid is the issue → `qa/manual/test-strategy`
-- Java sibling → `qa/java/skills/api-test-author/review`
-- TypeScript sibling → `qa/typescript/skills/api-test-author/review`

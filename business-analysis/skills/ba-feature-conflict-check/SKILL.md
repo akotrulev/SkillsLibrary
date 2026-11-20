@@ -10,20 +10,6 @@ The quality gate of the `business-analysis/` family: takes a **new or changed fe
 
 Without the KB there is nothing to sweep against — the value scales with what previous sessions persisted.
 
-## When to use
-
-- A new feature/story arrives in a project with a business-model KB — before it's built or test-designed
-- An existing feature changes (new rule, new state, new trigger)
-- Periodic audit: "sweep the whole model for unresolved interactions"
-- Another `business-analysis` skill logged conflict-shaped findings that need severity + resolution
-
-## When NOT to use
-
-- No KB and no wish for one — single-story flagging is `qa/manual/requirements-breakdown`
-- The input is a vague, unscoped initiative rather than concrete requirements — scope it first with `business-analysis/skills/ba-scoping-writeup`
-- The conflict is already visible and localized — go straight to the owning model skill
-- Code-level dependency/impact analysis — this is requirements-level
-
 ## Contract with the KB
 
 Per `business-analysis/skills/ba-project-memory`: **read first** — `INDEX.md`, `interaction-map.md` (don't re-litigate resolved conflicts), `glossary.md`, every flow/entity/decision file the new feature plausibly touches, and `events.md`, `shared-data.md` and `invariants.md` where they exist (the pair list is built from them). **Update after** — findings and resolutions into `interaction-map.md`, plus `active-context.md` + INDEX.
@@ -113,11 +99,3 @@ Standard CLAUDE.md review format, typed by kind:
 ## Anti-example
 
 Bad: reading the new story alone and listing its internal ambiguities — that's `requirements-breakdown`'s job, and it finds nothing *between* features. Also bad: "these might conflict somehow" with no boundary condition, or quietly deciding the promo wins because it "seems right" — undecided precedence is the finding; inventing the decision destroys it.
-
-## Handoffs
-
-- Deeper analysis of a pair → `business-analysis:decision-table` / `business-analysis:state-grid` / `business-analysis:process-flow` per the escalation matrix
-- Findings from the connection layer (unconsumed events, orphan reactions, unenforced invariants, CRUD gaps) arrive from `business-analysis/skills/ba-dependency-map`
-- KB mechanics → `business-analysis/skills/ba-project-memory`
-- Findings resolved → the feature is ready for `qa/manual/requirements-breakdown` (boundary conditions = test seeds: BVA, and the cross-feature cases of `qa-<stack>:cross-feature-test-design`) and `qa/manual/agents/qa-test-case-designer`
-- Full orchestration → `business-analysis/agents/business-analyst`

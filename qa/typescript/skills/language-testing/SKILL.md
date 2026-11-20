@@ -208,15 +208,3 @@ past the midpoint means the navigation sits on the right.
   which specs a project runs is decided by tags, never by a branch in a test.
 - Test names `Should_X_When_Y`; one logical assertion per test; no `waitForTimeout`/sleeps; no inline comments;
   page objects and fixtures, never raw `page.` calls; `strict: true`.
-
-## Cross-references
-
-- `qa-java:language-testing` · `qa-dotnet:language-testing` — the sibling stacks (ICU4J / `ResourceBundle` ·
-  `CultureInfo` / `.resx`); same four ideas.
-- `qa-typescript:ui-tests-playwright` — the fixtures this extends; `references/emulation-and-mobile-web.md`
-  for locale, time zone and `page.clock`.
-- `qa-typescript:visual-regression` — the pixel record of a pseudo-loc overflow; this skill asserts it didn't.
-- `qa-typescript:data-driven-testing` — the locale matrix is its row-binding pattern applied to locales.
-- `qa-typescript:accessibility-testing` — `html[lang]` / `dir` a11y rules; run them on the locale-pinned page.
-- `qa-typescript:test-reports` — each locale project is its own result group, so a failure says *which*
-  language broke.

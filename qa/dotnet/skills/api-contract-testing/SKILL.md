@@ -8,20 +8,6 @@ disable-model-invocation: true
 
 Wires Pact V4 into a .NET service via **PactNet v5+** for consumer-driven contract testing with NUnit. Covers the consumer test, provider verification, state handlers, and CI publish. Load `qa/_shared/contract-testing-pact` for the Broker model, matchers reference, and `can-i-deploy` gate that are shared across all stacks.
 
-## When to use
-
-- A .NET service consumes or produces an HTTP API and needs contract coverage.
-- Replacing brittle multi-service E2E tests with PactNet verification.
-- Catching breaking changes at the .NET producer side before they ship.
-- Pairing with `qa/_shared/contract-testing-pact` for Broker / `can-i-deploy` wiring.
-
-## When NOT to use
-
-- Java / JVM consumer or provider → `qa/java/skills/api-contract-testing`
-- TypeScript / Node consumer or provider → `qa/typescript/skills/api-contract-testing`
-- Live-service API tests (no contract) → `qa/dotnet/skills/api-test-author/writer`
-- OpenAPI-only validation with no consumer-driven aspect → schema validation library
-
 ## Stack
 
 - **Runtime**: .NET 10 (net8/9 supported — match the service's TFM)
@@ -249,13 +235,3 @@ See `qa/_shared/contract-testing-pact` for the shared `can-i-deploy` and `record
 6. Wire provider CI: `dotnet test` with `PACT_BROKER_*` and `GIT_SHA` / `BRANCH_NAME` env vars.
 7. Add `can-i-deploy` and `record-deployment` to both deploy pipelines (see `_shared`).
 8. Smoke a full cycle: change the contract on the consumer → fail provider verification → fix → success.
-
-## Handoffs
-
-- Cross-stack Broker / `can-i-deploy` / matchers concepts → `qa/_shared/contract-testing-pact`
-- Java consumer/provider → `qa/java/skills/api-contract-testing`
-- TypeScript consumer/provider → `qa/typescript/skills/api-contract-testing`
-- Live-service API tests → `qa/dotnet/skills/api-test-author/writer`
-- DTOs → `qa/dotnet/skills/api-models`
-- CI pipeline syntax → `qa/cicd/dotnet/skills/ci-pipelines/{github-actions,azure-pipelines,gitlab-ci}` or `devops/<ci>`
-- Allure publishing for contract test results → `qa/reporting/dotnet/skills/test-reports`

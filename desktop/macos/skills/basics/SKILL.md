@@ -26,24 +26,6 @@ Read `SWIFT_VERSION` / `swiftLanguageModes`, `swift --version`, `MACOSX_DEPLOYME
 
 Three **separate** Swift switches, as on iOS: language mode (`SWIFT_VERSION = 6`, errors for data races), default actor isolation (`MainActor`, Swift 6.2 compiler) and Approachable Concurrency (`SWIFT_APPROACHABLE_CONCURRENCY`). The Xcode 27 template is still `SWIFT_VERSION = 5.0`. Never assume one implies another. `await` in `defer`, `weak let` and `~Sendable` are **[Swift 6.4]**; a 6.2–6.3 project is not flagged for lacking them. Depth: [`references/concurrency.md`](references/concurrency.md).
 
-## When to use
-
-- Writing Swift in a Mac app, a local package or a helper
-- "Struct or class?", "may I force-unwrap?", "which error type?", "which isolation for this module?"
-- Deciding whether something is a window, a menu command or a screen
-- Fixing a `Sendable` diagnostic
-
-## When NOT to use
-
-- Creating the project, entitlements, xcconfig, lint → `project-setup`
-- State ownership and injection → `architecture`
-- SwiftUI views, `Table`, inspectors → `ui-components`
-- Windows and scenes, menus → `windows-and-scenes`, `menus-and-commands`
-- Reviewing a diff → `code-review`
-- iOS-only Swift → `mobile-ios:concepts`; Windows → `desktop-windows:concepts`
-
----
-
 ## The Mac model — what is different from a phone
 
 | Phone habit | On the Mac |
@@ -158,12 +140,3 @@ One `Logger` per category, a `static let`. Interpolate into the call so the syst
 - **A hover-only control**: add a click or context-menu path (touch Macs).
 - **A `static var`**: mutable global state; make it `let`, an actor, or inject it.
 - **Cross-platform shell** (Electron, Tauri): detected and named, never taught here; `migration` mentions the move to native.
-
-## Handoffs
-
-- Concurrency depth → [`references/concurrency.md`](references/concurrency.md)
-- Project, sandbox, hardened runtime, lint → `project-setup`
-- State and injection → `architecture`
-- Windows, menus → `windows-and-scenes`, `menus-and-commands`
-- Swift 5 → 6, AppKit → SwiftUI → `migration`
-- iOS counterpart → `mobile-ios:concepts`

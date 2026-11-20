@@ -12,25 +12,6 @@ The library's default persistence layer for TypeScript on **Node 24 (active LTS)
 
 Detect the project's Node major before scaffolding (`package.json` `engines` / `.nvmrc` / lockfile). Node 20 is EOL since April 2026 — flag it, don't target it. Prisma/Drizzle/TypeORM client behavior below is unaffected by the 22-vs-24 choice.
 
-## When to use
-
-- New Node service needs persistence
-- Adding an entity / table to an existing schema
-- Tuning a slow query
-- Wiring optimistic concurrency
-- Setting up the migrations workflow
-- Choosing between Prisma / Drizzle / TypeORM
-
-## When NOT to use
-
-- DB engine specifics / DDL → `data/postgresql` / `data/sqlserver` / `data/mysql`
-- Cross-engine migrations → `data/_shared/migrations`
-- Cross-engine query optimization → `data/_shared/slow-query-fixes`
-- Caching → `data/_shared/caching-patterns` + `data/redis`
-- Raw SQL with no ORM — `pg` directly works fine; this skill is about typed ORMs
-- .NET → `backend/dotnet/skills/database-code`
-- Java → `backend/java/skills/database-code`
-
 ## Picking the ORM
 
 | Tool | When | Pros | Cons |
@@ -393,14 +374,3 @@ The standards this skill's output must meet are the be-node rule files, not a li
 6. Wire `migrate deploy` into the deploy pipeline.
 7. Enable Prisma tracing + register OTel instrumentation per `observability/opentelemetry-node`.
 8. Smoke locally with Postgres in Docker; confirm queries log + traces appear.
-
-## Handoffs
-
-- DB engine specifics → `data/postgresql` / `data/sqlserver` / `data/mysql`
-- Migrations across engines → `data/_shared/migrations`
-- Query optimization principles → `data/_shared/slow-query-fixes`
-- Caching → `data/_shared/caching-patterns` + `data/redis`
-- API contracts (Zod) → `qa/typescript/skills/api-models`
-- API tests → `qa/typescript/skills/api-test-author/writer`
-- .NET equivalent → `backend/dotnet/skills/database-code`
-- Java equivalent → `backend/java/skills/database-code`

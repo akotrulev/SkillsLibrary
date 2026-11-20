@@ -8,20 +8,6 @@ disable-model-invocation: true
 
 Reviews codebases or proposed designs at the pattern / architecture altitude — independent of language. Spots stacking, premature abstraction, under-abstraction, layering bleeds, and pattern-as-ceremony. Stack-specific syntax reviews live in `backend/<stack>/skills/code-review`.
 
-## When to use
-
-- Architecture review across multiple services / multiple stacks
-- "Is this design overengineered" / "underengineered" question
-- Pre-RFC sanity check on a proposed pattern adoption
-- Cross-stack consistency audit (Java service + .NET service + TS service should treat patterns the same way)
-
-## When NOT to use
-
-- Per-file syntax-level review → `backend/<stack>/skills/code-review`
-- API tests → `qa/<stack>/skills/api-test-author/code-review`
-- UI tests → `qa/<stack>/skills/ui-test-author/code-review`
-- Page-object architecture → `qa/<stack>/skills/page-object-design`
-
 ## Inputs needed
 
 1. **Scope** — one service, one feature, one repo, multiple repos
@@ -135,11 +121,3 @@ Load **[`engineering-practices/code-comments`](../../../engineering-practices/co
 4. Walk abstraction (under and over)
 5. Cross-stack: pick one representative class from each service and check consistency
 6. Produce the table; do **not** rewrite
-
-## Handoffs
-
-- Need stack-specific rewrites → `backend/<stack>/skills/pattern-writer`
-- Stack-specific syntax review → `backend/<stack>/skills/code-review`
-- Page-object architecture (UI tests) → `qa/<stack>/skills/page-object-design`
-- Test strategy → `qa/manual/test-strategy`
-- Communication of findings to non-engineers → if `communication/stakeholder-updates` is available in your install

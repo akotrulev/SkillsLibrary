@@ -21,20 +21,6 @@ Owns **hangs, hitches, launch, memory and size**. The main thread has a frame bu
 
 Detect first: the deployment target (decides the MetricKit branch), whether a crash reporter already forwards hangs, and any existing signposts or performance test plan — extend, never duplicate.
 
-## When to use
-
-- A freeze, a scroll hitch, a slow screen transition, a slow cold start, rising memory
-- Setting budgets; wiring MetricKit; trimming app size
-- "Why does this view re-render?", "is this `body` too heavy?"
-
-## When NOT to use
-
-- Crash-reporter and OTel setup, release-health thresholds → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md)
-- Animation design and Reduce Motion → [`animation`](../animation/SKILL.md)
-- Request timing, retries, cache policy → [`networking`](../networking/SKILL.md)
-- List and view authoring → [`ui-components`](../ui-components/SKILL.md)
-- Other stacks → `mobile-react-native:performance`, `mobile-android:performance`
-
 ## Budgets — set them before measuring
 
 | Budget | Target | Measured with |
@@ -144,9 +130,3 @@ The standards this skill's output must meet are the mobile-ios rule files, not a
 - Ten navigate-and-back cycles leave no extra instances in the Memory Graph.
 - A before-and-after launch figure from the App Launch template.
 - Dev-side tests for the logic moved off the main actor use injected seams: [`unit-testing`](../unit-testing/SKILL.md); XCTest `measure` / `XCTApplicationLaunchMetric` belong to the XCTest lane named there.
-
-## Handoffs
-
-- Crash reporter, OTel, symbols → [`mobile-<stack>:observability`](../../../_shared/observability/SKILL.md) · release gates → [`mobile-<stack>:release`](../../../_shared/release/SKILL.md)
-- Views and lists → [`ui-components`](../ui-components/SKILL.md) · state ownership → [`architecture`](../architecture/SKILL.md)
-- Background transfers → [`system-integration`](../system-integration/SKILL.md) · persistence cost → [`offline-and-storage`](../offline-and-storage/SKILL.md)

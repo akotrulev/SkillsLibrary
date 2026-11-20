@@ -8,22 +8,6 @@ disable-model-invocation: true
 
 Guardrails for the **SQL string itself** when a Java 21 TestNG integration test reaches into the database to verify behaviour. Connection wiring, seeder, and probe scaffolding live in `qa/java/skills/db-testing/connection`; this skill owns *what the SQL is allowed to look like* — named parameter binding only, explicit column lists, safe `LIKE`, type-correct parsing, exists / not-exists / count assertions, an Awaitility-based poller that re-runs the safe query, and a hard refusal list for destructive verbs outside cleanup.
 
-## When to use
-
-- A test is about to embed a SQL string (`NamedParameterJdbcTemplate.query(...)`, `DSLContext.fetch(...)`, raw `JdbcTemplate.queryForObject`) and you need it reviewed or generated.
-- An existing probe / seeder uses string concatenation, `SELECT *`, or unbounded `DELETE` and needs a rewrite.
-- A test needs an "assert exactly one row matches these columns" or "assert no row matches" custom assertion.
-- An async flow needs an Awaitility wait that re-runs the verification query until the projection catches up.
-
-## When NOT to use
-
-- Spring `DataSource` wiring / fixture lifecycle / `@Rollback` cleanup → `qa/java/skills/db-testing/connection`.
-- Container boot, Flyway migrations on startup → `qa/java/skills/db-testing/testcontainers`.
-- Production data-access SQL (Spring Data JPA, jOOQ in production) → the `backend/java` dev stack's generator, if installed.
-- .NET SQL guardrails → `qa/dotnet/skills/db-testing/verification-queries`.
-- TypeScript SQL guardrails → `qa/typescript/skills/db-testing/verification-queries`.
-- Pure unit tests with no SQL surface — keep them mock-driven.
-
 ## Inputs needed (≤2 questions)
 
 1. **Engine + client**: Postgres + `NamedParameterJdbcTemplate` (default), Postgres + jOOQ (when joins/windowing earn it), MySQL, or SQL Server?
@@ -347,13 +331,3 @@ The standards a verification query must meet are the qa-java rule files, not a l
 - Only literal strings owned by the test code flow into the SQL shape (`DbAssertions.exists`' `whereClause`), never runtime input.
 - Probe with explicit SQL, not an entity whose lazy association fires a second query inside the test's transaction.
 - jOOQ only when joins or windowing earn it, always with an explicit `select(col, col, ...)`.
-
-## Handoffs
-
-- `DataSource` wiring / fixture / `@Rollback` cleanup → `qa/java/skills/db-testing/connection`
-- Container lifecycle → `qa/java/skills/db-testing/testcontainers`
-- Test data builders feeding seeders → `qa/java/skills/test-data-builder`
-- .NET SQL guardrails → `qa/dotnet/skills/db-testing/verification-queries`
-- TypeScript SQL guardrails → `qa/typescript/skills/db-testing/verification-queries`
-- Production data access SQL → the `backend/java` dev stack's generator, if installed
-- Test strategy where DB tests fit → `qa/manual/test-strategy`

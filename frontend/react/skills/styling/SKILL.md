@@ -10,21 +10,6 @@ Owns how a React app is styled with **CSS you write**: component-scoped CSS Modu
 
 **Version rule:** CSS Modules, CSS custom properties, and `composes` behave identically across React 18/19 and Next 14/15 — this skill is largely version-agnostic. The version-sensitive edges live in the sibling skills: which library owns the theme (v-major differences → [`component-library`](../component-library/SKILL.md)) and static-asset handling ([`performance`](../performance/SKILL.md)).
 
-## When to use
-
-- Scoping a component's CSS so it can't leak or collide (CSS Modules)
-- Sharing rules between modules (`composes`) without a global dump
-- Setting up design tokens (CSS custom properties) from a `design/visual-identity` palette
-- Dark mode, responsive breakpoints (the CSS mechanics)
-- Deciding the styling authority: library `sx`/`theme` vs Tailwind vs CSS Modules
-
-## When NOT to use
-
-- A component library's theme/token object (MUI `createTheme`, Mantine/Chakra `createSystem`/tokens) → [`component-library`](../component-library/SKILL.md)
-- Picking the palette, fonts, visual direction, type *treatment* → [`design/visual-identity`](../../../../design/visual-identity/SKILL.md) (primary theming authority), `design/theme-presets` (optional quick-start)
-- Contrast/WCAG auditing of the colors you chose → [`accessibility`](../accessibility/SKILL.md)
-- Layout *component* structure (composition, slots) → [`basics`](../basics/SKILL.md); the breakpoint contract + grids → [`responsive-design`](../responsive-design/SKILL.md)
-
 ## The styling authority decision
 
 Pick **one** primary styling authority per app. Mixing them uncontrolled is the top cause of specificity wars and dark-mode drift. This decision is driven by the component-library choice ([`component-library`](../component-library/SKILL.md)):
@@ -186,12 +171,3 @@ Beyond the rule files, this skill's own rules:
 - Grep `*.module.css` (and `sx` literals) for hex/`px` colors → none (all `var(--token)`).
 - Only one styling authority present (no Tailwind + CSS-in-JS library together).
 - Resize to mobile width → layout reflows via `min-width` queries, no horizontal scroll.
-
-## Handoffs
-
-- Component library's own theme object (MUI `createTheme`, Mantine/Chakra tokens, Tailwind-as-authority for shadcn) → [`component-library`](../component-library/SKILL.md)
-- Palette, fonts, visual direction, the *type treatment* → [`design/visual-identity`](../../../../design/visual-identity/SKILL.md) (primary), `design/theme-presets` (quick-start)
-- Contrast/WCAG check of chosen colors, focus-visible styling → [`accessibility`](../accessibility/SKILL.md)
-- Breakpoint contract, grids, cross-breakpoint alignment, container queries → [`responsive-design`](../responsive-design/SKILL.md)
-- Font/static-asset performance, bundle → [`performance`](../performance/SKILL.md)
-- Component/layout structure (composition, slots) → [`basics`](../basics/SKILL.md)

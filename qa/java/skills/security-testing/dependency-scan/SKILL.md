@@ -242,10 +242,8 @@ public class DependencyVulnerabilityTest {
 }
 ```
 
-
 The `.NET`/TS siblings parse their own tool's JSON (`dotnet list package --vulnerable --format json` /
 `npm audit --json`) the same way.
-
 
 ## CI wiring — the gate, the NVD cache, the remediation complement
 
@@ -335,18 +333,3 @@ These sections live in `references/details.md` — **read it when the task touch
   code-scanning.
 - Pair the **gate** with a **remediation** tool (Dependabot/Renovate) and the **`dependency-review-action`**
   PR-diff gate. A clean SCA ≠ "secure" — **run DAST too**: SCA and DAST are orthogonal layers.
-
-## Cross-references
-
-- `qa-typescript:dependency-scan` — same skill, TS / `npm audit` (`--audit-level`,
-  `--json`, `npm audit fix`, `overrides`/`.nsprc`; Dependency-Check as the shared option).
-- `qa-dotnet:dependency-scan` — same skill, .NET / `dotnet list package --vulnerable
-  --include-transitive` + NuGet audit (`<NuGetAudit>`, `NuGetAuditLevel`).
-- `qa-java:passive-scan` — the **DAST** sibling that opened the `security-testing`
-  family: ZAP probes the **running app's HTTP surface**; SCA reads your **dependency tree**. Orthogonal
-  layers — **run both** (together they close Step 2).
-- `qa-java:accessibility-testing` — the **ticketed-baseline triage** discipline reused
-  here for the suppression file (gate new findings, document every suppression with a ticket).
-- `qa-java:ci-pipelines` — the gate step, `dependency-review-action`, NVD-cache, artifact +
-  SARIF upload.
-- `qa-java:test-reports` — attach the Dependency-Check HTML/JSON report to the run.

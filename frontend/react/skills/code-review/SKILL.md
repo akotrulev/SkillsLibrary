@@ -21,21 +21,6 @@ Read `react.md`, plus each other file whose `paths:` match a file under review, 
 
 Detect the installed React (and Next.js) major and whether the React Compiler is on, from `package.json`, before flagging. `forwardRef` is a finding only on React 19 (where `ref` is a plain prop); on 18 it's correct. Hand-rolled `useMemo`/`useCallback` are a finding on a Compiler-enabled project but correct where the Compiler is off. Manual `isPending`/rollback is correct on 18 (where `useActionState`/`useOptimistic` don't exist). Never flag a down-level project for lacking an API it doesn't have. The rule files' "the codebase wins" line applies: a convention the project follows consistently is not a finding.
 
-## When to use
-
-- A `.tsx` diff submitted (component, hook, context, route, `page.tsx`/`layout.tsx`/`error.tsx`)
-- Pre-merge gate on a PR touching `app/`, `src/components/`, `src/hooks/`, `src/features/`
-- "Why does this page re-render / hydrate twice / fetch twice?"
-- Audit `'use client'` placement, effect/cleanup hygiene, or `data-testid` coverage
-
-## When NOT to use
-
-- Conceptual lookup → [`basics`](../basics/SKILL.md)
-- Generating new code → [`component-writer`](../component-writer/SKILL.md)
-- Reviewing **UI test code** (Playwright specs / POMs) → **peer** `qa/typescript/skills/ui-test-author/review`
-- Blazor review → `frontend/blazor/skills/code-review`
-- Auth wiring review → `auth/auth0-react` + general review
-
 ## Inputs needed
 
 1. **Files** (component, hook, context, route file)
@@ -64,14 +49,3 @@ Detect the installed React (and Next.js) major and whether the React Compiler is
 ```
 
 End with one line: `Rules: project .claude/rules/fe-react/ | plugin copy (not installed)`.
-
-## Handoffs
-
-- Rewrite → [`component-writer`](../component-writer/SKILL.md)
-- Conceptual lookup → [`basics`](../basics/SKILL.md)
-- React performance rule deep-dive → `frontend/react/bundled/reference/`
-- Composition deep-dive → `frontend/react/bundled/composition-patterns`
-- Component tests to lock a fix → [`component-testing`](../component-testing/SKILL.md)
-- UI test-code review → **peer** `qa/typescript/skills/ui-test-author/review`
-- Auth0 wiring review → `auth/auth0-react`
-- A rule is missing or wrong → edit the project's `.claude/rules/fe-react/`; for every project, the plugin's `frontend/react/skills/rules/`

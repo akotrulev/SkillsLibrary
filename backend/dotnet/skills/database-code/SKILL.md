@@ -8,21 +8,6 @@ disable-model-invocation: true
 
 The library's default persistence layer for .NET — **.NET 10 / EF Core 10 primary, .NET 8-9 / EF Core 8-9 supported**. Code-first models against PostgreSQL / SQL Server providers, explicit configurations via `IEntityTypeConfiguration<T>`, migrations under source control, opt-in tracking, row-version optimistic concurrency, and AOT-friendly compiled queries for hot paths. The recipes below are current EF Core 8/9/10 API; version-specific divergence is called out where it exists (primarily around `ExecuteUpdate`/`ExecuteDelete`, available since EF Core 7, and `Timestamp`/`ComplexProperty` behavior).
 
-## When to use
-
-- New .NET service needs persistence
-- Adding a new aggregate / entity to an existing `DbContext`
-- Tuning a slow query (LINQ pattern, missing index, N+1)
-- Wiring optimistic concurrency
-- Setting up the migrations workflow
-
-## When NOT to use
-
-- Schema / DDL / engine-specific tuning → `data/postgresql` / `data/sqlserver`
-- Cross-engine migration patterns → `data/_shared/migrations`
-- Cross-engine query optimization → `data/_shared/slow-query-fixes`
-- Raw ADO.NET / Dapper when EF is overkill — for read-heavy reporting paths, Dapper is fine; this skill is about EF
-
 ## Version policy
 
 **First act: detect the project's `<TargetFramework>`** and match the corresponding EF Core major (EF Core 8 ↔ net8.0, EF Core 9 ↔ net9.0, EF Core 10 ↔ net10.0 — EF Core does not skip-version support an unrelated TFM). Never up-level a net8/net9 project's EF Core package reference to 10 as part of an unrelated change; never flag a net8/net9 project for lacking a net10-only EF Core feature.
@@ -366,13 +351,3 @@ The standards this skill's output must meet are the be-dotnet rule files, not a 
 6. Add the first migration; review the SQL it generates.
 7. Add read repositories / query helpers; default `AsNoTracking()`.
 8. Add concurrency tokens on aggregates with shared writes.
-
-## Handoffs
-
-- DB engine specifics → `data/postgresql` / `data/sqlserver`
-- Migration mechanics across engines → `data/_shared/migrations`
-- Query optimization principles → `data/_shared/slow-query-fixes`
-- Caching in front of the DB → `data/_shared/caching-patterns` + `data/redis`
-- API contracts that read from this layer → `qa/dotnet/skills/api-models`
-- Java equivalent → `backend/java/skills/database-code`
-- Node equivalent → `backend/node/skills/database-code`

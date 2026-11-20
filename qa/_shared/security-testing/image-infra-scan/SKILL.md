@@ -339,20 +339,3 @@ identical two-pass via `aquasec/trivy` Docker steps (cross-link `qa-<stack>:ci-p
   scan config — env vars, read lazily.
 - A clean Trivy run ≠ "secure" — it means the **image / OS / IaC** layers passed. Run the full layer set
   (`qa-<stack>:security-foundations`).
-
-## Cross-references
-
-- `qa-<stack>:security-foundations` — the OWASP backbone (A03 Software Supply Chain, A02 Misconfiguration), the
-  ticketed-triage discipline, SARIF → code-scanning consolidation, the layer map, and the
-  authorization-to-scan rules. **Load alongside this skill** — it owns the concepts this one applies.
-- `qa-<stack>:dependency-scan` — **application** dependency-CVE SCA
-  (build graph / lockfile, CVSS-gated by the native tool). The **boundary partner**: SCA owns app-deps,
-  Trivy owns OS image + container + IaC. `trivy fs`/`image` overlap on app lockfiles — let SCA own them.
-  **Run both layers.**
-- `qa-<stack>:active-scan` — the **DAST** sibling (running-app HTTP surface);
-  orthogonal to image/IaC scanning.
-- `qa-<stack>:ci-pipelines` + `qa/cicd/ci-conventions` — wire the
-  two-pass image + IaC gates, `aquasecurity/trivy-action`, the Trivy DB cache, and the SARIF upload.
-- `qa-<stack>:test-reports` — attach the Trivy HTML/JSON report to the run.
-- `qa/_shared/agents/qa-security.md` — the step-by-step orchestrator that runs this as the **build-artifact gate**
-  (Step 5).

@@ -15,19 +15,6 @@ Mutation testing (`test-quality-check`, Java and .NET) is the complement. Mutati
 faults**; this skill proves a test is **worth keeping**. A test can kill mutants and still be a near-duplicate
 of its sibling, and a test can be unique and still assert nothing.
 
-## When to use
-
-- The suite is slow, flaky or expensive to maintain and the user wants to know what to cut
-- The user asks which tests protect nothing, duplicate each other, or assert on implementation detail
-- Before a refactor, to find tests that will break for no behavioural reason
-
-## When NOT to use
-
-- "Do my tests detect faults?" — mutation testing (`test-quality-check`)
-- "Write or fix a test" — the stack's test-authoring skill
-- A review of tests in one diff — apply the value bar below inline; this skill is the whole-suite sweep
-- The suite is empty or the user has not shared a repo — ask for the path
-
 ## Boundaries
 
 - **Read-only.** The only file written is the report under `docs/audits/`.

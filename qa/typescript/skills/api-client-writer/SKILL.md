@@ -8,22 +8,6 @@ disable-model-invocation: true
 
 Generator skill. Scaffolds a single `{resource}Client.ts` file in the TypeScript API test project under `src/clients/{api}/`, following the conventions below. Uses **native `fetch`** (built into Node 22 and 24) and **Zod** for response validation.
 
-## When to use
-
-- The user asks to add a new client module under `src/clients/{api}/`.
-- A new endpoint group has been added to the API under test and needs a typed wrapper for tests.
-- The user is extending an existing client with new endpoints in the same style.
-
-## When NOT to use
-
-- Writing the test spec — use `qa/typescript/skills/api-test-author/writer`.
-- Reviewing an existing client for convention drift — use `qa/typescript/skills/api-test-author/review`.
-- Authoring Zod schemas / DTO types — use `qa/typescript/skills/api-models` first.
-- Reacting to a **new version of a swagger/OpenAPI spec** — start at `qa/_shared/api-spec-assets` (`qa-<stack>:api-spec-assets`): it replaces the stored spec asset in place and derives from `git diff` exactly which client methods changed. Come back here for those methods only.
-- .NET stack (RestSharp) — use `qa/dotnet/skills/api-client-writer`.
-- Java stack (RestAssured) — use `qa/java/skills/api-client-writer`.
-- Projects standardized on axios / got / supertest — these conventions assume native `fetch`.
-
 ## Folder & naming convention
 
 Clients are organized by API group. **One module per resource**; user-facing and admin operations live in the same module. Each module exports a factory function that returns a strongly-typed client object — no class-per-client unless the project explicitly prefers classes.

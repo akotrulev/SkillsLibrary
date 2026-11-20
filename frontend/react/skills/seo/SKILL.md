@@ -12,23 +12,6 @@ Owns making **public, crawlable** pages rank and preview correctly: the render s
 
 **Version rule:** the Metadata API (`export const metadata` / `generateMetadata`), `not-found.tsx`/`notFound()`, `sitemap.ts`, `robots.ts`, and RSC streaming are stable on **Next 14 and 15** (Next 15's async request APIs — `await cookies()`/`params` — matter where metadata reads them). The **Vite SPA** lane has **no server render** — a client-rendered SPA is blank to crawlers/unfurl bots on first paint; SEO there requires SSR/prerendering (a framework like Remix/React Router 7 in SSR mode, or a prerender step) and **React 19 `<title>`/`<meta>` hoisting** (render metadata tags from anywhere; they hoist to `<head>`) instead of the Next Metadata API. Tag the SPA path explicitly; the App Router is primary.
 
-## When to use
-
-- Deciding the render strategy for a public/marketing/content route (crawlability)
-- Setting per-route `title` + `meta description` + Open Graph/Twitter tags from route data
-- Making streamed content visible to crawlers
-- Returning a correct 404 (status code + page)
-- Adding canonical URLs, `sitemap.xml`, `robots.txt`
-- Adding JSON-LD structured data (Article, Product, BreadcrumbList, Organization)
-
-## When NOT to use
-
-- The tab-title **convention** → [`ui-rules`](../ui-rules/SKILL.md); its **emission** in scaffolds → [`component-writer`](../component-writer/SKILL.md)
-- Choosing render strategy for the app generally → [`project-setup`](../project-setup/SKILL.md) (this skill applies the *public-page* corollary)
-- Public-page load performance (bundle, LCP, streaming for speed) → [`performance`](../performance/SKILL.md)
-- Internal/authenticated screens (no crawler ever sees them) — skip SEO entirely
-- Blazor → `frontend/blazor/skills/seo`
-
 ## Crawlability = render strategy. Public pages default to server rendering
 
 A crawler reads the **HTTP response body**. Whatever a page needs client JS to render **is not in that body** on first paint — so a client-only component (a `'use client'` tree that fetches after hydration, or `next/dynamic` with `ssr:false`) is blank to a crawler and to a social unfurl bot (which never runs JS at all).
@@ -161,11 +144,3 @@ The general standards (the RSC boundary, a title on every route) are the fe-reac
 - Hit a non-existent URL and a valid-route-no-data URL → **HTTP 404** (check the status, not just the page), and it's `noindex`.
 - `/sitemap.xml` returns valid XML of canonical public URLs; `/robots.txt` allows public paths, disallows app/auth, links the sitemap.
 - Run the URL through a rich-results / OG-preview checker → title/description/image/structured-data render correctly.
-
-## Handoffs
-
-- Tab-title convention → [`ui-rules`](../ui-rules/SKILL.md); its emission in scaffolds → [`component-writer`](../component-writer/SKILL.md)
-- Render-strategy selection across the app → [`project-setup`](../project-setup/SKILL.md)
-- Public-page load performance (bundle, LCP, streaming for speed) → [`performance`](../performance/SKILL.md)
-- Configured base-host / no-localhost-fallback for absolute URLs → [`project-setup`](../project-setup/SKILL.md)
-- Automated Lighthouse SEO/score gate in CI → qa `accessibility-testing`/CI peers (Lighthouse covers SEO + a11y + perf categories)

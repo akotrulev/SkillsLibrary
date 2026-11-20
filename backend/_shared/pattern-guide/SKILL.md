@@ -8,19 +8,6 @@ disable-model-invocation: true
 
 The "what & when" of design patterns at a level that survives stack switches. Each card explains intent, when to use, when NOT to use, and the most common failure mode. Stack-specific implementations live in `backend/<stack>/skills/pattern-guide`.
 
-## When to use
-
-- "What does pattern X solve?"
-- "When should I reach for pattern X vs Y?"
-- Comparing patterns conceptually before picking a stack
-- Onboarding a new contributor to the library's pattern vocabulary
-
-## When NOT to use
-
-- Need executable code in a specific language → `backend/<stack>/skills/pattern-guide`
-- Scaffolding into a repo → `backend/<stack>/skills/pattern-writer`
-- Reviewing existing code → `backend/<stack>/skills/code-review`
-
 ## Core principles (apply everywhere)
 
 | Principle | Why |
@@ -221,9 +208,3 @@ Is there a real abstraction surface (≥ 2 implementations)? → introduce a pat
    ↓ no
 Wait. Add when the second instance arrives.
 ```
-
-## Handoffs
-
-- Specific stack code → `backend/<stack>/skills/pattern-guide` + `backend/<stack>/skills/pattern-writer`
-- Reviewing existing code for misuse → `backend/<stack>/skills/code-review` or `backend/_shared/code-review`
-- Test data builders → `qa/<stack>/skills/test-data-builder`

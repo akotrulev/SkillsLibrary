@@ -14,23 +14,6 @@ Owns the **mechanics** of animating a React UI: how a reveal, transition, exit, 
 
 **Version rule.** CSS transitions/keyframes, `prefers-reduced-motion`, `animation-timeline: view()`, and the browser `@view-transition` rule are **framework-version-agnostic** (React 18/19, Next 14/15 identical — they're browser capabilities, not React APIs). The one React-version-sensitive piece is the **`<ViewTransition>` component**: it ships on React's **experimental/canary** channel (and Next's `experimental.viewTransition`), *not* stable React 19.0 — treat it as opt-in-experimental, and use the browser-native `document.startViewTransition` + CSS `@view-transition` (stable everywhere) or `animation` (production-ready) as the default route-transition path. `animation-timeline: view()` is broadly available across engines as of late 2025, with the IntersectionObserver hook as the fallback for older targets.
 
-## When to use
-
-- A page-load entrance sequence (staggered reveals of a hero, cards, list rows)
-- Fade/slide/scale an element in as it scrolls into view
-- Animating an element **out** as it leaves the list/DOM (the React-specific case)
-- A transition between routes/pages
-- Hover/press micro-interactions on interactive elements
-- Making any of the above respect `prefers-reduced-motion` correctly
-
-## When NOT to use
-
-- Deciding *whether* or *where* to animate, the orchestrated concept → [`design/visual-identity`](../../../../design/visual-identity/SKILL.md)
-- Setting up CSS Modules, tokens, dark mode → [`styling`](../styling/SKILL.md)
-- Focus movement + live-region announcement on navigation (not "motion") → [`accessibility`](../accessibility/SKILL.md)
-- A component library's own transition props (MUI `Fade`/`Grow`/`Slide`/`Collapse`, `TransitionComponent`) → [`component-library`](../component-library/SKILL.md) — use them before hand-rolling
-- `useDeferredValue`/`useTransition` to keep input responsive (that's *scheduling*, not visual motion) → [`performance`](../performance/SKILL.md)
-
 ## The technique decision
 
 ```
@@ -236,13 +219,3 @@ The general standards (cleanup, stable keys, `'use client'` on the leaf, reduced
 - Navigate between routes → the transition plays where wired; on a browser without the API it swaps instantly with no error.
 - DevTools Performance → animated frames stay on the compositor (no purple "Layout" bars per frame).
 - Unmount a component using the IntersectionObserver hook → no leaked observer (cleanup ran).
-
-## Handoffs
-
-- Whether/where to animate, the orchestrated concept, restraint ("remove one accessory") → [`design/visual-identity`](../../../../design/visual-identity/SKILL.md)
-- CSS Modules, tokens, `:focus-visible`, dark mode → [`styling`](../styling/SKILL.md)
-- Focus movement + announcement on client-side navigation (not visual motion) → [`accessibility`](../accessibility/SKILL.md)
-- Component-library transition components (use before hand-rolling) → [`component-library`](../component-library/SKILL.md)
-- `useDeferredValue`/`useTransition` scheduling, keeping the client bundle lean → [`performance`](../performance/SKILL.md)
-- The full View Transitions pattern catalogue (shared element, Suspense reveal, directional nav) → the bundled seed [`frontend/react/bundled/view-transitions`](../../bundled/view-transitions/SKILL.md)
-- Effect-cleanup / subscription-teardown discipline (same rule) → [`realtime`](../realtime/SKILL.md)

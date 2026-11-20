@@ -17,20 +17,6 @@ Owns changing the **language mode, framework, dependency manager, SDK or deploym
 | Dated | **CocoaPods trunk read-only 2026-12-02** · uploads need the **iOS 27 SDK from April 2027** (the Xcode 26 SDK until then) | Both are deadlines, not preferences — [`cocoapods-to-spm`](references/cocoapods-to-spm.md) and [`ios27-sdk-and-targets`](references/ios27-sdk-and-targets.md) |
 | Below iOS 16 | — | The UIKit lane only ([`uikit`](../uikit/SKILL.md)); a finding plus a deployment-target run, never a SwiftUI migration |
 
-## When to use
-
-- The user names a move: Swift 6, `@Observable`, async, SwiftUI, Swift, SPM, a deployment target, the iOS 27 SDK
-- The audit reports A1, A5, A8, A9, A10 or A11 ([`standards-audit`](../standards-audit/SKILL.md) section A)
-- A post-migration break: a runtime isolation crash, a view that lost its state, a `pod install` that no longer resolves
-
-## When NOT to use
-
-- New app → [`project-setup`](../project-setup/SKILL.md)
-- Feature work, a bug fix → the agent's FIX / EXTEND modes; they never up-level a lane
-- A patch / minor dependency bump, or a package major with no lane change — dependency hygiene
-- An Expo project's native side → `mobile-react-native:migration`; this skill covers only the Swift an Expo module contains
-- Android → `mobile-android:migration`
-
 ## Inputs needed
 
 1. **The move** — one of the seven below. A request for two is two runs, in the order the table gives
@@ -88,14 +74,3 @@ Order 0 moves first when their date is near; the numbered ones follow by depende
 - **Raising the deployment target to use one API** — gate it with `#available` instead, until the target move is its own run.
 - **Combine → async by wrapping `values` around every publisher** — convert the pipeline, not the surface.
 - **Bundling a feature into the migration commit.**
-
-## Handoffs
-
-- The Swift standard and the concurrency reference → [`basics`](../basics/SKILL.md)
-- Project, package and xcconfig layout → [`project-setup`](../project-setup/SKILL.md)
-- UIKit lane, scene lifecycle, interop seams → [`uikit`](../uikit/SKILL.md)
-- State ownership after the move → [`architecture`](../architecture/SKILL.md)
-- Store model migrations (SwiftData `VersionedSchema`) → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Privacy manifest, signing, SDK upload requirements → `mobile-<stack>:store-compliance`, `mobile-<stack>:release`
-- Review the migration diff → [`code-review`](../code-review/SKILL.md); conformance after the move → [`standards-audit`](../standards-audit/SKILL.md)
-- Tests that lock the move → [`unit-testing`](../unit-testing/SKILL.md); device journeys → peer `qa-mobile-java` / `qa-mobile-dotnet` / `qa-mobile-typescript`

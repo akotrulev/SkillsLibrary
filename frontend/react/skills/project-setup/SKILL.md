@@ -10,21 +10,6 @@ Stands up a **Next.js 15 App Router** app (primary) or a **Vite SPA** (fallback 
 
 **Version rule:** detect the installed React/Next major from `package.json` **first** — it drives every version-sensitive recipe. React 19 + Next 15 are primary; React 18 + Next 14 are tagged fallbacks. Never emit a React-19-only API (`use()`, ref-as-prop, Actions) into a React 18 project, or an async-request-API pattern into Next 14.
 
-## When to use
-
-- New Next.js App Router app, or a new Vite React SPA
-- Deciding the rendering strategy for a specific route (static/dynamic/streaming; where the client islands sit)
-- Setting up feature folders, the `'use client'` boundary, strict TS, ESLint/Prettier, env config
-
-## When NOT to use
-
-- Adding a component/page to an existing app → [`component-writer`](../component-writer/SKILL.md)
-- Request/response data fetching → [`data-fetching`](../data-fetching/SKILL.md)
-- Live/push data → [`realtime`](../realtime/SKILL.md)
-- Component library + theming → [`component-library`](../component-library/SKILL.md), [`styling`](../styling/SKILL.md)
-- Auth0 wiring → `auth/auth0-react`
-- Concepts / RSC explanation → [`basics`](../basics/SKILL.md)
-
 ## Inputs needed
 
 0. **Framework + versions** — Next.js App Router (default) or Vite SPA; React 18/19, Next 14/15 (drives recipe variants)
@@ -171,12 +156,3 @@ Beyond the rule files, this skill's own rules:
 - App **boots**: the `dev` script, home route renders.
 - **One route per chosen mode renders**: a static content route, one dynamic/personalised route, and (if used) a streamed route with its `loading.tsx`. Confirm a client island hydrates, a Server Component ships no JS for its subtree, `curl -s <route>` returns the route's server-rendered content in the HTML, and `<body data-hydrated="true">` appears after hydration.
 - Lockfile committed; `@/*` alias resolves; typed env parses at boot.
-
-## Handoffs
-
-- Fetch data into these routes → [`data-fetching`](../data-fetching/SKILL.md) (request/response · Server Actions) · [`realtime`](../realtime/SKILL.md) (live/push)
-- Scaffold pages/components/forms → [`component-writer`](../component-writer/SKILL.md) · [`forms`](../forms/SKILL.md)
-- Component library + theme → [`component-library`](../component-library/SKILL.md), [`styling`](../styling/SKILL.md)
-- Auth → `auth/auth0-react`
-- Concepts / RSC explanation → [`basics`](../basics/SKILL.md)
-- CI pipeline for the app → `qa/cicd/typescript` (peer, invoked separately)

@@ -22,25 +22,6 @@ Owns the **request-level half** of resilience: how a call is made, cancelled, ti
 
 Detect an existing client first (Alamofire, Moya, a generated OpenAPI client, an in-house wrapper) — **match it; never add a second HTTP layer.** Those are lanes, not defects.
 
-## When to use
-
-- Writing the API client or a call against it, an upload, a download
-- A request hangs on a bad cell link; a retry storm; a duplicate write
-- Attaching a token, handling `401`, replaying once
-- Refetching on foreground and on reconnect
-- A `URLSessionWebSocketTask` or SSE stream that must pause in the background
-
-## When NOT to use
-
-- Rendering failure, the banner, offline indicator, forced-update prompt → `mobile-ios:error-handling`
-- Persisting responses, an offline write queue, sync and conflicts → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Where server data lives in the view tree → [`architecture`](../architecture/SKILL.md)
-- Form submit UX and field errors → [`forms`](../forms/SKILL.md)
-- Auth provider setup (Universal Login, `CredentialsManager`) → `mobile-ios:auth0`; token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- Registering a device token with the server → `mobile-ios:push-and-deep-links`
-- Background uploads that outlive the app → `mobile-ios:system-integration`
-- Another stack → `mobile-react-native:networking`, `mobile-android:networking`
-
 ## One concrete client
 
 One type owns the session, the base URL, the budgets and the decode. **It is a concrete `final class`, not a protocol with one implementation.** A protocol appears the day a second implementation exists — a test fake counts — and then it is the *smallest* seam the caller needs (often one method), not a mirror of the whole client.
@@ -208,11 +189,3 @@ The standards this skill's output must meet are the mobile-ios rule files, not a
 - Airplane mode: no retry attempts in the network log; reconnect refetches.
 - A `503` with `Retry-After: 5` retries after 5 s, not sooner; N concurrent `401`s cause exactly one refresh.
 - Dev-side tests (`URLProtocol` stub, injected clock for backoff): [`mobile-ios:unit-testing`](../unit-testing/SKILL.md).
-
-## Handoffs
-
-- Failed region, banner, stale, forced update → `mobile-ios:error-handling`
-- Persisted cache, write queue, token storage → [`offline-and-storage`](../offline-and-storage/SKILL.md)
-- State ownership → [`architecture`](../architecture/SKILL.md) · field errors → [`forms`](../forms/SKILL.md)
-- ATS, pinning, secrets → [`mobile-<stack>:security`](../../../_shared/security/SKILL.md)
-- API contract tests → `qa-api-typescript` / `qa-api-dotnet` / `qa-api-java` (peer of the backend)

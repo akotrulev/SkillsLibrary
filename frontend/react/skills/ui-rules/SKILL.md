@@ -27,25 +27,6 @@ The conventions split across the feature-build skills by domain; this skill owns
 | Config hygiene (no hardcoded hosts) | [`project-setup`](../project-setup/SKILL.md) |
 | **Everything below** | **this skill** |
 
-## When to use
-
-- Building or reviewing any grid, list, detail pane, or edit form
-- An enum renders as a number; a GUID shows where a name should; formats vary page-to-page
-- Rows reorder/duplicate across paging or after an edit
-- An edit succeeds but a value doesn't stick; a Status `<select>` bypasses transition logic
-- A destructive action fires without confirming what it hits
-- The same concept is named/verbed differently across pages
-
-## When NOT to use
-
-- The mechanics of fetching, mutating, caching → [`data-fetching`](../data-fetching/SKILL.md)
-- Rendering the failed/empty states themselves → [`error-handling`](../error-handling/SKILL.md)
-- Making navigation a real `<Link>` / emitting the route title → [`component-writer`](../component-writer/SKILL.md)
-- Field-level validation UX → [`forms`](../forms/SKILL.md)
-- A11y labels + contrast → [`accessibility`](../accessibility/SKILL.md)
-
----
-
 ## 1. Display correctness
 
 The layer decides how a stored value becomes a shown value. The failures are all "technically rendered, semantically wrong."
@@ -226,16 +207,3 @@ The standards this skill's output must meet are the fe-react rule files `react.m
 - A title on every route; no duplicate titles for distinct concepts; nav groups within budget; no dead routes.
 - The active nav item is visibly marked (and not by color alone) on every page; desktop shows top-level nav, hamburger only below the breakpoint.
 - Footer is a `<footer>` with labeled columns; new-tab links carry a visible signal + `rel="noopener"`; no auto-opened modals.
-
-## Handoffs
-
-- Fetch / mutation / caching / DTO shape → [`data-fetching`](../data-fetching/SKILL.md)
-- Rendering the failed/loading/empty states → [`error-handling`](../error-handling/SKILL.md)
-- Real-`<Link>` navigation, route-title emission, the new-tab affordance + `rel="noopener"` → [`component-writer`](../component-writer/SKILL.md)
-- Nav collapse / hamburger breakpoint, table→card, sticky header → [`responsive-design`](../responsive-design/SKILL.md)
-- Modal focus-trap/restore, `contentinfo`/`navigation` landmarks, current-location not-by-color-alone → [`accessibility`](../accessibility/SKILL.md)
-- The wording of nav labels, footer column labels, confirmation copy → [`design/ux-writing`](../../../../design/ux-writing/SKILL.md)
-- Field-level validation UX → [`forms`](../forms/SKILL.md)
-- Stable `data-testid` on grids/actions/selection → [`test-ids`](../test-ids/SKILL.md)
-- Virtualization / server-paging perf → [`performance`](../performance/SKILL.md)
-- Auth/session lifecycle → `auth/auth0-react`

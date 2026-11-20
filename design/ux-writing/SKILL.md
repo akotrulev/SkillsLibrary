@@ -18,20 +18,6 @@ Owns the **words** in a UI and the voice they share. Interface copy is design ma
 
 Never duplicate the structural rules back into this skill, and never restate voice rules in those skills — cross-link. `design/visual-identity` carries a design-side *summary* of this discipline (its "writing in design" section); the depth lives here.
 
-## When to use
-
-- Choosing what a button, link, menu item, tab, or toggle says
-- Writing an error message, empty state, confirmation, toast, or form hint
-- Renaming labels so one concept has one name across the whole product
-- Reviewing existing copy for voice, tone, and consistency
-
-## When NOT to use
-
-- The visual/aesthetic direction of the page → [`design/visual-identity`](../visual-identity/SKILL.md)
-- The *structure* of empty states/confirmations + IA rules → the stack's `ui-rules` ([Blazor](../../frontend/blazor/skills/ui-rules/SKILL.md) · [React](../../frontend/react/skills/ui-rules/SKILL.md))
-- Error → message *mapping/categorization* mechanics → the stack's `error-handling` ([Blazor](../../frontend/blazor/skills/error-handling/SKILL.md) · [React](../../frontend/react/skills/error-handling/SKILL.md))
-- Translating copy / locale-formatting / pseudo-localization → qa `language-testing` + a localization skill
-
 ## The six rules
 
 ### 1. Write from the user's side of the screen
@@ -103,11 +89,3 @@ Numbered because audit finding ids cite the numbers: new checks are appended, an
 The standards copy must meet are the design rule file `ui-copy.md`, not a list here; it also loads on its own when a session edits a message catalog. Read the project's copy in `.claude/rules/design/`, or the plugin's in `design/rules/` when the project has not installed them (`/design:rules` does). Where it and this skill disagree, the rule file wins. The checklist above stays: it is the form `/design:audit` sweeps as section H, and its check numbers are that audit's finding ids.
 
 Beyond the rule file: do not invent the *structure* here. The slots (which errors, which empty states, which confirmations) come from `ui-rules` / `error-handling`; you fill them.
-
-## Handoffs
-
-- Visual/aesthetic direction (this discipline's design-side summary) → [`design/visual-identity`](../visual-identity/SKILL.md)
-- Empty-state/confirmation **structure**, IA "one verb per operation" rule → stack `ui-rules` ([Blazor](../../frontend/blazor/skills/ui-rules/SKILL.md) · [React](../../frontend/react/skills/ui-rules/SKILL.md))
-- Error **categorization/mapping**, three-state regions, correlation id → stack `error-handling` ([Blazor](../../frontend/blazor/skills/error-handling/SKILL.md) · [React](../../frontend/react/skills/error-handling/SKILL.md))
-- The markup that *carries* these labels (buttons, page and window titles, real anchors) → stack `component-writer` (native: `ui-components`)
-- Translation, locale formatting, pseudo-localization → qa `language-testing` + a localization skill

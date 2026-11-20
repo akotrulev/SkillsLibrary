@@ -21,20 +21,6 @@ How a WinForms codebase is built and modernized **as WinForms**: **dark mode thr
 | MVVM | CommunityToolkit.Mvvm 8.4.2 | Binding source objects, no XAML |
 | Designer | Visual Studio 2026 WinForms designer; out-of-process designer for .NET | Designer-owned `*.Designer.cs` is generated code (`V8`) |
 
-## When to use
-
-- The project has `<UseWindowsForms>true</UseWindowsForms>` and `*.Designer.cs`
-- "Dark mode for WinForms", "show a dialog without blocking", "fix blurry text on a second monitor", "bind a form to a model"
-
-## When NOT to use
-
-- WPF project → `desktop-windows:wpf`; WinUI project → [`ui-components`](../ui-components/SKILL.md)
-- Moving to WinUI or WPF, .NET Framework upgrade → `desktop-windows:migration`
-- Win32 / WinRT calls, HWND → `desktop-windows:interop`
-- HTTP and storage → `desktop-windows:networking`, `desktop-windows:offline-and-storage`
-
----
-
 ## Stay in the lane
 
 - **Detect first:** `UseWindowsForms`, `Program.cs` with `ApplicationConfiguration.Initialize()`, `*.Designer.cs`. Report lane and TFM before changing anything.
@@ -143,11 +129,3 @@ The shared base (`desktop-shared:observability`): `ILogger` from the host, a spa
 - **Designer-only parameterless constructor with real logic** — runs in the designer.
 - **`VisualStylesMode.Net11` enabled "for the look"** — it is final-in-progress; opt-in with a reason.
 - **WinUI added "just for one view"** — a lane change; run `migration`.
-
-## Handoffs
-
-- Lane changes, .NET Framework → .NET 10 → `desktop-windows:migration`; HWND and native calls → `desktop-windows:interop`
-- View-model and DI shape → [`architecture`](../architecture/SKILL.md); forms and validation → [`forms`](../forms/SKILL.md)
-- HTTP → `desktop-windows:networking`; storage and secrets → `desktop-windows:offline-and-storage`
-- Window and command behaviour → `desktop-windows:windows-and-navigation`
-- Tests → `desktop-windows:unit-testing`; ids → `desktop-windows:test-ids`; the WPF sibling → `desktop-windows:wpf`

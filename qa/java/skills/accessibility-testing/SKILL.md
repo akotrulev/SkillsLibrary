@@ -62,11 +62,3 @@ reach `localhost` or a firewalled host.
 - Results that are not locators — a violation list, a score — are asserted with AssertJ and `.as(...)`.
 - Automation is the floor (roughly a third of WCAG). Keyboard, focus order and screen-reader behaviour still
   need manual testing (`qa-<stack>:exploratory-charter-writer`).
-
-## Handoffs
-
-- `BaseTest`, page objects, the build → `qa/java/skills/ui-test-author/playwright`
-- Accessible-name, role and aria-snapshot assertions → its `references/assertions.md`
-- Failure evidence and traces → `qa/java/skills/evidence-capture`
-- The CI job and artifact upload → `qa/cicd/java/skills/ci-pipelines`
-- TypeScript and .NET → `qa-typescript:accessibility-testing`, `qa-dotnet:accessibility-testing`

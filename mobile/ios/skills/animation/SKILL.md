@@ -23,22 +23,6 @@ Motion on iOS is **state-driven**: the view is a function of state, and an anima
 
 An API newer than the deployment target needs `#available`; never raise the target for a flourish ([`project-setup`](../project-setup/SKILL.md)). Facts are from long-standing APIs, not re-confirmed against Apple pages this session (plan D23).
 
-## When to use
-
-- Animating a state change: expand, reveal, toggle, loading → loaded
-- Entrance and exit of a view; a hero or zoom transition between two screens
-- A drag, swipe-to-dismiss, long-press or pinch
-- A multi-step or looping effect; a number or symbol that changes
-- Honouring Reduce Motion everywhere motion exists
-
-## When NOT to use
-
-- Where motion belongs in the product, durations, restraint → [`design:motion`](../../../../design/motion/SKILL.md)
-- Pushing, presenting and tab changes → [`navigation`](../navigation/SKILL.md)
-- Hitches, dropped frames, Instruments → `mobile-ios:performance`
-- Roles, labels, focus as an accessibility requirement → `mobile-ios:accessibility`
-- Another stack → `mobile-react-native:animation`, `mobile-android:animation`
-
 ## Rules
 
 The standards this skill's output must meet are the mobile-ios rule files, not a list here: `ios-styling.md` (Motion) and `ios-accessibility.md`. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them (`/mobile-ios:rules` does). Where they and this skill's recipes disagree, the rule files win.
@@ -144,13 +128,3 @@ struct DismissibleCard<Content: View>: View {
 - `rg "\.animation\([^,)]*\)$"` for value-less modifiers → none (Q2).
 - A list insert / remove animates and reflows with stable ids; nothing flashes.
 - Dev-side: the pure parts — a drag-distance-to-dismiss decision, a phase sequence — as functions in Swift Testing; the motion itself is a device and snapshot concern, not a unit test.
-
-## Handoffs
-
-- Where / whether, durations, restraint → [`design:motion`](../../../../design/motion/SKILL.md)
-- Push, present, tab transitions → [`navigation`](../navigation/SKILL.md)
-- Hitches, Instruments, `body` cost → `mobile-ios:performance`
-- VoiceOver actions, Reduce Motion as accessibility, Differentiate Without Color → `mobile-ios:accessibility`
-- Liquid Glass, materials → [`styling`](../styling/SKILL.md)
-- Test ids on animated targets → [`test-ids`](../test-ids/SKILL.md)
-- Haptic feedback on gesture end → [`device-features`](../device-features/SKILL.md)

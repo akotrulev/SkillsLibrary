@@ -8,22 +8,6 @@ disable-model-invocation: true
 
 Picks the right state primitive for the job. House style: **local first, lift only when shared, Context for cross-cutting non-frequent client state, TanStack Query (or RSC/Server Actions) for server state, Zustand for global client state when needed, Redux Toolkit only when the team's already on it.** React 19 + TypeScript strict; Next.js App Router primary (RSC changes *where* state lives), Vite SPA fallback.
 
-## When to use
-
-- A feature needs to share state across components
-- Existing code prop-drills more than ~2 levels
-- Choosing between Context, Zustand, Redux, Jotai
-- Separating **server state** (what the API knows) from **client state** (UI-only)
-- Migrating from a heavyweight store to a lighter one
-
-## When NOT to use
-
-- New component scaffolding → [`component-writer`](../component-writer/SKILL.md)
-- Form state specifically → [`forms`](../forms/SKILL.md)
-- The data-fetching mechanics themselves (RSC fetch, Server Actions, TanStack Query setup) → [`data-fetching`](../data-fetching/SKILL.md)
-- Conceptual lookup → [`basics`](../basics/SKILL.md)
-- Blazor → `frontend/blazor/skills/state-management`
-
 ## Inputs needed
 
 1. **What kind of state**: server data (fetched from API), UI state (toggles, modals, focus), session state (current user, theme), form state, URL-derivable state
@@ -294,12 +278,3 @@ Beyond the rule files, this skill's own rules:
 5. Move URL-derivable state into `searchParams`.
 6. Sweep prop-drilling chains the new Context/store replaces; remove dead props.
 7. Confirm types are tight (no `any`); add `satisfies` where useful.
-
-## Handoffs
-
-- Component scaffolding using the new state → [`component-writer`](../component-writer/SKILL.md)
-- Form state → [`forms`](../forms/SKILL.md)
-- Data-fetching mechanics (RSC fetch, Server Actions, TanStack Query setup, streaming) → [`data-fetching`](../data-fetching/SKILL.md)
-- Conceptual lookup (Context vs store, hooks) → [`basics`](../basics/SKILL.md)
-- Auth-driven state (current user) → `auth/auth0-react`
-- Blazor equivalent → `frontend/blazor/skills/state-management`

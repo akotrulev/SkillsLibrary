@@ -10,20 +10,6 @@ Models a business entity's lifecycle as **one state model per entity — never p
 
 **Grid over diagram.** A state table forces every *event × state* cell to be answered — legal, illegal, or unspecified. A state diagram only shows the arrows someone remembered to draw.
 
-## When to use
-
-- Requirements reveal an entity with a lifecycle (states, and events that move it between them)
-- A new feature adds, reads, or removes entity states — overlay it on the existing model
-- A conflict sweep flagged suspected state interference and needs the grid to localize it
-- The user asks "what can happen to X while it's in state Y"
-
-## When NOT to use
-
-- Multi-step process paths between actors → `business-analysis:process-flow`
-- Input-combination → outcome rules → `business-analysis:decision-table`
-- Deriving state-transition **test cases**, n-switch coverage, transition-pair mechanics → `qa/manual/test-design-techniques` §4 owns those; this skill produces the model they consume
-- An "entity" with two states and one transition — note it in the flow file instead; a grid earns its keep at ≥3 states or ≥2 features touching the lifecycle
-
 ## Contract with the KB
 
 Per `business-analysis/skills/ba-project-memory`: **read first** (`INDEX.md` + the existing `entities/<entity>.md` — extending the shared model is the whole discipline; creating a second model for the same entity is the anti-pattern), **update after** (entity file + INDEX + active-context).
@@ -95,12 +81,3 @@ The quality bar is the business-analysis rule files, not a list here: `business-
 ## Anti-example
 
 Bad: the refunds feature gets its own tidy three-state diagram (`Confirmed → Refunding → Refunded`) in its own spec. It never learns the archival feature moves Confirmed orders to Archived after 90 days — so "refund an archived order" ships as a production surprise. One shared grid with both features overlaid makes that cell (`Archived × refund requested = ?`) impossible to not see.
-
-## Handoffs
-
-- Findings → severity + resolution recording → `business-analysis/skills/ba-feature-conflict-check`
-- A guard hides a multi-input rule set → `business-analysis/skills/ba-decision-table`
-- Events become triggers, and what else they set off becomes reactions → `business-analysis/skills/ba-dependency-map`
-- The process *between* transitions → `business-analysis/skills/ba-process-flow-diagram`
-- KB mechanics → `business-analysis/skills/ba-project-memory`
-- State-transition test design (n-switch, transition pairs) from this model → `qa/manual/test-design-techniques`

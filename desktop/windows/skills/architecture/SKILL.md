@@ -19,23 +19,6 @@ Where state and logic live: **MVVM with CommunityToolkit.Mvvm source generators,
 
 A project on a field-style `[ObservableProperty]` is not flagged for lacking partial properties.
 
-## When to use
-
-- Creating a screen's view model, a service, or the composition root
-- "Where does this logic go?", "how does a view model get its service?", "do I need a messenger?"
-- Modelling loading / loaded / failed state
-
-## When NOT to use
-
-- Controls, templates, `x:Bind` syntax → [`ui-components`](../ui-components/SKILL.md)
-- HTTP clients, retries → `desktop-windows:networking`
-- Local storage → `desktop-windows:offline-and-storage`
-- Windows and navigation → `desktop-windows:windows-and-navigation`
-- Validation → `desktop-windows:forms`
-- Tests for view models → `desktop-windows:unit-testing`
-
----
-
 ## The layers (flat)
 
 | Layer | Holds | Knows about |
@@ -157,13 +140,3 @@ Two windows on the same data share **one service holding the state** (a singleto
 - **`async void` command handlers** — exceptions crash the app; use `[RelayCommand]` on `async Task`.
 - **Singleton view model** — state leaks between navigations; view models are transient.
 - **Reading a service's result before `StartAsync`** — hosted services start in `OnLaunched`, awaited.
-
-## Handoffs
-
-- Controls, `x:Bind`, templates, `InfoBar` markup → [`ui-components`](../ui-components/SKILL.md)
-- Typed HTTP clients, timeouts → `desktop-windows:networking`
-- Persistence, `PasswordVault` → `desktop-windows:offline-and-storage`
-- Navigation and window lifetime → `desktop-windows:windows-and-navigation`
-- Validation (`ObservableValidator`) → `desktop-windows:forms`
-- View-model tests, `TimeProvider` seams → `desktop-windows:unit-testing`
-- Telemetry → `desktop/_shared/observability`

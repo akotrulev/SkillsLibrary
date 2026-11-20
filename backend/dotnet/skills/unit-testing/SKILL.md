@@ -24,25 +24,6 @@ Owns **dev-side unit tests of backend logic**: instantiate a class directly, dri
 
 **First act: detect `<TargetFramework>` in the target `.csproj`.** .NET **10 primary, 8/9 supported**. Everything here works unmodified on all three — `TimeProvider` and `FakeTimeProvider` are net8+, so the time seam below is available on every supported TFM. Never up-level a project to reach a testing API, and never flag a down-level project for lacking one. Match the test project's TFM to the project under test.
 
-## When to use
-
-- A class the `pattern-writer` skill just generated has behavior: a strategy, a resolver, a decorator, a pipeline step, a handler, a factory.
-- A domain rule, invariant, or guard clause needs to be pinned before it's refactored.
-- A calculation: money, rounding, proration, tax, totals, date math.
-- A mapper / `Result<T,E>`-style branch / error-to-ProblemDetails translation.
-- A validator (FluentValidation rules, custom validation attributes).
-- Reproducing a bug at the unit level before fixing it (`dev:debugging`'s repro step).
-
-## When NOT to use
-
-- Contract / integration / E2E tests through the API → **peer** `qa-api-dotnet`
-- Real-DB seed-assert-clean, Testcontainers → **peer** `qa-api-dotnet` (`db-testing/*`)
-- Grading whether the tests actually catch faults (mutation score) → **peer** `qa-dotnet:test-quality-check` (Stryker.NET)
-- Blazor components → `fe-blazor:component-testing` (bUnit)
-- Test-suite *architecture* at scale — page objects, ObjectMother, shared fixtures across hundreds of tests → **peer** `qa-api-dotnet` + `qa-dotnet:test-data-builder`
-- Auditing an existing suite → **peer** `qa-dotnet:standards-audit`
-- **DTOs, records with no behavior, EF configurations, DI registration code, generated code** → don't test them at all (see below)
-
 ## Stack
 
 Versions pinned once in `Directory.Packages.props` if the repo uses CPM (`PackageReference` without `Version`; a `Version` attribute under CPM triggers `NU1008`).
@@ -258,13 +239,3 @@ The tests cover **at least 80% of the branches in the code the change wrote**: e
 5. **Add the boundary cases** as `[TestCase]` rows — nulls, empties, min/max, the rounding boundary, the state that must be refused.
 6. **Verify:** `dotnet test` green, `dotnet build` 0 warnings, `dotnet format --verify-no-changes`, branch coverage of the changed code ≥ 80% (*Coverage floor*). Report the counts and the coverage figure. Inside a plan task, `Gate: own tests` runs this task's tests — step 4's red run, then green — and the *Coverage floor* measure over the files it wrote; the last runnable task runs everything else.
 7. **Sweep:** any sibling of the same shape left untested? A strategy family with one tested member is a gap.
-
-## Handoffs
-
-Besides the peers under *When NOT to use*:
-
-- Flaky test triage / quarantine → **peer** `qa/reporting/dotnet/skills/flaky-test-quarantine`
-- The class under test needs a seam / a pattern → [`pattern-writer`](../pattern-writer/SKILL.md)
-- Reviewing the tests with the change → [`code-review`](../code-review/SKILL.md)
-- Whole-service conformance sweep (incl. §M testability) → [`standards-audit`](../standards-audit/SKILL.md)
-- Java equivalent → `backend/java/skills/unit-testing` · TypeScript equivalent → `backend/node/skills/unit-testing`

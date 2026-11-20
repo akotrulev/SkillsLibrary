@@ -28,20 +28,6 @@ The primary lane is Appium 3 with Appium.WebDriver 9. **Check the vendor before 
 3. `driver.Capabilities` on the started session shows what the vendor granted; `GET <hub>/status` reports `build.version` where the hub proxies it.
 4. Appium.WebDriver 9's only breaking change is strong-name signing, so the client bump is not itself gated on the server; the `mobile:` commands it sends are what an older driver may lack. One session settles it.
 
-## When to use
-
-- Uploading a build (`.apk`/`.aab`/`.xapk`/`.ipa`) and referencing it from the `app` capability (by `bs://…` id or `custom_id`)
-- One suite across a **matrix of real devices and OS versions**
-- A feature that needs a **real device**: biometric login, GPS-based behavior, a network condition, permissions, a localized build
-
-## When NOT to use
-
-- Connect, capability blocks, parallelism, tunnels, status wiring → `qa/dotnet/skills/browser-cloud-setup`
-- Java / TypeScript farms → `qa/{java,typescript}/skills/device-cloud`
-- Page objects and tests → `qa/dotnet/skills/ui-test-author/appium`
-- CI matrix and sharding → `qa/cicd/dotnet/skills/ci-pipelines/*`
-- Web (Playwright) cloud runs → `qa/dotnet/skills/browser-cloud-setup`
-
 ## AWS Device Farm cannot run a .NET Appium suite
 
 Device Farm is a **remote-run** farm: it runs an uploaded test package on its own infrastructure. Its `ScheduleRunTest` types name Appium for Java (JUnit, TestNG), Python, Node and Ruby, and **none for .NET**, so a NUnit suite cannot be shipped there and polled for a verdict. A custom-environment test spec that runs `dotnet test` on the farm's host is conceivable, but it is unverified here and this skill does not teach it. For a .NET suite use a **live-session** farm: your NUnit process runs locally or in CI and drives the remote device over the hub URL. A team already on AWS that needs Device Farm writes the Appium suite in Java or TypeScript for that run (`qa/{java,typescript}/skills/device-cloud`).
@@ -137,13 +123,3 @@ Capability-block schemas, **session pass/fail**, **parallelism** and **tunnels**
 3. Add `AppUploader`, `RealDeviceDriverFactory`, `DeviceFeatures`, `DeviceMatrix` and `farm-devices.json` from `references/details.md`; drive the matrix from `[TestCaseSource]`.
 4. Reuse `browser-cloud-setup`'s session-status teardown; map the device count onto `NumberOfTestWorkers`.
 5. Run **one** device first to confirm the upload, options and features before fanning the matrix out.
-
-## Cross-references
-
-- **`qa/dotnet/skills/browser-cloud-setup`** — connect, capability blocks, parallelism, tunnels, session pass/fail and dashboard URL
-- **`qa/java/skills/device-cloud`**, **`qa/typescript/skills/device-cloud`** — the sibling stacks, including the AWS Device Farm remote-run lane that .NET lacks
-- **`qa/dotnet/skills/ui-test-author/appium`** — the page objects and `BaseMobileTest` that run unchanged on the farm
-- **`qa/dotnet/skills/evidence-capture`** — farm session video and the pass/fail mark (`references/appium.md` § Device farms)
-- **`qa/dotnet/skills/data-driven-testing`** — the `[TestCaseSource]` mechanics
-- **`qa/cicd/dotnet/skills/ci-pipelines`** — build-then-upload job, sharding the matrix
-- **`qa/reporting/dotnet/skills/test-reports`** — attach the session dashboard URL and device name to the report

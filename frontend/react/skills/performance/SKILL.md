@@ -12,24 +12,6 @@ The **primary source** for the concrete recipes is the React performance rule se
 
 **Version rule:** detect the React/Next major first (`package.json`). `key`, derive-don't-effect, `useDeferredValue`/`useTransition`, `next/dynamic`, and parallel fetching behave the same across 18/19. The **React 19** delta is the **React Compiler** — with it on (default in new Next 15 apps), most `useMemo`/`useCallback`/`React.memo` is automatic; you add them by hand only where the compiler can't prove safety. On **React 18** memoization is manual. Never assume the Compiler is on without checking `next.config` / the babel plugin. The Vite SPA lane has no RSC — the bundle/startup levers still apply; the server-render section doesn't.
 
-## When to use
-
-- A component (or a list row) re-renders more than it should; a parent update repaints a whole subtree
-- The JS bundle is large; TTI/INP is slow; hydration is heavy
-- Typing/scrolling janks while an expensive derived render runs
-- Deciding what to code-split (`next/dynamic`/`lazy`) and where the `'use client'` boundary belongs *for bundle size*
-- Server fetches waterfall instead of running in parallel; a slow section blocks first paint
-- Wiring perf diagnostics (Profiler, web-vitals, bundle analyzer) and setting Core-Web-Vitals budgets
-
-## When NOT to use
-
-- CSS / layout / asset styling → [`styling`](../styling/SKILL.md), [`responsive-design`](../responsive-design/SKILL.md)
-- Live/server-pushed data as a *feature* → [`realtime`](../realtime/SKILL.md)
-- Fetch/cache *correctness* (revalidate, dedup, `cache`) → [`data-fetching`](../data-fetching/SKILL.md) (this skill owns the *shape* of fetching for speed; that skill owns caching semantics)
-- Server-side query/DB tuning → `data/*`
-- Load/stress/soak of the deployed app → `qa/typescript/skills/load-testing` (peer)
-- Deep conceptual "why does this re-render/hydrate" → [`basics`](../basics/SKILL.md)
-
 ## Cost-center routing — where is my slowness?
 
 ```
@@ -239,13 +221,3 @@ Beyond the rule files, this skill's own rules:
 - Network/Performance: independent server fetches run in parallel (overlapping in the waterfall), slow sections stream via Suspense, wrapper paints first.
 - Typing in a filtered list stays responsive (deferred value); no long tasks in the Performance panel.
 - Lighthouse CI: LCP/INP/CLS within budget on a throttled profile; `web-vitals` field data trends within budget.
-
-## Handoffs
-
-- Conceptual "why does this re-render / hydrate" → [`basics`](../basics/SKILL.md); the full rule files → `frontend/react/bundled/reference/rules/`
-- CSS/layout/asset styling → [`styling`](../styling/SKILL.md); breakpoint/layout perf → [`responsive-design`](../responsive-design/SKILL.md)
-- Fetch/cache correctness (revalidate, dedup, `cache`) → [`data-fetching`](../data-fetching/SKILL.md)
-- Live-data as a feature (not perf) → [`realtime`](../realtime/SKILL.md)
-- Server-side query/DB tuning → `data/*`
-- `web-vitals`/OTel export to Grafana → `observability/opentelemetry-node`
-- Load/stress/soak of the deployed app → `qa/typescript/skills/load-testing` (peer)

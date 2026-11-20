@@ -22,17 +22,6 @@ How a Windows app is localized: **every user-visible string lives in a `.resw` f
 
 Detect first: `Strings/**/*.resw` or `*.resx`, `x:Uid` in XAML, the languages in the manifest, and a third-party localization library already in use. Extend what exists.
 
-## When to use
-
-- A new screen with text, "move these strings out", "add a language", "support Arabic / Hebrew"
-- A date, number, currency or list that renders wrong in another culture
-
-## When NOT to use
-
-- `AutomationProperties.Name` wording, Narrator → `desktop-windows:accessibility` (the *text* is localized here, the property is set there)
-- Ids for tests: never localized → `desktop-windows:test-ids`
-- Error message *wording* from a server → `desktop-windows:networking`; where it shows → `desktop-windows:error-handling`
-
 ## Strings
 
 ### In XAML
@@ -152,10 +141,3 @@ A missing-resource lookup logs once at `Warning` with the key and language (neve
 - **A manifest still on `x-generate`** — the declared language set is not what you shipped.
 - **`ToString()` in a log or key** — culture-dependent output as an id breaks on a comma-decimal machine.
 - **A bound `Text` formatted in the view model with `CurrentCulture` read once at startup** — an in-app language change does not apply until it is re-read.
-
-## Handoffs
-
-- Labels, names, Narrator → `desktop-windows:accessibility`; ids never localized → `desktop-windows:test-ids`
-- Form errors in the user's language → `desktop-windows:forms`; server messages → `desktop-windows:networking`
-- Settings persistence for the chosen language → `desktop-windows:offline-and-storage`
-- Mac counterpart → `desktop-macos:languages`
