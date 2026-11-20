@@ -8,12 +8,14 @@ ADRs that the interview writes while it runs. Add `design:prototype`, which rend
 different variants of a screen in the project's design language. When the project has no design
 language, it first interviews you on style through the `ui-ux-pro-max` corpus.
 
-**Status:** A1, A2, B1, P1, R1, G1 and A3 landed: the standard (`engineering-practices/writing-for-agents/`),
+**Status:** A1, A2, B1, P1, R1, G1, A3 and A4 landed: the standard (`engineering-practices/writing-for-agents/`),
 `tools/skill-lint.py` with its tests (99% branch; A3 sharpened R12 and R8 and excluded `bundled/`, D16),
-`dev:feature` with `domain-modeling`, `design:prototype`, their registration, and the audit's first half,
-`docs/audits/004-skill-authoring-r1.md` (lint sweep: 238 findings; the 38 front doors judged). Next: A4,
-the agents and the sample. Built but unverified: `/dev:feature` and `/design:prototype` untried in a real
-project session, their trigger phrases untested; about two thirds of A3's judgment rows not spot-checked.
+`dev:feature` with `domain-modeling`, `design:prototype`, their registration, and the audit,
+`docs/audits/004-skill-authoring-r1.md`, complete: lint sweep, the 38 front doors, the 24 front-door
+agents and a 14-skill sample (D17), and the summary (528 findings, 249 major; R17 the top judgment rule).
+Next: A5, the remediation plan, which files 014. Built but unverified: `/dev:feature` and
+`/design:prototype` untried in a real project session, their trigger phrases untested; about two thirds
+of A3's judgment rows and most of A4's Code rows not re-read at their lines.
 
 **Test design:** none. The plan serves no stories. Its only code is `tools/skill-lint.py`, which A2
 covers with unit tests.
@@ -393,6 +395,20 @@ instruction phrased "the agent should run `x:y` via …" without a bare imperati
 pointer whose named skill is a different one with the same folder name, and bundled text is never
 linted.
 
+**D17 — A front-door agent for a plugin with no plugin-name command, and what "hidden" means in the
+sample** (A4, 2026-11-20). §8 and A4 say the front-door agent is "the one its plugin-name command runs";
+seven of the 24 plugins have none. Taken instead: `dev` → `/dev:refine` → `requirements-author` (the
+command calls itself "the front door to the delivery lane"); `design` → `/design:audit` →
+`design-auditor` (its only command); `qa-java`, `qa-dotnet`, `qa-typescript` → `/qa-<lang>:ui` →
+`qa-ui-<lang>` (the UI lane is each plugin's primary); `penetration-testing` → `/pentest` →
+`penetration-tester`; `security-governance` → `/architect` → `security-architect`. A hidden skill is
+one with `disable-model-invocation: true` or one registered nowhere and loaded by path, so
+`engineering-practices/standards-audit-engine` (12,282, unregistered) was sampled over `domain-modeling`
+(3,676, flagged). The plan's reading: only plugin-name commands, so seven plugins without a judged
+agent, and only flagged skills. Cost: `dev`'s other four agents (`solution-planner`, `be-documenter`,
+`be-feature-documenter`, `code-auditor`, two of them over the R2 budget) and each `qa-*` plugin's other
+thirteen agents stay unjudged until a later round.
+
 ## 10. Answered questions (2026-11-20)
 
 **O1 — Where do the glossary and ADRs live:** the existing BA glossary, extended, plus `docs/adr/` (D4, D6).
@@ -761,6 +777,24 @@ front-door agents (~60k), ~14 sampled skills (~30k), writes ~7k.
 - Pick the sample by size: the largest hidden skill in each domain folder, since sediment collects
   there.
 - **Not in A4:** fixing anything.
+- **As built (2026-11-20):** `docs/audits/004-skill-authoring-r1.md` gains "Round 1, second half (A4)":
+  the 24 front-door agents with the command that runs each, the 14-skill sample with paths and sizes, 119
+  judgment rows under Data issues (8) / Code issues (96) / Logical conflicts (15), and the "Summary"
+  (the appendix moved to the end). Totals: **528 findings, 249 major, 279 minor, no blocker or nit**;
+  Data 34, Code 464, Logical 30; mechanical 348 (lint 238, R2 89, R23 21), judgment 180 (A3 61, A4 119).
+  Top five rules: R2 89, R9 89, R7 64, R17 45, R3 31; among judgment rules R17 leads (45), then R19 28,
+  R15 24. **Differed from the plan:** seven plugins have no plugin-name command, so their front-door
+  agent was taken from the command each presents as its entry (D17); "hidden" in the sample includes
+  unregistered skills loaded by path, which made `standards-audit-engine` the engineering-practices
+  pick. A judgment row counts once even when it names many files (20 agents in one R17 row), so the
+  judgment totals understate the sites to change. Read by three Sonnet reviewers on one brief; every
+  Data and Logical row re-read at its line; three reviewer rows dropped as wrong
+  (`delivery-plan/SKILL.md:88` and `:421` resolve; a template-text row). Commands: the selection
+  `grep -oE 'agents/[a-z0-9-]+\.md' <command>` per registered command, and the sample by `wc -c` over
+  every `SKILL.md` with `disable-model-invocation: true` or unregistered. **Unverified:** most Code rows
+  rest on the reviewers' line numbers (sampled, not all re-read); `ba-project-memory`'s rows were not
+  checked against `kb-lint.py`; whether the sibling `unit-testing` skills carry the Kover-in-a-task
+  line that `mobile/android` does.
 
 ### A5 — The remediation plan, and filing 014
 
@@ -832,47 +866,9 @@ three; then G1, A3, A4 and A5 run in sequence.
 | A5 | `docs` | `general-purpose` | A4 | — | ~110k |
 | — | try `/dev:feature`, `/design:prototype` in a real project | **the user** | G1 | — | — |
 
-A1, A2, B1, P1, R1, G1 and A3 have landed; two prompts are live.
+A1, A2, B1, P1, R1, G1, A3 and A4 have landed; one prompt is live.
 
 ---
-
-### A4 — audit round 1, the agents and the sample (general-purpose, docs)
-
-````
-Depends on: A3
-Agent: general-purpose · Stack: docs
-
-Task A4 of docs/plans/014-authoring-standard-domain-language-feature-prototype.md: finish the audit
-report A3 started. Judge each plugin's front-door agent and one sampled hidden skill per domain
-folder, then write the summary.
-
-Read, in this order:
-1. CLAUDE.md (repo root): "Review behavior".
-2. The plan: §3, §8, task A4, A3's As built, and "Close-out — every task".
-3. engineering-practices/writing-for-agents/SKILL.md, the rule table; .skill-template/agent.md.
-4. The report A3 wrote: docs/audits/004-skill-authoring-r1.md. Its lint sections already hold every
-   agent's R8, R12, R13 and R14 findings (`python3 tools/skill-lint.py <agent.md>` reproduces them, with
-   D16's reading of R8); do not re-run the sweep.
-
-Do:
-- Front-door agents: for each plugin in marketplace.json, the agent its plugin-name command runs
-  (read the command file to find it). Judge against R13–R23.
-- The sample: the largest hidden SKILL.md in each top-level domain folder (qa, frontend, desktop,
-  mobile, design, backend, observability, data, devops, security, business-analysis,
-  training-data, tooling, engineering-practices). Name the paths in the report.
-- Append the findings in the same three classes, then the summary: totals by severity and class,
-  and the five rules with the most findings.
-
-Traps:
-- An agent file can be 14k characters; read one, write its rows, then move on. Do not hold all of
-  them before writing.
-- Read-only: fix nothing.
-
-Gate: none. The deliverable is the report; the lint ran in A3.
-
-Commit: `docs(audits): skill-authoring audit r1, agents and sample (014 A4)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### A5 — the remediation plan, and filing 014 (general-purpose, docs)
 
@@ -886,8 +882,12 @@ into the remediation plan, then file this plan as its last task.
 Read, in this order:
 1. CLAUDE.md (repo root): "Planning".
 2. engineering-practices/writing-plans/references/plan-format.md, all of it.
-3. The audit report: docs/audits/004-skill-authoring-r1.md (A3 and A4's rounds; D16 for the lint's R8
-   and R12 readings — the R8 wording in the standard is itself a Logical-conflicts row to remediate).
+3. The audit report: docs/audits/004-skill-authoring-r1.md (A3's part, then "Round 1, second half
+   (A4)" and "Summary"; D16 for the lint's R8 and R12 readings — the R8 wording in the standard is
+   itself a Logical-conflicts row to remediate; D17 for which agents A4 judged). Group rows name many
+   files in one row (up to 20 agents, the 23 `rules` skills): split them into per-file work by path.
+   Two group rows land in `.skill-template/agent.md` (the Fix sweep, the `Gate evidence` line) and
+   are fixed there first, then in each agent.
 4. This plan: header, §8, task A5, and "Close-out — every task".
 
 Write docs/plans/<next>-skill-authoring-remediation.md, with the next free number across
@@ -899,6 +899,9 @@ docs/plans/ and docs/plans/implemented/:
 - A gate task that sweeps every touched path, and its prompts, the close-out section and the task
   table per plan-format.
 - Header: `Documentation task: none — <why>` and `Test design: none — <why>`.
+- The Logical-conflicts rows (A3 7, A4 15) need an owner's choice, not a fix: list each in the plan's
+  open questions with the two readings, and give its task the decision once answered; the R11
+  domain-term rows and `/dev:refine`'s missing `business-analysis` dependency are such rows.
 
 Traps:
 - Fix no skill here.
