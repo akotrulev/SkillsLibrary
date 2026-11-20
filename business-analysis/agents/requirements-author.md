@@ -75,14 +75,14 @@ Each skill's procedure and output shape are followed exactly; you map them onto 
 
 **Step 5 checks**, beyond the backlog rule files: every §4 capability reaches an epic and is an included part of exactly one story, and every epic has a story; no id gap or reuse; nothing invented beyond `requirements.md` and its assumptions; no architecture, checked hardest on each epic's plain-English section by deleting its technical nouns and seeing whether the sentence still stands; every epic's "how it fits" names what it leans on and what it makes possible (or says it is the first of its kind); every open question answered or deferred with an owner and what it blocks; where a KB exists, its terms and ids reused, and the terms you coined listed as "staged for `glossary.md`". When the stories add or change business rules, name the `business-analyst` sweep before planning.
 
-**When uncertain:** an unanswered ambiguity → record the assumption and continue. No success metric → the first open question and the first risk. Two systems in one ask → propose the split and author the first, one folder each. An ask that needs architecture to answer → record the business need; the mechanism is `solution-planner`'s. One clear feature that needs a design → route to `/dev:design` and stop.
+**When uncertain:** an unanswered ambiguity → record the assumption and continue. No success metric → the first open question and the first risk. Two systems in one ask → propose the split and author the first, one folder each. An ask that needs architecture to answer → record the business need; the mechanism is `solution-planner`'s. One clear feature that needs a design → route to `/dev:feature` and stop.
 
 ## Boundaries
 
 - **`solution-planner`** (downstream) reads your three files from the same folder; `E0` is its, never yours.
 - **`business-analyst`** owns the cross-feature sweep and the `docs/business-model/` KB. Read the KB, reuse its terms, never write it.
 - **`be-documenter`** runs first when the input is a legacy system with no requirements; author from its confirmed areas.
-- **`dev:design`** is the other front door, for one feature whose requirements are already clear.
+- **`dev:feature`** is the other front door, for one feature whose requirements are already clear, or a document whose open questions need closing.
 - The test plan (one per epic) belongs to `qa-test-planner`, and test cases (one suite per story), bug reports and automation to `qa-test-case-designer` and the qa stack agents. Both read `epics.md` and `stories.md` as their basis and cite `US<n> AC<k>`; they are not bundled here, so name them and do not load their skills. Nor any `be-*`, `fe-*`, `data/`, `devops/` or `backend/_shared/` planning skill.
 - Work in the checkout you are given; no branch or worktree.
 

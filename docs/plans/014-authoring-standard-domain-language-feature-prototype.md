@@ -8,11 +8,11 @@ ADRs that the interview writes while it runs. Add `design:prototype`, which rend
 different variants of a screen in the project's design language. When the project has no design
 language, it first interviews you on style through the `ui-ux-pro-max` corpus.
 
-**Status:** A1, A2, B1 and P1 landed: the standard (`engineering-practices/writing-for-agents/`),
-`tools/skill-lint.py` with its tests, `dev:feature` with `domain-modeling`, and `design:prototype` —
-none of the new skills registered yet. Next: R1. Unverified: registration and `FRONT_DOORS` (R1;
-`plugin-surface-check.py` is expected red until then), and the library sweep (A3). The lint passes on
-the standard, B1's and P1's folders.
+**Status:** A1, A2, B1, P1 and R1 landed: the standard (`engineering-practices/writing-for-agents/`),
+`tools/skill-lint.py` with its tests, `dev:feature` with `domain-modeling`, `design:prototype`, and their
+registration (`marketplace.json`, `FRONT_DOORS`, every live reference renamed; `plugin-surface-check.py`
+prints `OK`). Next: G1. Unverified: the whole set together (G1), the library sweep (A3), and
+`/dev:feature` and `/design:prototype` in a real project session.
 
 **Test design:** none. The plan serves no stories. Its only code is `tools/skill-lint.py`, which A2
 covers with unit tests.
@@ -609,6 +609,32 @@ writes ~15k, tool output 5k, review 5k.
   `docs/skills-catalog.md` (the dev chain, the design catalog, counts, the slash-surface count in
   `CLAUDE.md`'s pointer line if it changes).
 - **Not in R1:** any change to a skill's body beyond a renamed reference.
+- **As built (2026-11-20):** `marketplace.json`: `dev.skills` adds `./engineering-practices/writing-for-agents`
+  and `./engineering-practices/domain-modeling` and drops `decision-interview` (22 skills plus `rules`);
+  `design.skills` adds `./design/prototype` (18 plus `rules`); both descriptions name the new skills, and
+  `dev`'s says `/dev:feature` where it said the old design command. `plugin-surface-check.py:41`–`47`:
+  `dev` lists `feature` and `writing-for-agents` in place of the two old names; `"design":
+  frozenset(("prototype",))` added. No collision: `dev`'s command stems are refine, plan-system,
+  document-system, document-feature, audit; `design`'s is audit. Renamed references:
+  `solution-planner.md:62` (DETAIL row) and its Step 1 `Load` cell, which gains
+  `engineering-practices/domain-modeling` "when a blueprint decision passes the three ADR tests";
+  `requirements-author.md:78` and `:85`; `business-analyst.md:61`. `README.md`: the `dev` paragraph
+  (22 skills, the feature-then-plan pair, `writing-for-agents`, hidden `domain-modeling`), the front-door
+  sentence (`feature`, `writing-for-agents`, `design:prototype`), the design paragraph (18 skills,
+  `/design:prototype`), the `/dev:feature` line under the command table, the `engineering-practices/`,
+  `meta/` and `design/` folder lines, and the `engineering-practices` and `meta` status rows.
+  `docs/skills-catalog.md`: the plugin table (dev 22, design 18), the slash-surface examples and the
+  front-door fence, "the eleven `dev` workflow skills and `design:prototype`", `solution-planner`'s entry
+  modes and fences, the engineering-practices intro (11 in-scope, 22 `dev` skills), the chain entry
+  rewritten for `dev:feature` (NEW and SHAPED, `domain-modeling`, the `/design:prototype` pointer), two
+  cross-cutting bullets (`dev:writing-for-agents`, `domain-modeling`), the reconciliation line, and a
+  design-catalog paragraph for the `design/prototype` front door. `meta/PLAN.md` (superseded, D12) lines
+  5 and 47 reworded so they no longer spell the removed folder's path. Unchanged: `CLAUDE.md`'s pointer
+  (no command was added; still 77), `CONTRIBUTING.md` (no hit). Gate: `plugin-surface-check.py` → `OK`;
+  `skill-lint.py` over the four folders → `0 findings`, exit 0; the grep → nothing.
+  **Noted, not this task's:** `token-audit.py --violations-only` flags `solution-planner.md` (16,966 chars
+  against 14,000); it was 16,871 before this task, so the violation predates the plan (A3 records it).
+  **Unverified:** the front doors' trigger rate in a real session (the user's smoke after G1).
 
 ### G1 — Gate: the whole set once more
 
@@ -741,65 +767,9 @@ three; then G1, A3, A4 and A5 run in sequence.
 | A5 | `docs` | `general-purpose` | A4 | — | ~110k |
 | — | try `/dev:feature`, `/design:prototype` in a real project | **the user** | G1 | — | — |
 
-A1, A2, B1 and P1 have landed; five prompts are live.
+A1, A2, B1, P1 and R1 have landed; four prompts are live.
 
 ---
-
-### R1 — register, rename and point (general-purpose, docs)
-
-````
-Depends on: A1, A2, B1, P1
-Agent: general-purpose · Stack: docs
-
-Task R1 of docs/plans/014-authoring-standard-domain-language-feature-prototype.md: register the new
-skills, update FRONT_DOORS, and rename every live reference to dev:design, decision-interview and
-meta/writing-skills.
-
-Read, in this order:
-1. CLAUDE.md (repo root).
-2. The plan: §5–§7, §9, task R1, the As built notes of A1, A2, B1, P1, and "Close-out — every task".
-3. .claude-plugin/marketplace.json: the `dev` and `design` entries only (find them with grep -n,
-   read those line ranges).
-4. tools/plugin-surface-check.py: FRONT_DOORS.
-5. The list from:
-   grep -rnE "dev:design|decision-interview|meta/writing-skills|brainstorming" --exclude-dir=.git . | grep -v docs/plans/implemented
-   and each hit's surrounding lines only.
-6. The Steps tables of backend/_shared/agents/solution-planner.md,
-   business-analysis/agents/requirements-author.md, business-analysis/agents/business-analyst.md.
-
-Do:
-- marketplace.json: dev adds ./engineering-practices/writing-for-agents and
-  ./engineering-practices/domain-modeling, drops ./engineering-practices/decision-interview;
-  design adds ./design/prototype; both plugin descriptions name the new skills.
-- FRONT_DOORS: dev swaps `design decision-interview` for `feature writing-for-agents`; add
-  `"design": frozenset(("prototype",))`.
-- Every hit from step 5 renamed to dev:feature / writing-for-agents as fits; solution-planner gains
-  the conditional Load (a blueprint decision passing the three ADR tests →
-  engineering-practices/domain-modeling).
-- B1 left plugin-surface-check red on exactly two lines (`feature` listed but not in FRONT_DOORS;
-  no SKILL.md in ./engineering-practices/decision-interview); this task's two edits above clear them.
-  The Load path follows the agent's existing form: `engineering-practices/domain-modeling`.
-- README.md (including the `meta/` folder line and the `meta` status row, which still name
-  writing-skills without the `meta/` prefix, so the gate grep misses them), docs/skills-catalog.md
-  (dev chain, design catalog, skill counts, front-door counts), and CLAUDE.md's catalog pointer line
-  if a count in it changed. CONTRIBUTING.md no longer enumerates the front doors (A1 replaced the
-  list with a pointer to FRONT_DOORS); touch it only for a hit from step 5.
-
-Traps:
-- Skills share one slash namespace with commands per plugin: `feature` must not collide with a
-  command stem in dev (today: refine, plan-system, document-system, document-feature, audit).
-- A pointer a main session follows names the agent (R22), not a bare hidden plugin:name.
-- Change no skill body beyond a renamed reference.
-
-Gate (own tests):
-  python3 tools/plugin-surface-check.py
-  python3 tools/skill-lint.py engineering-practices/writing-for-agents engineering-practices/brainstorming engineering-practices/domain-modeling design/prototype
-  grep -rnE "dev:design|decision-interview|meta/writing-skills" --exclude-dir=.git . | grep -v docs/plans/implemented | grep -v docs/plans/014-
-The first prints OK, the second exits 0, the third prints nothing.
-
-Commit: `feat(dev, design): register writing-for-agents, feature, domain-modeling and prototype (014 R1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### G1 — gate, the whole set once more (general-purpose, infra)
 
