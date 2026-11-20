@@ -8,7 +8,23 @@ ADRs that the interview writes while it runs. Add `design:prototype`, which rend
 different variants of a screen in the project's design language. When the project has no design
 language, it first interviews you on style through the `ui-ux-pro-max` corpus.
 
-**Status:** Not started. Nothing is built. Next: A1. After A1, tasks A2, B1 and P1 run side by side.
+**Status:** Done and filed, 2026-11-20. Every task landed.
+
+Delivered:
+- **The standard:** `engineering-practices/writing-for-agents/`, rules R1–R23.
+- **The lint:** `tools/skill-lint.py`, with its tests at 99% branch. It carries D16's readings of R12
+  and R8, and excludes `bundled/`.
+- **`dev:feature`** with `domain-modeling` (glossary and ADRs), **`design:prototype`**, and their
+  registration.
+- **The audit:** `docs/audits/004-skill-authoring-r1.md`, with 528 findings, 249 of them major.
+- **The remediation plan:** `docs/plans/015-skill-authoring-remediation.md`, with L1 (the owner's
+  answers to O1–O24), T1, P1–P20 and G1.
+
+**Unverified:**
+- `/dev:feature` and `/design:prototype` have not been tried in a real project session, and their
+  trigger phrases are untested.
+- About two thirds of A3's judgment rows and most of A4's Code rows were not re-read at their lines.
+  015's tasks re-read them before fixing.
 
 **Test design:** none. The plan serves no stories. Its only code is `tools/skill-lint.py`, which A2
 covers with unit tests.
@@ -62,9 +78,9 @@ the one tool that checks it. Nothing is checked twice.
 | **R5** — listed to the model only when a front door | skills, commands | `plugin-surface-check` | major |
 | **R6** — a hidden skill has no `When to use`, `When NOT to use`, `Handoffs` or `Related` heading | skills | `skill-lint` | minor |
 | **R7** — a front door has `When to use` and `When NOT to use` | skills | `skill-lint` | minor |
-| **R8** — pointers resolve: every relative Markdown link, and every backticked `references/…`, `scripts/…`, `templates/…` or `examples/…` path in a skill or agent, exists relative to that file's folder | skills, agents | `skill-lint` | major |
+| **R8** — pointers resolve: every relative Markdown link, and every backticked path under `references/`, `scripts/`, `templates/` or `examples/` in a skill or agent, exists relative to that file's folder; a path holding a placeholder (`<`, `{`, `*` or `…`) is a pattern and is skipped | skills, agents | `skill-lint` | major |
 | **R9** — a reference file over 300 lines opens with a contents list of its `##` headings, before its first `##` | skill `references/*.md` | `skill-lint` | minor |
-| **R10** — no placeholders: `TODO`, `TBD`, `FIXME`, `XXX` outside a code fence, and no `@path` force-load links | skills, agents | `skill-lint` | major |
+| **R10** — no placeholders: `TODO`, `TBD`, `FIXME`, `XXX` outside a code fence or an inline code span, and no `@path` force-load links | skills, agents | `skill-lint` | major |
 | **R11** — vocabulary: `Phase`, `Slice` or `Milestone` never appears in a heading or a table header row | skills, agents | `skill-lint` | minor |
 | **R12** — no line tells a model to invoke a hidden skill through the Skill tool; it names the path to `Read`, or the agent | skills, agents | `skill-lint` | major |
 | **R13** — agent shape per `.skill-template/agent.md`: a `## Steps` table whose header has `Load` and `Done when`, and a `## Report` section holding a `Mode:` line | agents | `skill-lint` | major |
@@ -108,6 +124,10 @@ python3 tools/skill-lint.py --json …         # a JSON array of {path, line, ru
   `Skill tool` or a verb from `invoke|call|run` together with `<plugin>:<name>`, where that name is
   hidden.
 - **Code fences are skipped** for R10, R11 and R12. A fence shows text; it is not an instruction.
+  **Inline code spans are skipped for R10 too**, for the same reason (a skill that says "remove
+  `TODO` comments" names the marker, it does not leave one). **R8 skips a path holding `<`, `{`, `*`
+  or `…`**: it is a pattern such as `references/<topic>.md`, not a pointer. Both keep the standard's
+  own rule table clean under its own lint (D13).
 - **Tests:** `tools/test_skill_lint.py`, pytest, loading the hyphenated script through
   `importlib.util` the way `test_kb_lint.py` loads `kb-lint.py`. Fixtures under
   `tools/fixtures/skill-lint/`: one clean skill, one clean agent, and per rule one file that breaks
@@ -335,6 +355,69 @@ standard replaces its unique content: the description trap is R4, and pressure-t
 `CONTRIBUTING.md`'s "Testing a new skill". Cost: its rationalization tables are gone, and are still
 in git history.
 
+**D13 — R8 and R10 are reworded so the standard passes its own lint** (A1, 2026-11-20). §3 as
+planned named `TODO` and `references/…` in backticks, so a literal R10 or R8 check would flag the
+rule table itself, and R1's gate lints that file. R10 now skips inline code spans as well as fences;
+R8 skips a path holding a placeholder (`<`, `{`, `*`, `…`). The plan's reading: only fences are
+skipped and every backticked path is checked. Cost: a real marker written inside backticks passes
+R10, and a mistyped pattern path is never checked.
+
+**D14 — A prototype's plan, language and verdict lines are `<meta>` tags in `<head>`** (P1,
+2026-11-20). §7 asks for "a line at the top of the file", which reads as a visible line or an HTML
+comment. A `<meta name="prototype-plan|prototype-language|prototype-verdict">` tag is at the top,
+cannot be mistaken for a code comment under the house comment rules, and stays out of the variants
+being judged. Cost: the lines are not visible on the rendered page; a reader opens the page source
+to see them.
+
+**D15 — `skill-lint` reads a skill as its whole folder, and skips fences for every body rule** (A2,
+2026-11-20). §4 names `SKILL.md`, agents and rule files, and fence-skipping for R10–R12 only. Built:
+(a) R8, R10, R11 and R12 also run on each `.md` beside a `SKILL.md` (the rule files) and under its
+`references/`, because the table says they apply to skills and those files are the skill; (b) every
+body rule, R8 and the R6/R7 heading checks included, skips fenced code, because Markdown parses no
+link, code span or heading inside a fence; (c) a backticked path in a reference file resolves against
+its own folder or the skill root, a Markdown link against its own folder only; (d) a bare folder name
+(`` `scripts/` ``) is not a pointer, and R12 ignores `/plugin:name`, a command a person types;
+(e) `tools/fixtures/` is excluded from the sweep, since its fixtures break rules on purpose; exclusions
+on an explicit folder argument are matched relative to that folder. The plan's reading: only
+`SKILL.md` and rule files are linted, and only R10–R12 skip fences. Cost: more files linted means more
+findings for A3, and a dangling link written inside a fence is never caught.
+
+**D16 — Three lint readings ruled in A3's sweep: R12 needs the verb to govern the name, R8 resolves inside
+a named skill, and `bundled/` is out of scope** (A3, 2026-11-20). The first sweep gave 552 findings, and
+most R12 and R8 hits were not what the rules mean. (a) **R12**: A2 flagged a line holding *any* form of
+invoke/call/run *anywhere* beside a hidden `plugin:name`, so "when running against …", "`docker run`",
+"a failing run" and "which you cannot invoke yourself" were findings (140, 2 real). Built: a line is
+flagged when it names the Skill tool beside a hidden name, or when a bare `invoke`, `call` or `run`
+stands right before the name (``run `x:y` ``), and not after a negation (`cannot`, `never`, `not`).
+The `spec-vs-code-audit/SKILL.md:50` line is therefore clean: it names the agent, as R12 asks.
+(b) **R8**: an agent's or skill's backticked `references/x.md` that belongs to another skill named in a
+code span on the same line, or on the line above for hard-wrapped prose (`` `evidence-capture` +
+`references/playwright.md` ``, `` `ui-test-author/playwright`'s `references/…` ``), now resolves inside
+that skill, found by frontmatter name, folder name, `plugin:name`, or a path into it from any ancestor
+folder. An unqualified pointer still fails (`qa-explorer.md:28` names no skill). The standard's R8 text
+("relative to that file's folder") is left as it is: the skill is outside this task's files, so the
+wording is an audit finding for the remediation plan. (c) **Scope**: `**/bundled/**` joins
+`vendor/` in the exclusions; those are upstream rule sets deliberately left unregistered
+(`docs/skills-catalog.md:24`, `:195`), not house text. The plan's reading: every R12 verb form
+anywhere on the line, R8 relative to the file only, and only `vendor/` excluded. Cost: R12 misses an
+instruction phrased "the agent should run `x:y` via …" without a bare imperative, R8 accepts a
+pointer whose named skill is a different one with the same folder name, and bundled text is never
+linted.
+
+**D17 — A front-door agent for a plugin with no plugin-name command, and what "hidden" means in the
+sample** (A4, 2026-11-20). §8 and A4 say the front-door agent is "the one its plugin-name command runs";
+seven of the 24 plugins have none. Taken instead: `dev` → `/dev:refine` → `requirements-author` (the
+command calls itself "the front door to the delivery lane"); `design` → `/design:audit` →
+`design-auditor` (its only command); `qa-java`, `qa-dotnet`, `qa-typescript` → `/qa-<lang>:ui` →
+`qa-ui-<lang>` (the UI lane is each plugin's primary); `penetration-testing` → `/pentest` →
+`penetration-tester`; `security-governance` → `/architect` → `security-architect`. A hidden skill is
+one with `disable-model-invocation: true` or one registered nowhere and loaded by path, so
+`engineering-practices/standards-audit-engine` (12,282, unregistered) was sampled over `domain-modeling`
+(3,676, flagged). The plan's reading: only plugin-name commands, so seven plugins without a judged
+agent, and only flagged skills. Cost: `dev`'s other four agents (`solution-planner`, `be-documenter`,
+`be-feature-documenter`, `code-auditor`, two of them over the R2 budget) and each `qa-*` plugin's other
+thirteen agents stay unjudged until a later round.
+
 ## 10. Answered questions (2026-11-20)
 
 **O1 — Where do the glossary and ADRs live:** the existing BA glossary, extended, plus `docs/adr/` (D4, D6).
@@ -372,6 +455,23 @@ anything unique 10k, writes ~25k, review 5k.
 - `git rm -r meta/writing-skills`. Add a first line to `meta/PLAN.md`: `**Superseded by
   docs/plans/014-authoring-standard-domain-language-feature-prototype.md (D12).**`
 - **Not in A1:** registration and `FRONT_DOORS` (R1); the lint (A2).
+- **As built (2026-11-20):** `engineering-practices/writing-for-agents/SKILL.md` (13,858 chars,
+  description 158): a five-step `## Procedure` with done-whens, then the levers (Pointers, The two
+  loads, Information hierarchy, Completion criteria, When to split, Leading words, Positive targets,
+  Pruning), then `## The rules` R1–R23 (`SKILL.md:89`–`117`), then When to use / When NOT to use.
+  `references/skill-mechanics.md` (101 lines, no contents list needed under R9): Frontmatter, Front
+  door or hidden, The description (the good/bad examples plus the workflow-summary trap and the
+  third-person point kept from `meta/writing-skills`), Skill body, Agents: thin routers, Rule files,
+  Names. No rule added or renumbered; **R8 and R10 reworded** (D13), with §3, §4 and A2's prompt
+  rewritten to match. `CONTRIBUTING.md`: the four writing sections are now contributor facts plus a
+  pointer; beyond the four, "Naming conventions" folded into "Names and registration" (name rules
+  moved to the reference, the reserved list stays), the rule-file writing bullets of "Code standards
+  are rules" moved to the reference (install and glob-proving stay), and the front-door enumeration
+  is replaced by the pointer to `FRONT_DOORS`. The PR checklist cites R1–R15, R21. `meta/writing-skills/`
+  removed; `meta/PLAN.md` line 1 marks it superseded. `python3 tools/plugin-surface-check.py` → `OK`.
+  **Unverified:** nothing lints the new files until A2 lands (G1, R1's gate). `README.md:284` and
+  `:476` still name `writing-skills`; R1's prompt now carries them. B1's and P1's prompts now also read
+  `references/skill-mechanics.md`.
 
 ### A2 — `tools/skill-lint.py`: the mechanical half of the standard
 
@@ -395,6 +495,25 @@ and coverage output 10k, fixes 7k.
 - Fixtures: `clean-skill/` (a front door and a hidden variant), `clean-agent.md`, and one breaking
   file per rule (`r3-no-triggers/`, `r8-dangling-ref/`, …).
 - **Not in A2:** registration (R1 owns `plugin-surface-check.py`), and any fix to an existing skill.
+- **As built (2026-11-20):** `tools/skill-lint.py` (477 lines): one `check_r<n>` per rule
+  (`skill-lint.py:186`–`327`), `lint_path` routes an argument (`:395`), `main(argv)` is the only
+  function touching argv or the process (`:450`). It reuses `plugin-surface-check.py`'s frontmatter
+  regex and its `disable-model-invocation: true` test, so the two tools agree on what a front door is.
+  Beyond §4 (D15): a skill is its `SKILL.md` plus every `.md` beside it (rule files) and under its
+  `references/`; R8, R10, R11 and R12 run on all of them, R9 on the `references/` ones. Every body rule
+  skips fences, R8 included. `tools/fixtures/` joins the sweep's exclusions. Fixtures:
+  `tools/fixtures/skill-lint/clean-skill/{front-door,hidden}/`, `clean-agent.md`, and `r1-missing-name/`,
+  `r1-not-kebab/`, `r3-bad-description/`, `r6-hidden-routing/`, `r7-front-door-no-routing/`,
+  `r8-dangling-ref/`, `r9-no-contents/`, `r10-placeholder/`, `r11-vocabulary/`, `r12-hidden-invoke/`,
+  `r13-agent-shape.md`, `r13-steps-no-table.md`, `r14-load-cell.md`. Gate:
+  `python3 -m pytest tools/test_skill_lint.py -q` → `86 passed`; coverage → `tools/skill-lint.py 336
+  stmts, 160 branches, 99%`; the clean fixtures → `0 findings`, exit 0. Also run (not as a gate):
+  `engineering-practices/writing-for-agents`, and B1's and P1's folders → `0 findings` each.
+  **Unverified:** the library sweep (A3's). A targeted run over `engineering-practices/` showed two
+  readings A3 must rule on rather than absorb: R12 flags a line that names a hidden skill to say it
+  *cannot* be invoked (`spec-vs-code-audit/SKILL.md:50`), and R8, read as written, resolves an
+  agent's backticked `references/x.md` against the agent's folder, so the skill-relative pointers in
+  agents' Load cells all fail.
 
 ### B1 — `dev:feature` and `domain-modeling`: the merged front door, the glossary and ADRs
 
@@ -429,6 +548,33 @@ glossary format and init sections) 6k, `business-documentation/references/glossa
 - `git rm -r engineering-practices/decision-interview`.
 - **Not in B1:** `marketplace.json`, `FRONT_DOORS`, renaming references in agents, the catalog
   and README (R1).
+- **As built (2026-11-20):** `engineering-practices/brainstorming/SKILL.md` is `name: feature`
+  (9,989 chars, description 177): the fence table, the approval gate, "The two modes" (NEW runs
+  steps 1–9, SHAPED 1–6), a nine-step `## Procedure` with done-whens (orient and draw the tree → the
+  frontier as one round, AskUserQuestion ≤ 4 questions with `(Recommended)` first, numbered `➡️` text
+  rounds otherwise → facts → restate and redraw → domain language → close and confirm → approaches →
+  design → spec, self-review, user gate, `dev:plan-feature`), "Design rules", "Output format" (spec
+  outline with `## Decisions from the interview` and an optional `## Prototype`), "Showing something
+  visual" (the `/design:prototype` pointer), When to use / When NOT to use.
+  `engineering-practices/domain-modeling/SKILL.md` (hidden, description 198, sibling `feature`): six
+  inline steps (challenge, sharpen, scenario, check the code, write each term now, ADR under the three
+  tests) and `## Rules` (synonym vs drift kept apart). `references/glossary-format.md` (the §6 table
+  plus a column table, rules, lazy creation, KB adoption, an older glossary gains `Avoid` as `—`);
+  `references/adr-format.md` (three tests, what qualifies, `docs/adr/NNNN-<slug>.md`, one-paragraph
+  example, optional `Status`/`Considered options`/`Consequences`, supersede-never-edit).
+  `ba-project-memory/SKILL.md:98` points to the format; init step 2 (`:138`) adopts an existing
+  `glossary.md`. `clean-kb/glossary.md` has the `Avoid` column.
+  `business-documentation/references/glossary.md`: the table is a pointer plus four KB-run notes
+  (where `Called in code` comes from; two code identifiers stay one row). `agent-orientation-cache`
+  gains the line in "Never cached" (`SKILL.md:61`). `plan-format.md:70`–`72` carries the ADR sentence.
+  `decision-interview/` removed. Every cross-skill pointer is written
+  `${CLAUDE_PLUGIN_ROOT}/engineering-practices/…` (the repo's existing form; every plugin's source is
+  `./`), so R8 skips it as a pattern (D13) and G1's read is what checks it. Gate:
+  `python3 -m pytest business-analysis/skills/ba-project-memory/scripts/test_kb_lint.py -q` → 18 passed.
+  **Unverified / expected red until R1:** `plugin-surface-check.py` reports `feature` listed but not in
+  `FRONT_DOORS` and the missing `decision-interview` folder; `skill-lint` has not run over these files
+  (A2 had not landed). `token-audit` flags `business-documentation/SKILL.md` (27,914), which B1 did
+  not touch and which predates this plan.
 
 ### P1 — `design:prototype`
 
@@ -454,6 +600,33 @@ smoke recorded as unverified in `Status:`.
   bar and the variant/state/theme/viewport wiring. Under ~120 lines of markup; its script obeys the
   house comment rules.
 - **Not in P1:** registration and `FRONT_DOORS` (R1). It writes no stack's app code, ever.
+
+**As built (2026-11-20):**
+- `design/prototype/SKILL.md` (`name: prototype`, no `disable-model-invocation`, 189-char
+  description: `Use when a screen or flow should be seen in a few variants before it is built.
+  Triggers "prototype this screen", "show me layout options". Not for a whole visual identity
+  (visual-identity).`), body 10.5k chars: §7 steps 1–7 each ending on a done-when, then
+  "Structural variants" (four axes), "In-app hand-off" (the brief for the stack agent), Rules,
+  Output format, one worked example, When to use / When NOT to use. Every pointer to a hidden skill
+  names the agent or the typed command (R22): `visual-identity` via the stack agent or
+  `/design:visual-identity`, `/design:brand-import`, `design-auditor` or `/design:ux-review`.
+- `references/design-language.md`: the seven parts, the four-source detection order with a per-stack
+  token table (web, shadcn, MUI/Mantine/Chakra, Style Dictionary, Blazor, React Native, SwiftUI,
+  Compose, WinUI/WPF), the design-language block, the partial-language rule, and the style
+  interview: answers mapped to `--variance/--motion/--density`, the `--design-system --json` query
+  (plugin path and in-repo path, no `--persist`), 2–3 directions built by moving one input,
+  each citing `design_system.source_identities` (style, color, typography rows).
+- `references/html-shell.md`: the file contract, a "Done when" checklist, a 111-line skeleton, and
+  the Playwright CLI screenshot command. Beyond §7: `viewport` round-trips in the URL beside
+  `variant/state/theme`, and responsive rules inside variants use `@container` on `.frame`, because
+  the viewport switch resizes the frame, not the window. The record lines are `<meta>` tags (D14).
+- Verified: `python3 tools/skill-lint.py design/prototype` → `0 findings`; `token-audit.py
+  --violations-only` prints nothing for `prototype`. The skeleton, extracted and run from `file://`
+  in headless Chromium: `?variant=B&state=failed&theme=dark&viewport=phone` opens on that view
+  (frame 390 px), `1` and `s` switch and rewrite the URL, an unknown value falls back to the first
+  option, the notification closes on its button, no console error.
+- **Unverified:** a real prototype built in a project (the user's trigger smoke, after G1); the
+  description's trigger rate as a front door (needs R1's registration).
 
 ### R1 — Register, rename and point
 
@@ -484,6 +657,32 @@ writes ~15k, tool output 5k, review 5k.
   `docs/skills-catalog.md` (the dev chain, the design catalog, counts, the slash-surface count in
   `CLAUDE.md`'s pointer line if it changes).
 - **Not in R1:** any change to a skill's body beyond a renamed reference.
+- **As built (2026-11-20):** `marketplace.json`: `dev.skills` adds `./engineering-practices/writing-for-agents`
+  and `./engineering-practices/domain-modeling` and drops `decision-interview` (22 skills plus `rules`);
+  `design.skills` adds `./design/prototype` (18 plus `rules`); both descriptions name the new skills, and
+  `dev`'s says `/dev:feature` where it said the old design command. `plugin-surface-check.py:41`–`47`:
+  `dev` lists `feature` and `writing-for-agents` in place of the two old names; `"design":
+  frozenset(("prototype",))` added. No collision: `dev`'s command stems are refine, plan-system,
+  document-system, document-feature, audit; `design`'s is audit. Renamed references:
+  `solution-planner.md:62` (DETAIL row) and its Step 1 `Load` cell, which gains
+  `engineering-practices/domain-modeling` "when a blueprint decision passes the three ADR tests";
+  `requirements-author.md:78` and `:85`; `business-analyst.md:61`. `README.md`: the `dev` paragraph
+  (22 skills, the feature-then-plan pair, `writing-for-agents`, hidden `domain-modeling`), the front-door
+  sentence (`feature`, `writing-for-agents`, `design:prototype`), the design paragraph (18 skills,
+  `/design:prototype`), the `/dev:feature` line under the command table, the `engineering-practices/`,
+  `meta/` and `design/` folder lines, and the `engineering-practices` and `meta` status rows.
+  `docs/skills-catalog.md`: the plugin table (dev 22, design 18), the slash-surface examples and the
+  front-door fence, "the eleven `dev` workflow skills and `design:prototype`", `solution-planner`'s entry
+  modes and fences, the engineering-practices intro (11 in-scope, 22 `dev` skills), the chain entry
+  rewritten for `dev:feature` (NEW and SHAPED, `domain-modeling`, the `/design:prototype` pointer), two
+  cross-cutting bullets (`dev:writing-for-agents`, `domain-modeling`), the reconciliation line, and a
+  design-catalog paragraph for the `design/prototype` front door. `meta/PLAN.md` (superseded, D12) lines
+  5 and 47 reworded so they no longer spell the removed folder's path. Unchanged: `CLAUDE.md`'s pointer
+  (no command was added; still 77), `CONTRIBUTING.md` (no hit). Gate: `plugin-surface-check.py` → `OK`;
+  `skill-lint.py` over the four folders → `0 findings`, exit 0; the grep → nothing.
+  **Noted, not this task's:** `token-audit.py --violations-only` flags `solution-planner.md` (16,966 chars
+  against 14,000); it was 16,871 before this task, so the violation predates the plan (A3 records it).
+  **Unverified:** the front doors' trigger rate in a real session (the user's smoke after G1).
 
 ### G1 — Gate: the whole set once more
 
@@ -511,6 +710,24 @@ git diff --name-only "$(git log --diff-filter=A --format=%h -1 -- docs/plans/014
 - `token-audit.py` already exits non-zero on violations that predate this plan (e.g.
   `security-governance`). Only a line naming this plan's files is a failure.
 - **Not in G1:** the library-wide sweep (A3), and any feature work.
+- **As built (2026-11-20):** the whole set ran once, green on the first pass, so the fix loop had
+  nothing to fix and no earlier task's work changed. `plugin-surface-check.py` → `OK`; pytest over
+  both suites → `104 passed`; coverage → `tools/skill-lint.py 336 stmts, 160 branches, 99%`;
+  `skill-lint.py` over the four folders → `0 findings`, exit 0; the `token-audit` grep → nothing
+  (exit 1); the `git diff` lists 53 files, all A1–R1's (the deleted `meta/writing-skills/*` and
+  `decision-interview/SKILL.md` among them). Cross-reference read, beyond the lint: every
+  `${CLAUDE_PLUGIN_ROOT}/…` path in the changed skills, agents, `CONTRIBUTING.md`, `README.md` and
+  the catalog resolves; every repo path naming `brainstorming`, `domain-modeling`,
+  `writing-for-agents` or `design/prototype` outside `docs/plans/` exists; every quoted section
+  pointer lands on a real heading (`design-language.md` "Style interview" and "Partial language",
+  `html-shell.md` "Done when", the prototype's "Structural variants" and "In-app hand-off",
+  `feature`'s "The two modes", `knowledge-base` "Initializing a KB", plan-format's "Answered
+  questions", `CONTRIBUTING.md` "The three-layer model" and "Names and registration", and the six
+  `skill-mechanics.md` sections `CONTRIBUTING.md` names). The only remaining `writing-skills`
+  mention is `README.md:476`, which states its retirement. Close-out step 6: `master` has no commit
+  beyond this branch (`git log HEAD..master` empty), so there was nothing to merge.
+  **Unverified:** `/dev:feature` and `/design:prototype` untried in a real project session; their
+  trigger phrases untested.
 
 ### A3 — Audit round 1: the lint sweep and the front doors
 
@@ -530,6 +747,30 @@ and reruns `python3 -m pytest tools/test_skill_lint.py -q`.
 - A lint finding that is a false positive is a lint defect: fix it in the script with a fixture that
   pins it, and say so in `As built`.
 - **Not in A3:** agents and hidden skills (A4); fixing any skill (the remediation plan).
+- **As built (2026-11-20):** `docs/audits/004-skill-authoring-r1.md`: scope, the lint per plugin × rule,
+  the size budgets, the 38 front doors (40 listings; `python-web-testing` sits in three plugins; 23 are
+  `rules` skills, judged as a group), and the findings under Data issues / Code issues / Logical
+  conflicts. **The lint changed** (D16): the first sweep gave 552 findings, most of R12 (140, 2 real)
+  and R8 (158) reading text that is not what the rules mean. R12 now needs a bare `invoke`/`call`/`run`
+  right before a hidden name, or the Skill tool named beside one, and skips a negated verb; R8 resolves a
+  backticked `references/…` inside a skill named in a code span on its line or the line above;
+  `**/bundled/**` joined the exclusions. Both A2 readings were ruled lint defects:
+  `spec-vs-code-audit/SKILL.md:50` is clean, and skill-relative Load-cell pointers resolve when the line
+  names the skill (`qa-explorer.md:28` names none and stays a finding). New fixtures
+  `tools/fixtures/skill-lint/r12-hidden-mention/`, `r8-named-skill/{owner,caller}/`; tests for both, the
+  `bundled/` exclusion, `skill_index` and `skill_holding`. Gate: `python3 tools/skill-lint.py --json >
+  /tmp/skill-lint-r1.json` → `238 findings` (41 major, 197 minor, 172 files), exit 1;
+  `python3 -m pytest tools/test_skill_lint.py -q` → `95 passed`; coverage → `tools/skill-lint.py 376
+  stmts, 174 branches, 99%`; the clean fixtures → `0 findings`. `token-audit.py --violations-only` → 89
+  violations. Judgment: the front doors were read by three Sonnet reviewers (dev ×8; audits, prototype,
+  `python-web-testing`, `inhouse-framework-conventions` ×3; the 23 `rules`), every row spot-checked or
+  verified before it went in; rows that judged a hidden-skill pointer by repo path as an R22 breach were
+  dropped (a path to `Read` passes R12/R22), as was one R17 row that cited the user's private global
+  `CLAUDE.md`. Not found by G1: `writing-plans/SKILL.md:3` and `systematic-debugging/SKILL.md:3` still
+  name the retired `design` sibling (Data issues). R10's 11 findings are mostly markers *mentioned* in
+  quotes, left as findings: D13 made a code span the way to mention one. R11's 8 are domain terms
+  ("KB slice", migration "Phases") and sit under Logical conflicts for the owner. **Unverified:** the
+  judgment rows not spot-checked (about two thirds) rest on the reviewers' line numbers.
 
 ### A4 — Audit round 1: the agents and the sample
 
@@ -545,6 +786,24 @@ front-door agents (~60k), ~14 sampled skills (~30k), writes ~7k.
 - Pick the sample by size: the largest hidden skill in each domain folder, since sediment collects
   there.
 - **Not in A4:** fixing anything.
+- **As built (2026-11-20):** `docs/audits/004-skill-authoring-r1.md` gains "Round 1, second half (A4)":
+  the 24 front-door agents with the command that runs each, the 14-skill sample with paths and sizes, 119
+  judgment rows under Data issues (8) / Code issues (96) / Logical conflicts (15), and the "Summary"
+  (the appendix moved to the end). Totals: **528 findings, 249 major, 279 minor, no blocker or nit**;
+  Data 34, Code 464, Logical 30; mechanical 348 (lint 238, R2 89, R23 21), judgment 180 (A3 61, A4 119).
+  Top five rules: R2 89, R9 89, R7 64, R17 45, R3 31; among judgment rules R17 leads (45), then R19 28,
+  R15 24. **Differed from the plan:** seven plugins have no plugin-name command, so their front-door
+  agent was taken from the command each presents as its entry (D17); "hidden" in the sample includes
+  unregistered skills loaded by path, which made `standards-audit-engine` the engineering-practices
+  pick. A judgment row counts once even when it names many files (20 agents in one R17 row), so the
+  judgment totals understate the sites to change. Read by three Sonnet reviewers on one brief; every
+  Data and Logical row re-read at its line; three reviewer rows dropped as wrong
+  (`delivery-plan/SKILL.md:88` and `:421` resolve; a template-text row). Commands: the selection
+  `grep -oE 'agents/[a-z0-9-]+\.md' <command>` per registered command, and the sample by `wc -c` over
+  every `SKILL.md` with `disable-model-invocation: true` or unregistered. **Unverified:** most Code rows
+  rest on the reviewers' line numbers (sampled, not all re-read); `ba-project-memory`'s rows were not
+  checked against `kb-lint.py`; whether the sibling `unit-testing` skills carry the Kover-in-a-task
+  line that `mobile/android` does.
 
 ### A5 — The remediation plan, and filing 014
 
@@ -561,6 +820,28 @@ plan is filed.
 - The next free number spans `docs/plans/` and `docs/plans/implemented/`.
 - Mechanical findings batch by rule across a plugin; judgment findings go with the skill they name.
 - **Not in A5:** fixing any skill.
+- **As built (2026-11-20):** `docs/plans/015-skill-authoring-remediation.md` is the next free number,
+  since 014 was the highest across both folders. It has 23 tasks.
+  - **L1** asks the owner every logical conflict in one message, as O1–O24, and records the answers.
+    These are A3's 7 judgment rows, its 8 R11 rows folded into O3 and O4, and A4's 15 rows. Each O
+    names reading (a), which is the audit's fix, reading (b), and the task that applies it. That is
+    015 D1.
+  - **T1** fixes the agent template (the Fix sweep, then `Gate evidence` under O18), the standard's R8
+    and R20 rows (O1, O5), and the 23 `rules` skills as one shape.
+  - **P1–P20** are one cluster of plugins each, with disjoint files, so any three run side by side.
+    Every one names its paths, lines and rule ids. A group row is split by path: each agent's Fix line,
+    "Read the rules", version asides, Done-when and `Gate evidence` go to its own plugin's task.
+  - **G1** sweeps the whole library and files 015.
+  - **Differed from the prompt:** each gate also runs `token-audit` grepped to the task's R2 files,
+    because the lint does not check R2. A qa task also runs `qa-version-check.py`, because pins move.
+    An answer that changes the lint (O1 b, O3 b, O4 b) makes L1 write an `infra` task T2, since that
+    is code.
+  - **Resolved A4's unverified item.** `grep -n "own tests"` finds the coverage-in-a-task line in the
+    `unit-testing` or `component-testing` skill of all five `be-*` stacks, both `fe-*`, `mobile/ios` and
+    `mobile/react-native`, possibly `desktop/windows:185`, and not `desktop/macos`. 015 §1 lists them
+    under O12.
+  - **Unverified:** the audit's line numbers. Each 015 task re-reads its rows first (015 D6). The
+    budgets are estimates from `wc -c`. 014 is filed here.
 
 ## Close-out — every task
 
@@ -616,417 +897,5 @@ three; then G1, A3, A4 and A5 run in sequence.
 | A5 | `docs` | `general-purpose` | A4 | — | ~110k |
 | — | try `/dev:feature`, `/design:prototype` in a real project | **the user** | G1 | — | — |
 
-No prompt has landed yet; all nine are live.
+Every task has landed, and all prompts are deleted. The plan is filed in `docs/plans/implemented/`.
 
----
-
-### A1 — writing-for-agents, the house authoring standard (general-purpose, docs)
-
-````
-Depends on: none
-Agent: general-purpose · Stack: docs
-
-Task A1 of docs/plans/014-authoring-standard-domain-language-feature-prototype.md: write the
-library's one authoring standard for anything an agent reads, as a `dev` front door, and make
-CONTRIBUTING.md point to it.
-
-Read, in this order:
-1. CLAUDE.md (repo root).
-2. The plan: §1, §2, §3, D1, D2, D8, D12, task A1, and "Close-out — every task".
-3. CONTRIBUTING.md: "SKILL.md structure" through "Names and registration", and the PR checklist.
-4. .skill-template/{reference,generator,reviewer}.SKILL.md and .skill-template/agent.md.
-5. Upstream, for ideas only (rewrite in your own words, copy no sentence):
-   https://raw.githubusercontent.com/mattpocock/skills/5863806dd4e15c63174bee4e7515a4256792ecfa/skills/productivity/writing-for-agents/SKILL.md
-   https://raw.githubusercontent.com/mattpocock/skills/5863806dd4e15c63174bee4e7515a4256792ecfa/skills/productivity/writing-for-agents/SKILL-MECHANICS.md
-6. The docstrings of tools/plugin-surface-check.py and tools/token-audit.py (what they already enforce).
-7. meta/writing-skills/SKILL.md, skimmed for anything not covered by §3 (D12).
-
-Write:
-- engineering-practices/writing-for-agents/SKILL.md: frontmatter `name: writing-for-agents`, no
-  `disable-model-invocation` (front door). Draft description, ≤ 200 chars, shape R3:
-  `Use when writing or editing a skill, agent, rule file or CLAUDE.md. Triggers "write a skill", "tighten this CLAUDE.md". Not for plan documents (plan-feature).`
-  Body: the writing levers (pointers, two loads, hierarchy, co-location, completion criteria,
-  splitting, leading words, positive targets, pruning), then §3's rule table with ids, enforcer and
-  severity, then When to use / When NOT to use.
-- engineering-practices/writing-for-agents/references/skill-mechanics.md: frontmatter, front door
-  vs hidden, the description shape with CONTRIBUTING's good/bad examples, agents as thin routers
-  with conditional Load cells, rule files (paths:, sizes), naming.
-- CONTRIBUTING.md: the four writing sections shrink to contributor facts plus a pointer; the PR
-  checklist cites rule ids.
-- `git rm -r meta/writing-skills`; first line of meta/PLAN.md:
-  `**Superseded by docs/plans/014-authoring-standard-domain-language-feature-prototype.md (D12).**`
-
-Traps:
-- The standard must obey itself: front-loaded leading words, no no-op sentences, positive targets.
-  Keep SKILL.md under 16,000 characters; anything only one branch needs goes to references/.
-- If you add, merge or reword a rule, rewrite §3, §4 and the A2 prompt block below in place. Never
-  renumber a rule id.
-- Don't register the skill or touch FRONT_DOORS. That is R1.
-- No colon followed by a space in the description line.
-
-Gate: none. The deliverable is text; G1 lints it.
-
-Commit: `feat(dev): writing-for-agents, the house authoring standard (014 A1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### A2 — tools/skill-lint.py, the mechanical half of the standard (general-purpose, infra)
-
-````
-Depends on: A1
-Agent: general-purpose · Stack: infra
-
-Task A2 of docs/plans/014-authoring-standard-domain-language-feature-prototype.md: build
-tools/skill-lint.py, which checks the standard's mechanical rules R1, R3, R6–R14, with pytest tests
-and fixtures.
-
-Read, in this order:
-1. CLAUDE.md (repo root).
-2. The plan: §3, §4, task A2, and "Close-out — every task".
-3. engineering-practices/writing-for-agents/SKILL.md: the rule table (A1 may have reworded a rule;
-   the table wins over this prompt).
-4. tools/plugin-surface-check.py: frontmatter parsing, the marketplace walk, FRONT_DOORS. Reuse
-   its frontmatter rules so the two tools agree.
-5. business-analysis/skills/ba-project-memory/scripts/kb-lint.py (output shape) and
-   test_kb_lint.py (how a hyphenated script is loaded with importlib.util in tests).
-
-Build:
-- tools/skill-lint.py per §4: CLI (no args = library sweep; paths; --json), output
-  `<path>:<line>: <severity> <rule> <message>`, exit 0/1/2, exclusions by name, one function per
-  rule, main() the only function touching argv.
-- tools/test_skill_lint.py + tools/fixtures/skill-lint/: a clean front door, a clean hidden skill,
-  a clean agent, and one fixture per rule that breaks it. A test per branch.
-
-Traps:
-- The interpreter is Python 3.9.6: no `match`, no `X | None` hints, nothing newer than 3.9.
-  Stdlib only.
-- Skip fenced code blocks for R10, R11 and R12. A Rust skill legitimately says "slice" in prose;
-  R11 checks headings and table header rows only.
-- R12 needs the hidden-name set per plugin from .claude-plugin/marketplace.json; a name hidden in
-  one plugin and absent from another is only hidden where registered.
-- Do not run the no-argument sweep as your gate, and fix no existing skill. A3 owns the sweep.
-
-Gate (own tests):
-  python3 -m pytest tools/test_skill_lint.py -q
-  python3 -m coverage run --branch -m pytest tools/test_skill_lint.py -q && python3 -m coverage report --include=tools/skill-lint.py
-  python3 tools/skill-lint.py tools/fixtures/skill-lint/clean-skill tools/fixtures/skill-lint/clean-agent.md
-Branch coverage ≥ 80%; the clean fixtures exit 0.
-
-Commit: `feat(tools): skill-lint, the mechanical half of the authoring standard (014 A2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### B1 — dev:feature and domain-modeling, the merged front door, glossary and ADRs (general-purpose, docs)
-
-````
-Depends on: A1
-Agent: general-purpose · Stack: docs
-
-Task B1 of docs/plans/014-authoring-standard-domain-language-feature-prototype.md: merge dev:design
-and dev:decision-interview into `dev:feature`, add the hidden `domain-modeling` skill with the
-glossary and ADR formats, and make the glossary format a single source.
-
-Read, in this order:
-1. CLAUDE.md (repo root).
-2. The plan: §1, §2, §5, §6, D3–D6, task B1, and "Close-out — every task".
-3. engineering-practices/writing-for-agents/SKILL.md (the standard you write to).
-4. engineering-practices/brainstorming/SKILL.md and engineering-practices/decision-interview/SKILL.md.
-5. business-analysis/skills/ba-project-memory/SKILL.md: "glossary.md and active-context.md format"
-   and the init procedure only.
-6. backend/_shared/business-documentation/references/glossary.md (the "## Glossary" part).
-7. engineering-practices/agent-orientation-cache/SKILL.md, the orientation-pass section.
-8. engineering-practices/writing-plans/references/plan-format.md §2 ("## Decisions" bullet).
-9. Upstream ideas, rewritten in your own words:
-   https://raw.githubusercontent.com/mattpocock/skills/5863806dd4e15c63174bee4e7515a4256792ecfa/skills/productivity/grilling/SKILL.md
-   https://raw.githubusercontent.com/mattpocock/skills/5863806dd4e15c63174bee4e7515a4256792ecfa/skills/engineering/domain-modeling/SKILL.md
-   (and its GLOSSARY-FORMAT.md, ADR-FORMAT.md beside it)
-
-Write:
-- engineering-practices/brainstorming/SKILL.md → `name: feature`, front door, draft description:
-  `Use when describing a new feature or closing a plan's open questions. Triggers "I want to add X", "grill me on this". Not for a loose multi-capability ask (requirements-author).`
-  Body: §5's two modes, the round-based interview (AskUserQuestion when present, ≤ 4 questions,
-  recommended option first; numbered text rounds otherwise), restate-and-redraw, domain language
-  inline via engineering-practices/domain-modeling, then approaches → design → spec (with
-  `## Decisions from the interview`) → dev:plan-feature. Keep the fence table and the approval gate.
-  "Showing something visual" becomes the /design:prototype pointer.
-- engineering-practices/domain-modeling/SKILL.md (hidden: `disable-model-invocation: true`) +
-  references/glossary-format.md (§6 table, synonyms vs drift, only project terms, lazy creation,
-  KB adoption) + references/adr-format.md (docs/adr/NNNN-<slug>.md, one paragraph default,
-  optional sections, the three tests, what qualifies).
-- ba-project-memory/SKILL.md: glossary table → pointer to glossary-format.md; init adopts an
-  existing glossary.md. scripts/fixtures/clean-kb/glossary.md gains the Avoid column.
-- business-documentation/references/glossary.md: table → pointer; keep the documenter's own notes.
-- agent-orientation-cache/SKILL.md: one orientation line (read glossary + ADR titles when present;
-  names follow the glossary; respect or explicitly supersede an ADR).
-- plan-format.md §2: one sentence (a D<n> passing the three tests also gets an ADR, written by the
-  task that records it, citing the plan).
-- `git rm -r engineering-practices/decision-interview`.
-
-Traps:
-- dev depends on nothing in business-analysis; business-analysis and be-* depend on dev. So the
-  format lives in dev and the BA/documenter files point to it, never the reverse.
-- Drift (one word, two meanings) is still a finding left to the business-analyst agent; only
-  synonyms are ruled out with Avoid. Do not merge the two rules.
-- The folder stays `brainstorming/` (D5). Do not touch marketplace.json, FRONT_DOORS, agents,
-  README or the catalog. That is R1.
-- domain-modeling is hidden, so nothing may tell a model to invoke it through the Skill tool (R12):
-  write "Read engineering-practices/domain-modeling/SKILL.md".
-
-Gate (own tests):
-  python3 -m pytest business-analysis/skills/ba-project-memory/scripts/test_kb_lint.py -q
-
-Commit: `feat(dev): dev:feature merges design and decision-interview; domain-modeling, glossary and ADRs (014 B1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P1 — design:prototype (general-purpose, docs)
-
-````
-Depends on: A1
-Agent: general-purpose · Stack: docs
-
-Task P1 of docs/plans/014-authoring-standard-domain-language-feature-prototype.md: write
-`design:prototype`, which renders 2–5 structurally different variants of a screen as one
-self-contained HTML file in the project's design language, or, when it has none, after a style
-interview through the ui-ux-pro-max corpus.
-
-Read, in this order:
-1. CLAUDE.md (repo root), especially the React and Mobile "data region" rules (states and the
-   persistent failure notification).
-2. The plan: §2, §7, D9–D11, task P1, and "Close-out — every task".
-3. engineering-practices/writing-for-agents/SKILL.md (the standard you write to).
-4. design/ui-ux-pro-max/SKILL.md (the query contract, --design-system, --persist layout, dials).
-5. design/visual-identity/SKILL.md and design/brand-import/SKILL.md (what they own; prototype
-   never writes token files).
-6. design/design-tokens/SKILL.md, its first section only.
-7. Upstream ideas, rewritten in your own words:
-   https://raw.githubusercontent.com/mattpocock/skills/5863806dd4e15c63174bee4e7515a4256792ecfa/skills/engineering/prototype/SKILL.md
-   https://raw.githubusercontent.com/mattpocock/skills/5863806dd4e15c63174bee4e7515a4256792ecfa/skills/engineering/prototype/UI.md
-
-Write:
-- design/prototype/SKILL.md: `name: prototype`, front door (no disable-model-invocation), a
-  description ≤ 200 chars in R3's shape (§7 has a draft that is too long); §7 steps 1–7; When to
-  use / When NOT to use (visual-identity, brand-import, ux-review, the stack agents).
-- design/prototype/references/design-language.md: the detection order per stack, what each source
-  yields, the design-language block, the partial-language rule, and the style interview with its
-  exact search.py command (plugin path and in-repo path).
-- design/prototype/references/html-shell.md: the file contract and an HTML skeleton (≤ ~120 lines)
-  of the switcher bar and the variant / state / theme / viewport wiring with URL round-trip.
-
-Traps:
-- design/ never writes app code: the in-app branch hands the variants to the stack agent
-  (fe-react, fe-blazor, mobile-*, desktop-*) as a brief.
-- Variants differ in structure, never only colour; all variants share one design language.
-- Never `--persist --force` the corpus output (ui-ux-pro-max forbids it without the user's say-so).
-- The skeleton's script obeys the house comment rules: no inline comments.
-- Don't register the skill or touch FRONT_DOORS. That is R1.
-
-Gate: none. The deliverable is text; G1 lints it. Building a real prototype is the user's trigger
-smoke, recorded as unverified.
-
-Commit: `feat(design): prototype, variant renders in the project's design language (014 P1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### R1 — register, rename and point (general-purpose, docs)
-
-````
-Depends on: A1, A2, B1, P1
-Agent: general-purpose · Stack: docs
-
-Task R1 of docs/plans/014-authoring-standard-domain-language-feature-prototype.md: register the new
-skills, update FRONT_DOORS, and rename every live reference to dev:design, decision-interview and
-meta/writing-skills.
-
-Read, in this order:
-1. CLAUDE.md (repo root).
-2. The plan: §5–§7, §9, task R1, the As built notes of A1, A2, B1, P1, and "Close-out — every task".
-3. .claude-plugin/marketplace.json: the `dev` and `design` entries only (find them with grep -n,
-   read those line ranges).
-4. tools/plugin-surface-check.py: FRONT_DOORS.
-5. The list from:
-   grep -rnE "dev:design|decision-interview|meta/writing-skills|brainstorming" --exclude-dir=.git . | grep -v docs/plans/implemented
-   and each hit's surrounding lines only.
-6. The Steps tables of backend/_shared/agents/solution-planner.md,
-   business-analysis/agents/requirements-author.md, business-analysis/agents/business-analyst.md.
-
-Do:
-- marketplace.json: dev adds ./engineering-practices/writing-for-agents and
-  ./engineering-practices/domain-modeling, drops ./engineering-practices/decision-interview;
-  design adds ./design/prototype; both plugin descriptions name the new skills.
-- FRONT_DOORS: dev swaps `design decision-interview` for `feature writing-for-agents`; add
-  `"design": frozenset(("prototype",))`.
-- Every hit from step 5 renamed to dev:feature / writing-for-agents as fits; solution-planner gains
-  the conditional Load (a blueprint decision passing the three ADR tests →
-  engineering-practices/domain-modeling).
-- CONTRIBUTING.md front-door list, README.md, docs/skills-catalog.md (dev chain, design catalog,
-  skill counts, front-door counts), and CLAUDE.md's catalog pointer line if a count in it changed.
-
-Traps:
-- Skills share one slash namespace with commands per plugin: `feature` must not collide with a
-  command stem in dev (today: refine, plan-system, document-system, document-feature, audit).
-- A pointer a main session follows names the agent (R22), not a bare hidden plugin:name.
-- Change no skill body beyond a renamed reference.
-
-Gate (own tests):
-  python3 tools/plugin-surface-check.py
-  python3 tools/skill-lint.py engineering-practices/writing-for-agents engineering-practices/brainstorming engineering-practices/domain-modeling design/prototype
-  grep -rnE "dev:design|decision-interview|meta/writing-skills" --exclude-dir=.git . | grep -v docs/plans/implemented | grep -v docs/plans/014-
-The first prints OK, the second exits 0, the third prints nothing.
-
-Commit: `feat(dev, design): register writing-for-agents, feature, domain-modeling and prototype (014 R1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### G1 — gate, the whole set once more (general-purpose, infra)
-
-````
-Depends on: R1, A2
-Agent: general-purpose · Stack: infra
-
-Task G1 of docs/plans/014-authoring-standard-domain-language-feature-prototype.md: the plan's gate.
-Run the whole set once more across the plan, fix what fails, and record what is unverified.
-
-Read, in this order:
-1. CLAUDE.md (repo root).
-2. The plan: header, §3, §4, task G1, every As built note, and "Close-out — every task".
-3. engineering-practices/writing-plans/references/plan-format.md §5, "The last task's fix loop".
-
-Gate (this is the last runnable task, so it runs the whole set once more across the plan, in order):
-  python3 tools/plugin-surface-check.py
-  python3 -m pytest tools/test_skill_lint.py business-analysis/skills/ba-project-memory/scripts/test_kb_lint.py -q
-  python3 -m coverage run --branch -m pytest tools/test_skill_lint.py -q && python3 -m coverage report --include=tools/skill-lint.py
-  python3 tools/skill-lint.py engineering-practices/writing-for-agents engineering-practices/brainstorming engineering-practices/domain-modeling design/prototype
-  python3 tools/token-audit.py --violations-only | grep -E "writing-for-agents|brainstorming|domain-modeling|prototype"
-  git diff --name-only "$(git log --diff-filter=A --format=%h -1 -- docs/plans/014-authoring-standard-domain-language-feature-prototype.md)" HEAD
-Expect: OK; all pass; branch ≥ 80%; exit 0; nothing printed; the plan's file list.
-
-Then read each changed SKILL.md once for cross-references the lint cannot see (a pointer to a
-section that moved or was renamed).
-
-Traps:
-- token-audit exits non-zero for violations that predate this plan; only a line naming this plan's
-  files fails the gate.
-- Fix by the fix loop: the narrowest command per failure, then only the failed rerun, then the
-  whole set once more. A failure may belong to A1–R1; fix it and name the task in As built.
-- Do not run the no-argument library sweep; A3 owns it.
-
-Record in Status (built but unverified): /dev:feature and /design:prototype untried in a real
-project session; trigger phrases untested.
-
-Commit: `chore: 014 gate, the whole set green (014 G1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### A3 — audit round 1, the lint sweep and the front doors (general-purpose, docs)
-
-````
-Depends on: G1
-Agent: general-purpose · Stack: docs
-
-Task A3 of docs/plans/014-authoring-standard-domain-language-feature-prototype.md: start the
-read-only skill-authoring audit. Sweep the whole library with the lint, then judge every listed
-front door against the standard's judgment rules.
-
-Read, in this order:
-1. CLAUDE.md (repo root): "Review behavior" (the findings table and severities).
-2. The plan: §3, §8, D7, task A3, and "Close-out — every task".
-3. engineering-practices/writing-for-agents/SKILL.md, the rule table.
-4. Then the front doors themselves, one at a time, as you judge them.
-
-Do:
-- `python3 tools/skill-lint.py --json > /tmp/skill-lint-r1.json` and `python3 tools/token-audit.py --violations-only`;
-  summarise counts per plugin × rule with a short python one-off. Never paste the raw JSON into
-  the report.
-- List the listed front doors (registered skills without `disable-model-invocation: true`) and
-  write the list into the report.
-- Judge each against R4 and R15–R23. Read the `rules` skills as a group; they share one shape.
-- Write docs/audits/<NNN>-skill-authoring-r1.md (next free NNN in docs/audits/): scope, the lint
-  summary, the front-door list, findings under Data issues / Code issues / Logical conflicts (each
-  heading present, `None.` when empty), house review table rows citing rule ids.
-
-Traps:
-- A lint false positive is a lint defect: fix tools/skill-lint.py, add a fixture that pins it,
-  rerun its tests, and say so in As built.
-- Read-only for every skill: fix nothing outside tools/ and the report.
-
-Gate (own tests):
-  python3 tools/skill-lint.py --json > /tmp/skill-lint-r1.json; test $? -le 1
-  python3 -m pytest tools/test_skill_lint.py -q   (only if you changed the lint)
-
-Commit: `docs(audits): skill-authoring audit r1, lint sweep and front doors (014 A3)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### A4 — audit round 1, the agents and the sample (general-purpose, docs)
-
-````
-Depends on: A3
-Agent: general-purpose · Stack: docs
-
-Task A4 of docs/plans/014-authoring-standard-domain-language-feature-prototype.md: finish the audit
-report A3 started. Judge each plugin's front-door agent and one sampled hidden skill per domain
-folder, then write the summary.
-
-Read, in this order:
-1. CLAUDE.md (repo root): "Review behavior".
-2. The plan: §3, §8, task A4, A3's As built, and "Close-out — every task".
-3. engineering-practices/writing-for-agents/SKILL.md, the rule table; .skill-template/agent.md.
-4. The report A3 wrote in docs/audits/.
-
-Do:
-- Front-door agents: for each plugin in marketplace.json, the agent its plugin-name command runs
-  (read the command file to find it). Judge against R13–R23.
-- The sample: the largest hidden SKILL.md in each top-level domain folder (qa, frontend, desktop,
-  mobile, design, backend, observability, data, devops, security, business-analysis,
-  training-data, tooling, engineering-practices). Name the paths in the report.
-- Append the findings in the same three classes, then the summary: totals by severity and class,
-  and the five rules with the most findings.
-
-Traps:
-- An agent file can be 14k characters; read one, write its rows, then move on. Do not hold all of
-  them before writing.
-- Read-only: fix nothing.
-
-Gate: none. The deliverable is the report; the lint ran in A3.
-
-Commit: `docs(audits): skill-authoring audit r1, agents and sample (014 A4)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### A5 — the remediation plan, and filing 014 (general-purpose, docs)
-
-````
-Depends on: A4
-Agent: general-purpose · Stack: docs
-
-Task A5 of docs/plans/014-authoring-standard-domain-language-feature-prototype.md: turn the audit
-into the remediation plan, then file this plan as its last task.
-
-Read, in this order:
-1. CLAUDE.md (repo root): "Planning".
-2. engineering-practices/writing-plans/references/plan-format.md, all of it.
-3. The audit report in docs/audits/ (<NNN>-skill-authoring-r1.md).
-4. This plan: header, §8, task A5, and "Close-out — every task".
-
-Write docs/plans/<next>-skill-authoring-remediation.md, with the next free number across
-docs/plans/ and docs/plans/implemented/:
-- §1 Need | Today | Gap from the report's findings.
-- Tasks: stack docs, agent general-purpose, one per cluster of findings by plugin, merged until a
-  session would pass ~150k. Mechanical findings batch by rule; judgment findings go with their
-  skill. Each gate: `python3 tools/skill-lint.py <its paths>` + `python3 tools/plugin-surface-check.py`.
-- A gate task that sweeps every touched path, and its prompts, the close-out section and the task
-  table per plan-format.
-- Header: `Documentation task: none — <why>` and `Test design: none — <why>`.
-
-Traps:
-- Fix no skill here.
-- Every remediation prompt names the exact paths and rule ids it fixes; never "the findings in the
-  report".
-
-Gate: none. It writes a plan document.
-
-Commit: `docs(plans): <next> skill-authoring remediation, from the 014 audit (014 A5)`.
-You delete the last prompt block, so you file this plan (close-out step 8).
-Close out per the plan's "Close-out — every task" before you stop.
-````

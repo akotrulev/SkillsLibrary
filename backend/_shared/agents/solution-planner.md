@@ -59,7 +59,7 @@ State the mode in one line with what settled it.
 | Mode | Recognized by | Where you start |
 |---|---|---|
 | **NEW** | Only a requirements pack, no meaningful code | Step 1 |
-| **DETAIL** | A high-level plan or spec (human-written, `dev:design`'s, a prior `blueprint.md`), no detail pack | Step 1 as validate-and-normalize, then 2–9 |
+| **DETAIL** | A high-level plan or spec (human-written, `dev:feature`'s, a prior `blueprint.md`), no detail pack | Step 1 as validate-and-normalize, then 2–9 |
 | **RESUME** | A detail pack and partial implementation | Reconcile first, then re-enter only what drifted |
 | **EXTEND** | A complete-enough plan and code; the ask adds a functional area | Step 1 for that area only, then 2–9 for the delta |
 
@@ -76,7 +76,7 @@ Artifacts land in `docs/plans/<NNN>-<initiative>/` under the target project's ro
 | # | Step | Load | Done when |
 |---|---|---|---|
 | 0 | Discover | `engineering-practices/agent-orientation-cache` (+ `qa/manual/requirements-breakdown` when the input is raw prose) | Mode declared; `E` and `US` ids listed; current-state map in one block |
-| 1 | Blueprint | `backend/_shared/solution-blueprint` (+ `backend/_shared/pattern-guide` when a pattern decision is live; `business-analysis/skills/ba-process-flow-diagram`, `ba-decision-table`, and `business-analysis:knowledge-base` where a KB exists; `design/ux-patterns` when anything is user-facing) | **BLOCKING: the human approves `blueprint.md`.** Every area names its epics and every epic is served; the routing map names exact agents (the `qa-*` ones with `qa-<stack>:test-first`); the Step-1 batch asked who runs the plan and whether a capability must be demonstrable early, whether test-first is opted out of, and whether test design (the `TD` tasks: test plans and test cases) is opted out of, and the answers are recorded |
+| 1 | Blueprint | `backend/_shared/solution-blueprint` (+ `backend/_shared/pattern-guide` when a pattern decision is live; `business-analysis/skills/ba-process-flow-diagram`, `ba-decision-table`, and `business-analysis:knowledge-base` where a KB exists; `design/ux-patterns` when anything is user-facing; `engineering-practices/domain-modeling` when a blueprint decision passes the three ADR tests) | **BLOCKING: the human approves `blueprint.md`.** Every area names its epics and every epic is served; the routing map names exact agents (the `qa-*` ones with `qa-<stack>:test-first`); the Step-1 batch asked who runs the plan and whether a capability must be demonstrable early, whether test-first is opted out of, and whether test design (the `TD` tasks: test plans and test cases) is opted out of, and the answers are recorded |
 | 2 | Data model | `backend/_shared/data-model-plan` | Every area has its entities; every entity an owner and a lifecycle (`ba-entity-state-grid` for lifecycles) |
 | 3 | Experience | `backend/_shared/experience-plan` + `design/ux-patterns` | Every primary task has a journey and screens; every screen its four region states and data needs; every web route a rendering mode per `experience-plan/references/rendering-strategy.md` (§4a). Skipped, stated, when the routing map names no frontend, mobile or desktop agent |
 | 4 | API surface | `backend/_shared/api-surface-plan` | Every endpoint typed both ways, on the validation catalog, resolvable against the data model; `experience-plan.md` §5 filled |

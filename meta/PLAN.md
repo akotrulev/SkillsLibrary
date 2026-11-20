@@ -1,6 +1,8 @@
+**Superseded by docs/plans/014-authoring-standard-domain-language-feature-prototype.md (D12).**
+
 # meta/ Remediation Plan
 
-Source: audit of `meta/skill-creator` + `meta/writing-skills`, 2026-07-12.
+Source: audit of `meta/skill-creator` + `writing-skills` (then beside it in `meta/`), 2026-07-12.
 
 **Context.** `meta/` holds the two skill-authoring skills. The audit found: (1) the two skills directly contradict each other on how to write a skill description; (2) neither references the library's real authoring authority (`.skill-template/`, CLAUDE.md conventions); (3) `writing-skills` is unregistered, collides with `skill-creator` on triggers, and carries stale leftovers that reference skills outside this library; (4) its Iron Law mandates per-edit subagent pressure-testing, violating the library's conservative agent-spawning policy; (5) assorted mechanical nits.
 
@@ -42,7 +44,7 @@ Steps (written for option (a); adapt if (b) is chosen):
 - [ ] 2.3 Create `skill-creator/references/discipline-skills.md` from the rationalization tables, red-flags list, loophole-closing, and spirit-vs-letter material; fold in a pointer to `persuasion-principles.md`.
 - [ ] 2.4 Move `testing-skills-with-subagents.md` and `persuasion-principles.md` to `skill-creator/references/`; update internal links. Move `graphviz-conventions.dot` + `render-graphs.js` too, or drop them if the flowchart guidance is cut.
 - [ ] 2.5 Add a short "Hardening discipline skills" pointer section to `skill-creator/SKILL.md` referencing the new files ("read when the skill enforces a rule agents will rationalize around").
-- [ ] 2.6 Delete `meta/writing-skills/`; update `README.md` lines 64 and 174 (folder listing + skills table) to reflect the merge.
+- [ ] 2.6 Delete the `writing-skills/` folder; update `README.md` lines 64 and 174 (folder listing + skills table) to reflect the merge.
 - [ ] 2.7 Commit: `meta: fold writing-skills into skill-creator references, retire the standalone skill`.
 
 ## Phase 3 — Purge stale external-skill references

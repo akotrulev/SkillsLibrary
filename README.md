@@ -114,7 +114,7 @@ So installing a single plugin gives you the stack's authoring/verification skill
 
 ### The `dev` plugin and the always-on internals
 
-`dev` registers 21 skills, 5 agents and 5 commands: the design-then-plan pair (`/dev:design`, `/dev:plan-feature`), `debugging`, `verify`, the spec-compliance / feature audit pair (`audit-spec`, `audit-feature`), the eleven `backend/_shared` planning and documentation skills (`plan-delivery`, `plan-data-model`, `doc-feature-trace`, …), the working-discipline skills `quality-constraints`, `source-grounding`, `decision-interview` and `notebooklm` and the agents `code-auditor`, `solution-planner`, `be-documenter`, `be-feature-documenter` and `requirements-author`.
+`dev` registers 22 skills, 5 agents and 5 commands: the feature-then-plan pair (`/dev:feature`, `/dev:plan-feature`), `debugging`, `verify`, the spec-compliance / feature audit pair (`audit-spec`, `audit-feature`), the eleven `backend/_shared` planning and documentation skills (`plan-delivery`, `plan-data-model`, `doc-feature-trace`, …), the working-discipline skills `quality-constraints`, `source-grounding`, `writing-for-agents` (the house standard for anything an agent reads) and `notebooklm`, the hidden `domain-modeling` (the project glossary and ADRs, loaded by `dev:feature` and `solution-planner`) and the agents `code-auditor`, `solution-planner`, `be-documenter`, `be-feature-documenter` and `requirements-author`.
 
 Three skills are **unregistered and loaded by path only** — they never appear in `/`, and every agent that needs one loads it from the installed repo checkout:
 
@@ -128,7 +128,7 @@ Three skills are **unregistered and loaded by path only** — they never appear 
 
 **Commands are kept to the entry points that matter: every front-door agent, the `dev` delivery workflow, and the read-only audits.** A command is typed by a person: every command file carries `disable-model-invocation: true`, so it is not listed to the model, and a session reaches the same workflow on its own by delegating to the agent. Agents are normally picked up by description match, which is probabilistic; the command is the deterministic entry point for when you would rather *name* the workflow than hope for it. Each command loads its agent definition and runs that agent's step-by-step workflow. Called bare with no argument, it runs the agent's orientation pass against the current repo and asks what you need.
 
-**Every skill is already slash-invocable as `/<plugin>:<name>`** — `/design:tokens`, `/business-analysis:stories`, `/qa-<stack>:bug-report-writer`, `/dev:audit-feature` — and the commands below are the agent entry points. **Only front doors are listed to the model**: each plugin's `rules` skill, the `dev` workflow skills (`design`, `plan-feature`, `debugging`, `verify` and six more) and two QA skills no agent loads. Every other skill carries `disable-model-invocation: true`, so it costs a session nothing until its agent or command reads it or you type its name; a session will not load it on a description match (CONTRIBUTING.md, "Front doors"). Prefer the agent for anything that touches code: an agent's first act is version detection (TFM / React major / engine version / Node major) plus reading existing files for conventions, and a skill invoked directly skips all of it — the exact way a .NET 8 repo ends up with a .NET 10 recipe.
+**Every skill is already slash-invocable as `/<plugin>:<name>`** — `/design:tokens`, `/business-analysis:stories`, `/qa-<stack>:bug-report-writer`, `/dev:audit-feature` — and the commands below are the agent entry points. **Only front doors are listed to the model**: each plugin's `rules` skill, the `dev` workflow skills (`feature`, `plan-feature`, `debugging`, `verify`, `writing-for-agents` and six more), `design:prototype` and two QA skills no agent loads. Every other skill carries `disable-model-invocation: true`, so it costs a session nothing until its agent or command reads it or you type its name; a session will not load it on a description match (CONTRIBUTING.md, "Front doors"). Prefer the agent for anything that touches code: an agent's first act is version detection (TFM / React major / engine version / Node major) plus reading existing files for conventions, and a skill invoked directly skips all of it — the exact way a .NET 8 repo ends up with a .NET 10 recipe.
 
 **Naming scheme.** A plugin's front-door command is the plugin's name; every read-only conformance audit is `:audit`; every other command is a short role or topic. 77 command files, 87 registrations.
 
@@ -161,7 +161,7 @@ The manual-QA writers (`qa-<stack>:test-case-writer`, `qa-<stack>:test-plan-writ
 | `/fe-react` | what to build, fix, or extend | the step-by-step React / Next.js UI workflow |
 | `/fe-react:audit` *(fe-react only)* | *(none — or a path/section limiter)* | read-only sweep of the repo against the `fe-react` conventions → findings report in `docs/audits/` |
 
-The 17 `design` craft skills (`/design:corpus` — **the source of truth for design facts** — `/design:visual-identity`, `/design:tokens`, `/design:app-structure`, `/design:ux-review`, `/design:html-video`, …) arrive through the `design` dependency and are skills, invoked by name; `/design:audit` runs them all as one audit.
+The 18 `design` craft skills (`/design:prototype` — 2–5 variants of a screen in the project's design language, as one HTML file — `/design:corpus` — **the source of truth for design facts** — `/design:visual-identity`, `/design:tokens`, `/design:app-structure`, `/design:ux-review`, `/design:html-video`, …) arrive through the `design` dependency and are skills, invoked by name; `/design:audit` runs them all as one audit.
 
 **`mobile-react-native` · `mobile-ios` · `mobile-android`** — 2 commands each:
 
@@ -249,7 +249,7 @@ The ten skills (`/business-analysis:scoping`, `/business-analysis:epics`, `/busi
 | `/dev:document-feature` | the feature, in your own words (e.g. "the refund flow") | document **one** feature of an existing codebase: locate the implementation, trace it end to end, and write one guide from one trace — `docs/features/<NNN>-<slug>.md`: an *In short*, who uses it (administrators included), each person's tasks, every rule and calculation, worked examples, open questions with their answers, and a few screenshots from a running non-production environment when one is given. As a plan's last task it also writes the delivery note. No KB writes; read-only on code |
 | `/dev:audit` | spec, stories, feature, or area | read-only audit engagement (the `code-auditor` agent), saved to `docs/audits/` — owns both the spec-vs-code and spec-less feature lanes; `dev:audit-spec` / `dev:audit-feature` remain invocable for a one-off |
 
-`/dev:design` (one clear feature → approved technical design/spec in `docs/specs/`; a loose or multi-capability ask → `/dev:refine`) and `/dev:plan-feature` (approved spec → a self-contained plan document in `docs/plans/`: the gap table, the decisions, one flat ordered task list, and one paste-ready prompt per task) are **skills** in `dev`, typed the same way.
+`/dev:feature` (describe one feature → an interview in rounds, then an approved technical design/spec in `docs/specs/`; a spec or plan with open questions → the interview only, each answer written back into it; a loose or multi-capability ask → `/dev:refine`) and `/dev:plan-feature` (approved spec → a self-contained plan document in `docs/plans/`: the gap table, the decisions, one flat ordered task list, and one paste-ready prompt per task) are **skills** in `dev`, typed the same way.
 
 **`design`** — 1 command:
 
@@ -280,10 +280,10 @@ observability/          # Grafana, OpenTelemetry, structured logging
 security/               # Security domain in two lanes: pentest kill chain + purple-team validation (penetration-testing) and defensive/governance (security-governance) + 4 agents
 training-data/          # LLM/VLM training-data engineering: skills across 4 stages and 2 modalities + dataset-engineer & dataset-auditor agents
 qa/                     # Test authoring (API/UI/perf), DB/email/network verification, CI pipelines, reporting (see QA skills below)
-engineering-practices/  # planning, debugging, verification, decision interviews, NotebookLM, audits — ships as the `dev` plugin
-meta/                   # Authoring skills themselves (writing-skills, skill-creator)
+engineering-practices/  # feature interviews, planning, debugging, verification, the authoring standard, glossary + ADRs, NotebookLM, audits — ships as the `dev` plugin
+meta/                   # skill-creator (the authoring standard is engineering-practices/writing-for-agents)
 design/                 # Ships as the `design` plugin. Visual/UX: visual-identity, design:tokens, charts, brand-import, iconography, ux-review, theme-presets, ux-writing, ui-code-audit,
-                        #   accessible-by-design (WCAG 2.2 design-time), ethical-patterns (dark patterns), ai-experience + design-auditor agent
+                        #   accessible-by-design (WCAG 2.2 design-time), ethical-patterns (dark patterns), ai-experience, prototype + design-auditor agent
 communication/          # BA, user stories, stakeholder updates, internal comms
 ai-development/         # claude-api, mcp-builder (wraps a third-party API)
 tooling/                # Agent-drivable surfaces over your own project: capability-contract -> mcp-builder / cli-builder + tooling-engineer agent
@@ -472,8 +472,8 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the templates in [`.skill-template/
 | devops                | authored + shipped — 9 cloud/CI-keyed skills (docker, kubernetes, infrastructure-as-code, aws-deployment, azure-deployment, github-actions, gitlab-ci, azure-pipelines, environment-config) + the `devops-engineer` (build) and `devops-auditor` (read-only conformance audit, `/devops:audit`) agents, both gated on a tool-stack confirmation before any skill loads; `devops` plugin |
 | observability         | authored + shipped — 6 skills (per-stack `opentelemetry-*` / `structured-logging-*` + stack-agnostic loki-tempo, prometheus-mimir, queries, dashboards) + `observability-engineer-{dotnet,java,node,rust}` agents; bundled within the category into the `be-*` plugins |
 | qa                    | authored — 35 code-producing nodes (mostly ×3 stacks; Playwright 1.64 on TypeScript and 1.63 on Java / .NET / Python, Appium 3, plus a TypeScript-only Maestro lane) + 9 process skills (incl. `cross-feature-test-design`). Unverified: no `time-and-concurrency-testing` sample (any stack) has been compiled or run; no Appium or Maestro flow has run on a device or emulator, and no WebMCP test has run against a site that registers tools. `qa-dotnet` additionally ships the `standards-audit` self-audit skill + `/qa-dotnet:audit` |
-| engineering-practices | authored + shipped — planning, debugging, verification, `quality-constraints`, `source-grounding`, `decision-interview` and `notebooklm` — registered in the `dev` plugin (3 internals and the bundled tree are loaded by path only) |
-| meta                  | authored (writing-skills, skill-creator) |
+| engineering-practices | authored + shipped — the `feature` interview, planning, debugging, verification, `quality-constraints`, `source-grounding`, `writing-for-agents`, `domain-modeling` and `notebooklm` — registered in the `dev` plugin (3 internals and the bundled tree are loaded by path only) |
+| meta                  | authored (skill-creator); `writing-skills` retired by plan 014 (D12) for `dev:writing-for-agents` |
 | documents             | authored + shipped |
 | design                | authored + shipped, plus `html-video` routing to HyperFrames — the `design` plugin, a dependency of `fe-*` and `mobile-*` |
 | communication         | authored (business-analysis, user-story-writer, stakeholder-updates) |

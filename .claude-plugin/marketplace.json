@@ -12,7 +12,7 @@
   "plugins": [
     {
       "name": "dev",
-      "description": "The developer-workflow layer every other plugin depends on: brainstorming into a design (/dev:design), implementation plans (/dev:plan-feature), systematic debugging, verify-before-done, spec-vs-code and feature audits, and the whole-application planning lane — solution blueprint, data-model, experience, API-surface and integration plans, epic map, delivery plan and session budget (/dev:plan-system). Ships the requirements-author front door (/dev:refine), the be-documenter and be-feature-documenter agents that reverse-engineer guides from existing code — the user's tasks for every role (administrators included), the analyst's rules and calculations, the product owner's summary, open questions with answers and a delivery note per plan, with screenshots when an environment is given (/dev:document-system, /dev:document-feature), and the read-only code-auditor engagement agent (/dev:audit) that saves versioned findings to docs/audits/. Also ships the working-discipline skills quality-constraints (the rules checked during the work), source-grounding (framework and version decisions cited to the version's official doc), decision-interview (one question at a time until no branch is open) and notebooklm (source-grounded answers from the user's own NotebookLM notebooks). Installed automatically as a dependency of every qa-*, fe-*, mobile-*, be-* plugin, devops and business-analysis; install it on its own for planning, documentation and audits without a stack plugin.",
+      "description": "The developer-workflow layer every other plugin depends on: the feature front door that interviews you in rounds and then writes the spec (/dev:feature), implementation plans (/dev:plan-feature), systematic debugging, verify-before-done, spec-vs-code and feature audits, and the whole-application planning lane — solution blueprint, data-model, experience, API-surface and integration plans, epic map, delivery plan and session budget (/dev:plan-system). Ships the requirements-author front door (/dev:refine), the be-documenter and be-feature-documenter agents that reverse-engineer guides from existing code — the user's tasks for every role (administrators included), the analyst's rules and calculations, the product owner's summary, open questions with answers and a delivery note per plan, with screenshots when an environment is given (/dev:document-system, /dev:document-feature), and the read-only code-auditor engagement agent (/dev:audit) that saves versioned findings to docs/audits/. Also ships the working-discipline skills quality-constraints (the rules checked during the work), source-grounding (framework and version decisions cited to the version's official doc), writing-for-agents (the house standard for anything an agent reads: skills, agents, rule files, CLAUDE.md), domain-modeling (the project glossary and ADRs the interview writes while it runs) and notebooklm (source-grounded answers from the user's own NotebookLM notebooks). Installed automatically as a dependency of every qa-*, fe-*, mobile-*, be-* plugin, devops and business-analysis; install it on its own for planning, documentation and audits without a stack plugin.",
       "source": "./",
       "strict": false,
       "author": {
@@ -35,7 +35,8 @@
         "./engineering-practices/verify-before-done",
         "./engineering-practices/quality-constraints",
         "./engineering-practices/source-grounding",
-        "./engineering-practices/decision-interview",
+        "./engineering-practices/writing-for-agents",
+        "./engineering-practices/domain-modeling",
         "./engineering-practices/notebooklm",
         "./engineering-practices/spec-vs-code-audit",
         "./engineering-practices/feature-audit",
@@ -69,7 +70,7 @@
     },
     {
       "name": "design",
-      "description": "The stack-agnostic design-craft layer for web, mobile and desktop UIs: the ui-ux-pro-max design-intelligence corpus (88 styles, 192 palettes, 74 font pairings, 119 UX guidelines, 105 icons, 34 landing patterns, 17 motion presets, 25 chart types and 22 stack files, searchable offline) that is the source of truth for every design fact, plus visual-identity, tokens, charts, brand-import, iconography, ux-patterns, landing-patterns, motion, ux-review, theme-presets, ux-writing, ui-code-audit, accessible-by-design, ethical-patterns, ai-experience and html-video (render an HTML composition to MP4 via HyperFrames), and the design-auditor agent (/design:audit) — a read-only design audit of an existing UI saved to docs/audits/. Installed automatically as a dependency of every fe-*, mobile-* and desktop-* plugin.",
+      "description": "The stack-agnostic design-craft layer for web, mobile and desktop UIs: the ui-ux-pro-max design-intelligence corpus (88 styles, 192 palettes, 74 font pairings, 119 UX guidelines, 105 icons, 34 landing patterns, 17 motion presets, 25 chart types and 22 stack files, searchable offline) that is the source of truth for every design fact, plus visual-identity, tokens, charts, brand-import, iconography, ux-patterns, landing-patterns, motion, ux-review, theme-presets, ux-writing, ui-code-audit, accessible-by-design, ethical-patterns, ai-experience, html-video (render an HTML composition to MP4 via HyperFrames) and prototype (2–5 structurally different variants of a screen in the project's design language, as one self-contained HTML file, /design:prototype), and the design-auditor agent (/design:audit) — a read-only design audit of an existing UI saved to docs/audits/. Installed automatically as a dependency of every fe-*, mobile-* and desktop-* plugin.",
       "source": "./",
       "strict": false,
       "author": {
@@ -102,6 +103,7 @@
         "./design/ux-review",
         "./design/ux-writing",
         "./design/visual-identity",
+        "./design/prototype",
         "./design/rules"
       ],
       "agents": [
