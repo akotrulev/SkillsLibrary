@@ -48,14 +48,16 @@ derived by `dev:plan-session-budget` while the task is being authored, not measu
 > **A task that touches both the API tree and the web tree is two tasks.** There is no mixed task at
 > any size, and no estimate justifies one.
 
-**Every task gates only its own tests.** Before it commits, a task builds what it touched and runs
-only its own tests, nothing more: the tests it wrote itself in this plan plus the acceptance tests bound to
-its own deliverable (the `Q` tests for its own endpoint or screen, usually one to three files), on a small core budget, on ports of its own and
-never under a machine-wide test lock, so two or three tasks gate at once. A non-frontend task runs its own
-unit and integration tests and its bound API acceptance tests plus typecheck, lint and format over what it
-touched, no e2e; a frontend or mobile task (and a `Q` journey task) runs only its own and its bound spec
-files on one or two workers, after the production build. None runs an earlier task's tests, another task's
-acceptance tests, the smoke suite or a coverage run. It leaves its tests green, fixing what stands in the way whichever task caused it. Its `**Gate:**`
+**Every task gates its own work and the work landed above it.** Before it commits, a task builds what it
+touched and runs its own tests (the tests it wrote itself in this plan plus the acceptance tests bound to
+its own deliverable, usually one to three files), the tests the landed tasks above it in the same plan
+wrote (acceptance tests bound to a deliverable no landed task has built yet first run in the task that
+builds it, or in the gate task), and the branch-coverage floor over the files it and those tasks touched,
+on a small core budget, on ports of its own and never under a machine-wide test lock, so two or three
+tasks gate at once. A non-frontend task runs unit and integration tests and its bound API acceptance tests
+plus typecheck, lint and format over what it touched, no e2e; a frontend or mobile task (and a `Q`
+journey task) runs spec files on one or two workers, after the production build. None runs another plan's
+tests, the smoke suite or the unfiltered suite. It leaves its tests green, fixing what stands in the way whichever task caused it. Its `**Gate:**`
 line names those exact commands. The last runnable task is the plan's one run under the lock: the smoke
 suite plus every test the plan wrote, then the whole set once more, ending with the coverage floor when
 the plan writes code, and it **fixes what it finds rather than handing it back** by the fix loop (plan
@@ -63,7 +65,7 @@ format §5). The project's whole e2e suite runs in its nightly CI run; each test
 project's tracked list with an owner and comes off it only when a nightly run is green for it. **The plan's last
 task is the documentation task** (`DOC1`, the documenter agent), which updates the documentation from
 the code that landed, writes the delivery note and files the plan. It holds no feature work when the plan has any. A plan stopped halfway has
-each landed task's own tests green, but the whole suite has not run, and the acceptance tests written by
+each landed task's tests and coverage green over its own files, but the whole suite has not run, and the acceptance tests written by
 `Q` tasks have not run together until the gate task. See Step 4.
 
 And one property decides the shape of the sequence: **how the plan will be executed**. User-facing work
@@ -357,7 +359,7 @@ Rules:
   deltas" is. Where the task is a batch, the bullets **are** its per-piece breakdown — one per
   endpoint, per screen, per rule.
 - **`Gate: own tests` on every task that writes code or tests**, naming its commands: a scoped build,
-  filtered unit tests, filtered acceptance tests, the coverage measure (`plan-format.md` §5). A `Q` task
+  filtered unit tests, filtered acceptance tests, the tests of the landed tasks above it, the coverage floor over the files they touched (`plan-format.md` §5). A `Q` task
   expects red for the recorded reason; a `Q` task whose app cannot start in one command proves its tests
   load and list (Playwright's `--list`), and the task that serves each journey turns it green. `Gate: none`
   is only for a task with nothing runnable, such as a docs-only task, and it says so. The last runnable
@@ -507,9 +509,9 @@ The task graph maps 1:1 — the streams in §2 become MC's lanes, each task keep
 `stream` and `order` alongside its `deliverable`, `agent`, `skills`, `files` and
 `dependsOn`, and the open questions below carry their options. There is no grouping
 level: ordering is the `order` sequence, and every prerequisite is an explicit
-`dependsOn` edge. Every task gates only its own tests: its `Gate:` line names the commands
-it runs before it commits, and no task runs an earlier task's tests, another task's acceptance tests or the unfiltered suite, so a lane's
-green covers its own tests. <the last runnable task> runs the whole set. MC's planner re-reads the target repo, so it may
+`dependsOn` edge. Every task gates its own work and the work landed above it: its `Gate:` line names the commands
+it runs before it commits, and no task runs another plan's tests or the unfiltered suite, so a lane's
+green covers its own tests and the tests landed above it. <the last runnable task> runs the whole set. MC's planner re-reads the target repo, so it may
 split a task it finds too large; that is expected and does not invalidate the
 sequence — the new pieces belong in the split task's own lane, and each needs its own
 deliverable.
@@ -613,17 +615,19 @@ that lands anything.>
 
 > **For agentic workers:** the tasks below are one flat sequence — work them in order. Each names the
 > agent that should execute it, the skills to load, and the one deliverable that means it is done.
-> **Every task gates only its own tests:** before it commits, it runs the commands its `Gate: own tests` line
-> names — the build of what it touched and only the tests it wrote itself plus the acceptance tests bound to
-> its deliverable (unit and integration, or its own and bound spec files for a frontend, mobile or journey
-> task), plus typecheck, lint and format over its files — on a small core budget and ports of its own, and
-> leaves them green, fixing what stands in the way whichever task caused it. No task runs an earlier task's
-> tests, another task's acceptance tests, the smoke suite or a coverage run. The acceptance
+> **Every task gates its own work and the work landed above it:** before it commits, it runs the commands its
+> `Gate: own tests` line names — the build of what it touched and the tests it wrote itself plus the
+> acceptance tests bound to its deliverable, the tests of the landed tasks above it (acceptance tests bound to
+> a deliverable no landed task has built yet excepted), and the coverage floor over the files they touched
+> (unit and integration, or spec files for a frontend, mobile or journey task), plus typecheck, lint and
+> format over its files — on a small core budget and ports of its own, and
+> leaves them green, fixing what stands in the way whichever task caused it. A task never runs another plan's
+> tests, the smoke suite or the unfiltered suite. The acceptance
 > tests a `Q` task wrote are read-only to every later task but the gate. <The last runnable task> is the
 > plan's one run under the test lock: the smoke suite plus every test the plan wrote, the whole set once
 > more, and the coverage floor over the whole plan's change. A plan stopped halfway has each landed task's
-> own tests green, but the whole suite has not run, and the acceptance tests written by `Q` tasks have not
-> run together until the gate task.
+> tests and coverage green over its own files, but the whole suite has not run, and the acceptance tests
+> written by `Q` tasks have not run together until the gate task.
 > **Update this document as you work** — the dated `As built` note on your task, the `Status:` line
 > above, and `## Decisions` for anything you built differently — rewrite the prompt blocks below yours
 > wherever what you landed differs from what they assume, commit, and only then **delete your own prompt

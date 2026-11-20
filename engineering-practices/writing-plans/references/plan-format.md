@@ -185,23 +185,28 @@ Act, since a setup call that reaches a stub is also the right reason — or, for
 screen's placeholder**. A test that passes against a stub asserts nothing. A test that is red on a
 `404`, a compile error or a wrong URL has a wiring defect, which the `Q` task fixes before it stops.
 
-## 5. Every task gates what it built
+## 5. Every task gates its own work and the work landed above it
 
-**Every task gates what it built, and only what it built.** Before it commits, a task builds what it
-touched and runs **only its own tests: the tests it wrote itself in this plan, plus the acceptance tests
-bound to its own deliverable** (the `Q` tests for its own endpoint or screen, usually one to three files),
-on a small core budget, on ports of its own, and never under a machine-wide test lock, so two or three tasks of a plan (or of plans
-side by side) gate at once. It leaves them green, fixing what stands in the way whichever task caused it.
-Its `**Gate:**` line names those exact commands.
+**Every task gates its own work and the work landed above it.** Before it commits, a task builds what it
+touched and runs:
 
-- **A non-frontend task** (`be`, `ts`, a `qa` API task): its own unit and integration tests, the bound
-  API acceptance tests it must turn green, plus the static checks (typecheck, lint, format) over what it
+- its own tests: the tests it wrote itself in this plan, plus the acceptance tests bound to its own
+  deliverable (the `Q` tests for its own endpoint or screen, usually one to three files);
+- the tests that the landed tasks above it in the same plan wrote, except acceptance tests bound to a
+  deliverable that no landed task has built yet (those first run in the task that builds the deliverable,
+  or in the gate task);
+- the branch-coverage floor (below), measured over the files that it and those tasks touched.
+
+It runs on a small core budget, on ports of its own, and never under a machine-wide test lock, so two or
+three tasks of a plan (or of plans side by side) gate at once. It leaves them green, fixing what stands
+in the way whichever task caused it. Its `**Gate:**` line names those exact commands.
+
+- **A non-frontend task** (`be`, `ts`, a `qa` API task): unit and integration tests, the bound API
+  acceptance tests it must turn green, plus the static checks (typecheck, lint, format) over what it
   touched. No e2e.
-- **A frontend or mobile task** (`fe`, `mobile`, a `qa` journey or UI task): only its own spec files and
-  the bound acceptance specs it must turn green (usually one to three), on one or two workers, on its own
-  port, after the production build they need.
-- **No task runs** an earlier task's tests, another task's acceptance tests that are not bound to it, the
-  smoke suite or a coverage run.
+- **A frontend or mobile task** (`fe`, `mobile`, a `qa` journey or UI task): spec files, usually a few, on
+  one or two workers, on its own port, after the production build they need.
+- **A task never runs** another plan's tests, the smoke suite or the unfiltered suite.
 
 **Two tasks close a plan: the gate task, then the documentation task.**
 
@@ -258,7 +263,7 @@ it is a test the task believes wrong, a dated `D<n>` with both readings, and it 
 
 | Form | On | Runs |
 |---|---|---|
-| ``**Gate: own tests** — `<command>`, `<command>`. Do not run the unfiltered suite.`` | every task that writes code or tests, the default | exactly its commands: a scoped build, the tests it wrote, filtered, and the static checks over what it touched |
+| ``**Gate: own tests** — `<command>`, `<command>`. Do not run the unfiltered suite.`` | every task that writes code or tests, the default | exactly its commands: a scoped build, the tests it and the landed tasks above it wrote, filtered, the coverage floor over the files they touched, and the static checks over what it touched |
 | `**Gate: none** — <why nothing here is runnable>.` | only a task with nothing runnable, such as a docs-only task | nothing, and it says so |
 | `**Gate (this is the last runnable task …):**` | the last runnable task | the whole set in run order, ending with the coverage floor |
 
@@ -270,12 +275,13 @@ it is a test the task believes wrong, a dated `D<n>` with both readings, and it 
 - **A `Q` task's commands run the tests it writes and expect red for the recorded reason** (a `Q` task
   whose app cannot start in one command proves its tests load and list: Playwright's `--list`, or the
   runner's equivalent). **An implementation task's commands build what it touched and run the unit and
-  integration tests it wrote, the acceptance tests bound to its deliverable (they must turn green), and
-  the static checks over its files; a frontend or mobile one runs only its own and its bound spec files,
-  no e2e beyond them.** Neither reruns an earlier task's tests or another task's acceptance tests, and
-  neither runs the coverage measure: the floor (the table below) is the gate task's.
-- **Acceptance tests not bound to a task's deliverable first run in the gate task**, with the project's
-  smoke suite, in its one locked run; so do any a task could not start on its own.
+  integration tests it wrote, the acceptance tests bound to its deliverable (they must turn green), the
+  tests of the landed tasks above it (the acceptance tests of a deliverable no landed task has built
+  excepted), the coverage floor over the files they touched, and the static checks over its files; a
+  frontend or mobile one runs spec files, no e2e beyond them.**
+- **Acceptance tests bound to a deliverable that no landed task has built yet first run in the task that
+  builds it, or in the gate task**, with the project's smoke suite, in its one locked run; so do any a
+  task could not start on its own.
 - **When a task's own tests need a running service**, the command starts it the project's own way
   (a Testcontainers fixture, the compose file, Playwright's `webServer`) on ports of its own, and the
   block says so.
@@ -284,8 +290,10 @@ it is a test the task believes wrong, a dated `D<n>` with both readings, and it 
 - **A test the task believes wrong is the one thing that stays red** (§4): it is a dated `D<n>`, and the
   last runnable task resolves it with the user.
 
-**The gate ends with the coverage floor** whenever the plan wrote code: unit tests cover **at least
-80% of the branches in the code the plan wrote** — every file it created, whole, and the methods it
+**Every task measures the floor over the files that it and the landed tasks above it touched, with the
+stack's command from the table below. The gate ends with the coverage floor over the whole plan**
+whenever the plan wrote code: unit tests cover **at least 80% of the branches in the code the plan
+wrote** — every file it created, whole, and the methods it
 changed in files that already existed. The scope is the plan's change, never the repo. The gate takes
 the file list from git, starting at the commit that added this plan (a `solution-planner` pack: its
 `delivery-plan.md`):
@@ -343,9 +351,9 @@ With no container runtime on the machine, or a service the gate cannot start, th
 the plan — a run the user starts, a credential, a decision — the gate belongs to the last task that can
 actually run, and the blocked tasks sit below it carrying their own gate for whenever they run.
 
-**What a halfway stop leaves, stated once in the plan:** each landed task's own tests green, but the
-whole suite has not run, and the acceptance tests written by `Q` tasks have not run together until the
-gate task.
+**What a halfway stop leaves, stated once in the plan:** each landed task's tests and coverage green over
+its own files, but the whole suite has not run, and the acceptance tests written by `Q` tasks have not run
+together until the gate task.
 
 ## 6. `## Prompts — one per task`
 
@@ -576,7 +584,7 @@ These are plan failures, not style:
 - A task with no `**Agent:**` line, or one naming two agents; a task naming two stacks
 - A `**Budget:**` with no drivers behind it
 - A task with no `**Gate:**` line, a code task whose gate runs nothing, or an intermediate task that runs
-  the unfiltered whole suite
+  the unfiltered whole suite or another plan's tests
 - A plan with no last task running the whole set
 - A plan that changes behaviour and does not end with a documentation task run by the documenter agent,
   or a gate task that writes the product documentation itself

@@ -194,6 +194,23 @@ across `dev`, `backend/_shared`, `qa/_shared`, the qa lanes and the 11 unit- and
 
 Cost: one more session. Every P task now also depends on C1.
 
+**D10 (2026-11-20) — T1 kept a name-only list in three `rules` skills instead of dropping the table
+everywhere.** The plan says drop the "Loads when" column and its glosses. `desktop-macos`,
+`desktop-windows` and `mobile-ios` count their files by the table's order ("leaving test files out of the
+first four"), and `desktop-windows` marks lane-only files. `data` keeps its `Installed` column.
+
+| Option | Verdict | Why |
+|---|---|---|
+| Drop the table in 19 files; keep a name-only list or the `Installed` column in the other 4 | chosen | Nothing is cached that `paths:` or `ls` shows, and no positional reference breaks |
+| Drop the table in all 23 | rejected | It leaves "the first four" and "(WPF only)" pointing at nothing |
+| Keep a name-only table in all 23 | rejected | It caches an `ls` in 19 files that nothing refers to |
+
+Cost: four files differ in shape from the other 19. P8 and P10 may therefore still see a file list there.
+
+**D11 (2026-11-20) — T1 did not edit `security-governance.md:40`, so T1's gate shows one finding.** The
+lint scans the folder of a `SKILL.md` it is given, and finds the `TBD` marker P12 owns. The edit was refused
+as outside T1's files. Cost: T1's `0 findings` is not reachable until P12 lands. P12's row is unchanged.
+
 ## Answered questions (2026-11-20)
 
 - **O1 — How R8 resolves a pointer: (a). R8 is reworded to the lint's reading. A pointer resolves relative to its file's folder, or inside a skill named in a code span on the same line or the line above. D16 stays, so there is no T2.**
@@ -336,6 +353,30 @@ Each line it prints either changes to the new rule, or `As built` names it as un
 - `docs/plans/**`. Filed plans are never edited, and `007-test-first-delivery.md` is another plan's.
 - `backend/_shared/business-documentation/evals/fixture-delivery/**`, an eval fixture.
 - Every audit finding in these files. Those are the P tasks' rows (§2 item 11).
+- **As built (2026-11-20):** O12's rule is in every listed file, in one wording, and the old-rule grep prints
+  nothing over C1's paths.
+  - `CLAUDE.md:76` is the new bullet "Every task gates its own work and the work landed above it". The "In
+    review" bullet (`:85`) now names a task that runs another plan's tests or the unfiltered suite.
+  - plan-format §5 (`:188–209`, `:275–296`) states the rule and the table row, and its halfway-stop line
+    (`:354`) follows it. The §5 heading changed, and its R9 contents-list finding stays the one it was.
+  - `Gate: own tests` stays the label of the gate line. The rule changes what it runs, not its name.
+  - The 9 unit- and component-testing skills with a `Measure` bullet read "Inside a plan task, the `Gate:` line
+    runs this over the files the task and the landed tasks above it touched. Outside a plan, run it before
+    you report". `desktop/windows` gained that sentence in its Coverage bullet, and `backend/rust` carries it
+    in step 6.
+  - `qa/_shared/test-first` now says the own-tests filter runs with the landed tasks' tests.
+  - `delivery-plan`'s example plan names the landed tasks' tests and a coverage read in the `C4`, `Q1`, `B2`
+    and `F2` gates, and in D4 and D5.
+  - Unrelated hits, left as they were: `quality-constraints:36` (a coverage-config exclusion),
+    `session-budget/references/prompts-section-template.md:49` and `writing-plans/SKILL.md:363` ("its own
+    files"), `documentation-plan.md:40,61` (the doc lint is a documenter task's check), the three
+    `api-contract-testing` descriptions ("one API's own tests"), `test-audit:75`, `desktop/windows:112,185`,
+    `backend/rust/skills/database-code:181`, `backend/rust/skills/unit-testing:157`, `CLAUDE.md:80`.
+  - Lint, over the 22 `SKILL.md` paths: 8 findings before C1, 8 after. It is the same set. Over every C1
+    file it can read, 8 before and 8 after.
+  - `python3 tools/plugin-surface-check.py` prints `OK`.
+  - The old-rule grep over the whole repo, `docs/plans/` excluded, prints nothing. `docs/plans/**` and the
+    eval fixture were left alone, as the task says.
 
 ### T1 — The agent template, the standard, and the 23 `rules` skills
 
@@ -390,6 +431,45 @@ prints nothing. `python3 tools/plugin-surface-check.py` gives `OK`.
   - **R18.** Delete "Never guess the answer."
 - **Not in T1:** the rule files beside each SKILL.md (R23 belongs to the P task of their plugin), and
   every agent (each agent's Fix line and `Gate evidence` line belong to its P task).
+- **As built (2026-11-20):** every deliverable line exists and the gate is green except one finding that
+  is not T1's. Proof, from the repo root:
+  - `.skill-template/agent.md:33` ends "…then sweep: every sibling sharing the defect's pattern fixed or
+    listed in the report." `:38` stops after "never edit, skip or weaken one." `:51` reads
+    `Gate evidence: <the Gate: line's commands and results, including coverage>`.
+  - `engineering-practices/writing-for-agents/SKILL.md:102` (R8) carries O1's wording, and the R20 row
+    (`:114`) points at "Leading words" (`:73`), which is now the one list. O3 and O4 were answered (a), so
+    the R11 row has no exception.
+  - The 23 `rules` SKILL.md: `python3 tools/skill-lint.py` over them and `writing-for-agents` gives
+    `1 finding`, `security/rules-security-governance/security-governance.md:40: R10 'TBD'`. That is a rule
+    file beside a SKILL.md, P12's row, and T1 did not edit it (an attempted edit was refused as outside
+    T1's files). The plan's `0 findings` gate for T1 cannot reach 0 until P12 lands. `token-audit` lists no
+    `rules` skill (its two hits for the plan's grep are `frontend/{react,blazor}/skills/ui-rules/SKILL.md`,
+    P5 and P6's). `plugin-surface-check` prints `OK`. `pytest tools/test_skill_lint.py` gives 95 passed.
+  - **Rows that differed at their line (§2 item 1):**
+    - R2: no description had a parenthetical list. All 19 were cut to ≤ 200 characters by dropping
+      " as path-scoped rules" ("as a path-scoped rule" in `tooling`), and "test-automation " as well in
+      `qa-java`. The trigger and the sibling stay.
+    - R19 "so a session that never … never pays for …": found in 20 files, not 22. `data` and
+      `training-data` carry no such clause (they say what a backend session gets without the agent, which
+      the plan keeps as it keeps `tooling`'s). `business-analysis` and `devops` had the clause as a second
+      half of a longer sentence, and only that half was deleted. `desktop-windows` also said "Install all
+      twelve", now "Install every file".
+    - R17 step 2: `design` also said "These two files" in its intro, now "These files".
+  - **Table (D10):** removed in 19 files; kept as a name-only list in `desktop-macos`, `desktop-windows` and
+    `mobile-ios` (step 5 counts "the first four" or "the first six" files by it, and `desktop-windows` marks
+    WinUI, WPF, WinForms and C++/WinRT only files); kept as a `File | Installed` table in `data`, where the
+    column is the install rule and not a copy of `paths:`.
+  - **R16:** the unattended paragraph is one sentence inline. Its remainder went under step 4 ("With nobody to
+    ask and no argument, write the plugin's copy beside it") and step 5 ("change no path and list each
+    proposed glob under `Waiting for the user:`"). The heading "Run by a person or by a model" became "Run by
+    a model", because the person sentence went (R19).
+  - **R15:** steps 3, 4, 5 and 7 end on a done-when in 21 files. `data` has two detection steps first, so
+    its steps 3, 4, 5, 6, 7 and 9 each got one. `tooling` names `tool-contract.md` in steps 3 and 4.
+  - **R7:** both headings are at the end of each file, one line each, as D4 words them.
+  - `engineering-practices/rules/SKILL.md` (dev): step 2 kept its form, minus "or a file named in the table
+    above is missing"; the sentence "Every `*.md` beside this SKILL.md … is a rule file" went, because step 2
+    says it.
+  - Not verified: no skill was run end to end; the rules skills were edited as text.
 
 ### P1 — dev: the planning and verification front doors
 
@@ -1165,151 +1245,9 @@ session that runs the task. No prompt edits a file outside the paths it names (�
 | P20 | `docs` | `general-purpose` | L1, T1, C1 | P1–P19 | ~130k |
 | G1 | `docs` | `general-purpose` | L1, T1, C1, P1–P20 | — | ~110k |
 
-L1 has landed. The 23 prompts of T1, C1, P1–P20 and G1 are live.
+L1, C1 and T1 have landed. The 21 prompts of P1–P20 and G1 are live.
 
 ---
-
-### T1 — the agent template, the standard, and the 23 rules skills (general-purpose, docs)
-
-````
-Depends on: L1
-Agent: general-purpose · Stack: docs
-
-Task T1 of docs/plans/015-skill-authoring-remediation.md. Fix the shared shapes that the per-plugin
-tasks copy: the agent template, the standard's own R8 and R20 rows, and the 23 `rules` skills.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table (R2, R7, R8, R11, R15–R20) and
-   "Leading words".
-2. The plan: §2, `## Answered questions` (O1, O3, O4, O5, O18, O20), D2, D4, task T1, and
-   "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md: the rows whose Location starts "all 23 `rules`",
-   "19 of 23", "21 `rules`" or "22 `rules`" (Code issues, "Judgment, the front doors"), the
-   `.skill-template/agent.md` Fix row (Code issues A4), and the `Gate evidence` row (Logical conflicts
-   A4).
-4. .skill-template/agent.md, then engineering-practices/rules/SKILL.md as the model for step 2's form.
-
-Fix, by path:
-- .skill-template/agent.md:33, R15. Fix ends "…then sweep: every sibling sharing the defect's pattern
-  fixed or listed in the report".
-- .skill-template/agent.md:51, O18. The line becomes
-  `Gate evidence: <the Gate: line's commands and results, including coverage>`.
-- .skill-template/agent.md:38, O20 (b). Delete the clause from "a test you believe is wrong stays as it
-  is and red" through "The close-out gate rules on it." Keep the read-only clause before it.
-- engineering-practices/writing-for-agents/SKILL.md:102, O1. Under (a), R8 reads "…exists relative to
-  that file's folder, or inside a skill named in a code span on the same line or the line above".
-- engineering-practices/writing-for-agents/SKILL.md:73 and :114, O5. One list, pointed at.
-- Under O3 (b) or O4 (b): the R11 row of the standard states the exception.
-- The 23 rules SKILL.md files:
-  - backend/{dotnet,java,node,python,rust}/skills/rules/SKILL.md
-  - business-analysis/skills/rules/SKILL.md
-  - data/rules/SKILL.md
-  - design/rules/SKILL.md
-  - desktop/{macos,windows}/skills/rules/SKILL.md
-  - devops/rules/SKILL.md
-  - engineering-practices/rules/SKILL.md
-  - frontend/{blazor,react}/skills/rules/SKILL.md
-  - mobile/{android,ios,react-native}/skills/rules/SKILL.md
-  - qa/{dotnet,java,typescript}/skills/rules/SKILL.md
-  - security/rules-security-governance/SKILL.md
-  - tooling/skills/rules/SKILL.md
-  - training-data/skills/rules/SKILL.md
-
-  In each:
-  - R2. Applies to all but design, business-analysis, desktop/macos and desktop/windows. Drop the
-    description's parenthetical list, and keep the trigger and the sibling.
-  - R7 (D4). Add `## When to use` with "installing or updating the rules", and `## When NOT to use`
-    with "writing code: the rule files apply themselves".
-  - R17. Drop the rule-file table's "Loads when" column and its glosses.
-  - R17, step 2. Applies to all but dev and tooling. Replace the hard-coded count with the form at
-    engineering-practices/rules/SKILL.md:32.
-  - R15. Steps 3, 4, 5 and 7 get a done-when. Step 3: "every source file is in the target". Step 5:
-    "every file each command lists is matched by an installed glob, or a glob is proposed for it".
-    Step 7: "each contradiction listed, or the report says none".
-  - R16. The unattended paragraph becomes one sentence inline, and the rest goes under the step it
-    governs.
-  - R19. Delete "A person types `/<plugin>:rules`.". In all but tooling, also delete the clause "so a
-    session that never touches … never pays for …".
-  - R18. Delete "Never guess the answer.".
-
-Traps:
-- Re-read each row at its line first (§2 item 1). A file whose shape differs from the group's gets its
-  own fix, named in As built.
-- The rule files beside each SKILL.md are NOT yours (R23 belongs to the P tasks), and neither is any
-  agent. 014's plan is filed: never edit it.
-
-Gate: own tests.
-  python3 tools/skill-lint.py engineering-practices/writing-for-agents backend/dotnet/skills/rules/SKILL.md backend/java/skills/rules/SKILL.md backend/node/skills/rules/SKILL.md backend/python/skills/rules/SKILL.md backend/rust/skills/rules/SKILL.md business-analysis/skills/rules/SKILL.md data/rules/SKILL.md design/rules/SKILL.md desktop/macos/skills/rules/SKILL.md desktop/windows/skills/rules/SKILL.md devops/rules/SKILL.md engineering-practices/rules/SKILL.md frontend/blazor/skills/rules/SKILL.md frontend/react/skills/rules/SKILL.md mobile/android/skills/rules/SKILL.md mobile/ios/skills/rules/SKILL.md mobile/react-native/skills/rules/SKILL.md qa/dotnet/skills/rules/SKILL.md qa/java/skills/rules/SKILL.md qa/typescript/skills/rules/SKILL.md security/rules-security-governance/SKILL.md tooling/skills/rules/SKILL.md training-data/skills/rules/SKILL.md
-    → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'rules/SKILL.md|rules-security-governance/SKILL.md'   → prints nothing
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 T1 — agent template, standard R8/R20, the 23 rules skills`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### C1 — the plan-task gating rule, everywhere it is stated (general-purpose, docs)
-
-````
-Depends on: L1
-Agent: general-purpose · Stack: docs
-
-Task C1 of docs/plans/015-skill-authoring-remediation.md. Rewrite the plan-task gating rule to the
-owner's O12 answer, in one wording, in every file that states it. It runs beside T1, and their files are
-disjoint.
-
-Read, in this order:
-1. The plan: `## Answered questions` (O12), D9, task C1 (the wording and the paths), and "Close-out —
-   every task".
-2. CLAUDE.md "Planning": the bullet "Every task gates only its own tests (2026-11-19)" and the
-   "In review" bullet.
-3. engineering-practices/writing-plans/references/plan-format.md §5.
-
-The rule (O12):
-- Before it commits, a task builds what it touched and runs:
-  - its own tests;
-  - the tests that the landed tasks above it in the same plan wrote, except acceptance tests bound to a
-    deliverable that no landed task has built yet (those first run in the task that builds the
-    deliverable, or in the gate task);
-  - the branch-coverage floor, measured over the files that it and those tasks touched.
-- It runs on a small core budget, on ports of its own, and never under a machine-wide test lock.
-- The last runnable task stays the plan's one run under the project's test lock: the smoke suite, every
-  test the plan wrote, and the coverage floor.
-- In the unit- and component-testing skills, the line reads: "Inside a plan task, the `Gate:` line runs
-  this over the files the task and the landed tasks above it touched. Outside a plan, run it before you
-  report."
-
-Do:
-1. List the sites:
-     grep -rn -e "own tests" -e "earlier task" -e "coverage run" -e "coverage measure" -e "only its own" <the paths in task C1>
-   Done when every printed line is marked "rewrite" or "unrelated".
-2. Rewrite each "rewrite" line to the rule, in the file's own voice and length:
-   - CLAUDE.md "Planning";
-   - plan-format §5 (:195–206, :270–280);
-   - rules/plans.md;
-   - writing-plans, verify-before-done, quality-constraints;
-   - delivery-plan and its example, session-budget and its prompts template, codebase-survey's
-     documentation-plan;
-   - qa/_shared test-first and test-audit, and the three api-contract-testing skills;
-   - docs/skills-catalog.md;
-   - the 12 testing skills listed in task C1.
-   In CLAUDE.md's "In review" bullet, narrow the major finding to a task that runs another plan's tests
-   or the unfiltered suite. Done when the old-rule grep in the gate prints nothing.
-
-Traps:
-- Change only the gating rule. Every audit row in these files belongs to a P task (§2 item 11).
-- docs/plans/** is not yours: filed plans are never edited, and 007 is another plan's. The eval fixture
-  under backend/_shared/business-documentation/evals/ is not yours either.
-- T1 runs beside you. Close-out: touch only your own task block, your prompt block and the landed line.
-
-Gate: own tests.
-  grep -rn -e "earlier task's tests" -e "gates only its own" -e "neither runs the coverage" -e "No task runs" <the paths in task C1>   → prints nothing
-  python3 tools/skill-lint.py <the skill paths in task C1>   → no more findings than before C1 (both counts in As built)
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(rules): 015 C1 — a plan task runs the landed tasks' tests and measures coverage (O12)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### P1 — dev: the planning and verification front doors (general-purpose, docs)
 

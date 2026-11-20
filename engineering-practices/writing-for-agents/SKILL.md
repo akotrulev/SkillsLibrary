@@ -99,7 +99,7 @@ Each rule has an id that the lint, the audit and a review cite. **Enforced by** 
 | **R5** — listed to the model only when a front door | skills, commands | `plugin-surface-check` | major |
 | **R6** — a hidden skill has no `When to use`, `When NOT to use`, `Handoffs` or `Related` heading | skills | `skill-lint` | minor |
 | **R7** — a front door has `When to use` and `When NOT to use` | skills | `skill-lint` | minor |
-| **R8** — pointers resolve: every relative Markdown link, and every backticked path under `references/`, `scripts/`, `templates/` or `examples/` in a skill or agent, exists relative to that file's folder; a path holding a placeholder (`<`, `{`, `*` or `…`) is a pattern and is skipped | skills, agents | `skill-lint` | major |
+| **R8** — pointers resolve: every relative Markdown link, and every backticked path under `references/`, `scripts/`, `templates/` or `examples/` in a skill or agent, exists relative to that file's folder, or inside a skill named in a code span on the same line or the line above; a path holding a placeholder (`<`, `{`, `*` or `…`) is a pattern and is skipped | skills, agents | `skill-lint` | major |
 | **R9** — a reference file over 300 lines opens with a contents list of its `##` headings, before its first `##` | skill `references/*.md` | `skill-lint` | minor |
 | **R10** — no placeholders: `TODO`, `TBD`, `FIXME`, `XXX` outside a code fence or an inline code span, and no `@path` force-load links | skills, agents | `skill-lint` | major |
 | **R11** — vocabulary: `Phase`, `Slice` or `Milestone` never appears in a heading or a table header row | skills, agents | `skill-lint` | minor |
@@ -111,7 +111,7 @@ Each rule has an id that the lint, the audit and a review cite. **Enforced by** 
 | **R17** — one meaning, one place: a rule in a rule file or `CLAUDE.md` is pointed at, never restated; a fact one command or one file away (scripts, config, layout) is looked up, not cached | skills, agents, rule files | judgment | major |
 | **R18** — state the target behaviour. A prohibition appears only as a hard guardrail, and is paired with the positive target | skills, agents, rule files | judgment | minor |
 | **R19** — no no-ops: a sentence that does not change behaviour against the model's default is deleted whole | skills, agents, rule files | judgment | minor |
-| **R20** — leading words: one concept, one word, reused as a token; the house vocabulary (task, step, deliverable, front door, gate) is never paraphrased | skills, agents | judgment | minor |
+| **R20** — leading words: one concept, one word, reused as a token; the house vocabulary listed under "Leading words" is never paraphrased | skills, agents | judgment | minor |
 | **R21** — examples obey the house code, comment and test rules (`CLAUDE.md`) | skills | judgment | major |
 | **R22** — a pointer a main session follows (in a front door or a rule file) names the agent that loads a hidden skill or runs a command | front doors, rule files | judgment | major |
 | **R23** — always-loaded text (a `CLAUDE.md`, a rule file, a front-door description) carries pointers, not content. A rule file is ≤ 6,000 chars for the core file and ≤ 2,500 for each other file | `CLAUDE.md`, rule files | judgment | major |

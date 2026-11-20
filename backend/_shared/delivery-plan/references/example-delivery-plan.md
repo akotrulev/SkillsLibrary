@@ -16,8 +16,7 @@ usable.
 
 Read for six things this example carries that a generic plan does not: every task names **one**
 stack, so the backend and screens of one capability are separate tasks; every task carries its **epic
-and story**; every task carries a **`Budget`** with the drivers behind it; **every code task gates only
-its own tests** (`Gate: own tests`, with named commands) and **`B7`, the last runnable one, is the plan's one locked run of the whole set**; **the acceptance tests exist, red on the stubs,
+and story**; every task carries a **`Budget`** with the drivers behind it; **every code task gates its own work and the work landed above it** (`Gate: own tests`, with named commands) and **`B7`, the last runnable one, is the plan's one locked run of the whole set**; **the acceptance tests exist, red on the stubs,
 before the code they specify** (`C8` → `Q1`–`Q4` → `B1`–`B3`); and the plan's **progress
 is the `As built` notes plus the prompt blocks that are left**, not a status column. Note also how the plan
 closes: **testing is planned inside it** (`TD1`–`TD3`, the test plan per epic and the test cases per
@@ -36,25 +35,28 @@ domain is verified.
 **Status:** *(2026-08-09)* `H1`, `C1`–`C9`, `TD1`–`TD2`, `Q1`–`Q3`, `B1` and `F1` have landed — **E1 is usable**: a
 member browses the timetable and an admin publishes a workshop (J1 walked by hand 2026-08-08). `B2`
 (bookings) is **partial**: book and my-bookings are written, cancel and attend are not, and `Q1`'s
-bookings tests for them are still red. Each landed task's own tests are green, but the whole suite has
+bookings tests for them are still red. Each landed task's tests and coverage are green over its own files, but the whole suite has
 not run, and the acceptance tests have not run together: **that is `B7`**, the last runnable task, and `DOC1` documents what it verified. `H2` (SendGrid
 domain authentication) is blocked on the studio owner, and `B4` sits below `DOC1` because of it.
 
 **Pack:** `./epics.md` · `./stories.md` · `./blueprint.md` · `./data-model.md` · `./experience-plan.md` · `./api-surface.md` · `./integrations.md` · `./epic-map.md`
 **Target repo:** `~/src/workshop-booking` · **Stack:** .NET 10 + PostgreSQL 18 (`src/`) · React 19 + Next 15 (`web/`)
-**Build/test:** `dotnet build` / `dotnet test` / `dotnet format` for `be` tasks · `pnpm build` / `pnpm test` for `fe` tasks — **run in full once, by `B7`, under the test lock**; every earlier code task runs only the scoped commands its `Gate: own tests` line names, for its own tests; the whole e2e suite runs in the project's nightly CI run
+**Build/test:** `dotnet build` / `dotnet test` / `dotnet format` for `be` tasks · `pnpm build` / `pnpm test` for `fe` tasks — **run in full once, by `B7`, under the test lock**; every earlier code task runs only the scoped commands its `Gate: own tests` line names, for its own tests, the landed tasks' tests above it and the coverage floor over their files; the whole e2e suite runs in the project's nightly CI run
 **Sequencing shape:** feature-complete — the studio owner wants the timetable demonstrable before booking exists · **Test-first:** yes — the API surface and journeys are the contract (the user did not opt out) · **Test design:** yes — a test plan per epic and a test-case suite per story (`TD1`–`TD3`) · **Documentation task:** `DOC1` → `be-documenter` (Scheduling, Booking, Membership)
 
 > **For agentic workers:** the tasks in §3 are one flat sequence — work them in order. Each names the
 > agent that should execute it, the skills to load, and the one deliverable that means it is done.
-> **Every task gates only its own tests:** before it commits, it runs the commands its `Gate: own tests` line
-> names — the build of what it touched, the tests it wrote itself, the acceptance tests bound to its own
-> deliverable and the static checks over its files, on a small core budget and ports of its own — and
-> leaves them green, fixing what stands in the way whichever task caused it. No task runs an earlier task's
-> tests, another task's acceptance tests, the smoke suite or a coverage run. The acceptance tests a `Q`
+> **Every task gates its own work and the work landed above it:** before it commits, it runs the commands its
+> `Gate: own tests` line names — the build of what it touched, the tests it wrote itself, the acceptance tests
+> bound to its own deliverable, the tests of the landed tasks above it (acceptance tests bound to a deliverable
+> no landed task has built yet excepted), the coverage floor over the files they touched and the static
+> checks over its files, on a small core budget and ports of its own — and
+> leaves them green, fixing what stands in the way whichever task caused it. A task never runs another plan's
+> tests, the smoke suite or the unfiltered suite. The acceptance tests a `Q`
 > task wrote are the spec, and read-only to every later task except `B7`. `B7` is the one locked run: the
 > smoke suite plus every test the plan wrote, the whole set once more, and it fixes what it finds,
-> whichever task it belongs to. A plan stopped halfway has each landed task's own tests green, but the
+> whichever task it belongs to. A plan stopped halfway has each landed task's tests and coverage green over
+> its own files, but the
 > whole suite has not run, and the acceptance tests have not run together.
 > **Update this document as you work** — a dated `As built` note on your task, the `Status:` line
 > above, and `## 6. Decisions` for anything you built differently — then **delete your own prompt
@@ -132,8 +134,9 @@ can self-register its routes without editing `Program.cs`.
 **Budget:** ~90k — CLAUDE.md 25k, `api-surface.md` §1/§3/§4 6k, 2 skills 16k, `src/Api/Program.cs` as
 written by C2 ~4k, 4 files created and 1 modified 9.5k, commit, diff and gate read-back 10k, churn ×1.2
 **Gate: own tests** — before committing, run `dotnet build src/Api`, then `dotnet test tests/Shared.Tests`,
-then `dotnet format src/Api --verify-no-changes --include src/Shared/`. Leave them green. Do not run the
-unfiltered suite or a coverage run.
+then `dotnet test tests/Api.Tests` (the config tests `C2` landed), with branch coverage over `src/Shared/`
+(`plan-format.md` §5), then `dotnet format src/Api --verify-no-changes --include src/Shared/`. Leave them
+green. Do not run the unfiltered suite.
 
 **Files:**
 - Create: `src/Shared/ProblemDetailsMiddleware.cs`, `src/Shared/PagedResult.cs`, `src/Shared/SessionSummary.cs`
@@ -166,7 +169,8 @@ acceptance test in `tests/Booking.AcceptanceTests/`, and each fails on `501 not-
 the OpenAPI asset's typed client 4k, 4 test files and 1 fixture created 10k, commit, diff and gate
 read-back 10k, churn ×1.2
 **Gate: own tests** — before committing, run `dotnet test tests/Booking.AcceptanceTests`; expect every test
-red on `not-implemented`, and record the reason. Do not run the unfiltered suite, `pnpm` or `dotnet format`.
+red on `not-implemented`, and record the reason; then `dotnet test tests/Shared.Tests` and `tests/Api.Tests`
+(the landed foundation tests; they stay green). Do not run the unfiltered suite, `pnpm` or `dotnet format`.
 
 **Files:**
 - Create: `tests/Booking.AcceptanceTests/BookSessionTests.cs`, `MyBookingsTests.cs`, `CancelBookingTests.cs`, `AttendBookingTests.cs`, `BookingApiFixture.cs`
@@ -200,8 +204,9 @@ and `B2`'s unit tests cover ≥ 80% of its branches.
 gate read-back 10k, churn ×1.2
 **Gate: own tests** — before committing, run `dotnet build src/Booking`, then `dotnet test tests/Booking.Tests`
 (the unit tests `B2` wrote), then `dotnet test tests/Booking.AcceptanceTests` (`Q1`'s tests, bound to this
-task; expect green), then `dotnet format src/Booking --verify-no-changes`; leave them green. Do not run
-another task's tests, the unfiltered suite, `pnpm` or a coverage run.
+task; expect green), then `dotnet test tests/Scheduling.Tests` (the tests `B1` landed), with branch coverage over
+`src/Booking/*` and `src/Scheduling/*` (`plan-format.md` §5), then `dotnet format src/Booking --verify-no-changes`;
+leave them green. Do not run the unfiltered suite or `pnpm`.
 
 **Files:**
 - Create: `src/Booking/Domain/Booking.cs`, `src/Booking/BookingService.cs`, `src/Booking/BookingEndpoints.cs`, `src/Booking/BookingConfiguration.cs`
@@ -241,10 +246,11 @@ a session is full — journey J2, end to end, and `Q2`'s J2 tests go green. **Th
 10k, 3 skills 24k, `web/app/timetable/*` as the screen pattern ~14k, 2 screens + 3 components created
 and 2 modified 15k, commit, diff and gate read-back 10k plus 8k for the production build and e2e, churn ×1.2
 **Gate: own tests** — before committing, run `pnpm build`, then `pnpm vitest run web/app/bookings`
-(the component tests `F2` wrote), then `pnpm eslint web/app/bookings`, then start the API and the database
+(the component tests `F2` wrote) and `web/app/timetable` (the ones `F1` landed) with `--coverage` over those two
+folders, then `pnpm eslint web/app/bookings`, then start the API and the database
 (`docker compose up -d api postgres`) and run `pnpm playwright test e2e/j2-*.spec.ts --workers=1` against the
-production build on a port of its own; expect `Q2`'s J2 tests (bound to this task) green, and leave them so.
-Do not run `J1`'s specs, the unfiltered suite, a coverage run, or `dotnet` beyond starting the API.
+production build on a port of its own; expect `Q2`'s J2 tests (bound to this task) and J1's, which `F1` turned
+green, green, and leave them so. Do not run the unfiltered suite or `dotnet` beyond starting the API.
 
 **Files:**
 - Create: `web/app/bookings/page.tsx`, `web/app/bookings/booking-list.tsx`, `web/app/bookings/cancel-dialog.tsx`
@@ -404,19 +410,20 @@ capability wait on provisioning. *(2026-08-02)*
 lands.** This is the one-stack rule, recorded once rather than re-argued per capability. The cost is
 stated rather than discovered: `B2` finished is not a demo. *(2026-08-02)*
 
-**D4 — every task gates only its own tests, and `B7` is the one locked run.** A failure in a task's own
-tests, or in the acceptance tests bound to it, surfaces in that session, while its files are still in
-context. Each code task pays about 10k of read-back for its scoped build and own tests, and no task takes a
+**D4 — every task gates its own work and the work landed above it, and `B7` is the one locked run.** A failure in a task's own
+tests, in the acceptance tests bound to it, or in a test landed above it that its change broke, surfaces in that
+session, while its files are still in context. Each code task pays about 12k of read-back for its scoped build,
+its tests, the tests landed above it and the coverage read, and no task takes a
 machine-wide lock, so two or three tasks gate at once. `B7` runs the smoke suite and every test the plan
-wrote, so its fix loop is 12k plus 2k per earlier task. No earlier task runs the unfiltered suite, another
-task's tests or a coverage run. What a halfway stop leaves: each landed task's own tests green, but the
+wrote, so its fix loop is 12k plus 2k per earlier task. A task never runs the unfiltered suite or another plan's
+tests. What a halfway stop leaves: each landed task's tests and coverage green over its own files, but the
 whole suite has not run, and the acceptance tests have not run together. `C4`'s `As built`
 note records its own test run for this reason. *(2026-08-02)*
 
 **D5 — the plan is test-first: the stubs and `Q1`–`Q4` precede the implementation.** The API surface and
 the journeys are the contract, so the acceptance tests are written by `qa-api-dotnet` and
 `qa-ui-typescript` against `C8`'s stubs and `C6`'s placeholders, red before any code exists. Each
-task runs its own filtered tests and the acceptance tests bound to it (`Gate: own tests`); `B7` runs everything once more. The cost:
+task runs its own filtered tests, the acceptance tests bound to it and the tests landed above it (`Gate: own tests`); `B7` runs everything once more. The cost:
 two more agent switches per capability, one more contract task (`C8`), and a wrong acceptance test stays
 red until `B7` resolves it with the user. *(2026-08-02)*
 
@@ -457,10 +464,10 @@ block and the line that says which have landed.
 ## Prompts — one per task
 
 Run them in order, one session each. Every block is complete on its own — it names the agent, the
-skills, and the exact sections to read. **Every task gates only its own tests:** each code block says
+skills, and the exact sections to read. **Every task gates its own work and the work landed above it:** each code block says
 `Gate: own tests` and names the commands it runs before it commits, and leaves them green. No block but
-`B7`'s runs the unfiltered suite, another task's tests or a coverage run. What a halfway stop leaves,
-stated once: each landed task's own tests green, but the whole suite has not run, and the acceptance tests
+`B7`'s runs the unfiltered suite or the smoke suite. What a halfway stop leaves,
+stated once: each landed task's tests and coverage green over its own files, but the whole suite has not run, and the acceptance tests
 have not run together.
 
 **Gates run locally.** Commit locally; ask before `git push`.
@@ -565,9 +572,10 @@ Traps:
 
 Gate: own tests — before you commit, run `dotnet build src/Booking`, then `dotnet test tests/Booking.Tests`,
 then `dotnet test tests/Booking.AcceptanceTests` (Q1's tests, bound to this task), then
-`dotnet format src/Booking --verify-no-changes`. Leave them green, fixing what stands in the way whichever
-task caused it, and name that task in `As built`. Do not run another task's tests, the unfiltered suite,
-`pnpm` or a coverage run.
+`dotnet test tests/Scheduling.Tests` (B1's tests, landed above you) with branch coverage over `src/Booking/*`
+and `src/Scheduling/*`, then `dotnet format src/Booking --verify-no-changes`. Leave them green, fixing what
+stands in the way whichever task caused it, and name that task in `As built`. Do not run the unfiltered suite
+or `pnpm`.
 
 Commit: `feat: booking cancel and attend (B2)`.
 
@@ -605,9 +613,9 @@ its `stream` and `order` alongside its `deliverable`, `agent`, `skills`, `files`
 and `budget` travel with each task as additive fields — MC ignores what it does not
 know, and losing them costs the whole epic and sizing story on a round trip. There is
 no grouping level: ordering is the `order` sequence, and every prerequisite is an
-explicit `dependsOn` edge. **Every task gates only its own tests:** its `Gate:` line names the
-commands it runs before it commits, and no earlier task runs another task's tests or the unfiltered suite, so a
-lane's green covers its own tests. `B7` runs the whole set. MC's planner re-reads the target repo, so it may split a task it
+explicit `dependsOn` edge. **Every task gates its own work and the work landed above it:** its `Gate:` line names the
+commands it runs before it commits, and no earlier task runs another plan's tests or the unfiltered suite, so a
+lane's green covers its own tests and the tests landed above it. `B7` runs the whole set. MC's planner re-reads the target repo, so it may split a task it
 finds too large; that is expected and does not invalidate the sequence — the new pieces
 belong in the split task's own lane, and each needs its own deliverable.
 

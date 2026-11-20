@@ -1,48 +1,36 @@
 ---
 name: rules
-description: Use when installing or updating the qa-dotnet test standards as path-scoped rules in .claude/rules/qa-dotnet/. Triggers "install the .NET QA rules", "set up this project". Not for reviewing tests (ui-tests-review).
+description: Use when installing or updating the qa-dotnet test standards in .claude/rules/qa-dotnet/. Triggers "install the .NET QA rules", "set up this project". Not for reviewing tests (ui-tests-review).
 argument-hint: "[replace | keep | beside]"
 ---
 
 # Install the qa-dotnet rules
 
-Plugins cannot ship Claude Code rules, so this skill copies them into the project. Each rule file carries `paths:` frontmatter, and Claude Code loads it only once the session reads or edits a matching file, so a session that never touches a page object never pays for the UI rules.
-
-| File (beside this SKILL.md) | Loads when the session touches |
-|---|---|
-| `automation.md`: test shape, roles, assertions, errors and cleanup, waits, secrets, comments | C# in a `*ApiTests` / `*UiTests` / `*AppiumTests` / `*MobileTests` / `*DesktopTests` / `*E2ETests` / `*IntegrationTests` / `*AcceptanceTests` / `*BddTests` project, or `TestCore/` |
-| `api.md`: typed clients, DTOs, strict deserialization, status and `ProblemDetails` assertions | C# in `*ApiTests` / `*IntegrationTests`, `TestCore/**/{Http,Clients}/`, and `Actions/` / `Pocos/` / `*Actions.cs` / `*Poco.cs` inside a `*Tests` project |
-| `page-objects.md`: pages, region and control components, flows, locator exposure, method shape | C# in `*UiTests` / `*E2ETests` / `*AppiumTests` / `*MobileTests` / `*DesktopTests` |
-| `web-ui.md`: `BaseTest`, locators, web-first assertions, Selenium | C# in `*UiTests` / `*E2ETests` |
-| `mobile-ui.md`: screen objects, driver lifecycle, Appium waits | C# in `*AppiumTests` / `*MobileTests` |
-| `desktop-tests.md`: window objects, driver or FlaUI lifecycle, desktop waits | C# in `*DesktopTests` |
-| `bdd.md`: feature files, step definitions as the intent layer, hooks | `*.feature`, `StepDefinitions/` / `Steps/` / `Hooks/`, `*BddTests` / `*Bdd.Tests` |
-| `test-data.md`: builders, ObjectMothers, data-driven rows, reference data, pre-clean, keep on failure | `Builders/` / `Mothers/` / `TestData/` and `*Builder.cs` / `*Mother.cs` inside a suite |
-| `db-verification.md`: seeders, probes, database fixtures | `Db/` / `Database/` / `Probes/` / `Seeders/` and `*Probe.cs` / `*Seeder.cs` / `*DbFixture.cs` inside a suite |
-| `performance.md`: NBomber scenarios | C# in `*PerfTests` / `*PerformanceTests` / `*LoadTests` |
-| `suite-config.md`: secrets, CPM pins, `.runsettings`, Allure config | `*.runsettings`, `allureConfig.json`, `reqnroll.json`, a suite's `*.csproj` and `appsettings*.json` |
+Plugins cannot ship Claude Code rules, so this skill copies them into the project. Each rule file carries `paths:` frontmatter, and Claude Code loads it only once the session reads or edits a matching file.
 
 The defaults match the project names the qa-dotnet scaffolds create. They deliberately leave out unit-test projects (`*.Tests`, `*.UnitTests`), which belong to the backend plugin's own test rules, and Razor or Blazor `Pages/`, which are application code.
 
 The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/qa-dotnet/`.
 
-## Run by a person or by a model
+## Run by a model
 
-A person types `/qa-dotnet:rules`. A model runs this skill itself, as `qa-dotnet:rules`, when it is asked to set up a project or to install or update the rules, and when it finds this plugin enabled in a project that has no `.claude/rules/qa-dotnet/`. One argument answers the differing-file question below for every file in advance: `replace`, `keep` or `beside`.
+A model runs this skill itself, as `qa-dotnet:rules`, when it is asked to set up a project or to install or update the rules, and when it finds this plugin enabled in a project that has no `.claude/rules/qa-dotnet/`. One argument answers the differing-file question below for every file in advance: `replace`, `keep` or `beside`.
 
-Where a step needs the user's answer or agreement and nobody is there to give it (a queued plan task, a subagent, a headless run) and no argument settles it, take the choice that changes nothing of theirs: a differing file gets the plugin's copy beside it as `<name>.plugin`, and a path or any other change to an installed copy is not made. List each one under `Waiting for the user:` in the report. Never guess the answer.
+Where a step needs the user's answer and nobody is there to give it (a queued plan task, a subagent, a headless run) and no argument settles it, take the choice that changes nothing of theirs and list it under `Waiting for the user:` in the report.
 
 ## Procedure
 
 1. **Find the project root**: `git rev-parse --show-toplevel`, or the working directory when it is not a git repo.
-2. **Check the source**: all eleven `.md` rule files listed above exist in `${CLAUDE_SKILL_DIR}`. If one is missing, stop and say so; never write a rule from memory.
-3. **Copy each file** that is missing from the target: `mkdir -p <root>/.claude/rules/qa-dotnet` and `cp` it byte for byte.
+2. **List the source**: every `*.md` in `${CLAUDE_SKILL_DIR}` except `SKILL.md`. If the list is empty, stop and say so; never write a rule from memory.
+3. **Copy each file** that is missing from the target: `mkdir -p <root>/.claude/rules/qa-dotnet` and `cp` it byte for byte. Done when every source file is in the target.
 4. **For each file already present**, `cmp` it with the source.
    - Identical: up to date.
    - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer or a `replace` argument.
-5. **Fit the paths to where the suites live.** C# is shared with the backend and Blazor plugins, so the defaults follow project names, not the extension. Find the automation projects: `git grep -l -E 'Include="(Microsoft\.Playwright|RestSharp|Reqnroll|Appium\.WebDriver|FlaUI\.UIA3|Selenium\.WebDriver|NBomber|Testcontainers|Microsoft\.AspNetCore\.Mvc\.Testing)' -- '*.csproj' 'Directory.Packages.props'`. A project referencing only NUnit/xUnit plus a mocking library is a unit-test project: leave it out. For each automation project whose folder no default glob matches, propose `"<dir>/**/*.cs"` for `automation.md` plus the discipline file its packages name (RestSharp or `Mvc.Testing` → `api.md`, Playwright or Selenium → `web-ui.md`, Appium → `mobile-ui.md` (a project whose Appium or FlaUI target is a desktop app → `desktop-tests.md`), each of those three plus `page-objects.md`, Reqnroll → `bdd.md`, NBomber → `performance.md` and not `automation.md`), and `"<dir>/**/*.csproj"` for `suite-config.md`. Then look for the families the folder names miss: page objects (`git grep -l -E ':\s*(PageBase|BasePage|BaseAppiumPage|BaseWindow)\b' -- '*.cs'`), bindings (`git grep -l '\[Binding\]' -- '*.cs'`), builders (`git grep -l -E 'class \w+(Builder|Mother)\b' -- '*.cs'` within the suites) and probes (`git grep -l -E 'Respawner|NpgsqlConnection|SqlConnection|QueryAsync<' -- '*.cs'` within the suites). Add the directory globs to the installed copies with the user's agreement; never widen a glob to `**/*.cs`.
+
+   With nobody to ask and no argument, write the plugin's copy beside it. Done when each file already present is up to date, replaced, kept or written beside as `<name>.plugin`.
+5. **Fit the paths to where the suites live.** C# is shared with the backend and Blazor plugins, so the defaults follow project names, not the extension. Find the automation projects: `git grep -l -E 'Include="(Microsoft\.Playwright|RestSharp|Reqnroll|Appium\.WebDriver|FlaUI\.UIA3|Selenium\.WebDriver|NBomber|Testcontainers|Microsoft\.AspNetCore\.Mvc\.Testing)' -- '*.csproj' 'Directory.Packages.props'`. A project referencing only NUnit/xUnit plus a mocking library is a unit-test project: leave it out. For each automation project whose folder no default glob matches, propose `"<dir>/**/*.cs"` for `automation.md` plus the discipline file its packages name (RestSharp or `Mvc.Testing` → `api.md`, Playwright or Selenium → `web-ui.md`, Appium → `mobile-ui.md` (a project whose Appium or FlaUI target is a desktop app → `desktop-tests.md`), each of those three plus `page-objects.md`, Reqnroll → `bdd.md`, NBomber → `performance.md` and not `automation.md`), and `"<dir>/**/*.csproj"` for `suite-config.md`. Then look for the families the folder names miss: page objects (`git grep -l -E ':\s*(PageBase|BasePage|BaseAppiumPage|BaseWindow)\b' -- '*.cs'`), bindings (`git grep -l '\[Binding\]' -- '*.cs'`), builders (`git grep -l -E 'class \w+(Builder|Mother)\b' -- '*.cs'` within the suites) and probes (`git grep -l -E 'Respawner|NpgsqlConnection|SqlConnection|QueryAsync<' -- '*.cs'` within the suites). Add the directory globs to the installed copies with the user's agreement; never widen a glob to `**/*.cs`. With nobody to ask, change no path and list each proposed glob under `Waiting for the user:` in the report. Done when every file each command lists is matched by an installed glob, or a glob is proposed for it.
 6. **Check it will be committed**: `git check-ignore -q <root>/.claude/rules/qa-dotnet/automation.md`. If it is ignored, say so; the rules then apply on this machine only.
-7. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`) for test rules that contradict these files, and any other folder in `.claude/rules/` whose globs also match the suites (a backend plugin's test rules); list each contradiction. A written contradiction is the user's to settle.
+7. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`) for test rules that contradict these files, and any other folder in `.claude/rules/` whose globs also match the suites (a backend plugin's test rules); list each contradiction. A written contradiction is the user's to settle. Done when each contradiction is listed, or the report says none.
 
 ## Report
 
@@ -56,3 +44,11 @@ Waiting for the user: none | <one line each: the file or path change, and the qu
 ```
 
 Then tell the user to commit the folder, and that a rule shows in `/memory` once the session has read a matching file.
+
+## When to use
+
+- Installing or updating the rules.
+
+## When NOT to use
+
+- Writing code: the rule files apply themselves.

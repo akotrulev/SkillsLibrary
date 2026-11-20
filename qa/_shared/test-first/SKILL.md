@@ -47,7 +47,7 @@ Every AC with an outcome on this surface has a test. The report lists any AC wit
 
 A test is red on the stub's `501` `application/problem+json` `not-implemented` — in Arrange or in Act, since a setup call that reaches a stub is also the right reason — or, for a journey, on the screen's placeholder. A test that **passes** against a stub asserts nothing: fix it. A test red on a `404`, a compile error or a wrong URL has a wiring defect: fix it before stopping.
 
-Run the new tests once under the task's `Gate: own tests` — the filtered command naming only these tests — and record each test's red reason in the report. If the app cannot start in one command, the gate proves the tests load and list instead (Playwright's `--list`, or the runner's equivalent), the report says so, and the task that serves each journey turns it green.
+Run the new tests once under the task's `Gate: own tests` — the filtered command naming these tests, besides the landed tasks' tests above it — and record each test's red reason in the report. If the app cannot start in one command, the gate proves the tests load and list instead (Playwright's `--list`, or the runner's equivalent), the report says so, and the task that serves each journey turns it green.
 
 ## Data
 
@@ -55,7 +55,7 @@ Set up through the public API or an existing test hook, never the database. A se
 
 ## Hand-over
 
-The report lists, per implementation task, its **own-tests filter** — the test classes or files per resource group or journey. The `Q` task writes each filter into the prompt block of the implementation task below it, so that task's `Gate: own tests` runs exactly those tests (the plan's close-out step 3).
+The report lists, per implementation task, its **own-tests filter** — the test classes or files per resource group or journey. The `Q` task writes each filter into the prompt block of the implementation task below it, so that task's `Gate: own tests` runs those tests, with the tests of the landed tasks above it (the plan's close-out step 3).
 
 ## Never
 

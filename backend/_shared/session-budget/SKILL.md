@@ -135,10 +135,12 @@ everything that session needs and names nothing it does not:
   down-level API that does not exist here. This is the part the prompt adds, and it is what earns it.
 - **The gate line.** `Gate: own tests — <commands>` on every block that writes code or tests: a `Q`
   block expects **red** for the recorded reason (or, when its app cannot start in one command, proves the
-  tests load and list), and any other code block expects **green**, on its own tests only: the tests it wrote
-  plus the acceptance tests bound to its own deliverable, with the static checks over its files, on a small
-  core budget and ports of its own, never under the test lock. No block runs an earlier task's tests,
-  another task's acceptance tests, the smoke suite or a coverage run; the coverage floor is the gate
+  tests load and list), and any other code block expects **green**, on its own work and the work landed above it: the tests it wrote
+  plus the acceptance tests bound to its own deliverable, the tests the landed tasks above it wrote
+  (acceptance tests bound to a deliverable no landed task has built yet first run in the task that builds
+  it, or in the gate block), and the coverage floor over the files they touched, with the static checks
+  over its files, on a small core budget and ports of its own, never under the test lock. No block runs
+  another plan's tests, the smoke suite or the unfiltered suite; the whole-plan coverage floor is the gate
   block's. `Gate: none — <why nothing here is runnable>` only on a block with
   nothing runnable. The last block carries the project's own commands for the whole set in run order, the
   instruction to **fix what they find rather than hand it back**, and the fix loop (plan format §5) with

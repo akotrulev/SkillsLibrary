@@ -144,7 +144,7 @@ dotnet test tests/Orders.Tests --collect:"XPlat Code Coverage" --results-directo
 dotnet tool run reportgenerator -reports:"artifacts/cov/**/coverage.cobertura.xml" -targetdir:artifacts/cov/report -reporttypes:TextSummary
 ```
 
-- Read the **branch** rate for the files the change touched, not the repo total. Repo-wide coverage is never a target.
+- Read the **branch** rate for the files the change touched, not the repo total. Repo-wide coverage is never a target. Inside a plan task, the `Gate:` line runs this over the files the task and the landed tasks above it touched. Outside a plan, run it before you report.
 - **Left out by name:** DTOs and records without logic, generated code (`*.g.cs`, `*.g.i.cs`, `Generated Files`), DI registration in `Program` / `App`, XAML code-behind that only forwards. A skipped file is listed in the report, never hidden by lowering the number or by an exclusion marker on code with behaviour.
 - Only an asserting test counts: a test with no assertion, written to move the number, is a major finding (`test-quality-check` catches it by mutation score).
 - Report the unit: "branches".

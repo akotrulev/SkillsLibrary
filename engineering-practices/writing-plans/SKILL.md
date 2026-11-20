@@ -28,9 +28,11 @@ the procedure; that file is the shape. Do not improvise either.
 2. **The narrative comes first; the tasks come last.** A task block is only readable against the
    context above it, so `## 1. What already exists, and what is missing` and the sections that decide
    the work are written *before* any task is.
-3. **Every task gates only its own tests** (the ones it wrote plus the acceptance tests bound to its deliverable). It runs the commands its `Gate:` line names and leaves
-   them green before it commits, on a small core budget, on ports of its own, under no test lock; the last
-   runnable task is the plan's one locked run of the whole set.
+3. **Every task gates its own work and the work landed above it** (its own tests and the acceptance tests
+   bound to its deliverable, the tests of the landed tasks above it, and the coverage floor over the files
+   they touched). It runs the commands its `Gate:` line names and leaves them green before it commits, on a
+   small core budget, on ports of its own, under no test lock; the last runnable task is the plan's one
+   locked run of the whole set.
 
 **The unit of work is a task.** A plan is one flat, ordered list of them, ids prefixed by the family of
 work (`B1`, `B2`, `B3`, then `P1`) — never a "slice", never a "phase", never a "stage", and never
@@ -144,7 +146,7 @@ them — the sequence itself carries the ordering, and the third task is "the th
   tasks, the test plan per epic (`qa-test-planner`), then the test-case suites per story
   (`qa-test-case-designer`) (format reference §4).
 
-**A plan stopped halfway has each landed task's own tests green, but the whole suite has not run, and the
+**A plan stopped halfway has each landed task's tests and coverage green over its own files, but the whole suite has not run, and the
 acceptance tests written by `Q` tasks have not run together until the gate task.** Say so in the plan, in
 those words. Where a stack-cut task cannot be
 demonstrated end to end on its own — a backend task whose screen arrives two tasks later — say so in
@@ -232,7 +234,7 @@ Re-derive it whenever the task's files, skills or cited sections change. A stale
 none — it is a number someone will trust.
 
 > **The budget is a guide, never a gate.** Three rules outrank it, always: one deliverable; one stack
-> and one agent; every task gates only its own tests. A task that overshoots with
+> and one agent; every task gates its own work and the work landed above it. A task that overshoots with
 > all three satisfied is a large task correctly authored — it is labelled, not filed as a defect. Never
 > split something coherent to hit a number, and never pad a task to fill one.
 
@@ -251,24 +253,27 @@ Four rules are easy to get wrong and expensive when you do:
   `Runs beside` column, and the preamble says what runs together in one line — "After C1, B1 → B2 run
   beside Q1; F1 waits for both; F2 runs the whole set."
 - **Every task that writes code or tests carries `**Gate: own tests**`**, naming the commands, filtered by
-  file or class, that build what it touched and run **only its own tests: the tests it wrote
-  itself in this plan plus the acceptance tests bound to its own deliverable** (format reference §5). A
-  non-frontend task runs its own unit and integration tests and its bound API acceptance tests plus
+  file or class, that build what it touched and run **its own tests (the ones it wrote
+  itself in this plan plus the acceptance tests bound to its own deliverable), the tests the landed tasks
+  above it wrote, and the coverage floor over the files they touched** (format reference §5). A
+  non-frontend task runs unit and integration tests and its bound API acceptance tests plus
   typecheck, lint and format over what it touched, no e2e; a frontend or mobile task (and a `Q` journey
-  task) runs only its own and its bound spec files, usually one to three, on one or two workers and its own
-  port, after the production build. None runs an earlier task's tests, another task's acceptance tests, the
-  smoke suite or a coverage run. A `Q` task expects red for
+  task) runs spec files, usually a few, on one or two workers and its own
+  port, after the production build. None runs another plan's tests, the smoke suite or the unfiltered
+  suite. A `Q` task expects red for
   the recorded reason; a `Q` task whose app cannot start in one command proves its tests load and list
-  (Playwright's `--list`). An implementation task expects green on its own tests and its bound acceptance tests, which
-  are read-only to it (format reference §4); acceptance tests not bound to a task first run in the gate
+  (Playwright's `--list`). An implementation task expects green on its own tests, its bound acceptance tests, which
+  are read-only to it (format reference §4), and the tests of the landed tasks above it; acceptance tests
+  bound to a deliverable no landed task has built yet first run in the task that builds it, or in the gate
   task. `**Gate: none**` is only for a task with nothing runnable, and it says so. The last
   runnable task is the plan's one run under the project's test lock: the smoke suite plus every test the
   plan wrote, then the whole set in run order, and it **fixes what it finds rather than handing it back**
   by the fix loop (format reference §5), which its block spells out. When the plan writes code, it ends
-  with the **coverage floor** (format reference §5): ≥ 80% branch coverage of the code the plan wrote,
-  short of which that task writes the missing tests. Every task before it still writes tests for each
+  with the **coverage floor** over the whole plan (format reference §5): ≥ 80% branch coverage of the code
+  the plan wrote, short of which that task writes the missing tests. Every task before it measures the
+  same floor over the files it and the landed tasks touched, and writes tests for each
   branch — each one's bullets name the branches its tests must reach, as `OrderServiceTests` does in the
-  format reference's deliverable table — but does not run the coverage measure. The project's whole e2e
+  format reference's deliverable table. The project's whole e2e
   suite runs in its nightly CI run, and each test red there goes on the project's tracked list with an
   owner until a nightly run is green for it.
 - **A prompt you cannot write yet is not guessed.** Where a block genuinely depends on what an earlier
@@ -319,10 +324,10 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
    either merged or left alone deliberately.
 11. **Gate check:** every code task's `**Gate: own tests**` names its commands, filtered and never the
     unfiltered suite; a code task whose gate runs nothing is a defect. `**Gate: none**` appears only on a
-    task with nothing runnable, which says so. No task's gate runs an earlier task's tests, another task's acceptance tests, the smoke suite or a coverage run. The last runnable task is
+    task with nothing runnable, which says so. No task's gate runs another plan's tests, the smoke suite or the unfiltered suite. The last runnable task is
     the one locked run of the whole set: its commands are the project's own and in run
     order, its block spells out the fix loop, it ends with the coverage floor (format reference §5) when the
-    plan writes code, and it holds no feature work when the plan has any. What a halfway stop leaves (each landed task's own tests green, the `Q` acceptance tests not yet run
+    plan writes code, and it holds no feature work when the plan has any. What a halfway stop leaves (each landed task's tests and coverage green over its own files, the `Q` acceptance tests not yet run
     together) is stated in the plan.
 12. **Documentation check:** the plan's last task is `DOC1` (stack `docs`, the documenter agent),
     depends on the gate task, names the documents it updates and the delivery note, and its gate is the doc lint; or the header
