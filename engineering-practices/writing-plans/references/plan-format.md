@@ -67,6 +67,9 @@ earn their place near the end of every plan:
   costs. Where the decision was a choice between options, it carries a `| Option | Verdict | Why |`
   table so the rejected ones stay rejected on the record. A decision made during execution is appended
   here with its date, not argued again in a task block.
+  A `D<n>` that passes the three ADR tests (hard to reverse, surprising without context, a real
+  trade-off) also gets an ADR in `docs/adr/`, written by the task that records the `D<n>` and citing
+  the plan (`${CLAUDE_PLUGIN_ROOT}/engineering-practices/domain-modeling/references/adr-format.md`).
 - **`## Answered questions (YYYY-MM-DD)`** — `**O1 — <question>: <answer>.**` one line each. Questions
   still open live in an `## Open questions` table (`| # | Question | Options | Blocks | Owner |`) and
   every one of them names what it blocks.

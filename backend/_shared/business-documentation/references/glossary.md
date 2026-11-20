@@ -4,14 +4,12 @@ Loaded by `SKILL.md` when a KB run writes `glossary.md`, and when a sentence nee
 
 ## Glossary
 
-Every domain term found, with its business meaning and the **mapping between the vocabularies** — the client's own term (from the trace's `Client vocabulary` table), what it means, and what the code calls it:
+The table, its columns and its rules (synonyms under `Avoid`, drift kept as a finding) are in `${CLAUDE_PLUGIN_ROOT}/engineering-practices/domain-modeling/references/glossary-format.md`. What a KB run adds:
 
-| Term (client) | Means | Called in code | Where the client sees it | Notes |
-|---|---|---|---|---|
-| Order | A confirmed purchase, from placement to delivery | `Order`, `PurchaseOrder` (legacy) | order confirmation email | Two names for one concept `#observed` |
-| Account | The billing relationship, not the login | `Customer` | invoice header | **Drift:** "customer" means the *person* in Identity, the *billing entity* in Billing `#observed` |
-
-**Terminology drift is a finding, not a merge** — record both, flag it, and let `business-analyst` resolve it.
+- **Every domain term the trace found gets a row**, mapping the vocabularies: the client's own term from the trace's `Client vocabulary` table, what it means, and what the code calls it.
+- **`Called in code` comes from the code you read**: every identifier for the concept, a legacy one marked `(legacy)`, with the `file:line` in *Notes* and the tag `#observed`.
+- **Two identifiers for one concept** are one row, both under `Called in code`: a naming split in the code is not a synonym in the client's language, so `Avoid` stays as the client's words decide.
+- **Drift found in the code** (one client word, a different concept per area) is recorded and left to the `business-analyst` agent; never merge it.
 
 ## The same fact, in the code and in the guide
 

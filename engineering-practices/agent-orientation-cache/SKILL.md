@@ -58,6 +58,7 @@ Report the outcome as one line — `Orientation: cached (delta: 2 sections refre
 
 - **Green-on-arrival.** Whether the thing builds and its tests pass is working-tree state, not layout. Always re-verified through the agent's own gate. A red state on arrival is still a finding to report, not your bug to absorb.
 - **Anything the current change depends on directly.** Before editing a file the map names, confirm it exists and still matches the description. **The map is a lead, not evidence** — the same rule the audit lane applies to a "Resolved" verdict.
+- **The project's language and decisions.** When they exist, read `docs/business-model/glossary.md` and the titles in `docs/adr/`. Every name you write follows the glossary, never a term in its `Avoid` column; work that touches what an ADR decides respects it, or writes the ADR that supersedes it.
 - **`#volatile` fields.** Live-resource facts describe a system that can change with no commit behind it: a database server version probe, a live cloud read, a device/emulator state, a deployed API's shape. Recorded for context, always re-probed before use.
 
 ## Orientation 2 — Derive the gaps

@@ -93,18 +93,11 @@ An area line has this shape and no other: `- [<Area name>](areas/<name>.md) — 
 
 ## glossary.md and active-context.md format
 
-Every session reads and writes these two, so their shape is fixed here.
+Every session reads and writes these two, so their shape is fixed.
 
-```markdown
-# Glossary
+**`glossary.md`** follows `${CLAUDE_PLUGIN_ROOT}/engineering-practices/domain-modeling/references/glossary-format.md`, the one format every writer of the glossary shares: its columns (`Avoid` included), synonyms ruled out under `Avoid`, drift kept as a finding, and lazy creation.
 
-| Term (client) | Means | Called in code | Where the client sees it | Notes |
-|---|---|---|---|---|
-| Account | The billing relationship, not the login | — | invoice header | BRD §2 `#confirmed` |
-| Customer | **Drift:** the person (E1 accounts, US4) · the billing entity (E3 invoicing, US21) | — | — | CONF-004, open |
-```
-
-One row per term, in the client's words; the source and the confidence tag go in *Notes*. It is the table `dev:doc-business-model` writes from code, and a row authored from requirements leaves *Called in code* as `—`. A term with two meanings keeps both in its row, marked **Drift**, with the `CONF-` id of the terminology-drift finding; it is never merged.
+**`active-context.md`**:
 
 ```markdown
 # Active context
@@ -142,7 +135,7 @@ The slice is the set of connections that matter for one feature. The input is an
 When no `docs/business-model/` exists and the user wants one:
 
 1. Confirm the path (default `docs/business-model/`; respect an existing docs convention if the project has one).
-2. Create `INDEX.md`, `glossary.md`, `active-context.md`, `interaction-map.md` with headers and empty sections (`events.md`, `shared-data.md` and `invariants.md` are created by `business-analysis:dependency-map` on first use) — plus the `areas/`, `flows/`, `entities/`, `decisions/` directories.
+2. Create `INDEX.md`, `glossary.md`, `active-context.md`, `interaction-map.md` with headers and empty sections (`events.md`, `shared-data.md` and `invariants.md` are created by `business-analysis:dependency-map` on first use) — plus the `areas/`, `flows/`, `entities/`, `decisions/` directories. A `glossary.md` that already exists, written by a `dev:feature` interview before the KB, is adopted as it is and listed in `INDEX.md`, never recreated.
 3. Do **not** backfill the whole model speculatively. The KB accretes as features are analyzed; seed it only with what the current task's analysis actually produces.
 4. Offer `/business-analysis:rules`, so the KB's standards load in every later session that edits it.
 
