@@ -24,7 +24,7 @@ CANCELLED_STATE = "| Cancelled | the seat is released | no | yes |"
 CANCELLED_ROW = "| Cancelled | — | — | ? |"
 STATES_HEADER = "| State | Meaning | Initial? | Terminal? | Source |\n|---|---|---|---|---|"
 CONF_002 = "## CONF-002 — AREA-002 scheduling × AREA-003 bookings: cancelling a cancelled booking"
-AREA_GUIDE = "# Area\n\n<!-- guide · id: AREA-001 · owner: dev:doc-business-model · audience: shareable -->\n"
+AREA_GUIDE = "# Area\n\n<!-- guide · id: AREA-001 · owner: product:doc-business-model · audience: shareable -->\n"
 ENTITIES = "(business-model-entities.md)"
 DECISIONS = "(business-model-decisions.md)"
 CONNECTIONS = "(business-model-connections.md)"
@@ -116,7 +116,7 @@ class KbLintTests(unittest.TestCase):
     def test_Should_ReportModelHeader_When_AMetadataLineIsMissing(self):
         self.assert_cases([
             ("created", [without(EVENTS, "**Created:** 2026-08-02\n")], [f"events.md:1: minor model-header no **Created:** <YYYY-MM-DD> line in the metadata block {CORE}"]),
-            ("owned by", [without(DECISION, "**Owned by:** `business-analysis:decision-table`\n")],
+            ("owned by", [without(DECISION, "**Owned by:** `product:decision-table`\n")],
              [f"{DECISION}:1: minor model-header no **Owned by:** line in the metadata block {CORE}"]),
         ])
 

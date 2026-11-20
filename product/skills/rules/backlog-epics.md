@@ -3,11 +3,11 @@ paths:
   - "docs/plans/**/epics.md"
 ---
 
-<!-- business-analysis rules v3 (2026-11-20): epics. Installed by /business-analysis:rules; edit to fit this project. -->
+<!-- product rules v3 (2026-11-20): epics. Installed by /product:rules; edit to fit this project. -->
 
 # Epic standards
 
-For `docs/plans/<NNN>-<initiative>/epics.md`. Severity as in the requirements rules: **blocker** cannot be planned from, **major** will mislead the stories or the plan, **minor** shape or format, **nit** wording. Recipe: `dev:epics`, loaded by the `requirements-author` agent.
+For `docs/plans/<NNN>-<initiative>/epics.md`. Severity as in the requirements rules: **blocker** cannot be planned from, **major** will mislead the stories or the plan, **minor** shape or format, **nit** wording. Recipe: `product:epics`, loaded by the `requirements-author` agent.
 
 - Epics are `E1..En`; every requirements.md §4 capability is covered by exactly one, and an initiative has at least one. Ids are cited downstream: never renumber. `E0` is the planner's foundations epic, never written here. *blocker*
 - One goal per epic: **who** can **do what** so that **measurable change**. Two goals are two epics. An unknown measure is `[TBD — <who decides>]` plus an open question, never an invented number. *blocker*

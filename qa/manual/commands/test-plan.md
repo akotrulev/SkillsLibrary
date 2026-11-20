@@ -14,4 +14,4 @@ Adopt the **`qa-test-planner` senior QA lead** role for this task.
 
 $ARGUMENTS
 
-If no task was given above, ask for what to plan testing for — an initiative folder from `/dev:refine` (one plan per epic), a story, spec, or contract; a live URL; a repo area; or just a description ("no documentation" is a supported input shape, not a blocker).
+If no task was given above, ask for what to plan testing for — an initiative folder from `/product:refine` (the `product` plugin; one plan per epic), a story, spec, or contract; a live URL; a repo area; or just a description ("no documentation" is a supported input shape, not a blocker).

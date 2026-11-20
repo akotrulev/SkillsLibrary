@@ -20,7 +20,7 @@ The blueprint is the document the human approves, and everything downstream (dat
 |---|---|
 | `#confirmed` | Stated by the human, in this session or in a requirements document. Never read out of code (that is `#observed`) |
 | `#inferred` | Your reasoning from indirect evidence; the human should scan these |
-| `#observed` | Read out of existing code or behavior, per `dev:knowledge-base`; in the documenter lane it always carries `file:line` |
+| `#observed` | Read out of existing code or behavior, per `product:knowledge-base`; in the documenter lane it always carries `file:line` |
 | `[TBD - <owner>, <by when>]` | Genuinely unknown, with a named owner; never a synonym for vague |
 | `⚠️ Assumption:` | You proceeded on an unconfirmed premise; each is also a line in Open Questions |
 
@@ -45,7 +45,7 @@ A **functional area** is a coherent slice of business capability that one person
 | Area | Short noun phrase |
 | Epics | The `E` ids from `epics.md` this area serves (`E1, E3`, or `E0` for a cross-cutting foundation). The join the whole pack is checked on |
 | Purpose | One sentence, the capability in business terms |
-| User-facing capabilities | What a person can *do* here, one short sentence each in the user's voice (*"a member books a session"*); empty where nothing user-facing sits. `dev:plan-delivery` sequences user-facing work one capability at a time on this column |
+| User-facing capabilities | What a person can *do* here, one short sentence each in the user's voice (*"a member books a session"*); empty where nothing user-facing sits. `product:plan-delivery` sequences user-facing work one capability at a time on this column |
 | Primary actors | Who or what drives it (end user, admin, scheduled job, external system) |
 | Key entities | The 2–5 nouns it owns, the seed of `data-model.md` |
 | In scope / Out of scope | What this initiative builds for it; what it excludes and where that work lives instead |
@@ -55,8 +55,8 @@ A **functional area** is a coherent slice of business capability that one person
 - **Name capabilities in the user's voice**: *"A member books a session"* is a capability; *"exposes the bookings endpoint"* is an implementation of one. The delivery plan closes each on a person actually doing it.
 - **6–8 areas is a lot.** Beyond that, split into separate initiatives (own folder, own plan) or merge areas, and say which. **Out of scope is mandatory**: an unstated boundary is the most common plan defect.
 - An area owning no entity is a cross-cutting concern, and belongs in the architecture section.
-- **When anything is user-facing, name the actors and propose the shell** in a short §2b: one line per actor with their two or three most frequent tasks (*verb + object + outcome*), and the **app shell** (sidebar / top nav / hybrid, from `design/ux-patterns` §2) as a `proposed` row with its reason. The nav map, journeys and screens are `dev:plan-experience`'s in Step 3. With no user-facing capability write "no user-facing area".
-- **Ask about existing data.** An area that replaces a system of record (a spreadsheet, a legacy app) puts that data in scope or out, and says which. Whether it comes across once or stays in sync is usually an open question; the mapping belongs to `dev:plan-data-model`'s backfill section.
+- **When anything is user-facing, name the actors and propose the shell** in a short §2b: one line per actor with their two or three most frequent tasks (*verb + object + outcome*), and the **app shell** (sidebar / top nav / hybrid, from `design/ux-patterns` §2) as a `proposed` row with its reason. The nav map, journeys and screens are `product:plan-experience`'s in Step 3. With no user-facing capability write "no user-facing area".
+- **Ask about existing data.** An area that replaces a system of record (a spreadsheet, a legacy app) puts that data in scope or out, and says which. Whether it comes across once or stays in sync is usually an open question; the mapping belongs to `product:plan-data-model`'s backfill section.
 
 Done when every area names its epics, every epic is served, and each area states its scope boundary.
 
@@ -72,7 +72,7 @@ Done when the blueprint holds the style, its reason, what was rejected, a reason
 
 Prose hides the questions a diagram forces, and this is the cheapest place in the pack to find a missing requirement. Model only what is load-bearing: a **process flowchart** per primary business flow (the 2–5 journeys the system exists to serve), a **decision table** per rule where 3+ inputs combine to select an outcome. Entity lifecycles belong in `data-model.md`. A single-step CRUD path and a two-branch `if` need neither.
 
-**A flow or a multi-input rule in the initiative → read `references/key-flows-and-decisions.md`** for the diagram and table shapes, and load `business-analysis:process-flow` and `business-analysis:decision-table` by path for the full discipline. Where the project keeps a business-model KB, the models live there as `FLOW-nnn` / `DEC-nnn` and the blueprint links them by ID.
+**A flow or a multi-input rule in the initiative → read `references/key-flows-and-decisions.md`** for the diagram and table shapes, and load `product:process-flow` and `product:decision-table` by path for the full discipline. Where the project keeps a business-model KB, the models live there as `FLOW-nnn` / `DEC-nnn` and the blueprint links them by ID.
 
 **The hit policy is never invented.** When nobody has decided what happens if two rules both apply, it is a `[TBD]` and an open question.
 
@@ -88,7 +88,7 @@ Done when every needed dimension has a row with a version and an evidence mark.
 
 ### Step 5 — Name the external systems (architecture altitude only)
 
-One line each: system, what it does for us, direction (we call it / it calls us / both), and criticality (does the feature fail without it, or degrade?). Depth (auth method, config keys, retry policy, sandbox strategy) belongs to `dev:plan-integrations`; here only enough to make the architecture and the risk list honest.
+One line each: system, what it does for us, direction (we call it / it calls us / both), and criticality (does the feature fail without it, or degrade?). Depth (auth method, config keys, retry policy, sandbox strategy) belongs to `product:plan-integrations`; here only enough to make the architecture and the risk list honest.
 
 ### Step 6 — Build the routing map
 
@@ -122,7 +122,7 @@ A capability with no agent is said so, naming the skill or human step that cover
 
 **Then record the execution model, one line, as an answer and not an inference.** The routing map says *which* agents build the system; the execution model says *how the run happens*, and selects the delivery plan's sequencing shape. Ask it in the Step-9 batch:
 
-| Execution model | Recognized by | Selects (in `dev:plan-delivery` Step 2) |
+| Execution model | Recognized by | Selects (in `product:plan-delivery` Step 2) |
 |---|---|---|
 | **One operator, sequential batches** | One person drives one session at a time; integration/E2E happens once at the end; nothing must be demonstrable before the last batch | `agent-batched` |
 | **Concurrent lanes / Mission Control** | Several lanes run at once, or a stakeholder wants the first capability early | `feature-complete` |

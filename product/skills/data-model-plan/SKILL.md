@@ -104,7 +104,7 @@ Lookup tables, enum tables, and any row the system cannot boot without: what it 
 | Source | Data | Target tables | One-time or sync | Validated by | Delivery task |
 |---|---|---|---|---|---|
 
-State the mapping at column level only where it is non-obvious (a spreadsheet column that splits into two fields, a legacy status that has no successor value). Every import feeds a delivery task — `dev:plan-delivery` sequences it after the schema it targets — and names the human who validates the imported data before cutover. No source of record being replaced → one line saying so.
+State the mapping at column level only where it is non-obvious (a spreadsheet column that splits into two fields, a legacy status that has no successor value). Every import feeds a delivery task — `product:plan-delivery` sequences it after the schema it targets — and names the human who validates the imported data before cutover. No source of record being replaced → one line saying so.
 
 ### Step 5 — Diagrams
 
@@ -130,7 +130,7 @@ stateDiagram-v2
 ```
 ````
 
-The state diagram is not decoration — every arrow that does *not* exist becomes a `409 illegal state transition` rule in `api-surface.md`. Where the project keeps a business-model KB, load `business-analysis:state-grid` and record the lifecycle there as an `ENT-nnn` state × event grid instead of drawing it twice — its `—` cells are exactly the refused transitions, and it forces you to say whether each is impossible, ignored, or an error.
+The state diagram is not decoration — every arrow that does *not* exist becomes a `409 illegal state transition` rule in `api-surface.md`. Where the project keeps a business-model KB, load `product:state-grid` and record the lifecycle there as an `ENT-nnn` state × event grid instead of drawing it twice — its `—` cells are exactly the refused transitions, and it forces you to say whether each is impossible, ignored, or an error.
 
 ### Step 6 — Ownership map
 
@@ -160,7 +160,7 @@ Rules:
 ```markdown
 # <Initiative> — Data Model Plan
 
-**Date:** YYYY-MM-DD · **Written by:** `dev:plan-data-model`
+**Date:** YYYY-MM-DD · **Written by:** `product:plan-data-model`
 **Blueprint:** `./blueprint.md` (approved YYYY-MM-DD)
 **Engine:** <engine + version> — detected | proposed
 

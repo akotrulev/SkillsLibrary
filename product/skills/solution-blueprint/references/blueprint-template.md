@@ -5,7 +5,7 @@ Read before writing `blueprint.md`. The section order is the contract; `referenc
 ```markdown
 # <Initiative> — Solution Blueprint
 
-**Date:** YYYY-MM-DD · **Written by:** `dev:plan-blueprint` · **Status:** DRAFT — awaiting approval
+**Date:** YYYY-MM-DD · **Written by:** `product:plan-blueprint` · **Status:** DRAFT — awaiting approval
 **Initiative folder:** `docs/plans/<NNN>-<initiative>/`
 **Entry mode:** NEW | DETAIL | RESUME | EXTEND — <what settled it>
 **Sources:** <requirements docs, stories, KB entries, repo paths — with what each contributed>

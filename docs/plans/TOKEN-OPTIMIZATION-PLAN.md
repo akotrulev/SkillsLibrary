@@ -49,8 +49,8 @@ Batches (59 files — ✅ all done 2026-07-16):
 - [x] `frontend/blazor/skills/` (16): basics, installable-offline-app, ui-rules, animation, accessibility, seo, component-testing, languages, javascript-calls, responsive-design, error-handling, styling, data-fetching, performance, component-library, realtime
 - [x] `data/` (3): elasticsearch, redis, mongodb
 - [x] `qa/*/skills/responsive-testing` (3: dotnet, java, typescript)
-- [x] `engineering-practices/` (3): requesting-code-review, spec-vs-code-audit, feature-audit
-- [x] misc (6): business-analysis/ba-feature-conflict-check, backend/{dotnet,java}/skills/cognito, auth/_shared/oidc-concepts (extras/xlsx out of plugin scope — skipped)
+- [x] `engineering/` (3): requesting-code-review, spec-vs-code-audit, feature-audit
+- [x] misc (6): product/skills/ba-feature-conflict-check, backend/{dotnet,java}/skills/cognito, auth/_shared/oidc-concepts (extras/xlsx out of plugin scope — skipped)
 
 **Result:** always-on desc tokens — fe-react 10,055→6,426 · fe-blazor 9,597→6,467 (−33%/−36%); qa-* −4%; data −16%. 67 files remain in the 500–800 band (next node).
 
@@ -102,7 +102,7 @@ Priority order (top band, >18KB):
 
 **The recipe (validated on 4 agents, 2026-07-25).** In leverage order:
 1. **Compress the brownfield block to `.skill-template/agent.md` shape** — it runs 4.1–5.2 KB inlined in every agent and compresses to ~2.0 KB with no loss: keep the orient / Mode A triage fork / Mode B / branch-finish structure and the agent's *distinctive* content (the per-family failure-class fork is the real value), drop the restated preamble and the numbered-list scaffolding. **Biggest single win: 2.0–3.2 KB per agent.**
-2. **Declare a path shorthand once, then use bare skill names** — `a bare name is <root>/<name>/SKILL.md; an ep-* name is engineering-practices/<name>/SKILL.md`. Collapsing `[`x`](../skills/x/SKILL.md)` and `` `qa/dotnet/skills/x/SKILL.md` `` to `` `x` `` saves 25–55 chars per mention, ~0.5–1.0 KB per agent.
+2. **Declare a path shorthand once, then use bare skill names** — `a bare name is <root>/<name>/SKILL.md; an ep-* name is engineering/<name>/SKILL.md`. Collapsing `[`x`](../skills/x/SKILL.md)` and `` `qa/dotnet/skills/x/SKILL.md` `` to `` `x` `` saves 25–55 chars per mention, ~0.5–1.0 KB per agent.
 3. **Compress the skill-loading protocol paragraph** (~1.0 KB → ~0.6 KB) and fold its 4-item numbered list into 3, adding *"where a skill routes to one of several `references/<tool>.md`, read only the one matching the project's tool"* — the one-of-N instruction this phase called for.
 4. **Merge the two output-contract blocks** — hoist the shared `Versions/Stack detected` line above both.
 5. **Stop restating `CLAUDE.md`'s code rules in full** — the loaded skills carry them; keep only what the agent gates on each phase.

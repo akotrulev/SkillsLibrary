@@ -1,7 +1,7 @@
 # Shared data
 
 **Created:** 2026-08-02
-**Owned by:** `business-analysis:dependency-map`
+**Owned by:** `product:dependency-map`
 
 ## CRUD matrix — entities touched by two or more features
 | Entity | Create | Read | Update | Delete | Completeness |

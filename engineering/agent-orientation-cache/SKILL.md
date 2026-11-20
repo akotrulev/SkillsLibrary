@@ -93,7 +93,7 @@ It records **what the code is**. It never records what is wrong with it or what 
 | Findings, verdicts, severity tables, conformance rounds | `docs/audits/` |
 | Implementation plans, task lists | `docs/plans/` |
 | Designs, specs, approved approaches | `docs/specs/` |
-| Business flows, entity states, decision tables, conflicts | `docs/business-model/` (`dev:knowledge-base`) |
+| Business flows, entity states, decision tables, conflicts | `docs/business-model/` (`product:knowledge-base`) |
 | Screen inventories from a live crawl | `docs/app-map/` (`mobile-app-crawler`) |
 | Missing `data-testid` reports for the dev team | `missing-testids.md` |
 
@@ -120,5 +120,5 @@ Orientation cache: updated | updated (partial — <why>) | created
 
 - The file skeleton to write → `references/file-template.md`
 - The agent's own field list (what goes in each section) → the agent that loaded this skill
-- Persist a *business* model instead of a code map → `business-analysis/skills/ba-project-memory`
-- Verify a claim before reporting the work done → `engineering-practices/verify-before-done` (`dev:verify`)
+- Persist a *business* model instead of a code map → `product/skills/ba-project-memory`
+- Verify a claim before reporting the work done → `engineering/verify-before-done` (`engineering:verify`)

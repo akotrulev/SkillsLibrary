@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Domain modeling: the glossary and ADRs, written as they settle
 
-Loaded by `dev:feature` during its interview, by the `solution-planner` blueprint step, and by any plan task recording a decision. It changes the project's language and its record of decisions while the design is being argued, so that the next session names things the same way and does not reopen a settled choice. Reading the glossary before naming code is a separate, lighter habit every agent already has (`engineering-practices/agent-orientation-cache`).
+Loaded by `product:feature` during its interview, by the `solution-planner` blueprint step, and by any plan task recording a decision. It changes the project's language and its record of decisions while the design is being argued, so that the next session names things the same way and does not reopen a settled choice. Reading the glossary before naming code is a separate, lighter habit every agent already has (`engineering/agent-orientation-cache`).
 
 | Artifact | Path | Format |
 |---|---|---|

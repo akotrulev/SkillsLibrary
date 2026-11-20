@@ -1,7 +1,7 @@
 # Flow — Book a seat (FLOW-001)
 
 **Created:** 2026-08-02
-**Owned by:** `business-analysis:process-flow`
+**Owned by:** `product:process-flow`
 
 **Sources**: US3 · **Feature**: AREA-003 bookings
 **Actors**: member, the system

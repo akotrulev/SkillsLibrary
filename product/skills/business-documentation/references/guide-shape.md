@@ -80,11 +80,11 @@ Optional sections are **dropped** when they do not apply, never padded. *Rules a
   **Describes:** the product as it was on 2026-09-14
   **Screenshots:** captured from the staging environment on 2026-09-14
 
-  <!-- guide · id: AREA-004 · owner: dev:doc-business-model · source: be-documenter @ a3f9c21 · models: FLOW-004, ENT-003, DEC-002 · stories: US4, US7 · audience: shareable -->
+  <!-- guide · id: AREA-004 · owner: product:doc-business-model · source: documenter @ a3f9c21 · models: FLOW-004, ENT-003, DEC-002 · stories: US4, US7 · audience: shareable -->
   ```
 
   - `**Created:**` always; `**Last updated:**` once updated; `**Describes:**` the date the product was read.
   - `**Screenshots:**` is one of `captured from <environment name, never its address> on YYYY-MM-DD` · `pending — <why>` · `waived — <the person's reason>` · absent when the guide has no screen at all.
-  - The stamp is `key: value` pairs separated by ` · `, opening with the word `guide`. Keys: `id` (area guides only, `AREA-nnn`), `owner` (area guides and the overview: `dev:doc-business-model`), `source` (`be-documenter @ <sha>` or `be-feature-documenter @ <sha>`), `models` (KB runs: the FLOW/ENT/DEC ids, optional), `stories` (the story ids a purpose was taken from, optional), `audience` (`shareable`). It is the only place internal and story ids appear.
+  - The stamp is `key: value` pairs separated by ` · `, opening with the word `guide`. Keys: `id` (area guides only, `AREA-nnn`), `owner` (area guides and the overview: `product:doc-business-model`), `source` (`documenter @ <sha>` or `feature-documenter @ <sha>`), `models` (KB runs: the FLOW/ENT/DEC ids, optional), `stories` (the story ids a purpose was taken from, optional), `audience` (`shareable`). It is the only place internal and story ids appear.
 
 **Length.** Under about 2,500 words, counted outside fenced blocks, `## About this document` and the stamp comment. When over, cut in this order until it fits: (1) an outcome the person does not notice; (2) a rule nobody meets in a task, unless an administrator changes it — statement and row together; (3) a *Good to know* entry → one sentence in the closest task; (4) example lines beyond the one that shows the rule → `## A <period> in numbers`; (5) *See also* entries a person would not go to. Still over: split by person, the administrators' tasks becoming their own guide linked from *See also*. A fact a person meets in a task is never trimmed.

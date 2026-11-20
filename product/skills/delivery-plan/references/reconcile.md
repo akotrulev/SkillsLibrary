@@ -21,7 +21,7 @@ Read when a plan and partly built code both exist. Run it **before** re-sequenci
 4. **Escalate every divergence.** Usually the code is right and the plan is stale, but the plan is never silently rewritten to match, because the other possibility is a defect. Present both readings, recommend one, and append the resolution to the plan's `## Decisions` as a dated `D<n>`.
 5. **Sweep the class.** If one task diverged because the plan assumed a convention the project does not use, every other pending task assuming it is also wrong. Fix them together.
 6. **Check the baseline.** Does the repo build and do its tests pass *right now*? A plan that assumes a green baseline while the build is red is wrong from task one. Report a red state as a finding; it is not yours to silently fix.
-7. **Re-sequence what remains**, then have `dev:plan-session-budget` re-derive the budgets that changed and rewrite `## Prompts — one per task` **from what you found**, not from what it previously said. Delete the blocks of tasks the reconcile found `Done`; restore a block for a task whose prompt was deleted on a claim the code does not support, and say so in `Status:`.
+7. **Re-sequence what remains**, then have `product:plan-session-budget` re-derive the budgets that changed and rewrite `## Prompts — one per task` **from what you found**, not from what it previously said. Delete the blocks of tasks the reconcile found `Done`; restore a block for a task whose prompt was deleted on a claim the code does not support, and say so in `Status:`.
 
 Report the reconcile as counts plus the divergences in full:
 

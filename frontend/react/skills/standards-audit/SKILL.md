@@ -25,8 +25,8 @@ Load the **owning skill's `SKILL.md`** (named per section in the checklist) when
 | Job | Owner | Why not this skill |
 |---|---|---|
 | Review one diff / a few files, inline severity table | [`fe-react:conventions-review`](../code-review/SKILL.md) | No saved artifact, no round tracking, no whole-repo sweep. This skill **reuses** its checklists at repo scale |
-| Code vs a written spec / stories / ACs | `dev:audit-spec` (or the `code-auditor` agent) | Their spine is a requirement register built from *the user's* sources; this skill's spine is *the plugin's* rules |
-| "How does feature X actually work / where is it defective" | `dev:audit-feature` | Behaviour tracing of one area, no fixed rule set |
+| Code vs a written spec / stories / ACs | `engineering:audit-spec` (or the `code-auditor` agent) | Their spine is a requirement register built from *the user's* sources; this skill's spine is *the plugin's* rules |
+| "How does feature X actually work / where is it defective" | `engineering:audit-feature` | Behaviour tracing of one area, no fixed rule set |
 | Multi-lane audit engagement, stakeholder report, other stacks | `code-auditor` agent | Stack-agnostic and lane-driven. Hand off when the ask grows past "does the React code follow our conventions" |
 | Attacking authz / injection / DAST | `qa-security` peer | This inventories gates; it does not attack them |
 | Running axe / Lighthouse / E2E to *prove* a11y or perf | `qa-ui-typescript` / `qa-security` peers | Static conformance only — see the evidence policy |

@@ -77,7 +77,7 @@ Reviews codebases or proposed designs at the pattern / architecture altitude —
 
 ### Comments & self-documentation
 
-Load **[`engineering-practices/code-comments`](../../../engineering-practices/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here. The rule is language-agnostic; the doc-comment syntax is not, so at this altitude judge the *discipline*, not the syntax.
+Load **[`engineering/code-comments`](../../../engineering/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here. The rule is language-agnostic; the doc-comment syntax is not, so at this altitude judge the *discipline*, not the syntax.
 
 | Check | Bad sign | Severity |
 |---|---|---|
@@ -111,7 +111,7 @@ Load **[`engineering-practices/code-comments`](../../../engineering-practices/co
 - **Static mutable state**
 - **"We'll need it later" abstractions** — wait for the second instance
 - **Hand-rolled cross-cutting** (logging copy-pasted, retry loops per call site) instead of decorators / middleware
-- **Comments compensating for naming, and stale comments.** A body that needs a step-by-step commentary needs extracting; a comment that no longer matches the code is a confident lie. Both per `engineering-practices/code-comments` — the fix is the rename or the extraction, never a reword.
+- **Comments compensating for naming, and stale comments.** A body that needs a step-by-step commentary needs extracting; a comment that no longer matches the code is a confident lie. Both per `engineering/code-comments` — the fix is the rename or the extraction, never a reword.
 
 ## Procedure
 

@@ -64,7 +64,7 @@ Your Task → Claude asks NotebookLM → Gemini synthesizes answer → Claude wr
 
 ## Installation
 
-The tool ships bundled at `engineering-practices/bundled/notebooklm/` and is loaded through `engineering-practices/notebooklm/SKILL.md`.
+The tool ships bundled at `product/bundled/notebooklm/` and is loaded through `product/skills/notebooklm/SKILL.md`.
 
 When you first use the skill, it automatically:
 - Creates an isolated Python environment (`.venv`)

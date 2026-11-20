@@ -4,7 +4,7 @@ Loaded by `SKILL.md` when a KB run writes `glossary.md`, and when a sentence nee
 
 ## Glossary
 
-The table, its columns and its rules (synonyms under `Avoid`, drift kept as a finding) are in `${CLAUDE_PLUGIN_ROOT}/engineering-practices/domain-modeling/references/glossary-format.md`. What a KB run adds:
+The table, its columns and its rules (synonyms under `Avoid`, drift kept as a finding) are in `${CLAUDE_PLUGIN_ROOT}/product/skills/domain-modeling/references/glossary-format.md`. What a KB run adds:
 
 - **Every domain term the trace found gets a row**, mapping the vocabularies: the client's own term from the trace's `Client vocabulary` table, what it means, and what the code calls it.
 - **`Called in code` comes from the code you read**: every identifier for the concept, a legacy one marked `(legacy)`, with the `file:line` in *Notes* and the tag `#observed`.

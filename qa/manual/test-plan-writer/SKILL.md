@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # QA — Test Plan Writer
 
-Assembles and formats a **test plan**: one document that says which versions are under test, what will be tested and what won't, at which level, with which harness, in which scenarios, by whom, producing which artifacts, when testing may start (Definition of Ready) and when it is done (Definition of Done). Its unit is whatever it is handed: **an epic and its stories** (the default after `/dev:refine`), one feature, or a release. It is the planning layer between `test-strategy` (risk reasoning) and the executing skills/agents (cases, automation) — lean IEEE 829 / ISO 29119-3 shape, none of the ceremony.
+Assembles and formats a **test plan**: one document that says which versions are under test, what will be tested and what won't, at which level, with which harness, in which scenarios, by whom, producing which artifacts, when testing may start (Definition of Ready) and when it is done (Definition of Done). Its unit is whatever it is handed: **an epic and its stories** (the default after `/product:refine`), one feature, or a release. It is the planning layer between `test-strategy` (risk reasoning) and the executing skills/agents (cases, automation) — lean IEEE 829 / ISO 29119-3 shape, none of the ceremony.
 
 This skill **owns the document**: its sections, tables, grammar, and quality bar. The *content* comes from elsewhere — the test basis from `requirements-breakdown` (or exploration), the risk register from `test-strategy`, technique choices from `test-design-techniques`, and the inventory of existing automation from reading the repo. The full feature→plan flow is orchestrated by the `qa/manual/agents/qa-test-planner` agent; load this skill to shape and quality-gate what that flow produced.
 
@@ -82,7 +82,7 @@ Test data strategy: <builders/ObjectMother · seeding · anonymized copy — and
 
 ## 11. Definition of Ready and Definition of Done
 **Ready — testing may start when**
-- [ ] <every in-scope story is ready: no `[TBD]` in its criteria, no open blocker from `dev:story-review`>
+- [ ] <every in-scope story is ready: no `[TBD]` in its criteria, no open blocker from `product:story-review`, when `product` is enabled>
 - [ ] <the build in §2 is deployed to the §8 environment>
 - [ ] <accounts, test data and external sandboxes in §8 are issued and reachable>
 - [ ] <the harness in §6 runs green on the default branch>

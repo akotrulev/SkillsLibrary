@@ -6,17 +6,17 @@ disable-model-invocation: true
 
 # BA — Feature Conflict Sweep
 
-The quality gate of the `business-analysis/` family: takes a **new or changed feature** and sweeps it **pairwise against the persisted project model**, asking a fixed taxonomy of conflict questions per pair. The classic feature-interaction lesson (telecom's call-waiting × call-forwarding) applies to every product: two features, each correct alone, collide at a shared trigger, state, or resource — and the right resolution is a **business decision**, not a technical default. This skill's job is to surface each collision *at requirements time* with the concrete scenario where it bites, then get the decision made and **recorded**.
+The quality gate of the `ba-*` family: takes a **new or changed feature** and sweeps it **pairwise against the persisted project model**, asking a fixed taxonomy of conflict questions per pair. The classic feature-interaction lesson (telecom's call-waiting × call-forwarding) applies to every product: two features, each correct alone, collide at a shared trigger, state, or resource — and the right resolution is a **business decision**, not a technical default. This skill's job is to surface each collision *at requirements time* with the concrete scenario where it bites, then get the decision made and **recorded**.
 
 Without the KB there is nothing to sweep against — the value scales with what previous sessions persisted.
 
 ## Contract with the KB
 
-Per `business-analysis/skills/ba-project-memory`: **read first** — `INDEX.md`, `interaction-map.md` (don't re-litigate resolved conflicts), `glossary.md`, every flow/entity/decision file the new feature plausibly touches, and `events.md`, `shared-data.md` and `invariants.md` where they exist (the pair list is built from them). **Update after** — findings and resolutions into `interaction-map.md`, plus `active-context.md` + INDEX.
+Per `product/skills/ba-project-memory`: **read first** — `INDEX.md`, `interaction-map.md` (don't re-litigate resolved conflicts), `glossary.md`, every flow/entity/decision file the new feature plausibly touches, and `events.md`, `shared-data.md` and `invariants.md` where they exist (the pair list is built from them). **Update after** — findings and resolutions into `interaction-map.md`, plus `active-context.md` + INDEX.
 
 ## Procedure
 
-> **Audit form (no new feature).** On the "periodic audit / refresh the model" trigger there is no feature to normalize, so **§1 is skipped** and the pair list (§2) is the KB's own **open surface** rather than a feature × KB cross: unresolved `CONF-` entries, `?` cells in entity grids, `[TBD]`/undeclared hit policies in decision tables, the connection layer's open checks (unconsumed events, orphan reactions, `unhandled`/`?` failures and modes, unenforced invariants, CRUD gaps), and unverified `#inferred` items. §3 (taxonomy), §4 (boundary condition per finding), and §5 (severity table + recorded resolutions) are unchanged. Pair the refresh procedure in `dev:knowledge-base` first (reconcile drift, prune, re-verify `#inferred`), then sweep that open surface.
+> **Audit form (no new feature).** On the "periodic audit / refresh the model" trigger there is no feature to normalize, so **§1 is skipped** and the pair list (§2) is the KB's own **open surface** rather than a feature × KB cross: unresolved `CONF-` entries, `?` cells in entity grids, `[TBD]`/undeclared hit policies in decision tables, the connection layer's open checks (unconsumed events, orphan reactions, `unhandled`/`?` failures and modes, unenforced invariants, CRUD gaps), and unverified `#inferred` items. §3 (taxonomy), §4 (boundary condition per finding), and §5 (severity table + recorded resolutions) are unchanged. Pair the refresh procedure in `product:knowledge-base` first (reconcile drift, prune, re-verify `#inferred`), then sweep that open surface.
 
 ### 1. Normalize the new feature
 
@@ -31,7 +31,7 @@ Decompose each of its requirements into one comparison tuple — the same six el
 | **constraints** | restrictions on it (frequency, window, amount, role) |
 | **state touched** | entity states it reads, sets, or removes |
 
-Also classify each requirement as **behavior**, **invariant** (a global "always/never" axiom), or **resource** claim (quota, budget, slot, lock) — invariant- and resource-mediated conflicts are invisible if you only compare behaviors to behaviors. Invariant and resource claims are persisted to `invariants.md` through `business-analysis:dependency-map`.
+Also classify each requirement as **behavior**, **invariant** (a global "always/never" axiom), or **resource** claim (quota, budget, slot, lock) — invariant- and resource-mediated conflicts are invisible if you only compare behaviors to behaviors. Invariant and resource claims are persisted to `invariants.md` through `product:dependency-map`.
 
 Glossary-check every term during normalization: a term used differently than `glossary.md` defines it is finding material *before* any pair is compared.
 
@@ -59,7 +59,7 @@ When `events.md` exists, the pair list is the **feature cross-section** (`ba-pro
 
 Every finding states the **concrete scenario where the two features collide**: "customer redeems loyalty points (B) on an order at exactly $100.00 (A's free-shipping threshold, computed *post*-discount → total drops to $87 → does shipping revert?)". A finding without a boundary condition is a suspicion, not a finding. Boundary conditions double as test seeds for QA — BVA, and the cross-feature cases of `qa-<stack>:cross-feature-test-design`.
 
-**Escalation tools** when a pair needs deeper analysis (the selection matrix): outcome-per-combination unclear → merge into a decision table (`business-analysis:decision-table`); lifecycle unclear → extend the entity grid (`business-analysis:state-grid`); paths/timeouts unclear → the flow (`business-analysis:process-flow`); **timing/interleaving between actors** → a Mermaid `sequenceDiagram` of that specific boundary scenario — the one place sequence diagrams are used, as an investigation tool, not a default artifact.
+**Escalation tools** when a pair needs deeper analysis (the selection matrix): outcome-per-combination unclear → merge into a decision table (`product:decision-table`); lifecycle unclear → extend the entity grid (`product:state-grid`); paths/timeouts unclear → the flow (`product:process-flow`); **timing/interleaving between actors** → a Mermaid `sequenceDiagram` of that specific boundary scenario — the one place sequence diagrams are used, as an investigation tool, not a default artifact.
 
 ### 5. Report — the severity table
 

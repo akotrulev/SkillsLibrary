@@ -28,12 +28,12 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
    - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer or a `replace` argument.
 
    With nobody to ask and no argument, write the plugin's copy beside it. Done when each file already present is up to date, replaced, kept or written beside as `<name>.plugin`.
-5. **Retire the old folder.** Before this plugin the same rule was installed as `<root>/.claude/rules/dev/audits.md`. `cmp` it with the plugin's `audits.md`.
+5. **Retire the old folder.** Before this plugin the same rule was installed as `audits.md` in the folder named `dev` under `<root>/.claude/rules/`. `cmp` it with the plugin's `audits.md`.
    - Identical: delete it.
    - Different: the team edited it, and the new copy sits in `.claude/rules/engineering/` already. Show `diff -u <old> <source>` and ask: **delete** the old file (its edits are lost), or **keep** it. With the `replace` argument, delete it. With the `keep` or `beside` argument, or with nobody to ask, keep it and list it under `Waiting for the user:`.
-   - Any other file in `.claude/rules/dev/` is left alone (`plans.md` and `feature-docs.md` belong to `product:rules`).
+   - Any other file in the `dev` folder is left alone (`plans.md` and `feature-docs.md` belong to `product:rules`).
 
-   Remove `.claude/rules/dev/` once it is empty. Done when the old file is deleted, listed as kept, or absent.
+   Remove the `dev` folder once it is empty. Done when the old file is deleted, listed as kept, or absent.
 6. **Fit the paths to where this project keeps its audits.** The default assumes `docs/audits/`. Find the real place: `git ls-files '*-audit-r*.md' '*-requirements.md'`. For each document found that no default glob covers, propose the glob that would cover it and add it to the installed copy with the user's agreement. Never widen to `**/*.md`: every README and design doc would load these rules. With nobody to ask, change no path and list each proposed glob under `Waiting for the user:` in the report. Done when every audit round found is matched by an installed glob, or a glob is proposed for it.
 7. **Check it will be committed**: `git check-ignore -q <root>/.claude/rules/engineering/audits.md`. If it is ignored, say so; the rules then apply on this machine only.
 8. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`) for audit rules that differ from `audits.md` (where rounds are saved, how they are numbered, the finding classes) and list them. The rule file already says the project wins; the list tells the user which installed lines to edit so the two never read differently. Done when each contradiction is listed, or the report says none.
@@ -43,7 +43,7 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
 ```
 engineering rules: audits.md: installed | up to date | replaced | kept | written as .plugin
 Path: <root>/.claude/rules/engineering/
-Old folder: removed | audits.md kept in .claude/rules/dev/ | none found
+Old folder: removed | audits.md kept in the dev folder under .claude/rules | none found
 Document paths: default | widened with <globs>
 Committed: yes | ignored by git
 Differs from the project's own rules: none | <one line each>

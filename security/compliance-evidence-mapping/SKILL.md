@@ -50,7 +50,7 @@ Every row carries the **evidence artifact path** (the SARIF, the test report, th
 ## How to build it
 
 1. **Scope** — which frameworks are in play (a fintech taking cards → PCI mandatory; an EU-data SaaS → GDPR + SOC 2; ISO for enterprise sales). Do not map to a framework the org is not pursuing — noise.
-2. **Inventory the controls that already run** — read the repo for the gates/tests/hardening/detections that exist and their output artifacts (this is where `engineering-practices/agent-orientation-cache`'s seam inventory + the other lanes' reports feed in). Evidence status is read from the artifact, this session — a green pipeline is a lead, the SARIF is the evidence.
+2. **Inventory the controls that already run** — read the repo for the gates/tests/hardening/detections that exist and their output artifacts (this is where `engineering/agent-orientation-cache`'s seam inventory + the other lanes' reports feed in). Evidence status is read from the artifact, this session — a green pipeline is a lead, the SARIF is the evidence.
 3. **Map via the SCF crosswalk** — control → requirement across every in-scope framework; state the ASVS level the app is verified at.
 4. **Tier the evidence** `#present`/`#partial`/`#gap` from the artifact, not the intent.
 5. **Emit the register** (Markdown for humans; OSCAL where consumed) + the prioritized **gap list**, each gap routed to its closing lane.

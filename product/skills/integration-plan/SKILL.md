@@ -132,7 +132,7 @@ One table that makes the system's degraded behavior reviewable in one read:
 ```markdown
 # <Initiative> — Integration Plan
 
-**Date:** YYYY-MM-DD · **Written by:** `dev:plan-integrations`
+**Date:** YYYY-MM-DD · **Written by:** `product:plan-integrations`
 **Blueprint:** `./blueprint.md` · **API surface:** `./api-surface.md`
 
 ## 1. Dependency register

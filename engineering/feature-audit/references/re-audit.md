@@ -40,7 +40,7 @@ Same surface structure and section order as round 1, plus status prefixes and a 
 # AUDIT — <feature> — Round <N>
 
 **Date:** <YYYY-MM-DD>  **Previous round:** `<path>` (<date>)  **Evidence mode:** static | static + <commands run>
-**Written by:** `dev:audit-feature` (via `code-auditor`)
+**Written by:** `engineering:audit-feature` (via `code-auditor`)
 **Question driving the audit:** <verbatim — restated, or the new one if it changed>
 **Re-verify scope:** <"prior findings + defect families" | "+ surface B re-traced, narrative had changed">
 

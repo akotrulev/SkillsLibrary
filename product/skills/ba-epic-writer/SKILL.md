@@ -12,7 +12,7 @@ The middle of the **requirements → epics → stories** chain. Takes a scoped r
 
 ## Inputs needed
 
-1. **The requirements document** (`requirements.md` from `dev:scoping`, ideally) — its §4 capabilities are what the epics cover, exactly once each
+1. **The requirements document** (`requirements.md` from `product:scoping`, ideally) — its §4 capabilities are what the epics cover, exactly once each
 2. **Success measures** — from `requirements.md` §6, or the epic's own where one capability has its own signal
 3. **Constraints that affect the route** — from `requirements.md` §5; compliance, contractual sequencing, a deadline
 4. **Known dependencies** — work that must complete before, or alongside
@@ -86,7 +86,7 @@ options set aside. No technology.>
 | 3 | The waiting list | join a full class, be offered a freed place | The full-class case |
 | ... | ... | ... | ... |
 
-These are anticipated, not committed — `business-analysis/skills/ba-story-writer` writes each one out in full (goal, how we get there, what is included, acceptance criteria). Each line is a feature a person would name with the parts it holds, never a layer or a component.
+These are anticipated, not committed — `product/skills/ba-story-writer` writes each one out in full (goal, how we get there, what is included, acceptance criteria). Each line is a feature a person would name with the parts it holds, never a layer or a component.
 
 ## 7. In scope / out of scope / deferred
 | In scope | Out of scope | Deferred (next epic) |
@@ -111,7 +111,7 @@ Nothing technical belongs in the document: no cross-team contract section, no AP
 
 ## Standards
 
-What an epic must and must never contain (one measurable goal, the plain-English section with no technology, no tech-only or goal-less epics, a route with a named axis, stories that are whole features and never layers, reasoned out-of-scope, two-way dependencies, the epic's own risks, a binary Definition of Done, a held delivery window, never an invented number) is the business-analysis rule file `backlog-epics.md`, not a list here. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win.
+What an epic must and must never contain (one measurable goal, the plain-English section with no technology, no tech-only or goal-less epics, a route with a named axis, stories that are whole features and never layers, reasoned out-of-scope, two-way dependencies, the epic's own risks, a binary Definition of Done, a held delivery window, never an invented number) is the product rule file `backlog-epics.md`, not a list here. Read the project's copy in `.claude/rules/product/`, or the plugin's in `product/skills/rules/` when the project has not installed them (`/product:rules` does). Where they and this skill disagree, the rule files win.
 
 ## Examples — goal lines
 
@@ -185,7 +185,7 @@ An epic is one capability a person gets. Size follows from that, not from a cale
 
 ## Generation steps
 
-1. Read the requirements document. If it is unscoped, route back to `business-analysis/skills/ba-scoping-writeup`. If it merely lacks a success measure, proceed — the measure becomes `[TBD — who decides]` and an open question
+1. Read the requirements document. If it is unscoped, route back to `product/skills/ba-scoping-writeup`. If it merely lacks a success measure, proceed — the measure becomes `[TBD — who decides]` and an open question
 2. Write the plain-English section (§2): who it is for and why, what gets built, how it fits. **Read it back with every technical noun removed** — if a sentence stops making sense, rewrite the sentence, do not reinstate the noun
 3. Draft the one-sentence goal from it — iterate with the user until WHO / DO WHAT / SO THAT MEASURABLE CHANGE all pass the sniff test
 4. Write how we get there (§5): the axis, the first story and why it is usable alone, what each later one adds, decisions taken
@@ -193,4 +193,4 @@ An epic is one capability a person gets. Size follows from that, not from a cale
 6. Mark in-scope / out-of-scope / deferred with rationale
 7. Surface epic-level risks and dependencies
 8. Write the Definition of Done as a binary checklist
-9. Hand off to `business-analysis/skills/ba-story-writer`
+9. Hand off to `product/skills/ba-story-writer`

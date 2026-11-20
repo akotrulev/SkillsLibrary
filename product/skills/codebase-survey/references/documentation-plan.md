@@ -2,7 +2,7 @@
 
 Load this when the confirmed reading plan holds **more than one session**. A run that fits one session is not planned: it goes straight on to tracing.
 
-The survey session writes the plan and stops. Every later session runs one prompt block of it, through Plan Queue or pasted by hand. Read the plan format first — `engineering-practices/writing-plans/references/plan-format.md` — it is the contract the plan is queued under and it is not restated here. This file says only what a documentation plan puts in each part.
+The survey session writes the plan and stops. Every later session runs one prompt block of it, through Plan Queue or pasted by hand. Read the plan format first — `product/skills/writing-plans/references/plan-format.md` — it is the contract the plan is queued under and it is not restated here. This file says only what a documentation plan puts in each part.
 
 **Path:** `docs/plans/NNN-document-<system>.md` in the documented project, `NNN` the next number across `docs/plans/` and `docs/plans/implemented/`.
 
@@ -28,12 +28,12 @@ The survey session writes the plan and stops. Every later session runs one promp
 
 ## Tasks
 
-One `A<n>` task per session of the reading plan, in its order; a session holding two small areas is one task naming both. `K1` is last. Every task is stack `docs`, agent `be-documenter`.
+One `A<n>` task per session of the reading plan, in its order; a session holding two small areas is one task naming both. `K1` is last. Every task is stack `docs`, agent `documenter`.
 
 ````markdown
 ### A2 — Ordering — placement (AREA-002)
 
-**Stack:** `docs` · **Agent:** `be-documenter`
+**Stack:** `docs` · **Agent:** `documenter`
 **Deliverable:** `docs/business-model/areas/ordering-placement.md` exists for AREA-002 — a section per role that places or handles an order, administrators included, and its screenshots (or `**Screenshots:** pending`) — with its flows, entity grids and decision tables, its `INDEX.md` line and its glossary terms, and the area lint exits 0.
 **Depends on:** A1 — the KB it initialised, the actors and terms it set, and the shared KB files both tasks write.
 **Budget:** ~128k — 85k fixed (harness, agent, skills, references, rule files, working overhead), 18k source (≈ 1,500 traced lines × 12), 25k the guide written and re-read and its screenshots captured.
@@ -47,7 +47,7 @@ One `A<n>` task per session of the reading plan, in its order; a session holding
 ````markdown
 ### K1 — the system overview, the consolidated KB and the whole-KB lint
 
-**Stack:** `docs` · **Agent:** `be-documenter`
+**Stack:** `docs` · **Agent:** `documenter`
 **Deliverable:** `docs/business-model/system-overview.md` exists, every surface of §2's coverage ledger is in an area or under *What is not documented*, and the lint over the whole KB exits 0.
 **Depends on:** A1, A2, A3 — every area's set.
 **Budget:** ~115k — 85k fixed, 10k the overview written and re-read, 15k reading every area guide's *Who uses it*, *How it fits together* and *See also*.
@@ -62,7 +62,7 @@ The lint is each task's runnable check, so an area task's gate takes the `own te
 
 ## Prompts
 
-Each block follows the plan format's §6 exactly: the heading `### A2 — <title> (be-documenter, docs)`, the first line `Depends on: <ids>`, the second `Agent: be-documenter · Stack: docs`, a four-backtick fence, and the close-out line last. The preamble says: run them in order, one session each, never beside each other (D1); no prompt changes source code. A documentation prompt carries:
+Each block follows the plan format's §6 exactly: the heading `### A2 — <title> (documenter, docs)`, the first line `Depends on: <ids>`, the second `Agent: documenter · Stack: docs`, a four-backtick fence, and the close-out line last. The preamble says: run them in order, one session each, never beside each other (D1); no prompt changes source code. A documentation prompt carries:
 
 - **The reading order** — the project's `CLAUDE.md`; the plan's §2 row for the area, §4, the Decisions, the task block and "Close-out — every task"; `docs/business-model/INDEX.md` and `glossary.md` as the previous task left them (`A1` has none: it initialises the KB); then the area's primary evidence, by path.
 - **The screens** — the environment by name and where the person keeps its address and test logins (never the values), or "none: write the guides with `**Screenshots:** pending`"; the line "ask once; screenshots never block the text".
@@ -77,4 +77,4 @@ Each block follows the plan format's §6 exactly: the heading `### A2 — <title
 
 A REFRESH whose stale areas need more than one session writes the same plan: one `A` task per session of stale areas, and `K1` reconciles the system overview.
 
-**A REFRESH over an old-shape KB** (guides with `## How it works` and no `## Who uses it`, or with retired `.behind-the-scenes.md` / `.technical.md` siblings — the lint's `old-shape`, `renamed-section`, `about-shape` and `retired-level` WARNs on arrival) is sized as an **in-place update**, never as writing the area from scratch (`dev:doc-business-model`, reconcile step 3): each area's estimate is the existing files read as leads (≈ their word count × 1.4 tokens), the targeted lookup for `Who uses it`, `**Where:**` paths and the diagram (the routes and labels searches, ≈ 8k), the screenshots captured when an environment is given (≈ 10k), the re-trace of **only the paths the git delta since the stamp's `source:` sha touches** (traced lines × 12), and the guide edited rather than written (≈ 60% of a new guide's write cost). Every area task's deliverable says "updated in place into the current shape, retired levels deleted"; its gate adds `--kept-from <the guide's old sha>` and clears each `fact-kept` WARN or explains it in the report. `K1` updates the overview and `INDEX.md` lines in place; its whole-KB lint has no `old-shape` WARN and its `--kept-from` run no unexplained `fact-kept`. An area still over its length cap after the skill's cuts is split by person (the administrators' tasks into their own guide), named in the plan's open questions, never trimmed of a fact a person meets.
+**A REFRESH over an old-shape KB** (guides with `## How it works` and no `## Who uses it`, or with retired `.behind-the-scenes.md` / `.technical.md` siblings — the lint's `old-shape`, `renamed-section`, `about-shape` and `retired-level` WARNs on arrival) is sized as an **in-place update**, never as writing the area from scratch (`product:doc-business-model`, reconcile step 3): each area's estimate is the existing files read as leads (≈ their word count × 1.4 tokens), the targeted lookup for `Who uses it`, `**Where:**` paths and the diagram (the routes and labels searches, ≈ 8k), the screenshots captured when an environment is given (≈ 10k), the re-trace of **only the paths the git delta since the stamp's `source:` sha touches** (traced lines × 12), and the guide edited rather than written (≈ 60% of a new guide's write cost). Every area task's deliverable says "updated in place into the current shape, retired levels deleted"; its gate adds `--kept-from <the guide's old sha>` and clears each `fact-kept` WARN or explains it in the report. `K1` updates the overview and `INDEX.md` lines in place; its whole-KB lint has no `old-shape` WARN and its `--kept-from` run no unexplained `fact-kept`. An area still over its length cap after the skill's cuts is split by person (the administrators' tasks into their own guide), named in the plan's open questions, never trimmed of a fact a person meets.

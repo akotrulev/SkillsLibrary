@@ -1,6 +1,6 @@
 # Contributing to SkillsLibrary
 
-This guide covers the contributor workflow: where a skill goes, how it is registered and tested, and the PR checklist. **How to write anything an agent reads** (skills, agents, rule files, `CLAUDE.md`) is the house standard, [`engineering-practices/writing-for-agents/SKILL.md`](engineering-practices/writing-for-agents/SKILL.md), with the skill, agent and rule-file mechanics in its [`references/skill-mechanics.md`](engineering-practices/writing-for-agents/references/skill-mechanics.md). Its rules carry ids, `R1`–`R23`, which the checklist below, `tools/skill-lint.py` and every review cite.
+This guide covers the contributor workflow: where a skill goes, how it is registered and tested, and the PR checklist. **How to write anything an agent reads** (skills, agents, rule files, `CLAUDE.md`) is the house standard, [`engineering/writing-for-agents/SKILL.md`](engineering/writing-for-agents/SKILL.md), with the skill, agent and rule-file mechanics in its [`references/skill-mechanics.md`](engineering/writing-for-agents/references/skill-mechanics.md). Its rules carry ids, `R1`–`R23`, which the checklist below, `tools/skill-lint.py` and every review cite.
 
 ## The three-layer model
 
@@ -35,11 +35,11 @@ qa/test-case-writer/
 
 ## SKILL.md structure
 
-Copy the right file from `.skill-template/` and keep its outline: frontmatter, **Inputs needed**, **Procedure**, **Output format**, **Examples**. How to fill it in, which sections a hidden skill and a front door carry (R6, R7), and what an example must obey (R21) are in `engineering-practices/writing-for-agents/references/skill-mechanics.md`, "Skill body".
+Copy the right file from `.skill-template/` and keep its outline: frontmatter, **Inputs needed**, **Procedure**, **Output format**, **Examples**. How to fill it in, which sections a hidden skill and a front door carry (R6, R7), and what an example must obey (R21) are in `engineering/writing-for-agents/references/skill-mechanics.md`, "Skill body".
 
 ## Agent structure
 
-Agents live in `<domain>/agents/<name>.md`. Copy `.skill-template/agent.md`; the reference agent is `backend/java/agents/be-java.md`. The skeleton, the conditional `Load` cells, the `Mode:` line and the fixed vocabulary are in `engineering-practices/writing-for-agents/references/skill-mechanics.md`, "Agents: thin routers" (R11, R13, R14).
+Agents live in `<domain>/agents/<name>.md`. Copy `.skill-template/agent.md`; the reference agent is `backend/java/agents/be-java.md`. The skeleton, the conditional `Load` cells, the `Mode:` line and the fixed vocabulary are in `engineering/writing-for-agents/references/skill-mechanics.md`, "Agents: thin routers" (R11, R13, R14).
 
 ## Code standards are rules, installed per project
 
@@ -48,23 +48,23 @@ A stack's do/don't standards are **Claude Code rules**, not skill sections: file
 - Where a file extension is shared with another stack in a monorepo (TypeScript, C#, Kotlin), the default globs stay narrow and the install skill finds where this stack's code really lives and proposes globs for it.
 - Prove new globs before merging: a scratch project with the rule files installed and an `InstructionsLoaded` hook logging to a file, then `claude -p "Read <sample files>"`; each file must load for its sample and not for a non-matching file. Reference: `backend/java/skills/rules/`.
 
-How a rule file is written (split by path, sizes, its opening lines, which side it owns, when a non-stack plugin earns one) is in `engineering-practices/writing-for-agents/references/skill-mechanics.md`, "Rule files" (R23).
+How a rule file is written (split by path, sizes, its opening lines, which side it owns, when a non-stack plugin earns one) is in `engineering/writing-for-agents/references/skill-mechanics.md`, "Rule files" (R23).
 
 ## Front doors: which skills the model sees
 
 **A skill is listed to the model only when it is a front door** (R5). Every other registered skill carries `disable-model-invocation: true`; a person can still type `/<plugin>:<name>`, and agents and commands `Read` it by path. Every command carries it too.
 
-The list is `FRONT_DOORS` in `tools/plugin-surface-check.py`. The checker fails when a skill outside it is listed, when a front door is hidden, and when a command is listed. When a skill earns a front door, and what follows from the choice (no routing sections in a hidden skill, pointers by path, pointers that name the agent), is in `engineering-practices/writing-for-agents/references/skill-mechanics.md`, "Front door or hidden".
+The list is `FRONT_DOORS` in `tools/plugin-surface-check.py`. The checker fails when a skill outside it is listed, when a front door is hidden, and when a command is listed. When a skill earns a front door, and what follows from the choice (no routing sections in a hidden skill, pointers by path, pointers that name the agent), is in `engineering/writing-for-agents/references/skill-mechanics.md`, "Front door or hidden".
 
 ## Writing a good `description`
 
-The shape (R3), the when-not-how rule (R4), the sizes (R2) and the good and bad examples are in `engineering-practices/writing-for-agents/references/skill-mechanics.md`, "The description". `tools/token-audit.py` enforces the sizes, and `tools/plugin-surface-check.py` fails on a colon followed by a space in the line.
+The shape (R3), the when-not-how rule (R4), the sizes (R2) and the good and bad examples are in `engineering/writing-for-agents/references/skill-mechanics.md`, "The description". `tools/token-audit.py` enforces the sizes, and `tools/plugin-surface-check.py` fails on a colon followed by a space in the line.
 
 ## Names and registration
 
-**Bundle within a category, depend across categories.** One plugin per category is installed per project (`qa-*`, `fe-*`, `mobile-*`, `be-*` are the categories with several stacks; every other plugin is its own). Sharing inside a category is bundled and duplicates nothing. Anything used by more than one category is registered in exactly one plugin (`dev`, `design`) and the others declare it in `dependencies` by bare name. A skill folder or agent file is never registered by plugins of two categories. Internals loaded by path (`engineering-practices/{agent-orientation-cache,code-comments,standards-audit-engine}`, `auth/_shared/*`) are not registered.
+**Bundle within a category, depend across categories.** One plugin per category is installed per project (`qa-*`, `fe-*`, `mobile-*`, `be-*` are the categories with several stacks; every other plugin is its own). Sharing inside a category is bundled and duplicates nothing. Anything used by more than one category is registered in exactly one plugin (`engineering`, `design`) and the others declare it in `dependencies` by bare name. A skill folder or agent file is never registered by plugins of two categories. Internals loaded by path (`engineering/{agent-orientation-cache,code-comments,standards-audit-engine}`, `auth/_shared/*`) are not registered.
 
-Name rules for skills and commands (topic only, no prefix or suffix, unique per plugin, one meaning per word, folders stay put on a rename) are in `engineering-practices/writing-for-agents/references/skill-mechanics.md`, "Names" (R1).
+Name rules for skills and commands (topic only, no prefix or suffix, unique per plugin, one meaning per word, folders stay put on a rename) are in `engineering/writing-for-agents/references/skill-mechanics.md`, "Names" (R1).
 
 **Reserved names.** No skill name or command stem may equal a Claude Code built-in (list as of 2026-10-11): `add-dir agents artifacts bug clear claude-api code-review compact config context cost dataviz doctor effort exit export fast feedback fewer-permission-prompts focus help hooks ide init install-github-app keybindings-help login logout loop mcp memory migrate-installer model output-style permissions plan plugin plugin-authoring pr-comments privacy-settings release-notes resume review rewind run schedule security-review simplify status statusline terminal-setup todos update-config upgrade usage vim workflow-authoring`.
 
@@ -86,7 +86,7 @@ Skills are versioned via git. If you make a breaking change to a skill's output 
 
 ## Pull request checklist
 
-Each item cites its rule in `engineering-practices/writing-for-agents`.
+Each item cites its rule in `engineering/writing-for-agents`.
 
 - [ ] The skill copies its `.skill-template/` file and keeps its outline
 - [ ] Description: ≤ 200 characters (R2), `Use when` … `Triggers "a", "b".` … `Not for <case> (<sibling>).` (R3), the situation and never the workflow (R4)

@@ -4,7 +4,7 @@ paths:
   - "docs/audits/*-audit-r*.md"
 ---
 
-<!-- dev rules v1 (2026-11-03): audits. Installed by /dev:rules; edit the paths above if this project keeps its audits elsewhere. -->
+<!-- engineering rules v1 (2026-11-03): audits. Installed by /engineering:rules; edit the paths above if this project keeps its audits elsewhere. -->
 
 # Audit register and round standards
 
@@ -16,7 +16,7 @@ For anyone who writes, edits or acts on an audit file. Severity: **blocker** bre
 - `<NNN>` is minted once per subject and every round reuses it. Requirement ids, surface letters and finding numbers are permanent: new ones continue the sequence, none is renumbered or reused. *blocker*
 - Fixing a finding never edits the audit: cite its id in your commit or report. **Resolved** is claimed only in a new round after re-reading the code that round, never on a commit, ticket, green test or `#inferred` evidence. *blocker*
 
-## code-auditor's files (written by `dev:audit-spec` or `dev:audit-feature`)
+## code-auditor's files (written by `engineering:audit-spec` or `engineering:audit-feature`)
 
 - The register is append-only: a new or descoped requirement takes the next free id, marked `Added r<N>` / `Descoped r<N>`. A source's own id goes in `Source`, never as the id. *blocker*
 - One checkable statement per requirement, every source cited. Contradicting sources stay two entries marked `⚠️ CONFLICT`; never pick a winner. *major*

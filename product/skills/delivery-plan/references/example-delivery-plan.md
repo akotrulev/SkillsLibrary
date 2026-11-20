@@ -11,15 +11,15 @@
 - Prompts — one per task
 - For Mission Control
 
-The filled example for `dev:plan-delivery`, from the **workshop-booking** toy initiative shared
+The filled example for `product:plan-delivery`, from the **workshop-booking** toy initiative shared
 by all the planner examples. **Shapes and disciplines are normative; domain content is illustrative.**
 A real artifact writes a full block for *every* task — this example writes five representative ones (a
 foundation task, an acceptance-test task, a backend capability task, the frontend task that actually
 delivers that capability, and the whole-set gate task) and abbreviates the rest, saying so.
 
-The document format is `engineering-practices/writing-plans/references/plan-format.md`; the prompts
-section's shape is `backend/_shared/session-budget/references/prompts-section-template.md`; the epic
-map these streams derive from is `backend/_shared/epic-map/references/example-epic-map.md`.
+The document format is `product/skills/writing-plans/references/plan-format.md`; the prompts
+section's shape is `product/skills/session-budget/references/prompts-section-template.md`; the epic
+map these streams derive from is `product/skills/epic-map/references/example-epic-map.md`.
 
 Workshop booking is user-facing, so it is sequenced **feature-complete**: after the foundations the
 first capability needs, the tasks for one capability run back to back and the last of them makes it
@@ -31,7 +31,7 @@ and story**; every task carries a **`Budget`** with the drivers behind it; **eve
 before the code they specify** (`C8` → `Q1`–`Q4` → `B1`–`B3`); and the plan's **progress
 is the `As built` notes plus the prompt blocks that are left**, not a status column. Note also how the plan
 closes: **testing is planned inside it** (`TD1`–`TD3`, the test plan per epic and the test cases per
-story, before the `Q` tasks), and **its last task is `DOC1`**, the `be-documenter` task that updates the
+story, before the `Q` tasks), and **its last task is `DOC1`**, the `documenter` task that updates the
 documentation from the code `B7` verified. And where the filing duty sits: `B4` is blocked on a person and
 outlives `DOC1`, so **`B4`'s block carries the move to `docs/plans/implemented/`**, not `DOC1`'s.
 
@@ -53,7 +53,7 @@ domain authentication) is blocked on the studio owner, and `B4` sits below `DOC1
 **Pack:** `./epics.md` · `./stories.md` · `./blueprint.md` · `./data-model.md` · `./experience-plan.md` · `./api-surface.md` · `./integrations.md` · `./epic-map.md`
 **Target repo:** `~/src/workshop-booking` · **Stack:** .NET 10 + PostgreSQL 18 (`src/`) · React 19 + Next 15 (`web/`)
 **Build/test:** `dotnet build` / `dotnet test` / `dotnet format` for `be` tasks · `pnpm build` / `pnpm test` for `fe` tasks — **run in full once, by `B7`, under the test lock**; every earlier code task runs only the scoped commands its `Gate: own tests` line names, for its own tests, the landed tasks' tests above it and the coverage floor over their files; the whole e2e suite runs in the project's nightly CI run
-**Sequencing shape:** feature-complete — the studio owner wants the timetable demonstrable before booking exists · **Test-first:** yes — the API surface and journeys are the contract (the user did not opt out) · **Test design:** yes — a test plan per epic and a test-case suite per story (`TD1`–`TD3`) · **Documentation task:** `DOC1` → `be-documenter` (Scheduling, Booking, Membership)
+**Sequencing shape:** feature-complete — the studio owner wants the timetable demonstrable before booking exists · **Test-first:** yes — the API surface and journeys are the contract (the user did not opt out) · **Test design:** yes — a test plan per epic and a test-case suite per story (`TD1`–`TD3`) · **Documentation task:** `DOC1` → `documenter` (Scheduling, Booking, Membership)
 
 > **For agentic workers:** the tasks in §3 are one flat sequence — work them in order. Each names the
 > agent that should execute it, the skills to load, and the one deliverable that means it is done.
@@ -96,7 +96,7 @@ grounding — every task below traces to a row, and a row with no task is someth
 | Traces, logs and RED metrics reaching a local Grafana stack from the first request | — | `C9` — the OpenTelemetry SDK, structured logging, the resource attributes, `deploy/local/` and a RED dashboard; each implementation task then instruments what it builds (`B2` names its signals) |
 | Business dashboards and alert rules | — | `B6`, once the named signals exist |
 | One verified build, suite and format pass across the plan | — | `B7`, the last runnable task |
-| Documentation that describes what was built, for the studio owner and for whoever maintains it | — | `DOC1`, the plan's last task: `be-documenter` writes the Scheduling, Booking and Membership areas in `docs/business-model/` from the code `B7` verified, and the delivery note `docs/deliveries/<NNN>-<plan-slug>.md` for the studio owner |
+| Documentation that describes what was built, for the studio owner and for whoever maintains it | — | `DOC1`, the plan's last task: `documenter` writes the Scheduling, Booking and Membership areas in `docs/business-model/` from the code `B7` verified, and the delivery note `docs/deliveries/<NNN>-<plan-slug>.md` for the studio owner |
 
 ## 2. Streams
 
@@ -336,7 +336,7 @@ attributing it is part of this task, and the `As built` note says which task eac
 - **The plan is not filed here, and the product documentation is not written here.** `DOC1` follows and
   documents what this task verified; `B4` is blocked on `H2` and still holds a prompt block, so
   `docs/plans/003-workshop-booking/` stays in `docs/plans/`. Say so in `Status:`.
-- **Not in B7:** the documentation in `docs/business-model/` (`DOC1`, `be-documenter`), writing acceptance tests (`Q1`–`Q4`; this task only runs them and resolves a disputed one),
+- **Not in B7:** the documentation in `docs/business-model/` (`DOC1`, `documenter`), writing acceptance tests (`Q1`–`Q4`; this task only runs them and resolves a disputed one),
   the environment-level integration suites (`qa-api-dotnet`), the access-control proof (`qa-security`) — and `B4`, which is blocked on `H2`
   and carries its own gate whenever it runs.
 
@@ -383,7 +383,7 @@ commands like `C4`'s, `Q1`'s, `B2`'s and `F2`'s; the `human` tasks have no gate.
 - **There is no pin task here.** The repo is greenfield, so no behaviour exists that no test pins. On a
   brownfield plan, a `qa-api-dotnet` or `be-dotnet` pin task would sit above the first task that touches
   the untested area: "the current behaviour of <area> is pinned by N tests, green on today's code."
-- **`DOC1` is the plan's last task**, `Stack: docs`, agent `be-documenter`, depending on `B7`. It traces
+- **`DOC1` is the plan's last task**, `Stack: docs`, agent `documenter`, depending on `B7`. It traces
   the three modules at HEAD and writes the Scheduling, Booking and Membership areas in
   `docs/business-model/` (a user guide each — members, staff and the studio owner as administrator, with
   worked examples and screenshots from the staging environment its prompt names), from the code and never from this plan, taking purpose from
@@ -513,7 +513,7 @@ have not run together.
 | 26 | B6 | `E0` | — | `be` | `foundations-api` | A Grafana dashboard shows bookings placed by outcome and an alert fires on a sustained 5xx rate | `observability-engineer-dotnet` | ~95k | C9, B1, B2 |
 | 27 | DA1 | `E0` | — | `data` | `schema` | A written verdict on the capacity guard under concurrent booking, with any constraint change applied | `data-architect` | ~80k | C7 |
 | 28 | B7 | `E0` | — | `be` | `foundations-api` | The solution builds, the whole suite and the journeys pass, the format check is clean, and the repository-state note is written | `be-dotnet` | ~130k | all of the above |
-| 29 | DOC1 | `E0` | — | `docs` | `docs` | The Scheduling, Booking and Membership areas in `docs/business-model/` describe what this plan landed, each guide's tasks, rules and worked example matching the code at HEAD, and `docs/deliveries/<NNN>-<plan-slug>.md` states what was delivered and what was not | `be-documenter` | ~120k | B7 |
+| 29 | DOC1 | `E0` | — | `docs` | `docs` | The Scheduling, Booking and Membership areas in `docs/business-model/` describe what this plan landed, each guide's tasks, rules and worked example matching the code at HEAD, and `docs/deliveries/<NNN>-<plan-slug>.md` states what was delivered and what was not | `documenter` | ~120k | B7 |
 | 30 | B4 | `E4` | `US14` | `be` | `email` | A confirmed booking produces a confirmation email, deliverable in dev against Mailpit | `be-dotnet` | ~90k | C4, B2, H2 |
 
 **`H1`, `C1`–`C9`, `TD1`–`TD2`, `Q1`–`Q3`, `B1` and `F1` have landed, and their prompts are deleted** — a prompt for a

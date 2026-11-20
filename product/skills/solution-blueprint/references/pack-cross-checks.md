@@ -22,6 +22,6 @@ Read at Step 9, after Steps 7–8, over the whole pack in `docs/plans/<NNN>-<ini
 - Lanes the epic map runs together are disjoint in the delivery plan's `Files` lists, not only in the epic map's own claim.
 - In a test-first plan, every AC with an API or journey outcome reaches a `Q` test, and untested behaviour the plan must keep has a pin task.
 - Every epic with stories has a test plan from a `TD` task, and every story a test-case suite; each `Q` task depends on the test-plan task for its epic; the gate task checks each plan's Definition of Done (or the header records the opt-out).
-- The plan's last task is `DOC1` (stack `docs`, `be-documenter` or `be-feature-documenter`), depends on the gate task and names the documents it updates.
+- The plan's last task is `DOC1` (stack `docs`, `documenter` or `feature-documenter`), depends on the gate task and names the documents it updates.
 - A telemetry-base task follows the scaffold, and every `be` task that adds an entry point, an outbound call, a job or a business event names its spans, logs and metrics.
 - Every agent and skill name resolves in the catalog.

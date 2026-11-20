@@ -96,7 +96,7 @@ Where the operator will run the plan alone, back to back, say that too — the w
 ```markdown
 # <Initiative> — Epic Map
 
-**Date:** YYYY-MM-DD · **Written by:** `dev:plan-epic-map`
+**Date:** YYYY-MM-DD · **Written by:** `product:plan-epic-map`
 **Pack:** `./epics.md` · `./stories.md` · `./blueprint.md` · `./delivery-plan.md`
 
 > `E0` is planner-created: it carries no stories and does not appear in `epics.md`.
@@ -145,7 +145,7 @@ Where the operator will run the plan alone, back to back, say that too — the w
 | Collapsing two colliding epics into one serial lane | Serialises work that only collided on a DI registration. Pull the registration into `E0` and keep both lanes |
 | `E2 depends on E1` with no reason | Unfalsifiable, so it is never removed, so the critical path never gets shorter |
 | Renumbering the backlog's epics to make the waves read better | Breaks every `US` and `E` citation in `stories.md` and in `delivery-plan.md` — its task blocks, its task table and every one of its prompt blocks |
-| Putting `E0` in `epics.md` | It has no goal a person can state, so it fails `dev:epics`'s own gate. It is a planner construct and belongs here |
+| Putting `E0` in `epics.md` | It has no goal a person can state, so it fails `product:epics`'s own gate. It is a planner construct and belongs here |
 | A wave table with no lane counts | The operator's question is "how many sessions can I open", and the document declines to answer it |
 | Treating one epic as one lane always | Two independent stories inside an epic are two sessions the plan never offered |
 

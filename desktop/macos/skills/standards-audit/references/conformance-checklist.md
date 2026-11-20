@@ -458,7 +458,7 @@ This section holds no rows of its own. The rows are those of `desktop/_shared/ob
 ---
 
 ## V — Comments & KISS
-*Owning skills: [`engineering-practices/code-comments`](../../../../../engineering-practices/code-comments/SKILL.md) · CLAUDE.md § Comments and § Simplicity (KISS)*
+*Owning skills: [`engineering/code-comments`](../../../../../engineering/code-comments/SKILL.md) · CLAUDE.md § Comments and § Simplicity (KISS)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -503,7 +503,7 @@ This section is not applicable on macOS: there is no P/Invoke, COM or C++/WinRT 
 | R | Testability & test ids | R1–R12 | `test-ids` |
 | S | Dev-side tests | S1–S17 | `unit-testing` |
 | U | Observability & logging | fragment | `desktop/_shared/observability` |
-| V | Comments & KISS | V1–V8 | `engineering-practices/code-comments`, CLAUDE.md § Simplicity |
+| V | Comments & KISS | V1–V8 | `engineering/code-comments`, CLAUDE.md § Simplicity |
 | X | Interop & native code | N/A | none on macOS |
 
 Sections Q (motion) and T (release) are unused: motion is in E, release in L. Fragment sections hold the rows of their `audit-checks.md` whose `Platforms` column names `macos`.

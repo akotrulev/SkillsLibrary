@@ -1,6 +1,6 @@
 # Worked example — a member books a session
 
-The filled example for `test-case-writer`: a basis excerpt in, a business-first suite out. The system is the **workshop-booking** toy of `backend/_shared/business-documentation/references/example-area.md`; `cross-feature-test-design/references/example-cancel-booking.md` covers cancelling in the same system. **Shape is normative; domain content is illustrative.**
+The filled example for `test-case-writer`: a basis excerpt in, a business-first suite out. The system is the **workshop-booking** toy of `product/skills/business-documentation/references/example-area.md`; `cross-feature-test-design/references/example-cancel-booking.md` covers cancelling in the same system. **Shape is normative; domain content is illustrative.**
 
 Thirteen cases: three journeys, five rule and calculation cases, three state and permission cases, one concurrency case and **one** field case. The request carries a single field, and the suite is still thirteen cases long, because the work is in what a booking costs and what it sets off.
 

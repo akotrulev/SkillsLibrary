@@ -6,15 +6,15 @@ disable-model-invocation: true
 
 # Delivery Plan — the ordered, agent-bound task list
 
-The artifact that turns the design pack into work, written in the library's plan format (`engineering-practices/writing-plans/references/plan-format.md`; read it first: this skill is the procedure, not the shape). It adds the streams table, the epic/story binding on every task, the reconcile procedure and the Mission Control ingestion block.
+The artifact that turns the design pack into work, written in the library's plan format (`product/skills/writing-plans/references/plan-format.md`; read it first: this skill is the procedure, not the shape). It adds the streams table, the epic/story binding on every task, the reconcile procedure and the Mission Control ingestion block.
 
-**Every task belongs to exactly one epic, one story, one stack and one agent, and runs in one session.** The task's id, deliverable, stack list and gate are `plan-format.md` §3–§5. The epic and story come from `epics.md` / `stories.md` by way of `epic-map.md`; `dev:plan-session-budget` derives the budget while the task is authored.
+**Every task belongs to exactly one epic, one story, one stack and one agent, and runs in one session.** The task's id, deliverable, stack list and gate are `plan-format.md` §3–§5. The epic and story come from `epics.md` / `stories.md` by way of `epic-map.md`; `product:plan-session-budget` derives the budget while the task is authored.
 
 **Prerequisites:** `blueprint.md` (approved), `data-model.md`, `api-surface.md`, `integrations.md` and `epic-map.md`, whose lanes and waves this plan's streams and order derive from. **A plan and partly built code both exist → read `references/reconcile.md` first** and run it before re-sequencing anything.
 
-The plan standards are the dev rule file `plans.md` (the project's copy in `.claude/rules/dev/`, else `engineering-practices/rules/`).
+The plan standards are the product rule file `plans.md` (the project's copy in `.claude/rules/product/`, else `product/skills/rules/`).
 
-**Output:** one file, `docs/plans/<NNN>-<initiative>/delivery-plan.md`, beside the pack; the whole folder moves to `docs/plans/implemented/` when the last task lands (`plan-format.md` §8). `dev:plan-session-budget` fills the `**Budget:**` lines and the `## Prompts — one per task` section inside it. The filled golden example, with the header, streams table, task blocks and Mission Control block, is `references/example-delivery-plan.md`; the prompt-block shape is `backend/_shared/session-budget/references/prompts-section-template.md`.
+**Output:** one file, `docs/plans/<NNN>-<initiative>/delivery-plan.md`, beside the pack; the whole folder moves to `docs/plans/implemented/` when the last task lands (`plan-format.md` §8). `product:plan-session-budget` fills the `**Budget:**` lines and the `## Prompts — one per task` section inside it. The filled golden example, with the header, streams table, task blocks and Mission Control block, is `references/example-delivery-plan.md`; the prompt-block shape is `product/skills/session-budget/references/prompts-section-template.md`.
 
 ## Procedure
 
@@ -80,7 +80,7 @@ A **stream** is a named lane: tasks in one stream run one after another, differe
 Use the plan format's task block (`plan-format.md` §4) plus the binding line `**Epic:** … · **Story:** … · **Stack:** … · **Stream:** … · **Order:** …`, the agent line with `**Skills:**`, and a `**Files:**` list; `references/example-delivery-plan.md` shows `Q1`, `B2`, `F2` and `B7` filled. A task `Not in <id>` names what belongs to a peer. Done when every block carries the binding line, `Skills`, `Files` and its `Not in <id>` bullet.
 
 - **`Epic`, `Story` and `Stack` are on every task or on none**, and so are `Stream` and `Order`. A task naming two stacks, an undeclared stream, a repeated `Order` or an unresolved `Epic`/`Story` is reported as a plan defect, never resolved by guessing.
-- **`Agent` is an exact catalog name** from the routing map in `blueprint.md` (`dev:plan-blueprint`), and so is every skill name: Mission Control and every executing session bind on the string. When the stack has no skill for a concern, bind the stack agent, write `— no <concern> skill for this stack; the agent works from the design pack` in `Skills` and open a question. A `human` task carries an `**Owner:**` line and is a gate to satisfy, never a lane to schedule.
+- **`Agent` is an exact catalog name** from the routing map in `blueprint.md` (`product:plan-blueprint`), and so is every skill name: Mission Control and every executing session bind on the string. When the stack has no skill for a concern, bind the stack agent, write `— no <concern> skill for this stack; the agent works from the design pack` in `Skills` and open a question. A `human` task carries an `**Owner:**` line and is a gate to satisfy, never a lane to schedule.
 - **`Files` are specific**: the stream check relies on them.
 - **Size by coherence, not volume.** Split when the task delivers two independent behaviours, part of it is blocked while the rest is not, or two agents own the halves; under ~80k merge with the next same-story same-stack task only if one deliverable remains; over ~150k annotate it and name its split point.
 - **A task bound to `fe-*`, a `be` task that adds an entry point, outbound call, job or business event, a batch or a `Q` / `TD` task → read `references/task-block-rules.md`.**
@@ -91,7 +91,7 @@ The table at the top of `## Prompts — one per task`, sorted by `#`, is the ind
 
 ### Step 6 — Write `## Prompts — one per task`
 
-`dev:plan-session-budget` writes the blocks. Done when every block opens with the Step 3 `Depends on:` line and the preamble says what runs together in one line: "After C1, B1 → B2 run beside Q1; F1 waits for both; F2 runs the whole set." The last runnable task waits for every task nothing else waits for. Write `## Close-out — every task` directly above the prompts, copied verbatim from `plan-format.md` §7. A prompt that cannot be written until an earlier task lands is `**Blocked on <id>** — <id> writes this prompt when it lands, from <what it will then know>.`, matched by a bullet on that task and a line in its prompt block.
+`product:plan-session-budget` writes the blocks. Done when every block opens with the Step 3 `Depends on:` line and the preamble says what runs together in one line: "After C1, B1 → B2 run beside Q1; F1 waits for both; F2 runs the whole set." The last runnable task waits for every task nothing else waits for. Write `## Close-out — every task` directly above the prompts, copied verbatim from `plan-format.md` §7. A prompt that cannot be written until an earlier task lands is `**Blocked on <id>** — <id> writes this prompt when it lands, from <what it will then know>.`, matched by a bullet on that task and a line in its prompt block.
 
 ### Step 7 — The Mission Control section
 

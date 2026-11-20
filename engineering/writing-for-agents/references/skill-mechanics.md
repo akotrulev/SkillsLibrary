@@ -22,7 +22,7 @@ What follows from the choice:
 - **A hidden skill is reached by path.** An agent's `Load` cell, a command or another skill names the path to `Read`. The Skill tool refuses a hidden skill, so no line tells a model to invoke one through it (R12).
 - **A hidden skill carries no routing sections.** Its agent's Steps table picks it, so `When to use`, `When NOT to use`, `Handoffs` and `Related` would be read on every load and decide nothing (R6). A rule about which of two skills owns a decision is content: it goes under `Rules`.
 - **A front door carries `When to use` and `When NOT to use`** (R7), because a session chooses it from its description and needs the fences once loaded.
-- **A pointer a main session follows names the agent** (R22). A front door and a rule file are read by sessions holding the Skill tool, where a bare hidden `plugin:name` is something the model cannot act on. Write "delegate to the `business-analyst` agent, which loads it, or type `/business-analysis:conflict-check`". Inside a hidden skill the bare form is fine: its reader is an agent that loads by path.
+- **A pointer a main session follows names the agent** (R22). A front door and a rule file are read by sessions holding the Skill tool, where a bare hidden `plugin:name` is something the model cannot act on. Write "delegate to the `business-analyst` agent, which loads it, or type `/product:conflict-check`". Inside a hidden skill the bare form is fine: its reader is an agent that loads by path.
 - **A hidden skill cannot be preloaded** through an agent's `skills:` frontmatter. Agents here load by path, so nothing depends on it.
 
 ## The description
@@ -77,7 +77,7 @@ An agent restates no rule file, no plan-execution protocol and no list of relate
 
 **A step loads by condition.** A skill costs 2–5k tokens each time an agent reads it, so a `Load` cell holds two groups split by a `·`: the skills every task entering the step needs, then `<what the task contains> → <skill>` for the rest. Keep the first group to what no task in that step can do without. A form, an API call, a new route, motion, translated text and each platform feature are conditions. A condition names something visible in the task or the code (R14). Measured on `fe-react` (2026-11-20): a task entering steps 2 to 5 read about 72k tokens of skills unconditionally, and 30k plus its conditions once the cells were split.
 
-**Brownfield is part of every agent.** It orients in an existing codebase before changing it; it fixes (reproduce → triage → smallest correct change → verify → sweep the class, loading `dev:debugging` and `dev:verify`); it extends (re-enter only the touched step, reuse the seams orientation found).
+**Brownfield is part of every agent.** It orients in an existing codebase before changing it; it fixes (reproduce → triage → smallest correct change → verify → sweep the class, loading `engineering:debugging` and `engineering:verify`); it extends (re-enter only the touched step, reuse the seams orientation found).
 
 **Vocabulary is fixed** (R11, R20). An agent's own procedure is numbered in **steps**. The work items of a plan it writes are **tasks**: flat, ordered, ids prefixed by the family of work (`C1`, `B1…Bn`, `F1…Fn`), one deliverable each.
 

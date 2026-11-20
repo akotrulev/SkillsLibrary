@@ -38,7 +38,7 @@ Shostack's method-agnostic frame is the spine of a run; STRIDE and attack trees 
 | Enumerate technical threats element-by-element | **STRIDE-per-element** | `references/stride.md` |
 | Reason about *a specific attacker goal* in depth | **Attack tree** | `references/attack-trees.md` |
 | Model privacy threats (regulated personal data) | **LINDDUN** (alongside STRIDE) | `references/stride.md` (Where STRIDE runs out) |
-| Model business-logic abuse (legal steps, illegal outcome) | **abuse cases / decision tables** | `qa/manual/test-design-techniques`, `business-analysis:decision-table` |
+| Model business-logic abuse (legal steps, illegal outcome) | **abuse cases / decision tables** | `qa/manual/test-design-techniques`, `product:decision-table` (needs `product` enabled) |
 | Risk-centric, business-impact-first pass on a high-stakes system | **PASTA** (7-stage) | `references/stride.md` |
 
 **STRIDE is the default** for a service or platform. Reach for an attack tree only after STRIDE surfaces a high-value goal worth decomposing (cross-tenant data read, cluster-admin, supply-chain compromise) — the tree explains *how far a single objective reaches*, which STRIDE's breadth does not.
@@ -121,7 +121,7 @@ docs/security/threat-models/<NNN>-<system>.md
 - **Boundaries drawn but crossings not enumerated.** The boundary is where the threats live; a crossing with no rows is the gap. *Fix:* enumerate every crossing twice (sender + receiver).
 - **A vague threat.** "Injection risk" can't be tested or routed. *Fix:* actor + action + consequence, specific enough that the downstream lane knows exactly what to try.
 - **Modelling once and never revisiting.** The model rots as the architecture changes. *Fix:* it is diagram-as-code beside the repo; revise it on an architecture change and re-route the new threats (question 4).
-- **Threat-modelling business logic with STRIDE.** A refund loop is a legal sequence with an illegal outcome — STRIDE won't see it. *Fix:* abuse cases / `business-analysis:decision-table` / `qa/manual/test-design-techniques`.
+- **Threat-modelling business logic with STRIDE.** A refund loop is a legal sequence with an illegal outcome — STRIDE won't see it. *Fix:* abuse cases / `product:decision-table` (needs `product` enabled) / `qa/manual/test-design-techniques`.
 
 ## Rules (hard constraints)
 

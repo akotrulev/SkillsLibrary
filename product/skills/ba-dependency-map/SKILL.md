@@ -12,7 +12,7 @@ A reaction that nobody fires, an event that nobody consumes, a field two feature
 
 ## Contract with the KB
 
-Per `business-analysis/skills/ba-project-memory`: **read first** (`INDEX.md`, the three files if they exist, and the entity grids and decision files the feature touches), **update after** (the three files, `INDEX.md`, `active-context.md`). New rows join the existing files; a second events file for one feature is the anti-pattern.
+Per `product/skills/ba-project-memory`: **read first** (`INDEX.md`, the three files if they exist, and the entity grids and decision files the feature touches), **update after** (the three files, `INDEX.md`, `active-context.md`). New rows join the existing files; a second events file for one feature is the anti-pattern.
 
 Where a cell names a feature, it uses the feature-identity rule: `E<n>` or `AREA-nnn` with a label. Every row carries a source and a confidence tag, in the KB's annotation grammar.
 
@@ -32,7 +32,7 @@ Where a cell names a feature, it uses the feature-identity rule: `E<n>` or `AREA
 # Events & reactions
 
 **Created:** <YYYY-MM-DD>
-**Owned by:** `business-analysis:dependency-map`
+**Owned by:** `product:dependency-map`
 
 ## Triggers
 | ID | Trigger | Kind | Fired by | Owner | Source |
@@ -95,11 +95,11 @@ Where a cell names a feature, it uses the feature-identity rule: `E<n>` or `AREA
 | Unenforced invariant | a threatening reaction is `no` or `?` | the concrete sequence of reactions that breaks it |
 | Unsafe failure or mode | *On failure* is `unhandled` or `?`, or *Mode* is `?` | the failed or repeated delivery and the data left behind |
 
-Every finding goes to `business-analysis/skills/ba-feature-conflict-check` for severity and resolution recording; none is resolved here. An edge a source is silent on is `[TBD - source silent]`, never a guessed `yes` or `in request`.
+Every finding goes to `product/skills/ba-feature-conflict-check` for severity and resolution recording; none is resolved here. An edge a source is silent on is `[TBD - source silent]`, never a guessed `yes` or `in request`.
 
 ## Standards
 
-The quality bar for the three files is the business-analysis rule files, not a list here: `business-model-connections.md` (closed vocabularies for kind, effects, mode and on-failure; every reaction column filled; the shared-data and invariant limits; silence as `[TBD - source silent]`) plus the core `business-model.md`. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win. Neither file holds test cases, techniques or coverage.
+The quality bar for the three files is the product rule files, not a list here: `business-model-connections.md` (closed vocabularies for kind, effects, mode and on-failure; every reaction column filled; the shared-data and invariant limits; silence as `[TBD - source silent]`) plus the core `business-model.md`. Read the project's copy in `.claude/rules/product/`, or the plugin's in `product/skills/rules/` when the project has not installed them (`/product:rules` does). Where they and this skill disagree, the rule files win. Neither file holds test cases, techniques or coverage.
 
 ## Anti-example
 

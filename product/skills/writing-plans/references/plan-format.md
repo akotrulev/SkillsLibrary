@@ -13,8 +13,8 @@
 - 9. Never in a plan
 
 The shape every plan in this library is written in — the one the Plan Queue VS Code plugin queues, and
-the one `dev:plan-feature`, `dev:plan-delivery` and `dev:plan-session-budget` all produce, and the one
-`be-documenter` writes when documenting a system takes more than one session.
+the one `product:plan-feature`, `product:plan-delivery` and `product:plan-session-budget` all produce, and the one
+`documenter` writes when documenting a system takes more than one session.
 
 **One file, self-contained.** The plugin queues whole plan documents, so everything a cold reader or a
 fresh session needs is *in the file*: the context, the decisions, the tasks, and the paste-ready prompt
@@ -81,7 +81,7 @@ earn their place near the end of every plan:
   here with its date, not argued again in a task block.
   A `D<n>` that passes the three ADR tests (hard to reverse, surprising without context, a real
   trade-off) also gets an ADR in `docs/adr/`, written by the task that records the `D<n>` and citing
-  the plan (`${CLAUDE_PLUGIN_ROOT}/engineering-practices/domain-modeling/references/adr-format.md`).
+  the plan (`${CLAUDE_PLUGIN_ROOT}/product/skills/domain-modeling/references/adr-format.md`).
 - **`## Answered questions (YYYY-MM-DD)`** — `**O1 — <question>: <answer>.**` one line each. Questions
   still open live in an `## Open questions` table (`| # | Question | Options | Blocks | Owner |`) and
   every one of them names what it blocks.
@@ -231,8 +231,8 @@ work when the plan has any, and it writes no product documentation.
 
 **The documentation task is the plan's last task**, after the gate task and depending on it:
 
-- **Id `DOC1`, stack `docs`, agent the documenter**: `be-documenter` where the project keeps
-  `docs/business-model/` (or keeps no documentation yet), `be-feature-documenter` where it documents
+- **Id `DOC1`, stack `docs`, agent the documenter**: `documenter` where the project keeps
+  `docs/business-model/` (or keeps no documentation yet), `feature-documenter` where it documents
   feature by feature in `docs/features/`. Never the agent that wrote the code.
 - **It updates the documentation from the code that landed, never from the plan.** It re-traces the areas
   or features the plan's tasks touched (their `As built` notes are leads, the code is the evidence),

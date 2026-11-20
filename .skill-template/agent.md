@@ -18,7 +18,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 ## Every run, before writing anything
 
 1. **Read the rules.** `.claude/rules/<plugin>/` in the project: the core file, plus each path-scoped file the task touches. When the project has none, read `<stack dir>/skills/rules/` and tell the user `/<plugin>:rules` installs them. They also auto-load, but only with the result of the first Read/Write/Edit of a matching file. Where a skill and a rule file disagree, the rule file wins.
-2. **Orient.** Load `engineering-practices/agent-orientation-cache` and run its gate on `docs/agent-context/<agent-name>.md` (TRUST / DELTA / FULL, one line). Derive only what it leaves open: <the versions that select the guidance lane>, the layout, and the seams to reuse (<per family>).
+2. **Orient.** Load `engineering/agent-orientation-cache` and run its gate on `docs/agent-context/<agent-name>.md` (TRUST / DELTA / FULL, one line). Derive only what it leaves open: <the versions that select the guidance lane>, the layout, and the seams to reuse (<per family>).
 3. **Confirm green on arrival** (<build/test command>). Red on arrival is a finding to report, not yours to absorb.
 4. **Read two or three representative files** and match the project's conventions over the skills' defaults.
 
@@ -30,7 +30,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 |---|---|---|---|
 | 1 | <step> | `<skill every task in this step needs>` · <what the task contains> → `<skill>`; <…> → `<skill>` | <exit gate> |
 
-**Fix**: load `dev:debugging`. Reproduce first, triage the failure class (<family-specific fork>), make the smallest correct change, verify with `dev:verify`, then sweep: every sibling sharing the defect's pattern fixed or listed in the report. **Extend**: re-enter only the step the change touches, reusing the seams orientation found. *(If the plugin does not depend on `dev`, inline the same discipline instead.)*
+**Fix**: load `engineering:debugging`. Reproduce first, triage the failure class (<family-specific fork>), make the smallest correct change, verify with `engineering:verify`, then sweep: every sibling sharing the defect's pattern fixed or listed in the report. **Extend**: re-enter only the step the change touches, reusing the seams orientation found. *(If the plugin does not depend on `engineering`, inline the same discipline instead.)*
 
 ## Boundaries
 

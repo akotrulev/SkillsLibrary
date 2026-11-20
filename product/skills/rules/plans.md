@@ -4,11 +4,11 @@ paths:
   - "docs/plans/*/delivery-plan.md"
 ---
 
-<!-- dev rules v4 (2026-11-13): plans. Installed by /dev:rules; edit to fit this project, re-run to compare with the plugin's copy. -->
+<!-- product rules v4 (2026-11-13): plans. Installed by /product:rules; edit to fit this project, re-run to compare with the plugin's copy. -->
 
 # Plan document standards
 
-Apply to every plan you write, edit, run a task from, or review. Severity: **blocker** makes a session or the queue act wrongly, **major** misleads or loses the record, **minor** is shape. The full format is the dev plugin's `writing-plans/references/plan-format.md`.
+Apply to every plan you write, edit, run a task from, or review. Severity: **blocker** makes a session or the queue act wrongly, **major** misleads or loses the record, **minor** is shape. The full format is the `product` plugin's `writing-plans/references/plan-format.md`.
 
 **The project wins.** Where the project's `CLAUDE.md`, a `docs/plans/README.md` or the plan itself states its own plan rules, follow the project and do not flag it. A plan's own `## Close-out — every task` is the close-out its tasks run.
 
@@ -32,7 +32,7 @@ Apply to every plan you write, edit, run a task from, or review. Severity: **blo
 - The last task is the plan's one run under the project's test lock: the smoke suite plus every test the plan wrote, then the whole set, the ≥ 80% branch floor over the plan's code and the telemetry smoke when service behaviour changed; it fixes what it finds and holds no feature work. The project's whole e2e suite runs in its nightly CI run; each test red there goes on the project's tracked list with an owner and comes off it only when a nightly run is green for it. *major*
 - The last task's gate carries the fix loop of plan-format §5. Never a full run to check one fix; a failure that moves between runs is an isolation or scheduling defect fixed in the code, never retried until green; inside a `Q` test or fixture it is a `D<n>`, the test left as it is. *major*
 - Order is plan-format §4's: contract and stubs answering `501 not-implemented`, then `TD`, then `Q`, then implementation; human prerequisites first. *major*
-- The plan's last task is `DOC1`, stack `docs`, agent `be-documenter` or `be-feature-documenter`, depending on the gate task (plan-format §5); the gate task writes no product documentation. Left out only with `Documentation task: none — <why>`. *major*
+- The plan's last task is `DOC1`, stack `docs`, agent `documenter` or `feature-documenter`, depending on the gate task (plan-format §5); the gate task writes no product documentation. Left out only with `Documentation task: none — <why>`. *major*
 - A plan that serves stories and has no `TD` tasks says in its header who opted out and why. *major*
 - `**Not in <id>:**` names what belongs elsewhere. A stack-cut task that cannot be demonstrated says so; never a fake success or an empty list. *major*
 - Acceptance tests a `Q` task wrote are read-only to every later task but the gate. A test you believe wrong stays red, recorded as a dated `D<n>` with both readings. *blocker*

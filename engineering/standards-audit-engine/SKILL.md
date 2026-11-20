@@ -12,8 +12,8 @@ This engine is the **CONVENTION lane**, the third of the library's three read-on
 
 | Lane | Spine | Owner |
 |---|---|---|
-| **SPEC** | A requirement register consolidated from *the user's* spec / stories / ACs | `dev:audit-spec` (via the `code-auditor` agent) |
-| **FEATURE** | A lettered surface decomposition of one feature, no spec in hand | `dev:audit-feature` |
+| **SPEC** | A requirement register consolidated from *the user's* spec / stories / ACs | `engineering:audit-spec` (via the `code-auditor` agent) |
+| **FEATURE** | A lettered surface decomposition of one feature, no spec in hand | `engineering:audit-feature` |
 | **CONVENTION** | *The plugin's own* fixed rule set, swept across the whole codebase | **this engine** + a stack checklist |
 
 ## Division of labour

@@ -52,7 +52,7 @@ Next permitted step: <one step>
 | Target acceptance | Means | Next permitted step |
 |---|---|---|
 | **VERIFIED** | The acceptance checks ran **against the deployed environment, on the build this work produced**, in this message, and passed | Report done; promote to the next environment, or close the task |
-| **FAILED** | They ran there and at least one failed | Report the failure with its evidence; reproduce and fix (`dev:debugging`); no promotion, no "done" |
+| **FAILED** | They ran there and at least one failed | Report the failure with its evidence; reproduce and fix (`engineering:debugging`); no promotion, no "done" |
 | **NOT PERFORMED** | They did not run there — not deployed yet, no access, no smoke tests for it, or only run locally | Say so plainly; the next step is the deployment or the check itself, named exactly. Never claim the feature works on the target |
 
 - **A local pass never counts as VERIFIED.** Nor does a green CI run of the unit suite, a successful deploy

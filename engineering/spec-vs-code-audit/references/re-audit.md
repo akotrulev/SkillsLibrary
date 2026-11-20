@@ -41,7 +41,7 @@ Same section structure, plus per-section rollups and a delta header. Done when e
 # Spec-Compliance Audit — <feature> — Round <N>
 
 **Register:** `<path>`  **Previous round:** `<path>` (<date>)  **Date:** <YYYY-MM-DD>
-**Written by:** `dev:audit-spec` (via `code-auditor`)
+**Written by:** `engineering:audit-spec` (via `code-auditor`)
 **Evidence mode:** static | static + <commands run>
 **Re-verify scope:** all non-Met · their sections · previously-Met touched by the diff
 **Register changes this round:** <"none" | "+3 requirements (D1–D3), 1 descoped">

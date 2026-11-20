@@ -1,6 +1,6 @@
 # Glossary format
 
-The single source for `docs/business-model/glossary.md`. Every writer follows it: `dev:feature`'s interview (through `domain-modeling`), the business-analysis KB (`knowledge-base`), and the `be-documenter` agent's KB runs (`business-documentation`). There is one glossary per project.
+The single source for `docs/business-model/glossary.md`. Every writer follows it: `product:feature`'s interview (through `domain-modeling`), the business-model KB (`knowledge-base`), and the `documenter` agent's KB runs (`business-documentation`). There is one glossary per project.
 
 ## The table
 

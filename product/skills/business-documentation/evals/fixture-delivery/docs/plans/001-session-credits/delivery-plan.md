@@ -20,7 +20,7 @@
 
 ## 2. Decisions
 
-**D1 — The feature is documented in `docs/features/`, not in a business model.** The studio keeps no `docs/business-model/`; `be-feature-documenter` runs DOC1. Cost: no knowledge base is fed.
+**D1 — The feature is documented in `docs/features/`, not in a business model.** The studio keeps no `docs/business-model/`; `feature-documenter` runs DOC1. Cost: no knowledge base is fed.
 
 ## 3. Tasks
 
@@ -58,11 +58,11 @@
 
 ### DOC1 — Documentation: the feature guide, the delivery note and the filing
 
-**Stack:** `docs` · **Agent:** `be-feature-documenter`
+**Stack:** `docs` · **Agent:** `feature-documenter`
 **Deliverable:** `docs/features/` holds the guide for the credit pricing and overage charges, describing what the code at HEAD does; `docs/deliveries/001-session-credits.md` states what people can do now and which stories were not delivered; this plan is filed in `docs/plans/implemented/`.
 **Depends on:** G1.
 **Budget:** ~110k — this plan 6k, the stories 10k, the code under `src/Workshops.Api` ~70 lines per file over about 20 files 17k, the guide and the delivery note ~15k writes, lint output 3k.
-**Gate: own tests** — `python3 ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/doc-lint.py --dir docs/features` and `python3 ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/doc-lint.py --dir docs/deliveries`.
+**Gate: own tests** — `python3 ${CLAUDE_PLUGIN_ROOT}/product/skills/business-documentation/scripts/doc-lint.py --dir docs/features` and `python3 ${CLAUDE_PLUGIN_ROOT}/product/skills/business-documentation/scripts/doc-lint.py --dir docs/deliveries`.
 
 - Environment for screenshots: none; the guide lands with `**Screenshots:** pending`.
 
@@ -106,31 +106,31 @@ Run the prompts in order, one session each; each block is complete on its own. D
 
 | # | Stack | Agent | Depends on | Runs beside | Budget |
 |---|---|---|---|---|---|
-| DOC1 | `docs` | `be-feature-documenter` | G1 | — | ~110k |
+| DOC1 | `docs` | `feature-documenter` | G1 | — | ~110k |
 
 B1, B2 and G1 have landed, and their prompts are deleted.
 
 ---
 
-### DOC1 — Documentation: the feature guide, the delivery note and the filing (be-feature-documenter, docs)
+### DOC1 — Documentation: the feature guide, the delivery note and the filing (feature-documenter, docs)
 
 ````
 Depends on: G1
-Agent: be-feature-documenter · Stack: docs
+Agent: feature-documenter · Stack: docs
 
-You are `be-feature-documenter`. Task DOC1 of docs/plans/001-session-credits/delivery-plan.md: document the feature this plan built — the credit pricing and overage charges of the Workshops service — from the code that landed, write the delivery note, and file the plan.
+You are `feature-documenter`. Task DOC1 of docs/plans/001-session-credits/delivery-plan.md: document the feature this plan built — the credit pricing and overage charges of the Workshops service — from the code that landed, write the delivery note, and file the plan.
 
 Read, in this order:
 1. The plan: the header, §1, task DOC1 and "Close-out — every task".
 2. The initiative's stories: docs/plans/001-session-credits/stories.md, then epics.md and requirements.md. They are the source of purpose and the baseline for what was planned, never evidence of what was built.
 3. B1's and B2's "As built" notes in the plan. An As built note says what a task believed it built; the code at HEAD is the evidence.
-4. The delivery note's shape: `${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/references/delivery-note.md`.
+4. The delivery note's shape: `${CLAUDE_PLUGIN_ROOT}/product/skills/business-documentation/references/delivery-note.md`.
 
 Traps:
 - Nothing the plan intended and the code does not do is written as built: it goes to the delivery note's *Not delivered* table and the report.
 - Screenshots: there is no non-production environment for this plan. Write the guide in full, hold no image, record `**Screenshots:** pending — <why>`, and say in the report what is needed.
 
-Gate: `python3 ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/doc-lint.py --dir docs/features` and `python3 ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/doc-lint.py --dir docs/deliveries`. Fix every ERROR; only `screenshots-pending` may stand.
+Gate: `python3 ${CLAUDE_PLUGIN_ROOT}/product/skills/business-documentation/scripts/doc-lint.py --dir docs/features` and `python3 ${CLAUDE_PLUGIN_ROOT}/product/skills/business-documentation/scripts/doc-lint.py --dir docs/deliveries`. Fix every ERROR; only `screenshots-pending` may stand.
 
 Commit: `docs: session credits guide and delivery note (DOC1)`.
 Close out per the plan's "Close-out — every task" before you stop.

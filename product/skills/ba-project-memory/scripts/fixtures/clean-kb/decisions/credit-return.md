@@ -1,7 +1,7 @@
 # Decision — Credit return on cancellation (DEC-001)
 
 **Created:** 2026-08-02
-**Owned by:** `business-analysis:decision-table`
+**Owned by:** `product:decision-table`
 
 **Question**: are a booking's credits returned when it is cancelled? **Output**: yes / no
 **Hit policy**: U

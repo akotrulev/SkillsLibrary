@@ -4,12 +4,12 @@
 Usage:
   kb-lint.py [<kb dir>]      default docs/business-model
 
-Output: <file>:<line>: <severity> <rule-id> <message>, one line per finding, severities as the business-analysis
+Output: <file>:<line>: <severity> <rule-id> <message>, one line per finding, severities as the product
 rule files tag them (blocker, major, minor, nit), then a count on stderr. Exit 1 when a finding is major or above,
 2 when the directory does not exist, 0 otherwise. A rule id's prefix names its rule file: model- business-model.md,
 entities- business-model-entities.md, decisions- business-model-decisions.md, connections-
 business-model-connections.md, interactions- business-model-interactions.md. Area guides and system-overview.md are
-dev:doc-business-model's and its doc-lint.py's; here they only take part in id uniqueness and INDEX link resolution.
+product:doc-business-model's and its doc-lint.py's; here they only take part in id uniqueness and INDEX link resolution.
 
 Rules:
   model-index             major    INDEX.md is missing, an INDEX link does not resolve, or a flow, entity, decision,

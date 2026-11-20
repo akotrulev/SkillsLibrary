@@ -126,4 +126,4 @@ Each rule has an id that the lint, the audit and a review cite. **Enforced by** 
 
 - A plan document: `plan-feature` and the plan format own its shape.
 - The contributor workflow around a skill in the SkillsLibrary repo (file layout, registration, testing, the PR checklist): `CONTRIBUTING.md`.
-- Documentation written for people: delegate to the `be-documenter` agent.
+- Documentation written for people: delegate to the `documenter` agent.

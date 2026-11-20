@@ -12,12 +12,15 @@ library moves to the new paths and names. A project switches over through the mi
 M3 writes.
 
 **Status:** Written 2026-11-20 from the owner's interview (`## Answered questions (2026-11-20)`).
-M1 is built (2026-11-20): `product/` and `engineering/` hold the moved tree, the manifest registers both,
-the surface check prints OK. Built but unverified: Claude Code loading the two new plugins, which needs a
-restart. Text still calls the old names, so `skill-lint` shows 31 R8 findings (baseline 0) until M2.
+M1 and M2 are built (2026-11-20): `product/` and `engineering/` hold the moved tree, the manifest registers
+both, and every path and name in the tree now uses the new ones (§5's two greps print nothing, `skill-lint`
+is back to 0 findings). Built but unverified: Claude Code loading the two new plugins, which needs a
+restart. M2 also did part of M3's wording (the `CLAUDE.md` rows, the README plugin rows and command
+sections, the catalog's plugin and command tables): M3 checks and finishes it, then does the catalog
+sections, the README switch section and `~/.claude/CLAUDE.md`.
 - **Starts after 015 merges into `master`.** 015 edits many of the files this plan moves. Running both
   at once would turn every 015 edit into a conflict on a moved path (D6).
-- **Next:** M2, then M3 and G1, one at a time.
+- **Next:** M3, then G1, one at a time.
 - **Known conflict:** branch `plan-queue/010-agents-md-dual-harness-b58e49` has 2 commits touching 2
   files this plan moves. Whichever of 010 and 016 merges second resolves them against the new paths.
 - **Metered:** about 4 sessions of subscription usage. The user starts the queue.
@@ -233,6 +236,13 @@ prompt already carries the rules they need. Owner's answer to O8.
 **D8 — The old plugin names are removed outright, with a migration section and no alias stubs.** M3
 writes the per-project switch and edits the owner's `~/.claude/CLAUDE.md`. Owner's answers to O9 and O12.
 
+**D9 — (2026-11-20, M2) `dev:scoping`, `dev:epics`, `dev:stories`, `dev:story-review` and
+`dev:knowledge-base` were rewritten too.** §3 lists `business-analysis:<skill>` for these names, but the
+old `dev` plugin registered the same five skills (015 O10), so text called them `dev:<name>` as well.
+Leaving them would have left about 64 calls that reach nothing. They became `product:<name>`. Reading A (§3 as
+written) keeps them as `dev:`; reading B (built) renames them. A `dev:` name that is not ours (`dev:run`)
+stays. Cost: none beyond the diff.
+
 ## Answered questions (2026-11-20)
 
 **O1 — What happens to `dev`: split it, make it the one plugin, or rename it and move the technical half out: rename `dev`, move the technical half out.**
@@ -374,6 +384,33 @@ says it needs `product` enabled (§4).
 - **Not in M2:** restructuring the catalog's sections and the README's plugin list (M3). M2 rewrites
   their names only.
 
+- **As built (2026-11-20):**
+  - Script (scratchpad, not in the repo): resolved every `../` link against the file's old location and
+    recomputed it from the new one, then applied §2's paths and §3's names as exact regexes. 233 files
+    changed. It skipped the two rules `SKILL.md` files (their retire step names the old folders on purpose)
+    and `tools/test_skill_lint.py`. `be-feature-documenter` ran before `be-documenter`; both agents'
+    `name:` now match their file names.
+  - By hand: `dev:rules` split by file location (`product/` → `product:rules`, `engineering/` →
+    `engineering:rules`), prose mentions of the plugins in `marketplace.json`, `README.md`, the catalog,
+    `CLAUDE.md`, `CONTRIBUTING.md`, `.skill-template/agent.md`, the live plans 005 and 006, and the rule
+    files' header lines (`product rules vN`, `engineering rules v1`; versions not bumped).
+  - The stack plugin descriptions in `marketplace.json` (7 stack plugins, 5 `be-*`, `devops`) now say the
+    planner, documenters and feature interview come from `product`, which a project enables itself.
+  - Hand-offs: 13 stack agents' "Don't re-plan; that is `solution-planner`'s" now names the `product`
+    plugin; `qa-test-planner`, `qa-test-case-designer` and `qa-feature-spec-writer` say `product:*` loads by
+    path whether or not `product` is enabled; `tooling-engineer`, `design-auditor`, `design/prototype`,
+    `devops/threat-modeling`, `test-plan-writer`, `requirements-breakdown/references/connections.md`,
+    `security-test-planner`, `data-architect` and `product-analytics` each say the plugin is needed.
+  - The retire step's "identical → delete" test (`cmp`) passes only for an old rules copy with no old
+    names in it. After this task every old copy differs, so the skill asks (or keeps and lists, with nobody
+    to ask). That is the safe branch of M1's step 5, and it stands. D9.
+  - Gate: both §5 greps print nothing (run under `bash`: in `zsh` the unquoted `$X` is not split and the
+    exclusions silently do nothing); `python3 tools/plugin-surface-check.py` → `OK`;
+    `python3 tools/skill-lint.py | tail -1` → `0 findings`; `python3 -m pytest tools/test_skill_lint.py -q`
+    → `95 passed`; `token-audit --violations-only` exit 0 (`qa-test-planner.md` 13,971 and
+    `qa-test-case-designer.md` 13,988 of 14,000 characters: no slack left); `qa-version-check` OK.
+  - Not committed by this session: the Plan Queue commits the work.
+
 ### M3 — The catalog, README, CONTRIBUTING, CLAUDE.md and the migration
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -509,60 +546,9 @@ session that runs the task.
 | G1 | `docs` | `general-purpose` | M3 | — | ~90k |
 | — | restart, try `/product:refine`, switch projects per README | **the user** | G1 | — | — |
 
-M1 has landed. M2, M3 and G1 are live.
+M1 and M2 have landed. M3 and G1 are live.
 
 ---
-
-### M2 — Every reference to a moved path or a renamed name (general-purpose, docs)
-
-````
-Depends on: M1
-Agent: general-purpose · Stack: docs
-
-Task M2 of docs/plans/016-product-and-engineering-plugins.md. The goal: the two greps in §5 print
-nothing, and every stack hand-off to a `product` skill or command says it needs `product` enabled.
-
-Read, in this order:
-1. CLAUDE.md: "Repository map".
-2. The plan: §2, §3, §4, §5, D4, M1's As built note, task M2, and "Close-out — every task".
-
-Do:
-- Write a script in the scratchpad that rewrites §2's paths, `${CLAUDE_PLUGIN_ROOT}/engineering-practices/…`
-  included, and exactly §3's names, across the tree minus §4's exclusions. Rewrite
-  `be-feature-documenter` before `be-documenter`. Run it, then read the diff summary.
-- Change the `name:` frontmatter of product/agents/documenter.md and feature-documenter.md to match the
-  file names.
-- M1 left 31 R8 findings in `python3 tools/skill-lint.py` (baseline 0). Fix each by hand where the
-  script cannot: a relative link whose depth changed (`../../../backend/_shared/experience-plan/…` is
-  `../../experience-plan/…` from `product/skills/writing-plans/references/`), and the stale
-  skill-path code spans on the same line as `references/…` in product/agents/documenter.md:43,
-  devops/agents/devops-auditor.md:36 and qa/manual/agents/qa-feature-spec-writer.md:23.
-- By hand:
-  - Each `dev:rules` mention becomes `product:rules` (plans, feature docs) or `engineering:rules`
-    (audits).
-  - Each prose mention of the plugins `dev` and `business-analysis` becomes `engineering` or `product`,
-    by what the sentence is about.
-- By hand, each stack-side hand-off to a `product` skill or command. List them with:
-    grep -rnE 'product:|/product:|documenter|requirements-author' qa frontend mobile desktop backend data devops security tooling training-data design observability
-  Each one keeps the hand-off and adds that it needs `product` enabled. For example: "hand to
-  `/product:refine` (the `product` plugin; when the project does not enable it, say so and stop)".
-
-Traps:
-- Never touch docs/plans/implemented/, docs/audits/, docs/plans/016-*, tools/fixtures/ or the synthetic
-  marketplaces in tools/test_skill_lint.py (§4).
-- `dev:run` in security/commands/assess-repo.md:22 is the target repo's skill. Leave it, and leave any
-  `dev:` not in §3's table.
-- The live plans 005, 006, 007, 013 and 015 are rewritten. Their prompts are living text.
-- `engineering:` calls need no "if enabled" note. Every stack depends on `engineering`.
-
-Gate: own tests.
-  The two greps in §5, which print nothing.
-  python3 tools/plugin-surface-check.py
-  python3 tools/skill-lint.py | tail -1    (at or below M1's baseline)
-
-Commit: `refactor: 016 M2 — every reference to the product and engineering names`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### M3 — The catalog, README, CONTRIBUTING, CLAUDE.md and the migration (general-purpose, docs)
 
@@ -607,6 +593,14 @@ Traps:
 - Stacks no longer bring `product` with them (D4). The README says so where it lists what a stack
   plugin installs.
 - Read only the catalog sections named. The whole file is about 55k tokens.
+- M2 already did part of this in wording: the `CLAUDE.md` repo-map rows and the `backend/` row, the README
+  plugin table, install lines, command sections and state-table rows, and the catalog's plugin table,
+  scope line and command table. Check each against the target and finish the rest: the two catalog
+  sections (still headed "Engineering-practices catalog" and "Business-analysis catalog"), the catalog's
+  plugin counts, the README switch section, CONTRIBUTING and `~/.claude/CLAUDE.md`.
+- The retire step of `product:rules` and `engineering:rules` deletes an old rules copy only when it is
+  identical to the plugin's (D9 note in M2's As built). Say in the switch section that every old copy
+  will differ, so each is asked about.
 
 Gate: own tests.
   python3 tools/skill-lint.py | tail -1    (at or below M1's baseline)
@@ -639,6 +633,10 @@ Do:
 
 Traps:
 - No new restructuring. A finding outside §5 goes into Status as a follow-up.
+- Run §5's greps under `bash` (`bash -c '…'`): in `zsh` the unquoted `$X` is not split and the exclusions
+  do nothing. Delete `.pytest_cache` after the pytest run, because the greps read the whole tree.
+- `qa/manual/agents/qa-test-planner.md` and `qa-test-case-designer.md` sit at 13,971 and 13,988 of the
+  14,000-character agent budget: an edit there must be neutral in length.
 - The plan file itself names the old paths on purpose. §5's greps exclude it.
 - Status names as unverified that no session has loaded `engineering` or `product`. The user restarts,
   types `/product:refine` and `/engineering:audit`, and runs `product:rules` in one project.

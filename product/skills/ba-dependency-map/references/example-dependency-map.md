@@ -1,6 +1,6 @@
 # Golden example — the dependency map
 
-The filled example for `business-analysis:dependency-map`: the three files as a `be-documenter` run would write them into `docs/business-model/`, plus the two artifacts they join to (the ENT-003 grid and DEC-003). The system is the **workshop-booking** toy of `backend/_shared/business-documentation/references/example-area.md`, imagined as an inherited codebase: AREA-002 Scheduling, AREA-003 Bookings, AREA-004 Session credits & charges. **Shape and the ids are normative; domain content and citations are illustrative.**
+The filled example for `product:dependency-map`: the three files as a `documenter` run would write them into `docs/business-model/`, plus the two artifacts they join to (the ENT-003 grid and DEC-003). The system is the **workshop-booking** toy of `product/skills/business-documentation/references/example-area.md`, imagined as an inherited codebase: AREA-002 Scheduling, AREA-003 Bookings, AREA-004 Session credits & charges. **Shape and the ids are normative; domain content and citations are illustrative.**
 
 What it demonstrates: one trigger, "a member cancels a booking" (EVT-002), reaches three features through EVT-006; a second path into the same event (staff cancel, session cancel) means the credit reaction cannot assume a member cancelled; and the `?` and `no` cells are the findings, each with the concrete sequence that breaks it.
 
@@ -11,8 +11,8 @@ What it demonstrates: one trigger, "a member cancels a booking" (EVT-002), reach
 # Events & reactions
 
 **Created:** 2026-08-02
-**Owned by:** `business-analysis:dependency-map`
-**Derived from:** code by `be-documenter` @ `a3f9c21` on 2026-08-02
+**Owned by:** `product:dependency-map`
+**Derived from:** code by `documenter` @ `a3f9c21` on 2026-08-02
 
 ### Triggers
 
@@ -45,8 +45,8 @@ What it demonstrates: one trigger, "a member cancels a booking" (EVT-002), reach
 # Shared data
 
 **Created:** 2026-08-02
-**Owned by:** `business-analysis:dependency-map`
-**Derived from:** code by `be-documenter` @ `a3f9c21` on 2026-08-02
+**Owned by:** `product:dependency-map`
+**Derived from:** code by `documenter` @ `a3f9c21` on 2026-08-02
 
 ### CRUD matrix — entities touched by two or more features
 
@@ -69,8 +69,8 @@ What it demonstrates: one trigger, "a member cancels a booking" (EVT-002), reach
 # Invariants
 
 **Created:** 2026-08-02
-**Owned by:** `business-analysis:dependency-map`
-**Derived from:** code by `be-documenter` @ `a3f9c21` on 2026-08-02
+**Owned by:** `product:dependency-map`
+**Derived from:** code by `documenter` @ `a3f9c21` on 2026-08-02
 
 | ID | Invariant | Fields | Threatened by | Enforced | Source |
 |---|---|---|---|---|---|
@@ -114,7 +114,7 @@ Source: `BookingCancelledHandler.cs:19-33` `#observed` · contributed by AREA-00
 
 ### What the findings look like
 
-Handed to `business-analysis:conflict-check`, each with its boundary condition:
+Handed to `product:conflict-check`, each with its boundary condition:
 
 | Severity | Kind | Pair | Finding (+ boundary condition) |
 |---|---|---|---|

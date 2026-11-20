@@ -5,17 +5,17 @@ description: Use when describing a new feature or closing a plan's open question
 
 # Feature: interview, then spec
 
-You describe a feature, or hand over a document with open questions. This skill interviews you in rounds until every decision is closed, records the project's language and hard-to-reverse decisions as they settle, and, for a new feature, turns the answers into an approved spec that `dev:plan-feature` plans.
+You describe a feature, or hand over a document with open questions. This skill interviews you in rounds until every decision is closed, records the project's language and hard-to-reverse decisions as they settle, and, for a new feature, turns the answers into an approved spec that `product:plan-feature` plans.
 
 **Which front door.** The library has two, and they do not overlap:
 
-| | `/dev:feature` (this skill) | `/dev:refine` (`requirements-author`) |
+| | `/product:feature` (this skill) | `/product:refine` (`requirements-author`) |
 |---|---|---|
 | The input | **One feature** whose requirements are clear enough to decide, or a spec, design or plan with open questions | A loose ask: the *what* is still open, or it spans several capabilities |
 | The question | *How* should we build it, and what is still undecided | *What* are we building, for whom, and what is out |
-| The output | `docs/specs/NNN-<feature>-design.md` → `/dev:plan-feature`, or the answers written back into the document | `docs/plans/<NNN>-<initiative>/{requirements,epics,stories}.md` → `/dev:plan-system` (`solution-planner`) |
+| The output | `docs/specs/NNN-<feature>-design.md` → `/product:plan-feature`, or the answers written back into the document | `docs/plans/<NNN>-<initiative>/{requirements,epics,stories}.md` → `/product:plan-system` (`solution-planner`) |
 
-When the ask turns out to be several capabilities, or the requirements keep moving, stop and delegate to the `requirements-author` agent, or tell the user to type `/dev:refine`. A whole initiative's task list is the `solution-planner` agent's, typed as `/dev:plan-system`.
+When the ask turns out to be several capabilities, or the requirements keep moving, stop and delegate to the `requirements-author` agent, or tell the user to type `/product:refine`. A whole initiative's task list is the `solution-planner` agent's, typed as `/product:plan-system`.
 
 **No implementation before an approved design.** Write no code, scaffold nothing and start no implementation skill until the user has approved a design, however small the change: a todo list, a one-function utility and a config change each get a design of a few sentences. A step-by-step agent that runs its own design approval (the `fe-blazor` build, the `qa-*` orchestrators) already satisfies this.
 
@@ -25,12 +25,12 @@ Pick the mode from the input before the first question.
 
 | Mode | Input | Runs | Output |
 |---|---|---|---|
-| **NEW** | You describe a feature | steps 1–9 | the spec, then `dev:plan-feature` |
+| **NEW** | You describe a feature | steps 1–9 | the spec, then `product:plan-feature` |
 | **SHAPED** | A spec, a design or a plan with open questions | steps 1–6 | each answer written back into the document it came from: a plan's `## Answered questions (YYYY-MM-DD)` as `**O<n> — <question>: <answer>.**` (plan-format §2), a spec's `## Decisions from the interview` |
 
 ## Procedure
 
-1. **Orient.** Read the files, the docs and the recent commits that the feature touches. When they exist, read `docs/business-model/glossary.md` and the titles in `docs/adr/`. Read `${CLAUDE_PLUGIN_ROOT}/engineering-practices/domain-modeling/SKILL.md`: step 5 applies it in every round. Then draw the **decision tree**: every decision the feature needs, each branching into the decisions that depend on it. A decision is **open** until you answer it, and **blocked** while a decision above it is open. Before the first round, check the scope: a request naming several independent subsystems goes to `requirements-author` now, before any question is spent on it. Done when every decision you can see is on the tree, marked open or blocked.
+1. **Orient.** Read the files, the docs and the recent commits that the feature touches. When they exist, read `docs/business-model/glossary.md` and the titles in `docs/adr/`. Read `${CLAUDE_PLUGIN_ROOT}/product/skills/domain-modeling/SKILL.md`: step 5 applies it in every round. Then draw the **decision tree**: every decision the feature needs, each branching into the decisions that depend on it. A decision is **open** until you answer it, and **blocked** while a decision above it is open. Before the first round, check the scope: a request naming several independent subsystems goes to `requirements-author` now, before any question is spent on it. Done when every decision you can see is on the tree, marked open or blocked.
 
 2. **Ask the frontier, one round at a time.** The **frontier** is every open decision that is not blocked. Ask it as one round, each question with a recommended answer, then stop and wait for the answers.
    - **With a multiple-choice question tool** (AskUserQuestion): at most 4 questions per round, 2–4 options each, the recommended option first with `(Recommended)` at the end of its label. A frontier larger than 4 is split across consecutive rounds, and the decisions that unblock the most go first.
@@ -55,7 +55,7 @@ Pick the mode from the input before the first question.
 
 8. **Present the design, section by section.** Scale each section to its complexity: a few sentences when it is plain, up to 300 words when it is not. Ask after each section whether it holds, and go back to it when it does not. Cover the architecture, the components, the data flow, error handling and testing (the design rules below). Done when the user has approved every section.
 
-9. **Write the spec, review it, and hand on.** Write the spec (Output format), commit it on the current branch, then self-review it: no placeholder, no section contradicting another, a scope one implementation plan can hold, and no requirement that reads two ways (pick one and say so). Fix what you find inline. Then ask the user to review it: "Spec written and committed to `<path>`. Review it and tell me what to change before the implementation plan is written." Apply changes and repeat the self-review until the user approves. Then invoke `dev:plan-feature`, the only skill this one hands to. Done when the user has approved the committed spec and `dev:plan-feature` is invoked.
+9. **Write the spec, review it, and hand on.** Write the spec (Output format), commit it on the current branch, then self-review it: no placeholder, no section contradicting another, a scope one implementation plan can hold, and no requirement that reads two ways (pick one and say so). Fix what you find inline. Then ask the user to review it: "Spec written and committed to `<path>`. Review it and tell me what to change before the implementation plan is written." Apply changes and repeat the self-review until the user approves. Then invoke `product:plan-feature`, the only skill this one hands to. Done when the user has approved the committed spec and `product:plan-feature` is invoked.
 
 ## Design rules
 
@@ -69,7 +69,7 @@ Pick the mode from the input before the first question.
 ```markdown
 # Booking cancellation Design
 
-**Date:** 2026-11-20 · **Written by:** `dev:feature`
+**Date:** 2026-11-20 · **Written by:** `product:feature`
 
 ## Goal
 ## Architecture
@@ -98,6 +98,6 @@ The interview is text by default. When the user asks to *see* a screen ("mock th
 
 ## When NOT to use
 
-- The ask is loose or spans several capabilities: delegate to the `requirements-author` agent, or type `/dev:refine`.
-- The design is approved and needs a task list: `dev:plan-feature`.
+- The ask is loose or spans several capabilities: delegate to the `requirements-author` agent, or type `/product:refine`.
+- The design is approved and needs a task list: `product:plan-feature`.
 - The question has a factual answer in the repo, the docs or a tool: look it up.

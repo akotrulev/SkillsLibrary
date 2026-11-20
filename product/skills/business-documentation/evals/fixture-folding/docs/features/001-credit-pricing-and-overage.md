@@ -215,4 +215,4 @@ These are questions for the product owner that the code cannot answer. Write the
 **Describes:** the product as it was on 2026-10-12
 **Screenshots:** waived — the screens of this product are not part of the codebase
 
-<!-- guide · source: be-feature-documenter @ 0000000 · audience: shareable -->
+<!-- guide · source: feature-documenter @ 0000000 · audience: shareable -->

@@ -13,12 +13,12 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 
 **The render mode of the surface decides what a change may do.** Interop needs an interactive mode, offline needs WASM, and a handler on a static-SSR page does nothing.
 
-**Rendering is decided per route, and the plan decides it.** Build to the plan's `rendering_plan` (`experience-plan.md` §4a, or the plan's `## Rendering per route`) and map it to Blazor's mechanisms with `backend/_shared/experience-plan/references/rendering-strategy.md`; with no plan, run that file's decision procedure and record the result in the Step-1 decision record.
+**Rendering is decided per route, and the plan decides it.** Build to the plan's `rendering_plan` (`experience-plan.md` §4a, or the plan's `## Rendering per route`) and map it to Blazor's mechanisms with `product/skills/experience-plan/references/rendering-strategy.md`; with no plan, run that file's decision procedure and record the result in the Step-1 decision record.
 
 ## Every run, before writing anything
 
 1. **Read the rules.** `.claude/rules/fe-blazor/` in the project: the core file `blazor.md`, plus each path-scoped file the task touches. When the project has none, read `frontend/blazor/skills/rules/` and tell the user `/fe-blazor:rules` installs them. They also auto-load, but only with the result of the first Read/Write/Edit of a matching file, so a new file written first would miss them. Where a skill and a rule file disagree, the rule file wins.
-2. **Orient.** Load `engineering-practices/agent-orientation-cache` and run its gate on `docs/agent-context/fe-blazor.md` (TRUST / DELTA / FULL, one line; a changed `.csproj`, `Directory.Packages.props` or `global.json` invalidates the version lane). Derive only what it leaves open: the `TargetFramework` (net10 primary with `[PersistentState]`, `NotFoundPage`, `AddValidation()`, `ReconnectModal`; net8/9 fallbacks), the render mode per surface (`@rendermode`, `App.razor`, the `.Client` project), the component library and styling authority, the state pattern, the data-fetching lane, auth, localization and `data-testid` coverage. Never use a net10-only API on a down-level project, and never flag one for not using it.
+2. **Orient.** Load `engineering/agent-orientation-cache` and run its gate on `docs/agent-context/fe-blazor.md` (TRUST / DELTA / FULL, one line; a changed `.csproj`, `Directory.Packages.props` or `global.json` invalidates the version lane). Derive only what it leaves open: the `TargetFramework` (net10 primary with `[PersistentState]`, `NotFoundPage`, `AddValidation()`, `ReconnectModal`; net8/9 fallbacks), the render mode per surface (`@rendermode`, `App.razor`, the `.Client` project), the component library and styling authority, the state pattern, the data-fetching lane, auth, localization and `data-testid` coverage. Never use a net10-only API on a down-level project, and never flag one for not using it.
 3. **Confirm the build is green** (`dotnet build`, 0 warnings) before you change anything. Red on arrival is a finding to report, not yours to absorb. Re-read the render mode of any surface the cache delta touched; it is the riskiest cached line.
 4. **Read two or three representative files** and match the project's conventions over the skills' defaults.
 
@@ -41,13 +41,13 @@ A new build runs them in order; a fix or an extension re-enters only the steps i
 
 **QA handshake.** When QA hands over a `missing-testids.md`, load `test-ids` alone, add the listed ids, and report locator counts and collisions. No other step runs.
 
-**Fix** (a defect): load `dev:debugging`. Reproduce first, ideally with a failing bUnit or plain test; triage the failure class (prerender double-fetch, interop before interactive, a background thread without `InvokeAsync`, a missing `@key`, an undisposed subscription or `DotNetObjectReference`, a captured `DbContext`); make the smallest correct change; verify with `dev:verify`; then sweep: every sibling sharing the defect's pattern, per `ui-rules`, fixed or listed in the report. **Extend**: re-enter only the steps the change touches, reusing the state containers, components and `data-testid` conventions orientation found, then Steps 4 and 5 on the changed surface only.
+**Fix** (a defect): load `engineering:debugging`. Reproduce first, ideally with a failing bUnit or plain test; triage the failure class (prerender double-fetch, interop before interactive, a background thread without `InvokeAsync`, a missing `@key`, an undisposed subscription or `DotNetObjectReference`, a captured `DbContext`); make the smallest correct change; verify with `engineering:verify`; then sweep: every sibling sharing the defect's pattern, per `ui-rules`, fixed or listed in the report. **Extend**: re-enter only the steps the change touches, reusing the state containers, components and `data-testid` conventions orientation found, then Steps 4 and 5 on the changed surface only.
 
 ## Boundaries
 
 - **Component tests here, journeys elsewhere.** E2E and page objects belong to `qa-ui-dotnet`; a backend or API defect goes to its owning peer, with the blocked surface noted.
 - **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests written by a `qa-*` task are read-only: never edit, skip or weaken one.
-- **Stay in your stack.** A file outside the frontend tree means the task was mis-cut: report it, don't widen your reach. Don't re-plan; that is `solution-planner`'s.
+- **Stay in your stack.** A file outside the frontend tree means the task was mis-cut: report it, don't widen your reach. Don't re-plan; that is `solution-planner`'s, in the `product` plugin a project enables itself.
 - **Workspace.** Work in the checkout you are given; no new branch or worktree. Commit only when asked or when the plan says to.
 - At most two or three clarifying questions up front (project path, TFM if undetectable, app URL, auth source, library preference); never a guess. A tempting refactor, restyle or TFM upgrade is offered as a separate follow-up.
 

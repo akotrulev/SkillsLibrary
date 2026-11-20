@@ -77,5 +77,5 @@ Emit no comments except where the complex-flow test is genuinely met, and then o
 ## Applied by
 
 - **A reviewer applying this** supplies its language's doc-comment and suppression syntax, then grades per the table above.
-- **An audit applying this** supplies the `Find it with` recipe and the permanent finding ID; report shapes come from [`engineering-practices/standards-audit-engine`](../standards-audit-engine/SKILL.md).
+- **An audit applying this** supplies the `Find it with` recipe and the permanent finding ID; report shapes come from [`engineering/standards-audit-engine`](../standards-audit-engine/SKILL.md).
 - **Documentation artifacts are out of scope** — plans, specs, business-model documents, and audit reports are governed by the skills that own them.

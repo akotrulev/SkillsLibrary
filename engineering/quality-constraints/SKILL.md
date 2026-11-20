@@ -7,7 +7,7 @@ description: Use when implementing, to stop the bar dropping to reach green (ski
 
 ## Overview
 
-`dev:verify` proves a claim at the end. This skill applies **during the work**: the moments where lowering the bar is the cheapest way to get a gate green. The bar is already written down — in `CLAUDE.md` and in the plan's acceptance tests. This skill adds no new artifact; it lists what the agent must not do and the evidence that shows it didn't.
+`engineering:verify` proves a claim at the end. This skill applies **during the work**: the moments where lowering the bar is the cheapest way to get a gate green. The bar is already written down — in `CLAUDE.md` and in the plan's acceptance tests. This skill adds no new artifact; it lists what the agent must not do and the evidence that shows it didn't.
 
 ## When to use
 
@@ -17,7 +17,7 @@ description: Use when implementing, to stop the bar dropping to reach green (ski
 
 ## When NOT to use
 
-- Claiming the work is done or passing — `dev:verify` owns that
+- Claiming the work is done or passing — `engineering:verify` owns that
 - Picking thresholds — the coverage floor is in `CLAUDE.md` (Test code rules)
 - Reviewing someone else's code — use the review skills and the house findings table
 

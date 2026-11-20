@@ -405,7 +405,7 @@ This section holds no rows of its own. The rows are those of `desktop/_shared/ob
 ---
 
 ## V — Comments & KISS
-*Owning skills: [`engineering-practices/code-comments`](../../../../../engineering-practices/code-comments/SKILL.md) · CLAUDE.md § Comments and § Simplicity (KISS)*
+*Owning skills: [`engineering/code-comments`](../../../../../engineering/code-comments/SKILL.md) · CLAUDE.md § Comments and § Simplicity (KISS)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -475,7 +475,7 @@ Not applicable without P/Invoke, COM or C++ projects.
 | R | Testability & test ids | R1–R10 | `test-ids` |
 | S | Dev-side tests | S1–S12 | `unit-testing` |
 | U | Observability & logging | fragment | `desktop/_shared/observability` |
-| V | Comments & KISS | V1–V8 | `engineering-practices/code-comments`, CLAUDE.md § Simplicity |
+| V | Comments & KISS | V1–V8 | `engineering/code-comments`, CLAUDE.md § Simplicity |
 | X | Interop & native code | X1–X22 | `interop`, `cpp-winrt` (N/A without P/Invoke, COM or C++ projects) |
 
 Sections Q (motion) and T (release) are unused: motion is in E, release in L. Fragment sections hold the rows of their `audit-checks.md` whose `Platforms` column names `windows`. **Lane tags:** the `[C++]` rows are B12, C12, N1, S1 and X13–X22 (14 rows); they are reported only against C++/WinRT projects, and every other row is reported against C# projects in its own idiom. `[WinUI]`, `[WPF]` and `[WinForms]` rows are reported only in their lane.

@@ -45,9 +45,9 @@ This skill is the **SPEC lane** of the `code-auditor` agent and carries both mod
 
 ## When NOT to use
 
-- No spec — the ask is "tell me what this feature does" → `dev:audit-feature`
+- No spec — the ask is "tell me what this feature does" → `engineering:audit-feature`
 - The spec itself needs distilling into testable rules for QA → `qa/manual/requirements-breakdown` (run it first on raw prose)
-- Requirements conflict with *other requirements*, not with code → the `business-analyst` agent (it loads `business-analysis:conflict-check`)
+- Requirements conflict with *other requirements*, not with code → the `business-analyst` agent (it loads `product:conflict-check`)
 - The user wants the gaps fixed → hand findings to the owning stack agent
 
 ## Evidence policy — static-first, execute opt-in
@@ -59,7 +59,7 @@ The default evidence source is **reading code**. Running anything (build, tests,
 
 ## Evidence rules
 
-The evidence, id and round standards every register and report must meet are the dev rule file `audits.md`, not a list here. Read the project's copy in `.claude/rules/dev/`, or the plugin's in `engineering-practices/rules/` when the project has not installed them (`/dev:rules` does). A grep hit is a lead, not evidence: open the file and trace the path before citing it. A `Missing` verdict states where you looked, and the spec is never evidence about the code, nor the code about the spec.
+The evidence, id and round standards every register and report must meet are the engineering rule file `audits.md`, not a list here. Read the project's copy in `.claude/rules/engineering/`, or the plugin's in `engineering/rules/` when the project has not installed them (`/engineering:rules` does). A grep hit is a lead, not evidence: open the file and trace the path before citing it. A `Missing` verdict states where you looked, and the spec is never evidence about the code, nor the code about the spec.
 
 ## Inputs needed
 
@@ -96,7 +96,7 @@ It runs even for one clean spec: the register is the audit's stable spine.
 - **Source citation** — every source that states it (`STORY-14 §AC-2`, `spec.md:88`).
 - **Stable ID** — see 1.3
 
-**1.3 Section and ID.** Group requirements into **lettered sections** (A, B, C…) by theme — the same lettering `dev:audit-feature` uses for surfaces, so the two audits' reports cross-read. Pick sections by what a reader wants a verdict on as a whole ("A. Authentication"), not by source document.
+**1.3 Section and ID.** Group requirements into **lettered sections** (A, B, C…) by theme — the same lettering `engineering:audit-feature` uses for surfaces, so the two audits' reports cross-read. Pick sections by what a reader wants a verdict on as a whole ("A. Authentication"), not by source document.
 
 IDs are `<letter><n>` (`A1`, `A2`, `B1`) assigned in section order and permanent (`audits.md`). A source's own ID goes in the `Source` column, since two stories can both call something "AC-2".
 
@@ -120,7 +120,7 @@ A later amendment follows the register rules in `audits.md`: next free id, marke
 ```markdown
 # Requirement Register — <feature>
 **Sources:** <each doc/story + version/date>  **Created:** <YYYY-MM-DD>  **Rounds:** r1 <date>, r2 <date>
-**Written by:** `dev:audit-spec` (via `code-auditor`)
+**Written by:** `engineering:audit-spec` (via `code-auditor`)
 **Requirements:** <n> verdicted · <n> out of scope · <n> conflicts open
 
 ## A. Orders
@@ -178,7 +178,7 @@ Organized **by register section**, each closed with a rollup — the same shape 
 # Spec-Compliance Audit — <feature> — Round 1
 
 **Register:** `docs/audits/<...>-requirements.md`  **Scope:** <repo/service audited>  **Date:** <YYYY-MM-DD>
-**Written by:** `dev:audit-spec` (via `code-auditor`)
+**Written by:** `engineering:audit-spec` (via `code-auditor`)
 **Evidence mode:** static | static + <commands run>
 **Requirements:** <n> verdicted · <n> out of audit scope
 

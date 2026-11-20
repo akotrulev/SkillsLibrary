@@ -13,7 +13,7 @@ Answering a question from the user's own NotebookLM notebooks, with citations to
 
 A framework, API or version question: `source-grounding` answers it from official docs, not from the user's notebooks.
 
-The tool is bundled at `engineering-practices/bundled/notebooklm/`. **Its own files are authoritative for the procedure**: authentication, the notebook library, the question interface, the follow-up rule and cleanup. This file states only where the library departs from them. Never paraphrase the bundled files from memory — read them.
+The tool is bundled at `product/bundled/notebooklm/`. **Its own files are authoritative for the procedure**: authentication, the notebook library, the question interface, the follow-up rule and cleanup. This file states only where the library departs from them. Never paraphrase the bundled files from memory — read them.
 
 ## Before first use
 
@@ -23,10 +23,10 @@ Print this line to the user, verbatim, before the first command of a session:
 
 ## Load order
 
-Resolve against `${CLAUDE_PLUGIN_ROOT}/engineering-practices/bundled/notebooklm/` from an installed plugin, or `engineering-practices/bundled/notebooklm/` in this repo.
+Resolve against `${CLAUDE_PLUGIN_ROOT}/product/bundled/notebooklm/` from an installed plugin, or `product/bundled/notebooklm/` in this repo.
 
 1. Read the bundled `SKILL.md` end to end, then `AUTHENTICATION.md` before the first sign-in. Done when both are read and the notebook library path is known.
-2. Run every script through the bundled wrapper, `engineering-practices/bundled/notebooklm/scripts/run.py`, by absolute path — `python <bundled>/scripts/run.py <script>.py …`. The wrapper resolves its own directory, so the working directory does not matter. The bundled text's relative form fails from anywhere else. Done when every command you run starts with the absolute wrapper path.
+2. Run every script through the bundled wrapper, `product/bundled/notebooklm/scripts/run.py`, by absolute path — `python <bundled>/scripts/run.py <script>.py …`. The wrapper resolves its own directory, so the working directory does not matter. The bundled text's relative form fails from anywhere else. Done when every command you run starts with the absolute wrapper path.
 3. Read `references/` only when a command fails. Done when the reference for the failing command is read, or no command failed.
 4. Apply the overrides below. Where one is silent, the bundled text holds. Done when every override row is applied to the run.
 
@@ -43,7 +43,7 @@ Resolve against `${CLAUDE_PLUGIN_ROOT}/engineering-practices/bundled/notebooklm/
 
 ## Where state lives
 
-The tool resolves `SKILL_DIR` from the script's own location (`engineering-practices/bundled/notebooklm/scripts/config.py`), so everything it writes lands **inside the bundled folder**:
+The tool resolves `SKILL_DIR` from the script's own location (`product/bundled/notebooklm/scripts/config.py`), so everything it writes lands **inside the bundled folder**:
 
 | Path under `bundled/notebooklm/` | Holds |
 |---|---|
@@ -51,7 +51,7 @@ The tool resolves `SKILL_DIR` from the script's own location (`engineering-pract
 | `data/browser_state/` | the signed-in Chrome profile and `state.json` cookies — **the Google session** |
 | `data/auth_info.json`, `data/library.json` | auth status, the notebook library |
 
-- **In this repo** that is the working tree. The root `.gitignore` must ignore `engineering-practices/bundled/notebooklm/data/` and `.venv/`; confirm with `git check-ignore -q` before the first sign-in, and never commit either.
+- **In this repo** that is the working tree. The root `.gitignore` must ignore `product/bundled/notebooklm/data/` and `.venv/`; confirm with `git check-ignore -q` before the first sign-in, and never commit either.
 - **From an installed plugin** that is the plugin cache. **A plugin update replaces the folder and wipes the Google session, the library and the venv** — the user signs in and re-adds notebooks again. Tell them this before sign-in. The bundled text says `~/.claude/skills/notebooklm/data/`; that path is wrong for this install.
 - The session is a signed-in Google profile on disk. Do not copy it, print it or attach it anywhere.
 

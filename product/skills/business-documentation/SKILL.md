@@ -24,13 +24,13 @@ Six disciplines:
 5. **A few screenshots, never one per step** (see *Screenshots*).
 6. **Describe, never judge.** Behaviour is stated neutrally ("the credits are returned twice"). The words *bug, defect, flaw, broken, wrong, mistake, vulnerability* and *should have* never appear (lint WARN; text quoted verbatim from the product is exempt). A defect found while tracing goes to the run's report, routed to `code-auditor`, never into the guide; where the code and a story disagree the guide states what the code does and the difference goes to the delivery note's *Not delivered* and the report.
 
-**Prerequisites:** a confirmed area map (`dev:doc-codebase-survey`) or feature scope, and per-area evidence (`dev:doc-feature-trace`) including its `Tasks` inventory, its `Client vocabulary` table and the verbatim refusal texts of its `Validations & gates`. A non-production environment with a test login per role is wanted for screenshots and never blocks the text. **When `docs/business-model/` exists or is being written, load `dev:knowledge-base` first**: it owns the KB layout, IDs, annotation grammar and the read-first/update-after contract. A standalone feature run skips it.
+**Prerequisites:** a confirmed area map (`product:doc-codebase-survey`) or feature scope, and per-area evidence (`product:doc-feature-trace`) including its `Tasks` inventory, its `Client vocabulary` table and the verbatim refusal texts of its `Validations & gates`. A non-production environment with a test login per role is wanted for screenshots and never blocks the text. **When `docs/business-model/` exists or is being written, load `product:knowledge-base` first**: it owns the KB layout, IDs, annotation grammar and the read-first/update-after contract. A standalone feature run skips it.
 
 **The golden example** is the `workshop-booking` toy system as an inherited codebase, one area: [`references/example-area.md`](references/example-area.md). Its shape, tone and example and screenshot discipline are normative; its domain content is an illustration, never a source. Every fact, number, currency, message, actor and screenshot in a guide comes from this run's trace and capture; a claim the trace did not find becomes an open question.
 
 ## Output — into the KB, under its contract
 
-Everything lands in **`docs/business-model/`**, per `dev:knowledge-base`. A standalone feature (`be-feature-documenter`) writes one guide under `docs/features/<NNN>-<slug>.md` and its screenshots in `docs/features/screenshots/<NNN>-<slug>/`.
+Everything lands in **`docs/business-model/`**, per `product:knowledge-base`. A standalone feature (`feature-documenter`) writes one guide under `docs/features/<NNN>-<slug>.md` and its screenshots in `docs/features/screenshots/<NNN>-<slug>/`.
 
 | File | Owner | This skill's role |
 |---|---|---|
@@ -40,7 +40,7 @@ Everything lands in **`docs/business-model/`**, per `dev:knowledge-base`. A stan
 | `system-overview.md` | **this skill** | The guide to the whole system |
 | `glossary.md` | shared | Terms, the client's own words, and the business ↔ code mapping |
 | `INDEX.md`, `active-context.md` | shared | Updated per the KB contract. **One `INDEX.md` line per area**, in this shape and no other (lint `index-line`): `- [<Area name>](areas/<name>.md) — AREA-nnn · <who, comma-separated> · <what a person does there, at most 20 words> · @ \`<sha>\``. The description is the area's row in the overview's `## Areas, by who uses them`. An existing line is edited into the shape together with its guide, never regenerated |
-| `events.md`, `shared-data.md`, `invariants.md` | `business-analysis:dependency-map` | **Not yours.** |
+| `events.md`, `shared-data.md`, `invariants.md` | `product:dependency-map` | **Not yours.** |
 | `flows/`, `entities/`, `decisions/` | `process-flow` · `state-grid` · `decision-table` | **Not yours.** You link to them by ID in the stamp comment |
 
 ---
@@ -93,7 +93,7 @@ Load [`references/glossary.md`](references/glossary.md) when a KB run writes `gl
 
 ## Self-check before handing off
 
-1. **Lint passes:** `python3 ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/doc-lint.py --dir <folder>` exits 0. Fix every `ERROR`; fix every `WARN` or say in the report why it stands (`screenshots-pending` stands until the capture pass).
+1. **Lint passes:** `python3 ${CLAUDE_PLUGIN_ROOT}/product/skills/business-documentation/scripts/doc-lint.py --dir <folder>` exits 0. Fix every `ERROR`; fix every `WARN` or say in the report why it stands (`screenshots-pending` stands until the capture pass).
 
 Then only what the lint cannot check:
 
@@ -113,9 +113,9 @@ Then only what the lint cannot check:
 Load [`references/sharing.md`](references/sharing.md) when a guide or delivery note goes to a client. `render-html.py` turns guides into standalone pages on demand; they are never committed and never written into the KB:
 
 ```bash
-uv run ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/render-html.py --out <dir> --dir docs/business-model
-uv run ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/render-html.py --out <dir> docs/features/<NNN>-<slug>.md
-uv run ${CLAUDE_PLUGIN_ROOT}/backend/_shared/business-documentation/scripts/render-html.py --out <dir> --dir docs/deliveries
+uv run ${CLAUDE_PLUGIN_ROOT}/product/skills/business-documentation/scripts/render-html.py --out <dir> --dir docs/business-model
+uv run ${CLAUDE_PLUGIN_ROOT}/product/skills/business-documentation/scripts/render-html.py --out <dir> docs/features/<NNN>-<slug>.md
+uv run ${CLAUDE_PLUGIN_ROOT}/product/skills/business-documentation/scripts/render-html.py --out <dir> --dir docs/deliveries
 ```
 
 ## Version policy

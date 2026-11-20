@@ -135,7 +135,7 @@ The per-endpoint blocks then carry deltas only.
 
 - **Pagination, filtering, sorting** — the exact parameter names, defaults, maximums, and the stable-sort rule. One contract for every list endpoint.
 - **Versioning & deprecation** — how a breaking change ships, what notice consumers get, how a deprecated endpoint announces itself (`Deprecation` / `Sunset` headers).
-- **Webhooks the API emits**, if any — event names, payload shapes, delivery guarantees, signature scheme, retry policy. (Webhooks the API *receives* are `dev:plan-integrations`'s.)
+- **Webhooks the API emits**, if any — event names, payload shapes, delivery guarantees, signature scheme, retry policy. (Webhooks the API *receives* are `product:plan-integrations`'s.)
 - **Consumers** — which frontend, service, or partner uses which resource. This is what makes a later breaking-change assessment possible.
 
 ---
@@ -145,7 +145,7 @@ The per-endpoint blocks then carry deltas only.
 ```markdown
 # <Initiative> — API Surface Plan
 
-**Date:** YYYY-MM-DD · **Written by:** `dev:plan-api-surface`
+**Date:** YYYY-MM-DD · **Written by:** `product:plan-api-surface`
 **Blueprint:** `./blueprint.md` · **Data model:** `./data-model.md`
 
 ## 1. API-wide contract

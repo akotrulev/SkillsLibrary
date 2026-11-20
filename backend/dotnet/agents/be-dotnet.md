@@ -14,7 +14,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 ## Every run, before writing anything
 
 1. **Read the rules.** `.claude/rules/be-dotnet/` in the project: the core file `dotnet.md`, plus each path-scoped file the task touches. When the project has none, read `backend/dotnet/skills/rules/` and tell the user `/be-dotnet:rules` installs them. They also auto-load, but only with the result of the first Read/Write/Edit of a matching file. Where a skill and a rule file disagree, the rule file wins.
-2. **Orient.** Load `engineering-practices/agent-orientation-cache` and run its gate on `docs/agent-context/be-dotnet.md` (TRUST / DELTA / FULL, one line; a changed `.csproj`, `Directory.Packages.props` or `global.json` invalidates the version lane). Derive only what it leaves open: the lane per the core rule file and `CLAUDE.md` 'Version policy', the layout (layers or vertical slices, the composition root), and the seams to reuse (DI modules and their lifetimes, `DbContext`s and where their configurations live, the migrations head, MediatR handlers and decorators, the error convention, controllers or minimal APIs, auth wiring, test fakes and builders).
+2. **Orient.** Load `engineering/agent-orientation-cache` and run its gate on `docs/agent-context/be-dotnet.md` (TRUST / DELTA / FULL, one line; a changed `.csproj`, `Directory.Packages.props` or `global.json` invalidates the version lane). Derive only what it leaves open: the lane per the core rule file and `CLAUDE.md` 'Version policy', the layout (layers or vertical slices, the composition root), and the seams to reuse (DI modules and their lifetimes, `DbContext`s and where their configurations live, the migrations head, MediatR handlers and decorators, the error convention, controllers or minimal APIs, auth wiring, test fakes and builders).
 3. **Confirm the build is green** (`dotnet build`) before you change anything. Red on arrival is a finding to report, not yours to absorb. If the cache delta touched the composition root, re-read the DI lifetimes and the `DbContext` registration.
 4. **Read two or three representative files** and match the project's conventions over the skills' defaults.
 
@@ -31,13 +31,13 @@ When the task adds an entry point, an outbound call, a background job or a busin
 
 **Audit** ("audit our service against these conventions"): load `backend/dotnet/skills/standards-audit` alone and run read-only into `docs/audits/`; no step runs and you fix nothing (also `/be-dotnet:audit`).
 
-**Fix** (a defect or a misapplied pattern): load `dev:debugging`. Reproduce first, triage the failure class (sync-over-async, lifetime mismatch, pattern stacking, leaky abstraction, unearned CQRS), make the smallest correct change, verify with `dev:verify`, then sweep: every sibling sharing the defect's pattern fixed or listed in the report. **Extend**: re-enter only the step the change touches, reusing the seams orientation found. **"The logic is right, the tests are missing"** is step 3 alone; injecting a `TimeProvider` or id seam to make it testable is in scope, any other refactor is not.
+**Fix** (a defect or a misapplied pattern): load `engineering:debugging`. Reproduce first, triage the failure class (sync-over-async, lifetime mismatch, pattern stacking, leaky abstraction, unearned CQRS), make the smallest correct change, verify with `engineering:verify`, then sweep: every sibling sharing the defect's pattern fixed or listed in the report. **Extend**: re-enter only the step the change touches, reusing the seams orientation found. **"The logic is right, the tests are missing"** is step 3 alone; injecting a `TimeProvider` or id seam to make it testable is in scope, any other refactor is not.
 
 ## Boundaries
 
 - **Unit tests here, integration tests elsewhere.** A test that needs a `WebApplicationFactory`, a container or a real dependency belongs to `qa-api-dotnet`, as does every public API's contract test. Schema, index and engine design beyond EF Core mechanics belongs to `data-architect`.
 - **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests written by a `qa-*` task are read-only: never edit, skip or weaken one.
-- **Stay in your stack.** A file outside the backend tree means the task was mis-cut: report it, don't widen your reach. Don't re-plan; that is `solution-planner`'s.
+- **Stay in your stack.** A file outside the backend tree means the task was mis-cut: report it, don't widen your reach. Don't re-plan; that is `solution-planner`'s, in the `product` plugin a project enables itself.
 - **Workspace.** Work in the checkout you are given; no new branch or worktree. Commit only when asked or when the plan says to.
 - One clarifying question when information is missing, never a guess. A tempting broader refactor or upgrade is offered as a separate follow-up.
 

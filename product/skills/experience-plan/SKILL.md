@@ -112,7 +112,7 @@ Once, at the end, from `ux-patterns` §5–§9: **density** (and why) · **accel
 ```markdown
 # <Initiative> — Experience Plan
 
-**Date:** YYYY-MM-DD · **Written by:** `dev:plan-experience` · **Discipline:** `design:app-structure`
+**Date:** YYYY-MM-DD · **Written by:** `product:plan-experience` · **Discipline:** `design:app-structure`
 **Inputs:** `./blueprint.md` (§2 capabilities, §3b flows, §6 routing) · `./data-model.md`
 **Frontend agent:** `fe-react` | `fe-blazor` — per the routing map
 

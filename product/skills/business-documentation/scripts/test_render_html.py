@@ -125,7 +125,7 @@ class LinkTests(unittest.TestCase):
 STAMPED_ABOUT = (
     "## About this document\n\n**Created:** 2026-08-02\n**Last updated:** 2026-09-14\n"
     "**Describes:** the product as it was on 2026-09-14\n\n"
-    "<!-- guide · id: AREA-004 · owner: dev:doc-business-model · source: be-documenter @ e5d7b02 · "
+    "<!-- guide · id: AREA-004 · owner: product:doc-business-model · source: documenter @ e5d7b02 · "
     "models: FLOW-004 · stories: US2 · audience: shareable -->\n"
 )
 
@@ -136,14 +136,14 @@ DELIVERY_NOTE = (
     "[Cancel a booking](../business-model/areas/credits-and-charges.md#cancel-a-booking) |\n\n"
     "## Not delivered\nEverything the plan set out to build was built.\n\n"
     "## About this document\n**Delivered:** 2026-09-20\n**Describes:** the product as it was on 2026-09-20\n\n"
-    "<!-- delivery · plan: 004 · source: be-documenter @ e5d7b02 · stories: US3 · audience: shareable -->\n"
+    "<!-- delivery · plan: 004 · source: documenter @ e5d7b02 · stories: US3 · audience: shareable -->\n"
 )
 
 
 class ClientPageTests(unittest.TestCase):
     ABOUT = (
         "## About this document\n\n**Id:** AREA-004\n**Created:** 2026-08-02\n**Last updated:** 2026-10-15\n"
-        "**Derived from:** code by `be-documenter` @ `a3f9c21` on 2026-08-02\n"
+        "**Derived from:** code by `documenter` @ `a3f9c21` on 2026-08-02\n"
         "**Audience:** shareable\n**Models:** [FLOW-004 pricing a booking]\n"
     )
 
@@ -162,7 +162,7 @@ class ClientPageTests(unittest.TestCase):
 
     def test_Should_RenderNothingInternal_When_AboutHoldsIdShaAndModels(self):
         html = page(f"# T\n\nBody.\n\n{self.ABOUT}")
-        for internal in ("AREA-004", "a3f9c21", "FLOW-004", "be-documenter", "About this document"):
+        for internal in ("AREA-004", "a3f9c21", "FLOW-004", "documenter", "About this document"):
             with self.subTest(internal=internal):
                 self.assertNotIn(internal, html)
 
@@ -191,7 +191,7 @@ class ClientPageTests(unittest.TestCase):
         self.assertIn('<p class="updated">Last updated 2026-09-14</p>', html)
 
     def test_Should_DropTheStamp_When_ItSitsOutsideAbout(self):
-        html = page("# T\n\nBody.\n\n<!-- guide · source: be-documenter @ e5d7b02 · audience: shareable -->\n")
+        html = page("# T\n\nBody.\n\n<!-- guide · source: documenter @ e5d7b02 · audience: shareable -->\n")
         self.assertNotIn("e5d7b02", html)
 
     def test_Should_CloseWithDeliveredDate_When_DocumentIsADeliveryNote(self):

@@ -42,8 +42,8 @@ LoRA freezes the base weights and trains a small low-rank delta injected into th
 
 - the `blocker` / `major` / `minor` / `nit` severity table and the review output format
 - the `#confirmed` / `#inferred` / `#observed` evidence grammar, and "a `file:line` is only produced by reading that line this round"
-- the comment rules (`engineering-practices/code-comments`) — no inline comments, doc comments only on the four qualifying cases
-- the orientation-cache protocol (`engineering-practices/agent-orientation-cache`) — TRUST / DELTA / FULL, the map is a lead not evidence
+- the comment rules (`engineering/code-comments`) — no inline comments, doc comments only on the four qualifying cases
+- the orientation-cache protocol (`engineering/agent-orientation-cache`) — TRUST / DELTA / FULL, the map is a lead not evidence
 - artifact conventions — `docs/audits/` · `docs/plans/` · `docs/business-model/`, `NNN` minting, rounds never overwritten, IDs never renumbered
 - the phase discipline itself — announce the mode, run the phases in order, close every section with a rollup, never skip the hostile self-review
 - the house code rules — constructor injection, async all the way, no `OR` in an assertion, no `try/catch` in a test body, simplicity over speculative abstraction
@@ -150,7 +150,7 @@ One adapter, but the data mix is deliberate. Weight by signal quality and volume
 `be-{dotnet,java,node}-pattern-writer` · `api-models` · `api-client-writer` · `test-data-builder` · `mobile-screen-objects` · `gherkin-step-code` · `feature-file-writer` · `be-shared-plain-language-companion` and the `-explained.md` lane · `page-object-design` (emit half).
 
 **Medium weight — structure-heavy, judgment-light enough to score:**
-the six `code-review` reviewers · the nine qa test reviewers · the three `standards-audit` skills · `business-analysis:stories` · `business-analysis:epics` · `requirements-breakdown`.
+the six `code-review` reviewers · the nine qa test reviewers · the three `standards-audit` skills · `product:stories` · `product:epics` · `requirements-breakdown`.
 
 **Light weight, present but not dominant — for the discipline, not the domain:**
 a tail of `code-auditor`, `be-planner`, and `business-analyst` runs. Include them so the adapter learns the evidence grammar and phase structure those agents exemplify best; do **not** include enough for the model to think it can *be* them.
@@ -166,7 +166,7 @@ The adapter raises the floor; it does not change the ceiling. Wire a frontier fa
 | Route to the house adapter | Keep on frontier, always |
 |---|---|
 | the heavy-weight mechanical writers (§5) | `be-planner` · `security-test-planner` |
-| `-explained.md` companion generation | `code-auditor` · `be-documenter` · `business-analyst` |
+| `-explained.md` companion generation | `code-auditor` · `documenter` · `business-analyst` |
 | structure-first reviewers, with findings spot-checked | `penetration-tester` · `infra-security-tester` |
 
 The reason is the same in every right-hand row: the artifact's entire value is a claim of fidelity. An audit is worth something only because its citations were really read; a plan pack is worth something only because its agent names really resolve. A model that is 95% right about those is worse than no output, because the 5% is invisible and load-bearing.

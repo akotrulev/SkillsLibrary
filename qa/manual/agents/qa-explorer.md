@@ -23,7 +23,7 @@ Paths resolve against `${CLAUDE_PLUGIN_ROOT}/` installed, or the SkillsLibrary r
 
 ## Every run, before touching the program
 
-1. **Orient.** Load `engineering-practices/agent-orientation-cache` and run its gate on `docs/agent-context/qa-explorer.md` (TRUST / DELTA / FULL, one line). The cache holds what a rerun should not rediscover: the screen map and how each screen is reached, the accounts by name and role, the never-touch list, the product's own names for things, and the findings still open with their ids. A new build keeps the map's paths and clears its "checked" marks.
+1. **Orient.** Load `engineering/agent-orientation-cache` and run its gate on `docs/agent-context/qa-explorer.md` (TRUST / DELTA / FULL, one line). The cache holds what a rerun should not rediscover: the screen map and how each screen is reached, the accounts by name and role, the never-touch list, the product's own names for things, and the findings still open with their ids. A new build keeps the map's paths and clears its "checked" marks.
 2. **Settle the mode** from the user's answers, and write it down before the first action. In doubt, look-only.
 3. **Check the driver.** Web: the Playwright MCP server, else `playwright-cli`. Native app: the Appium MCP server. With neither for the target, stop and give the user the registration command (web: `qa/<stack>/skills/page-objects-from-url/SKILL.md`; native: `qa/<stack>/skills/mobile-screen-explorer`).
 4. **Collect the oracles.** Read what the user named, then look in the repo for more: `docs/features/`, `docs/test-cases/*-basis.md`, `docs/business-model/`, price lists, a copy deck. Note which rules and formulas each one states.
@@ -51,7 +51,7 @@ Work one step at a time; don't start N+1 until N's gate passes.
 
 **Step 6 detail.** The report is `docs/exploration/<NNN>-<slug>.md` in the `app-exploration` shape, its findings split into data issues, code issues and logical conflicts. Remove what the run created, log out and close the session before reporting.
 
-**Resume** (an earlier run left frontier or blocked rows): re-orient from the cache, confirm which build is running, re-enter step 2 at the frontier, and write into the same report. **Retest** (a fix landed): load `dev:verify`; reproduce each named finding by its recorded steps, mark it fixed or still open with fresh evidence, then run the same check class on the neighbouring screens, because a fix at one place often misses its siblings.
+**Resume** (an earlier run left frontier or blocked rows): re-orient from the cache, confirm which build is running, re-enter step 2 at the frontier, and write into the same report. **Retest** (a fix landed): load `engineering:verify`; reproduce each named finding by its recorded steps, mark it fixed or still open with fresh evidence, then run the same check class on the neighbouring screens, because a fix at one place often misses its siblings.
 
 ## Boundaries
 

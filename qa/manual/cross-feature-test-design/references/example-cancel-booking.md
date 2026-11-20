@@ -1,6 +1,6 @@
 # Golden example — "a member cancels a booking"
 
-The filled example for `cross-feature-test-design`: the cross-section for `EVT-002`, the basis's §8 as `requirements-breakdown` writes it, the coverage-item list, and the suite. The system is the **workshop-booking** toy of `backend/_shared/business-documentation/references/example-area.md` (Ana's month, AREA-004), and the connections are the map in `business-analysis/skills/ba-dependency-map/references/example-dependency-map.md`. **Shape and ids are normative; domain content is illustrative.** Facts: Basic plan = 8 credits, £6.00 per overage credit; tiers Standard 1, Workshop 2, Masterclass 3; cut-off 24 h; staff cancellations always return credits; posting on the 1st at 00:00; session capacity 6 in case 6 `#assumption`.
+The filled example for `cross-feature-test-design`: the cross-section for `EVT-002`, the basis's §8 as `requirements-breakdown` writes it, the coverage-item list, and the suite. The system is the **workshop-booking** toy of `product/skills/business-documentation/references/example-area.md` (Ana's month, AREA-004), and the connections are the map in `product/skills/ba-dependency-map/references/example-dependency-map.md`. **Shape and ids are normative; domain content is illustrative.** Facts: Basic plan = 8 credits, £6.00 per overage credit; tiers Standard 1, Workshop 2, Masterclass 3; cut-off 24 h; staff cancellations always return credits; posting on the 1st at 00:00; session capacity 6 in case 6 `#assumption`.
 
 ## Before — what the field-level pipeline produces
 

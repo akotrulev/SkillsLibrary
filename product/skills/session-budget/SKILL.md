@@ -13,16 +13,16 @@ Two jobs, both about the boundary between a plan and the sessions that run it.
 
 **The estimate is a target, never a gate.** It says what to aim for. It does not decide what a task is — coherence does, and coherence wins every time the two disagree. Never split a task that is one thing to get under a number, and never merge unrelated work to fill one up.
 
-**Prerequisites:** a task list from `dev:plan-delivery` with `Files` filled in, and `epic-map.md` for the lane structure. Sizing a task whose files are vague produces a number with nothing behind it.
+**Prerequisites:** a task list from `product:plan-delivery` with `Files` filled in, and `epic-map.md` for the lane structure. Sizing a task whose files are vague produces a number with nothing behind it.
 
 ## Output
 
-Two things, both **inside the plan document** — `docs/plans/<NNN>-<initiative>/delivery-plan.md`, or the single-file plan an `dev:plan-feature` run produced:
+Two things, both **inside the plan document** — `docs/plans/<NNN>-<initiative>/delivery-plan.md`, or the single-file plan an `product:plan-feature` run produced:
 
 1. A **`**Budget:**`** line on every task block, with its drivers itemized, and a matching `Budget` cell in the task table.
 2. The **`## Prompts — one per task`** section — one paste-ready block per task that has not landed. See `references/prompts-section-template.md`.
 
-The plan document format both of these live in is specified in `engineering-practices/writing-plans/references/plan-format.md`; read it before writing either.
+The plan document format both of these live in is specified in `product/skills/writing-plans/references/plan-format.md`; read it before writing either.
 
 ---
 
@@ -110,7 +110,7 @@ than none — it is a number someone will trust.
 
 **One block per task that has not landed, inside the plan document**, in task order. The plan is
 queued and handed over whole, so the prompts live in it — see
-`engineering-practices/writing-plans/references/plan-format.md` §6 for the section's shape, and
+`product/skills/writing-plans/references/plan-format.md` §6 for the section's shape, and
 `references/prompts-section-template.md` for the filled template.
 
 The section opens with a preamble — run them one session each, in the order the `Depends on:` lines allow, each block complete on its
@@ -159,7 +159,7 @@ kind of stale that reads as current.
 
 ### Step 5 — Carry the close-out into the plan
 
-Write `## Close-out — every task` directly above `## Prompts — one per task`, copied verbatim from `engineering-practices/writing-plans/references/plan-format.md` §7. It holds the whole duty of the executing agent; a copy edited per plan is a second contract.
+Write `## Close-out — every task` directly above `## Prompts — one per task`, copied verbatim from `product/skills/writing-plans/references/plan-format.md` §7. It holds the whole duty of the executing agent; a copy edited per plan is a second contract.
 
 Two things stay this skill's to get right, because the close-out section cannot know them:
 
@@ -174,7 +174,7 @@ Two things stay this skill's to get right, because the close-out section cannot 
 
 ## Rules
 
-The standards the `**Budget:**` lines and the prompt blocks must meet are the dev rule file `plans.md`. Read the project's copy in `.claude/rules/dev/`, or the plugin's in `engineering-practices/rules/` when the project has not installed it (`/dev:rules` does); a project's own plan rules in its `CLAUDE.md` win. Three sizing rules are this skill's own:
+The standards the `**Budget:**` lines and the prompt blocks must meet are the product rule file `plans.md`. Read the project's copy in `.claude/rules/product/`, or the plugin's in `product/skills/rules/` when the project has not installed it (`/product:rules` does); a project's own plan rules in its `CLAUDE.md` win. Three sizing rules are this skill's own:
 
 - **Estimate before authoring is finished, not after.** The number is an input to how the task is written. Producing a task list and then measuring it turns the estimate into trivia.
 - **The floor is not negotiable and not divisible.** Two tasks in one session do not pay one floor — they are one task, or they are two sessions.

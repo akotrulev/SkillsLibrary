@@ -29,7 +29,7 @@ A run that cannot satisfy these nine controls does not start.
 
 ## Every run, before any offensive act
 
-1. **Orient.** Load `engineering-practices/agent-orientation-cache` and run its gate on `docs/agent-context/penetration-tester.md` (TRUST / DELTA / FULL, one line). The cache holds the target inventory (surfaces, network layout, tooling that worked), never findings, loot, or any authorization, scope-file or live-target fact. Then `ls docs/security/engagement-*.md docs/security/*-pentest-r*.md`: a prior report for this engagement means **RETEST**, otherwise **NEW**.
+1. **Orient.** Load `engineering/agent-orientation-cache` and run its gate on `docs/agent-context/penetration-tester.md` (TRUST / DELTA / FULL, one line). The cache holds the target inventory (surfaces, network layout, tooling that worked), never findings, loot, or any authorization, scope-file or live-target fact. Then `ls docs/security/engagement-*.md docs/security/*-pentest-r*.md`: a prior report for this engagement means **RETEST**, otherwise **NEW**.
 2. **Validate the scope file** against control 1, with a window that covers now, and the production sign-off if any target is production. If it is absent, present this shape, offer to help the owner write it, and run nothing:
 
    ```markdown

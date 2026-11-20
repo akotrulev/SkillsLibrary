@@ -46,10 +46,10 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
    - Different: the team may have edited it. Show `diff -u <target> <source>` and ask: **replace** with the plugin's copy, **keep** theirs, or **write the plugin's copy beside it** as `<name>.plugin` to merge by hand. Never overwrite without that answer or a `replace` argument.
 
    With nobody to ask and no argument, write the plugin's copy beside it. Done when each file already present is up to date, replaced, kept or written beside as `<name>.plugin`.
-5. **Retire the old folders.** Before this plugin the same rules were installed under two other names. For `<root>/.claude/rules/dev/plans.md`, `<root>/.claude/rules/dev/feature-docs.md` and every file in `<root>/.claude/rules/business-analysis/`, `cmp` it with the plugin's file of the same name.
+5. **Retire the old folders.** Before this plugin the same rules were installed under two other names. Under `<root>/.claude/rules/`, look in the folders named `dev` and `business-analysis`. For `plans.md` and `feature-docs.md` in `dev`, and every file in `business-analysis`, `cmp` it with the plugin's file of the same name.
    - Identical: delete it.
    - Different: the team edited it, and the new copy sits in `.claude/rules/product/` already. Show `diff -u <old> <source>` and ask: **delete** the old file (its edits are lost), or **keep** it. With the `replace` argument, delete it. With the `keep` or `beside` argument, or with nobody to ask, keep it and list it under `Waiting for the user:`.
-   - A file in `.claude/rules/dev/` that is not `plans.md` or `feature-docs.md` is left alone (`audits.md` belongs to `engineering:rules`).
+   - A file in the `dev` folder that is not `plans.md` or `feature-docs.md` is left alone (`audits.md` belongs to `engineering:rules`).
 
    Remove each old folder once it is empty. Done when each old file is deleted or listed as kept.
 6. **Fit the paths to where this project keeps its documents.** The defaults assume `docs/plans/`, `docs/features/` and the KB at `docs/business-model/`, all at the root. Find the real places:
@@ -68,7 +68,7 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
 ```
 product rules: <file>: installed | up to date | replaced | kept | written as .plugin   (one line per file)
 Path: <root>/.claude/rules/product/
-Old folders: removed | <file kept in .claude/rules/dev/ or .claude/rules/business-analysis/> | none found
+Old folders: removed | <file kept in the dev or business-analysis folder under .claude/rules> | none found
 Document paths: default | widened with <globs>
 Committed: yes | ignored by git
 Conflicts: none | <one line each, with the file that states it>

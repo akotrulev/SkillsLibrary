@@ -12,11 +12,11 @@ The notation is a **Mermaid flowchart** (text-based, diffable, token-cheap, rend
 
 ## Contract with the KB
 
-Per `business-analysis/skills/ba-project-memory`: **read first** (`INDEX.md` + any existing flow files this feature touches + `glossary.md` for the terms it uses), **update after** (the flow file, `INDEX.md`, `active-context.md`). Extending an existing flow beats creating a near-duplicate — check the INDEX before authoring `flows/<new>.md`.
+Per `product/skills/ba-project-memory`: **read first** (`INDEX.md` + any existing flow files this feature touches + `glossary.md` for the terms it uses), **update after** (the flow file, `INDEX.md`, `active-context.md`). Extending an existing flow beats creating a near-duplicate — check the INDEX before authoring `flows/<new>.md`.
 
 ## Standards (the BPMN discipline)
 
-What a flow file must meet (named actors and swimlanes, a start trigger and named outcomes with no dead ends, every decision exit labelled including failure, timeout and never-arrives exits, merges that state what rejoins, stable `FLOW-nnn.k` node ids, the precondition → action → postcondition steps table, glossary terms only) is the business-analysis rule files, not a list here: `business-model-flows.md` plus the core `business-model.md`. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win. They are also this skill's quality bar.
+What a flow file must meet (named actors and swimlanes, a start trigger and named outcomes with no dead ends, every decision exit labelled including failure, timeout and never-arrives exits, merges that state what rejoins, stable `FLOW-nnn.k` node ids, the precondition → action → postcondition steps table, glossary terms only) is the product rule files, not a list here: `business-model-flows.md` plus the core `business-model.md`. Read the project's copy in `.claude/rules/product/`, or the plugin's in `product/skills/rules/` when the project has not installed them (`/product:rules` does). Where they and this skill disagree, the rule files win. They are also this skill's quality bar.
 
 ## The event-timeline pass (do this before drawing)
 
@@ -24,7 +24,7 @@ A degraded — deliberately solo-agent — form of event storming. Before drawin
 
 1. **Derive the domain-event list** from the requirements: past-tense facts ("Order Placed", "Payment Captured", "Refund Issued").
 2. **Order them on a timeline.** Where order is unclear or contested, that's a hotspot → open question.
-3. **Ask per event:** *what must already have happened?* (missing preconditions = missing upstream steps) and *who else reacts to this?* (hidden fan-out: notifications, quotas, lifecycle jobs, analytics — the recurring interaction hotspots). The answers to "who else reacts" are recorded as reactions in `events.md` through `business-analysis:dependency-map`, not left in the flow file.
+3. **Ask per event:** *what must already have happened?* (missing preconditions = missing upstream steps) and *who else reacts to this?* (hidden fan-out: notifications, quotas, lifecycle jobs, analytics — the recurring interaction hotspots). The answers to "who else reacts" are recorded as reactions in `events.md` through `product:dependency-map`, not left in the flow file.
 4. **Mark pivotal events** — ownership/step boundaries ("Payment Captured" hands off from checkout to fulfillment). Pivotal events are the natural seams for splitting a big flow into linked sub-flow files.
 
 The timeline is scaffolding; keep it in the flow file under "Event timeline" — it's the cheapest cross-feature ordering check the sweep has.
@@ -35,8 +35,8 @@ The timeline is scaffolding; keep it in the flow file under "Event timeline" —
 # Flow — <Name> (FLOW-001)
 
 **Created:** <YYYY-MM-DD>
-**Owned by:** `business-analysis:process-flow`
-**Last updated:** <YYYY-MM-DD> by `business-analysis:process-flow` — <one line what changed>
+**Owned by:** `product:process-flow`
+**Last updated:** <YYYY-MM-DD> by `product:process-flow` — <one line what changed>
 
 **Sources**: <US<n> / BRD / contract refs> · **Feature**: <E<n> label, or AREA-nnn>
 **Actors**: <list>

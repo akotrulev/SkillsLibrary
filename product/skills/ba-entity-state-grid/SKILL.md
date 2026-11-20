@@ -12,14 +12,14 @@ Models a business entity's lifecycle as **one state model per entity — never p
 
 ## Contract with the KB
 
-Per `business-analysis/skills/ba-project-memory`: **read first** (`INDEX.md` + the existing `entities/<entity>.md` — extending the shared model is the whole discipline; creating a second model for the same entity is the anti-pattern), **update after** (entity file + INDEX + active-context).
+Per `product/skills/ba-project-memory`: **read first** (`INDEX.md` + the existing `entities/<entity>.md` — extending the shared model is the whole discipline; creating a second model for the same entity is the anti-pattern), **update after** (entity file + INDEX + active-context).
 
 ## Procedure
 
 1. **Identify the entity and enumerate its states** from the requirements *and* the existing KB model. States are business-meaningful conditions ("Submitted", "Suspended"), not implementation flags. A new feature inventing a near-synonym of an existing state ("Deactivated" vs "Suspended") is terminology drift → glossary check before adding. Mark each state **`Initial?`** — `yes` for a state the entity is created in, the target of a `creates <Entity>` or `ENT-nnn — → <State>` effect in `events.md` (from code, the state the create path writes) — and **`Terminal?`** — `yes` when no transition leaves it by decision. What the source does not say is `?`.
 2. **Enumerate the events** — everything any feature does that can move the entity: user actions, system events, timeouts, lifecycle jobs (archival, cleanup, expiry — the classically forgotten writers). Once `events.md` exists, each event is a trigger there and the column header carries its `EVT-` id; grids built earlier keep free-text headers until the map is built or refreshed.
 3. **Fill the grid — every cell.** For each `state × event`: the target state, `—` (illegal by decision), or `?` (unspecified — a finding). Never leave a cell blank.
-4. **Annotate every legal transition with its owning feature** — the feature whose requirements define it, written as an `E<n>`/`AREA-` id with a label per `dev:knowledge-base`. One transition claimed by two features is a **double-fire** finding; a transition no feature owns is an orphan.
+4. **Annotate every legal transition with its owning feature** — the feature whose requirements define it, written as an `E<n>`/`AREA-` id with a label per `product:knowledge-base`. One transition claimed by two features is a **double-fire** finding; a transition no feature owns is an orphan.
 5. **Overlay the new feature** (the common case): add its events/states to the existing grid, then read the *whole* grid again — the conflicts are in the cells the new feature changed *and* the cells it silently assumed.
 6. **Run the conflict-surface checklist** (below) and log findings.
 
@@ -34,7 +34,7 @@ Per `business-analysis/skills/ba-project-memory`: **read first** (`INDEX.md` + t
 | **Unreachable / dead state** | a state no grid cell targets whose `Initial?` is not `yes`, or a state whose row has no legal transition and no `?` whose `Terminal?` is not `yes` | gap |
 | **Guard conflict** | same transition, two features demand different guards ("only admin" vs "any owner") | contradictory rules / permission |
 
-Each finding gets a **boundary condition** — the concrete scenario where it bites ("subscription expires (A) while the upgrade payment (B) is mid-capture") — and goes to `business-analysis:conflict-check` for the severity table + resolution recording.
+Each finding gets a **boundary condition** — the concrete scenario where it bites ("subscription expires (A) while the upgrade payment (B) is mid-capture") — and goes to `product:conflict-check` for the severity table + resolution recording.
 
 ## Entity file format (`docs/business-model/entities/<entity>.md`)
 
@@ -42,8 +42,8 @@ Each finding gets a **boundary condition** — the concrete scenario where it bi
 # Entity — Order (ENT-001)
 
 **Created:** <YYYY-MM-DD>
-**Owned by:** `business-analysis:state-grid`
-**Last updated:** <YYYY-MM-DD> by `business-analysis:state-grid` — <one line what changed>
+**Owned by:** `product:state-grid`
+**Last updated:** <YYYY-MM-DD> by `product:state-grid` — <one line what changed>
 
 **Sources**: <refs> · **Features touching this lifecycle**: E1 checkout, E2 fulfillment, E4 refunds, AREA-007 archival
 
@@ -76,7 +76,7 @@ An entity file in the older shape, with no `Initial?` column, gains it in place 
 
 ## Standards
 
-The quality bar is the business-analysis rule files, not a list here: `business-model-entities.md` (one shared model per entity, initial and terminal states marked, every cell filled, one owning feature per transition, lifecycle jobs as events, guards with owner and source, a boundary condition per finding) plus the core `business-model.md`. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win.
+The quality bar is the product rule files, not a list here: `business-model-entities.md` (one shared model per entity, initial and terminal states marked, every cell filled, one owning feature per transition, lifecycle jobs as events, guards with owner and source, a boundary condition per finding) plus the core `business-model.md`. Read the project's copy in `.claude/rules/product/`, or the plugin's in `product/skills/rules/` when the project has not installed them (`/product:rules` does). Where they and this skill disagree, the rule files win.
 
 ## Anti-example
 

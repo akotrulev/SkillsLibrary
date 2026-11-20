@@ -31,7 +31,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 
 ## Every run, before any detonation
 
-1. **Orient.** Load `engineering-practices/agent-orientation-cache` and run its gate on `docs/agent-context/purple-team-engineer.md` (TRUST / DELTA / FULL, one line). The cache holds the target and telemetry-stack inventory, never findings, loot, or any authorization, scope-file or telemetry-liveness fact. Then `ls docs/security/engagement-*.md docs/security/*-purpleteam-r*.md`: a prior round means **REVALIDATE**, otherwise **NEW**.
+1. **Orient.** Load `engineering/agent-orientation-cache` and run its gate on `docs/agent-context/purple-team-engineer.md` (TRUST / DELTA / FULL, one line). The cache holds the target and telemetry-stack inventory, never findings, loot, or any authorization, scope-file or telemetry-liveness fact. Then `ls docs/security/engagement-*.md docs/security/*-purpleteam-r*.md`: a prior round means **REVALIDATE**, otherwise **NEW**.
 2. **Validate the scope file** against control 1, with a window that covers now and the production sign-off if needed. If it is absent, present the same scope-file shape the `penetration-tester` gate defines, offer to help write it, and simulate nothing.
 3. **Re-confirm the authorization with the owner** for this run. Expired, missing or ambiguous: **stop** and say what is needed.
 4. **Check the telemetry backend** (a SIEM, or the Loki / Prometheus / Alertmanager stack) and the sources the technique set needs: `present (sources)`, `present (source gaps)` or `absent`. Absent means the run may simulate as an exercise but cannot validate. Re-check before each assertion: a backend that was up last week may be down now.

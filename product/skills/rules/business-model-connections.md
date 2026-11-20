@@ -3,11 +3,11 @@ paths:
   - "docs/business-model/{events,shared-data,invariants}.md"
 ---
 
-<!-- business-analysis rules v2 (2026-11-20): connections. Installed by /business-analysis:rules; edit to fit this project. -->
+<!-- product rules v2 (2026-11-20): connections. Installed by /product:rules; edit to fit this project. -->
 
 # Connection-file standards (events, shared data, invariants)
 
-Severity tags as in the core business-model rules: **blocker**, **major**, **minor**, **nit**. The KB wins where it consistently does otherwise. Templates and checks are in the `business-analysis:dependency-map` skill; to use it, delegate to the `business-analyst` agent, which loads it, or type `/business-analysis:dependency-map`. QA reads these files as data, so the vocabularies below are closed.
+Severity tags as in the core business-model rules: **blocker**, **major**, **minor**, **nit**. The KB wins where it consistently does otherwise. Templates and checks are in the `product:dependency-map` skill; to use it, delegate to the `business-analyst` agent, which loads it, or type `/product:dependency-map`. QA reads these files as data, so the vocabularies below are closed.
 
 - One `events.md`, `shared-data.md` and `invariants.md` per KB; new rows join them. *major*
 - Trigger Kind is `command`, `schedule` (Fired by names the schedule and its timezone, or `?`), `timeout`, `external` or `event` (Fired by lists the emitting `RX-` ids). *major*

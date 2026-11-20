@@ -1,6 +1,6 @@
 # Run modes — REFRESH, AREA and CAPTURE
 
-Read by `be-documenter` when its run is not FULL. A FULL run (no KB yet, or the whole system) runs Steps 1–6 as the agent file states them.
+Read by `documenter` when its run is not FULL. A FULL run (no KB yet, or the whole system) runs Steps 1–6 as the agent file states them.
 
 **Done when** the run has run exactly the steps its mode lists below, and its report names the mode.
 

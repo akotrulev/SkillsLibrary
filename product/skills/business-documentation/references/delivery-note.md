@@ -2,7 +2,7 @@
 
 Load this when writing the delivery note of a plan. The note is written only when the documenter runs as the plan's documentation task (`DOC1`), after the guides are updated — never on a standalone run.
 
-One file per plan, **`docs/deliveries/<NNN>-<plan-slug>.md`** (`<NNN>` is the plan's number), in the same place for `be-documenter` and `be-feature-documenter`. It is for the product owner: what the plan delivered, in business words, with a link into the guide for each thing.
+One file per plan, **`docs/deliveries/<NNN>-<plan-slug>.md`** (`<NNN>` is the plan's number), in the same place for `documenter` and `feature-documenter`. It is for the product owner: what the plan delivered, in business words, with a link into the guide for each thing.
 
 ````markdown
 # What was delivered — <the plan's title, in the client's words>
@@ -29,7 +29,7 @@ One file per plan, **`docs/deliveries/<NNN>-<plan-slug>.md`** (`<NNN>` is the pl
 **Delivered:** YYYY-MM-DD
 **Describes:** the product as it was on YYYY-MM-DD
 
-<!-- delivery · plan: NNN · source: be-documenter @ <sha> · stories: US1, US2, US3 · audience: shareable -->
+<!-- delivery · plan: NNN · source: documenter @ <sha> · stories: US1, US2, US3 · audience: shareable -->
 ````
 
 ## Rules
@@ -78,5 +78,5 @@ Members can now spend a monthly allowance of credits on sessions and pay only fo
 **Delivered:** 2026-09-14
 **Describes:** the product as it was on 2026-09-14
 
-<!-- delivery · plan: 004 · source: be-documenter @ e5d7b02 · stories: US1, US2, US3, US4, US5, US6 · audience: shareable -->
+<!-- delivery · plan: 004 · source: documenter @ e5d7b02 · stories: US1, US2, US3, US4, US5, US6 · audience: shareable -->
 ```

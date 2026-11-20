@@ -3,11 +3,11 @@ paths:
   - "docs/business-model/entities/**/*.md"
 ---
 
-<!-- business-analysis rules v3 (2026-11-20): entity state grids. Installed by /business-analysis:rules; edit to fit this project. -->
+<!-- product rules v3 (2026-11-20): entity state grids. Installed by /product:rules; edit to fit this project. -->
 
 # Entity state-grid standards
 
-Severity tags as in the core business-model rules: **blocker**, **major**, **minor**, **nit**. The KB wins where it consistently does otherwise. The template and the procedure are in the `business-analysis:state-grid` skill; to use it, delegate to the `business-analyst` agent, which loads it, or type `/business-analysis:state-grid`.
+Severity tags as in the core business-model rules: **blocker**, **major**, **minor**, **nit**. The KB wins where it consistently does otherwise. The template and the procedure are in the `product:state-grid` skill; to use it, delegate to the `business-analyst` agent, which loads it, or type `/product:state-grid`.
 
 - One model per business entity, shared by every feature. A new feature's states and events are overlaid on it, never kept in a copy of their own. *blocker*
 - States are business conditions from the glossary ("Submitted", "Suspended"), not implementation flags. A near-synonym of an existing state is terminology drift. *major*

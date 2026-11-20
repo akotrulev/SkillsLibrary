@@ -20,10 +20,10 @@ Ask only what's missing, at most 2–3 questions:
 
 ## Review checklist
 
-Apply per story; each failed check becomes one finding row with a severity. The per-story checks (one whole feature with one goal, a plan and not a design, every included part proven, met-or-not acceptance criteria, testability, no technology) are the business-analysis rule files `backlog-stories.md`, and `backlog-epics.md` for epics, not a list here:
+Apply per story; each failed check becomes one finding row with a severity. The per-story checks (one whole feature with one goal, a plan and not a design, every included part proven, met-or-not acceptance criteria, testability, no technology) are the product rule files `backlog-stories.md`, and `backlog-epics.md` for epics, not a list here:
 
-1. **The project's copies first**: `.claude/rules/business-analysis/`. The team may have edited them, and its edits win.
-2. **Otherwise the plugin's copies**: `business-analysis/skills/rules/`. Say in the report that the project has no installed rules and that `/business-analysis:rules` installs them.
+1. **The project's copies first**: `.claude/rules/product/`. The team may have edited them, and its edits win.
+2. **Otherwise the plugin's copies**: `product/skills/rules/`. Say in the report that the project has no installed rules and that `/product:rules` installs them.
 
 Read them in full before the first finding; never review from memory of the rules, and never add a check the files do not contain (propose it as a rule change instead). For a backlog from outside `docs/plans/` (a tracker export, a client document), skip the id, heading, section-order and `Source` rules and judge the content: an "As a / I want / so that" line is read as the goal and Given / When / Then scenarios as the acceptance criteria, each held to the same met-or-not bar. A layer-only story gets the verdict **Not a story**; a fragment of a feature (login with no way to register) gets **Merge candidate**.
 
@@ -80,18 +80,18 @@ Calibrate to the stated purpose: for a *testability* review, silent validations 
 <The findings that would stall `qa/manual/requirements-breakdown` — silent validations, contradictions, unfalsifiable AC — so QA knows exactly what to chase. "None" if clean.>
 
 ## Recommended next step
-<one sentence: e.g. "Route US13/US14 to dev:stories for repair; US12 can proceed to requirements-breakdown now.">
+<one sentence: e.g. "Route US13/US14 to product:stories for repair; US12 can proceed to requirements-breakdown now.">
 ```
 
 Story and epic ids are quoted as the source backlog writes them; where the backlog has none, assign `US<n>`/`E<n>` in reading order and say so, so the findings are citable.
 
 ## Rules
 
-- **Review-only.** Never rewrite a story during the review — point to the fix; `business-analysis/skills/ba-story-writer` applies it. (Library-wide review behavior.)
+- **Review-only.** Never rewrite a story during the review — point to the fix; `product/skills/ba-story-writer` applies it. (Library-wide review behavior.)
 - Every finding cites its location (story ID + AC number) so the author can act without re-reading the review.
 - Verdicts are per story; a batch never gets one blended verdict.
 - Don't manufacture findings to look thorough — a clean story gets ✅ and zero rows.
-- Don't re-litigate product decisions; review the story's *quality*, not whether the feature is a good idea (that was settled upstream in `dev:scoping`).
+- Don't re-litigate product decisions; review the story's *quality*, not whether the feature is a good idea (that was settled upstream in `product:scoping`).
 
 ## Anti-patterns to flag in the backlog
 

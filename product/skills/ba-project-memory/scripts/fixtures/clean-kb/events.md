@@ -1,7 +1,7 @@
 # Events & reactions
 
 **Created:** 2026-08-02
-**Owned by:** `business-analysis:dependency-map`
+**Owned by:** `product:dependency-map`
 
 ## Triggers
 | ID | Trigger | Kind | Fired by | Owner | Source |

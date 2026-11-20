@@ -14,9 +14,9 @@ State the mode — Mode A (baseline) or Mode B (re-audit) — and the target pat
 
 ## Read before sweeping
 
-1. **[`engineering-practices/standards-audit-engine`](../../../../engineering-practices/standards-audit-engine/SKILL.md)** — Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping and coverage policy, the five steps, the hostile self-review. **Read it first**; this file adds only what is specific to React Native.
+1. **[`engineering/standards-audit-engine`](../../../../engineering/standards-audit-engine/SKILL.md)** — Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping and coverage policy, the five steps, the hostile self-review. **Read it first**; this file adds only what is specific to React Native.
 2. [`references/conformance-checklist.md`](references/conformance-checklist.md) — sections A–X and every check; the section index at its end. **Read end-to-end** before Step 2.
-3. `engineering-practices/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Step 3.
+3. `engineering/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Step 3.
 4. The fragments for sections K, L, T, U, X: `mobile/_shared/{security,store-compliance,release,observability,in-app-purchases}/references/audit-checks.md` — rows whose `Stacks` column names `react-native`.
 
 Load the **owning skill** (named per section in the checklist) whenever a check is ambiguous, version-keyed, or you are about to write its fix direction. When checklist and skill disagree, **the skill wins** — and report the disagreement.
@@ -28,8 +28,8 @@ Report path: `docs/audits/<NNN>-mobile-react-native-conformance-r<N>.md`.
 | Job | Owner |
 |---|---|
 | Review one diff, inline table, no artifact, screenshot pass | [`code-review`](../code-review/SKILL.md) — this skill reuses its rows at repo scale |
-| Code vs a written spec / stories | `dev:audit-spec` (or the `code-auditor` agent) |
-| How one feature works, where it is defective | `dev:audit-feature` |
+| Code vs a written spec / stories | `engineering:audit-spec` (or the `code-auditor` agent) |
+| How one feature works, where it is defective | `engineering:audit-feature` |
 | Proof of pinning, on-disk data, resilience controls on a built binary | **peer** `qa-security` (`mobile-app-scan`, `mobile-runtime-testing`) — a row a static read cannot prove is reported **unverified**, never passed |
 | E2E suites, device journeys | **peer** `qa-mobile-typescript` |
 | Design heuristics on screens | `design/ux-review` on screenshots |

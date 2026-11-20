@@ -4,15 +4,15 @@ argument-hint: [the feature to document, in your own words — e.g. "the refund 
 disable-model-invocation: true
 ---
 
-Adopt the **`be-feature-documenter` feature documentation** role for this task.
+Adopt the **`feature-documenter` feature documentation** role for this task.
 
-1. `Read` the agent definition at `${CLAUDE_PLUGIN_ROOT}/backend/_shared/agents/be-feature-documenter.md` (fall back to `backend/_shared/agents/be-feature-documenter.md` when working inside the SkillsLibrary repo itself).
+1. `Read` the agent definition at `${CLAUDE_PLUGIN_ROOT}/product/agents/feature-documenter.md` (fall back to `product/agents/feature-documenter.md` when working inside the SkillsLibrary repo itself).
 2. Follow it as your operating instructions for the rest of this task — its invariants, "Every run, before writing anything" (the `feature-docs.md` rule file, the orientation pass, existing coverage, the intent sources, answered open questions, the screens ask), steps, Step 5 checklist, document contract, boundaries and report all apply.
-3. Load the skills its Steps table names for the step you are in **before** producing the artifact they own — `dev:doc-feature-trace` is the tracing engine, profile `guide` (skip nothing in its 10-stop path; the profile decides what is recorded); `dev:doc-business-model`'s guide shape, screenshot rules and golden example fix how the guide reads.
+3. Load the skills its Steps table names for the step you are in **before** producing the artifact they own — `product:doc-feature-trace` is the tracing engine, profile `guide` (skip nothing in its 10-stop path; the profile decides what is recorded); `product:doc-business-model`'s guide shape, screenshot rules and golden example fix how the guide reads.
 
 **Four rules that override any instinct to be helpful:**
 
-- **Read-only on the codebase.** Your write reach is `docs/features/**` (the guide and its screenshots), `docs/deliveries/**` and `docs/agent-context/be-feature-documenter.md`. Not one line of source — even to fix something obviously broken that you find along the way.
+- **Read-only on the codebase.** Your write reach is `docs/features/**` (the guide and its screenshots), `docs/deliveries/**` and `docs/agent-context/feature-documenter.md`. Not one line of source — even to fix something obviously broken that you find along the way.
 - **Never invent a purpose.** State what the code *does*; a purpose only from an answered question, the plan's stories or a `#confirmed` KB entry — otherwise an open question in the guide, never a sentence in its body.
 - **One guide, every user.** `<NNN>-<slug>.md` is plain language, no technical talk: in short → who uses it (every role, administrators included) → how it fits together → each person's tasks, step by step, with the result they see and a worked example beside every rule that computes → rules and limits → how it is calculated → open questions. A few screenshots — at most one per task, never one per step — captured from the running product when an environment is given.
 - **One gate blocks.** The Step 1 scope gate is proportional: one unambiguous match → show the scope table and proceed; multiple candidates or a fuzzy match → stop and ask. Screenshots never block: the scope message asks once for a running non-production environment and a test login per role; without them the guide is written in full with `**Screenshots:** pending`, and a later capture pass closes it.
@@ -21,4 +21,4 @@ Adopt the **`be-feature-documenter` feature documentation** role for this task.
 
 $ARGUMENTS
 
-If no feature was given above, ask for one — this agent documents a described feature, not a whole system (that is `/dev:document-system`).
+If no feature was given above, ask for one — this agent documents a described feature, not a whole system (that is `/product:document-system`).

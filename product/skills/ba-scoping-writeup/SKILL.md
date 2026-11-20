@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Initiative Scoping
 
-Converts an ambiguous business request into a structured artifact engineering and product can act on. Output is decision-ready: actors, capabilities, constraints, success measures, scope, risks, and open questions — separated and labeled. Inside the delivery lane this document **is** `docs/plans/<NNN>-<initiative>/requirements.md`, written by `requirements-author` (`/dev:refine`); standalone, it is the scoping writeup handed to whoever plans next.
+Converts an ambiguous business request into a structured artifact engineering and product can act on. Output is decision-ready: actors, capabilities, constraints, success measures, scope, risks, and open questions — separated and labeled. Inside the delivery lane this document **is** `docs/plans/<NNN>-<initiative>/requirements.md`, written by `requirements-author` (`/product:refine`); standalone, it is the scoping writeup handed to whoever plans next.
 
 ## Inputs needed
 
@@ -102,4 +102,4 @@ This is the shape of `requirements.md`. Ten sections, this order, none dropped �
 
 ## Standards
 
-What the document must and must never contain (the ten sections, the verbatim ask, the problem before any solution, no technology in §4, quality targets with their number or `[TBD]`, a named decision-maker, a real success measure or an open question, three-column scope, assumptions and two-axis risks) is the business-analysis rule file `backlog-requirements.md`, not a list here. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win.
+What the document must and must never contain (the ten sections, the verbatim ask, the problem before any solution, no technology in §4, quality targets with their number or `[TBD]`, a named decision-maker, a real success measure or an open question, three-column scope, assumptions and two-axis risks) is the product rule file `backlog-requirements.md`, not a list here. Read the project's copy in `.claude/rules/product/`, or the plugin's in `product/skills/rules/` when the project has not installed them (`/product:rules` does). Where they and this skill disagree, the rule files win.

@@ -184,4 +184,4 @@ These techniques are part of systematic debugging and available in this director
 > code.
 
 **Related skills:**
-- **`dev:verify`** - Verify fix worked before claiming success
+- **`engineering:verify`** - Verify fix worked before claiming success

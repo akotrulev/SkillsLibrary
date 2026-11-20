@@ -66,7 +66,7 @@ flowchart LR
 **Last updated:** YYYY-MM-DD                               ← once updated
 **Describes:** the product as it was on YYYY-MM-DD
 
-<!-- guide · owner: dev:doc-business-model · source: be-documenter @ <sha> · audience: shareable -->
+<!-- guide · owner: product:doc-business-model · source: documenter @ <sha> · audience: shareable -->
 ````
 
 - **`## In short`** — three to five bullets, one sentence each, about the whole system: who uses it, what people can do, the rules that matter most with their numbers, what happens without anyone acting. No bold, no links, nothing the overview does not say again below.
@@ -76,7 +76,7 @@ flowchart LR
 - **`## End-to-end flows`** — a `###` per journey, numbered steps naming each area's guide by name, never by `AREA-` id.
 - **`## Foundations`** — sign-in and roles in the words a user meets them (who can see what, what an administrator can do that others cannot), in plain lines. No technology names.
 - **`## Open questions`** has the four columns `| # | Question | Why it matters | Answer |`; *Answer* is empty until a person fills it, and the next run folds it into the text and removes the row, as `SKILL.md`'s reconcile procedure says.
-- **`## About this document`** — `**Created:**`, `**Last updated:**` once updated, `**Describes:**`, then one stamp comment as the last line: `guide`, `owner`, `source: be-documenter @ <sha>`, `audience: shareable` (`models` and `stories` when used). No `id`, no `**Screenshots:**` line; the visible block carries no owner, derivation, model or audience line.
+- **`## About this document`** — `**Created:**`, `**Last updated:**` once updated, `**Describes:**`, then one stamp comment as the last line: `guide`, `owner`, `source: documenter @ <sha>`, `audience: shareable` (`models` and `stories` when used). No `id`, no `**Screenshots:**` line; the visible block carries no owner, derivation, model or audience line.
 - **An overview in an earlier shape** is updated in place into this shape under `SKILL.md`'s reconcile procedure: it gains `## In short`, the open-questions table gains its `Answer` column, and the About lines move into the stamp comment. An **old-shape overview** (`## Overview` and `## The areas` and no `## Who uses it`) moves its `## The areas` rows under the person who uses each area; nothing is regenerated. Its `system-overview.behind-the-scenes.md` and `system-overview.technical.md` are retired levels: read as leads, then deleted.
 
-**"What is not documented" is mandatory.** A documentation set that does not state its own limits gets read as complete, and the parts nobody traced become the parts everyone assumes are fine. Every entry point, job and consumer the survey parked is a row here, with its reason; the orientation cache, `docs/agent-context/be-documenter.md`, keeps the surface counts.
+**"What is not documented" is mandatory.** A documentation set that does not state its own limits gets read as complete, and the parts nobody traced become the parts everyone assumes are fine. Every entry point, job and consumer the survey parked is a row here, with its reason; the orientation cache, `docs/agent-context/documenter.md`, keeps the surface counts.

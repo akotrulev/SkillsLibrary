@@ -83,7 +83,7 @@ A `.mjs` Workflow orchestration script has **no unit-test lane in this repo** �
 
 ### DOC1 — docs: catalog, cross-links and filing the plan
 
-**Stack:** `docs` · **Agent:** `be-documenter`
+**Stack:** `docs` · **Agent:** `documenter`
 **Deliverable:** `docs/skills-catalog.md` reflects the Pro workflow and `/penetration-testing:assess-repo-pro` (command counts recomputed, the `penetration-testing` slash-surface row and the Metasploit-workflow paragraph updated); `security/metasploit-setup/references/metasploit-pro.md` cross-links the workflow; the plan is moved to `docs/plans/implemented/`.
 **Depends on:** P1 (documents what P1 landed, from the code).
 **Budget:** ~45k — CLAUDE.md 25k, this plan ~5k, `docs/skills-catalog.md` the two command-count lines + the pentest row + the Metasploit-workflow paragraph ~8k, the reference cross-link ~2k, writes ~5k.
@@ -133,7 +133,7 @@ Run them in order, one session each; each block is complete on its own. P1 build
 | # | Stack | Agent | Depends on | Runs beside | Budget |
 |---|---|---|---|---|---|
 | P1 | `ts` | `tooling-engineer` | none | — | ~90k |
-| DOC1 | `docs` | `be-documenter` | P1 | — | ~45k |
+| DOC1 | `docs` | `documenter` | P1 | — | ~45k |
 
 ---
 
@@ -196,13 +196,13 @@ Commit: `feat(penetration-testing): Metasploit Pro assessment workflow + command
 Close out per the plan's "Close-out — every task" before you stop.
 ````
 
-### DOC1 — catalog, cross-links and filing the plan (be-documenter, docs)
+### DOC1 — catalog, cross-links and filing the plan (documenter, docs)
 
 ````
 Depends on: P1
-Agent: be-documenter · Stack: docs
+Agent: documenter · Stack: docs
 
-You are `be-documenter`. Task DOC1 of docs/plans/013-metasploit-pro-assessment-workflow.md: document
+You are `documenter`. Task DOC1 of docs/plans/013-metasploit-pro-assessment-workflow.md: document
 what P1 landed, from the code, and file the plan. Doc-only.
 
 Read, in this order:

@@ -1,12 +1,12 @@
 # Golden example — `blueprint.md`
 
-This is the filled example for `dev:plan-blueprint`, from a deliberately small toy initiative: **workshop-booking** — a studio lets members book seats in scheduled workshops. All five planner examples (`backend/_shared/*/references/example-*.md`) describe this same initiative, so together they form one coherent pack. **The shapes and disciplines are normative; the domain content is illustrative.** This example shows the *post-approval* state, so the question→answer loop is visible.
+This is the filled example for `product:plan-blueprint`, from a deliberately small toy initiative: **workshop-booking** — a studio lets members book seats in scheduled workshops. All five planner examples (`backend/_shared/*/references/example-*.md`) describe this same initiative, so together they form one coherent pack. **The shapes and disciplines are normative; the domain content is illustrative.** This example shows the *post-approval* state, so the question→answer loop is visible.
 
 ---
 
 # Workshop Booking — Solution Blueprint
 
-**Date:** 2026-08-02 · **Written by:** `dev:plan-blueprint` · **Status:** APPROVED 2026-08-02
+**Date:** 2026-08-02 · **Written by:** `product:plan-blueprint` · **Status:** APPROVED 2026-08-02
 **Initiative folder:** `docs/plans/001-workshop-booking/`
 **Entry mode:** NEW — empty repo, one-page business brief from the studio owner
 **Sources:** `brief.md` (owner's email, distilled via `qa/manual/requirements-breakdown`) — contributed the capability list and the cancellation policy; everything else `proposed`.

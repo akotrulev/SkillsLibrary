@@ -8,12 +8,12 @@
 
 | Need | Today | Gap |
 |---|---|---|
-| One run per feature produces the document and the suite | Two agents, two runs: `be-feature-documenter` (`backend/_shared/agents/be-feature-documenter.md`, `/dev:document-feature`) writes `docs/features/<NNN>-<slug>.md`; `qa-test-case-designer` Code mode (`qa/manual/agents/qa-test-case-designer.md:72-80`) traces the **same** code again for the basis | One agent that traces once and writes both from that one trace (§2) |
+| One run per feature produces the document and the suite | Two agents, two runs: `feature-documenter` (`product/agents/feature-documenter.md`, `/product:document-feature`) writes `docs/features/<NNN>-<slug>.md`; `qa-test-case-designer` Code mode (`qa/manual/agents/qa-test-case-designer.md:72-80`) traces the **same** code again for the basis | One agent that traces once and writes both from that one trace (§2) |
 | Cases are e2e only | The designer writes whatever the basis supports. In the 005 H1 trial its suite was automated in-process (WebApplicationFactory + Testcontainers, `WebhookRetryAndDeliveryTests.cs`), and nothing in the suite says which surface a case uses | An e2e rule: every case names its surface and its seam, Setup and Cleanup included; a case that needs another seam is written as **needs-hook** (§3) |
 | The QA repo knows which agent automates which case | The hand-off notes are prose (`qa-test-case-designer.md:163`) | `Surface` and `Automated by` on every case (§3.3) |
 | Test hooks are found once, not 163 times | No step looks for them | A seam inventory, kept in the orientation cache (§3.2) |
 | The document and the suite share a number | The documenter takes the next free number in `docs/features/`, and the designer the next free one in `docs/test-cases/`. The two counters can drift (005 H1, D9) | One `NNN` for all three files (§4) |
-| The trace finds every writer of a shared field | Edges asks for *readers* of written fields only (`backend/_shared/feature-trace/SKILL.md:89`). The 005 trial missed the operator-settle writer (005 H1, D2) | Edges also lists other writers (§5) |
+| The trace finds every writer of a shared field | Edges asks for *readers* of written fields only (`product/skills/feature-trace/SKILL.md:89`). The 005 trial missed the operator-settle writer (005 H1, D2) | Edges also lists other writers (§5) |
 | Code mode has slice ids | `connections.md:7` takes ids from the KB only. With no KB, the 005 trial invented `L<n> T<n>` (005 H1, D3) | A local id scheme for Code mode (§5) |
 | Async budgets are not guesses | The budget comes from "the reaction's mode or the NFR" (`qa/manual/test-case-writer/SKILL.md:54`). Code mode has neither, so every budget was `#assumption` (005 H1, D7) | In e2e mode the budget is one named environment parameter (§5) |
 
@@ -23,14 +23,14 @@
 
 **Input:** a feature sentence plus its entry points — exactly the form of a `docs/features/INVENTORY.md` command line. Or a row number (`#57`) when that file exists.
 
-**It procedures by citation, not by copy.** The document's shape and self-review belong to `be-feature-documenter`; the five steps and the depth gate belong to `qa-test-case-designer`. The new agent reads the named sections of those two files and follows them. It adds only what §3 and §4 define. If one of them changes, the other picks the change up with no edit.
+**It procedures by citation, not by copy.** The document's shape and self-review belong to `feature-documenter`; the five steps and the depth gate belong to `qa-test-case-designer`. The new agent reads the named sections of those two files and follows them. It adds only what §3 and §4 define. If one of them changes, the other picks the change up with no edit.
 
 | # | Step | Follows | Adds | Exit gate |
 |---|---|---|---|---|
-| 0 | Orient | `engineering-practices/agent-orientation-cache` against `docs/agent-context/qa-feature-spec-writer.md` | The seam inventory (§3.2) on a FULL verdict | Verdict in one line; seams listed |
-| 1 | Locate & scope | `be-feature-documenter.md` Step 1 (proportional gate and scope table) | Takes the `NNN` (§4) | Scope table shown |
-| 2 | Trace, once | `dev:doc-feature-trace`, all ten stops, seven inventories | Nothing — this trace record feeds steps 3 and 4 | Every scoped entry point traced |
-| 3 | Write the feature document | `be-feature-documenter.md` "Document contract" and its Step 4 checklist | — | Document written; checklist passes |
+| 0 | Orient | `engineering/agent-orientation-cache` against `docs/agent-context/qa-feature-spec-writer.md` | The seam inventory (§3.2) on a FULL verdict | Verdict in one line; seams listed |
+| 1 | Locate & scope | `feature-documenter.md` Step 1 (proportional gate and scope table) | Takes the `NNN` (§4) | Scope table shown |
+| 2 | Trace, once | `product:doc-feature-trace`, all ten stops, seven inventories | Nothing — this trace record feeds steps 3 and 4 | Every scoped entry point traced |
+| 3 | Write the feature document | `feature-documenter.md` "Document contract" and its Step 4 checklist | — | Document written; checklist passes |
 | 4 | Write the suite | `qa-test-case-designer.md` Steps 1–5. Step 1 takes the document and the trace record as its basis, with no second trace | The e2e rule (§3) in Steps 3–5 | Suite and basis written; depth gate and e2e gate pass |
 | 5 | Report | — | Marks the `INVENTORY.md` row `documented + suite` when the file exists | Output contract (§4) |
 
@@ -99,7 +99,7 @@ INVENTORY: row #<n> marked | no inventory
 
 | Fix | File | Change |
 |---|---|---|
-| D2 — other writers | `backend/_shared/feature-trace/SKILL.md` §7 Edges (`:89`) and the trace-record copy (`:146`) | "For every written field, search for the readers **and the other writers**." Add an `Also written by` column. One-line addition to the self-check |
+| D2 — other writers | `product/skills/feature-trace/SKILL.md` §7 Edges (`:89`) and the trace-record copy (`:146`) | "For every written field, search for the readers **and the other writers**." Add an `Also written by` column. One-line addition to the self-check |
 | D3 — Code-mode ids | `qa/manual/requirements-breakdown/references/connections.md` (`:7`) and `qa/manual/cross-feature-test-design/SKILL.md` Procedure 1 | With no KB: `T<n>` trigger, `R<n>` reaction, `S<n>` shared field, `I<n>` invariant, local to the basis, and stated to be local in §8's header. KB ids win whenever a KB exists |
 | D7 — async budget | `qa/manual/test-case-writer/SKILL.md` *Async effects* (`:54`) | Add: "With no mode or NFR, declare one named budget in Setup and cite it by name." That is the same rule §3.3 applies |
 
@@ -114,7 +114,7 @@ Run from the SkillsLibrary root, in this order:
 3. `python3 tools/plugin-surface-check.py` reports OK.
 4. `python3 tools/token-audit.py --violations-only` lists none of the files this plan wrote or changed.
 5. `python3 tools/qa-version-check.py` reports OK.
-6. Cross-reference check: every section heading the new agent cites by name in `be-feature-documenter.md` and `qa-test-case-designer.md` exists verbatim (`grep -n` each one).
+6. Cross-reference check: every section heading the new agent cites by name in `feature-documenter.md` and `qa-test-case-designer.md` exists verbatim (`grep -n` each one).
 7. Format sweep over the changed files: no inline `TODO`, every `file:line` in §5 still points at the edited text.
 
 ## Decisions
@@ -124,17 +124,17 @@ Run from the SkillsLibrary root, in this order:
 | Option | Verdict | Why |
 |---|---|---|
 | New agent that cites the two existing ones | **chosen** | One run per feature over 163 features; one trace instead of two; the e2e rule lives in one file |
-| An `e2e-only` mode on `qa-test-case-designer`, after `be-feature-documenter` | rejected | Two runs and two traces per feature: about 160 extra sessions |
+| An `e2e-only` mode on `qa-test-case-designer`, after `feature-documenter` | rejected | Two runs and two traces per feature: about 160 extra sessions |
 
 Cost: a third file couples to the section headings of the other two. The gate's step 6 checks that.
 
-**D2 — Procedures by citation.** The agent reads `be-feature-documenter.md` "Document contract" + "Step 4 checklist" and `qa-test-case-designer.md` "Steps" + their step details, and does not copy them. Cost: a heading rename in either file breaks the new agent silently until the next gate. That is why gate step 6 exists.
+**D2 — Procedures by citation.** The agent reads `feature-documenter.md` "Document contract" + "Step 4 checklist" and `qa-test-case-designer.md` "Steps" + their step details, and does not copy them. Cost: a heading rename in either file breaks the new agent silently until the next gate. That is why gate step 6 exists.
 
 **D3 — Allowed seams are public surfaces plus existing test hooks.** The user chose this (2026-10-11). A case that needs any other seam is written as `needs-hook` and routed to `be-<stack>`. Cost: until those hooks land, the temporal and fault cases from 005 (exact-instant clock, lost bus message) stay unautomated.
 
 **D4 — Output goes to the service repo's `docs/`, untracked.** The user chose this (2026-10-11). The QA-repo session reads the suites by absolute path. Cost: the docs exist on one machine only, and nothing versions them.
 
-**D5 — It ships in the three `qa-*` plugins, not in `dev`.** It is a QA deliverable, and `dev` stays stack-free. `be-feature-documenter` stays where it is for documentation-only runs.
+**D5 — It ships in the three `qa-*` plugins, not in `product`.** It is a QA deliverable, and `product` stays stack-free. `feature-documenter` stays where it is for documentation-only runs.
 
 **D6 — (2026-10-11, E2) `test-case-writer/SKILL.md` stays over the token budget.** The gate's step 4 expected no listed file this plan changed; that file was already a violation (17576) and the §5 sentence adds 76. Reading A: trim the skill now. Reading B (taken): leave it — the violation predates this plan and trimming unrelated text exceeds E2's scope. Cost: the audit still lists the file until someone splits it.
 
@@ -151,15 +151,15 @@ Cost: a third file couples to the section headings of the other two. The gate's 
 **Stack:** `docs` · **Agent:** `general-purpose`
 **Deliverable:** `qa/manual/agents/qa-feature-spec-writer.md` and `qa/manual/commands/feature-spec.md` exist and are registered in `qa-java`, `qa-dotnet` and `qa-typescript` in `.claude-plugin/marketplace.json`. The agent implements §2–§4.
 **Depends on:** —
-**Budget:** ~110k — CLAUDE.md 25k, this plan §1–§4 and D1–D5 12k, `be-feature-documenter.md` 12k, `qa-test-case-designer.md` 15k, `qa/manual/commands/test-cases.md` as the command pattern 1k, `test-case-writer/SKILL.md` case forms 8k, marketplace `qa-*` entries 5k, writes ~25k (agent ~180 lines, command, three registrations).
+**Budget:** ~110k — CLAUDE.md 25k, this plan §1–§4 and D1–D5 12k, `feature-documenter.md` 12k, `qa-test-case-designer.md` 15k, `qa/manual/commands/test-cases.md` as the command pattern 1k, `test-case-writer/SKILL.md` case forms 8k, marketplace `qa-*` entries 5k, writes ~25k (agent ~180 lines, command, three registrations).
 **Gate: none** — this plan gates once, in E2. Do not run `claude plugin validate`, the `tools/*.py` checkers, the token audit or any compiler.
 
-- Frontmatter: `name: qa-feature-spec-writer`; a description ≤ 500 characters with triggers ("document this feature and write its e2e test cases", "spec this inventory row") and fences (docs only → `be-feature-documenter`; cases without the e2e rule → `qa-test-case-designer`; automation → `qa-api/ui/mobile-<stack>`); `tools: Read, Write, Edit, Bash, Glob, Grep`.
+- Frontmatter: `name: qa-feature-spec-writer`; a description ≤ 500 characters with triggers ("document this feature and write its e2e test cases", "spec this inventory row") and fences (docs only → `feature-documenter`; cases without the e2e rule → `qa-test-case-designer`; automation → `qa-api/ui/mobile-<stack>`); `tools: Read, Write, Edit, Bash, Glob, Grep`.
 - Body: §2's step table and write reach, §3 in full (seams, seam inventory, case fields, e2e gate), §4's numbering and report. Each step cites the exact section headings of the two agents it follows (D2).
 - Command: the same shape as `test-cases.md`, adopting the new agent; `argument-hint: [feature sentence + entry points | #<inventory row>]`.
 - Register the agent and the command in all three `qa-*` plugin entries, next to `qa-test-case-designer` and `test-cases.md`.
 - **Not in E1:** the §5 skill fixes, the catalog and README, and the gate (all E2).
-- **As built (2026-10-11):** as planned, no divergence. `qa/manual/agents/qa-feature-spec-writer.md` (description 440 chars, 5-step table, e2e rule, report) and `qa/manual/commands/feature-spec.md`; registered in qa-java, qa-dotnet and qa-typescript beside `qa-test-case-designer` / `test-cases.md` (`.claude-plugin/marketplace.json`, 6 added lines, `json.tool` OK). Cited headings, for E2's step 6: be-feature-documenter — `Steps`, `Document contract — \`docs/features/<NNN>-<feature-slug>.md\``, `Step 4 checklist`; qa-test-case-designer — `Code mode — a feature in the code → test basis`, `Steps`, `Step 1 detail`…`Step 5 detail`, `Output contract`. Unverified: the gate has not run; `Step 4 checklist` is a bold lead-in, not a `#` heading, so grep it as text.
+- **As built (2026-10-11):** as planned, no divergence. `qa/manual/agents/qa-feature-spec-writer.md` (description 440 chars, 5-step table, e2e rule, report) and `qa/manual/commands/feature-spec.md`; registered in qa-java, qa-dotnet and qa-typescript beside `qa-test-case-designer` / `test-cases.md` (`.claude-plugin/marketplace.json`, 6 added lines, `json.tool` OK). Cited headings, for E2's step 6: feature-documenter — `Steps`, `Document contract — \`docs/features/<NNN>-<feature-slug>.md\``, `Step 4 checklist`; qa-test-case-designer — `Code mode — a feature in the code → test basis`, `Steps`, `Step 1 detail`…`Step 5 detail`, `Output contract`. Unverified: the gate has not run; `Step 4 checklist` is a bold lead-in, not a `#` heading, so grep it as text.
 
 ### E2 — the three skill fixes, the docs and the gate
 
@@ -173,7 +173,7 @@ Cost: a third file couples to the section headings of the other two. The gate's 
 - `docs/skills-catalog.md`: the `qa-*` row of the command table (`:33`) gains `:feature-spec`; one bullet under the qa/manual agents next to `qa-test-case-designer` (`:144`); the `qa/manual/` sentence (`:58`) names three agents.
 - `README.md`: the same command and agent count changes wherever it lists the `qa-*` surface.
 - Run §6. Then close out; this task deletes the last automated block, but H1's block stays, so the plan does **not** move.
-- **As built (2026-10-11):** §5's three rows applied as written — `feature-trace/SKILL.md:89-91` and `:147` (`Also written by` column in both Edges tables, sample row, self-check 9), `connections.md:7` plus its Edges-column mapping, `cross-feature-test-design/SKILL.md:35` (Code-mode `T<n>`/`R<n>`/`S<n>`/`I<n>`, local to the basis, stated in §8's header), `test-case-writer/SKILL.md:54` (named budget in Setup). Catalog `:27,:33,:58` plus a new `agents/qa-feature-spec-writer` bullet; README `:63,:104,:106` plus a `:feature-spec` row. Recounted: 65 command files, 73 registrations, 12 commands per qa stack (13 for qa-dotnet); `CLAUDE.md` "64-command" → "65-command". Gate: `json.tool` OK; `claude plugin validate .` ✔ Validation passed; `plugin-surface-check.py` OK; `qa-version-check.py` OK; `token-audit --violations-only` lists none of the new files, only `qa/manual/test-case-writer/SKILL.md` [qa-java] at 17652 (17576 before — see D6); §6 step 6: every cited heading found in both agents (`Step 4 checklist` is a bold lead-in at `be-feature-documenter.md:70`); step 7: no `TODO`/`FIXME` in changed files, §5 lines still point at the edited text. Repair: E1's commit had left the plan's tail duplicated (a second Close-out, Prompts and stale E1/E2 blocks); removed the duplicates, leaving one Prompts section with H1's block.
+- **As built (2026-10-11):** §5's three rows applied as written — `feature-trace/SKILL.md:89-91` and `:147` (`Also written by` column in both Edges tables, sample row, self-check 9), `connections.md:7` plus its Edges-column mapping, `cross-feature-test-design/SKILL.md:35` (Code-mode `T<n>`/`R<n>`/`S<n>`/`I<n>`, local to the basis, stated in §8's header), `test-case-writer/SKILL.md:54` (named budget in Setup). Catalog `:27,:33,:58` plus a new `agents/qa-feature-spec-writer` bullet; README `:63,:104,:106` plus a `:feature-spec` row. Recounted: 65 command files, 73 registrations, 12 commands per qa stack (13 for qa-dotnet); `CLAUDE.md` "64-command" → "65-command". Gate: `json.tool` OK; `claude plugin validate .` ✔ Validation passed; `plugin-surface-check.py` OK; `qa-version-check.py` OK; `token-audit --violations-only` lists none of the new files, only `qa/manual/test-case-writer/SKILL.md` [qa-java] at 17652 (17576 before — see D6); §6 step 6: every cited heading found in both agents (`Step 4 checklist` is a bold lead-in at `feature-documenter.md:70`); step 7: no `TODO`/`FIXME` in changed files, §5 lines still point at the edited text. Repair: E1's commit had left the plan's tail duplicated (a second Close-out, Prompts and stale E1/E2 blocks); removed the duplicates, leaving one Prompts section with H1's block.
 
 ### H1 — run it on real features (the user)
 
@@ -224,7 +224,7 @@ E1 and E2 landed 2026-10-11; their blocks are deleted. H1 is live.
 H1 of docs/plans/006-e2e-feature-spec-writer.md — your checklist.
 
 0. In SkillsLibrary: `git push origin master`, then `claude plugin marketplace update skills-library`.
-   Open a fresh session at ~/projects/flexinvest-microservices (qa-dotnet, dev and business-analysis
+   Open a fresh session at ~/projects/flexinvest-microservices (qa-dotnet and product
    are enabled in .claude/settings.local.json).
 1. Pick two rows from docs/features/INVENTORY.md: one with an API trigger and one with a schedule or
    a consumer. Run `/qa-dotnet:feature-spec #<row>` for each, one session each.

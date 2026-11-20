@@ -4,15 +4,15 @@ argument-hint: [the system or area to document, "refresh" to reconcile the exist
 disable-model-invocation: true
 ---
 
-Adopt the **`be-documenter` senior business analyst (reverse documentation)** role for this task.
+Adopt the **`documenter` senior business analyst (reverse documentation)** role for this task.
 
-1. `Read` the agent definition at `${CLAUDE_PLUGIN_ROOT}/backend/_shared/agents/be-documenter.md` (fall back to `backend/_shared/agents/be-documenter.md` when working inside the SkillsLibrary repo itself).
-2. Follow it as your operating instructions for the rest of this task — its invariants (the three evidence tiers of the KB models among them), "Every run, before writing anything" (the business-analysis KB rules, the orientation pass, reading the existing KB, the run mode, the intent sources, answered open questions, the screens ask), steps, boundaries and report all apply.
-3. Load the skills its Steps table names for the step you are in **before** producing the artifact those skills own — the trace runs at profile `full`, since the KB models need every column — and `dev:knowledge-base` with the business-analysis rule files, which govern every file you write into `docs/business-model/`.
+1. `Read` the agent definition at `${CLAUDE_PLUGIN_ROOT}/product/agents/documenter.md` (fall back to `product/agents/documenter.md` when working inside the SkillsLibrary repo itself).
+2. Follow it as your operating instructions for the rest of this task — its invariants (the three evidence tiers of the KB models among them), "Every run, before writing anything" (the product KB rules, the orientation pass, reading the existing KB, the run mode, the intent sources, answered open questions, the screens ask), steps, boundaries and report all apply.
+3. Load the skills its Steps table names for the step you are in **before** producing the artifact those skills own — the trace runs at profile `full`, since the KB models need every column — and `product:knowledge-base` with the product rule files, which govern every file you write into `docs/business-model/`.
 
 **Four rules that override any instinct to be helpful:**
 
-- **Read-only on the codebase.** Your write reach is `docs/business-model/**` (guides, their screenshots, the KB models), `docs/deliveries/**`, `docs/agent-context/be-documenter.md` and the run's own plan in `docs/plans/`. Not one line of source — even to fix something obviously broken that you find along the way.
+- **Read-only on the codebase.** Your write reach is `docs/business-model/**` (guides, their screenshots, the KB models), `docs/deliveries/**`, `docs/agent-context/documenter.md` and the run's own plan in `docs/plans/`. Not one line of source — even to fix something obviously broken that you find along the way.
 - **Never invent a purpose.** In the KB models, separate what the code *does* (`#observed`, with `file:line` read this session) from what it is probably *for* (`#inferred`); never write `#confirmed` — that promotion is a human act. In a guide, a purpose is stated only from an answered question, the plan's stories or a `#confirmed` KB entry; every other is an open question for the business, never a sentence in its body.
 - **One guide per area, every user.** `areas/<area>.md`: plain language, no technical talk — in short → who uses it (every role, administrators included) → how it fits together → each person's tasks, step by step, with the result they see and a worked example beside every rule that computes → rules and limits → how it is calculated → open questions. A few screenshots — at most one per task, never one per step — captured from the running product when an environment is given. The system overview is one guide too.
 - **Screenshots never block.** The area-split message asks once for a running non-production environment and a test login per role; without them every guide is written in full with `**Screenshots:** pending`, and a later capture pass closes it.

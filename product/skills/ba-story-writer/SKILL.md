@@ -12,7 +12,7 @@ A story describes **one feature that must be built**. It says what the goal is, 
 
 ## Inputs needed
 
-1. **The epics** (`epics.md` from `dev:epics`, ideally) and the requirements document they cover
+1. **The epics** (`epics.md` from `product:epics`, ideally) and the requirements document they cover
 2. **Who each feature is for**, specifically ("a member with a confirmed account", not "the user")
 3. **The business rules with their numbers** (limits, time windows, thresholds) and the quality targets from `requirements.md` §4, and the constraints in §5
 
@@ -97,4 +97,4 @@ A complete story in this shape, three parts and sixteen criteria: [`references/e
 
 ## Standards
 
-What every story must meet (the `US<n>` id and parent epic, one whole feature with one goal, no layer stories, the sections in order, an approach that is a plan and not a design, every included part proven by criteria, met-or-not bullets with stable `AC` ids, validations with their violation outcome, no technology, per-story exclusions and dependencies) is the business-analysis rule file `backlog-stories.md`, not a list here. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win.
+What every story must meet (the `US<n>` id and parent epic, one whole feature with one goal, no layer stories, the sections in order, an approach that is a plan and not a design, every included part proven by criteria, met-or-not bullets with stable `AC` ids, validations with their violation outcome, no technology, per-story exclusions and dependencies) is the product rule file `backlog-stories.md`, not a list here. Read the project's copy in `.claude/rules/product/`, or the plugin's in `product/skills/rules/` when the project has not installed them (`/product:rules` does). Where they and this skill disagree, the rule files win.

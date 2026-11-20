@@ -15,7 +15,7 @@ Overlap/completeness checking **is** conflict detection. That's the whole reason
 
 ## Contract with the KB
 
-Per `business-analysis/skills/ba-project-memory`: **read first** (`INDEX.md` + the existing `decisions/<point>.md` — new rules join the existing merged table; a second table for the same decision point is the anti-pattern), **update after** (decision file + INDEX + active-context).
+Per `product/skills/ba-project-memory`: **read first** (`INDEX.md` + the existing `decisions/<point>.md` — new rules join the existing merged table; a second table for the same decision point is the anti-pattern), **update after** (decision file + INDEX + active-context).
 
 ## Hit policies (DMN semantics, markdown form — declare one per table)
 
@@ -34,7 +34,7 @@ Author toward **U**; when to escalate to F, P or C, and what an undecided policy
 ## Procedure
 
 1. **Name the decision point** and its output(s) ("order shipping cost: money"). One table = one question.
-2. **Collect every contributing rule from every feature** — the KB's existing table plus the new feature's requirements. Tag each rule row with its owning feature (an `E<n>`/`AREA-` id with a label, per `dev:knowledge-base`) + source (`US<n> AC<k>`, BRD section).
+2. **Collect every contributing rule from every feature** — the KB's existing table plus the new feature's requirements. Tag each rule row with its owning feature (an `E<n>`/`AREA-` id with a label, per `product:knowledge-base`) + source (`US<n> AC<k>`, BRD section).
 3. **Enumerate the inputs** and their value ranges/partitions. Inputs must be glossary-checked (two features using "total" differently — pre- vs post-discount — is terminology drift that fakes agreement).
 4. **Build the merged table**; declare the hit policy.
 5. **Run the completeness check**: sweep the input-combination space (collapse with `-` don't-cares); every combination matching no rule → a **gap** finding with the concrete combination as its boundary condition.
@@ -47,8 +47,8 @@ Author toward **U**; when to escalate to F, P or C, and what an undecided policy
 # Decision — Order shipping cost (DEC-002)
 
 **Created:** <YYYY-MM-DD>
-**Owned by:** `business-analysis:decision-table`
-**Last updated:** <YYYY-MM-DD> by `business-analysis:decision-table` — <one line what changed>
+**Owned by:** `product:decision-table`
+**Last updated:** <YYYY-MM-DD> by `product:decision-table` — <one line what changed>
 
 **Question**: what shipping does an order pay? **Output**: money
 **Hit policy**: F (business decided: free-shipping beats flat-rate — BRD §5.1)
@@ -77,7 +77,7 @@ Author toward **U**; when to escalate to F, P or C, and what an undecided policy
 
 ## Standards
 
-The quality bar is the business-analysis rule files, not a list here: `business-model-decisions.md` (one merged table per decision point, a sourced hit policy or `[TBD]` plus a finding, owner and source per row, glossary-checked inputs, both checks recorded) plus the core `business-model.md`. Read the project's copy in `.claude/rules/business-analysis/`, or the plugin's in `business-analysis/skills/rules/` when the project has not installed them (`/business-analysis:rules` does). Where they and this skill disagree, the rule files win.
+The quality bar is the product rule files, not a list here: `business-model-decisions.md` (one merged table per decision point, a sourced hit policy or `[TBD]` plus a finding, owner and source per row, glossary-checked inputs, both checks recorded) plus the core `business-model.md`. Read the project's copy in `.claude/rules/product/`, or the plugin's in `product/skills/rules/` when the project has not installed them (`/product:rules` does). Where they and this skill disagree, the rule files win.
 
 ## Anti-example
 

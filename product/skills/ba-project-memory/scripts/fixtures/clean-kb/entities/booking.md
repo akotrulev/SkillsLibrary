@@ -1,7 +1,7 @@
 # Entity — Booking (ENT-001)
 
 **Created:** 2026-08-02
-**Owned by:** `business-analysis:state-grid`
+**Owned by:** `product:state-grid`
 
 **Sources**: US3, US4, US7 · **Features touching this lifecycle**: AREA-002 scheduling, AREA-003 bookings
 

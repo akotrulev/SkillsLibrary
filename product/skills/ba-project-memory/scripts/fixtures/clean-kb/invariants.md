@@ -1,7 +1,7 @@
 # Invariants
 
 **Created:** 2026-08-02
-**Owned by:** `business-analysis:dependency-map`
+**Owned by:** `product:dependency-map`
 
 | ID | Invariant | Fields | Threatened by | Enforced | Source |
 |---|---|---|---|---|---|

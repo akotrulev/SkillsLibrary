@@ -9,7 +9,7 @@
 The last section of the plan document, and the reason the document is queueable whole. It answers one
 question — **what do I paste into a fresh session** — and it answers it as something runnable rather
 than something to read. It lives **inside** the plan (`docs/plans/<NNN>-<initiative>/delivery-plan.md`,
-or the single-file plan an `dev:plan-feature` run produced). There is no `NEXT-PROMPTS.md`.
+or the single-file plan an `product:plan-feature` run produced). There is no `NEXT-PROMPTS.md`.
 
 **One block per task that has not landed.** No fewer: a task with no block is a session nobody knows
 they can open. No more: **a landed task's block is deleted**, because a prompt for finished work is a
@@ -43,7 +43,7 @@ they disagree, the `As built` notes are right.
 `````markdown
 ## Close-out — every task
 
-<copied verbatim from engineering-practices/writing-plans/references/plan-format.md §7 — never edited per plan>
+<copied verbatim from product/skills/writing-plans/references/plan-format.md §7 — never edited per plan>
 
 ## Prompts — one per task
 
@@ -319,13 +319,13 @@ Close out per the plan's "Close-out — every task" before you stop.
 
 ---
 
-### DOC1 — <title: the documentation for <areas | features>> (<be-documenter | be-feature-documenter>, docs)
+### DOC1 — <title: the documentation for <areas | features>> (<documenter | feature-documenter>, docs)
 
 ````
 Depends on: <the gate task's id; ids only>
-Agent: <be-documenter | be-feature-documenter> · Stack: docs
+Agent: <documenter | feature-documenter> · Stack: docs
 
-You are `<be-documenter | be-feature-documenter>`. Task DOC1 of
+You are `<documenter | feature-documenter>`. Task DOC1 of
 docs/plans/<NNN>-<initiative>/delivery-plan.md, the plan's last task: update the documentation to
 describe what this plan landed, from the code.
 
@@ -421,7 +421,7 @@ updates the documentation from the merged code and files the plan.
 | 3 | B1 | `E1` | `US3` | `be` | `timetable-api` | `be-dotnet` | ~112k | C1 | — |
 | 4 | B2 | `E3` | `US9` | `be` | `profile` | `be-dotnet` | ~95k | C1 | — |
 | 5 | F4 | `E1` | `US3` | `fe` | `timetable-ui` | `fe-react` | ~150k | B1, B2 | — |
-| 6 | DOC1 | — | — | `docs` | `docs` | `be-documenter` | ~110k | F4 | — |
+| 6 | DOC1 | — | — | `docs` | `docs` | `documenter` | ~110k | F4 | — |
 
 **H1 and C1 have landed, and their prompts are deleted.** B1, B2, F4 and DOC1 are live.
 

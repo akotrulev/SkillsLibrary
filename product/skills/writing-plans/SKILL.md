@@ -17,7 +17,7 @@ An approved spec, design or set of requirements that must become an ordered list
 ## When NOT to use
 
 - The design itself, with the *how* still open: `feature` (brainstorming) writes the spec this skill plans from.
-- A whole initiative's task list from stories: `/dev:plan-system` (`solution-planner`).
+- A whole initiative's task list from stories: `/product:plan-system` (`solution-planner`).
 
 ## The format is a contract
 
@@ -25,8 +25,8 @@ An approved spec, design or set of requirements that must become an ordered list
 [`./references/plan-format.md`](./references/plan-format.md): the header, the numbered sections, the
 task block's fields, the gate rule, the `## Prompts — one per task` section and the close-out. This
 skill is the procedure; that file is the shape. Do not improvise either. The standards a plan must
-meet are the dev rule file `plans.md` (the project's copy in `.claude/rules/dev/`, or the plugin's in
-`engineering-practices/rules/` before `/dev:rules` has installed it); where the project's `CLAUDE.md`
+meet are the product rule file `plans.md` (the project's copy in `.claude/rules/product/`, or the plugin's in
+`product/skills/rules/` before `/product:rules` has installed it); where the project's `CLAUDE.md`
 states its own plan rules, those win, and where this skill and the rule file disagree, the rule file wins.
 
 **Three properties of that format drive everything below:**

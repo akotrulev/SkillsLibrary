@@ -473,7 +473,7 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/obs
 ---
 
 ## V — Comments & KISS
-*Owning skills: [`engineering-practices/code-comments`](../../../../../engineering-practices/code-comments/SKILL.md) · CLAUDE.md § Comments and § Simplicity (KISS)*
+*Owning skills: [`engineering/code-comments`](../../../../../engineering/code-comments/SKILL.md) · CLAUDE.md § Comments and § Simplicity (KISS)*
 
 | # | Check | Violation looks like | Find it with | Sev |
 |---|---|---|---|---|
@@ -539,7 +539,7 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/in-
 | S | Dev-side tests | S1–S16 | `unit-testing` |
 | T | Release & signing | fragment | `mobile/_shared/release` |
 | U | Observability & logging | fragment | `mobile/_shared/observability` |
-| V | Comments & KISS | V1–V8 | `engineering-practices/code-comments`, CLAUDE.md § Simplicity |
+| V | Comments & KISS | V1–V8 | `engineering/code-comments`, CLAUDE.md § Simplicity |
 | W | Kotlin Multiplatform | W1–W11 | `kotlin-multiplatform` — N/A unless KMP modules exist |
 | X | In-app purchases | fragment | `mobile/_shared/in-app-purchases` |
 

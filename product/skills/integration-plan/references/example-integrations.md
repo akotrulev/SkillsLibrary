@@ -1,12 +1,12 @@
 # Golden example — `integrations.md`
 
-The filled example for `dev:plan-integrations`, from the **workshop-booking** toy initiative shared by all five planner examples. **Shapes and disciplines are normative; domain content is illustrative.** A real artifact writes a full block per dependency — this example writes SendGrid in full (the degraded-mode one, where the interesting policy lives) and abbreviates Auth0, saying so.
+The filled example for `product:plan-integrations`, from the **workshop-booking** toy initiative shared by all five planner examples. **Shapes and disciplines are normative; domain content is illustrative.** A real artifact writes a full block per dependency — this example writes SendGrid in full (the degraded-mode one, where the interesting policy lives) and abbreviates Auth0, saying so.
 
 ---
 
 # Workshop Booking — Integration Plan
 
-**Date:** 2026-08-02 · **Written by:** `dev:plan-integrations`
+**Date:** 2026-08-02 · **Written by:** `product:plan-integrations`
 **Blueprint:** `./blueprint.md` · **API surface:** `./api-surface.md`
 
 ## 1. Dependency register

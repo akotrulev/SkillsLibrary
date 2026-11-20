@@ -18,7 +18,7 @@ This is **read-only analysis** on product code. The audit points; owners fix. Th
 | Work | The three inventories → findings | Re-trace each finding + sweep its defect family |
 | Output | `…-audit-r1.md` | `…-audit-r<N>.md` — every finding prefixed **Resolved** / **Still open**, every surface closed with a rollup |
 
-Where `dev:audit-spec` persists a requirement register, this skill's **report is its own register**: the surface letters, finding IDs, and defect families are the stable spine every later round reuses. That is why the report is saved to a file, not just narrated.
+Where `engineering:audit-spec` persists a requirement register, this skill's **report is its own register**: the surface letters, finding IDs, and defect families are the stable spine every later round reuses. That is why the report is saved to a file, not just narrated.
 
 State the mode and the feature in the first line of output.
 
@@ -42,7 +42,7 @@ This skill is the **FEATURE lane** of the `code-auditor` agent, and carries both
 
 ## When NOT to use
 
-- A spec exists and the ask is "does the code meet it" → `dev:audit-spec`
+- A spec exists and the ask is "does the code meet it" → `engineering:audit-spec`
 - The ask is really "find security vulnerabilities" → `qa-security` agent (this audit *inventories* authz gates; it doesn't attack them)
 - The ask is whole-codebase health, not one feature → decompose first; audit one area at a time
 - The user wants the findings fixed → the owning `be-*`/`fe-*` agent; never edit product code here
@@ -53,7 +53,7 @@ Evidence is **read code** by default; running builds/tests or probing a live app
 
 ## Evidence rules
 
-The evidence, id and round standards every report must meet are the dev rule file `audits.md`, shared with `dev:audit-spec`, not a list here. Read the project's copy in `.claude/rules/dev/`, or the plugin's in `engineering-practices/rules/` when the project has not installed them (`/dev:rules` does). Where it and this skill disagree, the rule file wins. A grep hit is a lead, not evidence; a negative claim ("X is never validated") names the search performed.
+The evidence, id and round standards every report must meet are the engineering rule file `audits.md`, shared with `engineering:audit-spec`, not a list here. Read the project's copy in `.claude/rules/engineering/`, or the plugin's in `engineering/rules/` when the project has not installed them (`/engineering:rules` does). Where it and this skill disagree, the rule file wins. A grep hit is a lead, not evidence; a negative claim ("X is never validated") names the search performed.
 
 ## Inputs needed
 
@@ -121,7 +121,7 @@ Done when the Summary, every surface summary, the Priority table with its three 
 # AUDIT — <feature>: <sub-areas covered> — Round 1
 
 **Date:** <YYYY-MM-DD>  **Scope:** <in / out, named>  **Evidence mode:** static | static + <commands run>
-**Written by:** `dev:audit-feature` (via `code-auditor`)
+**Written by:** `engineering:audit-feature` (via `code-auditor`)
 **Question driving the audit:** <the driving question, verbatim>
 
 ## Summary

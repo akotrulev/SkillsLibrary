@@ -3,11 +3,11 @@ paths:
   - "docs/plans/**/stories.md"
 ---
 
-<!-- business-analysis rules v5 (2026-11-20): stories. Installed by /business-analysis:rules; edit to fit this project. -->
+<!-- product rules v5 (2026-11-20): stories. Installed by /product:rules; edit to fit this project. -->
 
 # Story standards
 
-For `docs/plans/**/stories.md` and the `dev:story-review` checklist. Severity: **blocker** cannot proceed, **major** will hurt soon, **minor** format, **nit** preference. Recipe: `dev:stories`, loaded by the `requirements-author` agent.
+For `docs/plans/**/stories.md` and the `product:story-review` checklist. Severity: **blocker** cannot proceed, **major** will hurt soon, **minor** format, **nit** preference. Recipe: `product:stories`, loaded by the `requirements-author` agent.
 
 - Each story is `## US<n> — <the feature's name>` with `**Epic:** E<n>`. Ids run flat across the initiative and are never renumbered; a dropped story keeps its id with the reason. *blocker*
 - A story is one whole feature a person would name, with one goal. Two goals are two stories; a part useless without another is merged into its feature; a layer or a technical task is no story. *major*

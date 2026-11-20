@@ -1,15 +1,15 @@
 # doc-business-model evals
 
-Regression evals for `dev:doc-business-model`, run through `be-feature-documenter` (evals 1, 4, 5, 6) and `be-documenter` (eval 2 in FULL mode, eval 3 as a plan-writing run).
+Regression evals for `product:doc-business-model`, run through `feature-documenter` (evals 1, 4, 5, 6) and `documenter` (eval 2 in FULL mode, eval 3 as a plan-writing run).
 
 | # | Agent and run | Protects against |
 |---|---|---|
-| 1 | `be-feature-documenter`, screenshots waived | A feature guide that is not the contract's shape, takes facts from a golden, or cannot be understood by its three readers |
-| 2 | `be-documenter`, FULL, one area, scope and split pre-confirmed, screenshots waived | The same for an area guide, plus the overview, `INDEX.md` and the KB models |
-| 3 | `be-documenter`, FULL, two sessions confirmed | A documentation plan that is not runnable, or that documents anything in the survey session |
-| 4 | `be-feature-documenter`, no environment and no waiver | Blocking on screenshots, a guide without `pending`, an image invented without a screen, the app being started |
-| 5 | `be-feature-documenter` as `DOC1` of a delivery plan with stories | A purpose not taken from a story, a story the code does not do written up as built, a missing or wrong delivery note, a plan left unfiled |
-| 6 | `be-feature-documenter`, a guide with two answered questions | An answer folded wrongly (or not at all), an answer the code contradicts silently accepted, a guide rewritten instead of updated |
+| 1 | `feature-documenter`, screenshots waived | A feature guide that is not the contract's shape, takes facts from a golden, or cannot be understood by its three readers |
+| 2 | `documenter`, FULL, one area, scope and split pre-confirmed, screenshots waived | The same for an area guide, plus the overview, `INDEX.md` and the KB models |
+| 3 | `documenter`, FULL, two sessions confirmed | A documentation plan that is not runnable, or that documents anything in the survey session |
+| 4 | `feature-documenter`, no environment and no waiver | Blocking on screenshots, a guide without `pending`, an image invented without a screen, the app being started |
+| 5 | `feature-documenter` as `DOC1` of a delivery plan with stories | A purpose not taken from a story, a story the code does not do written up as built, a missing or wrong delivery note, a plan left unfiled |
+| 6 | `feature-documenter`, a guide with two answered questions | An answer folded wrongly (or not at all), an answer the code contradicts silently accepted, a guide rewritten instead of updated |
 
 The fixture is an API with no runnable screens, so evals 1, 2 and 6 waive the screenshots in their prompts (6 already carries the waiver in the guide); the screenshot rules themselves are covered by the lint's unit tests and the golden example.
 
@@ -31,7 +31,7 @@ This README sits outside the fixtures, so the agent under test never sees it.
 - **Golden-copy detectors.** The expectations prefixed `Golden-copy check:` hold only for a guide traced from the fixture and fail for one copied from the golden: fixed tier costs, no way to set a personal overage rate, the Plus plan, no way for staff to cancel one member's booking, and a refusal text with no full stop.
 - **Comprehension (evals 1, 2 and the delivery note in 5).** Eight questions the three readers would ask, each with the one correct answer the fixture's code fixes: a Basic member out of credits books a Masterclass (£18.00, charged on the 1st); a Plus member's Workshop (1 credit, £5.00); a cancellation 20 hours ahead; one exactly 24 hours ahead; staff cancelling a session; who changes the overage rate, where, and from when; unused credits at month end; what a member sees on the 1st. The fixture file and line that fix each answer are in the expectation's grader note, never in the question. Beside them: no term the guide leaves unexplained (the grader lists any), the `In short` bullets alone tell a product owner the rules with their numbers, and every numeric rule a task states is a row of `Rules and limits`.
 - Eval 2 only: `system-overview.md` exists without retired siblings and has the overview's shape, `INDEX.md` has the credits line in its shape, the KB models carry `file:line` evidence tiered `#observed` / `#inferred`, and one comprehension question is answered from the overview alone.
-- Eval 3 only: one plan in `docs/plans/` in the library's plan format (`engineering-practices/writing-plans/references/plan-format.md`, shaped by `backend/_shared/codebase-survey/references/documentation-plan.md`) — tasks A1, A2 and K1 in sequence, machine-readable prompt headings and first lines, the close-out section, the screens line (ask once, never block) — no area documented in the survey session, and the environment named but never its address or logins.
+- Eval 3 only: one plan in `docs/plans/` in the library's plan format (`product/skills/writing-plans/references/plan-format.md`, shaped by `product/skills/codebase-survey/references/documentation-plan.md`) — tasks A1, A2 and K1 in sequence, machine-readable prompt headings and first lines, the close-out section, the screens line (ask once, never block) — no area documented in the survey session, and the environment named but never its address or logins.
 - Eval 4 only: the agent asks once for the environment and logins and does not stop; the guide is written in full with `**Screenshots:** pending —`, no image; the lint's only finding is `screenshots-pending`; the report says what the capture pass needs; the app is never built or started.
 - Eval 5 only: the stories are read as the source of purpose (the cut-off's purpose is stated, no open question asks it, `stories:` in the stamp, no story id in the body); the delivery note is at `docs/deliveries/001-session-credits.md` in the contract's shape, its `New` rows link real guide tasks, and `Not delivered` holds exactly the three planted differences — **US3 AC12** (personal rate: nothing sets it), **US4 AC14** (built differently: charged on the 1st, not the last day) and **US4 AC16** (roll-over: credits are lost) — while the plan's own B2 `As built` line overstates ("US3 and US4 covered"), so a run that trusts it fails; the close-out is done as the plan format says (As built, Status, prompt deleted, whole folder moved to `implemented/`, two commits).
 - Eval 6 only: Q1 (answer agrees with the code) is folded into the body as one sentence and its row removed, its id never reused; Q2 (answer the code contradicts) stays with its answer and the report escalates both readings; the guide is updated in place (same file, same `**Created:**`, `**Last updated:**` added, the stamp's sha is the run's HEAD); `Answers folded: 1`.
@@ -41,24 +41,24 @@ This README sits outside the fixtures, so the agent under test never sees it.
 ## How to run
 
 ```bash
-E=<library>/backend/_shared/business-documentation/evals
+E=<library>/product/skills/business-documentation/evals
 W=$(mktemp -d) && cp -R "$E/fixture/." "$W" && cd "$W"
 git init -q && git add -A && git commit -qm "fixture"
 ```
 
-Each eval starts from a fresh `$W`. Open Claude Code in `$W` with the plugins enabled — evals 1, 4, 5, 6: `dev` and `be-dotnet`; eval 2: `dev`, `be-dotnet` and `business-analysis` (`be-documenter` uses its knowledge-base skills); eval 3: as eval 2 — then:
+Each eval starts from a fresh `$W`. Open Claude Code in `$W` with the plugins enabled — evals 1, 4, 5, 6: `engineering`, `product` and `be-dotnet`; eval 2: the same three (`documenter` and its knowledge-base skills are in `product`); eval 3: as eval 2 — then:
 
-- eval 1: `/dev:document-feature` with the eval 1 prompt from `evals.json` (it carries the screenshot waiver)
-- eval 2: `/dev:document-system` with the eval 2 prompt (scope and split pre-confirmed, so the survey gate does not stop)
-- eval 3: `/dev:document-system` with the eval 3 prompt; it ends at the written plan — do not run the plan's prompts
-- eval 4: `/dev:document-feature` with the eval 4 prompt (no waiver); it asks once and writes the guide with the screenshots pending
-- eval 5: first add the overlay, then run `DOC1` as the `be-feature-documenter` agent, the way Plan Queue would, with the eval 5 prompt:
+- eval 1: `/product:document-feature` with the eval 1 prompt from `evals.json` (it carries the screenshot waiver)
+- eval 2: `/product:document-system` with the eval 2 prompt (scope and split pre-confirmed, so the survey gate does not stop)
+- eval 3: `/product:document-system` with the eval 3 prompt; it ends at the written plan — do not run the plan's prompts
+- eval 4: `/product:document-feature` with the eval 4 prompt (no waiver); it asks once and writes the guide with the screenshots pending
+- eval 5: first add the overlay, then run `DOC1` as the `feature-documenter` agent, the way Plan Queue would, with the eval 5 prompt:
 
   ```bash
   cp -R "$E/fixture-delivery/." . && git add -A && git commit -qm "plan and stories"
   ```
 
-- eval 6: first add the overlay; its stamp carries a placeholder sha, which is replaced by the fixture commit so the guide looks like one written on it. Then `/dev:document-feature` with the eval 6 prompt:
+- eval 6: first add the overlay; its stamp carries a placeholder sha, which is replaced by the fixture commit so the guide looks like one written on it. Then `/product:document-feature` with the eval 6 prompt:
 
   ```bash
   SHA=$(git rev-parse --short HEAD)
@@ -69,10 +69,10 @@ Each eval starts from a fresh `$W`. Open Claude Code in `$W` with the plugins en
 Then lint and check each expectation by hand or with a grader (comprehension expectations by a grader that sees the guide only):
 
 ```bash
-python3 <library>/backend/_shared/business-documentation/scripts/doc-lint.py --dir docs/features        # evals 1, 4, 5, 6
-python3 <library>/backend/_shared/business-documentation/scripts/doc-lint.py --dir docs/business-model  # eval 2
-python3 <library>/backend/_shared/business-documentation/scripts/doc-lint.py --dir docs/deliveries      # eval 5
-python3 <library>/backend/_shared/business-documentation/scripts/doc-lint.py --kept-from "$SHA" --dir docs/features   # eval 6
+python3 <library>/product/skills/business-documentation/scripts/doc-lint.py --dir docs/features        # evals 1, 4, 5, 6
+python3 <library>/product/skills/business-documentation/scripts/doc-lint.py --dir docs/business-model  # eval 2
+python3 <library>/product/skills/business-documentation/scripts/doc-lint.py --dir docs/deliveries      # eval 5
+python3 <library>/product/skills/business-documentation/scripts/doc-lint.py --kept-from "$SHA" --dir docs/features   # eval 6
 ```
 
 Eval 3 has nothing to lint: read `docs/plans/*.md` and the agent's reply against its expectations. In eval 4 the only finding must be the `screenshots-pending` WARN; in eval 5 the same for `docs/features`.

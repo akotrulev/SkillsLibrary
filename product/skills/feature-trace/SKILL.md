@@ -6,20 +6,20 @@ disable-model-invocation: true
 
 # Feature Trace — recovering behavior from code
 
-One area at a time, in depth. The output is **structured evidence**, not prose: ten inventories, every item with its `file:line`, for `dev:doc-business-model` to turn into a user guide and for the KB models. The guide needs tasks and actors, rules (each with the task a person meets it in), formulas, the client's words and refusal texts; the models need the rest. A **profile** says how much of the rest is recorded (*Two profiles*).
+One area at a time, in depth. The output is **structured evidence**, not prose: ten inventories, every item with its `file:line`, for `product:doc-business-model` to turn into a user guide and for the KB models. The guide needs tasks and actors, rules (each with the task a person meets it in), formulas, the client's words and refusal texts; the models need the rest. A **profile** says how much of the rest is recorded (*Two profiles*).
 
 The discipline: **separate what the code does from what you think it means.** Every extracted item is `#observed` with a `file:line` read this session. Intent is a separate, marked layer; where unrecoverable, the output is the behavior plus a question.
 
-**Prerequisite:** a confirmed area from `dev:doc-codebase-survey` or `be-feature-documenter`'s confirmed Step 1 scope table.
+**Prerequisite:** a confirmed area from `product:doc-codebase-survey` or `feature-documenter`'s confirmed Step 1 scope table.
 
 ## Output
 
-Per-area evidence for the documenter's write step (`be-documenter` Steps 3–4), never a KB artifact or content of `docs/business-model/`; it stays in the session (or scratchpad) unless it must survive it.
+Per-area evidence for the documenter's write step (`documenter` Steps 3–4), never a KB artifact or content of `docs/business-model/`; it stays in the session (or scratchpad) unless it must survive it.
 
-**Multi-session runs persist the trace** (`full` profile only; `be-feature-documenter` runs one session). A run that will not reach Write in the same session persists each completed area's inventory to **`docs/business-model/.trace/<area>.md`** — working files, never in `INDEX.md`, each opening:
+**Multi-session runs persist the trace** (`full` profile only; `feature-documenter` runs one session). A run that will not reach Write in the same session persists each completed area's inventory to **`docs/business-model/.trace/<area>.md`** — working files, never in `INDEX.md`, each opening:
 
 ```markdown
-**Working trace by `be-documenter` @ <commit> on <date> — not a KB artifact**
+**Working trace by `documenter` @ <commit> on <date> — not a KB artifact**
 ```
 
 On resume a persisted trace is a **lead, not evidence**: spot-check three citations at the current commit; if code moved or a check fails, re-trace. Step 5 (Consolidate) deletes `.trace/` once every write-up cites its evidence; a leftover one means a run ended before consolidation.
@@ -61,7 +61,7 @@ For **every** entry point, walk this path in order, in both profiles — each st
 
 ## Two profiles
 
-The caller names the profile: `be-documenter` runs `full` (the KB models need every column); `be-feature-documenter` runs `guide` (no models to feed). None named: `full`. **`file:line` stays on every item in both.** A profile is independent of **depth** (`full` / `shallow`, how far calls are followed); the inventory reference says how each inventory reduces under **`guide`**.
+The caller names the profile: `documenter` runs `full` (the KB models need every column); `feature-documenter` runs `guide` (no models to feed). None named: `full`. **`file:line` stays on every item in both.** A profile is independent of **depth** (`full` / `shallow`, how far calls are followed); the inventory reference says how each inventory reduces under **`guide`**.
 
 | Inventory | `full` | `guide` |
 |---|---|---|
