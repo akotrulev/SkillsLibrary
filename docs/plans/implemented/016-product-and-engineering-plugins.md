@@ -11,17 +11,16 @@ The `be-documenter` and `be-feature-documenter` agents drop their `be-` prefix. 
 library moves to the new paths and names. A project switches over through the migration section that
 M3 writes.
 
-**Status:** Written 2026-11-20 from the owner's interview (`## Answered questions (2026-11-20)`).
-M1, M2 and M3 are built (2026-11-20): `product/` and `engineering/` hold the moved tree, the manifest
-registers both, every path and name uses the new ones, and the catalog, `README.md` (with the switch
-section), `CONTRIBUTING.md`, `CLAUDE.md` and the owner's `~/.claude/CLAUDE.md` describe them. Built but
-unverified: Claude Code loading the two new plugins (needs a restart), and any project switched over.
-- **Starts after 015 merges into `master`.** 015 edits many of the files this plan moves. Running both
-  at once would turn every 015 edit into a conflict on a moved path (D6).
-- **Next:** G1.
+**Status:** Delivered 2026-11-20. `product/` and `engineering/` hold the moved tree, the manifest
+registers both (`product` 26 skills, `engineering` 8) and no `dev` or `business-analysis`, every path and
+name uses the new ones, and the catalog, `README.md` (with the switch section), `CONTRIBUTING.md`,
+`CLAUDE.md` and the owner's `~/.claude/CLAUDE.md` describe them. G1 ran §5 on the tree and it was green.
+- **Built but unverified:** no session has loaded `engineering` or `product`. The user restarts, types
+  `/product:refine` and `/engineering:audit`, and runs `product:rules` in one project. No project has
+  been switched over yet (README, "Switching from `dev` and `business-analysis`").
 - **Known conflict:** branch `plan-queue/010-agents-md-dual-harness-b58e49` has 2 commits touching 2
   files this plan moves. Whichever of 010 and 016 merges second resolves them against the new paths.
-- **Metered:** about 4 sessions of subscription usage. The user starts the queue.
+- **Follow-up:** none found outside §5.
 
 **Test design:** none. The plan serves no stories and changes skill text, manifests and two lint
 scripts. The checks are `tools/plugin-surface-check.py`, `tools/skill-lint.py`, `tools/token-audit.py`
@@ -530,6 +529,21 @@ order):** the commands in §5.
   project.
 - **Not in G1:** new restructuring. A finding outside §5 goes into Status as a follow-up.
 
+- **As built (2026-11-20):**
+  - Nothing differed from the plan. §5 ran once and was green, so no fix and no second run was needed.
+    `plugin-surface-check` → `OK`; `skill-lint | tail -1` → `0 findings` (baseline `0 findings`);
+    `token-audit --violations-only` exit 0, 0 description and 0 file-budget violations;
+    `pytest tools/test_skill_lint.py -q` → `95 passed` (`.pytest_cache` deleted after); `qa-version-check` →
+    `OK`; both greps printed nothing under `bash`; the marketplace assertion printed `OK`.
+  - `product/skills/rules/SKILL.md` lists 11 files and `engineering/rules/SKILL.md` names `audits.md`. Each
+    row's file sits beside its skill, and each row's `paths:` equals the file's own frontmatter.
+  - Manifest: `product` 26 skills, 5 agents, 5 commands, depends on `engineering`; `engineering` 8 skills,
+    1 agent, 1 command, no dependencies (D10).
+  - Merge of `master`: `git log HEAD..master` is empty, because `master` has not moved since 015 merged
+    (`bf98124c`), so there was nothing to merge and no old path to rewrite.
+  - Not committed by this session: the Plan Queue commits the work. Built but unverified: Claude Code
+    loading `engineering` and `product`, and no project switched over.
+
 ## Close-out — every task
 
 Before you stop, in this order, in this file. Another task may be running in this working tree:
@@ -583,46 +597,4 @@ session that runs the task.
 | G1 | `docs` | `general-purpose` | M3 | — | ~90k |
 | — | restart, try `/product:refine`, switch projects per README | **the user** | G1 | — | — |
 
-M1, M2 and M3 have landed. G1 is live.
-
----
-
-### G1 — The whole sweep, and filing the plan (general-purpose, docs)
-
-````
-Depends on: M3
-Agent: general-purpose · Stack: docs
-
-Task G1 of docs/plans/016-product-and-engineering-plugins.md. The goal: every command in §5 passes on
-the merged tree, and the plan is filed.
-
-Read, in this order:
-1. CLAUDE.md: "Planning".
-2. The plan: §3, §5, every As built note, task G1, and "Close-out — every task".
-
-Do:
-- Run §5 once. Fix each failure at the narrowest file, rerun only what failed, then run §5 once more.
-- Read product/skills/rules/SKILL.md and engineering/rules/SKILL.md against §3. Each table row must name
-  a file beside the skill.
-- Merge `master` into the plan's branch (close-out step 6). Where a plan merged since M1 wrote an old
-  path or name, rewrite it per §2–§3 and run §5 again.
-
-Traps:
-- No new restructuring. A finding outside §5 goes into Status as a follow-up.
-- Run §5's greps under `bash` (`bash -c '…'`): in `zsh` the unquoted `$X` is not split and the exclusions
-  do nothing. Delete `.pytest_cache` after the pytest run, because the greps read the whole tree.
-- `qa/manual/agents/qa-test-planner.md` and `qa-test-case-designer.md` sit at 13,971 and 13,988 of the
-  14,000-character agent budget: an edit there must be neutral in length.
-- The plan file itself names the old paths on purpose. §5's greps exclude it. The README's switch section
-  names the `dev` and `business-analysis` plugins on purpose, worded so §5's greps pass (D11): leave it.
-- `product` registers 26 skills (D10), not the 25 in M1's As built.
-- Status names as unverified that no session has loaded `engineering` or `product`. The user restarts,
-  types `/product:refine` and `/engineering:audit`, and runs `product:rules` in one project.
-
-Gate (this is the last runnable task, so it runs the whole set once more across the plan, in order):
-  the commands in §5.
-
-Commit: `chore: 016 G1 — the sweep`.
-Close out per the plan's "Close-out — every task" before you stop. Your prompt is the last, so close-out
-step 8 files the plan.
-````
+M1, M2, M3 and G1 have landed. No prompt block is left.
