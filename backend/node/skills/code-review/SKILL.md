@@ -1,6 +1,7 @@
 ---
 name: conventions-review
 description: Use when reviewing Node/TypeScript backend code for type-safety leaks, async bugs or missing runtime validation. Triggers "review this TS service". Not for explanations (patterns).
+disable-model-invocation: true
 ---
 
 # Node / TypeScript backend — Reviewer

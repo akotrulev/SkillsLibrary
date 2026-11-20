@@ -1,6 +1,7 @@
 ---
 name: auth0
 description: Use when adding Auth0 to a Spring Boot API (JWT validation, @PreAuthorize RBAC, M2M). Triggers "add Auth0 to my Spring Boot API", "validate Auth0 JWTs". Not for Cognito (cognito).
+disable-model-invocation: true
 ---
 
 # Auth — Auth0 in Java 21 / Spring Boot 3

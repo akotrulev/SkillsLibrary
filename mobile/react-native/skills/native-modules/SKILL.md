@@ -1,6 +1,7 @@
 ---
 name: native-modules
 description: Use when an Expo/React Native app needs native code (Expo Modules API in Swift/Kotlin, TurboModules, config plugins). Triggers "write a Swift module". Not for camera or location (device-features).
+disable-model-invocation: true
 ---
 
 # React Native — Native Modules

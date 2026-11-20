@@ -1,6 +1,7 @@
 ---
 name: interop
-description: Use when C# desktop code crosses a boundary: CsWinRT, HWND, COM, P/Invoke via LibraryImport, XAML Islands, WinUI in WPF/WinForms. Triggers "call a Win32 API". Not for the C++ lane (cpp-winrt).
+description: Use when C# desktop code crosses a boundary (CsWinRT, HWND, COM, P/Invoke via LibraryImport, XAML Islands, WinUI in WPF/WinForms). Triggers "call a Win32 API". Not for the C++ lane (cpp-winrt).
+disable-model-invocation: true
 ---
 
 # Windows — Interop

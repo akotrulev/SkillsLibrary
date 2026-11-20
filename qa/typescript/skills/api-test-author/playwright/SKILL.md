@@ -1,6 +1,7 @@
 ---
 name: api-tests-playwright
 description: Use when writing TypeScript API tests via Playwright's APIRequestContext, when the suite already runs Playwright. Triggers "write API tests with Playwright". Not for plain API suites (api-tests).
+disable-model-invocation: true
 ---
 
 # QA — API Test Writer (TypeScript / Playwright 1.64 + APIRequestContext + Zod)

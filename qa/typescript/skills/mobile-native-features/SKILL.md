@@ -1,6 +1,7 @@
 ---
 name: mobile-native-features
 description: Use when WebdriverIO Appium tests must cover OS features (permissions, push, deep links, biometrics). Triggers "test our deep link", "test Face ID login". Not for plain screen flows (ui-tests-appium).
+disable-model-invocation: true
 ---
 
 # QA — Mobile Native Features (TypeScript: WebdriverIO 10 + Appium 3)

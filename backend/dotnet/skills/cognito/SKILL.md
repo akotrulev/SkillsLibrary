@@ -1,6 +1,7 @@
 ---
 name: cognito
 description: Use when adding AWS Cognito to an ASP.NET Core API (access-token JWTs, scopes, groups, M2M). Triggers "add Cognito to my ASP.NET Core API". Not for Auth0 (auth0).
+disable-model-invocation: true
 ---
 
 # Auth — AWS Cognito in ASP.NET Core (.NET 10 primary / 8-9 supported)

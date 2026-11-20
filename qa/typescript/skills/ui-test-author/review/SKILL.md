@@ -1,6 +1,7 @@
 ---
 name: ui-tests-review
 description: Use when reviewing existing TypeScript UI test code or page objects (Playwright, Selenium, Appium). Triggers "review this Playwright spec". Not for writing new tests (ui-tests-playwright).
+disable-model-invocation: true
 ---
 
 # QA — UI Test & Page Object Reviewer (TypeScript)

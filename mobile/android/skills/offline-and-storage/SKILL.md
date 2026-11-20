@@ -1,6 +1,7 @@
 ---
 name: offline-and-storage
 description: Use when an Android app must persist data (Room, DataStore, Keystore secrets, WorkManager sync, offline-first). Triggers "where do I store this". Not for fetch mechanics (networking).
+disable-model-invocation: true
 ---
 
 # Android — Offline and Storage

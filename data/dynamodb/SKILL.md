@@ -1,6 +1,7 @@
 ---
 name: dynamodb
 description: Use when designing, securing or tuning Amazon DynamoDB (access patterns, single-table design, GSIs, capacity). Triggers "design a DynamoDB table", "set up a GSI". Not for Cosmos DB (cosmosdb).
+disable-model-invocation: true
 ---
 
 # Data — DynamoDB

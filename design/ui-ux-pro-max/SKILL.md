@@ -3,6 +3,7 @@ name: corpus
 description: Use when a design decision needs the design corpus (styles, palettes, font pairings, UX guidelines, icons). Triggers "pick a font pairing". Not for the judgment on top (visual-identity).
 metadata:
   version: "2.13.0"
+disable-model-invocation: true
 ---
 
 # UI/UX Pro Max — the design-intelligence corpus

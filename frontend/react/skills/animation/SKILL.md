@@ -1,6 +1,7 @@
 ---
 name: animation
 description: Use when animating a React UI (CSS Modules transitions, reduced motion, scroll reveals, exit animations). Triggers "fade elements in on scroll". Not for motion design (motion).
+disable-model-invocation: true
 ---
 
 # React — Motion

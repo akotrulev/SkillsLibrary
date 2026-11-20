@@ -1,6 +1,7 @@
 ---
 name: charts
 description: Use when designing charts inside a branded product UI (analytics screens) with a viz palette apart from brand and status colors. Triggers "chart colors clash". Not for ops dashboards (dashboards).
+disable-model-invocation: true
 ---
 
 # Data Visualization — chart & dashboard design

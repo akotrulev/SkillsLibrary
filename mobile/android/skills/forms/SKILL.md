@@ -1,6 +1,7 @@
 ---
 name: forms
 description: Use when building or fixing a Jetpack Compose form (validation, keyboard order, autofill, server errors on fields). Triggers "build a sign-up form". Not for the request (networking).
+disable-model-invocation: true
 ---
 
 # Android — Forms

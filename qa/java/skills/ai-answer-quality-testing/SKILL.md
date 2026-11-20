@@ -1,6 +1,7 @@
 ---
 name: ai-answer-quality-testing
 description: Use when testing a RAG feature from a Java/TestNG suite, retrieval apart from generation (RAG triad, Ragas). Triggers "test our RAG pipeline". Not for non-RAG LLM evals (ai-feature-testing).
+disable-model-invocation: true
 ---
 
 # RAG Testing (Java 21 / TestNG — retrieval ⊕ generation, Ragas-spined)

@@ -1,6 +1,7 @@
 ---
 name: conventions-review
 description: Use when reviewing Java/Spring Boot code for pattern misuse, @Transactional, threading or DI anti-patterns. Triggers "review this Spring service". Not for explanations (patterns).
+disable-model-invocation: true
 ---
 
 # Java / Spring Boot — Reviewer

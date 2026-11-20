@@ -1,6 +1,7 @@
 ---
 name: landing-patterns
 description: Use when structuring a marketing or landing page (section order, CTA placement, conversion rules). Triggers "structure the landing page", "where does the CTA go". Not for app IA (app-structure).
+disable-model-invocation: true
 ---
 
 # Landing patterns — the section order a marketing page earns

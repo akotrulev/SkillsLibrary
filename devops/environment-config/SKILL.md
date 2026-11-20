@@ -1,6 +1,7 @@
 ---
 name: environment-config
 description: Use when managing per-environment config and secrets (typed config, Key Vault, Secrets Manager, Vault). Triggers "where do secrets go", "validate config at startup". Not for IaC (iac).
+disable-model-invocation: true
 ---
 
 # DevOps — Environment Configuration & Secrets

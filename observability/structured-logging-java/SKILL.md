@@ -1,6 +1,7 @@
 ---
 name: structured-logging
 description: Use when setting up structured logging in a Java/Spring Boot service with Logback (JSON, correlation IDs, Loki, redaction). Triggers "Logback JSON config". Not for traces or metrics (opentelemetry).
+disable-model-invocation: true
 ---
 
 # Observability — Structured Logging (Java 21 / Spring Boot 3)

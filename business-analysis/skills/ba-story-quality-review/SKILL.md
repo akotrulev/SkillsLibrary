@@ -1,6 +1,7 @@
 ---
 name: story-review
 description: Use when reviewing stories or epics someone else wrote for readiness (whole feature, goal and plan, met-or-not AC, testability). Triggers "review these stories". Not for writing stories (stories).
+disable-model-invocation: true
 ---
 
 # Backlog Reviewer

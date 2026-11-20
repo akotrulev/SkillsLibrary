@@ -1,6 +1,7 @@
 ---
 name: source-audit
 description: Use when running an agent-driven, source-first security audit of a codebase with verified findings. Triggers "security audit this codebase", "white-box review". Not for a CI SAST gate (code-scan).
+disable-model-invocation: true
 ---
 
 # Security Testing — Source Audit

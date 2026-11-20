@@ -1,6 +1,7 @@
 ---
 name: test-reports
 description: Use when setting up Allure reporting for a .NET test suite (NUnit, xUnit, Playwright .NET, Appium). Triggers "set up Allure for our NUnit project". Not for flaky tests (flaky-test-quarantine).
+disable-model-invocation: true
 ---
 
 # QA — Allure Reporting (.NET / NUnit & xUnit)

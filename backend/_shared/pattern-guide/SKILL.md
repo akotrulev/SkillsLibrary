@@ -1,6 +1,7 @@
 ---
 name: pattern-catalog
 description: Use when explaining a design pattern language-agnostically (intent, when to use, trade-offs). Triggers "what is the Strategy pattern", "when to use Repository". Not for stack code (patterns).
+disable-model-invocation: true
 ---
 
 # Design Patterns — Shared Reference (language-agnostic)

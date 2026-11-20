@@ -1,6 +1,7 @@
 ---
 name: forms
-description: Use when building WinUI forms: input controls, ObservableValidator, NumberBox, focus and tab order, server errors on fields. Triggers "add a form". Not for dialogs (ui-components).
+description: Use when building WinUI forms (input controls, ObservableValidator, NumberBox, focus and tab order, server errors on fields). Triggers "add a form". Not for dialogs (ui-components).
+disable-model-invocation: true
 ---
 
 # Windows — Forms and Input

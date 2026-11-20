@@ -1,6 +1,7 @@
 ---
 name: standards-audit
 description: Use when auditing a whole Windows app (WinUI, WPF, WinForms, C++/WinRT) against desktop-windows conventions; read-only report. Triggers "audit our Windows app". Not for one diff (conventions-review).
+disable-model-invocation: true
 ---
 
 # desktop-windows Conformance Audit

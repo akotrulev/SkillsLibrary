@@ -1,6 +1,7 @@
 ---
 name: atomic-simulation
 description: Use when running MITRE ATT&CK techniques (Atomic Red Team, Caldera) in an owned lab to prove detections fire. Triggers "simulate T1003 in our lab". Not for asserting alerts (detection-validation).
+disable-model-invocation: true
 ---
 
 # Purple Team — Atomic Simulation (Atomic Red Team · Apache Caldera · Stratus Red Team)

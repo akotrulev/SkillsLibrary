@@ -1,6 +1,7 @@
 ---
 name: realtime-stream-testing
 description: Use when testing WebSocket or SSE streams in TypeScript with protocol clients or Playwright, asserting frames without sleeps. Triggers "test our WebSocket endpoint". Not for plain HTTP (api-tests).
+disable-model-invocation: true
 ---
 
 # WebSocket & SSE Testing (Node 24 + TypeScript) — **ported from the canonical `qa-dotnet:realtime-stream-testing`**

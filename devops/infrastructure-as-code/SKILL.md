@@ -1,6 +1,7 @@
 ---
 name: iac
 description: Use when authoring Infrastructure as Code in Terraform or Bicep (modules, repo layout). Triggers "Terraform module for X", "should this be Bicep or Terraform". Not for scanning IaC (iac-security).
+disable-model-invocation: true
 ---
 
 # DevOps — Infrastructure as Code (Bicep & Terraform)

@@ -1,6 +1,7 @@
 ---
 name: error-handling
-description: Use when a Windows screen can fail: loading/failed/stale/offline states, InfoBar, unhandled-exception handlers, stowed exceptions. Triggers "show the error". Not for server retry policy (networking).
+description: Use when a Windows screen can fail (loading/failed/stale/offline states, InfoBar, unhandled-exception handlers, stowed exceptions). Triggers "show the error". Not for server retry policy (networking).
+disable-model-invocation: true
 ---
 
 # Windows — Error Resilience

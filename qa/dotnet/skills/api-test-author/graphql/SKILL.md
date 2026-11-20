@@ -1,6 +1,7 @@
 ---
 name: api-tests-graphql
 description: Use when writing black-box GraphQL API tests in .NET (NUnit + HttpClient), asserting the data/errors envelope. Triggers "write a GraphQL test for X". Not for REST (api-tests).
+disable-model-invocation: true
 ---
 
 # QA — GraphQL API Test Writer (.NET 8 / NUnit + HttpClient + System.Text.Json)

@@ -1,6 +1,7 @@
 ---
 name: plan-data-model
 description: Use when an approved blueprint needs its database planned (entities, columns, keys, indexes, migration order). Triggers "what tables do we need". Not for endpoints (plan-api-surface).
+disable-model-invocation: true
 ---
 
 # Data Model Plan — the logical DB structure

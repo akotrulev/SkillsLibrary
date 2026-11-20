@@ -1,6 +1,7 @@
 ---
 name: concepts
 description: Use when explaining React Native + Expo fundamentals (New Architecture, Hermes, threads, web React vs RN). Triggers "RN equivalent of X". Not for reviewing a diff (conventions-review).
+disable-model-invocation: true
 ---
 
 # React Native / Expo — Basics

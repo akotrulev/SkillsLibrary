@@ -1,6 +1,7 @@
 ---
 name: decision-table
 description: Use when merging several features' rules into one DMN-style decision table per decision point, with hit policy and gap checks. Triggers "do these discounts stack". Not for flows (process-flow).
+disable-model-invocation: true
 ---
 
 # BA — Decision Modeler

@@ -1,6 +1,7 @@
 ---
 name: query-tuning
 description: Use when diagnosing a slow query or designing an index on any SQL or document engine (plans, paging, ESR, N+1). Triggers "why is this query slow". Not for caching (caching).
+disable-model-invocation: true
 ---
 
 # Data — Query Optimization (cross-engine)

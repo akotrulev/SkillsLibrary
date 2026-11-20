@@ -1,6 +1,7 @@
 ---
 name: security
 description: Use when iOS, Android or React Native code stores data, handles tokens, opens links or hosts a WebView (MASVS). Triggers "where do tokens live". Not for scanning a built APK/IPA (mobile-app-scan).
+disable-model-invocation: true
 ---
 
 # Mobile — Secure Coding (MASVS 2.1)

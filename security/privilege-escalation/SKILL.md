@@ -1,6 +1,7 @@
 ---
 name: privilege-escalation
 description: Use when elevating a foothold to root or SYSTEM on one host in an authorized pentest (SUID, sudo, kernel, tokens). Triggers "escalate this foothold to root". Not for moving hosts (lateral-movement).
+disable-model-invocation: true
 ---
 
 # Penetration Testing — Privilege Escalation (linPEAS/winPEAS · GTFOBins/LOLBAS · kernel/sudo/SUID chains)

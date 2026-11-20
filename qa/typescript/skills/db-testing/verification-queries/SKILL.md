@@ -1,6 +1,7 @@
 ---
 name: db-verification-queries
 description: Use when writing or reviewing safe verification SQL in TypeScript tests (row exists, COUNT, polling). Triggers "review my test SQL". Not for seeding or cleanup (db-connection).
+disable-model-invocation: true
 ---
 
 # QA — DB Testing Query Author (TypeScript / Node 24)

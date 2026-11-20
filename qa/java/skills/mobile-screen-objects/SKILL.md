@@ -1,6 +1,7 @@
 ---
 name: mobile-screen-objects
 description: Use when creating or updating a Java Appium page object from live-screen elements. Triggers "create a page object for the Login screen". Not for finding elements (mobile-screen-explorer).
+disable-model-invocation: true
 ---
 
 # QA — Appium Page Object Builder (Java)

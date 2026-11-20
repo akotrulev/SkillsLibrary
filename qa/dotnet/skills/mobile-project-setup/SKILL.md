@@ -1,6 +1,7 @@
 ---
 name: mobile-project-setup
 description: Use when starting a mobile test project from zero in .NET (NUnit + Appium 3, pins, emulator). Triggers "scaffold a mobile test project". Not for writing tests (ui-tests-appium).
+disable-model-invocation: true
 ---
 
 # Mobile Test Project Scaffold (C# / .NET 10)

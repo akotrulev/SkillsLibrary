@@ -1,6 +1,7 @@
 ---
 name: concepts
 description: Use when explaining how Blazor works (render modes, lifecycle, state containers, PersistentState, cascading). Triggers "when to use RenderMode X". Not for scaffolding (component-writer).
+disable-model-invocation: true
 ---
 
 # Blazor Design Patterns — Reference

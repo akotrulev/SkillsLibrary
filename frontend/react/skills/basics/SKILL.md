@@ -1,6 +1,7 @@
 ---
 name: concepts
 description: Use when explaining how React 19 and the Next.js App Router work (Server vs Client Components, hydration, hooks, Actions). Triggers "where does use client go". Not for scaffolding (component-writer).
+disable-model-invocation: true
 ---
 
 # React Design Patterns — Reference

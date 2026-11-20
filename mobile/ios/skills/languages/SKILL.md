@@ -1,6 +1,7 @@
 ---
 name: i18n
 description: Use when an iOS app must support more languages or regions (String Catalogs, plurals, FormatStyle, RTL). Triggers "translate the app". Not for copy wording (design:ux-writing).
+disable-model-invocation: true
 ---
 
 # iOS — Localization and Globalization

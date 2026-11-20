@@ -1,6 +1,7 @@
 ---
 name: mobile-app-crawler
 description: Use when a WebdriverIO mobile suite must crawl many screens of a live app via the Appium MCP into a resumable screen map. Triggers "crawl the app". Not for one screen (mobile-screen-explorer).
+disable-model-invocation: true
 ---
 
 # QA — Appium App Crawler (TypeScript)

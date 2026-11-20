@@ -1,6 +1,7 @@
 ---
 name: bdd-reviewer
 description: Use when reviewing Gherkin .feature files and playwright-bdd/CucumberJS steps in TypeScript for reuse and binding. Triggers "review these feature files". Not for generating steps (gherkin-step-code).
+disable-model-invocation: true
 ---
 
 # BDD / Gherkin Reviewer (TypeScript)

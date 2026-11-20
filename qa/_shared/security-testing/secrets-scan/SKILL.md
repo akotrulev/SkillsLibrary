@@ -1,6 +1,7 @@
 ---
 name: secrets-scan
 description: Use when scanning a repo and its git history for committed secrets with Gitleaks, verifying live keys with TruffleHog. Triggers "scan for leaked secrets". Not for source code flaws (code-scan).
+disable-model-invocation: true
 ---
 
 # Security Testing — Secrets Scanning (Shared)

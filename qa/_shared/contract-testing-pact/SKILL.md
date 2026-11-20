@@ -1,6 +1,7 @@
 ---
 name: contract-pact
 description: Use when setting up Pact consumer-driven contract testing; cross-stack Pact Broker, matchers, can-i-deploy and versioning rules. Triggers "wire can-i-deploy". Not for Pact code (api-contract-testing).
+disable-model-invocation: true
 ---
 
 # QA — Contract Testing with Pact (Shared)

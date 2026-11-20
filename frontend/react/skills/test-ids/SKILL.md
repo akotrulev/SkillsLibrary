@@ -1,6 +1,7 @@
 ---
 name: test-ids
 description: Use when adding, auditing or fixing data-testid attributes in React pages for UI suites. Triggers "add testids to this page", "audit the data-testids". Not for page objects (page-objects-from-url).
+disable-model-invocation: true
 ---
 
 # React — Testability (`data-testid` writer)

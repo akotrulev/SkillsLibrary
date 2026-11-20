@@ -1,6 +1,7 @@
 ---
 name: api-tests-review
 description: Use when reviewing existing .NET API test code (NUnit + RestSharp) for quality. Triggers "review this API test". Not for writing new tests (api-tests).
+disable-model-invocation: true
 ---
 
 # QA — API Test Reviewer (.NET / NUnit + RestSharp)

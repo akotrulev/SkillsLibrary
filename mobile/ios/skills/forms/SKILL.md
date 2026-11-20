@@ -1,6 +1,7 @@
 ---
 name: forms
 description: Use when building or fixing a SwiftUI form (@FocusState order, validation, autofill, server errors on fields). Triggers "build a sign-up form". Not for the request (networking).
+disable-model-invocation: true
 ---
 
 # iOS — Forms

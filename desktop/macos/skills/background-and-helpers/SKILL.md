@@ -1,6 +1,7 @@
 ---
 name: background-and-helpers
 description: Use when a Mac app runs outside its window (SMAppService login item or agent, XPCSession helper). Triggers "launch at login". Not for permissions (sandbox-and-permissions).
+disable-model-invocation: true
 ---
 
 # macOS — Background and Helpers

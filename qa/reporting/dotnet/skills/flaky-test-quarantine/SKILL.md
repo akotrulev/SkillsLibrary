@@ -1,6 +1,7 @@
 ---
 name: flaky-test-quarantine
 description: Use when detecting and quarantining flaky tests in a .NET NUnit suite while still running them. Triggers "this NUnit test is flaky", "quarantine our flaky tests". Not for Allure wiring (test-reports).
+disable-model-invocation: true
 ---
 
 # Flaky-Test Quarantine (.NET 10 / NUnit)

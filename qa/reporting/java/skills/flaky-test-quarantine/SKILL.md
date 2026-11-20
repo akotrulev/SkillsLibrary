@@ -1,6 +1,7 @@
 ---
 name: flaky-test-quarantine
 description: Use when detecting and quarantining flaky tests in a Java TestNG suite while still running them. Triggers "this test is flaky, stop it blocking the pipeline". Not for Allure wiring (test-reports).
+disable-model-invocation: true
 ---
 
 # Flaky-Test Quarantine (Java 21 / TestNG) — **canonical stack**

@@ -1,6 +1,7 @@
 ---
 name: windows-and-navigation
 description: Use when writing WinUI windows, title bar, multi-window, NavigationView + Frame, TabView, commands, access keys. Triggers "add a window". Not for single instancing (activation-and-notifications).
+disable-model-invocation: true
 ---
 
 # Windows — Windows, Navigation and Commands

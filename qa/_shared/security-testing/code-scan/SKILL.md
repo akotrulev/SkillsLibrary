@@ -1,6 +1,7 @@
 ---
 name: code-scan
 description: Use when adding SAST with Opengrep/Semgrep as a PR gate for injection, crypto and auth flaws in source. Triggers "add SAST", "run Semgrep in CI". Not for dependency CVEs (dependency-scan).
+disable-model-invocation: true
 ---
 
 # Security Testing — SAST (Static Application Security Testing, shared)

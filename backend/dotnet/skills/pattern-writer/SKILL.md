@@ -1,6 +1,7 @@
 ---
 name: patterns-apply
 description: Use when scaffolding a design pattern into a C#/.NET repo (strategy, repository, MediatR handler). Triggers "scaffold strategy in C#". Not for explanations (patterns).
+disable-model-invocation: true
 ---
 
 # .NET Design Patterns — Generator

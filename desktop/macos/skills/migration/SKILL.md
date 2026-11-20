@@ -1,6 +1,7 @@
 ---
 name: migration
 description: Use when a Mac project changes lane (Swift 6, @Observable, AppKit to SwiftUI, Catalyst, Apple silicon only, Document). Triggers "move us to Swift 6". Not for a new app (project-setup).
+disable-model-invocation: true
 ---
 
 # macOS — Migration

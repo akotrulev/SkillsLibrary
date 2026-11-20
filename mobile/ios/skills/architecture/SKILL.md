@@ -1,6 +1,7 @@
 ---
 name: architecture
 description: Use when deciding where state and logic live in a SwiftUI app (@Observable models, view models only when earned). Triggers "MVVM or not". Not for API calls (networking).
+disable-model-invocation: true
 ---
 
 # iOS — Architecture and State

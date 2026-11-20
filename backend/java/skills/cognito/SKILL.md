@@ -1,6 +1,7 @@
 ---
 name: cognito
 description: Use when adding AWS Cognito to a Spring Boot API (access-token JWTs, scopes, groups, M2M). Triggers "add Cognito to my Spring Boot API". Not for Auth0 (auth0).
+disable-model-invocation: true
 ---
 
 # Auth — AWS Cognito in Java 21 / Spring Boot 3

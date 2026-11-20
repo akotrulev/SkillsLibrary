@@ -1,6 +1,7 @@
 ---
 name: error-handling
 description: Use when a React failure must not blank the screen (error boundaries, safe retries, failed regions, 401 recovery). Triggers "an error blanks my app". Not for producing the error (data-fetching).
+disable-model-invocation: true
 ---
 
 # React — Error Resilience

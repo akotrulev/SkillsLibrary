@@ -1,6 +1,7 @@
 ---
 name: failure-injection-testing
 description: Use when writing fault-injection tests in Java/TestNG with Toxiproxy via Testcontainers to assert graceful degradation. Triggers "survive a slow database". Not for load (load-testing).
+disable-model-invocation: true
 ---
 
 # QA — Chaos / Fault-Injection Testing (Java 21 / Toxiproxy + Testcontainers + TestNG)

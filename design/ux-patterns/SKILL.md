@@ -1,6 +1,7 @@
 ---
 name: app-structure
 description: Use when designing how an app is used before it is built (IA, app shell, navigation, page anatomy, onboarding). Triggers "design the navigation". Not for reviewing a built UI (ux-review).
+disable-model-invocation: true
 ---
 
 # UX patterns — designing how the app is used

@@ -1,6 +1,7 @@
 ---
 name: api-tests-grpc
 description: Use when writing black-box gRPC API tests in .NET (Grpc.Net.Client + NUnit) against a proto-defined service. Triggers "write a gRPC test for RPC X". Not for REST (api-tests).
+disable-model-invocation: true
 ---
 
 # QA — gRPC API Test Writer (.NET 8 / Grpc.Net.Client + NUnit)

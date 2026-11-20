@@ -1,6 +1,7 @@
 ---
 name: component-library
 description: Use when picking or wiring a React component library (shadcn/ui + Tailwind, Mantine, MUI, Chakra) and its theme. Triggers "which component library". Not for hand-written CSS (styling).
+disable-model-invocation: true
 ---
 
 # React — Component Library (one-of-N family)

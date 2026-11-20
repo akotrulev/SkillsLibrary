@@ -1,6 +1,7 @@
 ---
 name: pwa
 description: Use when a Blazor WebAssembly app must be installable or work offline (manifest, service worker, updates). Triggers "make this installable". Not for live reconnection (realtime).
+disable-model-invocation: true
 ---
 
 # Blazor — PWA & Offline

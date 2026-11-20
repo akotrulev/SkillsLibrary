@@ -1,6 +1,7 @@
 ---
 name: detection-engineering
 description: Use when authoring security detections as code (Sigma rules, alert-as-code) mapped to MITRE ATT&CK and tested on logs. Triggers "write a Sigma rule". Not for checking it fires (detection-validation).
+disable-model-invocation: true
 ---
 
 # Security Governance — Detection Engineering (Sigma · alert-as-code · ATT&CK-mapped)

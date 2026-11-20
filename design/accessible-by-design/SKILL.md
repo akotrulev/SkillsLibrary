@@ -1,6 +1,7 @@
 ---
 name: accessibility
 description: Use when accessibility is a design decision (WCAG 2.2 target size, accessible auth, focus not obscured, RTL layout). Triggers "is this design accessible". Not for markup (the stack's accessibility).
+disable-model-invocation: true
 ---
 
 # Accessible by design — the decisions a scan cannot make

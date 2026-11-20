@@ -1,6 +1,7 @@
 ---
 name: postgresql
 description: Use when designing, securing (roles, RLS), querying or tuning PostgreSQL, incl. pgvector. Triggers "design a Postgres schema", "multi-tenant RLS". Not for cross-engine modeling (schema-design).
+disable-model-invocation: true
 ---
 
 # Data — PostgreSQL

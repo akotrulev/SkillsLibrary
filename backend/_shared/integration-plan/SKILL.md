@@ -1,6 +1,7 @@
 ---
 name: plan-integrations
 description: Use when a planned backend needs its external dependencies specified (auth, config keys, limits, retries). Triggers "what external services do we depend on". Not for own endpoints (plan-api-surface).
+disable-model-invocation: true
 ---
 
 # Integration Plan — the external dependency register

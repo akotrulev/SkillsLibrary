@@ -1,6 +1,7 @@
 ---
 name: i18n
 description: Use when a Blazor UI ships in several languages (IStringLocalizer + .resx, culture cookie, WASM culture, RTL). Triggers "add multi-language support". Not for display-format policy (ui-rules).
+disable-model-invocation: true
 ---
 
 # Blazor — Localization & Globalization

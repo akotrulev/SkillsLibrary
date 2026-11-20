@@ -1,6 +1,7 @@
 ---
 name: credential-attacks
 description: Use when recovering and cracking credentials in an authorized pentest (hash cracking, LAN capture, secrets harvesting). Triggers "crack these hashes". Not for reuse across hosts (lateral-movement).
+disable-model-invocation: true
 ---
 
 # Penetration Testing — Credential Attacks (hashcat · hydra · Responder · secrets harvesting)

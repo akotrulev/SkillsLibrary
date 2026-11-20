@@ -1,6 +1,7 @@
 ---
 name: desktop-project-setup
 description: Use when starting a desktop E2E project in TypeScript (WebdriverIO 10, Appium 3, Mac2, WinCore). Triggers "scaffold a desktop test project". Not for writing tests (desktop-window-objects).
+disable-model-invocation: true
 ---
 
 # Desktop Test Project Scaffold (TypeScript, WebdriverIO 10)

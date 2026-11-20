@@ -1,6 +1,7 @@
 ---
 name: networking
 description: Use when a Mac app calls an API (URLSession async, timeouts, retries, token refresh, sandbox network entitlement, ATS). Triggers "request hangs after wake". Not for the failure UI (error-handling).
+disable-model-invocation: true
 ---
 
 # macOS — Networking

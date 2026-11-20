@@ -1,6 +1,7 @@
 ---
 name: ui-tests-maestro
 description: Use when writing, tagging, running in CI or reviewing Maestro mobile E2E flows (typically Expo/React Native). Triggers "write a Maestro flow for X". Not for Appium/WebdriverIO tests (ui-tests-appium).
+disable-model-invocation: true
 ---
 
 # QA — Maestro Flow Author (TypeScript lane)

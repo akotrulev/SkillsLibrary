@@ -1,6 +1,7 @@
 ---
 name: auth0
 description: Use when adding or fixing Auth0 login in a Windows WinUI or WPF app (.NET, system browser, PKCE, PasswordVault/DPAPI). Triggers "add Auth0 login". Not for tenant setup or OIDC theory.
+disable-model-invocation: true
 ---
 
 # Auth — Auth0 in Windows desktop apps (.NET)

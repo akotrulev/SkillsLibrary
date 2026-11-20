@@ -1,6 +1,7 @@
 ---
 name: messaging-testing
 description: Use when a Java/TestNG suite must produce, consume or assert broker messages (Kafka, SQS, RabbitMQ, Service Bus). Triggers "assert event X was published". Not for contracts (api-contract-testing).
+disable-model-invocation: true
 ---
 
 # QA — Messaging Testing (Java 21)

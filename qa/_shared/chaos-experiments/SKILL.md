@@ -1,6 +1,7 @@
 ---
 name: chaos-experiments
 description: Use when running cluster or cloud chaos (Chaos Mesh, Litmus, AWS FIS, Chaos Studio) with SLO steady state and aborts. Triggers "run a chaos experiment". Not for Toxiproxy (failure-injection-testing).
+disable-model-invocation: true
 ---
 
 # QA — Chaos Experiments (Shared)

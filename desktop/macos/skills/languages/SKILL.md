@@ -1,6 +1,7 @@
 ---
 name: i18n
 description: Use when a Mac app must support more languages or regions (String Catalogs, plurals, FormatStyle, RTL window layouts). Triggers "translate the app". Not for copy wording (design:ux-writing).
+disable-model-invocation: true
 ---
 
 # macOS: Localization and Globalization

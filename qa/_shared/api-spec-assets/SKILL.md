@@ -1,6 +1,7 @@
 ---
 name: api-spec-assets
 description: Use when an OpenAPI/Swagger spec arrives for an API test suite; store it dated and diff updates into DTO/client changes. Triggers "here is the swagger json". Not for writing DTOs (api-models).
+disable-model-invocation: true
 ---
 
 # QA — API Spec Assets & Diff-Driven Updates (Shared)

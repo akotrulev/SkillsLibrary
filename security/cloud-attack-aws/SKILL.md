@@ -1,6 +1,7 @@
 ---
 name: cloud-attack-aws
 description: Use when exploiting an authorized AWS account after recon (IAM privesc, EC2 metadata credentials, S3, RDS). Triggers "what can this access key become". Not for recon (cloud-recon-enumeration).
+disable-model-invocation: true
 ---
 
 # Penetration Testing — AWS Exploitation (IAM privesc · EC2/S3/RDS · Pacu/CloudFox/PMapper)

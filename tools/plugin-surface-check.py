@@ -8,6 +8,9 @@ Over .claude-plugin/marketplace.json, verifies:
   4. no skill name carries a domain/stack prefix or suffix the plugin namespace already says
   5. no skill folder or agent file is registered by plugins of two different categories
   6. every `dependencies` entry names a plugin in this marketplace, and the graph has no cycle
+  7. only a front door is listed to the model: a skill named `rules` or one in FRONT_DOORS has no
+     `disable-model-invocation`, and every other registered skill sets it to true
+  8. no skill `description:` is a plain scalar holding ': ', which breaks the YAML and with it check 7
 
 Prints OK and exits 0, or one line per failure and exits 1.
 
@@ -34,17 +37,32 @@ BANNED_PREFIXES = ("be-shared-", "mobile-shared-", "ep-", "ba-", "td-", "tool-",
 BANNED_SUFFIXES = ("-java", "-dotnet", "-typescript", "-node", "-python", "-shared")
 STACK_CATEGORIES = ("qa", "fe", "be", "mobile", "desktop")
 
+FRONT_DOORS = {
+    "dev": frozenset("""
+        design plan-feature debugging verify quality-constraints source-grounding decision-interview
+        notebooklm audit-spec audit-feature
+    """.split()),
+    "qa": frozenset(("inhouse-framework-conventions", "python-web-testing")),
+}
+
 
 def category(plugin_name):
     prefix = plugin_name.split("-", 1)[0]
     return prefix if prefix in STACK_CATEGORIES else plugin_name
 
 
-def skill_name(skill_md):
+def is_front_door(plugin_name, label):
+    return label == "rules" or label in FRONT_DOORS.get(category(plugin_name), ())
+
+
+def frontmatter(skill_md):
     with open(skill_md, encoding="utf-8") as f:
-        text = f.read()
-    m = re.match(r"^---\r?\n(.*?)\r?\n---", text, re.S)
-    nm = re.search(r"^name:\s*(\S+)\s*$", m.group(1), re.M) if m else None
+        m = re.match(r"^---\r?\n(.*?)\r?\n---", f.read(), re.S)
+    return m.group(1) if m else ""
+
+
+def skill_name(block):
+    nm = re.search(r"^name:\s*(\S+)\s*$", block, re.M)
     return nm.group(1).strip("\"'") if nm else None
 
 
@@ -99,7 +117,8 @@ def main():
                 failures.append(f"{pname}: skill folder has no SKILL.md: {entry}")
                 continue
             skill_owners.setdefault(rel, set()).add(pname)
-            label = skill_name(skill_md)
+            block = frontmatter(skill_md)
+            label = skill_name(block)
             if not label:
                 failures.append(f"{pname}: {rel}/SKILL.md has no name:")
                 continue
@@ -109,6 +128,14 @@ def main():
                 failures.append(f"{pname}: skill name '{label}' carries a prefix the plugin namespace already says ({rel})")
             if label.endswith(BANNED_SUFFIXES):
                 failures.append(f"{pname}: skill name '{label}' ends in a stack or -shared token ({rel})")
+            hidden = re.search(r"^disable-model-invocation:\s*true\s*$", block, re.M) is not None
+            if is_front_door(pname, label) and hidden:
+                failures.append(f"{pname}: front-door skill '{label}' sets disable-model-invocation ({rel})")
+            if not is_front_door(pname, label) and not hidden:
+                failures.append(f"{pname}: skill '{label}' is listed to the model but is not a front door; "
+                                f"set disable-model-invocation: true or add it to FRONT_DOORS ({rel})")
+            if re.search(r"^description:[ \t]*[^\s\"'>|][^\n]*: ", block, re.M):
+                failures.append(f"{pname}: description of '{label}' holds an unquoted ': ' ({rel})")
 
         for entry in plugin.get("agents", []):
             rel = entry[2:] if entry.startswith("./") else entry

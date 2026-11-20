@@ -1,6 +1,7 @@
 ---
 name: api-fuzzing
 description: Use when fuzzing an API from its OpenAPI/GraphQL schema with Schemathesis as a CI gate for 5xx and contract violations. Triggers "fuzz our API". Not for authorization/BOLA (permission-testing).
+disable-model-invocation: true
 ---
 
 # Security Testing — API Fuzzing (Schemathesis, shared)

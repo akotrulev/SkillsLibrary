@@ -1,6 +1,7 @@
 ---
 name: distributed-app-testing
 description: Use when a TypeScript suite must boot the whole multi-service system from its compose file (Testcontainers) for a test run. Triggers "test the whole stack". Not for one API alone (db-testcontainers).
+disable-model-invocation: true
 ---
 
 # QA — Distributed App Testing (Testcontainers `DockerComposeEnvironment` + Vitest / Playwright)

@@ -1,6 +1,7 @@
 ---
 name: api-tests-grpc
 description: Use when writing black-box gRPC API tests in TypeScript (@grpc/grpc-js + Vitest) against a proto-defined service. Triggers "write a gRPC test for RPC X". Not for REST (api-tests).
+disable-model-invocation: true
 ---
 
 # QA — gRPC API Test Writer (TypeScript / Vitest + @grpc/grpc-js)

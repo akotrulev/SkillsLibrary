@@ -1,6 +1,7 @@
 ---
 name: ai-feature-testing
 description: Use when testing LLM output from a TypeScript suite with rubric and grounding asserts (promptfoo, DeepEval). Triggers "test our chatbot". Not for RAG metrics (ai-answer-quality-testing).
+disable-model-invocation: true
 ---
 
 # LLM-App Testing (Node 24 / TypeScript — promptfoo + Anthropic SDK)

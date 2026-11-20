@@ -1,6 +1,7 @@
 ---
 name: concepts
 description: Use when writing or reviewing Windows desktop C# and XAML (lane detection, packaged identity, UI thread, DPI, nullable). Triggers "which Windows framework". Not for a diff review (code-review).
+disable-model-invocation: true
 ---
 
 # Windows — The C# and XAML Coding Standard

@@ -1,6 +1,7 @@
 ---
 name: migrations
 description: Use when choosing a migration tool or planning an online-safe schema or data change on any SQL or document store. Triggers "rename a column safely". Not for data modeling (schema-design).
+disable-model-invocation: true
 ---
 
 # Data — Migrations (cross-engine)

@@ -1,6 +1,7 @@
 ---
 name: change-coverage-review
 description: Use when reviewing a PR or diff for whether each behaviour change is tested (Covered/Partial/Missing) plus testability smells. Triggers "are these changes tested". Not for suite pruning (test-audit).
+disable-model-invocation: true
 ---
 
 # Change coverage review — is every behaviour this diff changes pinned by a test?

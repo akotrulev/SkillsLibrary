@@ -1,6 +1,7 @@
 ---
 name: responsive-design
 description: Use when a React layout must adapt across screen sizes (breakpoints, CSS Grid/Flexbox, container queries). Triggers "make this page responsive". Not for tokens or dark mode (styling).
+disable-model-invocation: true
 ---
 
 # React — Responsive design (breakpoints, grids, cross-breakpoint alignment)

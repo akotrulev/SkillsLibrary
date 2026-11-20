@@ -1,6 +1,7 @@
 ---
 name: test-plan-writer
 description: Use when writing a test plan for an epic, a feature or a release; versions, what is tested, approach, harness, scenarios, Definition of Ready and Done. Triggers "write a test plan for X". Not for risk strategy alone (test-strategy).
+disable-model-invocation: true
 ---
 
 # QA — Test Plan Writer

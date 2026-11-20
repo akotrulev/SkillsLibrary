@@ -1,6 +1,7 @@
 ---
 name: test-ids
 description: Use when adding accessibilityIdentifier so Appium and Maestro can target a SwiftUI or UIKit app. Triggers "E2E can't find this element". Not for writing device tests (qa-mobile-typescript).
+disable-model-invocation: true
 ---
 
 # iOS — Testability (`accessibilityIdentifier` writer)

@@ -1,6 +1,7 @@
 ---
 name: in-app-purchases
 description: Use when an iOS, Android or React Native app sells subscriptions or unlocks in-app (entitlements, restore, refunds). Triggers "restore purchases". Not for store rules (store-compliance).
+disable-model-invocation: true
 ---
 
 # Mobile — In-App Purchases

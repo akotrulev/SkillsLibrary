@@ -1,6 +1,7 @@
 ---
 name: eval-sets
 description: Use when building held-out eval data for a small LLM or VLM you trained (golden sets, judge data, contamination checks). Triggers "build an eval set". Not for running evals (ai-feature-testing).
+disable-model-invocation: true
 ---
 
 # Training Data — Evaluation Sets

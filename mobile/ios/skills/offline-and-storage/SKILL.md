@@ -1,6 +1,7 @@
 ---
 name: offline-and-storage
 description: Use when an iOS app must persist data (SwiftData, Core Data, Keychain, UserDefaults, offline write queue). Triggers "where do I store this". Not for fetch mechanics (networking).
+disable-model-invocation: true
 ---
 
 # iOS — Offline and Storage

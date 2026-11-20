@@ -1,6 +1,7 @@
 ---
 name: image-infra-scan
 description: Use when scanning container images and IaC (Terraform, K8s, Helm) with Trivy as a CI gate, or making an SBOM. Triggers "add Trivy to the pipeline". Not for lockfile CVEs (dependency-scan).
+disable-model-invocation: true
 ---
 
 # Security Testing — Container & IaC Scanning (Trivy)

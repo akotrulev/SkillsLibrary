@@ -1,6 +1,7 @@
 ---
 name: desktop-project-setup
 description: Use when starting a desktop E2E project in .NET (NUnit + Appium 3, Mac2, WinCore, or FlaUI 5 on Windows). Triggers "scaffold a desktop test project". Not for writing tests (desktop-window-objects).
+disable-model-invocation: true
 ---
 
 # Desktop Test Project Scaffold (C# / .NET 10)

@@ -1,6 +1,7 @@
 ---
 name: architecture-review
 description: Use when critiquing pattern usage across stacks (pattern stacking, premature abstraction, layering). Triggers "is this architecture overdesigned". Not for stack-level review (conventions-review).
+disable-model-invocation: true
 ---
 
 # Design Patterns — Shared Reviewer (language-agnostic)

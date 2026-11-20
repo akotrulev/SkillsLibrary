@@ -1,6 +1,7 @@
 ---
 name: ui-components
 description: Use when writing Jetpack Compose UI (stateless composables, previews, lazy lists, side effects, Material 3). Triggers "build this screen". Not for state ownership (architecture).
+disable-model-invocation: true
 ---
 
 # Android — UI Components (Compose)

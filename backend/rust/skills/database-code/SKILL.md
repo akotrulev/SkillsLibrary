@@ -1,6 +1,7 @@
 ---
 name: persistence
 description: Use when setting up or refactoring Rust persistence with sqlx, diesel or sea-orm (queries, migrations, transactions, tuning). Triggers "add a sqlx query". Not for raw SQL (postgresql).
+disable-model-invocation: true
 ---
 
 # Rust — Persistence with sqlx (default), diesel, sea-orm

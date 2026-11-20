@@ -1,6 +1,7 @@
 ---
 name: offline-and-storage
-description: Use when a Windows app persists data: ApplicationData vs paths, SQLite/EF Core, settings, PasswordVault/DPAPI, migrations, offline cache. Triggers "save settings". Not for HTTP (networking).
+description: Use when a Windows app persists data (ApplicationData vs paths, SQLite/EF Core, settings, PasswordVault/DPAPI, migrations, offline cache). Triggers "save settings". Not for HTTP (networking).
+disable-model-invocation: true
 ---
 
 # Windows — Offline and Storage

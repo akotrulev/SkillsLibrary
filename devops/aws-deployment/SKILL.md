@@ -1,6 +1,7 @@
 ---
 name: aws-deployment
 description: Use when deploying a service to AWS (ECS Fargate, Lambda, App Runner, S3 + CloudFront, EKS). Triggers "deploy this service to ECS". Not for Azure (azure-deployment).
+disable-model-invocation: true
 ---
 
 # DevOps — AWS Deployment

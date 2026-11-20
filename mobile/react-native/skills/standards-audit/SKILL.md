@@ -1,6 +1,7 @@
 ---
 name: standards-audit
 description: Use when auditing a whole React Native/Expo app against mobile-react-native conventions; read-only report. Triggers "audit our RN app". Not for one diff (conventions-review).
+disable-model-invocation: true
 ---
 
 # mobile-react-native Conformance Audit

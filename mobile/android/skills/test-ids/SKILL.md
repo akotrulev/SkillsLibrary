@@ -1,6 +1,7 @@
 ---
 name: test-ids
 description: Use when adding test ids (testTag, android:id) so Appium and Maestro can target a Compose or Views app. Triggers "E2E can't find this element". Not for writing device tests (qa-mobile-typescript).
+disable-model-invocation: true
 ---
 
 # Android — Testability (`testTag` writer)

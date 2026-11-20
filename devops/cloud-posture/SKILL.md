@@ -1,6 +1,7 @@
 ---
 name: cloud-posture
 description: Use when scanning a live, owned AWS/Azure/GCP account for misconfiguration (CSPM) with Prowler or ScoutSuite. Triggers "scan our AWS account for misconfigurations". Not for IaC (iac-security).
+disable-model-invocation: true
 ---
 
 # DevOps — Cloud Security Posture (Prowler / ScoutSuite)

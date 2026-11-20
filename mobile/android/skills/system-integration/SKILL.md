@@ -1,6 +1,7 @@
 ---
 name: system-integration
 description: Use when an Android app works outside its screens (WorkManager, foreground services, Glance widgets, alarms). Triggers "add a widget". Not for push (push-and-deep-links).
+disable-model-invocation: true
 ---
 
 # Android — System Integration

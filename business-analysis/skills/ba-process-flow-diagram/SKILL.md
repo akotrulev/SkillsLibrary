@@ -1,6 +1,7 @@
 ---
 name: process-flow
 description: Use when turning requirements into a BPMN-style Mermaid business flow with actors, decisions and failure paths. Triggers "map the flow for this feature". Not for entity lifecycles (state-grid).
+disable-model-invocation: true
 ---
 
 # BA — Flow Mapper

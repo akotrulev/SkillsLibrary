@@ -1,6 +1,7 @@
 ---
 name: standards-audit
 description: Use when auditing a .NET test suite against the qa-dotnet conventions into a re-runnable report in docs/audits/. Triggers "audit our test suite". Not for reviewing one file (ui-tests-review).
+disable-model-invocation: true
 ---
 
 # qa-dotnet Conformance Audit

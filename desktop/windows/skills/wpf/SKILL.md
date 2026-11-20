@@ -1,6 +1,7 @@
 ---
 name: wpf
-description: Use when working in a WPF app on .NET 10/11: MVVM, Fluent theme opt-in, ThemeMode, dark mode, modernizing in place. Triggers "WPF". Not for moving to WinUI (migration) or WinUI apps (ui-components).
+description: Use when working in a WPF app on .NET 10/11 (MVVM, Fluent theme opt-in, ThemeMode, dark mode, modernizing in place). Triggers "WPF". Not for moving to WinUI (migration) or WinUI apps (ui-components).
+disable-model-invocation: true
 ---
 
 # Windows — WPF Lane

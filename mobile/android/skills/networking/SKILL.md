@@ -1,6 +1,7 @@
 ---
 name: networking
 description: Use when an Android app calls an API (Retrofit + OkHttp or Ktor; timeouts, retries, token refresh). Triggers "request hangs on cell". Not for the failure UI (error-handling).
+disable-model-invocation: true
 ---
 
 # Android — Networking

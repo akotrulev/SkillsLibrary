@@ -1,6 +1,7 @@
 ---
 name: migration
 description: Use when upgrading React or Next.js across a major (React 18 to 19, Next 14 to 15, Pages to App Router) via codemods. Triggers "upgrade us to React 19". Not for a fresh project (project-setup).
+disable-model-invocation: true
 ---
 
 # React — Version Migration

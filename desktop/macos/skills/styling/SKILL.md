@@ -1,6 +1,7 @@
 ---
 name: styling
 description: Use when styling a Mac SwiftUI app (Liquid Glass, semantic colours, density, materials, Reduce Transparency, motion and Reduce Motion). Triggers "dark mode". Not for structure (ui-components).
+disable-model-invocation: true
 ---
 
 # macOS — Styling, Liquid Glass, Density and Motion

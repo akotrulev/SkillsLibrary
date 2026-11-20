@@ -1,6 +1,7 @@
 ---
 name: production-uptime-checks
 description: Use when authoring synthetic monitoring as code in TypeScript with Checkly against live staging/prod. Triggers "add a prod uptime check". Not for pre-merge CI gates (ci-pipelines).
+disable-model-invocation: true
 ---
 
 # Synthetic Monitoring as Code (Checkly · Node 24 / TypeScript) — **canonical stack**

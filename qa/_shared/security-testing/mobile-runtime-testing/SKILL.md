@@ -1,6 +1,7 @@
 ---
 name: mobile-runtime-testing
 description: Use when dynamically testing a mobile app on an owned device with Frida, objection, mitmproxy; pinning bypass, runtime storage. Triggers "bypass SSL pinning". Not for static scans (mobile-app-scan).
+disable-model-invocation: true
 ---
 
 # Security Testing — Mobile Runtime / Dynamic Analysis (MobSF dynamic · Frida · objection)

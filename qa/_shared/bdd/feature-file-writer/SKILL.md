@@ -1,6 +1,7 @@
 ---
 name: feature-files
 description: Use when turning manual test cases or acceptance criteria into reusable Gherkin feature files. Triggers "convert these test cases to Gherkin". Not for step-definition code (gherkin-step-code).
+disable-model-invocation: true
 ---
 
 # Gherkin Authoring — Test Cases → Living-Documentation Feature Files

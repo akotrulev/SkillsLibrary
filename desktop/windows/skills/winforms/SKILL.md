@@ -1,6 +1,7 @@
 ---
 name: winforms
-description: Use when working in a WinForms app on .NET 10/11: dark mode, ShowAsync, high DPI, binding, MVVM-ish structure, VisualStylesMode. Triggers "WinForms". Not for moving to WinUI (migration).
+description: Use when working in a WinForms app on .NET 10/11 (dark mode, ShowAsync, high DPI, binding, MVVM-ish structure, VisualStylesMode). Triggers "WinForms". Not for moving to WinUI (migration).
+disable-model-invocation: true
 ---
 
 # Windows — WinForms Lane

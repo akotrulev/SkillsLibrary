@@ -1,6 +1,7 @@
 ---
 name: ai-experience
 description: Use when designing how an AI or agent feature behaves on screen (streaming, tool calls, stop, approvals, confidence). Triggers "design the chat UI". Not for LLM testing (ai-feature-testing).
+disable-model-invocation: true
 ---
 
 # AI experience — designing what the agent shows

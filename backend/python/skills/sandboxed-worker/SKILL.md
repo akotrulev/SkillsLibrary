@@ -1,6 +1,7 @@
 ---
 name: sandboxed-worker
 description: Use when containerising a Python worker for untrusted uploads (uv Dockerfile, no network, non-root, per-job limits). Triggers "Dockerfile for the Python worker". Not for other service images (docker).
+disable-model-invocation: true
 ---
 
 # Sandboxed Python Worker — Generator

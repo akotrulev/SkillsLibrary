@@ -1,6 +1,7 @@
 ---
 name: page-objects-from-url
 description: Use when given a URL or HTML page to build or update a Page Object Model for a TypeScript Playwright suite. Triggers "build a POM from this URL". Not for POM structure design (page-object-design).
+disable-model-invocation: true
 ---
 
 # QA — POM Builder from Live Page (TypeScript)

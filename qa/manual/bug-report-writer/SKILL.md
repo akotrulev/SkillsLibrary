@@ -1,6 +1,7 @@
 ---
 name: bug-report-writer
 description: Use when writing or improving a formal, reproducible bug report for a defect the user found. Triggers "write a bug report for X", "help me file this bug". Not for test cases (test-case-writer).
+disable-model-invocation: true
 ---
 
 # QA Bug Report Writer

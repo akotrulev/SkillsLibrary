@@ -1,6 +1,7 @@
 ---
 name: ui-tests-playwright
 description: Use when scaffolding Playwright UI tests in TypeScript (specs, page objects, signed-in state, web-first assertions). Triggers "write a Playwright test for X". Not for Selenium (ui-tests-selenium).
+disable-model-invocation: true
 ---
 
 # QA — Playwright Test & Page Object Generator (TypeScript)

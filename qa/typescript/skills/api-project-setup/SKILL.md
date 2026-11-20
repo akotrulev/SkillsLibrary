@@ -1,6 +1,7 @@
 ---
 name: api-project-setup
 description: Use when starting an API test project from zero in TypeScript (Vitest, fetch, Zod, pins, config loader). Triggers "scaffold an API test project". Not for writing tests (api-tests).
+disable-model-invocation: true
 ---
 
 # API Test Project Scaffold (TypeScript, Vitest + fetch + Zod)

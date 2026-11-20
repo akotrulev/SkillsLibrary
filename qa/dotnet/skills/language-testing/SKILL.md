@@ -1,6 +1,7 @@
 ---
 name: language-testing
 description: Use when writing i18n tests in .NET, Playwright pinned to a locale, asserting by .resx key. Triggers "test German/Arabic rendering". Not for breakpoints (responsive-testing).
+disable-model-invocation: true
 ---
 
 # QA — i18n / Localization Testing (.NET 10 / Playwright 1.63 + NUnit + CultureInfo)

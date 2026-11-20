@@ -1,6 +1,7 @@
 ---
 name: networking
-description: Use when a Windows desktop app calls an API: typed HttpClient, timeouts, retries, ProblemDetails, token refresh, ClientWebSocket. Triggers "call the API". Not for the form UI (forms).
+description: Use when a Windows desktop app calls an API (typed HttpClient, timeouts, retries, ProblemDetails, token refresh, ClientWebSocket). Triggers "call the API". Not for the form UI (forms).
+disable-model-invocation: true
 ---
 
 # Windows — Networking and Realtime

@@ -1,6 +1,7 @@
 ---
 name: cosmosdb
 description: Use when designing, securing or tuning Azure Cosmos DB (containers, partition keys, RU/s, Entra RBAC). Triggers "pick a partition key", "RU/s tuning". Not for DynamoDB (dynamodb).
+disable-model-invocation: true
 ---
 
 # Data — Azure Cosmos DB (NoSQL API)

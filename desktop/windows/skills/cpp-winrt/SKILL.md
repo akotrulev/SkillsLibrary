@@ -1,6 +1,7 @@
 ---
 name: cpp-winrt
-description: Use when writing or reviewing a C++/WinRT WinUI app: com_ptr, coroutines, get_strong, dispatcher resume, hresult_error, IDL, tests. Triggers "vcxproj", "winrt::". Not for C# (interop).
+description: Use when writing or reviewing a C++/WinRT WinUI app (com_ptr, coroutines, get_strong, dispatcher resume, hresult_error, IDL, tests). Triggers "vcxproj", "winrt::". Not for C# (interop).
+disable-model-invocation: true
 ---
 
 # Windows — C++/WinRT

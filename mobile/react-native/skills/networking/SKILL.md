@@ -1,6 +1,7 @@
 ---
 name: networking
 description: Use when an Expo/React Native app calls an API (fetch + TanStack Query; timeouts, retries, token refresh). Triggers "request hangs on cell". Not for the failure UI (error-handling).
+disable-model-invocation: true
 ---
 
 # React Native — Networking

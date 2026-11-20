@@ -1,6 +1,7 @@
 ---
 name: styling
 description: Use when writing CSS for a React app (CSS Modules, tokens as custom properties, type scale, dark mode). Triggers "scope this component's CSS". Not for library theming (component-library).
+disable-model-invocation: true
 ---
 
 # React — Styling (CSS Modules, tokens, dark mode, the styling authority)

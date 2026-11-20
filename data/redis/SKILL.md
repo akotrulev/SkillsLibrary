@@ -1,6 +1,7 @@
 ---
 name: redis
 description: Use when Redis/Valkey serves as a cache, rate limiter, lock, queue, session store or pub/sub (persistence, cluster, eviction). Triggers "implement a rate limiter". Not for caching strategy (caching).
+disable-model-invocation: true
 ---
 
 # Data — Redis / Valkey

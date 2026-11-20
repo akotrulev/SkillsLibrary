@@ -1,6 +1,7 @@
 ---
 name: standards-audit
 description: Use when auditing a whole Android app (Kotlin, Compose, Views, KMP) against mobile-android conventions; read-only report. Triggers "audit our Android app". Not for one diff (conventions-review).
+disable-model-invocation: true
 ---
 
 # mobile-android Conformance Audit

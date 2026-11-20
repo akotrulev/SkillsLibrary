@@ -1,6 +1,7 @@
 ---
 name: cloud-attack-azure
 description: Use when exploiting an authorized Azure/Entra tenant after recon (managed-identity tokens, Key Vault, RBAC privesc). Triggers "escalate in this Azure tenant". Not for recon (cloud-recon-enumeration).
+disable-model-invocation: true
 ---
 
 # Penetration Testing — Azure Exploitation (Entra ID · managed identity · Key Vault · Azure RBAC)

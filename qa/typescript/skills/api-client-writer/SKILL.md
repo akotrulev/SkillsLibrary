@@ -1,6 +1,7 @@
 ---
 name: api-client-writer
 description: Use when creating an API client class ({resource}Client.ts) in a TypeScript API test project. Triggers "write an API client for X". Not for DTOs (api-models).
+disable-model-invocation: true
 ---
 
 # qa-typescript:api-client-writer

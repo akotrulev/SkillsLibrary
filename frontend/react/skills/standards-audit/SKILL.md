@@ -1,6 +1,7 @@
 ---
 name: standards-audit
 description: Use when auditing a whole React/Next.js codebase against the fe-react conventions, read-only, saved to docs/audits/. Triggers "audit our codebase". Not for one diff (conventions-review).
+disable-model-invocation: true
 ---
 
 # fe-react Conformance Audit

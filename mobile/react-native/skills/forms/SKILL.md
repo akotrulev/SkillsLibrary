@@ -1,6 +1,7 @@
 ---
 name: forms
 description: Use when building or fixing an Expo/React Native form (React Hook Form + Zod, keyboard avoidance, server errors on fields). Triggers "build a sign-up form". Not for the request (networking).
+disable-model-invocation: true
 ---
 
 # React Native — Forms

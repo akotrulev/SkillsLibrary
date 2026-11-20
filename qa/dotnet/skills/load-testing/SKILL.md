@@ -1,6 +1,7 @@
 ---
 name: load-testing
 description: Use when designing or writing NBomber load/performance tests in .NET (average, spike, ramp). Triggers "write a NBomber test for endpoint X". Not for fault injection (failure-injection-testing).
+disable-model-invocation: true
 ---
 
 # QA — Performance Testing with NBomber (.NET 8)

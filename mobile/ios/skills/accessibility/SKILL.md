@@ -1,6 +1,7 @@
 ---
 name: accessibility
 description: Use when a SwiftUI or UIKit screen must work with VoiceOver, Dynamic Type and Reduce Motion. Triggers "VoiceOver reads the wrong thing". Not for a11y scanning (qa-mobile-typescript).
+disable-model-invocation: true
 ---
 
 # iOS — Accessibility

@@ -1,6 +1,7 @@
 ---
 name: observability
 description: Use when a macOS or Windows desktop app needs crash reporting or OpenTelemetry telemetry to Grafana. Triggers "add crash reporting". Not for the Collector, Loki or Tempo backend (logs-traces).
+disable-model-invocation: true
 ---
 
 # Desktop — Observability

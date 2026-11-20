@@ -1,6 +1,7 @@
 ---
 name: dependency-scan
 description: Use when wiring SCA as a CI gate for a TypeScript build (npm audit), failing on vulnerable packages. Triggers "fail the build on vulnerable dependencies". Not for runtime DAST (passive-scan).
+disable-model-invocation: true
 ---
 
 # Security Testing — Dependency Scanning / SCA (TypeScript)

@@ -1,6 +1,7 @@
 ---
 name: api-tests-review
 description: Use when reviewing existing Java API test code (RestAssured + TestNG) for quality. Triggers "review this API test". Not for writing new tests (api-tests).
+disable-model-invocation: true
 ---
 
 # QA — API Test Reviewer (Java / RestAssured + TestNG)

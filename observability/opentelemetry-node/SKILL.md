@@ -1,6 +1,7 @@
 ---
 name: opentelemetry
 description: Use when instrumenting a Node/TypeScript service with OpenTelemetry (traces, metrics, log correlation, OTLP). Triggers "add OTel to this Node service". Not for log shaping (structured-logging).
+disable-model-invocation: true
 ---
 
 # Observability — OpenTelemetry (Node 24 / TypeScript)

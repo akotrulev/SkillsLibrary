@@ -1,6 +1,7 @@
 ---
 name: architecture
 description: Use when deciding folders and where state lives in an Expo/React Native app (TanStack Query, Zustand, Context). Triggers "Zustand vs Context". Not for API calls (networking).
+disable-model-invocation: true
 ---
 
 # React Native — Architecture and State

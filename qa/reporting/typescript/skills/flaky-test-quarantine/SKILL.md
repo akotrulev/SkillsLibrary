@@ -1,6 +1,7 @@
 ---
 name: flaky-test-quarantine
 description: Use when detecting and quarantining flaky tests in a TypeScript Playwright or Vitest suite while still running them. Triggers "this Playwright test is flaky". Not for Allure wiring (test-reports).
+disable-model-invocation: true
 ---
 
 # Flaky-Test Quarantine (Node 24 + TypeScript / Playwright + Vitest)

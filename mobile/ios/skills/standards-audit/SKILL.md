@@ -1,6 +1,7 @@
 ---
 name: standards-audit
 description: Use when auditing a whole iOS app (Swift, SwiftUI, UIKit) against mobile-ios conventions; read-only report. Triggers "audit our iOS app". Not for one diff (conventions-review).
+disable-model-invocation: true
 ---
 
 # mobile-ios Conformance Audit

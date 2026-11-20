@@ -1,6 +1,7 @@
 ---
 name: test-reports
 description: Use when setting up Allure reporting for a Java test suite (TestNG, JUnit, RestAssured, Playwright, Appium). Triggers "set up Allure for our TestNG suite". Not for flaky tests (flaky-test-quarantine).
+disable-model-invocation: true
 ---
 
 # QA — Allure Reporting (Java / TestNG & JUnit Jupiter)

@@ -1,6 +1,7 @@
 ---
 name: pretraining-corpus
 description: Use when building a raw-text pretraining corpus for a small LLM (sourcing, HTML/PDF extraction, filtering, dedup, sharding). Triggers "build a pretraining corpus". Not for SFT data (instruction-sft).
+disable-model-invocation: true
 ---
 
 # Training Data — Pretraining Corpus

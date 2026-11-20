@@ -1,6 +1,7 @@
 ---
 name: offline-and-storage
 description: Use when a Mac app persists data (SwiftData, Core Data, GRDB, Keychain, UserDefaults, sandbox container paths, offline queue). Triggers "where does this file go". Not for documents (documents).
+disable-model-invocation: true
 ---
 
 # macOS — Offline and Storage

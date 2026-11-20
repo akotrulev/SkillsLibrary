@@ -1,6 +1,7 @@
 ---
 name: device-features
 description: Use when an Android app uses camera, photos, location, biometrics or files, with runtime permissions. Triggers "ask for camera access", "pick a photo". Not for push or links (push-and-deep-links).
+disable-model-invocation: true
 ---
 
 # Android — Device Features

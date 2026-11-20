@@ -1,6 +1,7 @@
 ---
 name: benchmarks
 description: Use when writing JMH microbenchmarks in Java or gating a hot path's speed and allocations in CI. Triggers "benchmark this method", "which is faster". Not for load (load-testing).
+disable-model-invocation: true
 ---
 
 # QA — Microbenchmarks with JMH (Java 21)

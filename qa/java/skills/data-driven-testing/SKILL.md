@@ -1,6 +1,7 @@
 ---
 name: data-driven-testing
 description: Use when one Java/TestNG test must run over many rows from an external CSV, JSON or spreadsheet. Triggers "run this test for every row". Not for building test objects (test-data-builder).
+disable-model-invocation: true
 ---
 
 # Data-Driven Testing (Java 21 / TestNG) — **canonical stack**

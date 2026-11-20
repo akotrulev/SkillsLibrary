@@ -1,6 +1,7 @@
 ---
 name: time-and-concurrency-testing
 description: Use when a TypeScript API suite must run a scheduled job, freeze the clock, race requests or redeliver a message. Triggers "freeze the clock". Not for fault injection (failure-injection-testing).
+disable-model-invocation: true
 ---
 
 # QA — Time and Concurrency Testing (Node 24 + TypeScript / Vitest)

@@ -1,6 +1,7 @@
 ---
 name: patterns
 description: Use when explaining a design pattern in Node/TypeScript (tagged unions, branded ids, Result types). Triggers "result type vs exceptions". Not for scaffolding (patterns-apply).
+disable-model-invocation: true
 ---
 
 # TypeScript Design Patterns — Reference

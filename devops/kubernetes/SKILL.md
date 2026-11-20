@@ -1,6 +1,7 @@
 ---
 name: kubernetes
 description: Use when authoring Kubernetes manifests, Helm charts or Kustomize overlays for AKS/EKS/GKE. Triggers "write a Deployment for X", "Helm chart for Y". Not for container builds (docker).
+disable-model-invocation: true
 ---
 
 # DevOps — Kubernetes (AKS / EKS / GKE)

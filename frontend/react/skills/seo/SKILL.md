@@ -1,6 +1,7 @@
 ---
 name: seo
 description: Use when public React/Next.js pages must rank and preview well (static rendering, metadata, OG tags, 404, sitemap). Triggers "make these pages crawlable". Not for the tab-title convention (ui-rules).
+disable-model-invocation: true
 ---
 
 # React — SEO & Discoverability

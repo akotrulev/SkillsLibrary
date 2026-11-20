@@ -1,6 +1,7 @@
 ---
 name: doc-codebase-survey
 description: Use when splitting an existing backend into functional areas by business capability before documenting it. Triggers "split this codebase into areas". Not for tracing one area (doc-feature-trace).
+disable-model-invocation: true
 ---
 
 # Codebase Survey — the area map and the reading plan

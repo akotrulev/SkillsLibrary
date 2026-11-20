@@ -1,6 +1,7 @@
 ---
 name: styling
 description: Use when theming a Jetpack Compose app (Material 3 tokens, dynamic colour, dark mode, adaptive layout, insets). Triggers "dark mode". Not for component structure (ui-components).
+disable-model-invocation: true
 ---
 
 # Android — Styling, Theming and Adaptive Layout

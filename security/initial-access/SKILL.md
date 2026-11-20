@@ -1,6 +1,7 @@
 ---
 name: initial-access
 description: Use when turning a validated vulnerability into a foothold in an authorized pentest. Triggers "chain the confirmed SQLi into a shell". Not for proving a single vuln (exploit-validation).
+disable-model-invocation: true
 ---
 
 # Penetration Testing — Initial Access / Exploitation (Metasploit · sqlmap · custom exploit)

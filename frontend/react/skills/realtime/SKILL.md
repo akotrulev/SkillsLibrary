@@ -1,6 +1,7 @@
 ---
 name: realtime
 description: Use when a React surface needs live server-pushed data (SSE, WebSocket hooks with reconnect, live handoff). Triggers "push updates to the UI". Not for request/response fetching (data-fetching).
+disable-model-invocation: true
 ---
 
 # React — Realtime (live / push lane)

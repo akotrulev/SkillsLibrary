@@ -3,6 +3,7 @@ name: ui-code-audit
 description: Use when auditing UI source against the web interface guidelines (aria-labels, div onClick, unlabeled inputs). Triggers "pre-ship UI code audit". Not for UX review (ux-review).
 metadata:
   version: "1.2.0"
+disable-model-invocation: true
 ---
 
 # Web Interface Guidelines — code-level UI audit

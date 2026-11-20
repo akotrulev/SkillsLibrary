@@ -1,6 +1,7 @@
 ---
 name: offline-and-storage
 description: Use when an Expo/React Native app must persist data (secure-store, MMKV, SQLite, cache persistence, offline queue). Triggers "where do I store this". Not for fetch mechanics (networking).
+disable-model-invocation: true
 ---
 
 # React Native — Offline and Storage

@@ -1,6 +1,7 @@
 ---
 name: ui-components
 description: Use when writing Mac SwiftUI views (Table, List selection, inspector, sidebar, context menus, hover and touch, .task loads). Triggers "build this window". Not for state (architecture).
+disable-model-invocation: true
 ---
 
 # macOS — SwiftUI Views

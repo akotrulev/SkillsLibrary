@@ -1,6 +1,7 @@
 ---
 name: network-mocking
 description: Use when TypeScript UI tests must mock, throttle or assert browser traffic (Playwright routes, HAR, MITM). Triggers "mock this XHR". Not for WebSocket/SSE (realtime-stream-testing).
+disable-model-invocation: true
 ---
 
 # QA — Network Mocking and Monitoring (TypeScript / Playwright 1.64)

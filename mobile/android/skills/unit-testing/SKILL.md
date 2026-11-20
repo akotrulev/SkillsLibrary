@@ -1,6 +1,7 @@
 ---
 name: unit-testing
 description: Use when Kotlin or Compose logic needs a dev-side unit test (JUnit, runTest, Turbine, Robolectric, Kover). Triggers "unit-test this ViewModel". Not for device journeys (qa-mobile-typescript).
+disable-model-invocation: true
 ---
 
 # Android — Unit Testing (JUnit 4 + fakes)

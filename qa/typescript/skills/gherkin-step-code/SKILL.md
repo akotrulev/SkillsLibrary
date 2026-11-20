@@ -1,6 +1,7 @@
 ---
 name: gherkin-step-code
 description: Use when turning Gherkin .feature files into playwright-bdd/CucumberJS steps in TypeScript bound to page objects. Triggers "generate step definitions". Not for writing .feature files (feature-files).
+disable-model-invocation: true
 ---
 
 # BDD Step Bindings + POM Implementation (TypeScript)

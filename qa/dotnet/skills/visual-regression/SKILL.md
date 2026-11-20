@@ -1,6 +1,7 @@
 ---
 name: visual-regression
 description: Use when a .NET/NUnit Playwright suite must catch visual change (screenshot baselines, Percy, Applitools). Triggers "add visual regression tests". Not for breakpoint layout (responsive-testing).
+disable-model-invocation: true
 ---
 
 # QA — Visual Regression (.NET 10 / Playwright 1.63)

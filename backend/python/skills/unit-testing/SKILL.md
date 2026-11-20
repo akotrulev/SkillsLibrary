@@ -1,6 +1,7 @@
 ---
 name: unit-testing
 description: Use when Python backend or worker logic needs a unit test with pytest (seams, hostile fixtures, coverage floor). Triggers "unit-test the validator". Not for HTTP tests (api-tests).
+disable-model-invocation: true
 ---
 
 # Python — Unit Testing (pytest)

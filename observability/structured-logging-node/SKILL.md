@@ -1,6 +1,7 @@
 ---
 name: structured-logging
 description: Use when setting up structured logging in a Node/TypeScript service with pino (JSON, correlation IDs, Loki, redaction). Triggers "use pino in NestJS". Not for traces or metrics (opentelemetry).
+disable-model-invocation: true
 ---
 
 # Observability — Structured Logging (Node 24 / TypeScript)

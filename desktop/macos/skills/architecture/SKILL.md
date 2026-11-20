@@ -1,6 +1,7 @@
 ---
 name: architecture
 description: Use when deciding where state and logic live in a Mac SwiftUI app (@Observable models, per-window vs app-wide, @FocusedValue). Triggers "MVVM or not". Not for API calls (networking).
+disable-model-invocation: true
 ---
 
 # macOS — Architecture and State

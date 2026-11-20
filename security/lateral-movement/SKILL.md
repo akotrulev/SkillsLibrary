@@ -1,6 +1,7 @@
 ---
 name: lateral-movement
 description: Use when pivoting from a compromised host to other in-scope systems in an authorized pentest (cred reuse, AD paths, K8s). Triggers "map the AD attack paths". Not for one host (privilege-escalation).
+disable-model-invocation: true
 ---
 
 # Penetration Testing — Lateral Movement (NetExec · impacket · BloodHound CE · ligolo-ng/chisel/sshuttle · K8s pivots)

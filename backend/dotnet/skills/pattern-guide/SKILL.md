@@ -1,6 +1,7 @@
 ---
 name: patterns
 description: Use when explaining a design pattern in C#/.NET (strategy, CQRS with MediatR, repository). Triggers "strategy pattern in C#", "explain CQRS with MediatR". Not for scaffolding (patterns-apply).
+disable-model-invocation: true
 ---
 
 # .NET Design Patterns — Reference

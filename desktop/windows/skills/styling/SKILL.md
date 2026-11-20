@@ -1,6 +1,7 @@
 ---
 name: styling
 description: Use when theming a WinUI app (Fluent 2 theme resources, light/dark/High Contrast, Mica, type ramp, icons, motion, DPI). Triggers "dark mode". Not for control structure (ui-components).
+disable-model-invocation: true
 ---
 
 # Windows — Styling (Fluent 2, theme, motion)

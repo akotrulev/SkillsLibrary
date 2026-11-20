@@ -1,6 +1,7 @@
 ---
 name: cloud-incident-response
 description: Use when responding to a cloud security incident on AWS, Azure or GCP (triage, forensics, containment, recovery, BCDR). Triggers "we got a GuardDuty alert". Not for detections (detection-engineering).
+disable-model-invocation: true
 ---
 
 # Security Governance — Cloud Incident Response (runbook · forensics · BCDR)

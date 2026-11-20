@@ -1,6 +1,7 @@
 ---
 name: menus-and-commands
 description: Use when adding Mac menu bar commands, shortcuts or context menus (CommandMenu, FocusedValue). Triggers "add a menu item". Not for windows or toolbars (windows-and-scenes).
+disable-model-invocation: true
 ---
 
 # macOS — Menus and Commands

@@ -1,6 +1,7 @@
 ---
 name: data-fetching
 description: Use when a React component fetches or writes data (Server Component fetch, TanStack Query, Server Actions, Suspense). Triggers "how should this load data". Not for pushed data (realtime).
+disable-model-invocation: true
 ---
 
 # React — Data Access (request/response lane)

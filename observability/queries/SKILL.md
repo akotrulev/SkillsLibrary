@@ -1,6 +1,7 @@
 ---
 name: queries
 description: Use when writing LogQL (Loki) or PromQL (Prometheus/Mimir) for dashboards, alerts or investigation. Triggers "PromQL for p95 latency", "LogQL for error logs". Not for dashboard layout (dashboards).
+disable-model-invocation: true
 ---
 
 # Observability — LogQL & PromQL

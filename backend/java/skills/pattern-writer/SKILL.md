@@ -1,6 +1,7 @@
 ---
 name: patterns-apply
 description: Use when scaffolding a design pattern into a Java/Spring Boot repo (strategy, repository, command handler). Triggers "scaffold strategy in Spring Boot". Not for explanations (patterns).
+disable-model-invocation: true
 ---
 
 # Java Design Patterns — Generator

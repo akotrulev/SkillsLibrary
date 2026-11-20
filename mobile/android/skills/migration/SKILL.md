@@ -1,6 +1,7 @@
 ---
 name: migration
 description: Use when an Android project changes lane (AGP 9, Views to Compose, kapt to KSP, LiveData to Flow). Triggers "move us to AGP 9". Not for a new app (project-setup).
+disable-model-invocation: true
 ---
 
 # Android — Migration

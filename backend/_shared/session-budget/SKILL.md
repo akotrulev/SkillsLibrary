@@ -1,6 +1,7 @@
 ---
 name: plan-session-budget
 description: Use when sizing plan tasks to one session each or writing each task's paste-ready prompt. Triggers "is this one session", "what do I paste next". Not for sequencing tasks (plan-delivery).
+disable-model-invocation: true
 ---
 
 # Session Budget — one task, one session, one prompt

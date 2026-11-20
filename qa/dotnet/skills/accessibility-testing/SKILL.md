@@ -1,6 +1,7 @@
 ---
 name: accessibility-testing
 description: Use when a .NET/NUnit Playwright suite must scan for WCAG violations with axe-core or Lighthouse. Triggers "add a11y tests". Not for pixel diffs (visual-regression).
+disable-model-invocation: true
 ---
 
 # QA — Accessibility Testing (.NET 10 / Playwright 1.63)

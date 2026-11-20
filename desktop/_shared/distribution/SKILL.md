@@ -1,6 +1,7 @@
 ---
 name: distribution
 description: Use when a macOS or Windows desktop app is signed, notarized, packaged, published or auto-updated. Triggers "notarize", "MSIX", "Sparkle". Not for pipeline YAML (devops-engineer).
+disable-model-invocation: true
 ---
 
 # Desktop — Distribution, Signing and Updates

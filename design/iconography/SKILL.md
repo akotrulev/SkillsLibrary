@@ -1,6 +1,7 @@
 ---
 name: iconography
 description: Use when choosing or auditing icons and OG/social images as a system (one family, Phosphor, Lucide, inline SVG). Triggers "which icon library", "make an OG image". Not for tokens (tokens).
+disable-model-invocation: true
 ---
 
 # Iconography — icons and social imagery as a system

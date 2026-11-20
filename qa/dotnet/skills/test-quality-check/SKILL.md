@@ -1,6 +1,7 @@
 ---
 name: test-quality-check
 description: Use when measuring test quality in a .NET suite with mutation testing (Stryker.NET), gating on mutation score. Triggers "add mutation testing". Not for pruning low-value tests (test-audit).
+disable-model-invocation: true
 ---
 
 # QA — Mutation Testing (Stryker.NET, C#)

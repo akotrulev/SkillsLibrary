@@ -1,6 +1,7 @@
 ---
 name: project-setup
 description: Use when standing up a new Blazor Web App from zero (interactivity model, .Client split, render modes). Triggers "create a new Blazor project". Not for an existing app (component-writer).
+disable-model-invocation: true
 ---
 
 # Blazor — Project Scaffold

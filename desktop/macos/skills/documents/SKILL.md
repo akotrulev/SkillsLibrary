@@ -1,6 +1,7 @@
 ---
 name: documents
 description: Use when a Mac app opens, edits or saves user files (DocumentGroup, Document, packages, autosave). Triggers "make it a document app". Not for app databases (offline-and-storage).
+disable-model-invocation: true
 ---
 
 # macOS — Documents

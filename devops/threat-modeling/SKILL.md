@@ -1,6 +1,7 @@
 ---
 name: threat-modeling
 description: Use when threat-modeling a system before testing it (DFDs, STRIDE, attack trees, threat register). Triggers "threat model this service". Not for running scanners (kubernetes-security).
+disable-model-invocation: true
 ---
 
 # DevOps — Threat Modeling (STRIDE · DFD · Attack Trees)

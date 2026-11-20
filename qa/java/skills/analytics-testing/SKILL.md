@@ -1,6 +1,7 @@
 ---
 name: analytics-testing
 description: Use when Java/TestNG Playwright tests must assert analytics beacons, dataLayer or consent gating (GA4, pixels, Consent Mode v2, GPC). Triggers "test our GA4 events". Not for mocks (network-mocking).
+disable-model-invocation: true
 ---
 
 # QA — Analytics, Tracking and Consent Testing (Java / Playwright 1.63 + TestNG)

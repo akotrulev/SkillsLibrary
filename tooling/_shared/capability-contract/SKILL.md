@@ -1,6 +1,7 @@
 ---
 name: capability-contract
 description: Use when deriving a project's agent-drivable capabilities into a typed contract before building an MCP or CLI. Triggers "what tools should the MCP have". Not for building it (mcp-builder).
+disable-model-invocation: true
 ---
 
 # Capability Contract — what the tool exposes, before it exists

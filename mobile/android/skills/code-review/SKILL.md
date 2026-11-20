@@ -1,6 +1,7 @@
 ---
 name: conventions-review
 description: Use when reviewing a Kotlin, Jetpack Compose or Views diff against plugin conventions, plus an emulator screenshot pass. Triggers "review this PR". Not for a whole-repo audit (standards-audit).
+disable-model-invocation: true
 ---
 
 # Android — Code Review

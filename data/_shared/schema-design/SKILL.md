@@ -1,6 +1,7 @@
 ---
 name: schema-design
 description: Use when choosing a database engine or designing a cross-engine data model (ids, soft delete, tenancy, money). Triggers "which database for this workload". Not for slow queries (query-tuning).
+disable-model-invocation: true
 ---
 
 # Data — Schema Design (cross-engine)

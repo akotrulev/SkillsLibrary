@@ -1,6 +1,7 @@
 ---
 name: navigation
 description: Use when adding screens, tabs or deep-link routes in Expo Router (typed and protected routes, modals). Triggers "add a screen". Not for push and link setup (push-and-deep-links).
+disable-model-invocation: true
 ---
 
 # React Native — Navigation (Expo Router)

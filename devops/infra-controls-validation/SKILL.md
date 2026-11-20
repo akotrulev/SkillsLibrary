@@ -1,6 +1,7 @@
 ---
 name: controls-validation
 description: Use when proving an infrastructure security control actually works, not just that it is configured. Triggers "verify TLS is actually enforced". Not for CSPM sweeps (cloud-posture).
+disable-model-invocation: true
 ---
 
 # DevOps — Infrastructure Controls Validation

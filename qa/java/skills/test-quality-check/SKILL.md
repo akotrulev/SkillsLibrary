@@ -1,6 +1,7 @@
 ---
 name: test-quality-check
 description: Use when measuring test quality in a Java suite with mutation testing (PIT), gating on mutation score. Triggers "add mutation testing". Not for pruning low-value tests (test-audit).
+disable-model-invocation: true
 ---
 
 # QA — Mutation Testing (PIT / pitest, Java/Kotlin)

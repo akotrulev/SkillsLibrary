@@ -1,6 +1,7 @@
 ---
 name: forms
 description: Use when building a Mac SwiftUI form (Settings, inspectors, FocusState, key-view loop, validation). Triggers "build a preferences pane". Not for the request (networking).
+disable-model-invocation: true
 ---
 
 # macOS — Forms

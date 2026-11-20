@@ -1,6 +1,7 @@
 ---
 name: load-testing
 description: Use when designing or writing Gatling load/performance tests in Java (average, spike, ramp). Triggers "write a Gatling test for endpoint X". Not for fault injection (failure-injection-testing).
+disable-model-invocation: true
 ---
 
 # QA — Performance Testing with Gatling (Java 21)

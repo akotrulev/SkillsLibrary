@@ -1,6 +1,7 @@
 ---
 name: test-audit
 description: Use when auditing a test suite for low-value tests to prune (no assertions, duplicates, brittle); read-only report. Triggers "which tests can we prune". Not for mutation testing (test-quality-check).
+disable-model-invocation: true
 ---
 
 # Test audit — a saved sweep for tests not worth their upkeep

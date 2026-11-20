@@ -1,6 +1,7 @@
 ---
 name: dataset-formats
 description: Use when deciding how a training dataset is stored (record schema, chat format, provenance, splits, shards). Triggers "JSONL schema for a chat dataset". Not for quality filtering (data-quality).
+disable-model-invocation: true
 ---
 
 # Training Data — Dataset Formats & Layout (cross-stage)

@@ -1,6 +1,7 @@
 ---
 name: mcp-builder
 description: Use when rendering a confirmed capability contract as a schema-validated MCP server, one tool per capability. Triggers "build an MCP for this project". Not for a terminal surface (cli-builder).
+disable-model-invocation: true
 ---
 
 # MCP Builder — the contract, rendered as tools

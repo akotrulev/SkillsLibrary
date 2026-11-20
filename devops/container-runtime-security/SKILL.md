@@ -1,6 +1,7 @@
 ---
 name: container-runtime-security
 description: Use when testing a running Kubernetes cluster's attack surface (kube-hunter, Falco), authorization-gated. Triggers "probe our running cluster". Not for CIS scoring (kubernetes-security).
+disable-model-invocation: true
 ---
 
 # DevOps — Container & Runtime Security (kube-hunter · Falco)

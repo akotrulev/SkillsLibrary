@@ -1,6 +1,7 @@
 ---
 name: patterns-apply
 description: Use when scaffolding Rust backend code (axum + tokio skeleton, typed config, thiserror errors, handlers). Triggers "scaffold a Rust service". Not for explanations (patterns).
+disable-model-invocation: true
 ---
 
 # Rust — Generator

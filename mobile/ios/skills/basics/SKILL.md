@@ -1,6 +1,7 @@
 ---
 name: concepts
 description: Use when writing or reviewing idiomatic Swift (optionals, errors, Swift 6 concurrency, Sendable). Triggers "is this Swift idiomatic". Not for reviewing a diff (conventions-review).
+disable-model-invocation: true
 ---
 
 # iOS — The Swift Coding Standard

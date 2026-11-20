@@ -1,6 +1,7 @@
 ---
 name: api-tests-review
 description: Use when reviewing existing TypeScript API test code (Vitest + fetch + Zod) for quality. Triggers "review this API test". Not for writing new tests (api-tests).
+disable-model-invocation: true
 ---
 
 # QA — API Test Reviewer (TypeScript / Vitest + fetch + Zod)

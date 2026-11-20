@@ -1,6 +1,7 @@
 ---
 name: unit-testing
 description: Use when TypeScript backend logic needs a unit test with Vitest (seams, DI over vi.mock, coverage floor). Triggers "unit-test this service", "fake the clock". Not for HTTP tests (api-tests).
+disable-model-invocation: true
 ---
 
 # Node — Unit Testing (Vitest + TypeScript strict)

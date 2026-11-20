@@ -1,6 +1,7 @@
 ---
 name: client-side-security
 description: Use when testing client-side security that server scanners miss; DOM XSS, CSP validation, SPA DAST on non-prod. Triggers "test for DOM XSS". Not for server-side injection (active-scan).
+disable-model-invocation: true
 ---
 
 # Security Testing — Client-Side Security (DOM XSS · CSP validation · SPA DAST)

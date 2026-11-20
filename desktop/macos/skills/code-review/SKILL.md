@@ -1,6 +1,7 @@
 ---
 name: conventions-review
 description: Use when reviewing a Swift, SwiftUI or AppKit Mac diff against plugin conventions, plus a window screenshot pass. Triggers "review this PR". Not for a whole-repo audit (standards-audit).
+disable-model-invocation: true
 ---
 
 # macOS — Code Review

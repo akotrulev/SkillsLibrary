@@ -1,6 +1,7 @@
 ---
 name: dark-patterns
 description: Use when a flow asks for money, consent, data or permissions, or is reviewed for dark patterns (DSA, FTC). Triggers "is this a dark pattern". Not for UI copy (ux-writing).
+disable-model-invocation: true
 ---
 
 # Ethical patterns — the flows that ask for something

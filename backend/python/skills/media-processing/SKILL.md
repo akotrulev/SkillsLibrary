@@ -1,6 +1,7 @@
 ---
 name: media-processing
 description: Use when writing Python Pillow code for hostile uploads (validation, SVG sanitising, EXIF/GPS strip, rembg, DPI). Triggers "strip GPS from photos". Not for the Dockerfile (sandboxed-worker).
+disable-model-invocation: true
 ---
 
 # Media Processing — Generator

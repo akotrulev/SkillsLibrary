@@ -1,6 +1,7 @@
 ---
 name: brand-import
 description: Use when turning an existing brand book, logo or colors into a working token system. Triggers "turn our brand book into tokens", "match our brand". Not for inventing an identity (visual-identity).
+disable-model-invocation: true
 ---
 
 # Brand Intake — an existing brand becomes a token system

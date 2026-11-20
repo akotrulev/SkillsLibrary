@@ -1,6 +1,7 @@
 ---
 name: visual-regression
 description: Use when a Java/TestNG Playwright suite must catch visual change (screenshot baselines, Percy, Applitools). Triggers "add visual regression tests". Not for breakpoint layout (responsive-testing).
+disable-model-invocation: true
 ---
 
 # QA — Visual Regression (Java / Playwright 1.63)

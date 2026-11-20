@@ -1,6 +1,7 @@
 ---
 name: data-grid
 description: Use when building or reviewing a React data grid (house DataGrid on TanStack Table, server paging, sort, filter, export). Triggers "add a table". Not for picking a library (component-library).
+disable-model-invocation: true
 ---
 
 # React — Data Grid (the house grid)

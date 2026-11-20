@@ -1,6 +1,7 @@
 ---
 name: auth0
 description: Use when adding or fixing Auth0 login in a native Swift/SwiftUI iOS app (Auth0.swift, PKCE, Keychain, biometrics). Triggers "add Auth0 login". Not for tenant setup or OIDC theory.
+disable-model-invocation: true
 ---
 
 # Auth — Auth0 in iOS (Swift)

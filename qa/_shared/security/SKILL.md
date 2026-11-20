@@ -1,6 +1,7 @@
 ---
 name: security-foundations
 description: Use when planning security testing; maps OWASP Top 10 and API Top 10 to scanner gates, severity policy and triage. Triggers "map our coverage to OWASP". Not for running a scan (active-scan).
+disable-model-invocation: true
 ---
 
 # QA — Security Testing (Shared / OWASP backbone)

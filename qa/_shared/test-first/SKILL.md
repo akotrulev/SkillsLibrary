@@ -1,6 +1,7 @@
 ---
 name: test-first
 description: Use when a plan's Q task writes acceptance tests before the implementation, red against 501 not-implemented stubs. Triggers "write the acceptance tests first". Not for unit tests (unit-testing).
+disable-model-invocation: true
 ---
 
 # QA — Test-First Acceptance Tests (Shared)

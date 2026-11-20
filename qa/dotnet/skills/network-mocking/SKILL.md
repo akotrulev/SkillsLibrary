@@ -1,6 +1,7 @@
 ---
 name: network-mocking
 description: Use when .NET/NUnit UI tests must mock, throttle or assert browser traffic (Playwright routes, HAR, MITM). Triggers "mock this XHR". Not for WebSocket/SSE (realtime-stream-testing).
+disable-model-invocation: true
 ---
 
 # QA — Network Mocking (.NET 10 / Playwright 1.63)

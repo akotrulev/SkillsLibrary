@@ -1,6 +1,7 @@
 ---
 name: distributed-app-testing
 description: Use when a Java/TestNG suite must boot the whole multi-service system and its dependencies (compose, Testcontainers). Triggers "test the services together". Not for one service (db-testcontainers).
+disable-model-invocation: true
 ---
 
 # QA — Distributed App Testing (Testcontainers + TestNG, Java 21)

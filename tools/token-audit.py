@@ -2,8 +2,9 @@
 """Token-cost audit for the SkillsLibrary plugins.
 
 Reports, per plugin in .claude-plugin/marketplace.json:
-  - always-on cost: sum of skill `description` frontmatter + agent `description`
-    frontmatter (both are injected into every session)
+  - always-on cost: the `description` of every skill listed to the model (one
+    without `disable-model-invocation: true`) + every agent `description`
+    (both are injected into every session)
   - per-invocation cost: SKILL.md body sizes
   - agent-run cost: full agent prompt (whole file) sizes
 
@@ -33,14 +34,15 @@ AGENT_BUDGET = 14_000
 
 
 def parse_frontmatter(path):
-    """Return (description, body) as decoded strings; ('', whole-text) if no frontmatter."""
+    """Return (description, body, listed); ('', whole-text, True) if no frontmatter."""
     with open(path, encoding="utf-8") as f:
         text = f.read()
     m = re.match(r"^---\r?\n(.*?)\r?\n---\r?\n?(.*)$", text, re.S)
     if not m:
-        return "", text
+        return "", text, True
     dm = re.search(r"^description:\s*(.*?)(?=^\w[\w-]*:|\Z)", m.group(1), re.S | re.M)
-    return (dm.group(1).strip() if dm else ""), m.group(2)
+    listed = re.search(r"^disable-model-invocation:\s*true\s*$", m.group(1), re.M) is None
+    return (dm.group(1).strip() if dm else ""), m.group(2), listed
 
 
 def read_chars(path):
@@ -58,22 +60,25 @@ def main():
     desc_viol, body_viol, agent_desc_viol, agent_viol = [], [], [], []
     seen = set()
 
-    header = f"{'plugin':<18} {'skills':>6} {'desc(tok)':>10} {'bodies(tok)':>12} {'ag-desc(tok)':>12} {'ag-body(tok)':>12}"
+    header = (f"{'plugin':<20} {'skills':>6} {'listed':>6} {'desc(tok)':>10} {'bodies(tok)':>12} "
+              f"{'ag-desc(tok)':>12} {'ag-body(tok)':>12}")
     if not violations_only:
         print(header)
     for plugin in marketplace["plugins"]:
         name = plugin["name"]
         skills = plugin.get("skills") or []
         agents = plugin.get("agents") or []
-        n = desc_total = body_total = agent_desc_total = agent_total = 0
+        n = n_listed = desc_total = body_total = agent_desc_total = agent_total = 0
         for s in skills:
             rel = s.lstrip("./")
             path = os.path.join(ROOT, rel if rel.endswith(".md") else os.path.join(rel, "SKILL.md"))
             if not os.path.exists(path):
                 continue
-            desc, body = parse_frontmatter(path)
+            desc, body, listed = parse_frontmatter(path)
             n += 1
-            desc_total += len(desc)
+            if listed:
+                n_listed += 1
+                desc_total += len(desc)
             body_total += len(body)
             relpath = os.path.relpath(path, ROOT)
             if relpath not in seen:
@@ -88,7 +93,7 @@ def main():
             path = os.path.join(ROOT, a.lstrip("./"))
             if not os.path.exists(path):
                 continue
-            desc, _ = parse_frontmatter(path)
+            desc, _, _ = parse_frontmatter(path)
             size = len(read_chars(path))
             agent_desc_total += len(desc)
             agent_total += size
@@ -100,7 +105,7 @@ def main():
                 if size > AGENT_BUDGET:
                     agent_viol.append((size, relpath, name))
         if not violations_only:
-            print(f"{name:<18} {n:>6} {tok(desc_total):>10} {tok(body_total):>12} "
+            print(f"{name:<20} {n:>6} {n_listed:>6} {tok(desc_total):>10} {tok(body_total):>12} "
                   f"{tok(agent_desc_total):>12} {tok(agent_total):>12}")
 
     def report(title, items, budget, unit):

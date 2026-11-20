@@ -1,6 +1,7 @@
 ---
 name: doc-business-model
 description: Use when traced behavior must be written up as a user guide for every role, admins included, or as a plan's delivery note. Trigger "turn this trace into docs". Not for tracing code.
+disable-model-invocation: true
 ---
 
 # Business Documentation — one trace, one guide, every user

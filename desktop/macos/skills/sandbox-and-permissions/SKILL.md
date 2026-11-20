@@ -1,6 +1,7 @@
 ---
 name: sandbox-and-permissions
 description: Use when a Mac app needs entitlements, TCC permissions or user files (sandbox, bookmarks, camera, Full Disk Access). Triggers "permission denied". Not for helpers (background-and-helpers).
+disable-model-invocation: true
 ---
 
 # macOS — Sandbox and Permissions

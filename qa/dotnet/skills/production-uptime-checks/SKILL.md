@@ -1,6 +1,7 @@
 ---
 name: production-uptime-checks
 description: Use when authoring synthetic monitoring as code in .NET with Azure Application Insights against live staging/prod. Triggers "add a prod uptime check". Not for pre-merge CI gates (ci-pipelines).
+disable-model-invocation: true
 ---
 
 # Synthetic Monitoring as Code (Azure App Insights · .NET 10) — **ported from the TypeScript/Checkly canonical**

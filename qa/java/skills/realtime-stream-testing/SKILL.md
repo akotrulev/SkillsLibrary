@@ -1,6 +1,7 @@
 ---
 name: realtime-stream-testing
 description: Use when testing WebSocket or SSE streams in Java/TestNG with protocol clients or Playwright, asserting frames without sleeps. Triggers "test our WebSocket endpoint". Not for plain HTTP (api-tests).
+disable-model-invocation: true
 ---
 
 # WebSocket & SSE Testing (Java 21 / TestNG / Playwright 1.63)

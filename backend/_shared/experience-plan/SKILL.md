@@ -1,6 +1,7 @@
 ---
 name: plan-experience
 description: Use when an approved blueprint needs its UX planned (actors, journeys, screen map, screen specs, SSR/CSR rendering per route, screen-endpoint matrix). Triggers "plan the screens", "SSR or CSR for this route". Not for endpoints (plan-api-surface).
+disable-model-invocation: true
 ---
 
 # Experience Plan — what the user sees, before the API exists

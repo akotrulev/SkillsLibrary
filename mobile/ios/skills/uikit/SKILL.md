@@ -1,6 +1,7 @@
 ---
 name: uikit
 description: Use when an iOS codebase uses UIKit or mixes UIKit and SwiftUI (view controllers, Auto Layout, hosting seams). Triggers "embed SwiftUI". Not for a new SwiftUI screen (ui-components).
+disable-model-invocation: true
 ---
 
 # iOS — UIKit

@@ -1,6 +1,7 @@
 ---
 name: api-project-setup
 description: Use when starting a RestAssured + TestNG API test project from zero in Java (Gradle, pins, Env, fat jar). Triggers "scaffold an API test project". Not for adding tests (api-tests).
+disable-model-invocation: true
 ---
 
 # API Test Project Scaffold (Java 21)

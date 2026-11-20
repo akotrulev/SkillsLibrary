@@ -1,6 +1,7 @@
 ---
 name: ui-project-setup
 description: Use when starting a web-UI test project from zero in Java (Playwright or Selenium, TestNG, Gradle, pins). Triggers "scaffold a UI test project". Not for writing tests (ui-tests-playwright).
+disable-model-invocation: true
 ---
 
 # UI Test Project Scaffold (Java 21)

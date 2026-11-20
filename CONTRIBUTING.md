@@ -37,7 +37,7 @@ qa/test-case-writer/
 
 Every skill follows the same outline. Copy the right file from `.skill-template/`.
 
-1. **YAML frontmatter** — `name`, `description`. The description is what Claude uses to decide whether to load this skill.
+1. **YAML frontmatter** — `name`, `description`, and `disable-model-invocation: true` unless the skill is a front door (see "Front doors"). A front door's description is what Claude uses to decide whether to load it.
 2. **When to use** — concrete trigger phrases.
 3. **When NOT to use** — explicit disambiguation from sibling skills.
 4. **Inputs needed** — what Claude should know before generating output.
@@ -65,16 +65,33 @@ A stack's do/don't standards are **Claude Code rules**, not skill sections: file
 - **Two plugins may load on the same file but must not contradict**: each rule file says which side it owns (be-* persistence = ORM and driver, data = engine and schema; qa CI = test jobs, devops = build, deploy and infra-gate jobs).
 - Prove new globs before merging: a scratch project with the rule files installed and an `InstructionsLoaded` hook logging to a file, then `claude -p "Read <sample files>"`; each file must load for its sample and not for a non-matching file. Reference: `backend/java/skills/rules/`.
 
+## Front doors: which skills the model sees
+
+**A skill is listed to the model only when it is a front door.** Every other registered skill carries `disable-model-invocation: true` in its frontmatter. Its description then leaves the session's skill listing, a person can still type `/<plugin>:<name>`, and agents and commands load it with `Read` by path exactly as before.
+
+The front doors are:
+
+- every `rules` skill, because a model runs it when it sets a project up;
+- the `dev` skills a main session reaches with no agent behind them: `design`, `plan-feature`, `debugging`, `verify`, `quality-constraints`, `source-grounding`, `decision-interview`, `notebooklm`, `audit-spec`, `audit-feature`;
+- the two QA skills no agent step or command loads: `inhouse-framework-conventions` and `python-web-testing`.
+
+The list is `FRONT_DOORS` in `tools/plugin-surface-check.py`. The checker fails when a skill outside it is listed, and when a front door is hidden.
+
+- **Why.** Every listed description is sent on every request. A project enabling nine plugins listed 219 skills, about 12,100 tokens, past the listing budget of about 1% of the context window, so Claude Code was dropping descriptions from the least-used skills. No agent or command reaches a skill through the listing: all of them `Read` the file by path. With front doors only, the same project lists 21 skills, about 1,100 tokens (measured 2026-11-20).
+- **The Skill tool refuses a hidden skill** and tells the user to type it. So an agent, command or skill never tells a model to invoke a hidden skill; it names the path to `Read`.
+- **Add a front door only when** no agent or command reaches the skill and a main session must load it on its own. Each one costs about 50 tokens in every session of every project that enables the plugin.
+- **A hidden skill cannot be preloaded** through an agent's `skills:` frontmatter. Agents here load by path, so nothing depends on that.
+
 ## Writing a good `description`
 
-This is the highest-leverage line in the whole skill. Claude reads only descriptions when deciding which skills are relevant — if the description is vague, the skill won't trigger; if it's too broad, it'll trigger for the wrong things.
+For a front door this is the highest-leverage line in the whole skill. Claude reads only descriptions when deciding which skills are relevant — if the description is vague, the skill won't trigger; if it's too broad, it'll trigger for the wrong things. For a hidden skill the description is what a person reads in the `/` menu, so the same shape applies.
 
-Every enabled skill's description is sent on every request, inside a listing budget of about 1% of the context window. When the listing overflows, Claude Code drops descriptions, starting with the least-used skills. Those skills then show as bare names and never trigger. A project enables several plugins with about 200 skills between them, so the budget per skill is small.
+A front door's description is sent on every request, inside a listing budget of about 1% of the context window. When the listing overflows, Claude Code drops descriptions, starting with the least-used skills. Those skills then show as bare names and never trigger.
 
 Rules:
 - **≤ 200 characters for a skill** and ≤ 650 for an agent. `tools/token-audit.py` enforces both.
 - Start with "Use when..." and the key use case. Name the stack or tool if the skill is stack-specific, since those words drive matching.
-- Then one or two quoted trigger phrases, written `Triggers "a", "b".` Never write `Triggers:`. A colon followed by a space breaks a plain YAML scalar.
+- Then one or two quoted trigger phrases, written `Triggers "a", "b".` Never write `Triggers:`, or a colon followed by a space anywhere in the line. It breaks a plain YAML scalar, and a frontmatter that does not parse loses its `disable-model-invocation` too. `tools/plugin-surface-check.py` fails on it.
 - End with one "Not for X (sibling)." clause naming the closest confusable sibling in the same plugin.
 - Leave enumerations, version lists and scope prose to the body.
 
@@ -107,7 +124,7 @@ Bad:
 
 **Reserved names.** No skill name or command stem may equal a Claude Code built-in (list as of 2026-10-11): `add-dir agents artifacts bug clear claude-api code-review compact config context cost dataviz doctor effort exit export fast feedback fewer-permission-prompts focus help hooks ide init install-github-app keybindings-help login logout loop mcp memory migrate-installer model output-style permissions plan plugin plugin-authoring pr-comments privacy-settings release-notes resume review rewind run schedule security-review simplify status statusline terminal-setup todos update-config upgrade usage vim workflow-authoring`.
 
-**Before a commit that touches `.claude-plugin/marketplace.json` or a `name:`**, `python3 tools/plugin-surface-check.py` must print `OK`; it enforces unique names per plugin, the reserved list, no prefixes, one category per skill and agent, resolvable dependencies with no cycle, and that every registered path exists. Rename a skill only with the references that cite it, and record it in the plan that renamed it.
+**Before a commit that touches `.claude-plugin/marketplace.json` or a skill's frontmatter**, `python3 tools/plugin-surface-check.py` must print `OK`; it enforces unique names per plugin, the reserved list, no prefixes, one category per skill and agent, resolvable dependencies with no cycle, that every registered path exists, that only front doors are listed to the model, and that no description holds an unquoted colon and space. Rename a skill only with the references that cite it, and record it in the plan that renamed it.
 
 ## Testing a new skill
 
@@ -130,4 +147,5 @@ Skills are versioned via git. If you make a breaking change to a skill's output 
 - [ ] At least one full example in the skill
 - [ ] Tested with 3+ trigger phrases
 - [ ] Listed in the appropriate section of the root `README.md` status table
+- [ ] `disable-model-invocation: true` is set, unless the skill is a front door added to `FRONT_DOORS`
 - [ ] `name:` is the topic only and `python3 tools/plugin-surface-check.py` prints `OK`

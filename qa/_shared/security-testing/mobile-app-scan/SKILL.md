@@ -1,6 +1,7 @@
 ---
 name: mobile-app-scan
 description: Use when statically scanning an Android APK/AAB or iOS IPA with MobSF for secrets, weak crypto and insecure config. Triggers "scan our APK/IPA". Not for on-device testing (mobile-runtime-testing).
+disable-model-invocation: true
 ---
 
 # Security Testing — Mobile Static Analysis (MobSF + mobile SAST)

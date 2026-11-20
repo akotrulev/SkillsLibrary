@@ -1,6 +1,7 @@
 ---
 name: js-interop
 description: Use when a Blazor component genuinely needs JavaScript (.razor.js modules, OnAfterRenderAsync, disposal, [JSInvokable]). Triggers "call this JS library from Blazor". Not for motion (animation).
+disable-model-invocation: true
 ---
 
 # Blazor — JavaScript Interop

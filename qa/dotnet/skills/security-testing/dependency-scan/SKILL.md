@@ -1,6 +1,7 @@
 ---
 name: dependency-scan
 description: Use when wiring SCA as a CI gate for a .NET build (dotnet list package), failing on vulnerable packages. Triggers "fail the build on vulnerable dependencies". Not for runtime DAST (passive-scan).
+disable-model-invocation: true
 ---
 
 # Security Testing — Dependency Scanning / SCA (.NET)

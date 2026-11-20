@@ -1,6 +1,7 @@
 ---
 name: ui-project-setup
 description: Use when starting a web-UI test project from zero in TypeScript (Playwright Test, pins, config, Docker image). Triggers "scaffold a UI test project". Not for writing tests (ui-tests-playwright).
+disable-model-invocation: true
 ---
 
 # UI Test Project Scaffold (TypeScript, Playwright Test 1.64)

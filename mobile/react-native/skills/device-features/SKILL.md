@@ -1,6 +1,7 @@
 ---
 name: device-features
 description: Use when an Expo/React Native app uses camera, photos, location, biometrics or files via expo-* modules. Triggers "ask for camera access", "pick a photo". Not for push or links (push-and-deep-links).
+disable-model-invocation: true
 ---
 
 # React Native — Device Features and Permissions

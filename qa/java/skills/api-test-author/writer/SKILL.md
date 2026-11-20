@@ -1,6 +1,7 @@
 ---
 name: api-tests
 description: Use when writing Java REST API tests with RestAssured + TestNG. Triggers "write an API test for X", "automate these test cases". Not for Playwright-runner API tests (api-tests-playwright).
+disable-model-invocation: true
 ---
 
 # QA — API Test Writer (Java / RestAssured + TestNG)

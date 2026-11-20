@@ -1,6 +1,7 @@
 ---
 name: language-testing
 description: Use when writing i18n tests in TypeScript, Playwright pinned to a locale, asserting by i18next/FormatJS key. Triggers "test German/Arabic rendering". Not for breakpoints (responsive-testing).
+disable-model-invocation: true
 ---
 
 # QA — i18n / Localization Testing (TypeScript / Playwright 1.64 + Vitest + Intl)

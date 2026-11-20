@@ -1,6 +1,7 @@
 ---
 name: db-testcontainers
 description: Use when scaffolding Java integration tests on a real database via Testcontainers. Triggers "spin up Postgres for these tests". Not for an existing DB (db-connection).
+disable-model-invocation: true
 ---
 
 # QA — DB Testing with Testcontainers (Java)

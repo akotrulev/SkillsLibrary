@@ -1,6 +1,7 @@
 ---
 name: styling
 description: Use when styling an Expo/React Native app (StyleSheet, typed tokens, dark mode, safe areas, tablets). Triggers "dark mode". Not for a UI kit's theme (component-library).
+disable-model-invocation: true
 ---
 
 # React Native — Styling and Adaptive Layout

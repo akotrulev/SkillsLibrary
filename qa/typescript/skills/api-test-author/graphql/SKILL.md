@@ -1,6 +1,7 @@
 ---
 name: api-tests-graphql
 description: Use when writing black-box GraphQL API tests in TypeScript (Vitest + fetch + Zod), asserting the data/errors envelope. Triggers "write a GraphQL test for X". Not for REST (api-tests).
+disable-model-invocation: true
 ---
 
 # QA — GraphQL API Test Writer (TypeScript / Vitest + fetch + Zod)

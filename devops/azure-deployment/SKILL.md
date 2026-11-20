@@ -1,6 +1,7 @@
 ---
 name: azure-deployment
 description: Use when deploying a service to Azure (Container Apps, Functions, App Service, Static Web Apps, AKS). Triggers "deploy to Azure Container Apps". Not for AWS (aws-deployment).
+disable-model-invocation: true
 ---
 
 # DevOps — Azure Deployment

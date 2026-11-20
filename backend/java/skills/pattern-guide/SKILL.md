@@ -1,6 +1,7 @@
 ---
 name: patterns
 description: Use when explaining a design pattern in Java/Spring Boot (strategy, CQRS, repository, sealed types). Triggers "strategy pattern in Java". Not for scaffolding (patterns-apply).
+disable-model-invocation: true
 ---
 
 # Java Design Patterns — Reference

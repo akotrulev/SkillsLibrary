@@ -1,6 +1,7 @@
 ---
 name: gitlab-ci
 description: Use when writing or modifying a GitLab CI/CD pipeline (.gitlab-ci.yml) for build, test and deploy. Triggers "write a .gitlab-ci.yml", "add a deploy stage". Not for test-suite CI lanes (ci-pipelines).
+disable-model-invocation: true
 ---
 
 # DevOps — GitLab CI/CD

@@ -1,6 +1,7 @@
 ---
 name: concepts
 description: Use when writing or reviewing Swift for a Mac app (Swift 6 concurrency, optionals, errors, os.Logger, the Mac model). Triggers "is this Swift idiomatic". Not for reviewing a diff (code-review).
+disable-model-invocation: true
 ---
 
 # macOS — The Swift Coding Standard and the Mac Model

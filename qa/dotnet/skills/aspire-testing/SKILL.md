@@ -1,6 +1,7 @@
 ---
 name: aspire-testing
 description: Use when a .NET Aspire solution needs NUnit integration tests that start the AppHost via Aspire.Hosting.Testing. Triggers "test the Aspire AppHost". Not for one API host alone (db-testcontainers).
+disable-model-invocation: true
 ---
 
 # QA — .NET Aspire Integration Testing (Aspire.Hosting.Testing + NUnit)

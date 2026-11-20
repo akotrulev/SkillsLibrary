@@ -1,6 +1,7 @@
 ---
 name: requirements-breakdown
 description: Use when distilling a story, BRD, AC or API contract into a sourced test basis before test cases. Triggers "turn this spec into a testable breakdown". Not for the test cases (test-case-writer).
+disable-model-invocation: true
 ---
 
 # QA Test Basis Analyzer

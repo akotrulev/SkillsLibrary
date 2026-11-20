@@ -1,6 +1,7 @@
 ---
 name: plan-blueprint
 description: Use when turning requirements into an approved high-level backend plan (areas, architecture, stack, agent routing). Triggers "plan the backend for X". Not for the detail pack (plan-data-model).
+disable-model-invocation: true
 ---
 
 # Solution Blueprint — the high-level backend plan

@@ -1,6 +1,7 @@
 ---
 name: conventions-review
 description: Use when reviewing Blazor code (lifecycle bugs, missing dispose, prerender double-fetch, render modes, JS interop). Triggers "review this Blazor page". Not for writing code (component-writer).
+disable-model-invocation: true
 ---
 
 # Blazor Design Patterns — Reviewer

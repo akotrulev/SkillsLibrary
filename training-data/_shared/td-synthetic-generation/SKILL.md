@@ -1,6 +1,7 @@
 ---
 name: synthetic-generation
 description: Use when generating training data with a Claude teacher model (distillation, self-instruct, evol-instruct, preference pairs). Triggers "distill from a teacher model". Not for schema (dataset-formats).
+disable-model-invocation: true
 ---
 
 # Training Data — Synthetic Generation (cross-stage engine)

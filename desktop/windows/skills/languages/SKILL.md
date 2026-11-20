@@ -1,6 +1,7 @@
 ---
 name: languages
-description: Use when a Windows app needs localization: .resw files, x:Uid, ResourceLoader, plurals, RTL, culture formats. Triggers "translate this app", "add German". Not for labels and Narrator (accessibility).
+description: Use when a Windows app needs localization (.resw files, x:Uid, ResourceLoader, plurals, RTL, culture formats). Triggers "translate this app", "add German". Not for labels and Narrator (accessibility).
+disable-model-invocation: true
 ---
 
 # Windows — Languages and Localization

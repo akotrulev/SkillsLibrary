@@ -1,6 +1,7 @@
 ---
 name: performance
 description: Use when a Blazor app is slow or heavy (re-renders, Virtualize, WASM startup, AOT, circuit scale). Triggers "my grid re-renders too much". Not for load tests (load-testing).
+disable-model-invocation: true
 ---
 
 # Blazor — Performance

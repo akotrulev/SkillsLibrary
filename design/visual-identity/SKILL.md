@@ -1,6 +1,7 @@
 ---
 name: visual-identity
 description: Use when an app or marketing page needs its visual identity (palette, type, spacing, layout) as tokens. Triggers "give this app a look", "pick a palette". Not for token naming (tokens).
+disable-model-invocation: true
 ---
 
 # Frontend Design

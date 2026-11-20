@@ -1,6 +1,7 @@
 ---
 name: component-library
 description: Use when choosing or wiring a React Native UI kit and theme (Expo UI, NativeWind, Tamagui, Unistyles, Paper). Triggers "which RN component library". Not for hand-written tokens (styling).
+disable-model-invocation: true
 ---
 
 # React Native — Component Library (one-of-N)

@@ -1,6 +1,7 @@
 ---
 name: error-handling
 description: Use when a failure must not blank an Expo/React Native screen (failed/stale/offline regions, error banner, 401 re-auth). Triggers "list empty when API fails". Not for retries (networking).
+disable-model-invocation: true
 ---
 
 # React Native — Error Resilience

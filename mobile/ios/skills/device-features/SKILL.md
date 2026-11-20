@@ -1,6 +1,7 @@
 ---
 name: device-features
 description: Use when an iOS app uses camera, photos, location, Face ID or files, with permission prompts. Triggers "ask for camera access", "pick a photo". Not for push or links (push-and-deep-links).
+disable-model-invocation: true
 ---
 
 # iOS — Device Features

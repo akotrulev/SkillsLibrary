@@ -1,6 +1,7 @@
 ---
 name: detection-validation
 description: Use when asserting the alert for a simulated ATT&CK technique actually fired, by querying the log/alert store. Triggers "did our SIEM catch T1003?". Not for running the technique (atomic-simulation).
+disable-model-invocation: true
 ---
 
 # Purple Team — Detection Validation (assert the guardrail actually fired)

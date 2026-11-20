@@ -1,6 +1,7 @@
 ---
 name: ui-components
 description: Use when writing an Expo/React Native screen or component (Pressable, expo-image, FlashList, native menus). Triggers "build this screen". Not for state ownership (architecture).
+disable-model-invocation: true
 ---
 
 # React Native — UI Components

@@ -1,6 +1,7 @@
 ---
 name: mobile-screen-explorer
 description: Use when a C# mobile suite must explore the open app screen via the Appium MCP and derive locators. Triggers "explore this screen". Not for writing the screen object (mobile-screen-objects).
+disable-model-invocation: true
 ---
 
 # QA — Appium Live-App Explorer (.NET)

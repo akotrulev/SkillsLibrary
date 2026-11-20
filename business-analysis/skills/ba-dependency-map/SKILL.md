@@ -1,6 +1,7 @@
 ---
 name: dependency-map
 description: Use when mapping a business model's connections (triggers, cross-feature reactions, shared data, invariants). Triggers "what else happens when X". Not for one entity's lifecycle (state-grid).
+disable-model-invocation: true
 ---
 
 # BA — Dependency Mapper

@@ -1,6 +1,7 @@
 ---
 name: webmcp-testing
 description: Use when a web app registers WebMCP tools (document.modelContext) and a UI suite must test registration, schemas, execute(). Triggers "test our WebMCP tools". Not for LLM evals (ai-feature-testing).
+disable-model-invocation: true
 ---
 
 # WebMCP testing (shared)

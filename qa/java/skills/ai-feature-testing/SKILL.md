@@ -1,6 +1,7 @@
 ---
 name: ai-feature-testing
 description: Use when testing LLM output from a Java/TestNG suite with rubric and grounding asserts (promptfoo, DeepEval). Triggers "test our chatbot". Not for RAG metrics (ai-answer-quality-testing).
+disable-model-invocation: true
 ---
 
 # LLM-App Testing (Java 21 / TestNG — promptfoo via ProcessBuilder + LangChain4j)

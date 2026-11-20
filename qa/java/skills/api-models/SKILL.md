@@ -1,6 +1,7 @@
 ---
 name: api-models
 description: Use when creating a DTO or response model in a Java API test project (Jackson). Triggers "add an OrderDto". Not for the client class (api-client-writer).
+disable-model-invocation: true
 ---
 
 # qa-java:api-models

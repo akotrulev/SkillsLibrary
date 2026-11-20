@@ -1,6 +1,7 @@
 ---
 name: test-data-builder
 description: Use when creating test data builders/ObjectMothers in a Java test project to replace duplicated literals. Triggers "create a builder for User". Not for row data files (data-driven-testing).
+disable-model-invocation: true
 ---
 
 # QA — Test Data Builder / ObjectMother (Java 21)

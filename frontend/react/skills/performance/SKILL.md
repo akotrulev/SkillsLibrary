@@ -1,6 +1,7 @@
 ---
 name: performance
 description: Use when a React UI is slow or heavy (re-renders, memo/Compiler, bundle size, code-splitting, Web Vitals). Triggers "this list re-renders too much". Not for load tests (load-testing).
+disable-model-invocation: true
 ---
 
 # React — Performance

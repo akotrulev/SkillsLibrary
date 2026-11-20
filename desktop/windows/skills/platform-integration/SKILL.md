@@ -1,6 +1,7 @@
 ---
 name: platform-integration
 description: Use when adding pickers, share, clipboard, drag and drop, background tasks, widgets, WebView2 or Windows AI to WinUI. Triggers "open a file dialog". Not for toasts (activation-and-notifications).
+disable-model-invocation: true
 ---
 
 # Windows — Platform Integration

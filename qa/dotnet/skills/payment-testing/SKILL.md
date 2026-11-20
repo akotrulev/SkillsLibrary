@@ -1,6 +1,7 @@
 ---
 name: payment-testing
 description: Use when .NET/NUnit tests must drive a payment sandbox (Stripe test cards, 3DS, webhooks, refunds). Triggers "test our Stripe checkout", "test the payment webhook". Not for mocks (network-mocking).
+disable-model-invocation: true
 ---
 
 # QA — Payment Flow Testing against a Provider Sandbox (.NET 10 / NUnit + Stripe.net)

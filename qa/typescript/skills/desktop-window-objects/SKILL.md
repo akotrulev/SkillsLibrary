@@ -1,6 +1,7 @@
 ---
 name: desktop-window-objects
 description: Use when creating or updating a WebdriverIO window object for a macOS or Windows app from explored elements. Triggers "create a window object". Not for finding elements (desktop-screen-explorer).
+disable-model-invocation: true
 ---
 
 # QA — Desktop Window Object Builder (TypeScript)

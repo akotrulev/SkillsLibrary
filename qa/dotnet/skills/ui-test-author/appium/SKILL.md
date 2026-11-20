@@ -1,6 +1,7 @@
 ---
 name: ui-tests-appium
 description: Use when scaffolding a .NET Appium 3 (Appium.WebDriver) page object or mobile UI test. Triggers "write an Appium test for X". Not for exploring a live screen (mobile-screen-explorer).
+disable-model-invocation: true
 ---
 
 # QA — Appium .NET Page Object & Test Generator

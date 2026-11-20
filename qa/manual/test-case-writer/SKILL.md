@@ -1,6 +1,7 @@
 ---
 name: test-case-writer
 description: Use when writing formal test cases from requirements, stories, ACs or specs; end-to-end journeys and business rules first. Triggers "write test cases for X". Not for a test plan (test-plan-writer).
+disable-model-invocation: true
 ---
 
 # QA Test Case Writer

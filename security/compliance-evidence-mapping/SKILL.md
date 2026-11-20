@@ -1,6 +1,7 @@
 ---
 name: compliance-evidence-mapping
 description: Use when mapping security controls and tests to compliance evidence (SOC 2, PCI DSS, GDPR, ISO 27001) with a gap list. Triggers "map our controls to SOC 2". Not for authoring controls (hardening).
+disable-model-invocation: true
 ---
 
 # Security Governance — Compliance Evidence Mapping (SOC 2 · PCI DSS · GDPR · ISO 27001 · ASVS)

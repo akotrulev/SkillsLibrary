@@ -1,6 +1,7 @@
 ---
 name: bdd-project-setup
 description: Use when adding a Reqnroll BDD layer to a .NET UI/mobile test project or starting one. Triggers "set up Reqnroll". Not for step definitions (gherkin-step-code).
+disable-model-invocation: true
 ---
 
 # Reqnroll BDD Project Scaffold (C# / .NET 10)

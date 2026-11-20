@@ -1,6 +1,7 @@
 ---
 name: ux-writing
 description: Use when writing or reviewing UI words (button labels, errors, empty states, toasts) in one voice. Triggers "what should this button say", "write the error message". Not for structure (ui-rules).
+disable-model-invocation: true
 ---
 
 # UX Writing — voice & microcopy

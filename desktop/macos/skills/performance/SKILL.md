@@ -1,6 +1,7 @@
 ---
 name: performance
 description: Use when a Mac app hangs (beach ball), drops frames, launches slowly or leaks (Instruments, MetricKit). Triggers "beach ball on big Table". Not for crash reporting (observability).
+disable-model-invocation: true
 ---
 
 # macOS: Performance

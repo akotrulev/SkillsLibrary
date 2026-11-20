@@ -1,6 +1,7 @@
 ---
 name: test-ids
 description: Use when adding testID props so Appium and Maestro can target an Expo/React Native app. Triggers "E2E can't find this element". Not for writing device tests (qa-mobile-typescript).
+disable-model-invocation: true
 ---
 
 # React Native — Testability (`testID` writer)

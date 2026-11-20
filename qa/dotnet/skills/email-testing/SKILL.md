@@ -1,6 +1,7 @@
 ---
 name: email-testing
 description: Use when a .NET/NUnit suite must capture and assert email the SUT sends (Mailpit, Mailosaur, IMAP). Triggers "assert the welcome email was sent". Not for broker messages (messaging-testing).
+disable-model-invocation: true
 ---
 
 # QA — Email Testing (.NET 8 / C#)

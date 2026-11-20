@@ -1,6 +1,7 @@
 ---
 name: accessibility
-description: Use when a Windows app needs accessibility: UI Automation names and peers, Narrator, keyboard and access keys, High Contrast, text scaling. Triggers "make it accessible". Not for test ids (test-ids).
+description: Use when a Windows app needs accessibility (UI Automation names and peers, Narrator, keyboard and access keys, High Contrast, text scaling). Triggers "make it accessible". Not for test ids (test-ids).
+disable-model-invocation: true
 ---
 
 # Windows — Accessibility

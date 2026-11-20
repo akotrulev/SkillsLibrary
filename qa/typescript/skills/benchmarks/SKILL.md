@@ -1,6 +1,7 @@
 ---
 name: benchmarks
 description: Use when writing Vitest micro-benchmarks (vitest bench) in TypeScript or gating a hot path's speed in CI. Triggers "benchmark this function", "which is faster". Not for load (load-testing).
+disable-model-invocation: true
 ---
 
 # QA — Micro-benchmarks with Vitest bench (TypeScript)

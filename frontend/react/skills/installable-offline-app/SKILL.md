@@ -1,6 +1,7 @@
 ---
 name: pwa
 description: Use when a React or Next.js app must be installable or work offline (manifest, Serwist or vite-plugin-pwa, updates). Triggers "make this installable". Not for live reconnection (realtime).
+disable-model-invocation: true
 ---
 
 # React — PWA & Offline

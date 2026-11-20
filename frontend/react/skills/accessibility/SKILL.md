@@ -1,6 +1,7 @@
 ---
 name: accessibility
 description: Use when making React components accessible (semantic markup, focus on navigation, keyboard + ARIA, live regions). Triggers "make this component accessible". Not for scans (accessibility-testing).
+disable-model-invocation: true
 ---
 
 # React — Accessibility

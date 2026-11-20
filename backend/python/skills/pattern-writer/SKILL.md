@@ -1,6 +1,7 @@
 ---
 name: patterns-apply
 description: Use when scaffolding Python backend or worker code (uv + ruff + mypy package, Result union, Protocols). Triggers "set up the Python worker package". Not for explanations (patterns).
+disable-model-invocation: true
 ---
 
 # Python Design Patterns — Generator

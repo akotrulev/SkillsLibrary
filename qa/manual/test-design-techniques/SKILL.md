@@ -1,6 +1,7 @@
 ---
 name: test-design-techniques
 description: Use when deriving test cases by technique (journeys, decision tables, calculations, states, boundaries, partitions). Triggers "what technique applies here". Not for writing cases (test-case-writer).
+disable-model-invocation: true
 ---
 
 # QA — Test Design Techniques (ISTQB)

@@ -1,6 +1,7 @@
 ---
 name: load-testing
 description: Use when designing or writing k6 load/performance tests in TypeScript (average, spike, ramp). Triggers "write a k6 test for endpoint X". Not for fault injection (failure-injection-testing).
+disable-model-invocation: true
 ---
 
 # QA — Performance Testing with k6 (TypeScript / JavaScript)

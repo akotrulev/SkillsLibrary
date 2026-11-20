@@ -1,6 +1,7 @@
 ---
 name: ui-components
 description: Use when writing WinUI XAML (pages, user controls, x:Bind, DataTemplates, virtualized lists, InfoBar, ContentDialog). Triggers "build this screen". Not for state ownership (architecture).
+disable-model-invocation: true
 ---
 
 # Windows — UI Components (WinUI XAML)

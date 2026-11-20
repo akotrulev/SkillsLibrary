@@ -1,6 +1,7 @@
 ---
 name: ui-components
 description: Use when writing SwiftUI views (small views, previews, .task loads, lists, SF Symbols). Triggers "build this screen". Not for state ownership (architecture).
+disable-model-invocation: true
 ---
 
 # iOS — SwiftUI Views

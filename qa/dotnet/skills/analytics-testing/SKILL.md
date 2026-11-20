@@ -1,6 +1,7 @@
 ---
 name: analytics-testing
 description: Use when .NET/NUnit Playwright tests must assert analytics beacons, dataLayer or consent gating (GA4, pixels, Consent Mode v2, GPC). Triggers "test our GA4 events". Not for mocks (network-mocking).
+disable-model-invocation: true
 ---
 
 # QA — Analytics, Tracking and Consent Testing (.NET 10 / Playwright 1.63 + NUnit)

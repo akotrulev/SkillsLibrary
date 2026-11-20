@@ -1,6 +1,7 @@
 ---
 name: test-reports
 description: Use when setting up Allure reporting for a TypeScript test suite (Vitest, Playwright, WebdriverIO). Triggers "set up Allure for our Vitest project". Not for flaky tests (flaky-test-quarantine).
+disable-model-invocation: true
 ---
 
 # QA — Allure Reporting (TypeScript / Vitest, Playwright, WebdriverIO)

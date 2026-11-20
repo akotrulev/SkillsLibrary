@@ -1,6 +1,7 @@
 ---
 name: architecture
 description: Use when deciding where state and logic live in a WinUI app (CommunityToolkit.Mvvm, Generic Host DI, services, view-model state). Triggers "ViewModel or code-behind". Not for API calls (networking).
+disable-model-invocation: true
 ---
 
 # Windows — Architecture (MVVM with CommunityToolkit.Mvvm)

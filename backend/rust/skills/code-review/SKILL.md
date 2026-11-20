@@ -1,6 +1,7 @@
 ---
 name: conventions-review
 description: Use when reviewing Rust code for production panics, needless clones, locks across .await or blocking the runtime. Triggers "review this Rust module". Not for explanations (patterns).
+disable-model-invocation: true
 ---
 
 # Rust — Reviewer

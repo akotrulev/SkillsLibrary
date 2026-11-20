@@ -1,6 +1,7 @@
 ---
 name: ci-pipelines
 description: Use when wiring a test suite into CI on GitHub Actions, Azure Pipelines or GitLab; shards, Allure publishing, OIDC. Triggers "add a CI pipeline for the tests". Not for cross-CI rules (ci-conventions).
+disable-model-invocation: true
 ---
 
 # QA — CI Pipelines (Java 21)

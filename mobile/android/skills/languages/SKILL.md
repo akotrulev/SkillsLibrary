@@ -1,6 +1,7 @@
 ---
 name: i18n
 description: Use when an Android app must support more languages or regions (string resources, plurals, RTL, locale formats). Triggers "translate the app". Not for copy wording (design:ux-writing).
+disable-model-invocation: true
 ---
 
 # Android — Localization and Globalization

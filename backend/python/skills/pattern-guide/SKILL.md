@@ -1,6 +1,7 @@
 ---
 name: patterns
 description: Use when explaining a design pattern in Python (Protocol vs ABC, dataclass vs pydantic, Result vs raise). Triggers "Protocol or ABC", "dataclass or pydantic". Not for scaffolding (patterns-apply).
+disable-model-invocation: true
 ---
 
 # Python Design Patterns — Reference

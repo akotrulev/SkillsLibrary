@@ -1,6 +1,7 @@
 ---
 name: opentelemetry
 description: Use when instrumenting a .NET service with OpenTelemetry (traces, metrics, log correlation, OTLP). Triggers "instrument this with OTel", "add a custom span". Not for log shaping (structured-logging).
+disable-model-invocation: true
 ---
 
 # Observability — OpenTelemetry (.NET 10 primary / 8-9 supported)

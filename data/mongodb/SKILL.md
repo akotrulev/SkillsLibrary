@@ -1,6 +1,7 @@
 ---
 name: mongodb
 description: Use when designing, securing, querying or tuning MongoDB (embed vs reference, aggregations, indexes). Triggers "this Mongo query is slow". Not for cross-engine modeling (schema-design).
+disable-model-invocation: true
 ---
 
 # Data — MongoDB

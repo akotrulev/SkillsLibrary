@@ -1,6 +1,7 @@
 ---
 name: architecture
 description: Use when deciding where state and logic live in a Jetpack Compose app (ViewModel + StateFlow, repositories, Hilt). Triggers "ViewModel or not". Not for API calls (networking).
+disable-model-invocation: true
 ---
 
 # Android — Architecture and State

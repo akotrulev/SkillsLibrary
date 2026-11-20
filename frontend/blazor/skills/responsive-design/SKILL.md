@@ -1,6 +1,7 @@
 ---
 name: responsive-design
 description: Use when a Blazor layout must adapt across screen sizes (breakpoints, MudGrid vs CSS Grid, container queries). Triggers "make this page responsive". Not for tokens or dark mode (styling).
+disable-model-invocation: true
 ---
 
 # Blazor — Responsive design (breakpoints, grids, cross-breakpoint alignment)

@@ -1,6 +1,7 @@
 ---
 name: preference-data
 description: Use when building preference data for a small LLM (DPO/ORPO chosen/rejected pairs, KTO labels, rankings). Triggers "make DPO pairs". Not for SFT data (instruction-sft).
+disable-model-invocation: true
 ---
 
 # Training Data — Preference / Alignment

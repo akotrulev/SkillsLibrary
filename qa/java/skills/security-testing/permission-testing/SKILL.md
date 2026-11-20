@@ -1,6 +1,7 @@
 ---
 name: permission-testing
 description: Use when writing access-control tests in Java (TestNG + RestAssured) for BOLA/IDOR and BFLA. Triggers "test for IDOR", "can user A read user B's data". Not for scanner DAST (passive-scan).
+disable-model-invocation: true
 ---
 
 # Security Testing — Access Control / Authorization Matrix (Java / TestNG)

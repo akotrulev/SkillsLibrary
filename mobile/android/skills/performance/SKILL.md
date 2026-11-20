@@ -1,6 +1,7 @@
 ---
 name: performance
 description: Use when an Android app janks, starts slowly, hits ANRs or leaks (Baseline Profiles, Macrobenchmark, R8, Perfetto). Triggers "slow cold start". Not for crash reporting (observability).
+disable-model-invocation: true
 ---
 
 # Android — Performance

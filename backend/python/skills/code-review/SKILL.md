@@ -1,6 +1,7 @@
 ---
 name: conventions-review
 description: Use when reviewing Python worker or backend code for typing leaks, swallowed exceptions, blocking async or unsafe I/O. Triggers "review this Python module". Not for explanations (patterns).
+disable-model-invocation: true
 ---
 
 # Python — Reviewer

@@ -1,6 +1,7 @@
 ---
 name: appkit
 description: Use when a Mac codebase uses AppKit or mixes it with SwiftUI (NSViewController, NSHostingView, Observation). Triggers "embed SwiftUI in AppKit". Not for a new SwiftUI window (ui-components).
+disable-model-invocation: true
 ---
 
 # macOS — AppKit

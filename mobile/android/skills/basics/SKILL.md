@@ -1,6 +1,7 @@
 ---
 name: concepts
 description: Use when writing or reviewing idiomatic Kotlin (null safety, coroutines, dispatchers, Flow vs StateFlow). Triggers "can I use !!". Not for reviewing a diff (conventions-review).
+disable-model-invocation: true
 ---
 
 # Android — The Kotlin Coding Standard

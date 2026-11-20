@@ -1,6 +1,7 @@
 ---
 name: recon-enumeration
 description: Use when mapping the in-scope attack surface at the start of an authorized pentest (subdomains, hosts, ports, services). Triggers "recon this target". Not for cloud (cloud-recon-enumeration).
+disable-model-invocation: true
 ---
 
 # Penetration Testing — Recon & Attack-Surface Enumeration (amass · subfinder · httpx · nmap · masscan · Shodan/Censys)

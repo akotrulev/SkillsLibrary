@@ -1,6 +1,7 @@
 ---
 name: state-management
 description: Use when Blazor state lives in the wrong place (scoped services, CascadingValue, PersistentState, Fluxor). Triggers "where should this state live". Not for forms (forms).
+disable-model-invocation: true
 ---
 
 # Blazor State Management

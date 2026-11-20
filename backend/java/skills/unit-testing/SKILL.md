@@ -1,6 +1,7 @@
 ---
 name: unit-testing
 description: Use when Java backend logic needs a unit test with JUnit 5 + Mockito, no Spring context (seams, fakes, coverage floor). Triggers "unit-test this service". Not for HTTP tests (api-tests).
+disable-model-invocation: true
 ---
 
 # Java — Unit Testing (JUnit 5 + Mockito + AssertJ)

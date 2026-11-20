@@ -1,6 +1,7 @@
 ---
 name: accessibility
 description: Use when a SwiftUI or AppKit Mac window must work with VoiceOver, Full Keyboard Access and Reduce Motion. Triggers "VoiceOver reads the wrong thing". Not for a11y scanning (qa-desktop-typescript).
+disable-model-invocation: true
 ---
 
 # macOS: Accessibility

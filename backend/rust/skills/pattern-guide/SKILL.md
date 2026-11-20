@@ -1,6 +1,7 @@
 ---
 name: patterns
 description: Use when explaining a design pattern in Rust (enum vs trait dispatch, newtype, typestate, builder). Triggers "enum or trait object here". Not for scaffolding (patterns-apply).
+disable-model-invocation: true
 ---
 
 # Rust Design Patterns — Reference

@@ -1,6 +1,7 @@
 ---
 name: performance
 description: Use when an iOS app hangs, drops frames, starts slowly or leaks (Instruments, launch budgets, MetricKit). Triggers "slow cold start". Not for crash reporting (observability).
+disable-model-invocation: true
 ---
 
 # iOS — Performance

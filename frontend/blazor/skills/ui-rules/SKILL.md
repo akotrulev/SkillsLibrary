@@ -1,6 +1,7 @@
 ---
 name: ui-rules
 description: Use when building a data-driven Blazor feature, for UI correctness (humanized enums, formats, stable sort, paging, CRUD parity). Triggers "enum shows as a number". Not for fetching (data-fetching).
+disable-model-invocation: true
 ---
 
 # Blazor — UI Conventions (data-driven correctness)

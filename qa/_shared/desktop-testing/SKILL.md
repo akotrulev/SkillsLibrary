@@ -1,6 +1,7 @@
 ---
 name: desktop-testing
-description: Use when a qa-desktop-* agent plans or reviews native macOS or Windows E2E: drivers, test-id contract, CI hosts. Triggers "desktop E2E rules". Not for mobile (qa-mobile-*) or web (qa-ui-*).
+description: Use when a qa-desktop-* agent plans or reviews native macOS or Windows E2E (drivers, test-id contract, CI hosts). Triggers "desktop E2E rules". Not for mobile (qa-mobile-*) or web (qa-ui-*).
+disable-model-invocation: true
 ---
 
 # QA — Native Desktop E2E Rules (Shared)

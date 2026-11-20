@@ -1,6 +1,7 @@
 ---
 name: sqlserver
 description: Use when designing, securing (RLS, Always Encrypted), querying or tuning SQL Server or Azure SQL. Triggers "this T-SQL is slow". Not for cross-engine modeling (schema-design).
+disable-model-invocation: true
 ---
 
 # Data — SQL Server / Azure SQL

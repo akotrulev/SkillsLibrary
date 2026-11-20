@@ -1,6 +1,7 @@
 ---
 name: error-handling
 description: Use when a Blazor failure must not blank the screen (ErrorBoundary, reconnect UX, Polly retries, failed regions). Triggers "an error blanks my app". Not for producing the error (data-fetching).
+disable-model-invocation: true
 ---
 
 # Blazor — Error Resilience

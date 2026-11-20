@@ -1,6 +1,7 @@
 ---
 name: project-setup
 description: Use when creating or hardening an iOS app in Xcode (Swift 6 mode, local packages, xcconfig, SwiftLint). Triggers "new iOS app". Not for signing and CI (release).
+disable-model-invocation: true
 ---
 
 # iOS — Project Setup

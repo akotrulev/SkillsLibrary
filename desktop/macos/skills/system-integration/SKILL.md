@@ -1,6 +1,7 @@
 ---
 name: system-integration
 description: Use when a Mac app joins the system (App Intents, widgets, notifications, URL schemes, Services, drag and drop). Triggers "add a Shortcuts action". Not for helpers (background-and-helpers).
+disable-model-invocation: true
 ---
 
 # macOS — System Integration

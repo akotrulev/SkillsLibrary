@@ -1,6 +1,7 @@
 ---
 name: api-tests-grpc
 description: Use when writing black-box gRPC API tests in Java (grpc-java + TestNG) against a proto-defined service. Triggers "write a gRPC test for RPC X". Not for REST (api-tests).
+disable-model-invocation: true
 ---
 
 # QA — gRPC API Test Writer (Java 21 / grpc-java + TestNG)

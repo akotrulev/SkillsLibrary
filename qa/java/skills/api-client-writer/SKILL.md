@@ -1,6 +1,7 @@
 ---
 name: api-client-writer
 description: Use when creating an API client class ({Resource}Client.java) in a Java API test project. Triggers "write an API client for X". Not for DTOs (api-models).
+disable-model-invocation: true
 ---
 
 # qa-java:api-client-writer

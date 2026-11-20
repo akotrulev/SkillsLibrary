@@ -1,6 +1,7 @@
 ---
 name: motion
 description: Use when deciding a UI's motion design (intensity tier, preset per trigger, duration and easing). Triggers "what animation should this have". Not for coding it (animation).
+disable-model-invocation: true
 ---
 
 # Motion design — the tier, the preset, the floor

@@ -1,6 +1,7 @@
 ---
 name: persistence
 description: Use when setting up or refactoring .NET persistence with EF Core (DbContext, migrations, transactions, tuning). Triggers "set up EF Core", "this LINQ query is slow". Not for raw SQL (postgresql).
+disable-model-invocation: true
 ---
 
 # .NET — Persistence with EF Core

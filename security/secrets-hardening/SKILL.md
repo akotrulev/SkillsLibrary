@@ -1,6 +1,7 @@
 ---
 name: secrets-hardening
 description: Use when fixing a found secret (rotation runbooks, Vault or cloud secret store wiring, recurrence gates). Triggers "rotate this leaked credential". Not for detecting secrets (secrets-scan).
+disable-model-invocation: true
 ---
 
 # Security Governance — Secrets Hardening (rotation runbooks · secret-store wiring · recurrence prevention)

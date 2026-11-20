@@ -1,6 +1,7 @@
 ---
 name: cloud-recon-enumeration
 description: Use when mapping an authorized cloud account's attack surface at pentest start (storage, metadata, IAM, federation). Triggers "what can this credential do". Not for network recon (recon-enumeration).
+disable-model-invocation: true
 ---
 
 # Penetration Testing — Cloud Recon & Enumeration (ScoutSuite · cloud_enum · metadata service · enumerate-iam)

@@ -1,6 +1,7 @@
 ---
 name: migration
 description: Use when an iOS project changes lane (Swift 6, @Observable, UIKit to SwiftUI, CocoaPods to SPM). Triggers "move us to Swift 6". Not for a new app (project-setup).
+disable-model-invocation: true
 ---
 
 # iOS — Migration

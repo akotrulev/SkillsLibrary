@@ -1,6 +1,7 @@
 ---
 name: bdd-reviewer
 description: Use when reviewing Gherkin .feature files and Cucumber-JVM steps in Java for reuse and binding. Triggers "review these feature files". Not for generating steps (gherkin-step-code).
+disable-model-invocation: true
 ---
 
 # Cucumber-JVM / Gherkin Reviewer (Java 21)

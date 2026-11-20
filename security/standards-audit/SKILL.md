@@ -1,6 +1,7 @@
 ---
 name: standards-audit
 description: Use when auditing defensive-security artifacts (Sigma, CSP/WAF, secret stores, compliance register) against plugin conventions. Triggers "audit our detections". Not for app code (source-audit).
+disable-model-invocation: true
 ---
 
 # security-governance Conformance Audit

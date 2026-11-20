@@ -1,6 +1,7 @@
 ---
 name: opentelemetry
 description: Use when instrumenting a Rust axum service with OpenTelemetry (traces, metrics, log correlation, OTLP). Triggers "spans missing in Tempo". Not for log shaping (structured-logging).
+disable-model-invocation: true
 ---
 
 # Observability — OpenTelemetry (Rust, tokio + axum)

@@ -1,6 +1,7 @@
 ---
 name: plan-delivery
 description: Use when a design pack must become an ordered task list, one deliverable, stack and agent per task. Triggers "what order do we build this in". Not for sizing or prompts (plan-session-budget).
+disable-model-invocation: true
 ---
 
 # Delivery Plan — the ordered, agent-bound task list

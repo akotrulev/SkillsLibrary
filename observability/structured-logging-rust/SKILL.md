@@ -1,6 +1,7 @@
 ---
 name: structured-logging
 description: Use when setting up structured logging in a Rust service with tracing (JSON, correlation IDs, Loki, redaction). Triggers "my Rust logs are not JSON". Not for traces or metrics (opentelemetry).
+disable-model-invocation: true
 ---
 
 # Observability — Structured Logging (Rust, `tracing`)

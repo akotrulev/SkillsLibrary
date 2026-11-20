@@ -4,6 +4,8 @@
 
 **Status (2026-09-26, `python3 tools/token-audit.py`, folded from the retired `docs/plans/token-optimization-progress.md`):** live. Budgets: skill `description` ≤ 200 chars (500 until 2026-11-03) · agent `description` ≤ 650 · SKILL.md body ≤ 16,000 · agent file ≤ 14,000. Skill descriptions over budget **0** · agent descriptions **0** (plan 001 cleared the last 45) · SKILL.md bodies **109** · agent files **51** — **160** size violations, all relocation-to-`references/` work. The script exits non-zero until they are gone. Next: its own numbered plan (plan 001, O7).
 
+**Status (2026-11-20):** only front doors are listed to the model. 550 of the 587 registered skill files carry `disable-model-invocation: true`; the 37 left are the `rules` skills, ten `dev` workflow skills and two QA orphans (`FRONT_DOORS` in `tools/plugin-surface-check.py`, which enforces it). A project enabling nine plugins went from 219 listed skills (~12,100 tok) to 21 (~1,100 tok). `tools/token-audit.py` now counts only listed skills as always-on and prints a `listed` column. Agent descriptions (~4,300 tok for the same project) are the largest always-on surface left.
+
 **Current (2026-07-25) — the two plugins worked so far:**
 
 | Plugin | Skills | Always-on desc | Agents | Status |

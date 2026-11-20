@@ -2,6 +2,8 @@
 name: <skill-name>
 # name rule: topic only — no domain or stack prefix, unique within its plugin, not a reserved name (CONTRIBUTING.md, "Names and registration")
 description: Use when explaining or looking up <concept> in <stack>. Triggers "what is X", "when should I use X". Not for scaffolding code (<sibling generator>).
+# hidden from the model unless the skill is a front door (CONTRIBUTING.md, "Front doors")
+disable-model-invocation: true
 ---
 
 # <Skill Title>

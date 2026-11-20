@@ -1,6 +1,7 @@
 ---
 name: component-writer
 description: Use when scaffolding a page, component, hook, context or boundary into a Next.js or Vite React repo. Triggers "scaffold a component for X", "extract a custom hook". Not for explanations (concepts).
+disable-model-invocation: true
 ---
 
 # React — Generator

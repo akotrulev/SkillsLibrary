@@ -1,6 +1,7 @@
 ---
 name: animation
 description: Use when an Expo/React Native app needs motion or gestures (Reanimated 4, Gesture Handler) honoring Reduce Motion. Triggers "animate this". Not for whether to animate (design:motion).
+disable-model-invocation: true
 ---
 
 # React Native — Animation and Gestures

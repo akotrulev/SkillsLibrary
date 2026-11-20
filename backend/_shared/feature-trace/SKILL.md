@@ -1,6 +1,7 @@
 ---
 name: doc-feature-trace
 description: Use when one area of an existing backend must be traced in depth into file:line-evidenced inventories. Triggers "trace how this area works". Not for writing the docs (doc-business-model).
+disable-model-invocation: true
 ---
 
 # Feature Trace — recovering behavior from code

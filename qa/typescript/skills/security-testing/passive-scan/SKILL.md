@@ -1,6 +1,7 @@
 ---
 name: passive-scan
 description: Use when adding an OWASP ZAP baseline (passive) DAST scan as a CI gate for a TypeScript pipeline. Triggers "add a DAST gate to CI". Not for active injection scans (active-scan).
+disable-model-invocation: true
 ---
 
 # Security Testing — OWASP ZAP Baseline Scan (TypeScript)

@@ -1,6 +1,7 @@
 ---
 name: iac-security
 description: Use when scanning Terraform or Helm for misconfiguration with Checkov or OPA/Conftest policy-as-code. Triggers "scan our Terraform for misconfig". Not for a live account (cloud-posture).
+disable-model-invocation: true
 ---
 
 # DevOps — IaC Security (Checkov & policy-as-code)

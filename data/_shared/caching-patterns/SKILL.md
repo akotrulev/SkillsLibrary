@@ -1,6 +1,7 @@
 ---
 name: caching
 description: Use when choosing a caching strategy in front of any database (cache-aside, write-through, invalidation, TTL, stampedes). Triggers "pick a caching strategy". Not for Redis mechanics (redis).
+disable-model-invocation: true
 ---
 
 # Data — Caching Patterns (cross-engine)

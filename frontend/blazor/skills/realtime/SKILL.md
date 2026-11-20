@@ -1,6 +1,7 @@
 ---
 name: realtime
 description: Use when a Blazor surface needs live server-pushed data (circuit push, SignalR, WebSocket/SSE). Triggers "push updates to the UI". Not for request/response fetching (data-fetching).
+disable-model-invocation: true
 ---
 
 # Blazor — Realtime (live / push lane)

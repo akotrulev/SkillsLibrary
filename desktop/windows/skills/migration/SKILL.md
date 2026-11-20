@@ -1,6 +1,7 @@
 ---
 name: migration
 description: Use when a Windows project changes lane (.NET 8/9 to 10, Windows App SDK 1.x to 2.x, UWP, WPF or WinForms to WinUI or modernized). Triggers "move us to .NET 10". Not for a new app (project-setup).
+disable-model-invocation: true
 ---
 
 # Windows — Migration

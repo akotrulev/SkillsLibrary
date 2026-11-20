@@ -1,6 +1,7 @@
 ---
 name: accessibility
 description: Use when a React Native screen must work with VoiceOver, TalkBack and large text. Triggers "VoiceOver reads the wrong thing". Not for a11y scanning (qa-mobile-typescript).
+disable-model-invocation: true
 ---
 
 # React Native — Accessibility

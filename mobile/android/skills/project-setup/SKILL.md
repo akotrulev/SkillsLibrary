@@ -1,6 +1,7 @@
 ---
 name: project-setup
 description: Use when creating or hardening an Android app on AGP 9 (version catalog, KSP, R8, detekt, edge-to-edge). Triggers "new Android app". Not for signing and CI (release).
+disable-model-invocation: true
 ---
 
 # Android — Project Setup

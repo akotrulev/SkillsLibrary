@@ -1,6 +1,7 @@
 ---
 name: cross-feature-test-design
 description: Use when test cases must cover a feature's effects on others; reaction chains, shared data, schedules, concurrency. Triggers "test the side effects of Y". Not for EP/BVA (test-design-techniques).
+disable-model-invocation: true
 ---
 
 # QA — Cross-Feature Test Design

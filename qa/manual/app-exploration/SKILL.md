@@ -1,6 +1,7 @@
 ---
 name: app-exploration
 description: Use when exploring a live web or mobile app for defects; broken links, layout, misleading copy, wrong calculations. Triggers "explore this app". Not for a human's charter (exploratory-charter-writer).
+disable-model-invocation: true
 ---
 
 # QA — App Exploration (live web and mobile)

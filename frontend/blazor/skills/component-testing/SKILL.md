@@ -1,6 +1,7 @@
 ---
 name: component-testing
 description: Use when a Blazor component or front-end logic needs a unit test (bUnit, NUnit or xUnit). Triggers "unit-test this component". Not for E2E journeys (ui-tests-playwright).
+disable-model-invocation: true
 ---
 
 # Blazor — Component & Pure-Logic Testing (bUnit v2)

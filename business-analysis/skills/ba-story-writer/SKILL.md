@@ -1,6 +1,7 @@
 ---
 name: stories
 description: Use when turning an epic into stories (goal, plan, what is included, met-or-not acceptance criteria). Triggers "write the stories for X", "add acceptance criteria". Not for scoping (scoping).
+disable-model-invocation: true
 ---
 
 # Story Writer

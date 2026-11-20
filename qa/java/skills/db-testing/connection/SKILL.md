@@ -1,6 +1,7 @@
 ---
 name: db-connection
 description: Use when Java tests connect to a real database to seed fixtures, run read-only asserts and clean up. Triggers "connect our tests to Postgres". Not for container lifecycle (db-testcontainers).
+disable-model-invocation: true
 ---
 
 # QA — DB Testing Client (Java 21 + Spring Boot 3)

@@ -1,6 +1,7 @@
 ---
 name: browser-cloud-setup
 description: Use when running TypeScript Playwright or Appium tests on a hosted grid (BrowserStack, Sauce Labs, LambdaTest). Triggers "run our tests on BrowserStack". Not for real-device matrices (device-cloud).
+disable-model-invocation: true
 ---
 
 # QA — Cloud Grid Config (TypeScript: Playwright + WebdriverIO/Appium)

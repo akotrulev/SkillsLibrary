@@ -1,6 +1,7 @@
 ---
 name: auth0
 description: Use when adding or fixing Auth0 login in a Blazor Server or WASM app (OpenIdConnect with PKCE, session refresh, logout). Triggers "add Auth0 login". Not for tenant setup or OIDC theory.
+disable-model-invocation: true
 ---
 
 # Auth — Auth0 in Blazor (Server & WebAssembly)

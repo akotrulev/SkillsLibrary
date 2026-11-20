@@ -1,6 +1,7 @@
 ---
 name: ci-conventions
 description: Use when deciding a test pipeline's shape across CIs; PR vs nightly lanes, shards, OIDC secrets, dual reporters, no retries. Triggers "PR lane vs nightly". Not for platform YAML (ci-pipelines).
+disable-model-invocation: true
 ---
 
 # QA — CI Conventions (Shared)

@@ -1,6 +1,7 @@
 ---
 name: html-video
 description: Use when rendering HTML/CSS animation to an MP4 (product demo, walkthrough) via HyperFrames. Triggers "render this to video", "make an MP4 from HTML". Not for deciding the motion (motion).
+disable-model-invocation: true
 ---
 
 # HTML → MP4 — route to HyperFrames

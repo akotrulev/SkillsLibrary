@@ -1,6 +1,7 @@
 ---
 name: dashboards
 description: Use when designing or building a Grafana dashboard (layout, RED/USE methods, alerts, variables, exemplars). Triggers "build a dashboard for service X". Not for LogQL/PromQL syntax (queries).
+disable-model-invocation: true
 ---
 
 # Observability — Grafana Dashboards

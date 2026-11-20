@@ -1,6 +1,7 @@
 ---
 name: hardening
 description: Use when authoring security controls (strict CSP, OWASP secure headers, WAF rules with OWASP CRS). Triggers "write a strict CSP". Not for testing that they block (client-side-security).
+disable-model-invocation: true
 ---
 
 # Security Governance — Security Hardening (CSP · secure headers · WAF rules)

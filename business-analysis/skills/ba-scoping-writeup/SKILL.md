@@ -1,6 +1,7 @@
 ---
 name: scoping
 description: Use when turning a vague business problem or stakeholder request into a single-initiative scoping writeup. Triggers "help me scope this initiative". Not for user stories (stories).
+disable-model-invocation: true
 ---
 
 # Initiative Scoping

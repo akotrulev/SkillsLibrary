@@ -1,6 +1,7 @@
 ---
 name: exploratory-charter-writer
 description: Use when writing a time-boxed, session-based exploratory testing charter for a feature or area. Triggers "write a charter for X". Not for scripted test cases (test-case-writer).
+disable-model-invocation: true
 ---
 
 # QA — Exploratory Test Charter Writer

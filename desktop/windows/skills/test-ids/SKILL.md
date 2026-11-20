@@ -1,6 +1,7 @@
 ---
 name: test-ids
 description: Use when adding AutomationId to a Windows app so WinCore, NovaWindows or FlaUI can locate elements. Triggers "E2E can't find this control". Not for writing desktop tests (qa-desktop-typescript).
+disable-model-invocation: true
 ---
 
 # Windows — Testability (`AutomationId` writer)

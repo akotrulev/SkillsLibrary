@@ -1,6 +1,7 @@
 ---
 name: github-actions
 description: Use when writing or modifying GitHub Actions workflows for build, test and deploy. Triggers "write a GitHub Actions workflow", "add a deploy job". Not for test-suite CI lanes (ci-pipelines).
+disable-model-invocation: true
 ---
 
 # DevOps — GitHub Actions

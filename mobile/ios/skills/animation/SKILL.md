@@ -1,6 +1,7 @@
 ---
 name: animation
 description: Use when a SwiftUI app needs motion or gestures (withAnimation, matchedGeometryEffect, DragGesture) honoring Reduce Motion. Triggers "animate this". Not for whether to animate (design:motion).
+disable-model-invocation: true
 ---
 
 # iOS — Animation and Gestures

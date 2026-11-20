@@ -1,6 +1,7 @@
 ---
 name: project-setup
 description: Use when standing up a new React app from zero (Next.js App Router or Vite SPA, rendering strategy, strict TS). Triggers "create a new React project". Not for an existing app (component-writer).
+disable-model-invocation: true
 ---
 
 # React — Project Scaffold

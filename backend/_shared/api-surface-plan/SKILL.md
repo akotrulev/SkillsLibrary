@@ -1,6 +1,7 @@
 ---
 name: plan-api-surface
 description: Use when a planned data model needs its API surface specified (endpoints, typed bodies, errors, paging). Triggers "plan the API surface", "what endpoints do we need". Not for tables (plan-data-model).
+disable-model-invocation: true
 ---
 
 # API Surface Plan — the contract, before the code

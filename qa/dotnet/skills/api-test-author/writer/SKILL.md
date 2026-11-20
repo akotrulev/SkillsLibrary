@@ -1,6 +1,7 @@
 ---
 name: api-tests
 description: Use when writing .NET REST API tests with NUnit + RestSharp. Triggers "write an API test for X", "automate these test cases". Not for Playwright-runner API tests (api-tests-playwright).
+disable-model-invocation: true
 ---
 
 # QA — API Test Writer (.NET)

@@ -1,6 +1,7 @@
 ---
 name: data-quality
 description: Use when cleaning, filtering, deduplicating, decontaminating or PII-scrubbing a training dataset. Triggers "dedup this corpus", "check for eval contamination". Not for record schema (dataset-formats).
+disable-model-invocation: true
 ---
 
 # Training Data — Quality, Dedup & Decontamination (cross-stage)

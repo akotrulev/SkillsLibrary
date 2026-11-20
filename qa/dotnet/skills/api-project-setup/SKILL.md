@@ -1,6 +1,7 @@
 ---
 name: api-project-setup
 description: Use when starting a RestSharp + NUnit API test project from zero in .NET (layout, package versions, run commands). Triggers "scaffold an API test project". Not for adding tests (api-tests).
+disable-model-invocation: true
 ---
 
 # API Test Project Scaffold (C# / .NET 10)

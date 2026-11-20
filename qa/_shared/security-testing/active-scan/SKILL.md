@@ -1,6 +1,7 @@
 ---
 name: active-scan
 description: Use when running an active DAST scan with ZAP against an owned non-prod app, injecting SQLi/XSS payloads. Triggers "run an active DAST scan". Not for the passive PR gate (passive-scan).
+disable-model-invocation: true
 ---
 
 # Security Testing — ZAP Automation Framework (active / full DAST, shared)

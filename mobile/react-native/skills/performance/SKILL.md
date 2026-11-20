@@ -1,6 +1,7 @@
 ---
 name: performance
 description: Use when an Expo/React Native app janks, starts slowly or ships a heavy bundle (lists, React Compiler, Expo Atlas). Triggers "slow cold start". Not for crash reporting (observability).
+disable-model-invocation: true
 ---
 
 # React Native — Performance

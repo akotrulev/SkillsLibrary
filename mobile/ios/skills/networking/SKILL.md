@@ -1,6 +1,7 @@
 ---
 name: networking
 description: Use when an iOS app calls an API (URLSession + Codable; timeouts, retries, token refresh). Triggers "request hangs on cell". Not for the failure UI (error-handling).
+disable-model-invocation: true
 ---
 
 # iOS — Networking

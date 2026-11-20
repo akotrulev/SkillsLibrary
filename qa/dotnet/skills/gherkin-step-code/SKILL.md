@@ -1,6 +1,7 @@
 ---
 name: gherkin-step-code
 description: Use when turning Gherkin .feature files into Reqnroll steps in .NET bound to page objects. Triggers "generate step definitions". Not for writing .feature files (feature-files).
+disable-model-invocation: true
 ---
 
 # Reqnroll Step Bindings + POM Implementation (C# / .NET 10)

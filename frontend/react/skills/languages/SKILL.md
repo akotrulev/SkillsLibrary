@@ -1,6 +1,7 @@
 ---
 name: i18n
 description: Use when a React UI ships in several languages (next-intl or react-i18next, locale routing, Intl formats, RTL). Triggers "add multi-language support". Not for display-format policy (ui-rules).
+disable-model-invocation: true
 ---
 
 # React — Localization & Globalization

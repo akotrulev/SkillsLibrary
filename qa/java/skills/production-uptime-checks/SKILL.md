@@ -1,6 +1,7 @@
 ---
 name: production-uptime-checks
 description: Use when authoring synthetic monitoring as code in Java with Grafana Synthetic Monitoring against live staging/prod. Triggers "add a prod uptime check". Not for pre-merge CI gates (ci-pipelines).
+disable-model-invocation: true
 ---
 
 # Synthetic Monitoring as Code (Grafana Cloud Synthetic Monitoring · Java 21)

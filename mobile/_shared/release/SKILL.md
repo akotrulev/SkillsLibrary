@@ -1,6 +1,7 @@
 ---
 name: release
 description: Use when an iOS, Android or React Native build is signed, uploaded, rolled out or shipped OTA (TestFlight, Play, EAS Update). Triggers "halt the rollout". Not for store rules (store-compliance).
+disable-model-invocation: true
 ---
 
 # Mobile — Release and Signing

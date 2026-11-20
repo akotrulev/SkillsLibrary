@@ -1,6 +1,7 @@
 ---
 name: accessibility-testing
 description: Use when a TypeScript Playwright suite must scan for WCAG violations with axe-core or Lighthouse. Triggers "add a11y tests". Not for pixel diffs (visual-regression).
+disable-model-invocation: true
 ---
 
 # QA — Accessibility Testing (TypeScript / Playwright 1.64)

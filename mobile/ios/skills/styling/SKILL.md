@@ -1,6 +1,7 @@
 ---
 name: styling
 description: Use when styling SwiftUI (Liquid Glass, semantic colours, Dynamic Type, dark mode, iPad size classes). Triggers "dark mode". Not for component structure (ui-components).
+disable-model-invocation: true
 ---
 
 # iOS — Styling, Liquid Glass and Adaptive Layout

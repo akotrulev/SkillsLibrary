@@ -1,6 +1,7 @@
 ---
 name: evidence-capture
 description: Use when a Playwright or WebdriverIO (TS) suite must keep failure evidence (screenshots, video, trace, HAR). Triggers "keep trace on failure". Not for visual baselines (visual-regression).
+disable-model-invocation: true
 ---
 
 # QA — Evidence Capture (TypeScript: Playwright 1.64 and Appium 3)

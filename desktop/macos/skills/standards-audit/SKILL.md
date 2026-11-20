@@ -1,6 +1,7 @@
 ---
 name: standards-audit
 description: Use when auditing a whole Mac app (Swift, SwiftUI, AppKit) against desktop-macos conventions; read-only report. Triggers "audit our Mac app". Not for one diff (conventions-review).
+disable-model-invocation: true
 ---
 
 # desktop-macos Conformance Audit

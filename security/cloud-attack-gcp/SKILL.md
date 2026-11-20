@@ -1,6 +1,7 @@
 ---
 name: cloud-attack-gcp
 description: Use when exploiting an authorized GCP project after recon (service-account impersonation, IAM privesc, GCS buckets). Triggers "escalate in this GCP project". Not for recon (cloud-recon-enumeration).
+disable-model-invocation: true
 ---
 
 # Penetration Testing — GCP Exploitation (IAM privesc · service-account impersonation · GCS buckets)

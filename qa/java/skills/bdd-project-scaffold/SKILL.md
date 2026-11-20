@@ -1,6 +1,7 @@
 ---
 name: bdd-project-setup
 description: Use when adding a Cucumber-JVM BDD layer to a Java UI/mobile test project or starting one. Triggers "set up Cucumber". Not for step definitions (gherkin-step-code).
+disable-model-invocation: true
 ---
 
 # Cucumber-JVM BDD Project Scaffold (Java 21)

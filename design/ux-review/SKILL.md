@@ -1,6 +1,7 @@
 ---
 name: ux-review
 description: Use when reviewing a built UI, screenshot, mockup or Figma flow for UX (Nielsen heuristics, flow friction, IA). Triggers "review the UX". Not for UI code audits (ui-code-audit).
+disable-model-invocation: true
 ---
 
 # UX heuristics — experience-level review

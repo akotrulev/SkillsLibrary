@@ -1,6 +1,7 @@
 ---
 name: animation
 description: Use when animating a Blazor UI (.razor.css transitions, reduced motion, scroll reveals, View Transitions). Triggers "fade elements in on scroll". Not for motion design (motion).
+disable-model-invocation: true
 ---
 
 # Blazor — Motion

@@ -3,6 +3,7 @@ name: theme-presets
 description: Use when applying one of 10 preset color+font themes to a deck, doc, HTML page or quick-start app. Triggers "apply a preset theme", "quick theme". Not for a bespoke identity (visual-identity).
 metadata:
   version: "1.1.0"
+disable-model-invocation: true
 ---
 
 # Theme Factory Skill

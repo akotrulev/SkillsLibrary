@@ -1,6 +1,7 @@
 ---
 name: realtime-stream-testing
 description: Use when testing WebSocket or SSE streams in .NET/NUnit with protocol clients or Playwright, asserting frames without sleeps. Triggers "test our WebSocket endpoint". Not for plain HTTP (api-tests).
+disable-model-invocation: true
 ---
 
 # WebSocket & SSE Testing (.NET 10 / NUnit) — **canonical stack**

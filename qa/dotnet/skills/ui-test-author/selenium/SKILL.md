@@ -1,6 +1,7 @@
 ---
 name: ui-tests-selenium
 description: Use when scaffolding a .NET Selenium 4 page object or NUnit UI test (BasePage pattern). Triggers "create a Selenium page object for X". Not for Playwright projects (ui-tests-playwright).
+disable-model-invocation: true
 ---
 
 # QA — Selenium .NET Page Object & Test Generator

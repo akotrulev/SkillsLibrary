@@ -1,6 +1,7 @@
 ---
 name: error-handling
 description: Use when a failure must not blank a Mac window (failed/stale/offline regions, inline banner, wake-from-sleep revalidation). Triggers "table empty when API fails". Not for retries (networking).
+disable-model-invocation: true
 ---
 
 # macOS — Error Resilience

@@ -1,6 +1,7 @@
 ---
 name: patterns-apply
 description: Use when scaffolding a design pattern into a Node/TypeScript repo (union strategy, Result type, branded ids). Triggers "create a Result type". Not for explanations (patterns).
+disable-model-invocation: true
 ---
 
 # TypeScript Design Patterns — Generator

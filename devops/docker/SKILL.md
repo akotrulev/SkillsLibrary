@@ -1,6 +1,7 @@
 ---
 name: docker
 description: Use when writing or improving Dockerfiles for .NET/Java/Node services (multi-stage, base image, non-root). Triggers "write a Dockerfile", "shrink this image". Not for orchestration (kubernetes).
+disable-model-invocation: true
 ---
 
 # DevOps — Docker

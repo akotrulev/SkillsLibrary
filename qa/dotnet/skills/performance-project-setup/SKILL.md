@@ -1,6 +1,7 @@
 ---
 name: performance-project-setup
 description: Use when starting an NBomber load test project from zero in .NET (layout, package versions, run commands). Triggers "set up an NBomber suite". Not for writing load scenarios (load-testing).
+disable-model-invocation: true
 ---
 
 # Performance Test Project Scaffold (C# / .NET 10)

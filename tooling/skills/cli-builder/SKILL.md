@@ -1,6 +1,7 @@
 ---
 name: cli-builder
 description: Use when rendering a confirmed capability contract as a subcommand CLI (typed flags, --json, exit codes, smoke test). Triggers "build a CLI for this project". Not for an MCP server (mcp-builder).
+disable-model-invocation: true
 ---
 
 # CLI Builder — the contract, rendered as commands

@@ -1,6 +1,7 @@
 ---
 name: activation-and-notifications
 description: Use when handling single instancing, protocol/file activation, startup tasks, restart or app notifications. Triggers "single instance", "toast". Not for windows (windows-and-navigation).
+disable-model-invocation: true
 ---
 
 # Windows — Activation and Notifications

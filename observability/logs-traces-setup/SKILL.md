@@ -1,6 +1,7 @@
 ---
 name: logs-traces
 description: Use when setting up Grafana Loki and Tempo (Collector wiring, storage, retention, Alloy shipping). Triggers "set up Loki", "Tempo configuration". Not for the metrics backend (metrics).
+disable-model-invocation: true
 ---
 
 # Observability — Loki + Tempo Setup

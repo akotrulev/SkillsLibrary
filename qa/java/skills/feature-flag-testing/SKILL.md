@@ -1,6 +1,7 @@
 ---
 name: feature-flag-testing
 description: Use when testing feature-flagged code in Java/TestNG, pinning flags in-process (OpenFeature, LaunchDarkly) on both sides. Triggers "test both sides of a flag". Not for endpoint tests (api-tests).
+disable-model-invocation: true
 ---
 
 # QA — Feature-Flag Testing (Java 21 / OpenFeature + LaunchDarkly `TestData` + TestNG) — **canonical stack**

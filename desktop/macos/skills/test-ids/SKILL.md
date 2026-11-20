@@ -1,6 +1,7 @@
 ---
 name: test-ids
 description: Use when adding accessibilityIdentifier so Appium Mac2 can target a SwiftUI or AppKit Mac app. Triggers "E2E can't find this element". Not for writing desktop tests (qa-desktop-typescript).
+disable-model-invocation: true
 ---
 
 # macOS: Testability (`accessibilityIdentifier` writer)

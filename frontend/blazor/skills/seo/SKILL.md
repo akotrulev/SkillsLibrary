@@ -1,6 +1,7 @@
 ---
 name: seo
 description: Use when public Blazor pages must rank and preview well (static SSR, PageTitle/HeadContent, OG tags, 404, sitemap). Triggers "make these pages crawlable". Not for the tab-title convention (ui-rules).
+disable-model-invocation: true
 ---
 
 # Blazor — SEO & Discoverability

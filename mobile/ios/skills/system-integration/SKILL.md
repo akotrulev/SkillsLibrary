@@ -1,6 +1,7 @@
 ---
 name: system-integration
 description: Use when an iOS app works outside its screens (App Intents, WidgetKit, Live Activities, background tasks). Triggers "add a widget". Not for push (push-and-deep-links).
+disable-model-invocation: true
 ---
 
 # iOS — System Integration

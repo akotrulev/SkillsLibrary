@@ -1,6 +1,7 @@
 ---
 name: test-login-tokens
 description: Use when obtaining Auth0 access tokens for automated .NET tests (M2M, or a test user without the UI). Triggers "get an Auth0 M2M token". Not for UI login journeys (ui-tests-playwright).
+disable-model-invocation: true
 ---
 
 # QA — Auth0 Test Tokens (.NET / NUnit)

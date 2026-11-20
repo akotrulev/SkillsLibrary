@@ -1,6 +1,7 @@
 ---
 name: forms
 description: Use when building or fixing a React form (React Hook Form + Zod, Server Actions, server-error mapping, wizards). Triggers "build a form for X", "validate with Zod". Not for state (state-management).
+disable-model-invocation: true
 ---
 
 # React — Forms

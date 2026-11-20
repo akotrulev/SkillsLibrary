@@ -1,6 +1,7 @@
 ---
 name: responsive-testing
 description: Use when testing responsive layout in Java with Playwright, driving the viewport across real breakpoints. Triggers "test around the breakpoints". Not for pixel diffs (visual-regression).
+disable-model-invocation: true
 ---
 
 # QA — Responsive / Breakpoint Testing (Java / Playwright 1.63 + TestNG)

@@ -1,6 +1,7 @@
 ---
 name: component-writer
 description: Use when scaffolding a component, page, state container or CascadingValue into a Blazor repo. Triggers "scaffold a component for X", "create a state container". Not for explanations (concepts).
+disable-model-invocation: true
 ---
 
 # Blazor Design Patterns — Generator

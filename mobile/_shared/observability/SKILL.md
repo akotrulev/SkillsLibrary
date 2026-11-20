@@ -1,6 +1,7 @@
 ---
 name: observability
 description: Use when an iOS, Android or React Native app needs crash reporting or OpenTelemetry telemetry to Grafana. Triggers "add crash reporting". Not for the Loki/Tempo backend (logs-traces).
+disable-model-invocation: true
 ---
 
 # Mobile — Observability

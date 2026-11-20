@@ -1,6 +1,7 @@
 ---
 name: knowledge-base
 description: Use when reading or updating the business-model knowledge base (docs/business-model/) before any BA modeling. Triggers "read the KB first". Not for the connection map (dependency-map).
+disable-model-invocation: true
 ---
 
 # BA — Project Knowledge (the KB protocol)

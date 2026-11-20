@@ -1,6 +1,7 @@
 ---
 name: page-object-design
 description: Use when designing the page object structure for a TypeScript UI test project. Triggers "design page objects for app X". Not for a POM from a live URL (page-objects-from-url).
+disable-model-invocation: true
 ---
 
 # QA — Page Object Architect (TypeScript)

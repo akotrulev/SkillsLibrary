@@ -1,6 +1,7 @@
 ---
 name: views-interop
 description: Use when an Android codebase uses XML Views or mixes Views and Compose (Fragments, RecyclerView, ComposeView). Triggers "embed Compose in a Fragment". Not for a new Compose screen (ui-components).
+disable-model-invocation: true
 ---
 
 # Android — Views and Interop

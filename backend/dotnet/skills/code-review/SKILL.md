@@ -1,6 +1,7 @@
 ---
 name: conventions-review
 description: Use when reviewing C#/.NET code for pattern misuse, over-abstraction, async or DI anti-patterns. Triggers "review this .NET service", "is this CQRS justified". Not for explanations (patterns).
+disable-model-invocation: true
 ---
 
 # C# / .NET — Reviewer

@@ -1,6 +1,7 @@
 ---
 name: azure-pipelines
 description: Use when writing or modifying Azure DevOps YAML pipelines for build, test and deploy. Triggers "write an Azure Pipelines YAML", "add a stage". Not for test-suite CI lanes (ci-pipelines).
+disable-model-invocation: true
 ---
 
 # DevOps — Azure Pipelines

@@ -1,6 +1,7 @@
 ---
 name: unit-testing
 description: Use when Swift logic needs a dev-side unit test (Swift Testing, fakes, clock seams, URLProtocol stubs). Triggers "unit-test this model". Not for device journeys (qa-mobile-typescript).
+disable-model-invocation: true
 ---
 
 # iOS — Unit Testing (Swift Testing)

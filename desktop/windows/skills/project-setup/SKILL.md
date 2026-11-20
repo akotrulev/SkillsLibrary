@@ -1,6 +1,7 @@
 ---
 name: project-setup
 description: Use when creating or hardening a Windows desktop project (WinUI template, TFM, MSIX, Directory.Build.props, analyzers, ARM64). Triggers "new WinUI app". Not for signing and CI (distribution).
+disable-model-invocation: true
 ---
 
 # Windows — Project Setup

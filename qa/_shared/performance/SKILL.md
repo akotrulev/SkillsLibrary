@@ -1,6 +1,7 @@
 ---
 name: performance-foundations
 description: Use when designing a load test across stacks; workload models, SLO thresholds, test data, environments, review checklist. Triggers "which workload model". Not for the tool script (load-testing).
+disable-model-invocation: true
 ---
 
 # QA — Performance Testing (Shared)

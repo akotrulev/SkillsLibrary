@@ -1,6 +1,7 @@
 ---
 name: instruction-sft
 description: Use when building SFT data for a small LLM (chat, instruction/response pairs, tool-use traces). Triggers "build an SFT dataset". Not for preference data (preference-data).
+disable-model-invocation: true
 ---
 
 # Training Data — Instruction / SFT

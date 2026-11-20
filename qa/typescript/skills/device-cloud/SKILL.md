@@ -1,6 +1,7 @@
 ---
 name: device-cloud
 description: Use when running WebdriverIO Appium tests on a real-device cloud (app upload, device matrix, parallel runs). Triggers "run on BrowserStack devices". Not for web grids (browser-cloud-setup).
+disable-model-invocation: true
 ---
 
 # QA — Mobile Device Farm (TypeScript: WebdriverIO + Appium on a real-device cloud)

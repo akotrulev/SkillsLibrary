@@ -1,6 +1,7 @@
 ---
 name: state-grid
 description: Use when modeling a business entity's lifecycle (Order, Subscription) as one state x event table across all features. Triggers "what states can an order be in". Not for process flows (process-flow).
+disable-model-invocation: true
 ---
 
 # BA — State Modeler

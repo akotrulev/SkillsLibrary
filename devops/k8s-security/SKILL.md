@@ -1,6 +1,7 @@
 ---
 name: kubernetes-security
 description: Use when benchmarking or validating Kubernetes security (CIS, RBAC, NetworkPolicy, Pod Security). Triggers "run CIS benchmark on our cluster". Not for manifests (kubernetes).
+disable-model-invocation: true
 ---
 
 # DevOps — Kubernetes Security Posture (kube-bench · Kubescape · Polaris · kube-score)

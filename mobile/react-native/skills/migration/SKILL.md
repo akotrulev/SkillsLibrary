@@ -1,6 +1,7 @@
 ---
 name: migration
 description: Use when an Expo/React Native project changes lane (Expo SDK upgrade, New Architecture, bare to Expo). Triggers "upgrade to SDK 57". Not for a new app (project-setup).
+disable-model-invocation: true
 ---
 
 # React Native / Expo — Migration

@@ -1,6 +1,7 @@
 ---
 name: unit-testing
 description: Use when Rust logic needs a unit test with cargo test or nextest (seams, proptest, paused tokio time, coverage floor). Triggers "unit-test this Rust module". Not for sqlx tests (persistence).
+disable-model-invocation: true
 ---
 
 # Rust — Unit Testing (`cargo test` / nextest)

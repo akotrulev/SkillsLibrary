@@ -1,6 +1,7 @@
 ---
 name: structured-logging
 description: Use when setting up structured logging in a .NET service with Serilog (JSON, correlation IDs, Loki, redaction). Triggers "set up Serilog". Not for traces or metrics (opentelemetry).
+disable-model-invocation: true
 ---
 
 # Observability — Serilog Structured Logging (.NET 10 primary / 8-9 supported)

@@ -1,6 +1,7 @@
 ---
 name: i18n
 description: Use when an Expo/React Native app must support more languages or regions (expo-localization, i18next, plurals, RTL). Triggers "translate the app". Not for copy wording (design:ux-writing).
+disable-model-invocation: true
 ---
 
 # React Native — Localization and Globalization

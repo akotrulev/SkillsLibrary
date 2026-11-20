@@ -1,6 +1,7 @@
 ---
 name: persistence
 description: Use when setting up or refactoring Node/TypeScript persistence with Prisma, Drizzle or TypeORM (schema, transactions, tuning). Triggers "set up Prisma". Not for raw SQL (postgresql).
+disable-model-invocation: true
 ---
 
 # TypeScript — Persistence with Prisma (default), Drizzle, TypeORM

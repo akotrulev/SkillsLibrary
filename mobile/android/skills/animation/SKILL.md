@@ -1,6 +1,7 @@
 ---
 name: animation
 description: Use when a Jetpack Compose app needs motion or gestures (shared elements, predictive back, swipe) honoring reduced motion. Triggers "animate this". Not for whether to animate (design:motion).
+disable-model-invocation: true
 ---
 
 # Android — Animation and Gestures

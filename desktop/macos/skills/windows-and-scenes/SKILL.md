@@ -1,6 +1,7 @@
 ---
 name: windows-and-scenes
 description: Use when declaring Mac windows (WindowGroup, Window, UtilityWindow, Settings, openWindow, restoration). Triggers "open a second window". Not for menu commands (menus-and-commands).
+disable-model-invocation: true
 ---
 
 # macOS — Windows and Scenes

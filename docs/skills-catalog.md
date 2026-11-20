@@ -48,7 +48,7 @@
 
 The `dev` commands arrive with every plugin that depends on `dev`. `/dev:design` and `/dev:plan-feature` are **skills** of `dev`, typed the same way; the two wrapper commands `dev-design` / `dev-plan-feature` were deleted. **Two front doors, fenced:** `/dev:design` takes one feature whose requirements are already clear and needs a technical design; `/dev:refine` takes anything where the *what* is still loose or spans several capabilities. For a spec-vs-code or spec-less feature audit, `/dev:audit` owns both lanes; the `dev:audit-spec` / `dev:audit-feature` skills remain invocable for a one-off. If two enabled plugins expose the same name, type the plugin-qualified form.
 
-**Known orphans** — no agent step loads them and they have no command, so they are reachable only by description auto-trigger: `inhouse-framework-conventions-{dotnet,java,typescript}` · `qa-<stack>:python-web-testing`.
+**Known orphans** — no agent step loads them and they have no command, so they are reachable only by description auto-trigger: `inhouse-framework-conventions-{dotnet,java,typescript}` · `qa-<stack>:python-web-testing`. They stay listed to the model for that reason. Every other skill outside the `rules` skills and ten `dev` workflow skills carries `disable-model-invocation: true` and is reached through its agent, its command, or its typed name (CONTRIBUTING.md, "Front doors").
 
 ## QA skills catalog
 

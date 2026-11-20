@@ -1,6 +1,7 @@
 ---
 name: opentelemetry
 description: Use when instrumenting a Java/Spring Boot service with OpenTelemetry (traces, metrics, log correlation, OTLP). Triggers "add the Java OTel agent". Not for log shaping (structured-logging).
+disable-model-invocation: true
 ---
 
 # Observability — OpenTelemetry (Java 21 / Spring Boot 3)

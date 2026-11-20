@@ -1,6 +1,7 @@
 ---
 name: component-testing
 description: Use when a React component, hook or front-end logic needs a unit test (Vitest + React Testing Library). Triggers "unit-test this component". Not for E2E journeys (ui-tests-playwright).
+disable-model-invocation: true
 ---
 
 # React — Component & Pure-Logic Testing (Vitest + React Testing Library)

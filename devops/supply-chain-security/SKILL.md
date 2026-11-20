@@ -1,6 +1,7 @@
 ---
 name: supply-chain-security
 description: Use when signing images, verifying SLSA provenance and attestations, or defending against dependency confusion. Triggers "sign our images", "SLSA level 3". Not for CVE scanning (image-infra-scan).
+disable-model-invocation: true
 ---
 
 # DevOps — Supply-Chain Security (Signing, Provenance & Build Integrity)

@@ -1,6 +1,7 @@
 ---
 name: plan-epic-map
 description: Use when arranging epics into parallel waves by cross-epic dependencies and disjoint files. Triggers "which epics can run in parallel". Not for ordering tasks (plan-delivery).
+disable-model-invocation: true
 ---
 
 # Epic Map — what can be built at the same time

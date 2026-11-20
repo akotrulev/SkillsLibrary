@@ -1,6 +1,7 @@
 ---
 name: push-and-deep-links
 description: Use when an Expo/React Native app needs push or local notifications (expo-notifications) or opens from a link. Triggers "add push", "link opens the app". Not for route structure (navigation).
+disable-model-invocation: true
 ---
 
 # React Native — Notifications and Links

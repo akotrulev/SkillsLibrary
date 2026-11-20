@@ -1,6 +1,7 @@
 ---
 name: project-setup
 description: Use when creating or configuring an Expo app (create-expo-app, dev builds, prebuild, config plugins, EAS). Triggers "new Expo app". Not for signing and CI (release).
+disable-model-invocation: true
 ---
 
 # React Native / Expo — Project Setup

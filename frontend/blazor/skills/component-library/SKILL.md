@@ -1,6 +1,7 @@
 ---
 name: component-library
 description: Use when picking or wiring a Blazor component library (MudBlazor, Fluent UI, Radzen) and its theme. Triggers "which component library". Not for hand-written CSS (styling).
+disable-model-invocation: true
 ---
 
 # Blazor — Component Library (one-of-N family)

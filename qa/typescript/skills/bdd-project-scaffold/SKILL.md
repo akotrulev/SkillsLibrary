@@ -1,6 +1,7 @@
 ---
 name: bdd-project-setup
 description: Use when adding a playwright-bdd/CucumberJS BDD layer to a TypeScript UI/mobile test project or starting one. Triggers "set up playwright-bdd". Not for step definitions (gherkin-step-code).
+disable-model-invocation: true
 ---
 
 # BDD Project Scaffold (TypeScript / Node 24, 22 maintenance)

@@ -1,6 +1,7 @@
 ---
 name: elasticsearch
 description: Use when designing, securing or querying Elasticsearch/OpenSearch (full-text, aggregations, kNN vectors). Triggers "design an Elasticsearch index". Not for log shipping (logs-traces).
+disable-model-invocation: true
 ---
 
 # Data — Elasticsearch / OpenSearch

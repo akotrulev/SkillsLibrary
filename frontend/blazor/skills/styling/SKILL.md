@@ -1,6 +1,7 @@
 ---
 name: styling
 description: Use when writing CSS for a Blazor app (.razor.css isolation, ::deep, tokens as custom properties, dark mode). Triggers "scope this component's CSS". Not for library theming (component-library).
+disable-model-invocation: true
 ---
 
 # Blazor — Styling (CSS isolation, tokens, dark mode)

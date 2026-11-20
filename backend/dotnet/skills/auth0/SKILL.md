@@ -1,6 +1,7 @@
 ---
 name: auth0
 description: Use when adding Auth0 to an ASP.NET Core API (JWT validation, RBAC policies, M2M). Triggers "add Auth0 to my ASP.NET Core API", "validate Auth0 JWTs". Not for Cognito (cognito).
+disable-model-invocation: true
 ---
 
 # Auth — Auth0 in ASP.NET Core (.NET 10 primary / 8-9 supported)

@@ -1,6 +1,7 @@
 ---
 name: tokens
 description: Use when building or auditing design tokens (primitive, semantic, component tiers, scales, dark mode as a swap). Triggers "set up design tokens". Not for palette or type choice (visual-identity).
+disable-model-invocation: true
 ---
 
 # Design Tokens — the token system discipline

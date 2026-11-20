@@ -1,6 +1,7 @@
 ---
 name: known-vuln-scan
 description: Use when scanning a running app or hosts with Nuclei templates for known CVEs, exposed .git/.env and default credentials. Triggers "add Nuclei to CI". Not for injection scanning (active-scan).
+disable-model-invocation: true
 ---
 
 # Security Testing — Nuclei (template-based scanner, shared)

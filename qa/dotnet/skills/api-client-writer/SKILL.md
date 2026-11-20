@@ -1,6 +1,7 @@
 ---
 name: api-client-writer
 description: Use when creating an API client class (*Client.cs) in a .NET API test project. Triggers "write an API client for X". Not for DTOs (api-models).
+disable-model-invocation: true
 ---
 
 # qa-dotnet:api-client-writer

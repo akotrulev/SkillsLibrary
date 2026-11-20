@@ -1,6 +1,7 @@
 ---
 name: certificate-scan
 description: Use when gating an endpoint's TLS config in CI with sslyze or testssl.sh; weak ciphers, old protocols, cert expiry. Triggers "scan our TLS config". Not for HTTP headers (passive-scan).
+disable-model-invocation: true
 ---
 
 # Security Testing — TLS / SSL Configuration Scanning (shared)

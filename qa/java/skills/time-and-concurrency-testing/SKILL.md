@@ -1,6 +1,7 @@
 ---
 name: time-and-concurrency-testing
 description: Use when a Java/TestNG API suite must run a scheduled job, freeze the clock, race requests or redeliver a message. Triggers "freeze the clock". Not for fault injection (failure-injection-testing).
+disable-model-invocation: true
 ---
 
 # QA — Time and Concurrency Testing (Java 21 + Spring Boot 3.x / TestNG)

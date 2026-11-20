@@ -1,6 +1,7 @@
 ---
 name: file-storage-testing
 description: Use when a TypeScript suite must assert object-storage side-effects (S3 via LocalStack, Blob via Azurite). Triggers "assert the file landed in the bucket". Not for DB asserts (db-connection).
+disable-model-invocation: true
 ---
 
 # QA — File Storage Testing (TypeScript)

@@ -1,6 +1,7 @@
 ---
 name: async-concurrency
 description: Use when writing or fixing async Rust on tokio (cancellation, shutdown, select! safety, locks vs channels). Triggers "future is not Send", "tokio Mutex or std Mutex". Not for profiling (performance).
+disable-model-invocation: true
 ---
 
 # Rust — Async and Concurrency on Tokio

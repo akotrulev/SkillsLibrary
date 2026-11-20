@@ -1,6 +1,7 @@
 ---
 name: performance
 description: Use when Rust code is slow, allocates too much or builds slowly (benchmarks, profiling, release tuning). Triggers "profile my Rust", "builds take forever". Not for SQL tuning (persistence).
+disable-model-invocation: true
 ---
 
 # Rust — Performance

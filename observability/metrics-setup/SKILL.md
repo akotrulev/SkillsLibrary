@@ -1,6 +1,7 @@
 ---
 name: metrics
 description: Use when setting up Prometheus or Mimir as the Grafana metrics backend (ingest, exemplars, retention, cardinality). Triggers "set up Prometheus", "deploy Mimir". Not for Loki or Tempo (logs-traces).
+disable-model-invocation: true
 ---
 
 # Observability — Prometheus / Mimir Setup

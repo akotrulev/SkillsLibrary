@@ -1,6 +1,7 @@
 ---
 name: unit-testing
-description: Use when Windows app logic needs a dev-side unit test: view models, services, NUnit, fakes, TimeProvider, WinUI Unit Test App. Triggers "unit-test this view model". Not for E2E (qa-desktop-dotnet).
+description: Use when Windows app logic needs a dev-side unit test (view models, services, NUnit, fakes, TimeProvider, WinUI Unit Test App). Triggers "unit-test this view model". Not for E2E (qa-desktop-dotnet).
+disable-model-invocation: true
 ---
 
 # Windows — Unit Testing (NUnit + fakes)

@@ -1,6 +1,7 @@
 ---
 name: bdd-reviewer
 description: Use when reviewing Gherkin .feature files and Reqnroll steps in .NET for reuse and binding. Triggers "review these feature files". Not for generating steps (gherkin-step-code).
+disable-model-invocation: true
 ---
 
 # Reqnroll / Gherkin Reviewer (C# / .NET 10)

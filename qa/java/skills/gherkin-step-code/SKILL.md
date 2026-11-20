@@ -1,6 +1,7 @@
 ---
 name: gherkin-step-code
 description: Use when turning Gherkin .feature files into Cucumber-JVM steps in Java bound to page objects. Triggers "generate step definitions". Not for writing .feature files (feature-files).
+disable-model-invocation: true
 ---
 
 # Cucumber-JVM Step Bindings + POM Implementation (Java 21)

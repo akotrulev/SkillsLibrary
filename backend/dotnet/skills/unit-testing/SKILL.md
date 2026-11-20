@@ -1,6 +1,7 @@
 ---
 name: unit-testing
 description: Use when C# backend logic needs a unit test with NUnit + NSubstitute (seams, fakes, coverage floor). Triggers "unit-test this handler", "fake the clock". Not for HTTP tests (api-tests).
+disable-model-invocation: true
 ---
 
 # .NET — Unit Testing (NUnit 4 + NSubstitute)

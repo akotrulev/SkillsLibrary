@@ -1,6 +1,7 @@
 ---
 name: vuln-reachability
 description: Use when an SCA/SAST gate is too noisy; re-rank findings by exploitability via CISA KEV, EPSS, VEX. Triggers "gate on exploitability not CVSS". Not for running a scan (dependency-scan).
+disable-model-invocation: true
 ---
 
 # Security Testing — Vulnerability Reachability & Exploitability Weighting

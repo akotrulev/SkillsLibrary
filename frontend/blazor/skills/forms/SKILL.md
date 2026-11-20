@@ -1,6 +1,7 @@
 ---
 name: forms
 description: Use when building or fixing a Blazor form (EditForm, DataAnnotations, FluentValidation, server-error mapping). Triggers "build a form for X", "wire FluentValidation". Not for state (state-management).
+disable-model-invocation: true
 ---
 
 # Blazor Forms

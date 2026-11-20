@@ -1,6 +1,7 @@
 ---
 name: data-fetching
 description: Use when a Blazor component fetches or writes data (typed HttpClient, one service for Server and WASM, PersistentState). Triggers "how should this load data". Not for pushed data (realtime).
+disable-model-invocation: true
 ---
 
 # Blazor — Data Access (request/response lane)

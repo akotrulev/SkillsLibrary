@@ -1,6 +1,7 @@
 ---
 name: store-compliance
 description: Use when an iOS, Android or React Native app ships or adds permissions, SDKs, accounts, tracking or IAP; App Store/Play review rules. Triggers "will review pass this". Not for signing (release).
+disable-model-invocation: true
 ---
 
 # Mobile — Store Compliance

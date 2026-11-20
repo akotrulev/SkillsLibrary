@@ -1,6 +1,7 @@
 ---
 name: standards-audit
 description: Use when auditing a whole .NET service against be-dotnet conventions into a re-runnable docs/audits/ report, read-only. Triggers "audit our .NET service". Not for one diff (conventions-review).
+disable-model-invocation: true
 ---
 
 # be-dotnet Conformance Audit

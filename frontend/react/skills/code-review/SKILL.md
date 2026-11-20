@@ -1,6 +1,7 @@
 ---
 name: conventions-review
 description: Use when reviewing React code (misplaced 'use client', hook rules, effect-derived state, index keys, hydration bugs). Triggers "review this component". Not for writing code (component-writer).
+disable-model-invocation: true
 ---
 
 # React — Reviewer (TypeScript)

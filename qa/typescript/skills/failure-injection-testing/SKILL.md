@@ -1,6 +1,7 @@
 ---
 name: failure-injection-testing
 description: Use when writing fault-injection tests in TypeScript with Toxiproxy via Testcontainers to assert graceful degradation. Triggers "survive a slow database". Not for load (load-testing).
+disable-model-invocation: true
 ---
 
 # QA — Chaos / Fault-Injection Testing (TypeScript / Toxiproxy + Testcontainers + Vitest)

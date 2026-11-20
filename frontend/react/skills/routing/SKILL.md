@@ -1,6 +1,7 @@
 ---
 name: routing
 description: Use when adding, nesting or debugging Next.js App Router routes (layouts, parallel and intercepting modal routes, middleware). Triggers "make this a modal route". Not for metadata (seo).
+disable-model-invocation: true
 ---
 
 # React — Routing & Navigation (Next.js App Router)

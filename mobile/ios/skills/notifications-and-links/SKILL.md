@@ -1,6 +1,7 @@
 ---
 name: push-and-deep-links
 description: Use when an iOS app needs push or local notifications (APNs) or opens from universal links. Triggers "add push", "link opens the app". Not for route structure (navigation).
+disable-model-invocation: true
 ---
 
 # iOS — Notifications and Links

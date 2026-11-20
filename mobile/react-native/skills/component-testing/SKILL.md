@@ -1,6 +1,7 @@
 ---
 name: component-testing
 description: Use when a React Native component, hook or logic needs a dev-side unit test (Jest + jest-expo + RNTL). Triggers "unit-test this screen". Not for device journeys (qa-mobile-typescript).
+disable-model-invocation: true
 ---
 
 # React Native — Component & Pure-Logic Testing (Jest + RNTL 14)

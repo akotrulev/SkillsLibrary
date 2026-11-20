@@ -1,6 +1,7 @@
 ---
 name: accessibility
 description: Use when a Jetpack Compose or Views screen must work with TalkBack, large font and Switch Access. Triggers "TalkBack reads the wrong thing". Not for a11y scanning (qa-mobile-typescript).
+disable-model-invocation: true
 ---
 
 # Android — Accessibility

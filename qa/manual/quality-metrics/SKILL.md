@@ -1,6 +1,7 @@
 ---
 name: quality-metrics
 description: Use when measuring QA effectiveness or delivery quality; DORA, defect escape rate, flake rate, MTTR, SLOs. Triggers "measure QA effectiveness", "DORA metrics". Not for release gates (test-strategy).
+disable-model-invocation: true
 ---
 
 # QA — Quality Metrics

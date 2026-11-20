@@ -1,6 +1,7 @@
 ---
 name: ai-answer-quality-testing
 description: Use when testing a RAG feature from a .NET/NUnit suite, retrieval apart from generation (RAG triad, Ragas). Triggers "test our RAG pipeline". Not for non-RAG LLM evals (ai-feature-testing).
+disable-model-invocation: true
 ---
 
 # RAG Testing (.NET 8 / NUnit — retrieval ⊕ generation, Ragas-spined)

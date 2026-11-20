@@ -1,6 +1,7 @@
 ---
 name: project-setup
 description: Use when creating or hardening a Mac app in Xcode (Swift 6, sandbox, hardened runtime, entitlements, xcconfig). Triggers "new Mac app". Not for signing, notarization and CI (distribution).
+disable-model-invocation: true
 ---
 
 # macOS — Project Setup

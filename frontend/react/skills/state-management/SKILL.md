@@ -1,6 +1,7 @@
 ---
 name: state-management
 description: Use when React state lives in the wrong place (lifted state, Context, Zustand, Redux Toolkit, server vs client state). Triggers "where should this state live". Not for forms (forms).
+disable-model-invocation: true
 ---
 
 # React — State Management

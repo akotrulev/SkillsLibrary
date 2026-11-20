@@ -1,6 +1,7 @@
 ---
 name: api-contract-testing
 description: Use when setting up consumer-driven contract tests with Pact in a Java service (Pact-JVM). Triggers "set up Pact". Not for one API's own tests (api-tests).
+disable-model-invocation: true
 ---
 
 # QA — Contract Testing with Pact (Java / Pact-JVM)

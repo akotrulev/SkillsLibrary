@@ -1,6 +1,7 @@
 ---
 name: push-and-deep-links
 description: Use when an Android app needs push or local notifications (FCM, channels) or opens from App Links. Triggers "add push", "link opens the app". Not for route structure (navigation).
+disable-model-invocation: true
 ---
 
 # Android — Notifications and Links

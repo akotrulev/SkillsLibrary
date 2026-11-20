@@ -1,6 +1,7 @@
 ---
 name: mysql
 description: Use when designing, securing, querying, migrating or tuning MySQL, MariaDB or Aurora MySQL. Triggers "design a MySQL schema", "this MySQL query is slow". Not for cross-engine modeling (schema-design).
+disable-model-invocation: true
 ---
 
 # Data — MySQL / MariaDB / Aurora MySQL

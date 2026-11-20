@@ -1,6 +1,7 @@
 ---
 name: persistence
 description: Use when setting up or refactoring Spring Boot persistence with JPA/Hibernate (entities, transactions, locking, tuning). Triggers "set up JPA", "N+1 in Hibernate". Not for raw SQL (postgresql).
+disable-model-invocation: true
 ---
 
 # Java — Persistence with JPA / Hibernate + Spring Data

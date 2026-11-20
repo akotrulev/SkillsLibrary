@@ -1,6 +1,7 @@
 ---
 name: data-driven-testing
 description: Use when one TypeScript test must run over many rows from an external CSV, JSON or spreadsheet. Triggers "run this test for every row". Not for building test objects (test-data-builder).
+disable-model-invocation: true
 ---
 
 # Data-Driven Testing (Node 24 / TypeScript — Vitest + Playwright)

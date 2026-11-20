@@ -1,6 +1,7 @@
 ---
 name: conflict-check
 description: Use when sweeping a new or changed feature against the whole business model for cross-feature conflicts. Triggers "does this feature conflict with anything". Not for scoping (scoping).
+disable-model-invocation: true
 ---
 
 # BA — Feature Conflict Sweep
