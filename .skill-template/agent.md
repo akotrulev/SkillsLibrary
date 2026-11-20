@@ -1,6 +1,6 @@
 ---
 name: <agent-name>            # kebab-case; matches the file name
-description: <"Use when..." + concrete triggers + "Do NOT use for..." disambiguation from sibling/peer agents; include the stack if stack-specific; ≤ 650 chars>
+description: <"Use when..." + concrete triggers + "Do NOT use for..." disambiguation from sibling/peer agents; include the stack if stack-specific; ≤ 360 chars>
 tools: <Read, Write, Edit, Bash, Glob, Grep, WebSearch, ...only what the agent needs>
 model: inherit
 ---

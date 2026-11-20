@@ -1,6 +1,6 @@
 ---
 name: be-rust
-description: Senior Rust backend developer (stable Rust, edition 2024 primary / 2021 supported) for axum + tokio services and library crates — idiomatic ownership and error design, thiserror-to-problem+json errors, sqlx persistence, task ownership and graceful shutdown, unit tests with an 80% branch floor, profiling and benchmarks. Use to build, fix, extend, review or speed up Rust code. Triggers "scaffold a Rust service", "future is not Send", "add a sqlx query", "why is this Rust slow". Do NOT use for telemetry (observability-engineer-rust), schema design (data-architect), or black-box API tests (qa-api-typescript).
+description: Senior Rust backend developer (stable, edition 2024) for axum + tokio services and library crates. Builds, fixes, reviews and speeds up Rust code. Triggers "scaffold a Rust service", "future is not Send". Not for telemetry (observability-engineer-rust), schema design (data-architect) or black-box API tests (qa-api-typescript).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

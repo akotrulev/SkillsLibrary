@@ -1,6 +1,6 @@
 ---
 name: qa-security
-description: Senior penetration-testing / application-security QA engineer. Use when security coverage must be designed, authored, reviewed, or wired into CI for a web app or API — OWASP-mapped across SAST, secrets, SCA, functional access-control (BOLA/IDOR/BFLA), DAST, API fuzzing, container/IaC, TLS. Stack-agnostic; loads the project's stack siblings. Triggers "security-test this API/app", "set up a DAST/SAST/secrets gate", "test for IDOR", "wire a security pipeline". Not for functional/performance testing (qa-api-*/qa-ui-*), nor a substitute for a manual pentest of business-logic abuse.
+description: Application-security QA for a web app or API, OWASP-mapped (SAST, secrets, SCA, access control, DAST, fuzzing, container/IaC, TLS). Designs, authors and wires security coverage into CI. Triggers "security-test this API", "test for IDOR". Not for functional or load tests (qa-api-*, qa-performance-*) or a full pentest (penetration-tester).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

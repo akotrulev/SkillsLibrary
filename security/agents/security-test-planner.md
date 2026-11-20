@@ -1,6 +1,6 @@
 ---
 name: security-test-planner
-description: Senior security-assessment planner. Given a repo, running system, cloud account, or loose description, it discovers the attack surface, blocks for a scope + authorization sign-off, then emits an assessment plan as an ordered task list, each task independently executable and bound to the lane agent that runs it (infra-security-tester, qa-security, penetration-tester, purple-team-engineer, security-architect). Mission Control vocabulary. Writes plans, never scans or exploits. Triggers "plan a security assessment for…", "sequence a pentest/posture review". Do NOT use to run a scan or exploit (the lane agents do) or to author app code.
+description: Security-assessment planner. Discovers the attack surface, blocks for scope and authorization sign-off, then writes an ordered task list bound to the lane agents. Writes plans, never scans or exploits. Triggers "plan a security assessment for…", "sequence a pentest". Not for running a scan or exploit (the lane agents).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

@@ -1,6 +1,6 @@
 ---
 name: qa-desktop-dotnet
-description: Senior automation QA engineer for native macOS and Windows desktop E2E in C#/.NET 10 (NUnit + Appium 3 with Mac2 4.6.1 and WinCore 3.3.2, or FlaUI 5.0.0 on Windows). Use when desktop test coverage must be scaffolded, authored or reviewed, end to end or any single step. Triggers "build desktop tests for…", "set up FlaUI tests", "write window objects". Do NOT use for mobile (qa-mobile-dotnet), browser or WebView-in-browser testing (qa-ui-dotnet), API testing (qa-api-dotnet), test-case design (qa-test-case-designer), Electron or Tauri apps, or other stacks (qa-desktop-*).
+description: Native macOS and Windows desktop E2E automation in C#/.NET 10 (8/9 supported) (Appium 3 Mac2/WinCore or FlaUI). Triggers "build desktop tests for…", "write window objects". Not for mobile (qa-mobile-dotnet), browser or WebView testing (qa-ui-dotnet), or Electron and Tauri apps.
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch, mcp__appium-mcp__appium_session_management, mcp__appium-mcp__appium_find_element, mcp__appium-mcp__appium_find_elements, mcp__appium-mcp__appium_gesture, mcp__appium-mcp__appium_set_value, mcp__appium-mcp__appium_get_text, mcp__appium-mcp__appium_alert, mcp__appium-mcp__appium_screenshot, mcp__appium-mcp__appium_get_window_size, mcp__appium-mcp__appium_get_page_source, mcp__appium-mcp__generate_locators, mcp__appium-mcp__appium_documentation_query, mcp__appium-mcp__appium_skills
 model: inherit
 ---

@@ -1,6 +1,6 @@
 ---
 name: tooling-engineer
-description: Senior engineer who turns a project into an agent-drivable surface — an MCP server, a CLI, or both — by deriving the capability contract (typed inputs, one envelope, flows, dependencies), then rendering it into smoke-tested code. Use for "build an MCP for this project", "expose these functions as a CLI", "make our service usable by an agent", "add a tool for X". Do NOT use to design a REST API for browser clients (`dev:plan-api-surface`), to wrap a third-party API with no local codebase (vendor `ai-development/mcp-builder`), to write CI pipelines (`devops-engineer`), or to document a feature for humans (`be-documenter`).
+description: Turns a project into an agent-drivable surface (an MCP server, a CLI or both) from a derived capability contract, as smoke-tested code. Triggers "build an MCP for this project", "expose these functions as a CLI". Not for a browser-facing REST API (solution-planner), CI pipelines (devops-engineer) or docs for people (be-documenter).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

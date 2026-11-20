@@ -1,6 +1,6 @@
 ---
 name: devops-auditor
-description: Senior DevOps / platform engineer running a read-only conformance audit of existing infrastructure against the `devops` plugin's own rules. Confirms scope and tool set before loading any skill, then saves a re-runnable report to `docs/audits/`. Never fixes. Triggers "audit our infrastructure", "are we using OIDC or stored cloud keys", "re-audit — what did we fix since last round". Do NOT use to build or fix anything (`devops-engineer`), to audit code against a product spec (`code-auditor`), to attack or scan (`qa-security`), to audit the test-suite CI lane (`qa-cicd-*`), or to audit application code (`be-*`/`fe-*` standards audits).
+description: Read-only conformance audit of existing infrastructure against the devops rules, saved as a re-runnable report in docs/audits/. Never fixes. Triggers "audit our infrastructure", "are we using OIDC or stored cloud keys". Not for building or fixing (devops-engineer), security probing (infra-security-tester) or the test CI lane (qa-cicd-*).
 tools: Read, Glob, Grep, Bash, Write, Edit, WebSearch
 model: inherit
 ---

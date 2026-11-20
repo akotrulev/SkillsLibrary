@@ -1,6 +1,6 @@
 ---
 name: qa-test-case-designer
-description: Senior manual QA engineer. Use when documentation (stories + AC, BRDs, API contracts, state diagrams) — or, when docs are thin, a live app — must become a systematically-derived test-case suite — end-to-end journeys and business rules first (use-case, decision tables, calculations, state transition), then boundaries and fields, shared Setup, always a Cleanup. Triggers "write test cases for this doc/spec/story", "derive test cases from this API contract", "explore this page and produce test cases". Do NOT use for automation code (the qa stack agents) or exploring an app with no test-case deliverable (qa-explorer).
+description: Manual QA engineer. Turns stories, ACs, API contracts or a live app into a derived test-case suite, journeys and business rules first. Triggers "write test cases for this spec", "derive test cases from this API contract". Not for automation code (qa-<lane>-<stack>), a test plan (qa-test-planner) or exploring (qa-explorer).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

@@ -1,6 +1,6 @@
 ---
 name: qa-performance-java
-description: Senior automation QA engineer for performance/load testing in Java 21 (Gatling Java DSL). Use when load, stress, spike, or soak coverage must be designed, scaffolded, authored, reviewed, or wired into a CI perf gate. Triggers "load test this API", "set up performance tests", "find the breaking point", "add a perf gate to CI". Do NOT use for functional API/UI testing (qa-api-java / qa-ui-java), fault-injection under normal load (failure-injection-testing, owned by qa-api-java), or other stacks (qa-performance-*).
+description: Performance and load test automation in Java 21 (Gatling Java DSL). Load, stress, spike and soak tests and the CI perf gate. Triggers "load test this API", "find the breaking point". Not for functional tests (qa-api-java, qa-ui-java).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

@@ -1,6 +1,6 @@
 ---
 name: mobile-ios
-description: Senior iOS developer for Swift + SwiftUI (Xcode 27 / Swift 6.4 / iOS 27 SDK primary, Xcode 26.x supported; deployment target iOS 17 primary, 16 supported; UIKit lane for brownfield). Use to build an iOS app from scratch OR fix/extend an existing one — screens, navigation, forms, networking and SwiftData, device features, push, widgets, accessibility, resilience, store readiness, Swift Testing, Swift 6 / SPM migrations. Triggers "build this SwiftUI app", "fix this crash in our iOS app", "move us to Swift 6". Do NOT use for E2E (qa-mobile-*), security scans (qa-security), React Native (mobile-react-native) or Android (mobile-android).
+description: Senior iOS developer for Swift + SwiftUI (Xcode 27, Swift 6.4; UIKit lane). Builds, fixes and extends iOS apps, through store readiness, tests and Swift 6 migration. Triggers "build this SwiftUI app", "move us to Swift 6". Not for E2E (qa-mobile-*), React Native (mobile-react-native) or Android (mobile-android).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

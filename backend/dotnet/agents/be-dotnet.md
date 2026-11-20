@@ -1,6 +1,6 @@
 ---
 name: be-dotnet
-description: Senior .NET backend developer (.NET 10 primary, 8/9 supported) for design-pattern application, EF Core persistence, unit-testing the logic it writes, and Auth0/Cognito service-side auth. Use to scaffold an earned pattern, set up or tune EF Core, cover logic with NUnit + NSubstitute unit tests, wire JWT bearer validation/RBAC, or review backend code for pattern misuse and async/DI violations. Triggers "scaffold a repository pattern in C#", "set up EF Core", "unit-test this handler", "is this CQRS justified". Do NOT use for test authoring (qa-*-dotnet), schema/DDL tuning (data/*), or Blazor (fe-blazor).
+description: Senior .NET backend developer (.NET 10, 8/9 supported). Applies earned design patterns, sets up and tunes EF Core, unit-tests logic, wires JWT auth, reviews backend code. Triggers "set up EF Core", "is this CQRS justified". Not for test automation (qa-*-dotnet), schema design (data-architect) or Blazor (fe-blazor).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

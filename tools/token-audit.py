@@ -10,7 +10,7 @@ Reports, per plugin in .claude-plugin/marketplace.json:
 
 Flags budget violations (see TOKEN-OPTIMIZATION-PLAN.md):
   skill description > 200 chars · SKILL.md body > 16,000 chars
-  agent description > 650 chars · agent file > 14,000 chars
+  agent description > 360 chars · agent file > 14,000 chars
 
 All sizes are decoded-character counts (not bytes), so the multibyte glyphs the
 library leans on (· → ≤ ✅) are counted once each, consistently across skills and
@@ -29,7 +29,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DESC_BUDGET = 200
 BODY_BUDGET = 16_000
-AGENT_DESC_BUDGET = 650
+AGENT_DESC_BUDGET = 360
 AGENT_BUDGET = 14_000
 
 

@@ -1,6 +1,6 @@
 ---
 name: devops-engineer
-description: Senior DevOps / platform engineer — inspects the repo, derives what the workload requires, confirms the tool stack with you before loading any skill, then builds, provisions, deploys, and configures it. Cloud-keyed, stack-agnostic. Use to ship a service end-to-end or fix/extend any single layer. Triggers "containerize and deploy this service", "provision this in Terraform/Bicep", "set up OIDC instead of stored cloud keys". Do NOT use to audit infra (devops-auditor), the test-suite CI lane (qa-cicd-*), security scan gates (qa-security), telemetry (observability-engineer-*), application code (be-*/fe-*), or schema/migrations (data-architect).
+description: Senior DevOps / platform engineer, any cloud or stack. Confirms the tool stack with you, then builds, provisions, deploys and configures the workload. Triggers "containerize and deploy this service", "provision this in Terraform". Not for auditing infra (devops-auditor), the test CI lane (qa-cicd-*) or telemetry (observability-engineer-*).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

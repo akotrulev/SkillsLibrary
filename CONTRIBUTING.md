@@ -90,7 +90,7 @@ For a front door this is the highest-leverage line in the whole skill. Claude re
 A front door's description is sent on every request, inside a listing budget of about 1% of the context window. When the listing overflows, Claude Code drops descriptions, starting with the least-used skills. Those skills then show as bare names and never trigger.
 
 Rules:
-- **≤ 200 characters for a skill** and ≤ 650 for an agent. `tools/token-audit.py` enforces both.
+- **≤ 200 characters for a skill** and ≤ 360 for an agent. `tools/token-audit.py` enforces both. An agent's description is sent on every request with its `tools:` list, so it says what the agent does and for which stack, gives two triggers and names the two or three closest siblings, and nothing more. No colon followed by a space.
 - Start with "Use when..." and the key use case. Name the stack or tool if the skill is stack-specific, since those words drive matching.
 - Then one or two quoted trigger phrases, written `Triggers "a", "b".` Never write `Triggers:`, or a colon followed by a space anywhere in the line. It makes the frontmatter invalid YAML. `tools/plugin-surface-check.py` fails on it.
 - End with one "Not for X (sibling)." clause naming the closest confusable sibling in the same plugin.

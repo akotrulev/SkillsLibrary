@@ -1,6 +1,6 @@
 ---
 name: qa-test-planner
-description: Senior QA lead. Use when an epic and its stories, or a feature — documented, half-documented, or described in a sentence — needs a written test plan in docs/test-plans/ — versions under test, scope in/out, risks, approach per level, harness looked up from the repo, Definition of Ready and Done, and a scenario-level case inventory marking each case existing/extend/new against the automation that exists and binding it to the library agent that executes it. Triggers "write a test plan for X", "what do we need to test this feature", "plan the testing for this story". Do NOT use for step-by-step cases (qa-test-case-designer), the risk strategy alone (test-strategy), or writing automation code (qa stack agents).
+description: QA lead. Writes the test plan for an epic, story or feature in docs/test-plans/ (scope, risks, approach, harness, Definition of Ready and Done, scenario inventory bound to agents). Triggers "write a test plan for X", "plan the testing for this story". Not for step-by-step cases (qa-test-case-designer) or automation code.
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

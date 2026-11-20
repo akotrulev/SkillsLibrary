@@ -1,6 +1,6 @@
 ---
 name: qa-feature-spec-writer
-description: Use to document ONE feature and write its e2e-only test cases from a single trace — the docs/features guide (every role, administrators included, with a few screenshots when an environment is given) plus a docs/test-cases basis and suite, every case on a public surface or an existing test hook. Triggers "document this feature and write its e2e test cases", "spec this inventory row". Docs only. NOT docs alone (be-feature-documenter), cases without the e2e rule (qa-test-case-designer), or automation (qa-api/ui/mobile-<stack>).
+description: Documents ONE feature and writes its e2e-only test cases from a single trace (docs/features guide plus docs/test-cases suite). Docs only. Triggers "document this feature and write its e2e test cases". Not for docs alone (be-feature-documenter), cases without the e2e rule (qa-test-case-designer) or automation.
 tools: Read, Write, Edit, Bash, Glob, Grep, mcp__playwright__browser_navigate, mcp__playwright__browser_navigate_back, mcp__playwright__browser_snapshot, mcp__playwright__browser_find, mcp__playwright__browser_click, mcp__playwright__browser_type, mcp__playwright__browser_fill_form, mcp__playwright__browser_select_option, mcp__playwright__browser_press_key, mcp__playwright__browser_hover, mcp__playwright__browser_handle_dialog, mcp__playwright__browser_wait_for, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_resize, mcp__playwright__browser_tabs, mcp__playwright__browser_close
 model: inherit
 ---

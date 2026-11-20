@@ -1,6 +1,6 @@
 ---
 name: solution-planner
-description: Senior whole-application solution planner, stack-agnostic (.NET / Java / Node / Python / Rust backends, React / Blazor frontends). Turns requirements into an approved blueprint, then a detail pack (data model, experience, API surface, integrations), an epic map, and a task list — each task one stack, one agent, one session, with its prompt. Blocks for approval; writes plans, never code. Triggers "plan this out", "turn these requirements into a build plan",. Do NOT use to write code (be-<stack> / fe-<stack>), for schema depth (data-architect), to author requirements (requirements-author), or for infra (devops-engineer).
+description: Whole-application solution planner, any stack. Turns requirements into an approved blueprint, a detail pack, an epic map and a task list with one prompt per task. Writes plans, never code. Triggers "plan this out", "turn these requirements into a build plan". Not for code (be-*, fe-*), schema depth (data-architect) or requirements (requirements-author).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

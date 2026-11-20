@@ -1,6 +1,6 @@
 ---
 name: dataset-engineer
-description: Senior LLM/VLM training-data engineer. Use to build a training dataset end-to-end for a small language or vision-language model — pretraining corpora, SFT data, preference/DPO data, and eval sets, text or multimodal, by curation and/or teacher synthesis. Produces JSONL with a dataset card, dedup + decontamination, and honest provenance. Triggers "build an SFT dataset for my model", "make a pretraining corpus", "generate DPO pairs", "build a VLM instruction dataset", "create training data for a small LLM". Do NOT use to train/fine-tune the model, run the eval harness (qa ai-feature-testing), or design app-database schema (data-architect).
+description: Senior LLM/VLM training-data engineer. Builds pretraining corpora, SFT, preference/DPO data and eval sets as JSONL with a dataset card, dedup, decontamination and provenance. Triggers "build an SFT dataset for my model", "generate DPO pairs". Not for training the model, running evals (qa-llm-*) or app schemas (data-architect).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

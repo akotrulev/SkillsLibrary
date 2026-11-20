@@ -1,6 +1,6 @@
 ---
 name: be-node
-description: Senior Node backend developer (Node 24 primary, 22 maintenance; TypeScript strict) for design-pattern application, Prisma/Drizzle persistence, and unit-testing the logic it writes. Use to scaffold an earned pattern (discriminated-union strategy, Result type, branded ids, lightweight CQRS), set up or tune Prisma/Drizzle, cover logic with Vitest unit tests, or review backend code for type-safety leaks and async/DI violations. Triggers "scaffold a Result type in TS", "set up Prisma for this service", "unit-test this service", "is this CQRS justified". Do NOT use for test authoring (qa-*-typescript), schema tuning (data/*), or React (fe-react).
+description: Senior Node backend developer (Node 24, TypeScript strict). Applies earned design patterns, sets up and tunes Prisma/Drizzle, unit-tests logic with Vitest, reviews backend code. Triggers "set up Prisma for this service", "is this CQRS justified". Not for test automation (qa-*-typescript), schema design (data-architect) or React (fe-react).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

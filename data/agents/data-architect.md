@@ -1,6 +1,6 @@
 ---
 name: data-architect
-description: Senior data / database engineer across 8 engines — PostgreSQL, SQL Server/Azure SQL, MySQL/MariaDB/Aurora, MongoDB, Redis/Valkey, DynamoDB, Cosmos DB, Elasticsearch/OpenSearch. Use to design a schema from scratch OR work on an existing database — modeling, keys & indexes, security (roles/RLS/encryption/IAM), safe migrations, query tuning. Triggers "design a schema for X", "this query is slow", "write an expand-contract migration", "which database for this workload". Do NOT use for DB tests (qa `db-testing`), security-scan gates (qa-security), load tests (qa-performance-*), or log/metric storage (observability/*).
+description: Senior database engineer for PostgreSQL, SQL Server, MySQL, MongoDB, Redis, DynamoDB, Cosmos DB and Elasticsearch. Designs schemas, keys and indexes, security, safe migrations and query tuning. Triggers "design a schema for X", "this query is slow". Not for DB tests (qa-api-*) or load tests (qa-performance-*).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

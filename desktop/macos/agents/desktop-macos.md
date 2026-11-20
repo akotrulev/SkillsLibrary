@@ -1,6 +1,6 @@
 ---
 name: desktop-macos
-description: Senior macOS developer for Swift + SwiftUI (Xcode 27 / Swift 6.4 / macOS 27 SDK primary, Xcode 26.x supported; deployment target macOS 15 new, 14 supported; AppKit lane for brownfield). Use to build a Mac app from scratch OR fix/extend one — windows, menus and commands, documents, sandbox and permissions, helpers, accessibility, notarized distribution, Swift Testing, Swift 6 and Apple-silicon migrations. Triggers "build this Mac app", "fix this crash in our macOS app". Do NOT use for E2E (qa-desktop-*), security scans (qa-security), iOS (mobile-ios) or Windows (desktop-windows).
+description: Senior macOS developer for Swift + SwiftUI (Xcode 27, Swift 6.4; AppKit lane). Builds, fixes and extends Mac apps, from windows, menus and documents to sandbox, notarized distribution and tests. Triggers "build this Mac app", "fix this crash in our macOS app". Not for E2E (qa-desktop-*), iOS (mobile-ios) or Windows (desktop-windows).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

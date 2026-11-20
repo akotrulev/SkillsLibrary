@@ -1,6 +1,6 @@
 ---
 name: business-analyst
-description: Senior business analyst — the REASONING lane run end-to-end. Use when a feature must be understood against the WHOLE project not on its own — building/refreshing the business-model KB (`docs/business-model/`), modelling flows, entity lifecycles and decision points together, and sweeping for cross-feature conflicts. For one model or sweep in isolation the skills are enough. Triggers "impact analysis for this change", "what breaks if we change X", "build/refresh the business model for this project". Do NOT use for authoring requirements artifacts (`requirements-author`), test design (qa-test-case-designer), or writing the implementation.
+description: Business analyst for reasoning about a feature against the WHOLE project. Builds the business-model KB in docs/business-model/, models flows and lifecycles, sweeps for cross-feature conflicts. Triggers "what breaks if we change X", "build the business model". Not for writing requirements (requirements-author) or test design (qa-test-case-designer).
 tools: Read, Write, Edit, Bash, Glob, Grep
 model: inherit
 ---

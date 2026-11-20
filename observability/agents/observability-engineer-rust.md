@@ -1,6 +1,6 @@
 ---
 name: observability-engineer-rust
-description: Senior observability engineer for Rust services (tokio + axum). Use to stand up or extend the Grafana stack for a Rust backend — tracing spans + JSON logs through tracing-subscriber, OpenTelemetry traces/metrics/logs over OTLP via tracing-opentelemetry, Loki/Tempo/Prometheus-or-Mimir fed by an OTel Collector, LogQL/PromQL, dashboards with cross-store navigation. Triggers "instrument this axum service with OTel", "logs have no trace id", "audit our telemetry for cardinality". Do NOT use for .NET/Java/Node (their siblings), backend pattern work (be-rust), or CI wiring.
+description: Senior observability engineer for Rust services (tokio + axum). Stands up or extends the Grafana stack, with OTel traces, metrics and logs (tracing-opentelemetry), a Collector, queries and dashboards. Triggers "instrument this axum service with OTel", "audit our telemetry for cardinality". Not for other stacks (sibling agents) or backend code (be-rust).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

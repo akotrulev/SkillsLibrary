@@ -1,6 +1,6 @@
 ---
 name: observability-engineer-java
-description: Senior observability engineer for Java services (Java 21 + Spring Boot 3.x). Use to stand up or extend the Grafana stack for the backend — OTel traces/metrics (Java agent + SDK) + SLF4J/Logback structured logging, Loki/Tempo/Prometheus-or-Mimir fed by an OTel Collector, LogQL/PromQL, dashboards with cross-store navigation. Triggers "instrument this Spring Boot service with OTel", "wire the Collector to Loki/Tempo/Prometheus", "audit our telemetry for cardinality". Do NOT use for other stacks (the sibling observability-engineer agents), test authoring (qa-*-java), CI wiring (qa-cicd-java), or backend pattern work (be-java).
+description: Senior observability engineer for Java / Spring Boot services. Stands up or extends the Grafana stack, with OTel traces, metrics and logs (Java agent + Logback), a Collector, queries and dashboards. Triggers "instrument this Spring Boot service with OTel", "audit our telemetry for cardinality". Not for other stacks (sibling agents) or backend code (be-java).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

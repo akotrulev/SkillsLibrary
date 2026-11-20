@@ -1,6 +1,6 @@
 ---
 name: requirements-author
-description: The front door to the planning lane. Takes a loose description of something to build (an idea, a stakeholder ask), refines it through batched questions, and writes requirements.md, epics.md and stories.md into a new initiative folder, ready for /dev:plan-system. Also repairs and extends an existing backlog. Triggers "I want to build…", "turn this ask into requirements", "what are the epics and stories for this". Do NOT use for cross-feature conflict analysis or the business-model KB (`business-analyst`), architecture or task planning (`solution-planner`), test cases (`qa-test-case-designer`), or automation code (the qa stack agents).
+description: Front door to the planning lane. Refines a loose description of something to build and writes requirements.md, epics.md and stories.md into a new initiative folder. Triggers "I want to build…", "turn this ask into requirements". Not for conflict analysis or the KB (business-analyst) or task planning (solution-planner).
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: inherit
 ---

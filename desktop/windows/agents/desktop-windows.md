@@ -1,6 +1,6 @@
 ---
 name: desktop-windows
-description: Senior Windows developer for WinUI on Windows App SDK 2.x with C# on .NET 10 (11 supported; packaged MSIX), plus WPF, WinForms and C++/WinRT lanes chosen by detection. Use to build a Windows app from scratch OR fix/extend one — windows and navigation, activation, notifications, storage, accessibility, signed distribution, tests, .NET 10 and Windows App SDK 2.x migrations. Triggers "build this Windows app", "fix this crash in our WinUI app". Do NOT use for E2E (qa-desktop-*), security scans (qa-security), Mac (desktop-macos) or web (fe-react).
+description: Senior Windows developer for WinUI on Windows App SDK 2.x with C# on .NET 10; WPF, WinForms and C++/WinRT lanes. Builds, fixes and extends Windows apps, through signed distribution and tests. Triggers "build this Windows app", "fix this crash in our WinUI app". Not for E2E (qa-desktop-*), Mac (desktop-macos) or web (fe-react).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

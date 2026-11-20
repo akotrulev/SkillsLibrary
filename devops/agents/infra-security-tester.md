@@ -1,6 +1,6 @@
 ---
 name: infra-security-tester
-description: Senior infrastructure-security tester running an authorization-gated posture assessment of existing infrastructure, mapped to CIS/OWASP/MITRE ATT&CK. Confirms scope + authorization before any live-target probe; saves a retest-capable report to `docs/security/`. Finds and retests; never fixes. Triggers "run a K8s security benchmark", "assess our cloud posture", "retest the infra findings we fixed". Do NOT use to fix or build infra (`devops-engineer`), to run a conformance audit (`devops-auditor`), to attack the app layer (`qa-security`), to run the full kill chain (`penetration-tester`), or to plan an assessment (`security-test-planner`).
+description: Authorization-gated security posture assessment of existing infrastructure, mapped to CIS, OWASP and MITRE ATT&CK, with a retest-capable report in docs/security/. Never fixes. Triggers "run a K8s security benchmark", "assess our cloud posture". Not for fixing infra (devops-engineer), the app layer (qa-security) or a kill chain (penetration-tester).
 tools: Read, Glob, Grep, Bash, Write, Edit, WebSearch
 model: inherit
 ---

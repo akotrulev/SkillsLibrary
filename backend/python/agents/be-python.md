@@ -1,6 +1,6 @@
 ---
 name: be-python
-description: Senior Python worker developer (Python 3.13 primary; 3.12, 3.14 supported) for the isolated upload-processing worker — content-sniffed validation, SVG sanitising, EXIF/GPS strip, rembg, VTracer, DPI verdict, colours, resize ladders — on uv + ruff + mypy --strict, pytest with hostile fixtures, in a no-network container with per-job limits. Use to build, fix, extend or review it. Triggers "build the Python upload worker", "strip GPS from uploads", "sanitise SVG in Python". Do NOT use for the TypeScript services around it (be-node), the QA suite that calls the container (qa-api-typescript), or generic images (devops).
+description: Senior Python developer (3.13) for the sandboxed upload-processing worker (validation, SVG sanitising, EXIF strip, rembg, VTracer, resize). Builds, fixes and reviews it. Triggers "build the Python upload worker", "sanitise SVG in Python". Not for the services around it (be-node) or its black-box tests (qa-api-typescript).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

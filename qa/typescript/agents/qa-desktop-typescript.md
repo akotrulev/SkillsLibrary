@@ -1,6 +1,6 @@
 ---
 name: qa-desktop-typescript
-description: Senior automation QA engineer for native macOS and Windows desktop E2E in TypeScript/Node 24 (WebdriverIO 10 + Appium 3, Mac2 4.6.1, WinCore 3.3.2). Use when desktop test coverage must be scaffolded, authored or reviewed, end to end or any single step. Triggers "build desktop tests for…", "set up Mac2 or WinCore tests", "write window objects". Do NOT use for mobile (qa-mobile-typescript), browser or WebView-in-browser testing (qa-ui-typescript), API testing (qa-api-typescript), test-case design (qa-test-case-designer), Electron or Tauri apps, or other stacks (qa-desktop-*).
+description: Native macOS and Windows desktop E2E automation in TypeScript/Node 24 (WebdriverIO + Appium 3 Mac2/WinCore). Triggers "build desktop tests for…", "write window objects". Not for mobile (qa-mobile-typescript), browser or WebView testing (qa-ui-typescript), or Electron and Tauri apps.
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch, mcp__appium-mcp__appium_session_management, mcp__appium-mcp__appium_find_element, mcp__appium-mcp__appium_find_elements, mcp__appium-mcp__appium_gesture, mcp__appium-mcp__appium_set_value, mcp__appium-mcp__appium_get_text, mcp__appium-mcp__appium_alert, mcp__appium-mcp__appium_screenshot, mcp__appium-mcp__appium_get_window_size, mcp__appium-mcp__appium_get_page_source, mcp__appium-mcp__generate_locators, mcp__appium-mcp__appium_documentation_query, mcp__appium-mcp__appium_skills
 model: inherit
 ---

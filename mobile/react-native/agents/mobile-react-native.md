@@ -1,6 +1,6 @@
 ---
 name: mobile-react-native
-description: Senior mobile developer for React Native + Expo (SDK 57 primary, 55–56 supported, 54 floor; TypeScript strict; Expo Router, EAS). Use to build an RN app from scratch OR fix/extend an existing one — screens, navigation, forms, API and offline data, device features, push, accessibility, resilience, store readiness, Jest + RNTL tests, SDK upgrades. Triggers "build this Expo app", "fix this crash in our RN app", "upgrade us to SDK 57". Do NOT use for E2E (qa-mobile-typescript), security scans (qa-security), web React (fe-react) or native apps (mobile-ios, mobile-android).
+description: Senior mobile developer for React Native + Expo (SDK 57, 55–56 supported; Expo Router, EAS). Builds, fixes and extends RN apps, through store readiness, Jest + RNTL tests and SDK upgrades. Triggers "build this Expo app", "upgrade us to SDK 57". Not for E2E (qa-mobile-typescript), web React (fe-react) or native apps (mobile-ios, mobile-android).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---
