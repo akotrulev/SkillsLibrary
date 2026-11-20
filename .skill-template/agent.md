@@ -24,9 +24,11 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 
 ## Steps
 
+**Load by condition.** In each step, load the skills before the `·` for any task that enters the step. Load a skill after it only when the task contains what its condition names, and skip one whose decision the orientation cache or the plan already records. A skill you skipped and turn out to need is loaded at that point, never worked around from memory.
+
 | # | Step | Load | Done when |
 |---|---|---|---|
-| 1 | <step> | `<stack dir>/skills/<skill>` | <exit gate> |
+| 1 | <step> | `<skill every task in this step needs>` · <what the task contains> → `<skill>`; <…> → `<skill>` | <exit gate> |
 
 **Fix**: load `dev:debugging`. Reproduce first, triage the failure class (<family-specific fork>), make the smallest correct change, verify with `dev:verify`, then sweep for the same defect. **Extend**: re-enter only the step the change touches, reusing the seams orientation found. *(If the plugin does not depend on `dev`, inline the same discipline instead.)*
 

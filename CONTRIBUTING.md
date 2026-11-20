@@ -51,6 +51,8 @@ Agents live in `<domain>/agents/<name>.md` and are **thin routers**: they say in
 
 **Vocabulary is fixed.** An agent's own operating procedure is numbered in **steps** (`## Steps`, `| # | Step | Goal | …`); the work items any plan it writes hands out are **tasks** (flat and ordered, ids prefixed by the family of work — `C1`, `B1…Bn`, `F1…Fn` — one deliverable each) — see the Planning rules in `CLAUDE.md`. Never call either a *phase* or a *slice*, in a heading, a table, or prose.
 
+**A step loads by condition.** A skill costs 2–5k tokens each time an agent reads it, so a `Load` cell names two groups, split by a `·`: the skills every task entering the step needs, then `<what the task contains> → <skill>` for the rest. Keep the first group to what no task in that step can do without (the component writer, the test ids, the three-state rules); a form, an API call, a new route, motion, translated text and each platform feature are conditions. A condition names something visible in the task or the code, never "when relevant". Measured on `fe-react` (2026-11-20): a task entering steps 2 to 5 read about 72k tokens of skills unconditionally; it now reads 30k plus what its conditions pull in.
+
 **Brownfield is still mandatory, in less space.** Every agent orients in an existing codebase before changing it, fixes (reproduce → triage → smallest correct change → verify → sweep the class, loading `dev:debugging` and `dev:verify`) and extends (re-enter only the touched step, reuse the seams orientation found). Its report template has a `Mode: BUILD | FIX | EXTEND` line.
 
 ## Code standards are rules, installed per project

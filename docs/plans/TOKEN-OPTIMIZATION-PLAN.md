@@ -8,6 +8,8 @@
 
 **Status (2026-11-20, second pass):** all 77 command files carry `disable-model-invocation: true` (~1,500 tok off every request for a nine-plugin project). The routing sections (`When to use`, `When NOT to use`, `Handoffs`, `Cross-references`, `Related`) were removed from 536 hidden skills: ~162k tok of skill text library-wide, 8–11% of each plugin's bodies. Six devops and security `Cross-references` sections were kept because they hold scanner-ownership rules. `Inputs needed` was kept everywhere: it feeds the procedure.
 
+**Status (2026-11-20, third pass):** agent descriptions rewritten to ≤ 360 chars (avg 318, was ~620). The seven app-stack agents (`fe-react`, `fe-blazor`, `mobile-*`, `desktop-*`) load by condition: each `Load` cell is split by `·` into always and `<condition> → <skill>`. `fe-react` steps 2–5 went from ~72k tok of unconditional skill text to a 30k floor. The other agents' tables were already conditional. Still open: agent `tools:` lists (~2,700 tok always-on for a nine-plugin project, four QA agents naming 40–60 MCP tools each).
+
 **Current (2026-07-25) — the two plugins worked so far:**
 
 | Plugin | Skills | Always-on desc | Agents | Status |
