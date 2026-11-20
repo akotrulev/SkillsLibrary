@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step qa-ui-java workflow — scaffold, author, and review web UI test coverage (or build a POM from a URL)
 argument-hint: [the flow, URL, or suite to cover or review]
+disable-model-invocation: true
 ---
 
 Adopt the **`qa-ui-java` senior automation QA engineer** role for this task.

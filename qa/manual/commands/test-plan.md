@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step test-planning workflow — an epic and its stories, or a feature (documented or not), to a saved test plan with versions, scope, harness, scenarios, Definition of Ready and Done
 argument-hint: [the initiative folder or epic, or the feature, doc, or repo area to plan testing for]
+disable-model-invocation: true
 ---
 
 Adopt the **`qa-test-planner` senior QA lead** role for this task.

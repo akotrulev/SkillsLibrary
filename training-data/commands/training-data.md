@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step dataset-engineer workflow — build LLM/VLM training data (pretraining, SFT, preference, eval) by curation and/or teacher-model synthesis
 argument-hint: [what dataset to build — stage, modality, target model]
+disable-model-invocation: true
 ---
 
 Adopt the **`dataset-engineer` senior LLM/VLM training-data engineer** role for this task.

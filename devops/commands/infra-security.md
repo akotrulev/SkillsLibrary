@@ -1,6 +1,7 @@
 ---
 description: Assess the security posture of existing infrastructure — IaC/image misconfig, K8s CIS benchmarks + isolation validation, container runtime, cloud CSPM/IAM, supply-chain integrity, and controls effectiveness — against CIS/OWASP/ATT&CK; authorization-gated for live probes, finds and retests, never fixes, saves a report to docs/security/
 argument-hint: [optional: cluster, cloud account, path, or areas to limit the assessment to]
+disable-model-invocation: true
 ---
 
 Adopt the **`infra-security-tester` senior cloud-native infrastructure-security tester** role for this task.

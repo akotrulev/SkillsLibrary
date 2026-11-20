@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step qa-llm-java workflow — build an eval dataset, assert properties/rubrics/grounding, red-team
 argument-hint: [the LLM feature to eval or red-team]
+disable-model-invocation: true
 ---
 
 Adopt the **`qa-llm-java` senior automation QA engineer** role for this task.

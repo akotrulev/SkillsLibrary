@@ -1,6 +1,7 @@
 ---
 description: Roll every security lane's findings (infra-security-tester, qa-security, penetration-tester, purple-team-engineer, the conformance auditors) into ONE CISO-altitude risk & posture picture — a normalized risk register, an ATT&CK coverage map, a compliance evidence register with gaps, and a leverage-ordered remediation roadmap framed for an increasing-threat environment. Consumes findings, authors defensive artifacts + the posture report; never scans, exploits, or fixes application code. Runs AFTER the lanes; the planner runs before. Saves to docs/security/posture/
 argument-hint: [optional: the system/repo to build a posture picture for, or a path/round to consolidate — the agent discovers which lanes have run]
+disable-model-invocation: true
 ---
 
 Adopt the **`security-architect` senior security architect** role for this task.

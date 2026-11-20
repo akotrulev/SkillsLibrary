@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step qa-reporting-dotnet workflow — wire Allure, tag tests by finding, detect and quarantine flakes
 argument-hint: [what to wire, tag, or quarantine]
+disable-model-invocation: true
 ---
 
 Adopt the **`qa-reporting-dotnet` senior automation QA engineer** role for this task.

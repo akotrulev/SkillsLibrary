@@ -1,6 +1,7 @@
 ---
 description: Audit this .NET service against the be-dotnet plugin conventions — read-only, saves a findings report to docs/audits/
 argument-hint: [optional: project, path, or sections to limit the sweep to]
+disable-model-invocation: true
 ---
 
 Run a **be-dotnet conformance audit** on this repository: sweep the service against the conventions and flows this plugin defines, and save a findings report.

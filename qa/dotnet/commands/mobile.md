@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step qa-mobile-dotnet workflow — scaffold, author, and review native/hybrid mobile test coverage
 argument-hint: [the app flow or suite to cover or review]
+disable-model-invocation: true
 ---
 
 Adopt the **`qa-mobile-dotnet` senior automation QA engineer** role for this task.

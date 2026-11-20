@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step qa-api-java workflow — scaffold, author, and review API test coverage
 argument-hint: [the endpoints or suite to cover or review]
+disable-model-invocation: true
 ---
 
 Adopt the **`qa-api-java` senior automation QA engineer** role for this task.

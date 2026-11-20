@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step desktop-windows workflow — build, fix, or extend a Windows app (WinUI, WPF, WinForms, C++/WinRT)
 argument-hint: [what to build, fix, or extend]
+disable-model-invocation: true
 ---
 
 Adopt the **`desktop-windows` senior Windows developer** role for this task.

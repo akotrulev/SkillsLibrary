@@ -10,7 +10,8 @@ Over .claude-plugin/marketplace.json, verifies:
   6. every `dependencies` entry names a plugin in this marketplace, and the graph has no cycle
   7. only a front door is listed to the model: a skill named `rules` or one in FRONT_DOORS has no
      `disable-model-invocation`, and every other registered skill sets it to true
-  8. no skill `description:` is a plain scalar holding ': ', which breaks the YAML and with it check 7
+  8. no skill `description:` is a plain scalar holding ': ', which is invalid YAML
+  9. every command sets `disable-model-invocation: true`: a command is typed, never listed to the model
 
 Prints OK and exits 0, or one line per failure and exits 1.
 
@@ -55,8 +56,8 @@ def is_front_door(plugin_name, label):
     return label == "rules" or label in FRONT_DOORS.get(category(plugin_name), ())
 
 
-def frontmatter(skill_md):
-    with open(skill_md, encoding="utf-8") as f:
+def frontmatter(path):
+    with open(path, encoding="utf-8") as f:
         m = re.match(r"^---\r?\n(.*?)\r?\n---", f.read(), re.S)
     return m.group(1) if m else ""
 
@@ -149,6 +150,8 @@ def main():
             if not os.path.isfile(os.path.join(ROOT, rel)):
                 failures.append(f"{pname}: command file missing: {entry}")
                 continue
+            if not re.search(r"^disable-model-invocation:\s*true\s*$", frontmatter(os.path.join(ROOT, rel)), re.M):
+                failures.append(f"{pname}: command does not set disable-model-invocation: true ({rel})")
             stem = os.path.splitext(os.path.basename(rel))[0]
             claim(stem, rel)
             check_name(stem, rel)

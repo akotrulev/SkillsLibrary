@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step qa-llm-typescript workflow — build an eval dataset, assert properties/rubrics/grounding, red-team
 argument-hint: [the LLM feature to eval or red-team]
+disable-model-invocation: true
 ---
 
 Adopt the **`qa-llm-typescript` senior automation QA engineer** role for this task.

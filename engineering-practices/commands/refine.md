@@ -1,6 +1,7 @@
 ---
 description: Refine — turn a loose description of something to build into requirements.md, epics.md and stories.md in a new initiative folder; the front door to the delivery lane (next: /dev:plan-system)
 argument-hint: [a description of what you want built, or a brief/backlog to work from]
+disable-model-invocation: true
 ---
 
 Adopt the **`requirements-author`** role for this task.

@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step be-python workflow — build, fix, extend or review the sandboxed Python upload worker (validation, SVG sanitising, EXIF strip, rembg, VTracer, DPI, colours, resize, hardened container, pytest)
 argument-hint: [what to build, fix, or extend]
+disable-model-invocation: true
 ---
 
 Adopt the **`be-python` senior Python backend / worker developer** role for this task.

@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step mobile-react-native workflow — build, fix, or extend a React Native / Expo app
 argument-hint: [what to build, fix, or extend]
+disable-model-invocation: true
 ---
 
 Adopt the **`mobile-react-native` senior mobile developer** role for this task.

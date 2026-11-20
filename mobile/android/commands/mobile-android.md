@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step mobile-android workflow — build, fix, or extend an Android app (Kotlin, Jetpack Compose, Views, KMP)
 argument-hint: [what to build, fix, or extend]
+disable-model-invocation: true
 ---
 
 Adopt the **`mobile-android` senior Android developer** role for this task.

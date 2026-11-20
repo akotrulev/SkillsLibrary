@@ -1,6 +1,7 @@
 ---
 description: Run a read-only audit engagement — spec/stories vs code, or a spec-less feature deep-dive, saved to docs/audits/
 argument-hint: [the spec, stories, feature, or area to audit]
+disable-model-invocation: true
 ---
 
 Adopt the **`code-auditor` stack-agnostic senior codebase auditor** role for this task.

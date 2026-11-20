@@ -1,6 +1,7 @@
 ---
 description: Audit this .NET test suite against the qa-dotnet plugin conventions — read-only, saves a findings report to docs/audits/
 argument-hint: [optional: scope api|ui|mobile|all (default all), plus a test project, path, or sections to limit the sweep to]
+disable-model-invocation: true
 ---
 
 Run a **qa-dotnet conformance audit** on this repository: sweep the **test suite** against the conventions this plugin defines, and save a findings report.

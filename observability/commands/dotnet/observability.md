@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step observability workflow for a .NET service — OTel, structured logging, Grafana backends, dashboards
 argument-hint: [what to instrument, query, or dashboard]
+disable-model-invocation: true
 ---
 
 Adopt the **`observability-engineer-dotnet` senior observability engineer** role for this task.

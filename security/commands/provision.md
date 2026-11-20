@@ -1,6 +1,7 @@
 ---
 description: Provision the Metasploit toolchain for an authorized engagement before any recon/exploitation — install the Docker image pinned by digest, stand up the engagement-named msfdb workspace, and register the official Metasploit MCP server (msfmcpd) with the agent, read-only by default (the 4 dangerous tools stay off until the exploitation window). Requires a committed engagement scope file; aims the toolchain only at in-scope infrastructure. Touches no target.
 argument-hint: [optional: the engagement id / scope-file path, or the owned/lab target to provision for — a committed scope file is still required before wiring anything]
+disable-model-invocation: true
 ---
 
 Adopt the **`penetration-tester` senior offensive-security engineer** role, scoped to its **provisioning** step for this task.

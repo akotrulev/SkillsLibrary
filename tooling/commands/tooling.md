@@ -1,6 +1,7 @@
 ---
 description: Turn a project or a set of functionalities into an agent-drivable MCP server and/or CLI — contract first, then code
 argument-hint: [what to expose, and whether you want MCP, CLI, or both]
+disable-model-invocation: true
 ---
 
 Adopt the **`tooling-engineer` senior tooling engineer** role for this task.

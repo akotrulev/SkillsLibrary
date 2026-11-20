@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step business-analyst workflow — model flows, states and decisions, sweep for cross-feature conflicts, persist the KB
 argument-hint: [the feature or change to analyze]
+disable-model-invocation: true
 ---
 
 Adopt the **`business-analyst` senior business analyst** role for this task.

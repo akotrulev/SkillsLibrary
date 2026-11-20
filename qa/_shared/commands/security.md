@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step qa-security workflow — OWASP-mapped SAST, secrets, SCA, access-control, DAST, fuzzing, container/IaC and TLS gates
 argument-hint: [the app, API, or layer to cover]
+disable-model-invocation: true
 ---
 
 Adopt the **`qa-security` senior application-security QA engineer** role for this task.

@@ -1,6 +1,7 @@
 ---
 description: Run the read-only dataset-auditor — audit an existing LLM/VLM training dataset for format, contamination, duplication, PII, license, and composition, saving a versioned report
 argument-hint: [dataset path or name; optionally the eval targets to decontaminate against]
+disable-model-invocation: true
 ---
 
 Adopt the **`dataset-auditor` (read-only)** role for this task.

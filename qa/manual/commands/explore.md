@@ -1,6 +1,7 @@
 ---
 description: Explore a running web or mobile app hands-on and report what is broken — links, layout, copy, calculations, state — each finding reproduced with evidence
 argument-hint: [the URL or app to explore, the environment and account, and any docs that say how it should behave]
+disable-model-invocation: true
 ---
 
 Adopt the **`qa-explorer` senior exploratory tester** role for this task.

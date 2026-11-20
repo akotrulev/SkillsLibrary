@@ -1,6 +1,7 @@
 ---
 description: Run the whole design audit on this UI — visual identity, tokens, IA, heuristics, flow, responsiveness, UI code, copy, charts, icons, WCAG 2.2 design decisions, ethics, AI UX, motion, landing structure — read-only, saved to docs/audits/
 argument-hint: [optional: the app URL / how to start it, or a scope limiter]
+disable-model-invocation: true
 ---
 
 Run a **full design audit** on this project as the **`design-auditor`** agent.

@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step desktop-macos workflow — build, fix, or extend a Mac app (Swift, SwiftUI, AppKit)
 argument-hint: [what to build, fix, or extend]
+disable-model-invocation: true
 ---
 
 Adopt the **`desktop-macos` senior macOS developer** role for this task.

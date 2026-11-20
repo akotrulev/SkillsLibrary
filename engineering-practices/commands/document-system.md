@@ -1,6 +1,7 @@
 ---
 description: Document a system — reverse-engineer user documentation from an existing backend: split it into functional areas, trace each one, and write one guide per area into docs/business-model/ for end users, business analysts and product owners — who uses it (administrators included), each person's tasks step by step, the rules and how they are calculated, worked examples and open questions, with screenshots from the running product when one is given; also captures the screenshots of guides written without one
 argument-hint: [the system or area to document, "refresh" to reconcile the existing KB against the code, or "capture the screenshots for <guide>"]
+disable-model-invocation: true
 ---
 
 Adopt the **`be-documenter` senior business analyst (reverse documentation)** role for this task.

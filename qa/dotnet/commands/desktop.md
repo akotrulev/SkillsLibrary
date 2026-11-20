@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step qa-desktop-dotnet workflow — scaffold, author, and review native macOS and Windows desktop E2E coverage
 argument-hint: [the app flow or suite to cover or review]
+disable-model-invocation: true
 ---
 
 Adopt the **`qa-desktop-dotnet` senior automation QA engineer** role for this task.

@@ -1,6 +1,7 @@
 ---
 description: Document a feature — locate ONE described feature in the codebase, trace it end to end, and write one docs/features/ guide for end users, business analysts and product owners — who uses it (administrators included), each person's tasks step by step, the rules and how they are calculated, worked examples and open questions, with screenshots from the running product when one is given; also captures the screenshots of a guide written without one
 argument-hint: [the feature to document, in your own words — e.g. "the refund flow" or "password reset" — or "capture the screenshots for <guide>"]
+disable-model-invocation: true
 ---
 
 Adopt the **`be-feature-documenter` feature documentation** role for this task.

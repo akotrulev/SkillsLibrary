@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step qa-reporting-java workflow — wire Allure, tag tests by finding, detect and quarantine flakes
 argument-hint: [what to wire, tag, or quarantine]
+disable-model-invocation: true
 ---
 
 Adopt the **`qa-reporting-java` senior automation QA engineer** role for this task.

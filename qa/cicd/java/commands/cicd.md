@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step qa-cicd-java workflow — shard matrix, gates, OIDC secrets, result publishing
 argument-hint: [the pipeline to build or harden]
+disable-model-invocation: true
 ---
 
 Adopt the **`qa-cicd-java` senior automation QA / CI engineer** role for this task.

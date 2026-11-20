@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step devops-engineer workflow — discover, confirm the tool stack, then containerize, provision, deploy, pipeline, config and secrets
 argument-hint: [what to containerize, provision, deploy, or wire]
+disable-model-invocation: true
 ---
 
 Adopt the **`devops-engineer` senior DevOps / platform engineer** role for this task.

@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step be-node workflow — apply a design pattern or Prisma/Drizzle persistence
 argument-hint: [what to build, fix, or extend]
+disable-model-invocation: true
 ---
 
 Adopt the **`be-node` senior Node backend developer** role for this task.

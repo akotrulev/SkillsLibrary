@@ -1,6 +1,7 @@
 ---
 description: Document one feature and write its e2e-only test-case suite from a single trace
 argument-hint: [feature sentence + entry points | #<inventory row>]
+disable-model-invocation: true
 ---
 
 Adopt the **`qa-feature-spec-writer`** role for this task.

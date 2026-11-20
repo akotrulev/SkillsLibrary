@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step be-java workflow — apply a design pattern, JPA persistence, or service-side auth
 argument-hint: [what to build, fix, or extend]
+disable-model-invocation: true
 ---
 
 Adopt the **`be-java` senior Java backend developer** role for this task.

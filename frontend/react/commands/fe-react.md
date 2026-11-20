@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step fe-react workflow — build, fix, or extend a React / Next.js UI
 argument-hint: [what to build, fix, or extend]
+disable-model-invocation: true
 ---
 
 Adopt the **`fe-react` senior frontend React developer** role for this task.

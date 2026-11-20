@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step fe-blazor workflow — build, fix, or extend a Blazor Web App UI
 argument-hint: [what to build, fix, or extend]
+disable-model-invocation: true
 ---
 
 Adopt the **`fe-blazor` senior frontend Blazor developer** role for this task.

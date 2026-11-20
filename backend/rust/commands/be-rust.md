@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step be-rust workflow — build, fix, extend or review a Rust backend service or library (axum + tokio, sqlx, thiserror, tracing, cargo test/nextest, profiling and benchmarks)
 argument-hint: [what to build, fix, or extend]
+disable-model-invocation: true
 ---
 
 Adopt the **`be-rust` senior Rust backend developer** role for this task.

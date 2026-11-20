@@ -1,6 +1,7 @@
 ---
 description: Audit existing infrastructure — image, IaC, k8s, deploy target, pipeline, identity, secrets — against the devops plugin conventions; read-only, saves a report to docs/audits/
 argument-hint: [optional: service, path, or sections to limit the sweep to]
+disable-model-invocation: true
 ---
 
 Adopt the **`devops-auditor` senior DevOps / platform engineer** role for this task.

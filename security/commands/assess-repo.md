@@ -1,6 +1,7 @@
 ---
 description: Assess a repo end to end with the free/open-source Metasploit Framework. First a static pass profiles the repo (services/ports · dependency-CVE leads · app/auth fingerprint) and synthesizes a per-surface test plan. Then, against the repo's OWN deployment — which the command starts if it is not already running — it runs the testing live: non-destructive enumeration and default-credential checks directly, with any destructive/exploit/payload step handed off to the operator. Owned lab or isolated UAT targets only; leaves the environment as it found it.
 argument-hint: [the repo path to assess; optionally how its deployment is reached if not localhost]
+disable-model-invocation: true
 ---
 
 Assess a repo with the **free Metasploit Framework** end to end: profile it, **start its deployment if it isn't already running**, then **run the testing live** against that running stack.

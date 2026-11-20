@@ -1,6 +1,7 @@
 ---
 description: Audit this React Native / Expo app against the mobile-react-native plugin conventions — read-only, saves a findings report to docs/audits/
 argument-hint: [optional: path, feature area, or sections to limit the sweep to]
+disable-model-invocation: true
 ---
 
 Run a **mobile-react-native conformance audit** on this repository: sweep the codebase against the conventions and flows this plugin defines, and save a findings report.

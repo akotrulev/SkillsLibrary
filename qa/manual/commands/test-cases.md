@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step manual test-design workflow — documentation (or a live page) to a systematically-derived test-case suite
 argument-hint: [the doc, story, contract, or URL to work from]
+disable-model-invocation: true
 ---
 
 Adopt the **`qa-test-case-designer` senior manual QA engineer** role for this task.

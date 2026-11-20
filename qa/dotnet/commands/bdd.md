@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step qa-bdd-dotnet workflow — test cases to feature files to step definitions bound to page objects
 argument-hint: [the test-case suite or features to work from]
+disable-model-invocation: true
 ---
 
 Adopt the **`qa-bdd-dotnet` senior automation QA engineer** role for this task.

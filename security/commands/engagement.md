@@ -1,6 +1,7 @@
 ---
 description: Plan a security assessment for a platform — discover the attack surface, block for a scope + authorization sign-off, then emit an ordered, independently-executable task list in Mission Control vocabulary, each step bound to the exact lane agent (infra-security-tester, qa-security, …) that runs it. Writes plans, never scans or exploits; saves to docs/security/assessments/
 argument-hint: [optional: a repo path, a running system/URL, a cloud account/cluster, or a loose description of what to assess]
+disable-model-invocation: true
 ---
 
 Adopt the **`security-test-planner` senior security-assessment planner** role for this task.

@@ -81,6 +81,7 @@ The list is `FRONT_DOORS` in `tools/plugin-surface-check.py`. The checker fails 
 - **The Skill tool refuses a hidden skill** and tells the user to type it. So an agent, command or skill never tells a model to invoke a hidden skill; it names the path to `Read`.
 - **Add a front door only when** no agent or command reaches the skill and a main session must load it on its own. Each one costs about 50 tokens in every session of every project that enables the plugin.
 - **A hidden skill cannot be preloaded** through an agent's `skills:` frontmatter. Agents here load by path, so nothing depends on that.
+- **Every command is hidden the same way.** A command file carries `disable-model-invocation: true`: it is an entry point a person types, and the model reaches the same workflow by delegating to the agent. The checker fails on a command without it.
 
 ## Writing a good `description`
 
@@ -91,7 +92,7 @@ A front door's description is sent on every request, inside a listing budget of 
 Rules:
 - **≤ 200 characters for a skill** and ≤ 650 for an agent. `tools/token-audit.py` enforces both.
 - Start with "Use when..." and the key use case. Name the stack or tool if the skill is stack-specific, since those words drive matching.
-- Then one or two quoted trigger phrases, written `Triggers "a", "b".` Never write `Triggers:`, or a colon followed by a space anywhere in the line. It breaks a plain YAML scalar, and a frontmatter that does not parse loses its `disable-model-invocation` too. `tools/plugin-surface-check.py` fails on it.
+- Then one or two quoted trigger phrases, written `Triggers "a", "b".` Never write `Triggers:`, or a colon followed by a space anywhere in the line. It makes the frontmatter invalid YAML. `tools/plugin-surface-check.py` fails on it.
 - End with one "Not for X (sibling)." clause naming the closest confusable sibling in the same plugin.
 - Leave enumerations, version lists and scope prose to the body.
 
@@ -124,7 +125,7 @@ Bad:
 
 **Reserved names.** No skill name or command stem may equal a Claude Code built-in (list as of 2026-10-11): `add-dir agents artifacts bug clear claude-api code-review compact config context cost dataviz doctor effort exit export fast feedback fewer-permission-prompts focus help hooks ide init install-github-app keybindings-help login logout loop mcp memory migrate-installer model output-style permissions plan plugin plugin-authoring pr-comments privacy-settings release-notes resume review rewind run schedule security-review simplify status statusline terminal-setup todos update-config upgrade usage vim workflow-authoring`.
 
-**Before a commit that touches `.claude-plugin/marketplace.json` or a skill's frontmatter**, `python3 tools/plugin-surface-check.py` must print `OK`; it enforces unique names per plugin, the reserved list, no prefixes, one category per skill and agent, resolvable dependencies with no cycle, that every registered path exists, that only front doors are listed to the model, and that no description holds an unquoted colon and space. Rename a skill only with the references that cite it, and record it in the plan that renamed it.
+**Before a commit that touches `.claude-plugin/marketplace.json` or a skill's frontmatter**, `python3 tools/plugin-surface-check.py` must print `OK`; it enforces unique names per plugin, the reserved list, no prefixes, one category per skill and agent, resolvable dependencies with no cycle, that every registered path exists, that only front doors are listed to the model, that every command is hidden from it, and that no skill description holds an unquoted colon and space. Rename a skill only with the references that cite it, and record it in the plan that renamed it.
 
 ## Testing a new skill
 

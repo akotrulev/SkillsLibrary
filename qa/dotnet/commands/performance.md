@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step qa-performance-dotnet workflow — design, author, review, and CI-gate a load test suite
 argument-hint: [the service or workload to load-test]
+disable-model-invocation: true
 ---
 
 Adopt the **`qa-performance-dotnet` senior automation QA engineer** role for this task.

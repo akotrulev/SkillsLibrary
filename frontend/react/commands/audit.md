@@ -1,6 +1,7 @@
 ---
 description: Audit this React/Next.js codebase against the fe-react plugin conventions — read-only, saves a findings report to docs/audits/
 argument-hint: [optional: path, app, or sections to limit the sweep to]
+disable-model-invocation: true
 ---
 
 Run a **fe-react conformance audit** on this repository: sweep the codebase against the conventions and flows this plugin defines, and save a findings report.

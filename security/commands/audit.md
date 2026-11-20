@@ -1,6 +1,7 @@
 ---
 description: Audit this repo's defensive-security artifacts against the security-governance plugin conventions — read-only, saves a findings report to docs/audits/
 argument-hint: [optional: path or sections to limit the sweep to]
+disable-model-invocation: true
 ---
 
 Run a **security-governance conformance audit** on this repository: sweep the defensive-security artifacts — Sigma detections, CSP/headers/WAF policy, secret-store wiring and rotation runbooks, the compliance evidence register, the posture reports — against the conventions this plugin defines, and save a findings report.

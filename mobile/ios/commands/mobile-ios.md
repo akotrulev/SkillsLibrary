@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step mobile-ios workflow — build, fix, or extend an iOS app (Swift, SwiftUI, UIKit)
 argument-hint: [what to build, fix, or extend]
+disable-model-invocation: true
 ---
 
 Adopt the **`mobile-ios` senior iOS developer** role for this task.

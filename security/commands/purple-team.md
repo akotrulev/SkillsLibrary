@@ -1,6 +1,7 @@
 ---
 description: Run authorization-gated purple-team continuous validation against an owned/lab target — detonate known MITRE ATT&CK techniques (red) and assert the SIEM/guardrail/alert actually fired (blue), one technique at a time, to prove detections still work and catch security drift. Refuses to simulate without a committed engagement scope file, gates every assertion on a telemetry backend being present, scores each technique detected/not-detected (not CVSS), cleans up every atomic, and saves a coverage matrix + drift delta + action log + cleanup verification to docs/security/.
 argument-hint: [optional: the engagement id / scope-file path, the owned/lab target, or the ATT&CK technique set to validate — the agent still requires a committed scope file and a telemetry backend before it can validate]
+disable-model-invocation: true
 ---
 
 Adopt the **`purple-team-engineer` purple-team engineer** role for this task.

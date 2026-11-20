@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step data-architect workflow — model, secure, implement, and tune a schema across 8 engines
 argument-hint: [what to model, secure, migrate, or tune]
+disable-model-invocation: true
 ---
 
 Adopt the **`data-architect` senior data / database engineer** role for this task.

@@ -1,6 +1,7 @@
 ---
 description: Run the step-by-step be-dotnet workflow — apply a design pattern, EF Core persistence, or service-side auth
 argument-hint: [what to build, fix, or extend]
+disable-model-invocation: true
 ---
 
 Adopt the **`be-dotnet` senior .NET backend developer** role for this task.
