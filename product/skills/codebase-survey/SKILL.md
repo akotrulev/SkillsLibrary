@@ -122,6 +122,8 @@ Use the harness's structured-question tool if one is available. Do not begin tra
 
 If the human has no opinion (common — they may know the business but not the codebase), say which names you are least confident in and proceed on your own proposal, marking those `#inferred` in `system-overview.md`.
 
+**A delivery plan's `DOC1` run does not ask.** It runs unattended, so the plan is the confirmation: survey only the surfaces the plan's tasks touched, name the areas from the plan's epics where the code agrees, put this message's tables in the run's report and go on to tracing. It never writes a documentation plan; a scope past the session follows `documenter`'s invariants (`business-documentation/references/documenter-invariants.md`).
+
 **After the confirmation, count the sessions.** One session: go straight on to tracing. More than one: load [`references/documentation-plan.md`](references/documentation-plan.md), write the reading plan as a runnable plan — `docs/plans/NNN-document-<system>.md`, one task per session in the reading order and a last task for the system overview and the whole-KB lint — and stop. Each task then runs in a session of its own.
 
 ---
@@ -166,8 +168,8 @@ If the human has no opinion (common — they may know the business but not the c
 4. Cross-cutting concerns are in Foundations, not in `areas/`.
 5. The reading order puts identity/actors first and consumers last, and says why.
 6. Depth is assigned per area and justified, not uniform by default; every area carries a token estimate and no session exceeds 135k.
-7. The split was **confirmed** — or the human declined to weigh in, and the low-confidence names are marked `#inferred`.
-8. A reading plan of more than one session is written as a plan, and nothing was traced in the survey session.
+7. The split was **confirmed** — or the human declined to weigh in, and the low-confidence names are marked `#inferred`, or the run is a `DOC1` and the plan's epics named the areas.
+8. A reading plan of more than one session is written as a plan, and nothing was traced in the survey session (never as `DOC1`).
 
 ## Version policy
 

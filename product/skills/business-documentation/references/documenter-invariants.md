@@ -6,9 +6,8 @@ Read by both documenter agents before their first step. It holds every rule the 
 
 ## What a guide may say
 
-- **Never invent a purpose.** A purpose (why a rule exists, what a capability is for) comes only from an answered question, the plan's stories or a `#confirmed` KB entry; otherwise it is an open question. "The code enforces X; I could not determine why" is a complete entry.
-- **Every person, administrators included.** Each role the trace finds is in *Who uses it* with its own `## For <role>`; back-office and settings screens are tasks.
-- **Describe, never judge.** Defects go in the report for `code-auditor`, never a guide. Where a story and the code disagree, the guide states the code and the difference is a *Not delivered* row and a report line.
+`product:doc-business-model`'s disciplines govern the guide: purposes only from a source (2), every person with administrators included (4), describe and never judge (6). Two more bind the run:
+
 - **Document only what people can reach.** A capability behind a dead route, a disabled flag or an unreachable branch is reported, never written up.
 - **The KB outranks you.** A `#confirmed` entry the trace contradicts is escalated with both readings (*KB stale* vs *code defect*), never overwritten.
 
