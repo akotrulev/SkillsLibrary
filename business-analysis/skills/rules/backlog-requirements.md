@@ -3,11 +3,11 @@ paths:
   - "docs/plans/**/requirements.md"
 ---
 
-<!-- business-analysis rules v2 (2026-11-17): initiative requirements. Installed by /business-analysis:rules; edit to fit this project. -->
+<!-- business-analysis rules v3 (2026-11-20): initiative requirements. Installed by /business-analysis:rules; edit to fit this project. -->
 
 # Initiative requirements standards
 
-For `docs/plans/<NNN>-<initiative>/requirements.md`. The tag after a rule is the severity a review reports: **blocker** the document cannot be planned from, **major** will mislead the epics or the plan, **minor** is shape or format, **nit** is wording. The project's own requirements convention wins where it consistently does otherwise. The template and the elicitation are `business-analysis:scoping`'s.
+For `docs/plans/<NNN>-<initiative>/requirements.md`. The tag after a rule is the severity a review reports: **blocker** the document cannot be planned from, **major** will mislead the epics or the plan, **minor** is shape or format, **nit** is wording. The project's own requirements convention wins where it consistently does otherwise. The template and the elicitation are in the `business-analysis:scoping` skill; to use it, delegate to the `requirements-author` agent, which loads it, or type `/business-analysis:scoping`.
 
 - Ten sections in this order, none dropped (an empty one says why): the ask verbatim, problem and why now, actors, what it must do, constraints, success, scope, assumptions, risks, open questions. *minor*
 - §1 quotes the stakeholder verbatim, never paraphrased; everything below is checked against it. *major*

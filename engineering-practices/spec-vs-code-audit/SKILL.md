@@ -47,7 +47,7 @@ This skill is the **SPEC lane** of the `code-auditor` agent, and carries both mo
 
 - No spec — the ask is "tell me what this feature does" → `dev:audit-feature`
 - The spec itself needs distilling into testable rules for QA → `qa/manual/requirements-breakdown` (run it *first* when the spec is raw prose; this skill consumes its output)
-- Requirements conflict with *other requirements*, not with code → `business-analysis:conflict-check`
+- Requirements conflict with *other requirements*, not with code → the `business-analyst` agent (it loads `business-analysis:conflict-check`, which you cannot invoke yourself)
 - The user wants the gaps fixed → hand findings to the owning stack agent; this skill never edits product code
 
 ## Evidence policy — static-first, execute opt-in

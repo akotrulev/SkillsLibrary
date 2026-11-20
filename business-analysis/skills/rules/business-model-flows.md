@@ -3,11 +3,11 @@ paths:
   - "docs/business-model/flows/**/*.md"
 ---
 
-<!-- business-analysis rules v1 (2026-11-03): flows. Installed by /business-analysis:rules; edit to fit this project. -->
+<!-- business-analysis rules v2 (2026-11-20): flows. Installed by /business-analysis:rules; edit to fit this project. -->
 
 # Business flow standards
 
-Severity tags as in the core business-model rules: **blocker**, **major**, **minor**, **nit**. The KB wins where it consistently does otherwise. The template and the event-timeline procedure are `business-analysis:process-flow`'s.
+Severity tags as in the core business-model rules: **blocker**, **major**, **minor**, **nit**. The KB wins where it consistently does otherwise. The template and the event-timeline procedure are in the `business-analysis:process-flow` skill; to use it, delegate to the `business-analyst` agent, which loads it, or type `/business-analysis:process-flow`.
 
 - A Mermaid `flowchart`, not BPMN XML. A `sequenceDiagram` is an investigation of one boundary scenario inside a conflict sweep, never a flow file. *minor*
 - Every action has a named actor (customer, reviewer, payment provider, scheduler, the system); more than one actor means `subgraph` swimlanes. An action with no actor is flagged, never guessed. *major*

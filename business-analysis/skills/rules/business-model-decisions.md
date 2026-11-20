@@ -3,11 +3,11 @@ paths:
   - "docs/business-model/decisions/**/*.md"
 ---
 
-<!-- business-analysis rules v1 (2026-11-03): decision tables. Installed by /business-analysis:rules; edit to fit this project. -->
+<!-- business-analysis rules v2 (2026-11-20): decision tables. Installed by /business-analysis:rules; edit to fit this project. -->
 
 # Decision-table standards
 
-Severity tags as in the core business-model rules: **blocker**, **major**, **minor**, **nit**. The KB wins where it consistently does otherwise. Hit-policy semantics, the template and the procedure are `business-analysis:decision-table`'s.
+Severity tags as in the core business-model rules: **blocker**, **major**, **minor**, **nit**. The KB wins where it consistently does otherwise. Hit-policy semantics, the template and the procedure are in the `business-analysis:decision-table` skill; to use it, delegate to the `business-analyst` agent, which loads it, or type `/business-analysis:decision-table`.
 
 - One merged table per decision point (one question, its outputs), holding the rules of every feature that touches it. Never a second table for the same point. *blocker*
 - A hit policy is declared: U, A, F, P, or a Collect with its aggregation (C list, C+ sum, C< min, C> max, C# count). Author toward U; F or P only where the business stated precedence, C only where combining is intended, each with its source. *major*

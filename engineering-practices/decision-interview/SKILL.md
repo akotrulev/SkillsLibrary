@@ -15,7 +15,7 @@ Drive a design that already has a shape to a decision on every branch of it. Not
 
 ## When NOT to use
 
-- The ask is loose, or spans several capabilities, and there is no design yet — send the user to `/dev:refine` (`requirements-author`), which writes what is being built, for whom, and what is out
+- The ask is loose, or spans several capabilities, and there is no design yet — delegate to the `requirements-author` agent, or have the user type `/dev:refine`; it writes what is being built, for whom, and what is out
 - The user wants approaches proposed and a design written from an idea — that is `/dev:design`; come here afterwards if branches remain open
 - The question has a factual answer in the repo, the docs or a tool — look it up instead of asking
 

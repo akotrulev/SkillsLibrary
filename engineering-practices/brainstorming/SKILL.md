@@ -15,9 +15,9 @@ Open the space here; close each remaining branch with `decision-interview`.
 |---|---|---|
 | The input | **One feature** whose requirements are already clear | A loose ask — the *what* is still open, or it spans several capabilities |
 | The question | *How* should we build it | *What* are we building, for whom, and what is out |
-| The output | `docs/specs/NNN-<topic>-design.md` → `/dev:plan-feature` | `docs/plans/<NNN>-<initiative>/{requirements,epics,stories}.md` → `/dev:plan-system` |
+| The output | `docs/specs/NNN-<topic>-design.md` → `/dev:plan-feature` | `docs/plans/<NNN>-<initiative>/{requirements,epics,stories}.md` → `/dev:plan-system` (`solution-planner`) |
 
-If, while brainstorming, the idea turns out to be several capabilities or the requirements keep moving, stop and hand to `/dev:refine` — do not decompose it into sub-project specs here.
+If, while brainstorming, the idea turns out to be several capabilities or the requirements keep moving, stop and hand to the `requirements-author` agent — do not decompose it into sub-project specs here. `/dev:refine` and `/dev:plan-system` are commands a person types; you cannot invoke them, so delegate to the agent named beside each (`requirements-author`, `solution-planner`) or tell the user which to type.
 
 Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design and get user approval.
 
@@ -73,7 +73,7 @@ digraph brainstorming {
 
 - Check out the current project state first (files, docs, recent commits)
 - Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
-- If the request is several capabilities rather than one feature, it is an initiative, not a design: hand it to `/dev:refine` (`requirements-author`), which writes the requirements, epics and stories that `/dev:plan-system` then turns into a task list. Come back here only for a single feature that needs a technical design.
+- If the request is several capabilities rather than one feature, it is an initiative, not a design: hand it to the `requirements-author` agent (`/dev:refine`), which writes the requirements, epics and stories that the `solution-planner` agent (`/dev:plan-system`) then turns into a task list. Come back here only for a single feature that needs a technical design.
 - For appropriately-scoped projects, ask questions one at a time to refine the idea
 - Prefer multiple choice questions when possible, but open-ended is fine too
 - Only one question per message - if a topic needs more exploration, break it into multiple questions

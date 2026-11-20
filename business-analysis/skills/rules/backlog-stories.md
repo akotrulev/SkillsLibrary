@@ -3,11 +3,11 @@ paths:
   - "docs/plans/**/stories.md"
 ---
 
-<!-- business-analysis rules v3 (2026-11-17): stories. Installed by /business-analysis:rules; edit to fit this project. -->
+<!-- business-analysis rules v4 (2026-11-20): stories. Installed by /business-analysis:rules; edit to fit this project. -->
 
 # Story standards
 
-For `docs/plans/<NNN>-<initiative>/stories.md`, and the checklist `business-analysis:story-review` applies to any backlog. Severity: **blocker** the story cannot proceed, **major** will hurt soon, **minor** format or naming, **nit** preference. The template, the worked example and the know-how are `business-analysis:stories`'s.
+For `docs/plans/<NNN>-<initiative>/stories.md`, and the checklist the `business-analysis:story-review` skill applies to any backlog. Severity: **blocker** the story cannot proceed, **major** will hurt soon, **minor** format or naming, **nit** preference. The template, the worked example and the know-how are in the `business-analysis:stories` skill; to use it or the review, delegate to the `requirements-author` agent, which loads it, or type `/business-analysis:stories` or `/business-analysis:story-review`.
 
 - Each story is `## US<n> — <the feature's name>` with `**Epic:** E<n>`. Ids run flat across the initiative, never restart per epic and are never renumbered; a dropped story keeps its id with a line saying why. *blocker*
 - A story is one feature a person would name, with one goal. Two goals are two stories. *major*

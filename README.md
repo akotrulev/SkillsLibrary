@@ -130,7 +130,7 @@ Three skills are **unregistered and loaded by path only** — they never appear 
 
 **Every skill is already slash-invocable as `/<plugin>:<name>`** — `/design:tokens`, `/business-analysis:stories`, `/qa-<stack>:bug-report-writer`, `/dev:audit-feature` — and the commands below are the agent entry points. **Only front doors are listed to the model**: each plugin's `rules` skill, the `dev` workflow skills (`design`, `plan-feature`, `debugging`, `verify` and six more) and two QA skills no agent loads. Every other skill carries `disable-model-invocation: true`, so it costs a session nothing until its agent or command reads it or you type its name; a session will not load it on a description match (CONTRIBUTING.md, "Front doors"). Prefer the agent for anything that touches code: an agent's first act is version detection (TFM / React major / engine version / Node major) plus reading existing files for conventions, and a skill invoked directly skips all of it — the exact way a .NET 8 repo ends up with a .NET 10 recipe.
 
-**Naming scheme.** A plugin's front-door command is the plugin's name; every read-only conformance audit is `:audit`; every other command is a short role or topic. 75 command files, 85 registrations.
+**Naming scheme.** A plugin's front-door command is the plugin's name; every read-only conformance audit is `:audit`; every other command is a short role or topic. 77 command files, 87 registrations.
 
 **`qa-java` · `qa-dotnet` · `qa-typescript`** — 12 commands each (`qa-dotnet` has 13 — see `:audit`); substitute your stack for `<stack>`:
 

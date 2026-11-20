@@ -6,7 +6,7 @@ paths:
   - "**/{tokens,design-tokens}/**/*.{css,scss,json,ts,js}"
 ---
 
-<!-- design rules v1 (2026-11-03): design tokens and brand. Installed by /design:rules; add the file that holds this app's tokens (a globals.css :root block, a Tailwind @theme, a theme file) to the paths above. -->
+<!-- design rules v2 (2026-11-20): design tokens and brand. Installed by /design:rules; add the file that holds this app's tokens (a globals.css :root block, a Tailwind @theme, a theme file) to the paths above. -->
 
 # Design-token standards
 
@@ -26,7 +26,7 @@ Apply these to the file that defines the app's tokens, whatever the stack. The t
 - Each category is a bounded scale: spacing off one base unit (commonly 4 px), type from one modular ratio and one base, a small named set for radius, elevation, motion durations and easings, breakpoints named once. No one-off values. *minor*
 - The semantic status set (success, warning, danger, info) is disjoint from brand tokens, even where the brand offers a matching hue. *major*
 - Chart colours are their own semantic group (`--viz-cat-*`, `--viz-seq-*`, `--viz-div-*`): at most 6 to 8 categorical hues, none equal to a status colour, the brand accent never an arbitrary data series. *major*
-- Values come from the brand or the `design:corpus` `--design-system` output, motion values from the corpus row for the product's one intensity tier; never invented. *minor*
+- Values come from the brand or the `design:corpus` `--design-system` output (the stack agent or `design-auditor` runs it; a person types `/design:corpus`), motion values from the corpus row for the product's one intensity tier; never invented. *minor*
 
 ## Theming
 

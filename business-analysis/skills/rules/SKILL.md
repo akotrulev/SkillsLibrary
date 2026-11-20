@@ -41,7 +41,7 @@ Where a step needs the user's answer or agreement and nobody is there to give it
 5. **Fit the paths to this project.** The defaults assume the KB at `docs/business-model/` and initiative folders under `docs/plans/`, both at the root.
    - Find the KB: `git ls-files '*INDEX.md' | xargs grep -l '^# Business Model'`, plus any directory named `business-model`. A KB somewhere else (a monorepo package's `docs/`, a `documentation/` folder) gets its own globs, the same suffixes under its real prefix (for example `"services/billing/docs/business-model/**/*.md"`), added to each `business-model*.md` copy with the user's agreement.
    - Find the backlogs: `git ls-files '*requirements.md' '*epics.md' '*stories.md'`. Any outside `docs/plans/` that follow the same shape (`US<n>` stories, `E<n>` epics) get the matching glob added to the `backlog-*.md` copies, with agreement. Never widen to a bare `**/requirements.md`: it would load on unrelated files.
-   - No KB yet: keep the defaults; `business-analysis:knowledge-base` creates it there.
+   - No KB yet: keep the defaults; the `business-analyst` agent creates it there (it loads `business-analysis:knowledge-base`, which you cannot invoke yourself).
 6. **Check it will be committed**: `git check-ignore -q <root>/.claude/rules/business-analysis/business-model.md`. If it is ignored, say so; the rules then apply on this machine only.
 7. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`) and any other installed rule set whose `paths:` reach `docs/business-model/` or `docs/plans/` (for example a plan-format rule set). List every statement that contradicts these files. A written contradiction is the user's to settle.
 

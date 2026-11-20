@@ -3,11 +3,11 @@ paths:
   - "docs/business-model/**/*.md"
 ---
 
-<!-- business-analysis rules v3 (2026-11-15): core. Installed by /business-analysis:rules; edit to fit this project, re-run to compare with the plugin's copy. -->
+<!-- business-analysis rules v4 (2026-11-20): core. Installed by /business-analysis:rules; edit to fit this project, re-run to compare with the plugin's copy. -->
 
 # Business-model knowledge base standards
 
-Apply these to every file you write, edit or review under `docs/business-model/`, whoever writes it: a BA session, `be-documenter`, a plan task or a person. The tag after a rule is the severity a review reports: **blocker** states something no source supports or loses a recorded decision, **major** is a gap or a broken trace that hides a cross-feature conflict, **minor** is shape or format, **nit** is wording. Flow, entity, decision, connection and interaction-map rules are separate files that load with those files. How to build each artifact, and its template, belongs to the owning skill (`business-analysis:knowledge-base` names them).
+Apply these to every file you write, edit or review under `docs/business-model/`, whoever writes it: a BA session, `be-documenter`, a plan task or a person. The tag after a rule is the severity a review reports: **blocker** states something no source supports or loses a recorded decision, **major** is a gap or a broken trace that hides a cross-feature conflict, **minor** is shape or format, **nit** is wording. Flow, entity, decision, connection and interaction-map rules are separate files that load with those files. How to build each artifact, and its template, belongs to the owning skill (`business-analysis:knowledge-base` names them; to use one, delegate to the `business-analyst` agent, which loads it, or type its name).
 
 **The KB wins over its defaults.** Where this KB consistently does something another way (another folder, another id width), follow it and do not flag it.
 
@@ -33,7 +33,7 @@ Apply these to every file you write, edit or review under `docs/business-model/`
 - Confidence tags: `#confirmed` (sourced to a requirement or a stakeholder decision), `#inferred` (derived, unverified), `#observed` (seen in the code or the live system, in no document). *major*
 - What a source does not say is `[TBD]`, `?` or an open question, never a filled-in guess. *blocker*
 - Only a person promotes an entry to `#confirmed`. A code trace never writes it and never overwrites a `#confirmed` entry; a contradiction goes to `active-context.md` and is escalated. An answer the documenter folds into a guide is not a promotion: `business-analyst` decides whether the model row becomes `#confirmed`. *blocker*
-- `areas/<area>.md` and `system-overview.md` (owned by `dev:doc-business-model`) are the plain-language guide for end users, business analysts and the product owner, the only documentation of an area: they carry no tags, `file:line` or code names, and internal ids (`AREA-`, `FLOW-`, `ENT-`, story ids) only in the stamp comment that closes the file; the guide opens with `## In short`, then `## Who uses it` (every role, administrators included), is organised by person and task (the overview by person and area), lists every business rule in `## Rules and limits` and every formula in `## How it is calculated`, and keeps its screenshots in `areas/screenshots/<area>/`. A `<name>.behind-the-scenes.md` or `<name>.technical*.md` file is a retired level: read as a lead and deleted when its guide is next updated. *minor*
+- `areas/<area>.md` and `system-overview.md` (owned by `dev:doc-business-model`, which the `be-documenter` agent runs) are the plain-language guide for end users, business analysts and the product owner, the only documentation of an area: they carry no tags, `file:line` or code names, and internal ids (`AREA-`, `FLOW-`, `ENT-`, story ids) only in the stamp comment that closes the file; the guide opens with `## In short`, then `## Who uses it` (every role, administrators included), is organised by person and task (the overview by person and area), lists every business rule in `## Rules and limits` and every formula in `## How it is calculated`, and keeps its screenshots in `areas/screenshots/<area>/`. A `<name>.behind-the-scenes.md` or `<name>.technical*.md` file is a retired level: read as a lead and deleted when its guide is next updated. *minor*
 
 ## Headers and provenance
 

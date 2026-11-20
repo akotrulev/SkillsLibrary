@@ -83,6 +83,7 @@ The list is `FRONT_DOORS` in `tools/plugin-surface-check.py`. The checker fails 
 - **The Skill tool refuses a hidden skill** and tells the user to type it. So an agent, command or skill never tells a model to invoke a hidden skill; it names the path to `Read`.
 - **Add a front door only when** no agent or command reaches the skill and a main session must load it on its own. Each one costs about 50 tokens in every session of every project that enables the plugin.
 - **A hidden skill cannot be preloaded** through an agent's `skills:` frontmatter. Agents here load by path, so nothing depends on that.
+- **A pointer a main session may follow names the agent.** A front-door skill and a rule file are read by sessions that have the Skill tool. Where one points at a hidden skill or a command, it names the agent that runs it ("delegate to the `business-analyst` agent, which loads it, or type `/business-analysis:conflict-check`"); the bare `plugin:name` form is something a model cannot act on. Inside a hidden skill the bare form is fine: its reader is an agent that loads by path.
 - **Every command is hidden the same way.** A command file carries `disable-model-invocation: true`: it is an entry point a person types, and the model reaches the same workflow by delegating to the agent. The checker fails on a command without it.
 
 ## Writing a good `description`
