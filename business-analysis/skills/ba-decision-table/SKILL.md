@@ -34,7 +34,7 @@ Author toward **U**; when to escalate to F, P or C, and what an undecided policy
 ## Procedure
 
 1. **Name the decision point** and its output(s) ("order shipping cost: money"). One table = one question.
-2. **Collect every contributing rule from every feature** — the KB's existing table plus the new feature's requirements. Tag each rule row with its owning feature (an `E<n>`/`AREA-` id with a label, per `business-analysis:knowledge-base`) + source (`US<n> AC<k>`, BRD section).
+2. **Collect every contributing rule from every feature** — the KB's existing table plus the new feature's requirements. Tag each rule row with its owning feature (an `E<n>`/`AREA-` id with a label, per `dev:knowledge-base`) + source (`US<n> AC<k>`, BRD section).
 3. **Enumerate the inputs** and their value ranges/partitions. Inputs must be glossary-checked (two features using "total" differently — pre- vs post-discount — is terminology drift that fakes agreement).
 4. **Build the merged table**; declare the hit policy.
 5. **Run the completeness check**: sweep the input-combination space (collapse with `-` don't-cares); every combination matching no rule → a **gap** finding with the concrete combination as its boundary condition.

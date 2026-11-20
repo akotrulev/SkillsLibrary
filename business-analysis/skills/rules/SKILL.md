@@ -31,7 +31,7 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
 5. **Fit the paths to this project.** The defaults assume the KB at `docs/business-model/` and initiative folders under `docs/plans/`, both at the root.
    - Find the KB: `git ls-files '*INDEX.md' | xargs grep -l '^# Business Model'`, plus any directory named `business-model`. A KB somewhere else (a monorepo package's `docs/`, a `documentation/` folder) gets its own globs, the same suffixes under its real prefix (for example `"services/billing/docs/business-model/**/*.md"`), added to each `business-model*.md` copy with the user's agreement.
    - Find the backlogs: `git ls-files '*requirements.md' '*epics.md' '*stories.md'`. Any outside `docs/plans/` that follow the same shape (`US<n>` stories, `E<n>` epics) get the matching glob added to the `backlog-*.md` copies, with agreement. Never widen to a bare `**/requirements.md`: it would load on unrelated files.
-   - No KB yet: keep the defaults; the `business-analyst` agent creates it there (it loads `business-analysis:knowledge-base`, which you cannot invoke yourself).
+   - No KB yet: keep the defaults; the `business-analyst` agent creates it there (it loads `dev:knowledge-base`, which you cannot invoke yourself).
 
    With nobody to ask, change no path and list each proposed glob under `Waiting for the user:` in the report. Done when every file each command lists is matched by an installed glob, or a glob is proposed for it.
 6. **Check it will be committed**: `git check-ignore -q <root>/.claude/rules/business-analysis/business-model.md`. If it is ignored, say so; the rules then apply on this machine only.

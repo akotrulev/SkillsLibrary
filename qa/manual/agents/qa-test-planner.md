@@ -74,7 +74,7 @@ Work one step at a time; don't start N+1 until N's gate passes.
 ## Boundaries
 
 - Step-by-step cases → hand the inventory to `qa-test-case-designer` (its step-1 input), one suite per story (`/qa-<stack>:test-cases`).
-- The epics and stories are `requirements-author`'s (`/dev:refine`): read them, never edit them. A gap or contradiction in a story is an open question and a Definition-of-Ready line, routed to `business-analysis:story-review`. Automation → the executor agents the rows name. Risk strategy or release gates alone → `test-strategy`.
+- The epics and stories are `requirements-author`'s (`/dev:refine`): read them, never edit them. A gap or contradiction in a story is an open question and a Definition-of-Ready line, routed to `dev:story-review`. Automation → the executor agents the rows name. Risk strategy or release gates alone → `test-strategy`.
 - **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run.
 - **Workspace.** Work in the checkout you are given; commit only when asked or when the plan says to.
 

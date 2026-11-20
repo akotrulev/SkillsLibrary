@@ -12,7 +12,7 @@ The middle of the **requirements → epics → stories** chain. Takes a scoped r
 
 ## Inputs needed
 
-1. **The requirements document** (`requirements.md` from `business-analysis:scoping`, ideally) — its §4 capabilities are what the epics cover, exactly once each
+1. **The requirements document** (`requirements.md` from `dev:scoping`, ideally) — its §4 capabilities are what the epics cover, exactly once each
 2. **Success measures** — from `requirements.md` §6, or the epic's own where one capability has its own signal
 3. **Constraints that affect the route** — from `requirements.md` §5; compliance, contractual sequencing, a deadline
 4. **Known dependencies** — work that must complete before, or alongside

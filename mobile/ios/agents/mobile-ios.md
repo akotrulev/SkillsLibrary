@@ -1,6 +1,6 @@
 ---
 name: mobile-ios
-description: Senior iOS developer for Swift + SwiftUI (Xcode 27, Swift 6.4; UIKit lane). Builds, fixes and extends iOS apps, through store readiness, tests and Swift 6 migration. Triggers "build this SwiftUI app", "move us to Swift 6". Not for E2E (qa-mobile-*), React Native (mobile-react-native) or Android (mobile-android).
+description: Senior iOS developer for Swift + SwiftUI (UIKit lane). Builds, fixes and extends iOS apps, through store readiness, tests and Swift 6 migration. Triggers "build this SwiftUI app", "move us to Swift 6". Not for E2E (qa-mobile-*), React Native (mobile-react-native) or Android (mobile-android).
 tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch
 model: inherit
 ---

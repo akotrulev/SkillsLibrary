@@ -16,7 +16,7 @@ Per `business-analysis/skills/ba-project-memory`: **read first** — `INDEX.md`,
 
 ## Procedure
 
-> **Audit form (no new feature).** On the "periodic audit / refresh the model" trigger there is no feature to normalize, so **§1 is skipped** and the pair list (§2) is the KB's own **open surface** rather than a feature × KB cross: unresolved `CONF-` entries, `?` cells in entity grids, `[TBD]`/undeclared hit policies in decision tables, the connection layer's open checks (unconsumed events, orphan reactions, `unhandled`/`?` failures and modes, unenforced invariants, CRUD gaps), and unverified `#inferred` items. §3 (taxonomy), §4 (boundary condition per finding), and §5 (severity table + recorded resolutions) are unchanged. Pair the refresh procedure in `business-analysis:knowledge-base` first (reconcile drift, prune, re-verify `#inferred`), then sweep that open surface.
+> **Audit form (no new feature).** On the "periodic audit / refresh the model" trigger there is no feature to normalize, so **§1 is skipped** and the pair list (§2) is the KB's own **open surface** rather than a feature × KB cross: unresolved `CONF-` entries, `?` cells in entity grids, `[TBD]`/undeclared hit policies in decision tables, the connection layer's open checks (unconsumed events, orphan reactions, `unhandled`/`?` failures and modes, unenforced invariants, CRUD gaps), and unverified `#inferred` items. §3 (taxonomy), §4 (boundary condition per finding), and §5 (severity table + recorded resolutions) are unchanged. Pair the refresh procedure in `dev:knowledge-base` first (reconcile drift, prune, re-verify `#inferred`), then sweep that open surface.
 
 ### 1. Normalize the new feature
 
@@ -37,7 +37,7 @@ Glossary-check every term during normalization: a term used differently than `gl
 
 ### 2. Build the pair list
 
-When `events.md` exists, the pair list is the **feature slice** (`business-analysis:knowledge-base`), plus anything the slice misses. Otherwise: new feature's tuples × the KB: features sharing a **trigger**, touching the same **entity/states**, writing into the same **decision point**, consuming the same **resource**, or adjacent on a flow's **event timeline**. Everything else is a non-pair — don't brute-force the full cross product; the KB's structure prunes it.
+When `events.md` exists, the pair list is the **feature cross-section** (`ba-project-memory/references/feature-cross-section.md`), plus anything the cross-section misses. Otherwise: new feature's tuples × the KB: features sharing a **trigger**, touching the same **entity/states**, writing into the same **decision point**, consuming the same **resource**, or adjacent on a flow's **event timeline**. Everything else is a non-pair — don't brute-force the full cross product; the KB's structure prunes it.
 
 ### 3. Sweep each pair with the taxonomy
 

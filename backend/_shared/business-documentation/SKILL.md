@@ -24,13 +24,13 @@ Six disciplines:
 5. **A few screenshots, never one per step** (see *Screenshots*).
 6. **Describe, never judge.** Behaviour is stated neutrally ("the credits are returned twice"). The words *bug, defect, flaw, broken, wrong, mistake, vulnerability* and *should have* never appear (lint WARN; text quoted verbatim from the product is exempt). A defect found while tracing goes to the run's report, routed to `code-auditor`, never into the guide; where the code and a story disagree the guide states what the code does and the difference goes to the delivery note's *Not delivered* and the report.
 
-**Prerequisites:** a confirmed area map (`dev:doc-codebase-survey`) or feature scope, and per-area evidence (`dev:doc-feature-trace`) including its `Tasks` inventory, its `Client vocabulary` table and the verbatim refusal texts of its `Validations & gates`. A non-production environment with a test login per role is wanted for screenshots and never blocks the text. **When `docs/business-model/` exists or is being written, load `business-analysis:knowledge-base` first**: it owns the KB layout, IDs, annotation grammar and the read-first/update-after contract. A standalone feature run skips it.
+**Prerequisites:** a confirmed area map (`dev:doc-codebase-survey`) or feature scope, and per-area evidence (`dev:doc-feature-trace`) including its `Tasks` inventory, its `Client vocabulary` table and the verbatim refusal texts of its `Validations & gates`. A non-production environment with a test login per role is wanted for screenshots and never blocks the text. **When `docs/business-model/` exists or is being written, load `dev:knowledge-base` first**: it owns the KB layout, IDs, annotation grammar and the read-first/update-after contract. A standalone feature run skips it.
 
 **The golden example** is the `workshop-booking` toy system as an inherited codebase, one area: [`references/example-area.md`](references/example-area.md). Its shape, tone and example and screenshot discipline are normative; its domain content is an illustration, never a source. Every fact, number, currency, message, actor and screenshot in a guide comes from this run's trace and capture; a claim the trace did not find becomes an open question.
 
 ## Output — into the KB, under its contract
 
-Everything lands in **`docs/business-model/`**, per `business-analysis:knowledge-base`. A standalone feature (`be-feature-documenter`) writes one guide under `docs/features/<NNN>-<slug>.md` and its screenshots in `docs/features/screenshots/<NNN>-<slug>/`.
+Everything lands in **`docs/business-model/`**, per `dev:knowledge-base`. A standalone feature (`be-feature-documenter`) writes one guide under `docs/features/<NNN>-<slug>.md` and its screenshots in `docs/features/screenshots/<NNN>-<slug>/`.
 
 | File | Owner | This skill's role |
 |---|---|---|

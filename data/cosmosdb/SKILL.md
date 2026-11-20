@@ -284,5 +284,5 @@ Each rule is stated nowhere else in this file.
 1. Confirm API choice (NoSQL is the default), workload shape, access patterns, multi-region needs.
 2. Design partition key from access patterns — single-partition reads dominant.
 3. Generate IaC (Bicep / Terraform) for the database + container with autoscale RU, partition key (hierarchical where the levels are natural), indexing policy, TTL, change feed, **`disableLocalAuth = true`, the data-plane role assignment for the app identity, a private endpoint, and CMK if key custody is required** (CMK + API + hierarchical keys are all creation-time).
-4. Generate the singleton client setup and a typed repository per logical entity.
+4. Generate the singleton client setup. Wrap it in a repository only when a second store or a test seam needs it. Done when the client reads the container through the singleton.
 5. Smoke locally with the Cosmos emulator; replay access patterns; confirm queries are single-partition and within RU budget.

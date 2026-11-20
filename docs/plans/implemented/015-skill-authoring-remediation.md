@@ -7,7 +7,7 @@ shared shapes: the agent template, the standard itself and the 23 `rules` skills
 tasks fix their own files, and a gate task runs the lint, the size audit and the surface check over the
 whole library.
 
-**Status:** L1, T1, C1 and P1–P20 have landed (2026-11-20): the owner answered all 24 questions, none deferred (`## Answered questions (2026-11-20)`), and every per-plugin task's gate is green over its own paths. P20 registered O10 (b) as D22: the five authoring skills `/dev:refine` loads moved from `business-analysis` to `dev`. Next: G1, the whole-library sweep, which also renames the `business-analysis:<label>` references that D22 left outside P20's paths, and files the plan. **Unverified:** `dev` installed alone, with the moved skills (the surface check passes; no installed plugin was run), and the library-wide lint, size and surface sweep until G1. **Metered:** about 24 sessions of subscription usage.
+**Status:** Delivered and filed (2026-11-20). Audit 004's 528 findings are cleared: the owner answered all 24 logical conflicts (`## Answered questions (2026-11-20)`, none deferred), L1, T1, C1 and P1–P20 landed, and G1's whole-library sweep is green: `skill-lint` `0 findings`, `token-audit --violations-only` exit 0 (no body over budget, so no D3 overage), `plugin-surface-check` and `qa-version-check` `OK`, `test_skill_lint.py` 95 passed. G1 also fixed P6, P7, P10, P14, P17 and P20's outside-their-paths items (D24). P20 registered O10 (b) as D22: five authoring skills `/dev:refine` loads moved from `business-analysis` to `dev`. **Unverified:** `dev` installed alone with the moved skills (the surface check passes; no installed plugin was run). **For a round-2 audit:** two unregistered bodies over 16,000 (`claude-api`, `product-analytics`) and inline comments in a few code samples, named in G1's `As built`. **Metered:** about 25 sessions of subscription usage.
 
 **Test design:** none. The plan serves no stories, and it changes skill text only. The check is
 `tools/skill-lint.py`, `tools/token-audit.py` and `tools/plugin-surface-check.py`, which already exist.
@@ -269,6 +269,8 @@ Cost: a run that skips a pointer misses the notification wiring, the validation 
 Reading 1 (the plan): list the bundle and make it, with no word on names. Reading 2 (built): the labels are `dev:scoping`, `dev:epics`, `dev:stories`, `dev:story-review` and `dev:knowledge-base`. P20 changed them in its own paths, in `README.md` and in `docs/skills-catalog.md`. About 20 files outside P20's paths still say `business-analysis:<label>`, and G1 renames them (P20's `As built`). Cost: `/business-analysis:stories` no longer exists, and `/dev:stories` does.
 
 **D23 (2026-11-20) — P20 went past the plan's rows in three small places.** (1) The gate line passes the folders `business-analysis/agents` and `training-data/agents`, which `skill-lint` rejects (D18). Reading 1 (the plan): run the line as written. Reading 2 (built): pass the agent files one by one. (2) The audit's R18 row for `business-analyst.md` names `:19` and `:60`, but `:19` holds a positive line ("Model only what a question demands") and only `:60` carries the prohibition. Reading 2: fix `:60` and leave `:19`. (3) The audit suggests `references/feature-slice.md`. O3 (a) renamed the term, so the file is `references/feature-cross-section.md`, its H1 is "Feature cross-section", and the `ba-project-memory` heading is "Connection cross-section". Cost: `ba-feature-conflict-check/SKILL.md:40` still says "feature slice" until G1.
+
+**D24 (2026-11-20) — G1 fixed items beyond the audit's rows and left others, because the outside-my-paths notes asked for both.** The plan says fix each outside-my-paths item in place and send new findings outside 004's rules to a round-2 audit. Reading 1 (the plan): fix every item the notes list. Reading 2 (built): fix those that name an audit rule or a logical conflict (the `dev:` labels, "feature slice", R21 example comments, the `cosmosdb` repository, the stale `Llm` sample, the test-body `switch`, the floating versions, the version restatements in two agent descriptions), and leave the five that are not findings under the rule they would be filed under (`name:` values, a routing line, an "Out of scope:" line that names its owners). Cost: the left items are named in G1's `As built`, and a reader who disagrees reopens them in round 2.
 
 ## Answered questions (2026-11-20)
 
@@ -1389,6 +1391,21 @@ Then run `python3 tools/plugin-surface-check.py`. It must give `OK`, and after a
 - Add each touched skill's per-file char count to `As built`. Get it from `wc -c` on the files that
   `git diff --name-only` lists.
 - **Not in G1:** new findings outside 004's rules. They go into a round-2 audit, not into this plan.
+- **As built (2026-11-20):** the whole set ran once, was fixed, and ran once more. Proof, from the repo root: `python3 tools/skill-lint.py` prints `0 findings`; `python3 tools/token-audit.py --violations-only` exits 0 (no description, body or agent file over budget); `python3 tools/plugin-surface-check.py` and `python3 tools/qa-version-check.py` print `OK`; `python3 -m pytest tools/test_skill_lint.py -q` gives 95 passed. No O is deferred, and no body is over budget under a D3 `D<n>`, so `Status:` names none.
+  - **The first run found two violations, both P7's.** `auth/auth0-android/SKILL.md` (206) and `auth/auth0-react-native/SKILL.md` (202) had descriptions over 200 (P7 owns the mobile `auth0` skills). Each lost one word ("native", "or Expo" to "/Expo"). `skill-lint` was already at `0 findings`.
+  - **The new references.** The plan added 68 `references/*.md` files (`git diff --name-status <plan's first commit> HEAD | grep '^A'`). Each is pointed at by its skill with the condition that fetches it, and every pointer lands on a real file, and where it names a heading, on a real heading (`Async / message contracts`, `Prerequisites`, `Choosing the surface`, `Step 0`, `Screenshots`, `Language discipline`, `Know your telemetry`). `solution-planner.md:64` points at `delivery-plan/references/reconcile.md`, which exists.
+  - **Outside-my-paths items, fixed in place:**
+    - P20's: the 19 files that still said `business-analysis:{scoping,epics,stories,story-review,knowledge-base}` now say `dev:<label>` (`grep -rIn 'business-analysis:\(scoping\|epics\|stories\|story-review\|knowledge-base\)' . --exclude-dir=.git | grep -v docs/` prints nothing; `docs/plans/` keeps the old labels as the record). `ba-feature-conflict-check/SKILL.md:40` says "feature cross-section" and points at `ba-project-memory/references/feature-cross-section.md`.
+    - P6's: the trailing comments citing `ui-rules`, `data-fetching` or the styling skill are gone from `component-library/references/{chakra,mui,mantine,none}.md` and `seo/SKILL.md`.
+    - P7's: the SDK, Xcode and Swift versions left the descriptions and headings of `mobile-react-native.md` and `mobile-ios.md`, as P7 did for Android (D14).
+    - P10's: `data/cosmosdb/SKILL.md` step 4 wraps the client in a repository only when a second store or a test seam needs it (O15's wording).
+    - P14's: `qa/java/skills/ai-feature-testing/references/details.md` shows an injected `LlmClient`, an `LlmTest` base class and `Should_X_When_Y` tests, as `SKILL.md` does.
+    - P17's: `qa/java/skills/security-testing/permission-testing/SKILL.md` has no `switch` in a test body (the data provider carries an `InvoiceCall` per row, as the BFLA sample does), and `passive-scan/SKILL.md` has no floating `7.+` versions (it names the artifacts and says the project's build pins them).
+  - **Outside-my-paths items judged not findings, left as they are:** `basics` `name: concepts` and `auth0` in the other auth0 skills, and `name: patterns-apply` in the five `pattern-writer` skills (R1 asks for a kebab-case topic, not the folder name); `desktop-windows.md:27` (".NET 8 or 9, Windows App SDK 1.x … is `migration`'s": a routing line that names its owner); `example-delivery-plan.md:571` ("Out of scope:" names each owner); the `catalog` wording of the reconcile procedure (no heading is named).
+  - **For a round-2 audit, outside 004's rules or outside `token-audit`'s scope:** `ai-development/claude-api/SKILL.md` (85,025 chars) and `frontend/_shared/product-analytics/SKILL.md` (22,020) are over 16,000, and neither is a registered skill, so `token-audit` does not list them and 004 has no row for them. Other inline comments remain in code samples of `logs-traces-setup` (Tempo, Collector, data source YAML), `passive-scan` and `permission-testing` (dotnet), `grpc` and `seo` (`app/sitemap.ts`, `robots.ts`). `desktop-windows` and the `standards-audit` conformance checklists were not re-measured.
+  - **Decisions.** `## Decisions` holds two `D12` and two `D14` (P2's and P3's blocks were renumbered by hand, and P4 and P7 each took `D14`). They are left as written, since an earlier note is never edited backwards; cite them by title.
+  - **Char counts of the touched files** (`wc -c`, body without frontmatter as `token-audit` counts it; 163 `SKILL.md`, 61 agents, 21 rule files and 175 references changed since the plan's first commit). The largest registered bodies: `data/elasticsearch` 15,999, `devops/supply-chain-security` 15,991, `qa/java/security-testing/permission-testing` 15,972, `writing-plans` 15,962, `spec-vs-code-audit` 15,935, `component-testing` 15,935, `solution-blueprint` 15,898, `api-test-author/grpc` 15,863. Agents: `solution-planner` 13,949, `be-documenter` 13,921, `qa-test-case-designer` 13,888, `qa-test-planner` 13,820, `be-feature-documenter` 13,680. Rule files: `rules/plans.md` 6,834 (D12), `business-model.md` 5,982, `feature-docs.md` 5,953, `swift.md` 5,922, the rest at or under 2,508.
+  - **Not done.** The default-branch merge (close-out step 6) and the commit: the queue commits, and a merge needs a commit. **Unverified:** `dev` installed alone with the moved skills, as before; no installed plugin was run.
 
 ## Close-out — every task
 
@@ -1462,47 +1479,4 @@ session that runs the task. No prompt edits a file outside the paths it names (�
 | P20 | `docs` | `general-purpose` | L1, T1, C1 | P1–P19 | ~130k |
 | G1 | `docs` | `general-purpose` | L1, T1, C1, P1–P20 | — | ~110k |
 
-L1, C1, T1, P1–P20 have landed. The one prompt of G1 is live.
-
----
-
-### G1 — the whole library once more, then filing (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1, P1, P2, P3, P4, P5, P6, P7, P8, P9, P10, P11, P12, P13, P14, P15, P16, P17, P18, P19, P20
-Agent: general-purpose · Stack: docs
-
-Task G1 of docs/plans/015-skill-authoring-remediation.md. This is the last task: run the whole sweep
-over the library, fix what it finds, and file the plan.
-
-Read, in this order:
-1. The plan: the header, §2, §4, `## Answered questions`, the Open questions still deferred, every
-   task's `As built` note (the "outside my paths" items and every D3 `D<n>`), task G1, and
-   "Close-out — every task".
-2. engineering-practices/writing-plans/references/plan-format.md §5, "The last task's fix loop".
-
-Gate (this is the last runnable task, so it runs the whole set once more across the plan, in order):
-  python3 tools/skill-lint.py                       → 0 findings, or only a deferred O's lines
-  python3 tools/token-audit.py --violations-only    → exit 0
-  python3 tools/plugin-surface-check.py             → OK
-  python3 tools/qa-version-check.py                 → OK
-  python3 -m pytest tools/test_skill_lint.py -q     → green
-  git diff --name-only "$(git log --diff-filter=A --format=%h -1 -- docs/plans/015-skill-authoring-remediation.md)" HEAD
-
-Do:
-- Use the fix loop: run the whole set once; fix each failure with its narrowest command
-  (`python3 tools/skill-lint.py <path>`); rerun only what failed; then run the whole set once more.
-- Read every references/*.md file the plan created, and every pointer added beside a moved section.
-  Each must land on a real heading or line.
-- Fix each "outside my paths" item from the As built notes.
-- Name in Status every deferred O and every body still over budget under a D3 `D<n>`.
-
-Traps:
-- A failure may belong to any P task. Fix it in place, and name the task in As built.
-- New findings outside audit 004's rules go to a round-2 audit, not into this plan.
-- There is no documentation task, so you delete the last prompt block, and you file the plan
-  (close-out step 8: git mv to docs/plans/implemented/; that folder has no README).
-
-Commit: `docs(skills): 015 G1 — whole-library sweep`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
+Every task has landed. No prompt block remains.

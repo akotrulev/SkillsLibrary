@@ -93,7 +93,7 @@ It records **what the code is**. It never records what is wrong with it or what 
 | Findings, verdicts, severity tables, conformance rounds | `docs/audits/` |
 | Implementation plans, task lists | `docs/plans/` |
 | Designs, specs, approved approaches | `docs/specs/` |
-| Business flows, entity states, decision tables, conflicts | `docs/business-model/` (`business-analysis:knowledge-base`) |
+| Business flows, entity states, decision tables, conflicts | `docs/business-model/` (`dev:knowledge-base`) |
 | Screen inventories from a live crawl | `docs/app-map/` (`mobile-app-crawler`) |
 | Missing `data-testid` reports for the dev team | `missing-testids.md` |
 

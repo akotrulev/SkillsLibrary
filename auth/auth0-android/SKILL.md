@@ -1,6 +1,6 @@
 ---
 name: auth0
-description: Use when adding or fixing Auth0 login in a native Kotlin/Compose Android app (Auth0.Android, PKCE, credentials, biometrics). Triggers "add Auth0 login". Not for tenant setup or OIDC theory (auth0-concepts).
+description: Use when adding or fixing Auth0 login in a Kotlin/Compose Android app (Auth0.Android, PKCE, credentials, biometrics). Triggers "add Auth0 login". Not for tenant setup or OIDC theory (auth0-concepts).
 disable-model-invocation: true
 ---
 

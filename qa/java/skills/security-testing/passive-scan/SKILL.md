@@ -43,18 +43,8 @@ There is no artifact for the scan — you need **Docker** on the runner and the 
 docker pull ghcr.io/zaproxy/zaproxy:stable      # the image carrying passive-scan.py
 ```
 
-Your test project needs only TestNG + AssertJ + a JSON parser (Jackson) — and Testcontainers if you spin
-the SUT from the test:
-
-```kotlin
-// build.gradle.kts
-dependencies {
-    testImplementation("org.testng:testng:7.+")
-    testImplementation("org.assertj:assertj-core:3.+")
-    testImplementation("com.fasterxml.jackson.core:jackson-databind:2.+")
-    testImplementation("org.testcontainers:testcontainers:1.+")   // to stand up the SUT
-}
-```
+Your test project needs only TestNG, AssertJ and a JSON parser (Jackson), plus Testcontainers if the test spins
+up the SUT. Their versions are the ones the project's build already pins.
 
 For the CI-first path you need **no local artifact** — the `zaproxy/action-baseline` Action wraps the image.
 

@@ -82,7 +82,7 @@ Test data strategy: <builders/ObjectMother · seeding · anonymized copy — and
 
 ## 11. Definition of Ready and Definition of Done
 **Ready — testing may start when**
-- [ ] <every in-scope story is ready: no `[TBD]` in its criteria, no open blocker from `business-analysis:story-review`>
+- [ ] <every in-scope story is ready: no `[TBD]` in its criteria, no open blocker from `dev:story-review`>
 - [ ] <the build in §2 is deployed to the §8 environment>
 - [ ] <accounts, test data and external sandboxes in §8 are issued and reachable>
 - [ ] <the harness in §6 runs green on the default branch>

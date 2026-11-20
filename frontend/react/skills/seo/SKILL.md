@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!p) return {};                                   // 404 handled in the page via notFound()
   const url = `https://acme.com/products/${p.slug}`;
   return {
-    title: `${p.name} — Acme`,                          // tab-title convention: ui-rules
+    title: `${p.name} — Acme`,
     description: p.summary,                             // unique per page — shows under the result
     alternates: { canonical: url },
     openGraph: {

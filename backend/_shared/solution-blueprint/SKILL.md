@@ -20,7 +20,7 @@ The blueprint is the document the human approves, and everything downstream (dat
 |---|---|
 | `#confirmed` | Stated by the human, in this session or in a requirements document. Never read out of code (that is `#observed`) |
 | `#inferred` | Your reasoning from indirect evidence; the human should scan these |
-| `#observed` | Read out of existing code or behavior, per `business-analysis:knowledge-base`; in the documenter lane it always carries `file:line` |
+| `#observed` | Read out of existing code or behavior, per `dev:knowledge-base`; in the documenter lane it always carries `file:line` |
 | `[TBD - <owner>, <by when>]` | Genuinely unknown, with a named owner; never a synonym for vague |
 | `⚠️ Assumption:` | You proceeded on an unconfirmed premise; each is also a line in Open Questions |
 

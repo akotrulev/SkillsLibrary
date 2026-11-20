@@ -155,10 +155,14 @@ package security.accesscontrol;
 
 import clients.billing.InvoicesClient;
 import models.billing.InvoiceDto;
+import models.billing.InvoiceInDto;
+import io.restassured.response.Response;
 import org.apache.http.HttpStatus;
 import org.testng.annotations.*;
 import security.accesscontrol.InvoiceFixtures.OwnedResource;
 import security.accesscontrol.InvoiceFixtures.SeededInvoices;
+
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static security.accesscontrol.AccessControlAssertions.expectDenied;
@@ -177,42 +181,42 @@ public class InvoiceBolaTest extends BaseTest {
         InvoicesClient.using(Actor.BOB.token().get()).delete(seeded.bob().id());
     }
 
-    // POSITIVE control — the owner CAN read their own invoice. Proves the suite isn't trivially always-deny.
     @Test(description = "WSTG-ATHZ-04 positive control")
     public void Should_ReturnInvoice_When_OwnerReadsOwn() throws Exception {
         InvoiceDto invoice = InvoicesClient.using(Actor.ALICE.token().get())
-            .getById(seeded.alice().id(), HttpStatus.SC_OK); // typed → status asserted + deserialized
+            .getById(seeded.alice().id(), HttpStatus.SC_OK);
         assertThat(invoice.amount()).isEqualTo(100);
     }
 
-    // The matrix of cross-user / privilege rows. 404 here = this project hides existence cross-tenant.
+    @FunctionalInterface
+    interface InvoiceCall { Response invoke(InvoicesClient client, String id) throws Exception; }
+
+    private static final InvoiceCall GET = (client, id) -> client.getByIdRaw(id);
+    private static final InvoiceCall PUT = (client, id) -> client.updateRaw(id, new InvoiceInDto(1, "EUR"));
+    private static final InvoiceCall DELETE = (client, id) -> client.deleteRaw(id);
+
     @DataProvider(name = "crossUserRows")
     public Object[][] crossUserRows() {
         return new Object[][] {
-            { Actor.ALICE, (java.util.function.Supplier<OwnedResource>) () -> seeded.bob(),   "GET",    HttpStatus.SC_NOT_FOUND },
-            { Actor.ALICE, (java.util.function.Supplier<OwnedResource>) () -> seeded.bob(),   "PUT",    HttpStatus.SC_NOT_FOUND },
-            { Actor.ALICE, (java.util.function.Supplier<OwnedResource>) () -> seeded.bob(),   "DELETE", HttpStatus.SC_NOT_FOUND },
-            { Actor.BOB,   (java.util.function.Supplier<OwnedResource>) () -> seeded.alice(), "GET",    HttpStatus.SC_NOT_FOUND },
-            { Actor.ANON,  (java.util.function.Supplier<OwnedResource>) () -> seeded.alice(), "GET",    HttpStatus.SC_UNAUTHORIZED },
+            { Actor.ALICE, (Supplier<OwnedResource>) () -> seeded.bob(),   GET,    HttpStatus.SC_NOT_FOUND },
+            { Actor.ALICE, (Supplier<OwnedResource>) () -> seeded.bob(),   PUT,    HttpStatus.SC_NOT_FOUND },
+            { Actor.ALICE, (Supplier<OwnedResource>) () -> seeded.bob(),   DELETE, HttpStatus.SC_NOT_FOUND },
+            { Actor.BOB,   (Supplier<OwnedResource>) () -> seeded.alice(), GET,    HttpStatus.SC_NOT_FOUND },
+            { Actor.ANON,  (Supplier<OwnedResource>) () -> seeded.alice(), GET,    HttpStatus.SC_UNAUTHORIZED },
         };
     }
 
     @Test(dataProvider = "crossUserRows")
     public void Should_DenyCrossUserAccess_When_CallerActsOnOthersInvoice(
-            Actor caller, java.util.function.Supplier<OwnedResource> target, String action, int expected)
-            throws Exception {
-        String token = caller.token().get();
-        String id = target.get().id();
-        var client = InvoicesClient.using(token);
-        Response response = switch (action) {
-            case "GET"    -> client.getByIdRaw(id);
-            case "PUT"    -> client.updateRaw(id, new InvoiceInDto(1, "EUR"));
-            default       -> client.deleteRaw(id);
-        };
+            Actor caller, Supplier<OwnedResource> target, InvoiceCall call, int expected) throws Exception {
+        Response response = call.invoke(InvoicesClient.using(caller.token().get()), target.get().id());
+
         expectDenied(response, expected);
     }
 }
 ```
+
+The owner-reads-own test is the positive control: the suite is not always-deny. `404` is the cross-user status because this project hides existence across tenants.
 
 The `getByIdRaw`/`updateRaw`/`deleteRaw` variants return the `Response` *without* asserting `200` (that's what
 the client's typed overloads do) — access-control tests assert the **status themselves**, so use the raw
