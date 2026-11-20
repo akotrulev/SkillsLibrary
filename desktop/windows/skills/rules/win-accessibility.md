@@ -10,32 +10,30 @@ paths:
 
 # Windows accessibility, keyboard and test-id standards
 
-Severity tags as in the core C# rules: **blocker**, **major**, **minor**, **nit**. The codebase wins where it consistently does otherwise. The target is WCAG 2.2 AA on UI Automation, Narrator and the keyboard.
+Severity tags as in the core C# rules. The codebase wins where it consistently does otherwise. The target is WCAG 2.2 AA on UI Automation, Narrator and the keyboard. Recipes: `accessibility`, `test-ids`.
 
 ## Names, roles and announcements
 
-- Every interactive element has an accessible name (`AutomationProperties.Name`, a bound label, or `AccessibleName` on WinForms); the name is for people and is localized. *major*
+- Every interactive element has a localized accessible name (`AutomationProperties.Name`, or `AccessibleName` on WinForms). *major*
 - Semantic controls, not clickable panels; a custom control exposes the right `AutomationPeer`, control pattern and change events. *major*
 - A status or failure change is announced (`LiveSetting`, `RaiseNotificationEvent`); an `InfoBar` announces itself, a hand-built banner does not. *major*
-- Decorative elements are `AccessibilityView="Raw"`; content is never `Collapsed` only to hide it from readers. *minor*
-- A Narrator and Accessibility Insights pass is recorded for each screen touched. *minor*
+- Decorative elements are `AccessibilityView="Raw"`. *minor*
 
 ## Keyboard and focus
 
-- Every command is reachable from the keyboard; the focus visual is never removed; tab order is complete and follows reading order (`TabIndex`, `XYFocusKeyboardNavigation` only with a reason). *major*
-- Access keys on menus and buttons, standard shortcuts kept; a focus trap (a dialog, a flyout) returns focus to its trigger on close. *major*
+- Every command is reachable from the keyboard; the focus visual is never removed; tab order is complete and follows reading order. *major*
+- Access keys on menus and buttons, standard shortcuts kept; a dialog or flyout returns focus to its trigger on close. *major*
 
 ## Contrast, text and settings
 
 - Text scales with the system setting and is never locked (`IsTextScaleFactorEnabled` stays true). *major*
-- High Contrast is honoured: system colours or theme resources with a `HighContrast` entry, tested on each screen. *major*
-- No state by colour alone; contrast 4.5:1 for text and 3:1 for graphics and focus. *major*
-- Animation effects and transparency settings are honoured. *minor*
+- High Contrast is honoured on each screen: system colours or theme resources with a `HighContrast` entry. *major*
+- No state by colour alone. *major*
 
 ## Test ids
 
 - Every interactive element and every list or grid container carries `AutomationProperties.AutomationId` (WinForms: a deliberate `Name`). *major*
-- Ids are `Screen.ElementType[.Qualifier]`, PascalCase, dot-separated, static; never the accessible name, never localized, never an index, a GUID or a state value. *major*
-- An id is unique among siblings only, so every list carries its own id and rows are located inside it; rows and the parts a test reads are tagged inside the `DataTemplate`. *major*
+- Ids are `Screen.ElementType[.Qualifier]`, PascalCase, dot-separated, static; never the accessible name, never localized, never an index, GUID or state value. *major*
+- Every list carries its own id and rows are located inside it; rows and the parts a test reads are tagged inside the `DataTemplate`. *major*
 - Banners, loading and failed regions, empty states and dialogs carry ids. *major*
-- `RuntimeId` (`id` in WinCore) is never a locator. *major*
+- `RuntimeId` is never a locator. *major*

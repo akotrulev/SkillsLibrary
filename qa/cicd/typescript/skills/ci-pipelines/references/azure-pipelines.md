@@ -1,5 +1,15 @@
 # QA — Azure Pipelines for TypeScript Test Suites
 
+**Contents:**
+- When to use
+- When NOT to use
+- Inputs needed
+- Decision matrix
+- Templates
+- Rules
+- Generation steps
+- Cross-references
+
 Authors `azure-pipelines.yml` for Vitest / Jest / Playwright / k6 suites on Microsoft-hosted Linux agents — sharded, Allure-published, OIDC-authenticated, with proper artifact retention and a hard perf gate.
 
 **The Playwright config is not written here.** `qa/typescript/skills/ui-test-author/playwright/assets/playwright.config.ts` owns it: on CI it writes `blob` (to `blob-report/`), `junit` (to `test-results/junit.xml`) and `allure-playwright` (to `allure-results/`), with `retries: 0`, trace and video `retain-on-failure`, and `updateSnapshots: 'none'`. Azure Pipelines does not set `CI` on its own, so every Playwright step sets `CI: 'true'`. What the evidence is and how to read it is `qa/typescript/skills/evidence-capture`.

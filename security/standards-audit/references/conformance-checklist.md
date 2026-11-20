@@ -6,6 +6,26 @@ The audit's spine. Section letters and check numbers are **permanent** — a fin
 
 **How to read a row.** *Check* = the invariant. *Violation looks like* = what disqualifies it. *Find it with* = a mechanical lead (a hit is never a finding — read the file). *Sev* = the default severity; adjust for real impact and say why.
 
+**Contents:**
+
+- The absence rule — read this before Step 1
+- The version lane — a standards-and-tooling pin lane, and it inverts
+- A — Adoption map, standards pins & version lane
+- B — Detection repository & the detection-as-code pipeline
+- C — Sigma rule anatomy, ATT&CK mapping & correlations
+- D — Detection testing, tuning & the telemetry contract
+- E — Content-Security-Policy
+- F — The secure-headers baseline
+- G — WAF ruleset & rollout discipline
+- H — Secret store & the leak channel
+- I — Rotation runbooks
+- J — Compliance scope & crosswalk authority
+- K — The evidence register & gap list
+- L — Posture reports, rounds & lane handoffs
+- M — Redaction & sensitive material in committed security artifacts
+- N — Artifact structure, config hygiene & comments
+- Section index — for the report's applicability matrix
+
 ## The absence rule — read this before Step 1
 
 **A control the repo has never adopted produces no finding.** No detection repo, no CSP, no WAF, no rotation runbook, no compliance scope → those sections are **N/A**, and the absence is recorded in the applicability matrix as a **coverage note routed to `security-architect`**, never as a conformance finding. Conformance audits an artifact that exists against the rules it must follow; *whether a control should exist at all* is a posture question and posture is the architect's lane.
@@ -250,7 +270,7 @@ rg -n "<pattern>" $DET -g '*.yml' -g '*.yaml'
 | K6 | Every `#partial` / `#gap` names the closing lane | Gaps recorded but unrouted — the routed gap list is the deliverable's whole point | read every non-`#present` row | major |
 | K7 | The gap list is prioritized, not just enumerated | An unordered list with no leverage ordering, so the reader picks by position | read the gap list | minor |
 | K8 | One control maps once and fans out to every framework | The same control re-derived per framework with divergent wording, so an edit updates one column and the others rot | scan for duplicate control names across framework sections | minor |
-| K9 | No placeholders | "TBD", "various", "assess as appropriate" with no owner and no date | `rg -n "TBD\|TODO\|various\|as appropriate" $SEC` | major |
+| K9 | No placeholders | `"TBD"`, "various", "assess as appropriate" with no owner and no date | `rg -n "TBD\|TODO\|various\|as appropriate" $SEC` | major |
 
 ---
 

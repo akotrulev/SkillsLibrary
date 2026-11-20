@@ -224,6 +224,6 @@ it('should map a failed response to the failed state', async () => {
 
 **Money is integer minor units, never a float** — `0.1 + 0.2 !== 0.3`, and a test whose expected value is `0.30000000000000004` is a design finding, not a test to adjust.
 
-### Handoff
+### Mutation grading
 
 Whether these assertions actually catch faults is a mutation-score question, and **StrykerJS has no skill in this library yet** — no TypeScript mutation-testing skill exists; the siblings `qa-java:test-quality-check` (PIT) and `qa-dotnet:test-quality-check` (Stryker.NET) do. Until it lands, treat mutation grading as unavailable on this stack rather than substituting a coverage number.

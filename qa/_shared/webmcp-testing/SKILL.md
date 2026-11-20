@@ -39,7 +39,7 @@ deprecates JSON-string input to `executeTool`; before 155 Chromium required a st
 `inputSchema` as a string. The `tools` Permissions Policy defaults to `'self'`; a cross-origin iframe needs
 `allow="tools"`.
 
-**Declarative tools** (explainer only, spec status TBD): `<form toolname tooldescription toolautosubmit>`,
+**Declarative tools** (explainer only, spec status `TBD`): `<form toolname tooldescription toolautosubmit>`,
 `toolparamdescription` on controls (falling back to the `<label>`). Without `toolautosubmit` the browser
 fills the form and waits for the user, so a programmatic call never resolves — assert the timeout.
 `SubmitEvent.agentInvoked` / `respondWith()` let the page answer.

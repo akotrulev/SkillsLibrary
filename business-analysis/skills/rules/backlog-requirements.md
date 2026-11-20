@@ -7,7 +7,7 @@ paths:
 
 # Initiative requirements standards
 
-For `docs/plans/<NNN>-<initiative>/requirements.md`. The tag after a rule is the severity a review reports: **blocker** the document cannot be planned from, **major** will mislead the epics or the plan, **minor** is shape or format, **nit** is wording. The project's own requirements convention wins where it consistently does otherwise. The template and the elicitation are in the `business-analysis:scoping` skill; to use it, delegate to the `requirements-author` agent, which loads it, or type `/business-analysis:scoping`.
+For `docs/plans/<NNN>-<initiative>/requirements.md`. The tag after a rule is the severity a review reports: **blocker** the document cannot be planned from, **major** will mislead the epics or the plan, **minor** is shape or format, **nit** is wording. The project's own requirements convention wins where it consistently does otherwise. Recipe: `dev:scoping`, loaded by the `requirements-author` agent.
 
 - Ten sections in this order, none dropped (an empty one says why): the ask verbatim, problem and why now, actors, what it must do, constraints, success, scope, assumptions, risks, open questions. *minor*
 - §1 quotes the stakeholder verbatim, never paraphrased; everything below is checked against it. *major*

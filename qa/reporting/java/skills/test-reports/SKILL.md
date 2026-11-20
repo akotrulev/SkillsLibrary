@@ -175,7 +175,7 @@ public void screenshotOnFailure(ITestResult result) {
 ## From a failed test to the backend trace
 
 Every test sends one W3C `traceparent` trace id on all its requests (`api-client-writer`'s
-`references/trace-context.md`; UI: `ui-test-author/playwright`'s `references/trace-correlation.md`). On
+`references/trace-context.md`; UI: `qa/<stack>/skills/ui-test-author/playwright/references/trace-correlation.md`). On
 failure the result gets a `telemetry` attachment (`text/uri-list`): the trace id, a Grafana Explore link to
 the trace in Tempo and one to its log lines in Loki. Grafana's base URL comes from `GRAFANA_URL`; unset, no
 link is written and the test is unaffected. The `TelemetryLinks` builder, the failure hook, the Explore URL format and the

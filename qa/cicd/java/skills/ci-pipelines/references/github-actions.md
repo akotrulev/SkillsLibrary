@@ -1,5 +1,15 @@
 # QA — GitHub Actions for Java Test Suites
 
+**Contents:**
+- When to use
+- When NOT to use
+- Inputs needed
+- Decision matrix
+- Templates
+- Rules
+- Generation steps
+- Cross-references
+
 Authors `.github/workflows/*.yml` that run TestNG suites — RestAssured API tests, Testcontainers-backed integration tests and Playwright-for-Java (or Selenium) UI tests — on GitHub-hosted `ubuntu-latest` runners using Java 21 + Gradle (Kotlin DSL). It shards via `strategy.matrix`, uploads the Playwright failure evidence, publishes Allure to GitHub Pages with history, fails on real failures (not flakes), and pulls secrets via OIDC federated credentials rather than PATs or stored cloud secrets.
 
 **The UI lifecycle is not written here.** `qa/java/skills/ui-test-author/playwright/assets/BaseTest.java` owns it: it reads `BASE_URL` (required), runs headless unless `HEADED=1`, and on a failed test keeps a full-page screenshot, the trace and the video in `build/playwright-artifacts/<Class>.<method>.{png,zip,webm}`. The workflow runs that as is and uploads exactly that folder. `build/playwright-videos/` holds raw recordings `BaseTest` deletes after every test; it is never uploaded. What the evidence is and how to read it is `qa/java/skills/evidence-capture`.

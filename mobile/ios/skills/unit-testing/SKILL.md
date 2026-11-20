@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Owns **every dev-side test of logic the agent writes**: models, services, mappers, formatters, state machines, the request policy. In-process, no device journeys, no network, no real backend. Web analog: [`fe-react:component-testing`](../../../../frontend/react/skills/component-testing/SKILL.md) — test behaviour, not markup; fakes at the boundary; pure logic without a renderer carry over; jsdom and RTL queries do not. Sibling: [`mobile-react-native:component-testing`](../../../react-native/skills/component-testing/SKILL.md).
 
-**Boundary.** Real devices, real navigation, permission dialogs, deep links, VoiceOver and cross-screen journeys are `qa-mobile-<stack>`'s — **Appium (XCUITest driver)**, with a **Maestro** lane (plan 003). A unit test fakes the platform, so it can never prove a gesture or a system dialog. This skill hands them the identifiers ([`test-ids`](../test-ids/SKILL.md)); it does not write the journeys.
+**Boundary.** Real devices, real navigation, permission dialogs, deep links, VoiceOver and cross-screen journeys are `qa-mobile-<stack>`'s — **Appium (XCUITest driver)**, with a **Maestro** lane. A unit test fakes the platform, so it can never prove a gesture or a system dialog. This skill hands them the identifiers ([`test-ids`](../test-ids/SKILL.md)); it does not write the journeys.
 
 ## Version lane
 

@@ -1,6 +1,6 @@
 ---
 name: metasploit-setup
-description: Use when standing up the Metasploit toolchain for an authorized engagement before recon/exploitation runs — install (Docker image pinned by digest), the workspace database, and the official Metasploit MCP server (msfmcpd) registered with the agent. Triggers "set up Metasploit for this engagement", "wire up the Metasploit MCP server". Not an attack step (initial-access owns gaining the foothold); not for cloud control-plane tooling (cloud-attack-*).
+description: Use when standing up Metasploit before recon/exploitation — pinned Docker image, workspace DB, MCP server. Triggers "set up Metasploit for this engagement". Not for running exploits (initial-access).
 disable-model-invocation: true
 ---
 

@@ -1,5 +1,22 @@
 # Messaging Testing — AWS SQS / SNS (Node 24 + TypeScript / Vitest)
 
+**Contents:**
+
+- Stack
+- The SQS model — visibility timeout, redrive → DLQ, FIFO, SNS fan-out
+- Local broker for tests — LocalStack
+- Core pattern 1 — producer-assert (the SUT produced message X)
+- Core pattern 2 — consumer-assert (the SUT consumed → side-effect Y)
+- Visibility timeout — received-but-not-deleted → redelivery (the peek-lock analogue)
+- Redrive-policy DLQ assertions
+- Standard vs FIFO queues
+- SNS→SQS fan-out
+- Receiving a batch / draining
+- Anti-patterns
+- Examples
+- Rules (hard constraints)
+- Cross-references
+
 Ported from the **canonical** `.NET` stack of the `qa/typescript/skills/messaging-testing/` node (.NET led this node by the
 user's choice; this file re-expresses the same model in TypeScript idioms — `@aws-sdk/client-sqs`/`client-sns`,
 Vitest, `expect.poll`, Testcontainers). This is the **second `messaging-testing` sibling** (service-bus →

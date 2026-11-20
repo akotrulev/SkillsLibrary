@@ -1,5 +1,16 @@
 # QA — Validate Outbound Mail via SendGrid Sandbox Mode (.NET)
 
+**Contents:**
+
+- When to use
+- When NOT to use
+- Inputs needed
+- SendGrid SDK surface (cheat-sheet — SendGrid NuGet)
+- Templates
+- Rules
+- Generation steps
+- Cross-references
+
 Scaffolds a thin, intent-revealing wrapper over the official `SendGrid` NuGet SDK plus NUnit fixtures that **validate the SUT's send request without delivering any email**. With `MailSettings.SandboxMode.Enable = true`, SendGrid runs its real validator over the form, type, and shape of the request — template IDs, personalizations, dynamic template data, `from` / `reply-to`, categories — accepts a valid one with **`HttpStatusCode.OK` (200)** (note: not the `Accepted` (202) a real send returns), and **delivers nothing**. A malformed request surfaces as a **`4xx` with an error body**.
 
 This is the **"no inbox at all"** sibling. The other three email skills all assert on a *captured / delivered* message; **this one never produces a received message** — there is no SMTP sink, no IMAP poll, no `Messages.GetAsync`. Two consequences shape the whole skill:

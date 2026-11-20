@@ -1,5 +1,9 @@
 # Deep-dive details — `qa-java:browser-cloud-setup`
 
+**Contents:**
+
+- Patterns
+
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
 ## Patterns

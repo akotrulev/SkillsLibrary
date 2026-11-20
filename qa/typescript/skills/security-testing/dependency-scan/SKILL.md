@@ -258,12 +258,9 @@ jobs:
   *Fix:* `--force` is for a reviewed PR, not the gate; let Dependabot raise reviewable bumps.
 - **Auditing only `package.json` by eye.** Most real CVEs are **transitive**. *Fix:* `npm audit` reads the
   full lockfile — don't substitute manual inspection.
-- **Suppressing a whole package to go green.** Hides every future CVE in it. *Fix:* a scoped, **ticketed**
-  `.nsprc`/`audit-ci` exception for the specific advisory, with a re-review date.
-- **Permanent allow-list entries with no ticket/date.** They rot. *Fix:* every exception names a ticket and
-  a re-review date; prefer an `override` (the real fix) over a deferral.
-- **Gating without remediating.** The build stays red and the team disables the gate. *Fix:* pair the gate
-  with `npm audit fix` / Dependabot / Renovate.
+- **Suppressing a whole package, or an allow-list entry with no ticket or date.** It hides every future CVE in
+  the package and rots. *Fix:* a scoped `.nsprc`/`audit-ci` exception for the one advisory, naming a ticket and a
+  re-review date; prefer an `override` (the real fix) over a deferral.
 - **Not committing `package-lock.json`.** Without it the audit can't resolve the exact tree. *Fix:* commit
   the lockfile; `npm ci` in CI.
 - **`--audit-level=low` on day one of a legacy tree.** Everything fails; the gate gets bypassed. *Fix:*
@@ -305,18 +302,3 @@ Lifecycle for this gate:
    re-review date — tracked, not silently muted.
 4. Dependabot later raises the parent bump that removes the deferred CVE; the allow-list entry is deleted at
    its review — the list shrinks, never grows.
-
-## Rules (hard constraints)
-
-- The gate is the **process exit code** of `npm audit --audit-level=<level>`, optionally plus a
-  **parsed-report** assertion. One logical assertion per test; test names `Should_X_When_Y`.
-- Scan **direct + transitive** deps against a CVE feed — transitive coverage is the point. SCA reads the
-  **lockfile** (no running app — contrast DAST). Commit `package-lock.json`; `npm ci` in CI.
-- Triage with a **ticketed allow-list** (`overrides` for the real fix; `.nsprc`/`audit-ci` for a deferral):
-  scope to the specific advisory, name a ticket + re-review date. Gate **new** CVEs; shrink the list, never
-  grow it (the `axe-playwright`/`passive-scan` discipline). Prefer **`overrides` (the fix)** over an allow-list (a deferral).
-- Emit **JSON**: attach to **Allure**, upload as a CI artifact, optionally convert to **SARIF** for GitHub
-  code-scanning.
-- Pair the **gate** with **remediation** (`npm audit fix` / Dependabot / Renovate) and the
-  **`dependency-review-action`** PR-diff gate. A clean SCA ≠ "secure" — **run DAST too**: orthogonal
-  layers.

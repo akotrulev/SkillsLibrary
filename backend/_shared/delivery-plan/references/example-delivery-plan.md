@@ -1,5 +1,16 @@
 # Golden example — `delivery-plan.md`
 
+**Contents:**
+- 1. What already exists, and what is missing
+- 2. Streams
+- 3. Tasks
+- 4. Open questions
+- 5. Deliberately not planned
+- 6. Decisions
+- Close-out — every task
+- Prompts — one per task
+- For Mission Control
+
 The filled example for `dev:plan-delivery`, from the **workshop-booking** toy initiative shared
 by all the planner examples. **Shapes and disciplines are normative; domain content is illustrative.**
 A real artifact writes a full block for *every* task — this example writes five representative ones (a

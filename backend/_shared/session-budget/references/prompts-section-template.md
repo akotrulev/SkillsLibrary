@@ -1,5 +1,11 @@
 # `## Prompts — one per task` — the paste-and-go section
 
+**Contents:**
+- The contract
+- Template
+- Filled example
+- Writing rules
+
 The last section of the plan document, and the reason the document is queueable whole. It answers one
 question — **what do I paste into a fresh session** — and it answers it as something runnable rather
 than something to read. It lives **inside** the plan (`docs/plans/<NNN>-<initiative>/delivery-plan.md`,

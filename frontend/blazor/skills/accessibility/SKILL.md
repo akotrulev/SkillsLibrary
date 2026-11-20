@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Standardizes **authoring** accessible Blazor UIs. Targets **WCAG 2.2 AA** as the baseline. The house rule mirrors the React sibling: **lean on the platform** (real `<button>`, `<a href>`, `<dialog>`, `<label>`), reach for ARIA only when no semantic element exists, and manage the one thing an SPA-style app breaks that a classic page load gave for free — **focus and announcement on navigation**.
 
-**Boundary — authoring, not scanning.** This skill makes the app accessible as you build it. *Verifying* it (automated axe/Lighthouse scans, WCAG audit gates in CI) is qa's [`accessibility-testing`](../../../qa) — a **peer** the orchestrator invokes separately, never loaded here. Build accessible; let QA prove it.
+**Boundary — authoring, not scanning.** This skill makes the app accessible as you build it. *Verifying* it (automated axe/Lighthouse scans, WCAG audit gates in CI) is qa's `accessibility-testing` — a **peer** the orchestrator invokes separately, never loaded here. Build accessible; let QA prove it.
 
 **What of WCAG 2.2 is *not* here.** Nine criteria are new in 2.2 and most are **design decisions made before this skill runs** — target size (2.5.8), a non-drag alternative (2.5.7), accessible authentication (3.3.8), redundant entry (3.3.7), consistent help (3.2.6), focus not obscured (2.4.11/2.4.12) and focus appearance (2.4.13). They belong to `design/accessible-by-design`; this skill implements what that decided (the focus token, the alternative control, the carried-forward value) and never invents it. A build cannot reach 2.2 AA from this file alone.
 

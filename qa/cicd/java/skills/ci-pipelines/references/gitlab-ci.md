@@ -1,5 +1,15 @@
 # QA — GitLab CI/CD for Java Test Suites
 
+**Contents:**
+- When to use
+- When NOT to use
+- Inputs needed
+- Decision matrix
+- Templates
+- Rules
+- Generation steps
+- Cross-references
+
 Authors `.gitlab-ci.yml` that runs TestNG suites — RestAssured API tests, Testcontainers-backed integration tests and Playwright-for-Java (or Selenium) UI tests — on GitLab runners using Java 21 + Gradle (Kotlin DSL). It shards via `parallel:`, uploads the Playwright failure evidence, publishes Allure to GitLab Pages with history, fails on real failures (not flakes), and pulls secrets via `id_tokens:` cloud OIDC rather than long-lived CI/CD variables.
 
 **The UI lifecycle is not written here.** `qa/java/skills/ui-test-author/playwright/assets/BaseTest.java` owns it: it reads `BASE_URL` (required), runs headless unless `HEADED=1`, and on a failed test keeps a full-page screenshot, the trace and the video in `build/playwright-artifacts/<Class>.<method>.{png,zip,webm}`. The pipeline runs that as is and collects exactly that folder. `build/playwright-videos/` holds raw recordings `BaseTest` deletes after every test; it is never collected. What the evidence is and how to read it is `qa/java/skills/evidence-capture`.

@@ -122,8 +122,8 @@ recorder. Code for each is in `references/playwright.md`.
 ## Exploratory capture (agents)
 
 An agent exploring a live page takes evidence with the Playwright MCP capture tools. The video and trace
-tools need the server registered with `--caps=devtools`:
-`claude mcp add --scope user playwright -- npx @playwright/mcp@0.0.85 --caps=testing,storage,devtools --isolated --output-dir=.playwright-mcp --redact-url-params=code,state,access_token,id_token`.
+tools need the server registered with `--caps=devtools`, with the command in `qa/dotnet/skills/page-objects-from-url`
+"Prerequisites".
 When MCP is not connected, or a long session would flood the context, the same capture runs through
 `playwright-cli` (`npm i -g @playwright/cli@latest`) from `Bash`. MCP stays the primary route. Both need
 Node; the .NET project does not.

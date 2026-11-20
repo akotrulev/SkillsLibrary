@@ -10,10 +10,10 @@ paths:
 
 # Java UI and mobile test standards
 
-Severity tags as in the core qa-java rules: **blocker**, **major**, **minor**, **nit**. The codebase wins where it consistently differs. Page, component and flow objects are `qa-java-page-objects.md`.
+Severity tags as in the core rules. The codebase wins where it consistently differs. Page, component and flow objects are `qa-java-page-objects.md`.
 
 - Test id first: Playwright test id → role → label → text → CSS; Selenium `data-test` → id → CSS → XPath; Appium id → native → XPath. Ids are static: no index, key or state. *major*
-- Never invent a locator; a fallback is a `missing-testids.md` row, never a code comment or `TODO`. *minor*
+- A fallback locator is a `missing-testids.md` row; no locator is invented. *minor*
 - Scope instead of picking; `nth()` / `first()` only where order is the behaviour. Never assert on an `or()` locator. *major*
 - Tests never call `driver.findElement`, `page.locator` or `page.navigate`. *major*
 - Drivers come from the base or factory, never `new ChromeDriver()`, `Playwright.create()` or `new AndroidDriver()` in a test. Playwright and Appium: instance fields, `parallel="classes"`, no `ThreadLocal`, no `parallel="methods"`, no `@DataProvider(parallel = true)`. Selenium: a `ThreadLocal<WebDriver>` factory. *blocker*

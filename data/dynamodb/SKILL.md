@@ -11,17 +11,17 @@ Single-table design driven by access patterns, capacity model, indexes, streams,
 ## Stack defaults
 
 - **DynamoDB** in a single AWS region (Global Tables when multi-region active-active is required)
-- **.NET 10**: **AWS SDK for .NET v4** (`AWSSDK.DynamoDBv2` 4.x — GA Aug 2025); the Object Persistence model for typed entities + low-level `IAmazonDynamoDB` for transactions and complex queries
+- **.NET 10**: **AWS SDK for .NET v4** (`AWSSDK.DynamoDBv2` 4.x); the Object Persistence model for typed entities + low-level `IAmazonDynamoDB` for transactions and complex queries
 - **Java 21**: AWS SDK v2 (`software.amazon.awssdk:dynamodb-enhanced` + `dynamodb`)
 - **Node 24 + TypeScript**: AWS SDK v3 — `@aws-sdk/client-dynamodb` + `@aws-sdk/lib-dynamodb` 3.x (`DynamoDBDocumentClient`)
 - Capacity: **On-demand** unless you've measured a stable, predictable load that pays for provisioned + autoscaling
 - Identity: IAM roles via IRSA (EKS) / Task Role (ECS) / instance profile — **no access keys in apps**
-- Encryption at rest is **always on**; choose the key ownership tier deliberately (see Security & IAM)
+- Encryption at rest is **always on**; choose the key ownership tier deliberately (`references/security-iam.md`)
 - Caching: **DAX** in front of Dynamo for sub-ms reads when the workload justifies it; otherwise Redis or in-process
 
 ### SDK version note — AWS SDK for .NET v4 (breaking vs v3)
 
-The current data samples pinned .NET 8 + SDK v3. On **v4** (the .NET 10 default):
+On **v4** (the .NET 10 default):
 
 - **DynamoDB Streams moved out** of `AWSSDK.DynamoDBv2` into its own package `AWSSDK.DynamoDBStreams` — add it explicitly if you consume Streams from the app.
 - Construct the context via **`DynamoDBContextBuilder`**; the old public `DynamoDBContext` constructors that implicitly `DescribeTable` are obsoleted (they cost a call + IAM permission per type).
@@ -93,7 +93,7 @@ If you can't reduce every AP to a `Query` / `GetItem`, the table model is wrong.
 ### Step 4 — Index types
 
 - **Local Secondary Index (LSI)** — alternative sort key for the same PK. Limited (5 per table), must be created at table creation, eventually consistent reads only.
-- **Global Secondary Index (GSI)** — independent PK/SK; eventually consistent by default; strongly consistent via projection settings is not supported on GSIs.
+- **Global Secondary Index (GSI)** — independent PK/SK; eventually consistent reads only.
 - Prefer GSIs for new design; LSIs are vestigial.
 
 ### Step 5 — Sort key patterns
@@ -102,109 +102,10 @@ If you can't reduce every AP to a `Query` / `GetItem`, the table model is wrong.
 - **Type prefix** (`ORDER#`, `LINE#`) for hierarchical reads (parent + children) in one query
 - **Composite numeric padding** (`PRIORITY#003#TS#...`) when range filtering needs lexical ordering of numbers — pad with zeros
 
-## Connections (per stack)
+## Connections and security
 
-### .NET 10 (AWS SDK for .NET v4)
-
-```csharp
-builder.Services.AddAWSService<IAmazonDynamoDB>();        // credentials from IAM role
-builder.Services.AddSingleton<IDynamoDBContext>(sp =>
-    new DynamoDBContextBuilder()                          // v4: builder, not the obsoleted ctor
-        .WithDynamoDBClient(() => sp.GetRequiredService<IAmazonDynamoDB>())
-        .ConfigureContext(c =>
-        {
-            c.ConsistentRead = false;
-            c.TableNamePrefix = builder.Configuration["Dynamo:TablePrefix"];
-            c.DisableFetchingTableMetadata = true;         // no per-type DescribeTable call
-        })
-        .Build());
-```
-
-Use the high-level Object Persistence (`IDynamoDBContext`) for typed CRUD; drop to `IAmazonDynamoDB` for `TransactWriteItems`, conditional updates, batch ops. Set `DisableFetchingTableMetadata` (and declare keys via attributes) so the app needs no `dynamodb:DescribeTable` grant at runtime.
-
-### Java 21
-
-```java
-DynamoDbClient ddb = DynamoDbClient.builder().region(Region.EU_WEST_1).build();
-DynamoDbEnhancedClient enhanced = DynamoDbEnhancedClient.builder().dynamoDbClient(ddb).build();
-DynamoDbTable<Order> table = enhanced.table("orders", TableSchema.fromBean(Order.class));
-```
-
-`TableSchema.fromBean` discovers `@DynamoDbBean` / `@DynamoDbPartitionKey` annotations.
-
-### Node 24 + TypeScript (AWS SDK v3)
-
-```typescript
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
-
-const client = new DynamoDBClient({});                    // IAM role-resolved credentials
-export const ddb = DynamoDBDocumentClient.from(client, {
-  marshallOptions: { removeUndefinedValues: true, convertClassInstanceToMap: true },
-});
-```
-
-Use the **DocumentClient** — it marshals JS objects to/from DynamoDB's `AttributeValue` wire format. Raw `DynamoDBClient` is rarely needed. One client + document client per process; both are cheap to share and expensive to recreate per request.
-
-## Security & IAM
-
-DynamoDB has no database users, roles, or `GRANT` — **IAM is the entire authorization surface**. Everything below is IAM policy plus a small amount of table configuration.
-
-### Fine-grained (item- and attribute-level) access control
-
-The headline capability: an IAM policy can restrict a principal to **only the items whose partition key matches the caller's identity**, and to **only a subset of attributes** — without any application code enforcing it. This is how you get real row-level multi-tenant isolation on a shared table.
-
-- **`dynamodb:LeadingKeys`** (v2 alias **`FirstPartitionKeyValues`**) — restricts an operation to items whose **partition key** equals a value you bind to the caller's identity. Use with the **`ForAllValues:StringEquals`** set operator and a policy variable substituted from the identity (Cognito identity id, a SAML/OIDC claim, or a session tag).
-- **`dynamodb:Attributes`** — whitelist the attributes a principal may read or write; pair with `dynamodb:Select = SPECIFIC_ATTRIBUTES` (reads) and `dynamodb:ReturnValues = NONE` (writes) so a caller can't exfiltrate columns by asking for `ALL_ATTRIBUTES`.
-
-```json
-{
-  "Effect": "Allow",
-  "Action": ["dynamodb:GetItem", "dynamodb:Query", "dynamodb:PutItem", "dynamodb:UpdateItem"],
-  "Resource": "arn:aws:dynamodb:eu-west-1:111122223333:table/app",
-  "Condition": {
-    "ForAllValues:StringEquals": {
-      "dynamodb:LeadingKeys": ["${cognito-identity.amazonaws.com:sub}"]
-    },
-    "StringEquals": { "dynamodb:Select": "SPECIFIC_ATTRIBUTES" },
-    "ForAllValues:StringEquals": {
-      "dynamodb:Attributes": ["PK", "SK", "name", "status", "totalMinor"]
-    }
-  }
-}
-```
-
-The classic delivery vehicle is the **Token Vending Machine**: the client authenticates, a broker returns short-lived STS credentials scoped by `LeadingKeys` to that user/tenant, and the client talks to DynamoDB directly — the data plane enforces isolation even if the app query is sloppy. Because the guarantee lives in IAM, it is exactly the kind of control the `qa-security` peer's **BOLA/IDOR** access-control matrix should verify: prove tenant A's credentials cannot read tenant B's partition.
-
-**Caveat:** `LeadingKeys` only constrains the **partition key**, and only on operations that carry it (`GetItem`, `Query`, `BatchGetItem`, `PutItem`, `UpdateItem`, `DeleteItem`). It cannot scope a `Scan`, and it cannot filter by sort key — model the tenant boundary into the partition key or don't rely on this.
-
-### Action / resource scoping
-
-- Grant **per-table and per-index** ARNs, never `dynamodb:*` on `*`. Index actions need the index ARN: `.../table/app/index/GSI1`.
-- Separate read vs write policies; most services need `GetItem`/`Query`/`BatchGetItem` far more than `PutItem`/`UpdateItem`.
-- Deny `dynamodb:DeleteTable`, `dynamodb:*Backup*`, and PITR-disabling actions on the runtime role — those belong to an ops/IaC role.
-- If the app declares keys via attributes (see the `.NET` note), it needs **no `dynamodb:DescribeTable`** grant.
-
-### Encryption at rest — pick the key tier
-
-At-rest encryption is **always enabled and cannot be turned off**; the only decision is who owns the key:
-
-| Key tier | Use when | Notes |
-|---|---|---|
-| **AWS owned** (default) | No compliance requirement for key custody | Free, invisible, no CloudTrail on key use |
-| **AWS managed** (`aws/dynamodb`) | You want key usage in CloudTrail with no key management | Free KMS key AWS rotates |
-| **Customer managed (CMK)** | Compliance / audit / cross-account / "revoke by disabling the key" | You control rotation, grants, and CloudTrail; per-request KMS cost; **DynamoDB caches data keys** so it isn't per-item |
-
-A CMK gives you the kill switch: disable the key and the table is instantly unreadable. Grant the runtime role `kms:Decrypt` (and `kms:GenerateDataKey` for writes) on that CMK. **In transit** is TLS by default — enforce it with an `aws:SecureTransport = true` condition and, in-VPC, a **gateway VPC endpoint** (`com.amazonaws.<region>.dynamodb`) so traffic never leaves the AWS network; scope the endpoint policy to the same table ARNs.
-
-### Backup & recovery
-
-- **PITR (point-in-time recovery)** — continuous backups, restore to any second in a rolling 35-day window. Turn it on for every table holding non-reconstructable data; it's the defense against a bad deploy or bulk delete. Restore creates a **new table** (you re-point the app), it never overwrites in place.
-- **On-demand backups** — full snapshots you retain long-term (compliance holds) independent of the 35-day PITR window; via AWS Backup for cross-account/cross-region vaulting.
-
-### Global tables (multi-region)
-
-Global tables (current version `2019.11.21`) replicate a table across regions with **active-active, last-writer-wins** multi-region writes. They need PITR-grade discipline: identical IAM in each region, the CMK replicated per region (a CMK is regional — use a multi-region key or a per-region key), and app awareness that a write in one region is **eventually** visible in another. Reach for them only for genuine multi-region active-active or low-latency-global-reads requirements, not "for resilience" (a single-region table with PITR already survives an AZ loss).
+- **Client setup**: a stack in the task → read `references/connections.md` (.NET 10, Java 21, Node 24 sections). One client per process.
+- **IAM, tenant isolation, KMS key tier, PITR, backups, TLS or global tables** → read `references/security-iam.md`. IAM is the entire authorization surface; there are no database users or `GRANT`.
 
 ## Migrations / schema evolution
 
@@ -231,11 +132,12 @@ Always set **TTL** on items that are ephemeral (sessions, events, idempotency ke
 ```typescript
 await ddb.send(new PutCommand({
   TableName: 'orders',
-  Item: { PK: `ORDER#${id}`, SK: 'ORDER', /* ... */ },
+  Item: { PK: `ORDER#${id}`, SK: 'ORDER', status: 'pending' },
   ConditionExpression: 'attribute_not_exists(PK)',
 }));
-// Throws ConditionalCheckFailedException if the item already exists
 ```
+
+The write throws `ConditionalCheckFailedException` when the item already exists.
 
 Idempotency keys: use a partition + SK pair like `IDEMP#<requestId>` with TTL, conditional-write `attribute_not_exists` — DynamoDB enforces single-execution semantics.
 
@@ -273,36 +175,22 @@ Streams give you Mongo-style change feeds; combine with Lambda for serverless re
 
 ## Rules
 
-- Single-table design per service; **never** "one table per entity" except in the simplest CRUD apps
-- Access patterns enumerated before schema design
-- Every read is `GetItem` or `Query` — never `Scan` in app code
-- Item size budget per record (1 KB typical, 400 KB hard limit); store large blobs in S3 and put the key in the item
-- TTL on every ephemeral entity (sessions, idempotency keys, transient events)
-- Conditional writes for idempotency / optimistic concurrency
-- IAM least-privilege — per-table, per-GSI grants; never `dynamodb:*` on `*`; split read vs write policies
-- Multi-tenant isolation enforced in IAM via `LeadingKeys` (partition-key = identity), not just in app code — and QA'd with a cross-tenant BOLA test
-- PITR on every table holding non-reconstructable data; a CMK when key custody / a revoke switch is required
-- Enforce TLS (`aws:SecureTransport`) and keep in-VPC traffic on a gateway VPC endpoint
-- Item attributes use short names (`pk`, `sk`, `s`, `n`) when storage cost matters at scale — readability vs. cost trade-off; document the mapping
-- All keys typed: PK / SK / GSI keys are always strings (use string-encoded ULIDs / ISO timestamps), never `Number` unless the entire app treats them numerically
+Each rule is stated nowhere else in this file.
 
-## What NOT to do
-
-- No `Scan` in application code paths
-- No client-side joins across tables in a hot path — model the relationship into the table
-- No relational thinking ("FK to customers table") — denormalize, dual-write, use Streams to maintain consistency
-- No mixing item types under the same PK without a type-discriminator field
-- No items growing unboundedly (huge attribute, ever-growing list) — split or store in S3
-- No `Strong consistency` reads as the default — only when truly required; they cost more and may fail during failover
-- No GSIs added "just in case" — they cost storage + per-write
-- No IAM users — IAM roles + role assumption
-- No long-lived clients per request — one per process
-- No app-side encryption layered over DynamoDB's at-rest encryption "for extra safety" without a real threat model — adds query restrictions
+- Keep each item under 1 KB where possible (400 KB is the hard limit); store large blobs in S3 and put the key in the item.
+- Model relationships into the table by denormalizing and dual-writing, with Streams keeping copies consistent; a hot path never joins client-side across tables.
+- Give every item type under a shared PK a type-discriminator field.
+- Bound item growth: split an ever-growing list or large attribute into more items, or store it in S3.
+- Read eventually consistent by default; use a strongly consistent read only where the access pattern needs it, since it costs more and may fail during failover.
+- Add a GSI for a named access pattern; each one costs storage and a write per item.
+- Store keys (PK, SK, GSI keys) as strings: string-encoded ULIDs and ISO timestamps, never `Number` unless the whole app treats them numerically.
+- Use short attribute names (`pk`, `sk`, `s`, `n`) when storage cost matters at scale, and document the mapping.
+- Rely on DynamoDB's at-rest encryption; add app-side encryption only against a named threat model, since it restricts queries.
 
 ## Generation steps
 
-1. Enumerate access patterns with the user, including cardinality + latency targets. Refuse to schema-design without this list.
-2. Design PK / SK and GSIs to make every pattern a `GetItem` or `Query`.
-3. Generate IaC (CDK / Terraform) for the table — partition key, sort key, GSIs, billing mode, TTL, Streams settings, **PITR on, encryption tier (CMK where required), and the least-privilege IAM policy** (per-table/index ARNs, `LeadingKeys` for tenant isolation where applicable).
-4. Generate the typed client setup for the chosen stack + a thin repository per logical entity.
-5. Smoke locally with DynamoDB Local or LocalStack; replay the AP list against the schema; confirm every read is a `Query` or `GetItem` in the trace.
+1. Enumerate the access patterns with the user, with cardinality and latency targets. Done when every pattern is in the AP table; schema design waits for it.
+2. Design PK / SK and GSIs. Done when every access pattern maps to one `GetItem` or `Query` row.
+3. Generate IaC (CDK or Terraform) for the table. Done when the IaC plan lists PITR, the key tier (CMK where required), billing mode, TTL, Streams settings and a per-ARN least-privilege policy (`LeadingKeys` for tenant isolation where applicable).
+4. Generate the typed client setup for the chosen stack. Wrap it in a repository only when a second store or a test seam needs it. Done when the client reads the table through the stack's connection pattern in `references/connections.md`.
+5. Smoke locally with DynamoDB Local or LocalStack. Done when the AP list is replayed against the schema and every read is a `Query` or `GetItem` in the trace.

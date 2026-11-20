@@ -1,5 +1,16 @@
 # QA — Email Testing with Mailpit (Java)
 
+**Contents:**
+
+- When to use
+- When NOT to use
+- Inputs needed
+- Mailpit API surface (cheat-sheet)
+- Templates
+- Rules
+- Generation steps
+- Cross-references
+
 Scaffolds a typed Mailpit HTTP-API client (Java 21 `HttpClient` + Jackson) and TestNG / JUnit probes that poll for a specific message with Awaitility, extract HTML / text / links / OTPs, and download attachments — each test isolated by its own recipient, never by wiping the shared inbox. Wires Mailpit into Spring Boot via `@DynamicPropertySource` so the SUT writes to the container.
 
 ## When to use

@@ -1,5 +1,19 @@
 # Evidence capture — Playwright for Java 1.63
 
+**Contents:**
+
+- 1. Screenshots
+- 2. Video
+- 3. Screencast — a recording you start and stop [1.59]
+- 4. Trace
+- 5. HAR
+- 6. Attachments (allure-java 3.0)
+- 7. No error-context.md in Java
+- 8. Viewing and reading evidence
+- 9. Exploratory capture: Playwright MCP and playwright-cli
+- 10. Codegen's recorder
+- 11. Size and CI
+
 Every capture API in its Java spelling, with the version it shipped in. `SKILL.md` decides what to capture
 and where it lands; this file is how. The samples extend
 `qa/java/skills/ui-test-author/playwright/assets/BaseTest.java` (`com.example.uitests.support.BaseTest`),

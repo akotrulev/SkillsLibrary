@@ -10,7 +10,7 @@ Scaffolds Rust service and library code into the active repo: **axum 0.8 on toki
 
 ## Version policy
 
-Detect before writing: `rust-toolchain.toml`, `Cargo.toml` `edition` + `rust-version`, `Cargo.lock` for tokio / axum / sqlx / tower-http. **Current stable is 1.99 (2026-10); edition 2024 primary, 2021 supported.** Match what the project declares — never raise the edition, `rust-version`, or a dependency's major as a side effect.
+The lane per `CLAUDE.md` 'Version policy'. Match what the project declares in `rust-toolchain.toml`, `Cargo.toml` and `Cargo.lock`.
 
 | Crate | Current (2026-10) | Notes that change code |
 |---|---|---|
@@ -20,7 +20,7 @@ Detect before writing: `rust-toolchain.toml`, `Cargo.toml` `edition` + `rust-ver
 | thiserror | 2 | — |
 | sqlx | 0.9 (needs Rust 1.94) | see `database-code` |
 
-A **new service** pins `rust-toolchain.toml` to a specific stable and sets `rust-version` to the same value. A **library** sets `rust-version` to the oldest toolchain it supports and tests it in CI — edition 2024's resolver 3 then prefers dependency versions that build on it.
+Pinning follows `cargo.md`. A library that sets `rust-version` to its oldest toolchain gets edition 2024's resolver 3, which prefers dependency versions that build on it.
 
 ## Inputs needed
 
@@ -102,9 +102,9 @@ undocumented_unsafe_blocks = "deny"
 debug = "line-tables-only"
 ```
 
-- **Lints live here, once** — `[workspace.lints]` in a workspace root, with `[lints] workspace = true` in each member. Groups get `priority = -1` so single lints override them. Never pick the whole `restriction` group (clippy itself lints that); pick lints from it by name.
-- A justified exception is `#[expect(clippy::lint_name, reason = "…")]` on the item, never a crate-wide `#![allow]`. `#[expect]` warns when the exception stops being needed.
-- Libraries keep `missing_errors_doc` / `missing_panics_doc` on and drop `unsafe_code = "forbid"` only for the module that needs it.
+- **Lints live here, once** (`cargo.md`). Pick `restriction` lints by name, never the whole group (clippy itself lints that).
+- A justified exception is `#[expect(clippy::lint_name, reason = "…")]` on the item, never a crate-wide `#![allow]`; `#[expect]` warns when it stops being needed.
+- Libraries keep `missing_errors_doc` / `missing_panics_doc` on.
 - Telemetry and sqlx dependencies are added by their skills.
 
 ```toml
@@ -168,7 +168,7 @@ where
 }
 ```
 
-`std::env::var` is read here and nowhere else; everything downstream receives `Config` or the part it needs. A handful of variables does not earn a config crate. When the project needs layered files plus env, use `config` 0.15 (maintained). `figment` and `envy` have had no release since 2024 and 2021.
+`std::env::var` is read here and nowhere else; everything downstream receives `Config` or the part it needs. A handful of variables does not earn a config crate; layered files plus env use `config` 0.15 (`figment` and `envy` are unmaintained).
 
 ## Newtypes and domain errors
 
@@ -287,7 +287,7 @@ impl From<PlaceOrderError> for ApiError {
 
 - The `From<DomainError>` impl is an **exhaustive match**, so a new domain variant forces a decision about its status code. Never use a blanket `From<anyhow::Error>` that sends every failure to 500.
 - The 500 body says "internal error". The source is logged once, here, and never sent to the client.
-- The shape follows the plan's `api-surface.md` validation catalog when one exists. That catalog wins over this sketch: field-level `errors[]`, the `type` URIs, 401/403 handling.
+- The plan's `api-surface.md` validation catalog, when one exists, wins over this sketch.
 
 ### Body rejections as problems
 
@@ -317,7 +317,7 @@ pub struct AppState {
 }
 ```
 
-Built once in `main` and cloned per request: every field is cheap to clone (`PgPool` and the OTel instruments are `Arc` inside). Handlers extract `State<AppState>`. A field that is not `Clone` gets wrapped in `Arc`. A collaborator becomes `Arc<dyn Trait>` only when a second implementation or a test fake of an outbound seam exists (`pattern-guide` → Traits as ports). Native `async fn` traits are not dyn-compatible: such a trait keeps `#[async_trait]`.
+Built once in `main` and cloned per request: every field is cheap to clone (`PgPool` and the OTel instruments are `Arc` inside); a field that is not `Clone` gets wrapped in `Arc`. A collaborator becomes `Arc<dyn Trait>` only when a second implementation or a test fake of an outbound seam exists (`pattern-guide` → Traits as ports). Native `async fn` traits are not dyn-compatible: such a trait keeps `#[async_trait]`.
 
 ## Handler
 
@@ -344,7 +344,7 @@ pub async fn place_order(
 ```
 
 - A handler is transport only: extract, convert the DTO into a domain command (`TryFrom`), call the module, map the result. A business rule in a handler is a finding.
-- **Time is a parameter.** The handler reads the clock once and passes `now` down, so domain functions are pure and tests pass a fixed instant without a `Clock` trait. Ids work the same way when a test needs a known value.
+- **Time is a parameter.** The handler reads the clock once and passes `now` down, so tests pass a fixed instant without a `Clock` trait; ids work the same way.
 - DTOs (`*Request`/`*Response`) are separate from domain types. A domain type never derives `Deserialize` from client input; it is built through its fallible constructor.
 
 ## Router and layers
@@ -369,7 +369,7 @@ pub fn app(state: AppState, config: &Config) -> Router {
 }
 ```
 
-`ServiceBuilder` applies layers top to bottom, so tracing sees everything, including a timeout or a panic. Every service has an edge timeout, because without one graceful shutdown waits forever on a stuck request. It also has a body limit; axum's default is 2 MB, and the limit should be set on purpose. `request_span` / `record_response` come from `observability/opentelemetry-rust`.
+`ServiceBuilder` applies layers top to bottom, so tracing sees a timeout or a panic. Every service has an edge timeout (without one, graceful shutdown waits forever on a stuck request) and a body limit set on purpose (axum's default is 2 MB). `request_span` / `record_response` come from `observability/opentelemetry-rust`.
 
 ## `main`
 
@@ -403,20 +403,7 @@ async fn run() -> anyhow::Result<()> {
 
 ## Module boundaries — crate per module
 
-A modular monolith that will be split later (blueprint `Modules:` line) is a **Cargo workspace with one library crate per module** plus one binary crate that composes them:
-
-```
-Cargo.toml                 # [workspace] members, [workspace.dependencies], [workspace.lints]
-crates/app/                # the binary: config, telemetry, router composition
-crates/orders/             # lib: pub fn router() -> Router<AppState>, pub commands, pub events
-crates/billing/            # lib
-```
-
-- **The compiler is the architecture test.** `billing` can reach `orders` only if `crates/billing/Cargo.toml` lists it, and then only its `pub` items. Keep internals `pub(crate)` and re-export the module's surface from `lib.rs`. No dependency-cruiser equivalent is needed.
-- **One schema per module.** Each module crate owns a `migrations/` folder whose tables live in its own Postgres schema (`orders.orders`). It holds another module's id as a plain column, with no foreign key into that schema (`database-code`).
-- Shared versions and lints are declared once in `[workspace.dependencies]` / `[workspace.lints]`, with `dep = { workspace = true }` in members.
-- **A call between modules** is a plain function on the other crate's public surface, taking the pool or the state it needs. **An event** is a type exported by the publisher, delivered in-process through a `tokio::sync::broadcast` or an outbox. Add one only when a second consumer, or "must not fail the publisher", earns it.
-- A single-crate service does not become a workspace in anticipation. Split when the blueprint names modules or a second binary appears.
+The blueprint names modules (`Modules:` line) or a second binary appears → read `references/crate-per-module.md`. A single-crate service does not become a workspace in anticipation.
 
 ## Rules
 

@@ -158,14 +158,16 @@ Tag every pact and every verification with the **consumer's commit SHA + branch*
 - No state handlers that run real production-like side effects (emails, payments) — mock or stub.
 - No huge pact files (100+ interactions) — split the consumer's pact by use case or feature.
 
-## When to use Pact at all
+## Choosing Pact
+
+**Use Pact when:**
 
 - Two or more services talk over HTTP and you want safety before deploys.
 - Replacing brittle multi-service E2E tests with cheaper contract verification.
 - Catching breaking changes at the producer side before they ship.
 - Sequencing deploys safely with `can-i-deploy`.
 
-## When NOT to use Pact
+**Use something else when:**
 
 - Single-service API tests against a deployed service → `qa/<stack>/skills/api-test-author/writer`.
 - UI tests → `qa/<stack>/skills/ui-test-author/<tool>`.

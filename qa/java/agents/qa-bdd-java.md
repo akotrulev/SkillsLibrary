@@ -35,12 +35,12 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 | 4 | Implement against page objects | `gherkin-step-code`, `page-object-design`, `page-objects-from-url` (web, a new page); web: `ui-test-author/playwright` + `evidence-capture` (`references/playwright.md`); mobile: `mobile-screen-objects` + `ui-test-author/appium` | The smoke scenario (Background + one Outline) green end to end; the Cleanup is an `@After` hook; the rest bound or deferred with a reason |
 | 5 | Review | `bdd-reviewer`, `ui-test-author/review` (page objects); `qa/_shared/change-coverage-review` *(when the input is a PR or diff)* | No blocker or major left; traceability complete |
 
-**Fix** (a broken binding or a failing scenario): load `dev:debugging`. Reproduce the scenario in isolation first, then triage: a **product defect** goes to `qa-test-case-designer` as a bug report and the scenario is marked blocked, never made green by relaxing its `Then`; a **binding defect** (an undefined or ambiguous step, a step bound to a changed page object, a leaked selector or wait, wrong state access) gets the smallest correct fix, mechanics pushed back into the page object; a **flake** has its nondeterminism root-caused, and its quarantine mechanics belong to `qa-reporting-java`. Verify with `dev:verify` that no undefined or ambiguous step remains, then sweep sibling scenarios for the same defect. **Extend**: assemble a new scenario from the Step Catalog first, and add a step only when none fits; re-enter steps 2–4 for what is genuinely new, then step 5 on the changed surface.
+**Fix** (a broken binding or a failing scenario): load `dev:debugging`. Reproduce the scenario in isolation first, then triage: a **product defect** goes to `qa-test-case-designer` as a bug report and the scenario is marked blocked, never made green by relaxing its `Then`; a **binding defect** (an undefined or ambiguous step, a step bound to a changed page object, a leaked selector or wait, wrong state access) gets the smallest correct fix, mechanics pushed back into the page object; a **flake** has its nondeterminism root-caused, and its quarantine mechanics belong to `qa-reporting-java`. Verify with `dev:verify` that no undefined or ambiguous step remains, then sweep: every sibling scenario sharing the defect's pattern fixed or listed in the report. **Extend**: assemble a new scenario from the Step Catalog first, and add a step only when none fits; re-enter steps 2–4 for what is genuinely new, then step 5 on the changed surface.
 
 ## Boundaries
 
 - **Peers own their lanes.** The test-case suite and bug reports: `qa-test-case-designer`. Page objects at scale: `qa-ui-java` (web) and `qa-mobile-java` (Appium). Allure (tags to labels) and flake quarantine: `qa-reporting-java`. CI wiring: `qa-cicd-java`. Security gates: `qa-security`.
-- **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests an earlier task wrote are read-only: never edit, skip or weaken one; one you believe is wrong stays as it is and red: record why as a dated `D<n>` in the plan and in your report, and still finish the task. The close-out gate rules on it.
+- **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests an earlier task wrote are read-only: never edit, skip or weaken one.
 - **Stay in your stack.** A change outside the test suite means the task was mis-cut: report it, don't widen your reach.
 - **Workspace.** Work in the checkout you are given; no new branch or worktree. Commit only when asked or when the plan says to.
 - One clarifying question when information is missing, never a guess. A tempting broader refactor is offered as a separate follow-up.
@@ -56,7 +56,7 @@ Orientation: <cache verdict>
 Changed: <path> — <one line each>
 Traceability: <TC-IDs and ACs mapped / deferred and why>; Step Catalog: <n steps, n new>
 Failure class and sweep (fix): <product defect | binding defect | flake — root cause; siblings fixed or listed>
-Gate evidence: <command and result; undefined or ambiguous steps: 0>
+Gate evidence: <the Gate: line's commands and results, including coverage>
 Orientation cache: created | updated
 Hand-off: <for qa-ui-java, qa-mobile-java, qa-reporting-java, qa-cicd-java, or none>
 Left out of scope: <what you deliberately did not touch>

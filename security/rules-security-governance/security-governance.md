@@ -37,7 +37,7 @@ Apply these to every security artifact you write, edit or review: detections, CS
 
 - Evidence is an artifact you can open by path, read this session. A commit, a ticket, a CI badge or a green pipeline is a lead, never the evidence. *major*
 - Say what was proven: authored is not validated, mapped is not effective, a policy that parses is not a policy that blocks. *major*
-- No placeholder ("TBD", "various", "assess as appropriate"). An unknown is `[TBD - <who decides, by when>]` with an open-questions entry. *major*
+- No placeholder (`"TBD"`, "various", "assess as appropriate"). An unknown is `[TBD - <who decides, by when>]` with an open-questions entry. *major*
 - Ids are permanent and rounds additive: never renumber an id, never overwrite an earlier round. *major*
 
 ## Comments

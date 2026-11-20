@@ -126,21 +126,18 @@ High-cardinality stuff (`trace_id`, `user_id`, `request_id`, `order_id`) lives *
 
 ### Grafana Alloy (recommended default)
 
-Alloy is Grafana's OpenTelemetry-based collector distribution and the **successor to Promtail** (Grafana deprecated Promtail in Feb 2025, EOL ~Mar 2026). Deploy it as a DaemonSet via the `grafana/alloy` Helm chart; the pipeline is declared in Alloy's River config — discover pods, tail their logs, parse JSON, attach only the low-cardinality labels, push to Loki.
+Alloy is Grafana's OpenTelemetry-based collector distribution and the successor to Promtail, which reached end of life in Mar 2026; use Alloy, and migrate an existing Promtail setup with `alloy convert --source-format=promtail`. Deploy it as a DaemonSet via the `grafana/alloy` Helm chart, one Alloy per node tailing that node's pod logs. The pipeline is declared in Alloy's configuration: discover pods, tail their logs, parse JSON, attach only the low-cardinality labels, push to Loki.
 
 ```yaml
-# alloy-values.yaml (Helm chart `grafana/alloy`)
 controller:
-  type: daemonset            # one Alloy per node, tails that node's pod logs
+  type: daemonset
 alloy:
   configMap:
     content: |
-      // 1. Discover pods on this node
       discovery.kubernetes "pods" {
         role = "pod"
       }
 
-      // 2. Keep only low-cardinality labels as Loki stream labels
       discovery.relabel "pod_logs" {
         targets = discovery.kubernetes.pods.targets
         rule {
@@ -153,13 +150,11 @@ alloy:
         }
       }
 
-      // 3. Tail the discovered pods' logs
       loki.source.kubernetes "pods" {
         targets    = discovery.relabel.pod_logs.output
         forward_to = [loki.process.parse.receiver]
       }
 
-      // 4. Parse the JSON line; promote ONLY level + service to labels
       loki.process "parse" {
         stage.json {
           expressions = { level = "level", service = "service.name" }
@@ -170,7 +165,6 @@ alloy:
         forward_to = [loki.write.default.receiver]
       }
 
-      // 5. Push to Loki
       loki.write "default" {
         endpoint {
           url = "http://loki-gateway/loki/api/v1/push"
@@ -180,19 +174,7 @@ alloy:
 
 Keep `environment` as a static external label (set once per cluster) rather than relabeling it per stream. Everything high-cardinality (`trace_id`, `user_id`, `request_id`) stays inside the log line and is parsed with `| json` at query time.
 
-### Vector (more flexible)
-
-Vector handles routing, filtering, dropping noisy logs, batching, multiple sinks. Use Vector when you want one tool to ship to Loki + another sink (e.g., archive to S3), or when you need richer transforms.
-
-### Fluent Bit (lightweight, broad community)
-
-CNCF-graduated; less footprint than Fluentd. Solid alternative if your org standardizes on it.
-
-### Promtail (legacy — deprecated)
-
-Promtail was the classic Loki forwarder but is **deprecated by Grafana (announced Feb 2025, EOL ~Mar 2026)** in favor of Grafana Alloy. Do not pick it for new clusters; for existing Promtail setups migrate with `alloy convert --source-format=promtail`.
-
-Pick **one** per cluster and stay consistent. Don't run two.
+Vector or Fluent Bit chosen, or a second sink beside Loki → read `references/forwarders.md`. Pick one forwarder per cluster.
 
 ## Tempo
 
@@ -298,13 +280,14 @@ Prometheus stores exemplars (a `trace_id` per histogram sample). Grafana renders
 
 ### Loki derived fields (logs → traces)
 
-**The trace-correlation contract.** The three stacks emit the trace id under different JSON field names — the derived-field regex must match all of them, or "jump to trace" silently breaks for the stacks it misses:
+**The trace-correlation contract.** The four stacks emit the trace id under different JSON field names — the derived-field regex must match all of them, or "jump to trace" silently breaks for the stacks it misses:
 
 | Stack | Emitting library | JSON field |
 |---|---|---|
 | dotnet | Serilog + `Serilog.Enrichers.Span` | `TraceId` |
 | java | OTel `logback-mdc-1.0` (default MDC keys) | `trace_id` |
 | node | pino + `@opentelemetry/instrumentation-pino` | `trace_id` |
+| rust | `tracing-subscriber` JSON with `with_span_list(true)`, root span from `opentelemetry-rust` | `trace_id` (a span field) |
 
 The **canonical cross-stack regex** (use exactly this in the Loki data source's derived field — one config serves all stacks):
 
@@ -340,22 +323,9 @@ The third leg — from a span back to the logs that service wrote during that sp
 
 `tags` maps the span's `service.name` resource attribute to the Loki `service` stream label — the only join key needed because the label set is low-cardinality by design. With all three legs wired the loop closes in both directions: metric exemplar → trace → logs → (derived field) back to trace.
 
-## Multi-tenant
+## Multi-tenant and Grafana Cloud
 
-If you serve multiple teams from one stack, Loki and Tempo both support **tenant headers**:
-
-- Forwarder / Collector sets `X-Scope-OrgID: team-orders`
-- Loki keeps streams separate per tenant
-- Per-tenant limits + retention via runtime config
-- Grafana data source per tenant **or** Grafana with auth pinning the header
-
-Most projects in this library are single-tenant. Skip multi-tenant unless you genuinely need it; it adds operational complexity.
-
-## Grafana Cloud as a managed alternative
-
-For teams that don't want to operate Loki + Tempo themselves, **Grafana Cloud** offers the same APIs, with paid limits. Same query language, same Grafana, less ops — pay for it if the time saved is worth it.
-
-The skill's recipes work against self-hosted or Grafana Cloud — only the endpoint and auth differ.
+Multi-tenant (tenant headers, per-tenant limits) or Grafana Cloud in the task → read `references/multi-tenant-and-cloud.md`. Otherwise the stack is single-tenant and self-hosted.
 
 ## Operational concerns
 
@@ -367,37 +337,18 @@ The skill's recipes work against self-hosted or Grafana Cloud — only the endpo
 
 ## Rules
 
-- Simple Scalable Loki for production
-- Object storage on the cloud's native service (S3 / Blob / GCS); IRSA / Workload Identity for auth
-- Retention tuned per tier; 30 days default; 7d for noisy, 90d+ for security/auth
-- Index labels low-cardinality only (`service`, `environment`, `level`, `namespace`)
-- High-cardinality stuff in the log body, parsed with `| json`
-- OTel Collector is the central hub; configurable sampling/batching/routing without app changes
-- Tempo `metrics_generator` enabled — free RED metrics + service graphs
-- All three cross-store legs wired: exemplars (metrics→traces), Loki derived fields with the canonical cross-stack regex (logs→traces), `tracesToLogsV2` (traces→logs)
-- One log forwarder per cluster (Grafana Alloy / Vector / Fluent Bit) — never two
-- Grafana data sources defined declaratively via Helm / Terraform — reviewable in PR
+Each rule is stated nowhere else in this file.
 
-## What NOT to do
-
-- No `trace_id` / `user_id` / `request_id` as Loki labels
-- No retention longer than 90 days at full fidelity on Loki without lifecycle policies (cost)
-- No skipping object storage (Loki on local disk is a toy)
-- No bypassing the Collector (apps pointing directly at Tempo / Loki) — kills your ability to evolve sampling/routing without redeploys
-- No `:latest` image tags for Loki / Tempo / Collector
-- No mixing single-tenant assumptions with a deployment configured for multi-tenant — `X-Scope-OrgID` discipline must be applied everywhere or nowhere
-- No Loki without a `compactor` running — small-file death
-- No "we'll figure out retention later" — defaults eat budget fast
-- No two forwarders per node — pick one
-- No keeping the same retention for verbose debug logs and security audit logs — set per-stream limits
+- Pin Loki, Tempo and Collector image tags to a version; never `:latest`.
+- Define Grafana data sources declaratively (Helm or Terraform), so a PR reviews them.
 
 ## Generation steps
 
-1. Confirm cluster, scale, retention, multi-tenant Y/N, log forwarder choice.
-2. Deploy **Loki** (Helm `grafana/loki`) in Simple Scalable mode; point to S3 / Blob / GCS; configure retention.
-3. Deploy **Tempo** (Helm `grafana/tempo`); point to object storage; enable `metrics_generator`.
-4. Deploy **OTel Collector** with receivers + processors + exporters config; route traces → Tempo, metrics → Prometheus.
-5. Deploy the log forwarder; restrict labels to the low-cardinality set; ship stdout JSON to Loki.
-6. Wire **Grafana data sources** (Loki, Tempo, Prometheus); set up **exemplars** on Prom→Tempo, **derived fields** (canonical cross-stack regex) on Loki→Tempo, and **`tracesToLogsV2`** on Tempo→Loki.
-7. Smoke the full loop: hit an app, find its logs in Loki by `{service=..., env=...}`, click the trace id to jump to Tempo, jump from a span back to its logs, see metrics with exemplars.
-8. Add **retention monitoring** + **cardinality monitoring** queries to a "stack health" dashboard.
+1. Confirm cluster, scale, retention, multi-tenant Y/N and the log forwarder. Done when each of the six inputs has an answer.
+2. Deploy **Loki** (Helm `grafana/loki`) in Simple Scalable mode on object storage with retention set. Done when a test line pushed to Loki is returned by a query.
+3. Deploy **Tempo** (Helm `grafana/tempo`) on object storage with `metrics_generator` enabled. Done when a test span is found in Tempo.
+4. Deploy the **OTel Collector** with receivers, processors and exporters; traces go to Tempo, metrics to Prometheus. Done when a span sent to the Collector reaches Tempo.
+5. Deploy the log forwarder, shipping stdout JSON to Loki. Done when `{service="<app>"}` returns lines and the stream labels are only the four allowed.
+6. Wire the **Grafana data sources** (Loki, Tempo, Prometheus), **exemplars** on Prometheus to Tempo, **derived fields** with the canonical cross-stack regex on Loki to Tempo, and **`tracesToLogsV2`** on Tempo to Loki. Done when each of the three legs opens its target from a test request.
+7. Smoke the full loop: hit an app, then find its logs with `{service="<app>", environment="<env>"}`, click the trace id to Tempo, jump from a span back to its logs, and see metrics with exemplars. Done when every hop in that order succeeds.
+8. Add retention and cardinality queries to a "stack health" dashboard. Done when the dashboard shows both panels with data.

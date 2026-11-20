@@ -137,3 +137,39 @@ public final class ChaosProxy {
     }
 }
 ```
+
+## Partial / garbled response — `slicer` / `limitData` (don't persist corruption)
+
+A response cut mid-stream must surface as an error the app handles — it must **not** be parsed and persisted as a
+valid (truncated) record. Inject `limitData` (cut after N bytes) or `slicer` (fragment the stream), drive a read,
+and assert the app rejects the partial result and leaves state uncorrupted.
+
+```java
+@Test
+public void shouldRejectAndNotPersistATruncatedResponse() throws Exception {
+    chaos.truncateAfter(64);                                  // cut every response after 64 bytes
+    CatalogService app = CatalogService.connectedTo(chaos.host(), chaos.port());
+
+    CatalogResult result = app.loadCatalog();
+
+    assertThat(result.isError()).as("partial response surfaces as an error").isTrue();
+    assertThat(app.lastPersistedCatalog()).as("no truncated record persisted").isNull();
+}
+```
+
+## Probabilistic faults — `toxicity` for flappy dependencies
+
+A `toxicity` below 1.0 applies the toxic to only a *fraction* of connections — an intermittent, flappy dependency.
+Assert the app's retries smooth over the failing fraction so the user-visible outcome stays correct.
+
+```java
+@Test
+public void shouldTolerateAnIntermittentlyResettingDependency() throws Exception {
+    chaos.withToxicity(chaos.cutConnection(0), 0.3f);
+    OrderService app = OrderService.connectedTo(chaos.host(), chaos.port());
+
+    List<OrderResult> results = new OrderLoad(app, "sku-1").placeWithRetry(20);
+
+    assertThat(results).as("retries absorb a 30% connection-reset rate").hasSize(20).allMatch(OrderResult::isSuccess);
+}
+```

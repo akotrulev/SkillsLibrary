@@ -46,58 +46,31 @@ Run this pair on a schedule and the matrix becomes a **drift monitor**: a techni
 
 ## Atomic Red Team — the scalpel (one technique, run-and-clean)
 
-**Atomic Red Team** (Red Canary) is a library of small, portable tests each mapped to an ATT&CK technique, executed by the **`invoke-atomicredteam`** PowerShell module. Pin honestly: the **module** (`redcanaryco/invoke-atomicredteam`) is mature and rarely re-tagged — last tag **v2.3.0** — while the **`atomics/` technique library** (`redcanaryco/atomic-red-team`) updates continuously and is synced separately. **For a reproducible run, pin the module version AND the atomics-folder commit** — "we ran the T1003.001 atomic" is not reproducible unless you record which atomics commit it came from.
-
-```powershell
-# Install the module + atomics folder (bootstrap). Do this on the AUTHORIZED lab host, not a workstation.
-IEX (IWR 'https://raw.githubusercontent.com/redcanaryco/invoke-atomicredteam/master/install-atomicredteam.ps1' -UseBasicParsing)
-Install-AtomicRedTeam -getAtomics                       # pulls the atomics/ library beside the module
-Import-Module invoke-atomicredteam -Force
-
-# The disciplined per-technique sequence — check, prereqs, run one test, then always clean up.
-Invoke-AtomicTest T1003.001 -ShowDetailsBrief           # what it will do — read before running
-Invoke-AtomicTest T1003.001 -CheckPrereqs               # does the host meet the test's prerequisites?
-Invoke-AtomicTest T1003.001 -GetPrereqs                 # stage prerequisites (opt-in — it changes the host)
-Invoke-AtomicTest T1003.001 -TestNumbers 1              # run exactly one test, not the whole technique blindly
-Invoke-AtomicTest T1003.001 -TestNumbers 1 -Cleanup     # clean up — revert what the test planted
-```
-
-- **`-TestNumbers`/`-TestGuids` scope the run.** Never `Invoke-AtomicTest T1003.001` with no test selector against a live env — that runs *every* atomic under the technique, some of which are more intrusive than you intend.
-- **`-Cleanup` is not optional.** Many atomics create files, registry keys, users, or services. The cleanup command is part of the technique definition; run it and then *verify* the artifact is gone (the safety model's cleanup-verification rule — a planted artifact you did not confirm removed is a finding against your own run).
-- **`-GetPrereqs` changes the host** (downloads tools, creates fixtures). It is an opt-in act under the scope file's allowed-techniques list, not a silent default.
-- **Run over PowerShell Core** to drive Linux/macOS targets, or the built-in `-Session` to run against a remote authorized host; the remote host must be in scope.
+**Atomic Red Team** (Red Canary) runs small, portable tests each mapped to an ATT&CK technique via the
+**`invoke-atomicredteam`** PowerShell module: check, stage prereqs, run exactly one numbered test, then
+always clean up and verify. Pin both the module version and the `atomics/` folder commit — the two update
+on separate schedules, and "we ran the T1003.001 atomic" is not reproducible without both. Full install,
+invocation sequence and the scope/cleanup rules: `references/atomic-red-team.md`.
 
 ## Apache Caldera — the campaign (a chain of techniques)
 
-**Apache Caldera** (v5.3.0; **note the governance move — the repo is now `apache/caldera`, relocated from `mitre/caldera`;** older tutorials pointing at `mitre/caldera` and pre-5.x plugin layouts are stale) is an autonomous adversary-emulation platform: a server, lightweight agents (`sandcat`/`manx`) on the in-scope hosts, and **abilities** each mapped to an ATT&CK technique that chain into an **adversary profile** and run as an **operation**.
+**Apache Caldera** (v5.3.0, now `apache/caldera`) is an autonomous adversary-emulation platform: a server,
+agents on in-scope hosts, and **abilities** mapped to ATT&CK technique ids that chain into an **adversary
+profile** run as an **operation** — the multi-technique scenario a single atomic can't express. The
+`atomic` plugin imports Atomic Red Team tests as abilities; `emu` ships CTID's ready emulation plans.
+**Scope discipline is louder here than for a single atomic** — an autonomous planner can pivot further
+than you expect; bound it to the in-scope hosts and cap the operation. Full setup and the pivot-abort
+rule: `references/caldera.md`.
 
-- **Abilities ↔ ATT&CK.** Each ability carries its technique id; a profile is an ordered chain (initial access → discovery → collection → …) — the multi-technique scenario a single atomic can't express.
-- **Planners** (`atomic`, `batch`) decide the order abilities run; **fact sources** feed values (a discovered credential) from one ability into the next.
-- **The `atomic` plugin imports the Atomic Red Team tests** as abilities, so a Caldera profile can chain ART atomics; the **`emu` plugin** ships the Center for Threat-Informed Defense (CTID) **adversary-emulation plans** (e.g. an APT profile) as ready ATT&CK-mapped chains.
-- **`debrief`** produces the operation report (techniques run, per-step results) — the red-side evidence the blue half validates against.
-- **Cleanup is first-class:** an operation runs its abilities' cleanup commands in reverse on completion; still verify, and remove the agents when the engagement ends.
+## Stratus Red Team & VECTR — cloud/K8s atomics, and the scoreboard
 
-> **Scope discipline is louder for Caldera than for a single atomic** — an autonomous operation walks a chain and can reach further than you expect. Bound it to the in-scope hosts (the agents you deployed), cap the operation, and re-read the scope file before starting it. A planner that would pivot to an out-of-scope host is a mid-run abort, not a continue.
-
-## Stratus Red Team — cloud & Kubernetes atomics
-
-**Stratus Red Team** (Datadog, v2.32.1) is the cloud equivalent of a single atomic — a **self-contained Go binary** that detonates a granular cloud/K8s attack technique against AWS, Azure, GCP, or Kubernetes, mapped to the **ATT&CK Cloud/Containers** matrices.
-
-```bash
-stratus list                                            # techniques available, with ATT&CK ids
-stratus warmup   aws.credential-access.ec2-get-password-data   # prepare prerequisite infra (opt-in)
-stratus detonate aws.credential-access.ec2-get-password-data   # run the technique — the CloudTrail event to detect
-stratus cleanup  aws.credential-access.ec2-get-password-data   # clean up — tear the technique's resources down
-stratus status                                          # what is warm / detonated / to be cleaned
-```
-
-- **warmup → detonate → cleanup** is the lifecycle; `cleanup` is mandatory and Stratus tracks state so a forgotten `detonate` is visible in `status`.
-- The point is the **telemetry it generates** — a detonated technique produces the exact CloudTrail / Azure Activity Log / GCP Audit Log event your cloud detection should catch; the blue half then queries the log store for it.
-- Use Stratus for the cloud/K8s row of the coverage matrix; use Atomic Red Team/Caldera for the host/endpoint rows. It runs against **the in-scope cloud account only** — a detonation creates and deletes real cloud resources, so a wrong account is both a scope breach and a cost.
-
-## VECTR — the scoreboard (track, benchmark, spot drift)
-
-**VECTR** (Security Risk Advisors; Community Edition **ce-9.14.1**, self-hosted; Enterprise Edition is the commercial benchmarking/executive-reporting variant) is where purple-team outcomes are *tracked over time*, not executed. Each test case records the technique (ATT&CK id), the tool that ran it, and the outcome — **blocked / alerted / logged / no signal** — building the coverage matrix across the ATT&CK map and, run round over round, the **drift** view. SRA's **Threat Simulation Index 2026** is a ready benchmark catalogue of techniques worth simulating. VECTR is optional — the purple-team report's detected/not-detected matrix carries the same data — but it is the natural home when the cadence is continuous and the audience wants a benchmarked trend.
+**Stratus Red Team** (Datadog) is the cloud equivalent of a single atomic: a Go binary that
+**warmup → detonate → cleanup**s a granular AWS/Azure/GCP/K8s technique, mapped to ATT&CK
+Cloud/Containers — the point is the telemetry it generates for the blue half to query. **VECTR** (SRA) is
+where purple-team outcomes are tracked over time, not executed: technique, tool and outcome
+(blocked/alerted/logged/no signal) building the coverage matrix and, round over round, the **drift** view;
+optional, since the report's detected/not-detected matrix carries the same data. Full invocation and
+lifecycle: `references/stratus-vectr.md`.
 
 ## Anti-patterns
 

@@ -9,12 +9,11 @@ paths:
 
 Apply these to every Swift file you write, edit or review. The tag after a rule is the severity a review reports: **blocker** ships a crash, a notarization or store rejection or a security break, **major** is a design or correctness problem, **minor** is style, **nit** is preference. SwiftUI, AppKit, accessibility, styling, localization, networking, persistence, test and project-config rules are separate files that load with those files.
 
-**The codebase wins.** Where this project consistently does something another way, follow the project and do not flag it. Detect the Xcode and Swift versions, `SWIFT_VERSION` and default isolation per target and package, the deployment target and `ARCHS`, SwiftUI vs AppKit, and the distribution channel before writing: never use an API newer than the target without `#available`, never flag a Swift 5-mode module for lacking Swift 6 or a macOS 13 target for using `ObservableObject`. An AppKit codebase is extended in AppKit.
+**The codebase wins.** Where this project consistently does something another way, follow the project and do not flag it. Detect the versions, `SWIFT_VERSION` and default isolation per target and package, the deployment target and `ARCHS`, SwiftUI vs AppKit, and the distribution channel before writing: gate an API newer than the target with `#available`, and a Swift 5-mode module or a macOS 13 target using `ObservableObject` is correct for its lane. An AppKit codebase is extended in AppKit.
 
 ## Simplicity and scope
 
-- Write the simplest thing that meets the requirement, then stop. No `protocol` with one conformer, no view model that mirrors a struct, no wrapper that only forwards, no configurability nothing uses. An abstraction is earned on the second real need. *major, fix by inlining*
-- Cut structure, never correctness: the region states, accessibility, cancellation, the denied path and the tests stay.
+- Simplicity per `CLAUDE.md` "Simplicity (KISS)": no `protocol` with one conformer, no view model that mirrors a struct, no wrapper that only forwards. *major, fix by inlining*
 - No TCA, Factory, swift-dependencies or DI container where the codebase did not choose one. *major*
 - Never raise the Swift language mode, SDK, toolchain, deployment target or architecture list as a side effect; that move is its own change. Gate a newer API with `#available` instead. *major*
 
@@ -24,7 +23,6 @@ Apply these to every Swift file you write, edit or review. The tag after a rule 
 - No implicitly unwrapped optional outside an `@IBOutlet`. *major*
 - `struct` and `enum` first; `final class` when identity matters; `actor` for shared mutable state. A mode is one enum, never several booleans. *minor*
 - No mutable global state: no `static var`; make it `let`, an actor, or inject it. *major*
-- Access control is the narrowest that works; `public` only on a package's API. *minor*
 
 ## Concurrency
 
@@ -34,7 +32,7 @@ Apply these to every Swift file you write, edit or review. The tag after a rule 
 - CPU-heavy work is `@concurrent`; no `Task.detached` to leave the main actor without a written reason. *major*
 - An unstructured `Task { }` is stored and cancelled when its owner (window, model) goes; window work is `.task`. *major*
 - No `@unchecked Sendable`, `nonisolated(unsafe)` or `MainActor.assumeIsolated` without a written justification beside it. *major*
-- No `DispatchQueue.main.async` or other GCD hop in new code; return to the main actor by isolation. *minor*
+- No GCD hop in new code; return to the main actor by isolation. *minor*
 
 ## State, architecture and dependencies
 
@@ -42,8 +40,7 @@ Apply these to every Swift file you write, edit or review. The tag after a rule 
 - One owner per model: `@State` owns an `@Observable` in the view that creates it, `@Bindable` binds, `@Environment` reads app-wide; never an `@Observable` in a `let` built in `body`. *major*
 - Several windows on the same data share one model created once in the `App`, never a copy per window; window-local state (selection, scroll, a draft) lives per window. *major*
 - Dependencies arrive by initializer or `@Environment` from the `App` composition root; no `.shared` singleton or locator inside a view or model. *major*
-- A view model exists only for logic that needs a test apart from the view. *major*
-- No coordinator, router object or "AppState" god-model beside the scenes. *major*
+- No coordinator, router or "AppState" god-model beside the scenes. *major*
 
 ## Errors, logging and secrets
 
@@ -65,6 +62,4 @@ Apply these to every Swift file you write, edit or review. The tag after a rule 
 
 ## Comments
 
-- No comments inside function bodies: no step markers, no restating the next line, no commented-out code, no `TODO`/`FIXME`. Extract and name the step instead. *minor; major when the comment is wrong or exists because the code is unclear*
-- A `///` doc comment only where the name cannot carry the meaning: a business rule, an ordering or isolation constraint on callers, a deliberate deviation, or a public contract. Never one that restates the signature. *minor*
-- Scaffolded template comments and file headers are removed. *minor*
+- Comments follow `CLAUDE.md` "Comments": none inside a body, a `///` doc comment only where the name cannot carry the meaning, scaffolded headers removed. *minor; major when the comment is wrong or exists because the code is unclear*

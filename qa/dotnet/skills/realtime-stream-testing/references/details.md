@@ -1,5 +1,17 @@
 # Deep-dive details — `qa-dotnet:realtime-stream-testing`
 
+**Contents:**
+
+- Layout
+- 0. AwaitFrame — bounded reads off a frame channel
+- 1. Protocol client — raw WebSocket (ClientWebSocket)
+- 2. Protocol client — SignalR hub (HubConnection)
+- 3. Protocol client — SSE (SseProbe)
+- Browser page objects
+- Disciplines & gotchas
+- Anti-patterns (protocol client)
+- Examples
+
 Sections moved out of SKILL.md for on-demand loading. Read what the task needs.
 
 ## Layout

@@ -212,47 +212,6 @@ jobs:
   # testssl.sh alternative: `uses: drwetter/testssl.sh` image or the testssl action, then jq-gate the JSON.
 ```
 
-## Anti-patterns
+## Guardrails
 
-- **No pinned Mozilla profile** — running `sslyze` without `--mozilla_config` (or testssl.sh with no
-  severity gate) so "the bar" drifts with the tool's defaults. *Fix:* pin `--mozilla_config=intermediate`
-  (or your chosen profile) explicitly in config; treat a profile bump as a reviewed change.
-- **Parsing testssl.sh by eye** — reading the HTML/terminal output and deciding "looks fine" instead of a
-  programmatic gate. *Fix:* gate the **JSON severity** (`jq` on `severity >= HIGH`); the HTML is for
-  humans *after* a failure, not the gate.
-- **Treating a cert-expiry warning as low** — letting a near-expiry cert through as informational. *Fix:*
-  near-expiry is a **gating** finding (it becomes a prod outage); alert and fail before it lapses.
-- **Ignoring HSTS** — dismissing a missing/short `Strict-Transport-Security` because "TLS itself is fine."
-  *Fix:* track HSTS — but remember the **header gate is ZAP's** (`passive-scan`); coordinate, don't drop
-  it between the two skills.
-- **Hammering a rate-limited prod endpoint** — looping the scan on every push against a WAF/rate-limited
-  prod host and getting throttled/blocked (or false-clean). *Fix:* schedule it, modest concurrency; run
-  per-PR against an ephemeral/staging endpoint matching prod.
-- **Accepting TLS 1.0 / 1.1** (or RC4/3DES/EXPORT ciphers) as "still works." Deprecated and a PCI-DSS
-  fail. *Fix:* the `intermediate` profile rejects them — keep them rejected; legacy needs a ticketed
-  exception, not a global downgrade.
-- **No ticket on a documented exception** — silently scanning a legacy host with `--mozilla_config=old`
-  (or excluding it) with no record. *Fix:* every relaxation is a **ticketed, expiring** accepted risk
-  (`qa-<stack>:security-foundations` triage); the global profile stays strict.
-- **Assuming SARIF works** — wiring `upload-sarif` against sslyze/testssl.sh output. Neither emits SARIF.
-  *Fix:* attach JSON/HTML as an artifact + Allure, or convert JSON→SARIF deliberately.
-- **Secrets in scan config** — putting an API key / auth token in the scan command to reach a gated
-  endpoint. *Fix:* env vars read lazily; the target host is config, not a secret.
-
-## Rules (hard constraints)
-
-- **A TLS scan is a passive, read-only handshake probe — prod-safe by nature.** It is the one scan you may
-  point at production. Never hammer a rate-limited endpoint; schedule it.
-- **Prefer sslyze's native Mozilla gate**: `sslyze --mozilla_config=<profile> --json_out out.json
-  host:443` — the **non-zero exit on non-compliance is the gate**. For testssl.sh, **parse the JSON** and
-  fail on `severity >= HIGH` (its exit code is not a policy verdict).
-- **Pin the Mozilla profile** (`intermediate` default) explicitly so the bar is auditable and can't drift.
-- **Gate NEW regressions hard; documented exceptions are ticketed** (with reason + expiry) — never relax
-  the global profile to pass one legacy host. Defer the full triage discipline to `qa-<stack>:security-foundations`.
-- **Map findings to OWASP A04 (transport crypto) / A02 (protocol-cipher config)**; a pinned `intermediate`
-  profile also satisfies the **PCI-DSS** early-TLS/weak-cipher bar — cite the profile.
-- **Neither tool emits SARIF** — attach JSON/HTML to Allure + CI artifact, or convert JSON→SARIF
-  deliberately; don't assume `upload-sarif` accepts raw output.
-- **No secrets in scan config** — env vars read lazily; the target host is config, not a secret.
-- A clean TLS scan covers **only** the transport layer — pair with the ZAP header baseline, DAST, SCA,
-  and the rest of the layer map (`qa-<stack>:security-foundations`). Green TLS ≠ "secure."
+- Keep secrets out of the scan command: auth tokens come from env vars read lazily; the target host is config, not a secret.

@@ -1,5 +1,15 @@
 # QA — GitLab CI/CD for TypeScript Test Suites
 
+**Contents:**
+- When to use
+- When NOT to use
+- Inputs needed
+- Decision matrix
+- Templates
+- Rules
+- Generation steps
+- Cross-references
+
 Authors `.gitlab-ci.yml` that runs Vitest / Jest / Playwright / Testcontainers-backed integration tests on GitLab runners using Node 24 + TypeScript (strict), shards for speed via `parallel:`, publishes Allure (and Playwright's own HTML report) to GitLab Pages with history, fails on real failures, and pulls secrets via `id_tokens:` cloud OIDC rather than long-lived CI/CD variables.
 
 This is a **true port** of this skill's GitHub Actions reference (`references/github-actions.md`) — the *same* pipeline (same stages, same shard strategy, same artifacts, same gates), re-keyed to GitLab's `.gitlab-ci.yml` vocabulary. **Translate, don't redesign.** The capability set is identical to the two CI siblings; only the YAML schema and a few primitives differ:

@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Capability Contract — what the tool exposes, before it exists
 
-An MCP server and a CLI are the same thing wearing different clothes: a set of **capabilities**, each with typed inputs, one predictable output shape, a fixed error vocabulary, and a stated place in a **flow**. Get that list right and both surfaces fall out of it mechanically. Get it wrong and you ship forty tools an agent cannot compose.
+An MCP server and a CLI are two renderings of one thing: a set of **capabilities**, each with typed inputs, one predictable output shape, a fixed error vocabulary, and a stated place in a **flow**. Get that list right and both surfaces fall out of it mechanically. Get it wrong and you ship forty tools an agent cannot compose.
 
 This skill produces the **one document both builders consume**. `tooling:mcp-builder` renders each capability as a tool; `tooling:cli-builder` renders each capability as a subcommand. Neither invents capabilities — if it is not in this document, it is not in the surface.
 
@@ -34,6 +34,8 @@ Take the highest-fidelity input available and say in the document which one you 
 
 Record the **detected stack and version** (TFM · JDK + Boot BOM · Node major from `package.json` · package manager) — it decides the builder's implementation lane, and it is the first thing the builders read out of this document.
 
+**Done when** the document names the input it used and records the detected stack and version.
+
 ### Step 2 — Derive candidate capabilities from the code
 
 Read the **entry points**, not the whole codebase. In order of value:
@@ -53,7 +55,9 @@ For each candidate, record where it came from as `file:line`. A capability with 
 
 - **No capability without a consumer.** Name the agent workflow that calls it, or drop it.
 - **Collapse CRUD noise.** Five near-identical getters differing by one filter are one capability with a filter parameter, not five.
-- **Never expose a capability the caller cannot be trusted with.** Anything that deletes, spends money, mutates production, or reads secrets is either out of scope or explicitly flagged `destructive` and gated (see Step 6).
+- **Never expose a capability the caller cannot be trusted with.** Anything that deletes, spends money, mutates production, or reads secrets is either out of scope or flagged `destructive` and gated per `tool-contract.md`.
+
+**Done when** every candidate has a `file:line` or an invention mark, and every one that survives the cuts names its consumer.
 
 ### Step 3 — The capability table
 
@@ -66,13 +70,9 @@ The whole surface on one screen. This table is what an agent's tool list will lo
 | `orders.place` | Create a pending order from a cart | write | `OrdersController.cs:70` | `orders:write` | via key | Place |
 | `orders.cancel` | Move `pending\|paid` → `cancelled` | destructive | `OrdersController.cs:96` | `orders:write` | no | Cancel |
 
-Rules:
+Capability ids, kinds, intents and flows follow `tool-contract.md`.
 
-- **`Capability` is `<noun>.<verb>`, lower-case, dot-separated.** It is the single id both builders derive their names from: the MCP tool is `<prefix>_<noun>_<verb>`, the CLI is `<bin> <noun> <verb>`. One id, two renderings, no divergence.
-- **The noun is the domain object, singular or plural consistently across the whole surface** — pick one and never mix. The verb is `list` · `get` · `create`/`place` · `update` · `delete` · or the domain's own transition verb.
-- **`Kind` is one of `read` · `write` · `destructive`.** It is not decoration: it drives the MCP annotations and the CLI's confirmation prompt, and it is the only thing standing between an agent and an irreversible action.
-- **`Intent` is a sentence an agent can route on**, not a restatement of the name. "Page the caller's orders, filterable by status" routes; "lists orders" does not.
-- **`Flow` names the flow from Step 5** this capability participates in. A capability in no flow is either a leaf lookup (fine — say so) or unjustified (cut it).
+**Done when** the table lists every surviving capability with all seven columns filled.
 
 ### Step 4 — Per-capability contract blocks
 
@@ -107,16 +107,13 @@ One block per row. This is the part the builders compile into Zod / `Option<T>` 
 | `forbidden` | token lacks `orders:write` | stop and report — retrying will not help |
 ````
 
-Rules:
+The block rules (examples, input provenance, the error table's last column, enumerated enums) are in `tool-contract.md`.
 
-- **Every input carries an `Example`.** It is what the agent copies on its first call, and it is the fixture the builder's smoke test uses.
-- **Every input whose value comes from another capability says so** in `Notes` (`from products.search`). This is how an agent learns the surface is composable without being told.
-- **The error table's last column is the point of the table.** "What the caller does next" is the difference between an agent recovering and an agent retrying the same failing call six times.
-- **Enumerate enums.** `status` as `string` is a wasted turn; `status` as `pending|paid|cancelled` is a correct first call.
+**Done when** every table row has a block with typed inputs, an `Example` on each input and an error table.
 
 ### Step 5 — Flows
 
-The ordered sequences an agent actually runs. This is the section that makes the surface usable and the one most often skipped:
+The ordered sequences an agent actually runs. This is the section that makes the surface usable:
 
 ````markdown
 #### Flow: Place an order
@@ -129,9 +126,7 @@ The ordered sequences an agent actually runs. This is the section that makes the
 **Fails at 3 with `conflict`:** drop or reduce the named line and repeat 3 with the **same** `idempotencyKey`.
 ````
 
-- **Name the field that carries between steps.** A flow whose steps do not share a field is not a flow, it is a list.
-- **State the recovery for the most likely failure**, per flow, once — not per capability.
-- **A flow that needs a capability the table does not have is the finding.** Add the capability or state the gap; do not let the flow assume it.
+**Done when** every capability is in a flow or marked a leaf, and every flow names the fields it carries and the recovery for its likeliest failure.
 
 ### Step 6 — Dependencies and the trust boundary
 
@@ -144,11 +139,9 @@ What must be true for any of this to run, and what the surface refuses to do:
 | PostgreSQL 18 | service | `orders.*` | reached through the API, not directly |
 | Redis 7.4 | service | `orders.place` | idempotency store |
 
-Then state, explicitly:
+Then state which capabilities are `destructive`, what is deliberately not exposed and why, and where each secret comes from; the gates and the secret rule are in `tool-contract.md`.
 
-- **Which capabilities are `destructive`** and what gate they carry (MCP: `destructiveHint` + a required confirmation input; CLI: an interactive prompt plus `--yes`).
-- **What is deliberately not exposed** and why — the single most useful line in the document for the next person who asks "why can't the agent do X".
-- **Where secrets come from.** A credential is never a capability input; it is process configuration. A contract that accepts a token as a parameter is a blocker finding.
+**Done when** the dependency table lists every config value and secret with its source, and the destructive and not-exposed statements are written.
 
 ### Step 7 — Confirm before anyone builds
 
@@ -166,4 +159,4 @@ Everything the code answers, answer from the code. Do not ask the user to confir
 
 ## Rules
 
-The standards a contract must meet are the tooling rule file `tool-contract.md`, not a list here: the capability table, ids, kinds and gates, contract blocks, flows, secrets, and the envelope, error, paging and wire-type contract from `references/output-contract.md`. Read the project's copy in `.claude/rules/tooling/`, or the plugin's in `tooling/skills/rules/` when the project has not installed it (`/tooling:rules` does). Where it and this skill disagree, the rule file wins.
+The standards a contract must meet are the tooling rule file `tool-contract.md`. Read the project's copy in `.claude/rules/tooling/`, or the plugin's in `tooling/skills/rules/` when the project has not installed it (`/tooling:rules` does). Where it and this skill disagree, the rule file wins.

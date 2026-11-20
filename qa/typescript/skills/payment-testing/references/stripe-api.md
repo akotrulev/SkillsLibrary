@@ -1,5 +1,16 @@
 # Stripe sandbox at the API layer (Playwright Test 1.64 + `stripe`)
 
+**Contents:**
+
+- Versions
+- 1. The guard and the sandbox fixture
+- 2. Test cards
+- 3. The SUT contract used in the samples
+- 4. Payment outcomes
+- 5. Minor units, idempotency, refunds
+- 6. Subscriptions with a test clock
+- Anti-patterns
+
 Test cards and tokens checked against [docs.stripe.com/testing](https://docs.stripe.com/testing) and test clocks
 against [docs.stripe.com/billing/testing/test-clocks/api-advanced-usage](https://docs.stripe.com/billing/testing/test-clocks/api-advanced-usage)
 on 2026-11-14. SDK surface checked in the `stripe` 23.1.0 source (`testHelpers.testClocks`,

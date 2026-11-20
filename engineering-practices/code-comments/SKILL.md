@@ -1,6 +1,7 @@
 ---
 name: code-comments
-description: The shared comment discipline every code-writing and code-reviewing skill applies — only complex code carries a comment, and only a short doc comment on a method, class, or type; no inline comments; stale comments deleted rather than updated. Loaded by a writer, reviewer, or audit skill, which supplies its own language's syntax. Do NOT invoke directly or route a user request here. Do NOT use for documentation artifacts (docs/plans, docs/specs) — this governs source-code comments only.
+description: Use when writing or reviewing source-code comments. Triggers "add a comment", "doc comment". Not for plans, specs or audit reports (writing-plans).
+disable-model-invocation: true
 ---
 
 # Code Comments — the discipline
@@ -73,7 +74,7 @@ A grep hit is never a finding — comment syntax appears inside strings, URLs, a
 
 Emit no comments except where the complex-flow test is genuinely met, and then one or two sentences. Strip whatever the template or CLI generated (rule 4) before handing the file over. If you find yourself wanting to explain a block, that is the signal to extract it and name it.
 
-## Handoffs
+## Applied by
 
 - **A reviewer applying this** supplies its language's doc-comment and suppression syntax, then grades per the table above.
 - **An audit applying this** supplies the `Find it with` recipe and the permanent finding ID; report shapes come from [`engineering-practices/standards-audit-engine`](../standards-audit-engine/SKILL.md).

@@ -4,7 +4,7 @@ The example for `dev:doc-business-model`: one area guide as a `be-documenter` ru
 
 Note what the example demonstrates: a guide for three readers — the member and the staff member who use the product, the analyst who needs every rule and formula, the product owner who needs the open questions. It opens with **In short**, then reads in the order a person meets the product: who uses it, the few ideas and a picture of how it fits together, each person's tasks in lifecycle order. The tasks hold no formula: the outcome says the result in one sentence and points to **How it is calculated**, while the example, with its arithmetic, stays in the task. **Rules and limits** is the one complete list of rules — every threshold, cut-off, limit and effect of a change the guide states is a row, with the task or work where a person meets it. The picture is a `flowchart LR` of the people and what happens in order, because the member tasks have **no screen** in the product the documenter was given, so the product shows the member no status. Those tasks carry no `**Where:**`, no bold label and no screenshot; the **staff — the area's administrators —** have their own section, and their busiest screen gets the guide's **one screenshot**, showing the example's own values (Basic, 8, £6.00, Ben's £4.50) and every label the steps name. A **task two people do** (cancelling a booking) sits under two headings. The automatic work is told from the member's side (**When**, **What people notice**), and *See also* is a plain list of where to go next.
 
-The guide was written on 2 August and updated on 14 September. The update shows two ways a purpose reaches the body. One is a story the plan that built the area held: the stamp's `stories` names it, and the body states the purpose in one plain sentence (a booking is never refused, so members can keep booking beyond their plan). The other is a person's answer to an open question: its row is gone and its id, Q3, is spent, and the answer is one plain sentence where the rule is stated (the 24-hour cut-off is a policy the business chose) — never struck through, never flagged as an answer. The questions still open have an empty *Answer* cell. There are no ids in the body — the stamp comment closes the file — and no `file:line`, tier tag, code noun or defect word. Optional sections that do not apply (*Good to know*) are dropped.
+The guide was written on 2 August and updated on 14 September. The update shows two ways a purpose reaches the body. One is a story the plan that built the area held: the stamp's `stories` names it, and the body states the purpose in one plain sentence (a booking is never refused, so members can keep booking beyond their plan). The other is a person's answer to an open question: its row is gone and its id, Q3, is spent, and the answer is one plain sentence where the rule is stated (the 24-hour cut-off is a policy the business chose) — never struck through, never flagged as an answer. The questions still open have an empty *Answer* cell. There are no ids in the body — the stamp comment closes the file — and no `file:line`, tier tag, code noun or defect word. Optional sections that do not apply (*Good to know*) are dropped. Links to sibling guides are written as `<bookings>.md` patterns here; a real guide links the file name.
 
 ---
 
@@ -79,7 +79,7 @@ Overage charge = 1 × £6.00 = £6.00
 Two credits are spent, and £6.00 is waiting for the month end.
 
 > [!NOTE]
-> The seat itself is allocated by [Bookings](bookings.md); this guide covers what the booking costs.
+> The seat itself is allocated by [Bookings](<bookings>.md); this guide covers what the booking costs.
 
 ### Cancel a booking
 
@@ -136,7 +136,7 @@ You cancel a member's booking the same way a member does (see *Cancel a booking*
 - The credits the booking spent are returned, however close the session is, and any overage accrued for that booking is removed.
 
 > [!NOTE]
-> When you cancel a whole session with **Cancel session**, [Scheduling](scheduling.md) cancels each booking on it, so every member's credits come back.
+> When you cancel a whole session with **Cancel session**, [Scheduling](<scheduling>.md) cancels each booking on it, so every member's credits come back.
 
 ## What happens automatically
 
@@ -230,8 +230,8 @@ Walking through the lines that matter:
 
 ## See also
 
-- [Bookings](bookings.md) — where a booking's seat is allocated and a booking is cancelled; this guide covers what it costs.
-- [Scheduling](scheduling.md) — where staff cancel a whole session, which returns every member's credits.
+- [Bookings](<bookings>.md) — where a booking's seat is allocated and a booking is cancelled; this guide covers what it costs.
+- [Scheduling](<scheduling>.md) — where staff cancel a whole session, which returns every member's credits.
 
 ## Open questions
 

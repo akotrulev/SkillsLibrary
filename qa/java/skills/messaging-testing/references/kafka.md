@@ -1,5 +1,22 @@
 # Messaging Testing — Apache Kafka (Java 21 / TestNG) — **canonical stack**
 
+**Contents:**
+
+- The Kafka model — a LOG, not a queue (read this first)
+- Stack
+- Local broker for tests — Kafka / Redpanda via Testcontainers
+- The test-side reader — KafkaProbe (the "drain" analogue)
+- Core pattern 1 — producer-assert (the SUT produced record X)
+- Core pattern 2 — consumer-assert (the SUT consumed → side-effect Y)
+- Offsets, consumer groups & commit semantics
+- Keys → partition routing & per-key ordering
+- App-level dead-letter topic (DLT) — a convention, not a broker feature
+- Receiving a batch / draining
+- Anti-patterns
+- Examples
+- Rules (hard constraints)
+- Cross-references
+
 This is the **canonical** stack of the `qa/java/skills/messaging-testing/` node, the **third `messaging-testing`
 sibling** (service-bus → SQS → **Kafka** → RabbitMQ). **Java leads here by judgment** (the same
 "lead where the tool is most authentic" call WireMock and Service Bus made): Kafka is **JVM-native**

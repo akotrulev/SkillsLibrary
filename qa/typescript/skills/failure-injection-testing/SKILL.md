@@ -202,70 +202,9 @@ describe('circuit breaker under sustained failure', () => {
 > `BrokenCircuitError` without reaching the proxy). That is the resilience contract; the `timeout` toxic is merely
 > the sustained failure that should provoke it.
 
-## Retry count — assert exactly the contracted attempts
+## More fault scenarios
 
-A `reset_peer` on the connection makes attempts fail; assert the app makes **exactly** the contracted number of
-tries (via a cockatiel `onRetry` counter, or by counting calls that reach the upstream), then succeeds/falls back —
-not infinite, not one.
-
-```ts
-it('retries exactly three times then falls back on connection resets', async () => {
-  const { chaos } = fixture;
-  const app = OrderService.connectedTo(chaos.host(), chaos.port());
-  await chaos.cutConnection();                          // every attempt's connection is reset
-
-  const result = await app.placeOrderWithRetry('sku-1');
-
-  expect(result.isFallback).toBe(true);
-  // The PATTERN: bounded retries, not a runaway loop — assert the configured attempt count.
-  expect(app.lastAttemptCount, 'maxAttempts honored').toBe(3);
-
-  await chaos.healed();
-});
-```
-
-## Partial / garbled response — `slicer` / `limit_data` (don't persist corruption)
-
-A response cut mid-stream must surface as an error the app handles — it must **not** be parsed and persisted as a
-valid (truncated) record. Inject `limit_data` (cut after N bytes) or `slicer` (fragment the stream), drive a read,
-and assert the app rejects the partial result and leaves state uncorrupted.
-
-```ts
-it('rejects and does not persist a truncated response', async () => {
-  const { chaos } = fixture;
-  await chaos.truncateAfter(64);                        // cut every response after 64 bytes
-  const app = CatalogService.connectedTo(chaos.host(), chaos.port());
-
-  const result = await app.loadCatalog();
-
-  expect(result.isError, 'partial response surfaces as an error').toBe(true);
-  expect(app.lastPersistedCatalog, 'no truncated record persisted').toBeNull();
-
-  await chaos.healed();
-});
-```
-
-## Probabilistic faults — `toxicity` for flappy dependencies
-
-A `toxicity` below 1.0 applies the toxic to only a *fraction* of connections — an intermittent, flappy dependency.
-Assert the app's retries smooth over the failing fraction so the user-visible outcome stays correct.
-
-```ts
-it('tolerates an intermittently resetting dependency', async () => {
-  const { chaos } = fixture;
-  await chaos.cutConnection(0, 0.3);                    // reset the connection only 30% of the time
-  const app = OrderService.connectedTo(chaos.host(), chaos.port());
-
-  const results = await new OrderTraffic(app).placeWithRetry('sku-1', 20);
-
-  expect(results.filter((r) => !r.isSuccess), 'retries absorb an intermittent fault').toEqual([]);
-
-  await chaos.healed();
-});
-```
-
-> Probabilistic faults are still **deterministic in intent** (a fixed toxicity), unlike real production chaos —
-> that determinism is what makes them a *test*. For true randomized cluster chaos, see the boundary note below.
+Retry count, a partial or garbled response, and probabilistic faults → read `references/scenarios.md`.
 
 ## The boundary — functional fault-injection vs production chaos engineering
 
@@ -286,17 +225,15 @@ chaos-engineering platforms.
 - **Injecting a toxic and never removing it.** You prove degradation but not **recovery**, and you leak the fault
   into the next test. *Fix:* run the full lifecycle — `healed()` (remove) then assert recovery; remove in teardown /
   `afterEach`.
-- **`setTimeout`/`browser`-style sleeps to wait for the breaker to open/close or the dependency to "settle".** Banned
-  by CLAUDE.md and flaky. *Fix:* **`vi.waitFor`** on the real state (breaker state, a successful call).
+- **Sleeps to wait for the breaker or the dependency to "settle".** *Fix:* **`vi.waitFor`** on the real state (breaker
+  state, a successful call).
 - **A `latency` so small it doesn't exceed the app's timeout** (or so large the suite hangs). *Fix:* inject a
   latency *deliberately past* the app's deadline; bound the test with the app's own timeout + `vi.waitFor`, never an
   open-ended wait.
 - **Faulting the wrong direction.** `downstream` faults dependency→app responses; `upstream` faults app→dependency
   requests. *Fix:* pick the `stream` that matches the failure you mean to simulate.
 - **One Toxiproxy/dependency per `it(...)`.** Slow and churns ports. *Fix:* stand them up once in `beforeAll` on a
-  shared `Network`; reset toxics (`healed()`) between tests, not the containers.
-- **Treating this as production chaos engineering.** *Fix:* deterministic toxic in a test ≠ GameDay on a live
-  cluster — see the boundary note; route prod-chaos requests to Gremlin/Litmus/Chaos Mesh.
+  shared `Network`; reset toxics (`healed()`) between tests, not the containers, and name each toxic so it can be removed.
 
 ## Examples
 
@@ -310,23 +247,3 @@ failing?*
 itself is exercised happy-path by `qa-typescript:db-testcontainers` / `qa-typescript:messaging-testing`. Chaos adds
 the proxy in front and asserts the resilience layer — it **composes** with those skills, it doesn't replace them. A
 data-driven fault matrix (toxic × parameter) binds cleanly via `qa-typescript:data-driven-testing` (`it.each`).
-
-## Rules (hard constraints)
-
-- **The assertion is the resilience PATTERN, never the dependency working or the fault itself.** Assert retry
-  count, circuit-breaker state transitions, an honored timeout (fails fast), or fallback content. "Assert the call
-  succeeded" is the wrong reflex here.
-- **The app under test connects to the PROXY**, not the real dependency — rewire its connection string / base URL /
-  bootstrap to `chaos.host():chaos.port()`. If the app bypasses the proxy, the test is inert.
-- **Every fault test runs the lifecycle** where recovery matters: steady → inject → assert degraded → `healed()`
-  (remove) → assert recovery. Always remove injected toxics (between tests / in teardown) so faults don't leak.
-- **No `setTimeout`/`browser.pause` sleeps.** Wait on real conditions with **`vi.waitFor`** — breaker state, a
-  successful probe call. A timeout/latency toxic is an *injected delay*, not a test wait.
-- **Pick the toxic + `stream` deliberately** to match the failure (latency/`bandwidth` for slow, `timeout`/`reset_peer`
-  for drop, `slicer`/`limit_data` for partial; `downstream` = responses, `upstream` = requests).
-- **One Toxiproxy + dependency per suite** on a shared `Network` in `beforeAll`; reset toxics between tests, not the
-  containers. Named toxics so they can be removed.
-- **This is functional fault-injection, not production chaos engineering** — deterministic toxic in CI; route
-  live-cluster chaos (Gremlin/Litmus/Chaos Mesh) elsewhere.
-- **Wrap all toxic wiring in `ChaosProxy`** with intent names — no raw `proxy.addToxic({...})` in `it(...)`.
-  Vitest + toxiproxy-node-client + Testcontainers + cockatiel.

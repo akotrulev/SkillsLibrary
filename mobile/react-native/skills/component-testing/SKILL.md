@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Owns **every dev-side test in an Expo app**, at two altitudes: **component tests** (it renders → RNTL) and **pure-logic tests** (it doesn't → plain Jest, no renderer). The split is mechanical — *does the unit need a renderer?* Web analog: [`fe-react:component-testing`](../../../../frontend/react/skills/component-testing/SKILL.md) — query-by-role-first, behaviour-over-implementation, logic-not-markup carry over; **jsdom, Vitest, `vi.*` and async Server Components do not exist here.**
 
-**Boundary.** Real devices, real navigation, real network and cross-screen journeys are `qa-mobile-typescript`'s — **Appium**, or its **Maestro** lane on Expo projects (plan 003). A component test fakes the native layer, so it can never prove a gesture, a permission dialog or a deep link on a device.
+**Boundary.** Real devices, real navigation, real network and cross-screen journeys are `qa-mobile-typescript`'s — **Appium**, or its **Maestro** lane on Expo projects. A component test fakes the native layer, so it can never prove a gesture, a permission dialog or a deep link on a device.
 
 ## Version lane
 

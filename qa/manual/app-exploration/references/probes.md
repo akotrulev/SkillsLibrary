@@ -1,20 +1,19 @@
 # Driving and probes — how the checks are run
 
+**Contents:**
+- 1. Driving a web app
+- 2. Web probes
+- 3. Recomputing numbers
+- 4. Driving a native app
+- 5. Native probes
+
 The tool calls and snippets behind `checks.md`. A probe returns **candidates**: read the result, look at the screenshot, and raise a finding only for what is really wrong.
 
 ## 1. Driving a web app
 
-**Primary: the Playwright MCP server**, registered by the user (an agent cannot set server flags on itself):
+**Primary: the Playwright MCP server**, registered by the user (an agent cannot set server flags on itself) with the command in `qa/<stack>/skills/page-objects-from-url/SKILL.md`, whose lane matches the project. Add `network` to its `--caps`: that adds `browser_route`, `browser_unroute` and `browser_network_state_set` for the failure-state probe in §2. The command's redaction flags are conveniences, not a security boundary: the safe-action floor and a disposable account are what protect the environment.
 
-```bash
-claude mcp add --scope user playwright -- npx @playwright/mcp@0.0.85 --caps=testing,storage,devtools,network --isolated --output-dir=.playwright-mcp --redact-url-params=code,state,access_token,id_token
-```
-
-- `network` adds `browser_route`, `browser_unroute` and `browser_network_state_set` for the failure-state probe in §2. Otherwise it is the line the `qa-ui-*` agents give, so one registration serves both.
-- `--redact-url-params` swaps the Auth0 `code` / `state` and the tokens a login redirect leaves in the URL for `<redacted>` in tool responses. It, `--secrets` and `--allowed-origins` are conveniences, not a security boundary (Playwright's own words): the safe-action floor and a disposable account are what protect the environment.
-- The version is pinned: the agent names its tools in `tools:`, so an upstream rename silently drops one. Bump it deliberately and re-check the names.
-
-**Fallback: `playwright-cli`** through `Bash` (`npm i -g @playwright/cli@latest`, or `npx playwright cli`), when the server is not connected or a long run would flood the context: it writes snapshots to `.playwright-cli/page-*.yml` and you read only what you need. Neither available: stop and give the user the command above.
+**Fallback: `playwright-cli`** through `Bash` (`npm i -g @playwright/cli@latest`, or `npx playwright cli`), when the server is not connected or a long run would flood the context: it writes snapshots to `.playwright-cli/page-*.yml` and you read only what you need. Neither available: stop and give the user the registration command named above.
 
 | Step | MCP tool (`mcp__playwright__…`) | `playwright-cli` |
 |---|---|---|

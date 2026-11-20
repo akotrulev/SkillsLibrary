@@ -1,5 +1,28 @@
 # fe-react Conformance Checklist — the 19 sections
 
+**Contents:**
+
+- A — Build health, version lane & migration hygiene
+- B — RSC & the 'use client' boundary  [App]
+- C — Routing & navigation
+- D — State ownership
+- E — Data access & realtime transport
+- F — Forms & validation
+- G — Component library & styling authority
+- H — Responsive & motion
+- I — Accessibility
+- J — Error resilience
+- K — Performance
+- L — SEO & discoverability  [App]
+- M — Testability (data-testid)
+- N — UI conventions
+- O — Component & pure-logic tests
+- P — Localization  (conditional)
+- Q — PWA / offline  (conditional)
+- R — Auth wiring  (conditional)
+- S — Project structure, TS strictness, secrets & comments
+- Section index — for the report's applicability matrix
+
 The audit's spine. Section letters and check numbers are **permanent** — a finding is `<letter><n>` (`B3`, `M1`) and keeps that ID across every round, forever. Never renumber; append new checks at the end of a section with the next free number.
 
 **How to read a row.** *Check* = the invariant. *Violation looks like* = what disqualifies it. *Find it with* = a mechanical lead (a grep hit is never a finding — read the code). *Sev* = the default severity; adjust for real impact and say why.

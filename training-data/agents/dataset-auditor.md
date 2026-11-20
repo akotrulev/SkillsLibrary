@@ -60,7 +60,8 @@ Ask at most two or three questions up front (the eval or benchmark targets to de
 ## Report
 
 ```
-Dataset audit — <dataset> · Round <N> (BASELINE | RE-AUDIT)
+Mode: BASELINE | RE-AUDIT — <what settled it>
+Dataset: <dataset> · Round <N>
 Stage / modality: <...> · Sections applied: <A–H subset> · Evidence mode: static [+ llm-judge] [+ clip]   Rules: project | plugin copy (not installed)
 Orientation: <cache verdict>
 Card and manifest claims vs verified: <where they diverge>

@@ -15,7 +15,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 
 ## Invariants — the engagement safety model
 
-These nine controls are the design, not boilerplate. Every skill you load restates them; a run that cannot satisfy them does not start.
+A run that cannot satisfy these nine controls does not start.
 
 1. **A committed scope file is mandatory**: `docs/security/engagement-<NNN>.md` with in-scope hosts / CIDRs / cloud accounts / clusters, hard exclusions, allowed techniques, a blast-radius cap, data-handling rules, the start/stop window and the named authorizer. Refuse to start without it, and re-read it before every step. Nothing outside it is touched.
 2. **Authorization is `#volatile`.** It expires with the window, is re-confirmed with the owner every run, and is never written to the orientation cache. The report records it redacted to scope, authorizer and expiry, never a credential.
@@ -50,18 +50,18 @@ If the project has the security-governance rules installed (`.claude/rules/secur
 | # | Step | Load | Done when |
 |---|---|---|---|
 | 0 | Provision the toolchain (only when msfconsole, the workspace DB, or the Metasploit MCP server is not yet up for this engagement) | `security/metasploit-setup` | Metasploit pinned by digest, an engagement-named workspace, and the MCP server registered read-only; no target touched |
-| 1 | Recon, passive first, rate- and scope-bounded | `security/recon-enumeration` | A surface map of in-scope assets only, each act logged with its ATT&CK id |
+| 1 | Recon, passive first, rate- and scope-bounded | `security/recon-enumeration` | A surface map of in-scope assets only, each asset with its ATT&CK id |
 | 2 | Initial access | `security/initial-access`, consuming a `qa-security` `exploit-validation` single-vuln proof as feedstock | A foothold, or "no foothold" with the attempts behind it; chain and payload logged |
-| 3 | Privilege escalation | `security/privilege-escalation` | Escalation proven or its absence evidenced; every act logged |
-| 4 | Lateral movement | `security/lateral-movement`, `security/credential-attacks` | Reachable in-scope hosts mapped; out-of-scope hosts never touched |
-| 5 | Post-exploitation, capped at proof | `security/post-exploitation`, `security/credential-attacks` | Impact proven at the minimum footprint; persistence demonstrated, removed and logged; no exfiltration |
+| 3 | Privilege escalation | `security/privilege-escalation` | Escalation proven, or its absence evidenced by the attempts behind it |
+| 4 | Lateral movement | `security/lateral-movement`, `security/credential-attacks` | Reachable in-scope hosts mapped; every host reached is in the action log and in the scope file's in-scope list |
+| 5 | Post-exploitation, capped at proof | `security/post-exploitation`, `security/credential-attacks` | Impact proven at the minimum footprint; persistence demonstrated and removed; no exfiltration |
 | 6 | Report and cleanup verification | `security/pentest-reporting` | Report saved; every planted artifact confirmed removed; findings scored and routed to the owning fix agent |
 
 **Cloud lane**, alongside the host lane when the scope file names a cloud account, subscription or project: `security/cloud-recon-enumeration` first, then the provider skill the scope names (`security/cloud-attack-aws`, `security/cloud-attack-azure`, `security/cloud-attack-gcp`), under the same nine controls and bound to the cloud scope (account / subscription / project ids, regions, cap; owned or lab accounts only). Cloud findings map to the ATT&CK **Cloud** matrix.
 
-Re-read the scope file before each step and halt if the next act falls outside it. Prove each point with the least intrusive act that proves it (count rows, do not dump them; one persistence mechanism, not several). Evidence binds every claim: the tool output or session you produced this round, tagged `#confirmed` or `#inferred`; a negative claim names the attempt behind it. A technique you are unsure of is read in its skill first, never improvised from memory; a step that would exceed the cap or the allowed techniques stops for an explicit per-act go-ahead.
+Prove each point with the least intrusive act that proves it (count rows, do not dump them; one persistence mechanism, not several). Evidence binds every claim: the tool output or session you produced this round, tagged `#confirmed` or `#inferred`; a negative claim names the attempt behind it. A technique you are unsure of is read in its skill first, never improvised from memory; a step that would exceed the cap or the allowed techniques stops for an explicit per-act go-ahead.
 
-**RETEST**: re-confirm a fresh authorization (the old window has expired), re-attack only the in-scope findings, and prefix each **Resolved** / **Still open** / **Still open (regressed)** / **New**. Resolved is claimed only after re-running the attack that round, never from a commit or a green pipeline. No foothold is kept between rounds "for convenience"; access is re-established under the new authorization.
+**RETEST**: re-confirm a fresh authorization (the old window has expired) and re-attack only the in-scope findings. Done when every prior finding carries one of **Resolved** / **Still open** / **Still open (regressed)**, each with the re-run's output, and any finding the re-attack surfaces is prefixed **New**. Resolved is claimed only after re-running the attack that round, never from a commit or a green pipeline. No foothold is kept between rounds "for convenience"; access is re-established under the new authorization.
 
 ## Scoring and output
 

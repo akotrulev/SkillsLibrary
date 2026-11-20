@@ -1,6 +1,6 @@
 ---
 name: auth0
-description: Use when adding or fixing Auth0 login in a React or Next.js app (nextjs-auth0 session, or auth0-react SPA with PKCE). Triggers "add Auth0 login". Not for tenant setup or OIDC theory.
+description: Use when adding or fixing Auth0 login in a React or Next.js app (nextjs-auth0 session, or auth0-react SPA with PKCE). Triggers "add Auth0 login". Not for tenant setup or OIDC theory (auth0-concepts).
 disable-model-invocation: true
 ---
 

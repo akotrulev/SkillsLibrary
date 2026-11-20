@@ -12,7 +12,7 @@
   "plugins": [
     {
       "name": "dev",
-      "description": "The developer-workflow layer every other plugin depends on: the feature front door that interviews you in rounds and then writes the spec (/dev:feature), implementation plans (/dev:plan-feature), systematic debugging, verify-before-done, spec-vs-code and feature audits, and the whole-application planning lane — solution blueprint, data-model, experience, API-surface and integration plans, epic map, delivery plan and session budget (/dev:plan-system). Ships the requirements-author front door (/dev:refine), the be-documenter and be-feature-documenter agents that reverse-engineer guides from existing code — the user's tasks for every role (administrators included), the analyst's rules and calculations, the product owner's summary, open questions with answers and a delivery note per plan, with screenshots when an environment is given (/dev:document-system, /dev:document-feature), and the read-only code-auditor engagement agent (/dev:audit) that saves versioned findings to docs/audits/. Also ships the working-discipline skills quality-constraints (the rules checked during the work), source-grounding (framework and version decisions cited to the version's official doc), writing-for-agents (the house standard for anything an agent reads: skills, agents, rule files, CLAUDE.md), domain-modeling (the project glossary and ADRs the interview writes while it runs) and notebooklm (source-grounded answers from the user's own NotebookLM notebooks). Installed automatically as a dependency of every qa-*, fe-*, mobile-*, be-* plugin, devops and business-analysis; install it on its own for planning, documentation and audits without a stack plugin.",
+      "description": "The developer-workflow layer every other plugin depends on: the feature front door that interviews you in rounds and then writes the spec (/dev:feature), implementation plans (/dev:plan-feature), systematic debugging, verify-before-done, spec-vs-code and feature audits, and the whole-application planning lane — solution blueprint, data-model, experience, API-surface and integration plans, epic map, delivery plan and session budget (/dev:plan-system). Ships the requirements-author front door (/dev:refine) with the skills it runs (scoping, epics, stories, story-review, knowledge-base), the be-documenter and be-feature-documenter agents that reverse-engineer guides from existing code — the user's tasks for every role (administrators included), the analyst's rules and calculations, the product owner's summary, open questions with answers and a delivery note per plan, with screenshots when an environment is given (/dev:document-system, /dev:document-feature), and the read-only code-auditor engagement agent (/dev:audit) that saves versioned findings to docs/audits/. Also ships the working-discipline skills quality-constraints (the rules checked during the work), source-grounding (framework and version decisions cited to the version's official doc), writing-for-agents (the house standard for anything an agent reads: skills, agents, rule files, CLAUDE.md), domain-modeling (the project glossary and ADRs the interview writes while it runs) and notebooklm (source-grounded answers from the user's own NotebookLM notebooks). Installed automatically as a dependency of every qa-*, fe-*, mobile-*, be-* plugin, devops and business-analysis; install it on its own for planning, documentation and audits without a stack plugin.",
       "source": "./",
       "strict": false,
       "author": {
@@ -29,6 +29,11 @@
       ],
       "category": "development",
       "skills": [
+        "./business-analysis/skills/ba-scoping-writeup",
+        "./business-analysis/skills/ba-epic-writer",
+        "./business-analysis/skills/ba-story-writer",
+        "./business-analysis/skills/ba-story-quality-review",
+        "./business-analysis/skills/ba-project-memory",
         "./engineering-practices/brainstorming",
         "./engineering-practices/writing-plans",
         "./engineering-practices/systematic-debugging",
@@ -679,7 +684,7 @@
     },
     {
       "name": "business-analysis",
-      "description": "Senior business-analysis plugin for the REASONING lane: it checks features against the WHOLE project. It keeps a persistent per-project business-model knowledge base (docs/business-model/ — read-first / update-after, stable IDs, source traceability), maps flows in BPMN-disciplined Mermaid, builds one state × event lifecycle grid per business entity with all features overlaid, merges DMN-style decision tables with declared hit policies and mechanical completeness/overlap checks, keeps a dependency map (triggers, reactions, shared data, invariants), and runs the taxonomy-driven feature-conflict sweep (11 conflict classes, mandatory boundary conditions, severity-tabled findings, resolutions recorded as business decisions). Also ships the story-writing and story-quality skills and the step-by-step business-analyst orchestrator agent (analyze / extend / fix / model / audit modes). Sits upstream of QA test design — its artifacts and boundary conditions are first-class test-basis inputs. The authoring lane (requirements-author: refine → requirements → epics → stories, /dev:refine) and the reverse-documentation agents (/dev:document-system, /dev:document-feature) arrive through the `dev` plugin this one depends on.",
+      "description": "Senior business-analysis plugin for the REASONING lane: it checks features against the WHOLE project. It keeps a persistent per-project business-model knowledge base (docs/business-model/ — read-first / update-after, stable IDs, source traceability), maps flows in BPMN-disciplined Mermaid, builds one state × event lifecycle grid per business entity with all features overlaid, merges DMN-style decision tables with declared hit policies and mechanical completeness/overlap checks, keeps a dependency map (triggers, reactions, shared data, invariants), and runs the taxonomy-driven feature-conflict sweep (11 conflict classes, mandatory boundary conditions, severity-tabled findings, resolutions recorded as business decisions). Also ships the step-by-step business-analyst orchestrator agent (analyze / extend / fix / model / audit modes). Sits upstream of QA test design — its artifacts and boundary conditions are first-class test-basis inputs. The authoring lane (requirements-author: refine → requirements → epics → stories, /dev:refine) with its scoping, epics, stories, story-review and knowledge-base skills, and the reverse-documentation agents (/dev:document-system, /dev:document-feature) arrive through the `dev` plugin this one depends on.",
       "source": "./",
       "strict": false,
       "author": {
@@ -699,11 +704,6 @@
         "dev"
       ],
       "skills": [
-        "./business-analysis/skills/ba-scoping-writeup",
-        "./business-analysis/skills/ba-epic-writer",
-        "./business-analysis/skills/ba-story-writer",
-        "./business-analysis/skills/ba-story-quality-review",
-        "./business-analysis/skills/ba-project-memory",
         "./business-analysis/skills/ba-process-flow-diagram",
         "./business-analysis/skills/ba-entity-state-grid",
         "./business-analysis/skills/ba-decision-table",

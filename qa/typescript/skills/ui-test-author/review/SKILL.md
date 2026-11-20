@@ -12,7 +12,7 @@ WebdriverIO, Maestro flows) against the qa-typescript rule files. Produces a fin
 
 The Playwright know-how behind those rules is `qa/typescript/skills/ui-test-author/playwright`:
 locators in `references/locators.md`, assertions in `references/assertions.md`, the config in
-`references/config-and-fixtures.md`.
+`references/config-and-fixtures.md` (all in `ui-test-author/playwright`).
 
 ## Inputs needed
 

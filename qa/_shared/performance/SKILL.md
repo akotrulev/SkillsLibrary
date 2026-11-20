@@ -182,7 +182,7 @@ Review checklist for an authored perf suite (any tool). Report findings in the l
 
 A clean review = no blocker or major rows after fixes, plus a per-scenario PASS/FAIL table against the step-1 thresholds.
 
-## When NOT to use any of these tools
+## Work that belongs to other skills
 
 - Functional behavior tests → `qa/<stack>/skills/api-test-author/writer` / `qa/<stack>/skills/ui-test-author/<tool>`
 - Unit / microbenchmarks (loop bodies, parsing speed) → BenchmarkDotNet via `qa-dotnet:benchmarks` (`qa/dotnet/skills/benchmarks`) / JMH (Java) / Vitest bench (TS)

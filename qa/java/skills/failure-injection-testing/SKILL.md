@@ -86,7 +86,7 @@ dependencies {
 
 ## Deep-dive reference
 
-These sections live in `references/details.md` — **read it when the task touches them**: **The mechanism — proxy BETWEEN app and dependency (idea #2)**; **The toxic fixture — `support/chaos/ChaosProxy.java`**.
+These sections live in `references/details.md` — **read it when the task touches them**: **The mechanism — proxy BETWEEN app and dependency (idea #2)**; **The toxic fixture — `support/chaos/ChaosProxy.java`**; **Partial / garbled response — `slicer` / `limitData`**; **Probabilistic faults — `toxicity`**.
 
 ## Inject-a-fault, assert-degradation (idea #1)
 
@@ -108,13 +108,12 @@ public class SlowDependencyTest extends BaseChaosTest {
 
     @Test
     public void shouldFailFastWhenTheDatabaseIsSlowerThanTheTimeout() throws Exception {
-        // App is configured with a 2s query timeout; inject 5s latency so the dependency overruns it.
         chaos.injectLatency(5_000, 0);
 
-        OrderService app = OrderService.connectedTo(chaos.host(), chaos.port());  // app talks to the PROXY
+        OrderService app = OrderService.connectedTo(chaos.host(), chaos.port());
 
         Instant start = Instant.now();
-        OrderResult result = app.placeOrder("sku-1");          // must NOT hang for 5s
+        OrderResult result = app.placeOrder("sku-1");
         Duration elapsed = Duration.between(start, Instant.now());
 
         assertThat(result.isFallback()).as("degrades to fallback under latency").isTrue();
@@ -122,9 +121,6 @@ public class SlowDependencyTest extends BaseChaosTest {
     }
 }
 ```
-
-> The assertion is on the **timeout being honored + a fallback served** — the resilience pattern — not on the 5s
-> delay. A test that asserts "the call took 5s" is asserting the *fault*, which proves nothing about the app.
 
 ## The full lifecycle — steady → inject → degraded → remove → recovered (idea #3)
 
@@ -148,9 +144,6 @@ public void shouldDegradeUnderConnectionDropThenRecoverWhenHealed() throws Excep
         .untilAsserted(() -> assertThat(app.placeOrder("sku-1").isSuccess()).isTrue());
 }
 ```
-
-> The recovery step uses **Awaitility** (a bounded condition-poll), *not* `Thread.sleep` — the recovery window (e.g.
-> resilience4j's `waitDurationInOpenState`) is a real condition to await, not a guessed delay.
 
 ## Assert the resilience PATTERN — circuit breaker via resilience4j (idea #4)
 
@@ -185,7 +178,7 @@ public class CircuitBreakerChaosTest extends BaseChaosTest {
         chaos.healed();
         Awaitility.await().atMost(Duration.ofSeconds(15))
             .untilAsserted(() -> {
-                app.placeOrderSafely("sku-1");                 // a probe call in HALF_OPEN
+                app.placeOrderSafely("sku-1");
                 assertThat(breaker.getState()).isEqualTo(CircuitBreaker.State.CLOSED);
             });
     }
@@ -214,10 +207,6 @@ public final class OrderLoad {
 }
 ```
 
-> Assert the **state transition** (CLOSED → OPEN → CLOSED) and the **short-circuit** (a call in OPEN throws
-> `CallNotPermittedException` without reaching the proxy). That is the resilience contract; the `timeout` toxic is
-> merely the sustained failure that should provoke it.
-
 ## Retry count — assert exactly the contracted attempts
 
 A `reset_peer` on the connection makes attempts fail; assert the app makes **exactly** the contracted number of
@@ -228,55 +217,15 @@ back — not infinite, not one.
 @Test
 public void shouldRetryExactlyThreeTimesThenFallBackOnConnectionResets() throws Exception {
     OrderService app = OrderService.connectedTo(chaos.host(), chaos.port());
-    chaos.cutConnection(0);                                   // every attempt's connection is reset
+    chaos.cutConnection(0);
 
     OrderResult result = app.placeOrderWithRetry("sku-1");
 
     assertThat(result.isFallback()).isTrue();
-    // The PATTERN: bounded retries, not a runaway loop — assert the configured attempt count.
     assertThat(app.retryMetrics().getNumberOfFailedCallsWithRetryAttempt()).isEqualTo(1);
     assertThat(app.lastAttemptCount()).as("maxAttempts honored").isEqualTo(3);
 }
 ```
-
-## Partial / garbled response — `slicer` / `limitData` (don't persist corruption)
-
-A response cut mid-stream must surface as an error the app handles — it must **not** be parsed and persisted as a
-valid (truncated) record. Inject `limitData` (cut after N bytes) or `slicer` (fragment the stream), drive a read,
-and assert the app rejects the partial result and leaves state uncorrupted.
-
-```java
-@Test
-public void shouldRejectAndNotPersistATruncatedResponse() throws Exception {
-    chaos.truncateAfter(64);                                  // cut every response after 64 bytes
-    CatalogService app = CatalogService.connectedTo(chaos.host(), chaos.port());
-
-    CatalogResult result = app.loadCatalog();
-
-    assertThat(result.isError()).as("partial response surfaces as an error").isTrue();
-    assertThat(app.lastPersistedCatalog()).as("no truncated record persisted").isNull();
-}
-```
-
-## Probabilistic faults — `toxicity` for flappy dependencies
-
-A `toxicity` below 1.0 applies the toxic to only a *fraction* of connections — an intermittent, flappy dependency.
-Assert the app's retries smooth over the failing fraction so the user-visible outcome stays correct.
-
-```java
-@Test
-public void shouldTolerateAnIntermittentlyResettingDependency() throws Exception {
-    chaos.withToxicity(chaos.cutConnection(0), 0.3f);
-    OrderService app = OrderService.connectedTo(chaos.host(), chaos.port());
-
-    List<OrderResult> results = new OrderLoad(app, "sku-1").placeWithRetry(20);
-
-    assertThat(results).as("retries absorb a 30% connection-reset rate").hasSize(20).allMatch(OrderResult::isSuccess);
-}
-```
-
-> Probabilistic faults are still **deterministic in intent** (a fixed toxicity), unlike real production chaos —
-> that determinism is what makes them a *test*. For true randomized cluster chaos, see the boundary note below.
 
 ## The boundary — functional fault-injection vs production chaos engineering
 
@@ -306,38 +255,14 @@ chaos-engineering platforms.
   requests. *Fix:* pick the `ToxicDirection` that matches the failure you mean to simulate.
 - **One Toxiproxy/dependency per `@Test` method.** Slow and churns ports. *Fix:* stand them up once in
   `@BeforeClass` on a shared `Network`; reset toxics (`healed()`) between tests, not the containers.
+- **Raw `proxy.toxics().timeout(...)` in a `@Test`.** *Fix:* wrap all toxic wiring in `ChaosProxy` with intent names, and name each toxic so it can be removed.
 - **Treating this as production chaos engineering.** *Fix:* deterministic toxic in a test ≠ GameDay on a live
   cluster — see the boundary note; route prod-chaos requests to Gremlin/Litmus/Chaos Mesh.
 
 ## Examples
-
-**End-to-end: the inverted assertion.** A REST author writes `assertThat(response.statusCode()).isEqualTo(200)`. A
-chaos author writes: inject `timeout`, then `assertThat(result.isFallback()).isTrue()` **and**
-`assertThat(breaker.getState()).isEqualTo(OPEN)`. Same dependency, opposite question — *does the app survive it
-failing?*
 
 **Composing with the dependency families.** The thing you fault is stood up by Testcontainers
 (`ToxiproxyContainer` next to a `PostgreSQLContainer` / `KafkaContainer` on a shared `Network`); the dependency
 itself is exercised happy-path by `qa-java:db-testcontainers` / `qa-java:messaging-testing`. Chaos adds the proxy in
 front and asserts the resilience layer — it **composes** with those skills, it doesn't replace them. A
 data-driven fault matrix (toxic × parameter) binds cleanly via `qa-java:data-driven-testing`.
-
-## Rules (hard constraints)
-
-- **The assertion is the resilience PATTERN, never the dependency working or the fault itself.** Assert retry
-  count, circuit-breaker state transitions, an honored timeout (fails fast), or fallback content. "Assert the call
-  succeeded" is the wrong reflex here.
-- **The app under test connects to the PROXY**, not the real dependency — rewire its connection string / base URL /
-  bootstrap server to `chaos.host():chaos.port()`. If the app bypasses the proxy, the test is inert.
-- **Every fault test runs the lifecycle** where recovery matters: steady → inject → assert degraded → `healed()`
-  (remove) → assert recovery. Always remove injected toxics (between tests / in teardown) so faults don't leak.
-- **No `Thread.sleep`.** Wait on real conditions with **Awaitility** (`await().atMost(...).untilAsserted(...)`) —
-  breaker state, a successful probe call. A timeout/latency toxic is an *injected delay*, not a test wait.
-- **Pick the toxic + `ToxicDirection` deliberately** to match the failure (latency/`bandwidth` for slow,
-  `timeout`/`reset_peer` for drop, `slicer`/`limitData` for partial; DOWNSTREAM = responses, UPSTREAM = requests).
-- **One Toxiproxy + dependency per suite** on a shared `Network` in `@BeforeClass`; reset toxics between tests, not
-  the containers. Named toxics so they can be removed.
-- **This is functional fault-injection, not production chaos engineering** — deterministic toxic in CI; route
-  live-cluster chaos (Gremlin/Litmus/Chaos Mesh) elsewhere.
-- **Wrap all toxic wiring in `ChaosProxy`** with intent names — no raw `proxy.toxics().timeout(...)` in `@Test`.
-  TestNG + toxiproxy-java + Testcontainers + AssertJ + Awaitility.

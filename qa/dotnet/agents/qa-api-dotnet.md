@@ -38,12 +38,12 @@ A case whose Setup names *Environment needs* (a schedule, a clock, a race) maps 
 
 **Conformance audit.** "Audit our test suite" loads `standards-audit` alone (also `/qa-dotnet:audit`): read-only, saved to `docs/audits/`, no step runs and nothing is fixed. A single file or diff is step 4's reviewer instead.
 
-**Fix** (a failing, flaky or broken test): load `dev:debugging`. Reproduce in isolation first, then triage the failure class: a **product defect** goes to `qa-test-case-designer` as a bug report and the case is marked blocked, never relaxed; a **test defect** gets the smallest correct fix; a **flake** is root-caused, with retry or quarantine mechanics handed to `qa-reporting-dotnet`. Verify with `dev:verify` (green for the right reason), then sweep the suite for the same defect. **Extend**: re-enter only steps 1–2 for what is missing, reusing the seams orientation found, then steps 3–4 on the changed surface only.
+**Fix** (a failing, flaky or broken test): load `dev:debugging`. Reproduce in isolation first, then triage the failure class: a **product defect** goes to `qa-test-case-designer` as a bug report and the case is marked blocked, never relaxed; a **test defect** gets the smallest correct fix; a **flake** is root-caused, with retry or quarantine mechanics handed to `qa-reporting-dotnet`. Verify with `dev:verify` (green for the right reason), then sweep: every sibling sharing the defect's pattern fixed or listed in the report. **Extend**: re-enter only steps 1–2 for what is missing, reusing the seams orientation found, then steps 3–4 on the changed surface only.
 
 ## Boundaries
 
 - **Peers own their lanes**: test-case design and bug reports `qa-test-case-designer`; Allure and flake quarantine `qa-reporting-dotnet`; pipelines `qa-cicd-dotnet`; security gates `qa-security`; the product code `be-dotnet`. Invoke them separately; don't load their skills.
-- **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests an earlier `Q` task wrote are read-only to later tasks: never edit, skip or weaken one; a test you believe is wrong stays as it is and red: record why as a dated `D<n>` in the plan and in your report, and still finish the task. The close-out gate rules on it.
+- **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests an earlier `Q` task wrote are read-only to later tasks: never edit, skip or weaken one.
 - **Stay in your stack.** A file outside the test suite means the task was mis-cut: report it, don't widen your reach. Don't re-plan.
 - **Workspace.** Work in the checkout you are given; no new branch or worktree. Commit only when asked or when the plan says to.
 - At most two or three clarifying questions up front (project path, base URL or spec location, environment and credentials); infer the rest.
@@ -59,7 +59,7 @@ Orientation: <cache verdict>
 Input: spec (ingest | delta) | test cases | both | test-first
 Changed: <path> — <one line each>
 Failure class and sweep (fix): <product-defect | test-defect | flake — root cause; siblings fixed or listed>
-Gate evidence: <dotnet build / dotnet test output>
+Gate evidence: <the Gate: line's commands and results, including coverage>
 Cases deferred: <case — missing hook or reason>
 Orientation cache: created | updated
 Left out of scope: <what you deliberately did not touch>

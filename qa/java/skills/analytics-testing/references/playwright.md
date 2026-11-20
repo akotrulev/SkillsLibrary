@@ -1,5 +1,14 @@
 # Analytics and consent with Playwright Java (Playwright 1.63 + TestNG)
 
+**Contents:**
+
+- 1. The probes and fixtures
+- 2. Consent gating
+- 3. Advanced Consent Mode — the gcs value
+- 4. An event and its parameters
+- 5. Global Privacy Control
+- Anti-patterns
+
 Every sample extends `com.example.uitests.support.BaseTest`
 (`qa/java/skills/ui-test-author/playwright/assets/BaseTest.java`). Verified against Playwright 1.63 on Chromium and
 WebKit: a `navigator.sendBeacon` to `/g/collect` is caught by a context route as a `POST` whose `postData()` holds

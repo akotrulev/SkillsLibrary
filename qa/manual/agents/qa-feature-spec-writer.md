@@ -32,14 +32,18 @@ Paths resolve against `${CLAUDE_PLUGIN_ROOT}/` in an installed plugin (the plugi
 
 ## Steps
 
-| # | Step | Follows | Adds | Done when |
-|---|---|---|---|---|
-| 0 | Orient | `engineering-practices/agent-orientation-cache` against `docs/agent-context/qa-feature-spec-writer.md` | The seam inventory on a FULL verdict | Verdict in one line; seams listed |
-| 1 | Locate & scope | `be-feature-documenter.md` **Steps** table, step 1 (proportional gate and the Step 1 scope table) | Takes the `NNN` | Scope table shown |
-| 2 | Trace, once | `dev:doc-feature-trace`, profile `full`, all ten stops, ten inventories (Tasks first) | Profile `full`, not `be-feature-documenter`'s `guide`: step 4's §8 reads Edges columns `guide` drops (Reads, Writes, Also written by, Mode). The record feeds steps 3 and 4 | Every scoped entry point traced, each in a task, automatic work, a no-screen task or parked |
-| 3 | Write the feature guide | `be-feature-documenter.md` steps 3–4, **Document contract — `docs/features/<NNN>-<feature-slug>.md`** and **Step 5 checklist** | — | The guide written, its screenshots captured or `**Screenshots:** pending — <why>`; checklist passes |
-| 4 | Write the suite | `qa-test-case-designer.md` **Steps**, steps 1–5, with the **Step 1 detail** to **Step 5 detail** paragraphs. Step 1 takes the document and the trace record as its basis | The e2e rule in steps 3–5 | Suite and basis written; depth gate and e2e gate pass |
-| 5 | Report | — | Marks the `INVENTORY.md` row `documented + suite` when the file exists | The report below |
+| # | Step | Load | Done when |
+|---|---|---|---|
+| 0 | Orient; on a FULL verdict, take the seam inventory | `engineering-practices/agent-orientation-cache` against `docs/agent-context/qa-feature-spec-writer.md` | Verdict in one line; seams listed |
+| 1 | Locate and scope; take the `NNN` | `be-feature-documenter.md` **Steps** table, step 1 (proportional gate and the Step 1 scope table) | Scope table shown |
+| 2 | Trace, once | `dev:doc-feature-trace`, profile `full`, all ten stops, ten inventories (Tasks first) | Every scoped entry point traced, each in a task, automatic work, a no-screen task or parked |
+| 3 | Write the feature guide | `be-feature-documenter.md` steps 3–4, **Document contract — `docs/features/<NNN>-<feature-slug>.md`** and **Step 5 checklist** | The guide written, its screenshots captured or `**Screenshots:** pending — <why>`; checklist passes |
+| 4 | Write the suite | `qa-test-case-designer.md` **Steps**, steps 1–5, with the **Step 1 detail** to **Step 5 detail** paragraphs | Suite and basis written; depth gate and e2e gate pass |
+| 5 | Report | none | The report below; the `INVENTORY.md` row marked `documented + suite` when the file exists |
+
+**Step 2 detail.** Profile `full`, not `be-feature-documenter`'s `guide`: step 4's §8 reads Edges columns `guide` drops (Reads, Writes, Also written by, Mode). The record feeds steps 3 and 4.
+
+**Step 4 detail.** Step 1 of the designer takes the guide and the trace record as its basis. The e2e rule applies in its steps 3–5.
 
 ## The e2e rule
 
@@ -100,6 +104,7 @@ Added to the rows of the depth gate in `qa-test-case-designer.md` **Step 5 detai
 ## Report
 
 ```
+Mode: BUILD | FIX | EXTEND — <one line>
 Orientation: <verdict> · seams: <n> hooks (<n> unconfirmed in the environment)
 Feature: <name> — <n> entry points traced
 Written: docs/features/<NNN>-<slug>.md (+ <n> screenshots, or pending — what is needed) · docs/test-cases/<NNN>-<slug>-basis.md · docs/test-cases/<NNN>-<slug>.md

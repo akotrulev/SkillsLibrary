@@ -100,84 +100,32 @@ Full recipes: `references/pacu.md` (Pacu + enumerate-iam), `references/cloudfox.
 **This is the spine of AWS offense.** The canonical corpus is **Rhino Security Labs' 21 IAM
 privilege-escalation methods** (secondary sources inflate the count to 41 — Rhino's own is **21**),
 automated by **Pacu `iam__privesc_scan`** and modeled graph-wise by **PMapper**. Each is a *configuration
-weakness, not a CVE*: `permission(s) held → action → more powerful principal`. The four families:
-
-| Family | Representative permissions | Escalation |
-|---|---|---|
-| **A. Direct policy/permission grant to self** | `iam:CreatePolicyVersion`, `iam:SetDefaultPolicyVersion`, `iam:Attach{User,Group,Role}Policy`, `iam:Put{User,Group,Role}Policy`, `iam:AddUserToGroup` | Grant yourself (or a group/role you reach) `Action:*`/`Resource:*` — e.g. `CreatePolicyVersion --set-as-default` bypasses needing attach rights; `SetDefaultPolicyVersion` rolls back to an older, more permissive version. |
-| **B. New credential / identity** | `iam:CreateAccessKey` (on another user), `iam:CreateLoginProfile`, `iam:UpdateLoginProfile`, `iam:CreateUser`+policy | Mint a second access key for a higher-priv user, set/reset a console password, or create a fresh admin user (privesc + persistence). `T1098.001`. |
-| **C. Trust-policy / assume-role abuse** | `iam:UpdateAssumeRolePolicy` (+ `sts:AssumeRole`), `sts:AssumeRole` chains | Rewrite a privileged role's trust policy to trust your principal, then assume it; or follow existing A→B→C trust edges to a more-privileged role (PMapper reachability; CloudFox `cape` surfaces cross-account hops). |
-| **D. `iam:PassRole` + a service that runs code** | `PassRole` + `ec2:RunInstances` / `lambda:CreateFunction`+`InvokeFunction` (or `CreateEventSourceMapping`) / Glue `CreateDevEndpoint` / `cloudformation:CreateStack` / `datapipeline:CreatePipeline` / `sagemaker:CreateNotebookInstance` | Hand a more-privileged role to a service that runs your code as it, then read the role's STS creds (from the metadata service, the function's own call, or the resource). The largest family. |
-
-Teach each as a **permission → consequence** pair, and always pair it with its detection footprint
-(Step 4). In a lab, run `iam__privesc_scan` to enumerate the held set against the 21 paths, read the
-**finding**, then exploit a single path by hand to understand the CloudTrail trail it leaves — never
-blind-fire the scan's auto-exploit against anything you have not scoped. Full method table with exact
-permissions: `references/pmapper.md` (the reachability edges) and `references/pacu.md`
-(`iam__privesc_scan` + `iam__enum_action_query`).
+weakness, not a CVE*: `permission(s) held → action → more powerful principal`, in four families — direct
+policy/permission grant to self, new credential/identity, trust-policy/assume-role abuse, and
+`iam:PassRole` + a service that runs code (the largest family). Teach each as a **permission →
+consequence** pair, paired with its detection footprint. In a lab, run `iam__privesc_scan` to enumerate
+the held set against the 21 paths, read the **finding**, then exploit a single path by hand to understand
+the CloudTrail trail it leaves — never blind-fire the scan's auto-exploit against anything you have not
+scoped. Full method table with exact permissions: `references/pmapper.md` (the reachability edges) and
+`references/pacu.md` (`iam__privesc_scan` + `iam__enum_action_query`).
 
 ## Step 3 — service exploitation
 
-- **EC2 — credential theft via IMDS (`T1552.005`), the highest-value path.**
-  `http://169.254.169.254/latest/meta-data/iam/security-credentials/<role>` returns the instance profile's
-  temporary STS creds; the classic chain is an **SSRF in an app on the instance** reaching IMDS from
-  inside. **IMDSv1** is a bare unauthenticated `GET` — any SSRF that forces a GET harvests the keys.
-  **IMDSv2** requires a session: `PUT /latest/api/token` (with `X-aws-ec2-metadata-token-ttl-seconds`)
-  returns a token that every subsequent `GET` must carry, and a **hop limit** (default 1) stops the token
-  leaving the instance — which defeats most SSRF, except a container adds a hop, so reaching IMDS from a
-  container needs hop limit 2, re-widening the path. **Detect, don't assume, the posture:** IMDSv2 has been
-  the EC2-console default since Nov 2023, but plenty of brownfield instances still run v1-optional
-  (**dual-accept**), and v1 is a **live risk** — F5 Labs reported an active SSRF→IMDSv1 credential-theft
-  campaign in March 2025. Also read **user-data** (`GET /latest/user-data` or `ec2:DescribeInstanceAttribute
-  --attribute userData`), which often carries bootstrap secrets. Report as blast-radius: "instance-profile
-  creds for role X recovered; role X grants <scope>" — never the key material.
-- **EC2/EBS snapshot theft (`T1578.001`/`.002`, `T1537`).** `CreateSnapshot` of a volume →
-  `ModifySnapshotAttribute createVolumePermission=all` (or share to a specific account) → restore a volume
-  elsewhere and read its filesystem for credentials/keys. Same pattern for AMIs. Read-only exfil of your
-  own lab volumes; no DoS.
-- **S3 — data exposure & exfil (`T1619`, `T1530`).** Anonymous `ListBucket`/`GetObject` from a public ACL
-  or bucket policy; `s3:GetBucketPolicy`/`GetBucketAcl` to read the grant; `s3:PutBucketPolicy`/`PutBucketAcl`
-  to grant yourself or `*` access; object discovery across discovered buckets then `GetObject` on interesting
-  keys (`.env`, tfstate, DB dumps). Full tool and read/write/privesc reachability reporting:
-  `references/s3-attacks.md`.
-- **RDS — snapshot & access testing (`T1537`).** `rds:CreateDBSnapshot` → `rds:ModifyDBSnapshotAttribute`
-  (or `ModifyDBClusterSnapshotAttribute`) adding another account or `all` to `restore` → restore under
-  attacker control, outside the victim's monitoring boundary. `rds:ModifyDBInstance --publicly-accessible`
-  + an open SG exposes the DB to the internet. Test recovered/guessed DB creds against a reachable instance
-  — **no brute-force that risks lockout or DoS, no load testing.**
-- **Lambda / Secrets Manager / SSM.** `lambda:GetFunction` + env vars often hold secrets;
-  `lambda:UpdateFunctionCode` injects exfil of the exec role's creds (privesc family D). `secretsmanager:
-  GetSecretValue` and `ssm:GetParameter(s) --with-decryption` frequently unlock DB creds/API keys → pivot.
-  `ssm:SendCommand`/`StartSession` against a managed instance is **RCE on EC2 without SSH/SG ingress** (as
-  the instance's SSM role) — a potent lateral primitive. Report every recovered secret as blast-radius,
-  never its value.
+The highest-value path is **EC2 credential theft via IMDS** (`T1552.005`): an SSRF reaching
+`169.254.169.254` for the instance profile's STS creds — IMDSv1 is a bare unauthenticated `GET`, IMDSv2
+needs a token and a hop limit that a container can re-widen. Alongside it: EC2/EBS snapshot theft (share →
+restore elsewhere → read the filesystem), S3 data exposure (`references/s3-attacks.md`), RDS
+snapshot/access testing, and Lambda/Secrets Manager/SSM secret recovery (`ssm:SendCommand` is RCE on EC2
+without SSH/SG ingress). Full recipes, detect-don't-assume posture checks and cleanup:
+`references/service-exploitation.md`, `references/s3-attacks.md`.
 
 ## Step 4 — CloudTrail / GuardDuty detection-surface awareness (`T1562.008`, awareness not evasion)
 
-Per **D5**, this skill teaches what an authorized action **emits** — so a tester knows their footprint and
-a defender knows what to tune — and **never** how to evade detection against a real target:
-
-- **CloudTrail** splits in two. **Management events** (control-plane: IAM changes, `RunInstances`,
-  `ModifyDBSnapshotAttribute`, `PutBucketPolicy`, `AssumeRole`, `CreateAccessKey`) are **on by default**
-  where a trail is configured, recorded with `eventName`, `userIdentity` (`IAMUser` vs `AssumedRole` vs
-  `Root`), `sourceIPAddress`, and `userAgent` (`aws-cli`, `Boto3`, `pacu` — the attribution fields). Nearly
-  every privesc action is a management event. **Data events** (S3 `GetObject`/`PutObject`, Lambda `Invoke`,
-  DynamoDB item ops) are **off by default** — so S3 object reads are often *not* logged; check
-  `cloudtrail:GetEventSelectors` to know whether they are, and report "object reads unlogged" as a
-  **defender-coverage gap**, never exploit it as a stealth feature.
-- **GuardDuty** fires findings off CloudTrail, VPC Flow Logs, and DNS logs. Name the finding each technique
-  tends to trip so the report states what *should* have fired:
-  `UnauthorizedAccess:IAMUser/InstanceCredentialExfiltration.OutsideAWS` (instance creds used off the
-  instance — the EC2 IMDS-theft signature), `.InsideAWS` (used from another account),
-  `PrivilegeEscalation:IAMUser/AnomalousBehavior` and `Persistence:IAMUser/AnomalousBehavior` (anomalous
-  IAM mutation), `CredentialAccess:IAMUser/AnomalousBehavior`, `Policy:S3/BucketPublicAccessGranted`, and
-  the tamper indicators `Stealth:IAMUser/CloudTrailLoggingDisabled` / `PasswordPolicyChange` (named so a
-  tester knows these *would* fire — the skill never teaches disabling logging).
-
-**Pairing rule:** every attack technique above is reported with its CloudTrail `eventName` and the
-GuardDuty finding it tends to trigger, so the learner reasons about footprint. Confirming an authorized
-action surfaced as a GuardDuty finding is purple-team value — it closes the detection loop the lab exists
-to teach.
+Per **D5**, this skill teaches what an authorized action **emits** — CloudTrail management vs. data
+events (data events are off by default, so unlogged S3 reads are a **defender-coverage gap** to report,
+never a stealth feature to use) and the GuardDuty findings each technique tends to trip — so a tester
+knows their footprint and a defender knows what to tune, and **never** how to evade detection against a
+real target. Full event/finding table: `references/detection-surface.md`.
 
 ## Decision matrix — which tool, which step, which reference
 

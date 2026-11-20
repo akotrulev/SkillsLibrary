@@ -5,7 +5,7 @@ description: Use when a screen or flow should be seen in a few variants before i
 
 # Prototype — see a screen before it is built
 
-A prototype is throwaway work that answers one question: *which shape should this screen take?* This skill renders **2–5 structurally different variants** of one screen or flow, in the project's own design language, as **one self-contained HTML file** a person opens and flips through. No app has to run, and no stack's code is touched. The chosen variant, and why, is the deliverable; the file is the evidence.
+A prototype is throwaway work that answers one question: *which shape should this screen take?* This skill renders **2–5 structurally different variants** of one screen or flow, in the project's own design language, as **one self-contained HTML file** a person opens and flips through. The chosen variant, and why, is the deliverable; the file is the evidence.
 
 Every variant shares one design language: the project's when it has one, a corpus-led direction chosen in a style interview when it has none. Variants differ in **structure** (layout, information hierarchy, primary affordance), never only in colour or copy.
 
@@ -29,7 +29,7 @@ Every variant shares one design language: the project's when it has one, a corpu
 
 6. **Record the verdict.** The user picks a variant or combines parts of several ("B's list with A's filter bar" is the usual answer, and a good one). Write it as the `prototype-verdict` line at the top of the file: date, the variant or the combination, and why. When `/dev:feature` called this skill, also write it into that spec, beside the decision it settles, with a link to the file. **Done when** the verdict line is in the file and, for a spec-driven run, in the spec. A variant left unpicked is recorded as `undecided`, with the open question.
 
-7. **In-app variants, on request only.** When the user wants the variants beside the real header, sidebar and data, hand them to the stack agent as a brief; this skill writes no app code. Write the brief from "In-app hand-off" below and delegate it to the stack's agent, or have the user type its command (`/fe-react`, `/fe-blazor`, `/mobile-react-native`, `/mobile-ios`, `/mobile-android`, `/desktop-macos`, `/desktop-windows`). **Done when** the brief is delivered to the agent, or handed to the user to paste, and it names the file, the variants and the verdict so far.
+7. **In-app variants, on request only.** When the user asks for the variants inside the real app (beside its header, sidebar and data), read `references/in-app-handoff.md` and delegate the brief to the stack's agent, or have the user type its command (`/fe-react`, `/fe-blazor`, `/mobile-react-native`, `/mobile-ios`, `/mobile-android`, `/desktop-macos`, `/desktop-windows`). **Done when** the brief is delivered to the agent, or handed to the user to paste, and it names the file, the variants and the verdict so far.
 
 ## Structural variants
 
@@ -45,16 +45,6 @@ A variant earns its place by disagreeing with the others about at least one of t
 Hold constant across variants: the tokens, the type, the icon family, the copy voice and the data. A variant may share a small piece (the page header), never the layout itself. A variant that would look like its neighbour in a greyscale thumbnail is a recolour: redraft it with the shared layout ruled out.
 
 The variants follow the platform's conventions when the target is native: a phone variant uses the platform's navigation and controls, a desktop variant its window chrome and menus. The design facts behind them come from the corpus (`--stack <stack>`), and the house mobile and desktop rules for the app hold for the prototype's states too.
-
-## In-app hand-off
-
-The brief carries:
-
-- the prototype file and the variants to build (all of them, or the shortlist);
-- the host: the existing route or screen, switched by a `?variant=` parameter (or the platform's equivalent: a launch argument, a debug menu). A new throwaway route, named with `prototype` in its path, only when no existing page can host it;
-- the data fetching kept above the switch, so only the rendered subtree changes; mutations pointed at stubs;
-- the switcher kept out of production builds;
-- the verdict so far, and the rule for afterwards: the winner is rewritten to the house rules when folded in, and the losing variants and the switcher are removed.
 
 ## Rules
 

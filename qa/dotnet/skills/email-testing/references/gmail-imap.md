@@ -1,5 +1,16 @@
 # QA — Email Testing against a Real Mailbox over IMAP (.NET)
 
+**Contents:**
+
+- When to use
+- When NOT to use
+- Inputs needed
+- IMAP surface (cheat-sheet — MailKit)
+- Templates
+- Rules
+- Generation steps
+- Cross-references
+
 Scaffolds a thin, intent-revealing wrapper over MailKit's `ImapClient` plus NUnit fixtures that **poll a real provider mailbox** (Gmail / Outlook / any IMAP server) for a specific message — by recipient alias + subject + `since` time bound — extract HTML / text body / links / OTP codes from the parsed `MimeMessage`, download attachments, and clean up by flagging the message `\Seen` / `\Deleted` rather than wiping an inbox.
 
 This is the sibling for flows that must exercise the **genuine provider inbox** — real MX, real spam/routing, real provider quirks — not an SMTP sink or a test-SaaS server. Two consequences shape the whole skill:

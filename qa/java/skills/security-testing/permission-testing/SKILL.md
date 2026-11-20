@@ -304,32 +304,9 @@ public class InvoicePropertyTest extends BaseTest {
 }
 ```
 
-## Building the matrix from a policy table (scales past a few endpoints)
+## Building the matrix from a policy table
 
-For a real API, express the policy once as data and generate the rows — one source of truth that doubles as
-documentation of intended access:
-
-```java
-// src/test/java/.../security/accesscontrol/PolicyRow.java
-package security.accesscontrol;
-
-import io.restassured.response.Response;
-import java.util.List;
-
-@FunctionalInterface
-interface ProtectedCall { Response invoke(String token, String id) throws Exception; }
-
-/** One PolicyRow per protected operation; a @DataProvider emits one test per (row × denied actor). */
-public record PolicyRow(
-    String endpoint,                 // for the test name
-    ProtectedCall call,
-    Actor owner,                     // who may (200)
-    List<Denied> others) {           // who may not, and how it's denied
-
-    public record Denied(Actor actor, int expected) {} // 401 | 403 | 404
-}
-// Adding an endpoint = adding a row. A new endpoint with no row is a visible coverage gap.
-```
+An API past a few endpoints expresses the policy once as data and generates the rows (one `PolicyRow` per protected operation) → read `references/policy-matrix.md`.
 
 ## Anti-patterns
 
@@ -348,19 +325,6 @@ public record PolicyRow(
 - **Minting a token per test / sleeping for auth.** *Fix:* cache per actor via `test-login-tokens`; never
   `Thread.sleep`.
 - **Hardcoding credentials/tokens.** *Fix:* env, read lazily (`System.getenv`).
+- **Untagged cases and rowless endpoints.** *Fix:* tag each case with its OWASP API id and WSTG-ATHZ id; a new protected endpoint with no matrix row is a visible coverage gap.
 - **Treating a green access-control suite as "access control is secure."** It covers the rows you wrote;
   business-logic abuse (API6) still needs a manual pentest. *Fix:* say so; track endpoint coverage.
-
-## Rules (hard constraints)
-
-- Cover **BOLA (API1)**, **object-property (API3)**, and **BFLA (API5)** — horizontal *and* vertical
-  escalation — plus an anonymous `401` baseline and a **positive control** per resource.
-- Assert the **project's documented denial status** (`403` vs `404` leak policy) **and** that **no resource
-  body leaks**. One logical assertion per test; test names `Should_X_When_Y`; parameterized matrix via
-  `@DataProvider` (no conditional logic in tests).
-- Seed **≥2 peer users + 1 elevated role**; each owns its own fixture; tests are independent. Matrix the
-  **verbs** (`GET`/`PUT`/`PATCH`/`DELETE`), not just reads.
-- Reuse the project's `{Resource}Client` **raw** overloads (status asserted by the test) and
-  `qa/java/skills/test-login-tokens` for per-actor tokens (cached, secrets via env read lazily).
-- Tag cases with their **OWASP API id** and **WSTG-ATHZ** test-id; a new protected endpoint with no matrix
-  row is a visible coverage gap. A green suite ≠ "secure" — business-logic abuse needs manual pentest.

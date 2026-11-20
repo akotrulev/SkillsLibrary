@@ -14,16 +14,16 @@ Owns **every dev-side test of logic the agent writes**: view models, services, m
 
 | Concern | Primary | Note |
 |---|---|---|
-| Runner | **NUnit** (the project's 4.x line) + `NUnit3TestAdapter` + `Microsoft.NET.Test.Sdk` | Keep the version the solution already pins |
-| Test project TFM | **Matches the app's**: `net10.0-windows10.0.26100.0` (`net11.0-windows…` on 11) | A plain `net10.0` project cannot reference a WinUI project (Learn, 2026-09-10) |
-| Pure logic | A **class library with no UI types** (`net10.0`, no Windows suffix) holds view models, services, models; the app and the tests reference it | The seam that makes most tests plain NUnit; the Learn guidance says the same |
+| Runner | **NUnit** + `NUnit3TestAdapter` + `Microsoft.NET.Test.Sdk` | Keep the version the solution already pins |
+| Test project TFM | **Matches the app's**: `net10.0-windows10.0.26100.0` (the same Windows TFM on a newer .NET) | A plain `net10.0` project cannot reference a WinUI project |
+| Pure logic | A **class library with no UI types** (`net10.0`, no Windows suffix) holds view models, services, models; the app and the tests reference it | The seam that makes most tests plain NUnit |
 | Test project that loads WinAppSDK types | `<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>`, `<WindowsAppSdkBootstrapInitialize>true</WindowsAppSdkBootstrapInitialize>`, the Windows App SDK runtime installed on the machine | Only when a test touches `Microsoft.WindowsAppSDK` types that are not XAML |
 | XAML types | **WinUI Unit Test App** (`winapp new --template winui-unittest`, or the Visual Studio *WinUI Unit Test App* template): MSTest, `[UITestMethod]` runs on the XAML UI thread | **D8 deviation: MSTest here, NUnit everywhere else**; the project stays a separate test app |
 | Time | `TimeProvider`; `FakeTimeProvider` from `Microsoft.Extensions.TimeProvider.Testing` | `DateTime.Now` in logic is a finding |
 | Fakes | Hand-written fakes; `NSubstitute` only where a call sequence is the behaviour | No mock of a type you own that a fake serves |
-| Coverage | `coverlet.collector` (`dotnet test --collect:"XPlat Code Coverage"`) writes Cobertura with **branch** rate; ReportGenerator prints a summary | The floor is **80% of branches** of the changed code |
+| Coverage | `coverlet.collector` (`dotnet test --collect:"XPlat Code Coverage"`) writes Cobertura with **branch** rate; ReportGenerator prints a summary | The floor is `CLAUDE.md` "Test code rules", read on branches |
 | `[WPF]` `[WinForms]` | NUnit over the logic library; view models and presenters tested the same way | Windows controls are not unit-tested; the E2E suite covers them |
-| `[C++]` | GoogleTest over a XAML-free core library, floor 80% of lines | Section below |
+| `[C++]` | GoogleTest over a XAML-free core library | Section below |
 
 Detect first: the runner already in use (`NUnit`, `xunit`, `MSTest`), whether a logic library exists, existing fakes and builders, and the coverage tool. Extend them; never migrate a stable suite to NUnit as a side effect.
 
@@ -55,14 +55,14 @@ public sealed class OrdersViewModelTests
     }
 
     [Test]
-    public async Task Should_ShowRows_When_LoadSucceeds()
+    public async Task Should_ShowTwoRows_When_LoadSucceeds()
     {
         orders.Returns(OrderBuilder.Default().Build(), OrderBuilder.Default().WithTitle("Second").Build());
         var viewModel = new OrdersViewModel(orders, time);
 
         await viewModel.LoadCommand.ExecuteAsync(null);
 
-        Assert.That(viewModel.State, Is.TypeOf<Load<IReadOnlyList<OrderRow>>.Loaded>());
+        Assert.That(((Load<IReadOnlyList<OrderRow>>.Loaded)viewModel.State).Value, Has.Count.EqualTo(2));
     }
 
     [Test]
@@ -91,17 +91,16 @@ public sealed class OrdersViewModelTests
 }
 ```
 
-- **Names are behaviour:** `Should_X_When_Y`. **One logical assertion** (`Assert.That` once, or several that verify one behaviour). **No `if`, no `for` driving an assertion**: use `[TestCase]` / `[TestCaseSource]`.
-- **Data through builders** (`OrderBuilder`) once an object has four or more fields; no inline literals duplicated across tests.
-- **No `try`/`catch` in a test body.** An expected exception is `Assert.ThrowsAsync<T>`; an unexpected one reaches the runner untouched. Cleanup of what the test created is a `[TearDown]`.
-- **Every assertion states one expected condition:** never `Is.EqualTo(200).Or.EqualTo(204)`.
-- **No inline comments;** the name and the arrange / act / assert shape are the explanation.
-- **No `Thread.Sleep`, `Task.Delay` to wait.** Await the command (`ExecuteAsync`), or advance the `FakeTimeProvider` (`time.Advance(TimeSpan.FromSeconds(30))`).
-- Tests are independent and run in any order; no shared static state; the `[SetUp]` builds fresh fakes.
+Test code follows `CLAUDE.md` "Test code rules". The NUnit forms:
+
+- **Variants:** `[TestCase]` / `[TestCaseSource]`, never an `if` or `for` driving an assertion.
+- **Expected exception:** `Assert.ThrowsAsync<T>`. **Cleanup** of what the test created is a `[TearDown]`.
+- **Waiting:** await the command (`ExecuteAsync`), or advance the `FakeTimeProvider` (`time.Advance(TimeSpan.FromSeconds(30))`).
+- **Isolation:** the `[SetUp]` builds fresh fakes; no shared static state.
 
 ## Commands and observable state
 
-- A `RelayCommand` (CommunityToolkit.Mvvm 8.4.2) is tested through `ExecuteAsync` on the generated `IAsyncRelayCommand`; assert the property it changed, not that a method ran.
+- A `RelayCommand` (CommunityToolkit.Mvvm) is tested through `ExecuteAsync` on the generated `IAsyncRelayCommand`; assert the property it changed, not that a method ran.
 - `CanExecute` is asserted with `viewModel.SaveCommand.CanExecute(null)` before and after the input changes.
 - `[ObservableProperty]` change notification: subscribe to `PropertyChanged` in the test and assert the name once; the toolkit's generated code needs no test of its own.
 - `ObservableValidator`: set the property, assert `viewModel.GetErrors(nameof(...))` for the rule; one `[TestCase]` per rule and per boundary value.
@@ -120,7 +119,7 @@ public sealed class OrdersViewModelTests
 public class PriceBadgeTests
 {
     [UITestMethod]
-    public void Should_ShowSaleBrush_When_PriceIsReduced()
+    public void Should_BeOnSale_When_PriceIsReduced()
     {
         var badge = new PriceBadge { Price = 8m, ListPrice = 10m };
 
@@ -129,15 +128,15 @@ public class PriceBadgeTests
 }
 ```
 
-- Create it with `winapp new --template winui-unittest` (needs `winapp` 0.8.0, preview) or Visual Studio's *WinUI Unit Test App* template. It is a **separate MSTest project** that hosts a XAML UI thread.
+- Create it with `winapp new --template winui-unittest` (needs `winapp`) or Visual Studio's *WinUI Unit Test App* template. It is a **separate MSTest project** that hosts a XAML UI thread.
 - **`[UITestMethod]` runs on the UI thread; `[TestMethod]` does not.** Anything that creates a `Grid`, `UserControl` or `DependencyObject` needs the former.
-- Pull the code under test out of the app project into a library the app and the test app both reference (Learn's own advice); the test app never references the app project.
-- The same rules apply: `Should_X_When_Y`, one logical assertion, no conditionals (`[DataRow]` for variants), no inline comments. **Using MSTest here is the D8 deviation** and is stated in the test project's folder name (`*.UiTests`) so a reader knows why a second runner is present.
+- Pull the code under test out of the app project into a library the app and the test app both reference; the test app never references the app project.
+- The same test code rules apply (`[DataRow]` for variants). **Using MSTest here is the D8 deviation** and is stated in the test project's folder name (`*.UiTests`) so a reader knows why a second runner is present.
 - Coverage inside the test app is **not verified** for this release: do not claim a measured number for XAML-bound code; say it is left out by name and covered by the E2E suite.
 
 ## Coverage — the floor
 
-CLAUDE.md § Test code rules: **≥ 80% of the branches of the code the change wrote** (a created file whole; in an existing file, the changed methods). Designed branch by branch, not to move a number: every `if`/`else` arm, `switch` case and default, ternary, `??` / `?.`, short-circuit operand, guard return, `catch`, and loop run zero and many times gets a test that asserts its effect.
+The floor, its scope and branch-by-branch design are `CLAUDE.md` "Test code rules". Here it is read on **branches**.
 
 ```powershell
 dotnet test tests/Orders.Tests --collect:"XPlat Code Coverage" --results-directory artifacts/cov
@@ -146,12 +145,11 @@ dotnet tool run reportgenerator -reports:"artifacts/cov/**/coverage.cobertura.xm
 
 - Read the **branch** rate for the files the change touched, not the repo total. Repo-wide coverage is never a target. Inside a plan task, the `Gate:` line runs this over the files the task and the landed tasks above it touched. Outside a plan, run it before you report.
 - **Left out by name:** DTOs and records without logic, generated code (`*.g.cs`, `*.g.i.cs`, `Generated Files`), DI registration in `Program` / `App`, XAML code-behind that only forwards. A skipped file is listed in the report, never hidden by lowering the number or by an exclusion marker on code with behaviour.
-- Only an asserting test counts: a test with no assertion, written to move the number, is a major finding (`test-quality-check` catches it by mutation score).
 - Report the unit: "branches".
 
 ## The C++/WinRT lane
 
-C++ logic is tested with **GoogleTest over a XAML-free core library**, with a floor of **80% of lines** (80% of branches where the project reports them with `llvm-cov`). The framework choice, the coverage tools and the commands are decision D16 and live in [`../cpp-winrt/references/testing-and-coverage.md`](../cpp-winrt/references/testing-and-coverage.md); this skill does not repeat them. A C# solution that also has a C++ core runs both families: NUnit for the C#, GoogleTest for the C++, each to its own floor.
+C++ logic is tested with **GoogleTest over a XAML-free core library**. The floor's unit on this lane, the framework choice, the coverage tools and the commands are decision D16 and live in [`../cpp-winrt/references/testing-and-coverage.md`](../cpp-winrt/references/testing-and-coverage.md); this skill does not repeat them. A C# solution that also has a C++ core runs both families: NUnit for the C#, GoogleTest for the C++, each to its own floor.
 
 ## What to test, and what not
 
@@ -162,19 +160,12 @@ C++ logic is tested with **GoogleTest over a XAML-free core library**, with a fl
 | Time-dependent behaviour with `FakeTimeProvider` | Control layout or visuals (E2E and screenshots) |
 | That every resource key the code names exists in the default `.resw` (`desktop-windows:languages`) | A third-party library's behaviour |
 
-## Telemetry
-
-Tests assert behaviour, not telemetry. A test that proves a failure raises the banner is the failure rule's test; the gate's telemetry smoke proves spans and metrics arrive (`desktop-shared:observability`).
-
 ## Rules
 
 1. NUnit by default; the WinUI Unit Test App (MSTest, `[UITestMethod]`) only for code that needs XAML types, recorded as D8.
 2. Logic lives in a library with no UI types; view models never touch the dispatcher.
-3. Names `Should_X_When_Y`; one logical assertion; no `if` or loop driving an assertion; no `try`/`catch` in a body; no `OR` in an assertion; no inline comments.
-4. Fakes over mocks; no in-memory substitute for a shipped database; time through `TimeProvider`.
-5. Test data through builders for four or more fields.
-6. ≥ 80% of the changed branches (lines on the C++ lane), measured on the changed files, designed branch by branch.
-7. Tests are independent; no `Thread.Sleep`; no shared static state.
+3. Fakes over mocks; no in-memory substitute for a shipped database; time through `TimeProvider`.
+4. Test code and the coverage floor follow `CLAUDE.md` "Test code rules".
 
 ## Generation steps
 
@@ -191,12 +182,11 @@ Tests assert behaviour, not telemetry. A test that proves a failure raises the b
 - `rg -n "\btry\b|\bcatch\b" -g '*Tests*.cs'` — none in a test body (helpers doing I/O only).
 - `rg -n "\.Or\." -g '*Tests*.cs'` — none (`Is.EqualTo(a).Or…`).
 - `rg -n "DispatcherQueue|XamlRoot|Microsoft\.UI\.Xaml" -g '*ViewModel*.cs'` — none.
-- The coverage report lists the changed files at ≥ 80% branches.
+- The coverage report lists every changed file at or above the floor, read on branches.
 
 ## Common gotchas
 
 - **`net10.0` test project referencing a WinUI project** — restore fails; use the Windows TFM or reference a UI-free library.
-- **A `Dispatcher` inside a view model** — untestable and a layering defect.
 - **`[TestMethod]` on a test that creates a `Grid`** — a `COMException` (wrong thread); it needs `[UITestMethod]`.
 - **`async void` test** — passes before it runs; return `Task`.
 - **`DateTime.UtcNow` in logic** — the test depends on the clock.

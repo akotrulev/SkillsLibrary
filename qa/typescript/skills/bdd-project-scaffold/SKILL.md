@@ -129,8 +129,8 @@ export default defineConfig({
   the Playwright HTML report carries the trace, video and screenshot of a failed scenario; Allure is the CI
   dashboard, its labels and history owned by `qa-reporting-typescript`. Attach calls come from `allure-js-commons`,
   awaited.
-- A signed-in suite adds the writer's `setup` project and `storageState` (`references/config-and-fixtures.md` §3
-  of `ui-test-author/playwright`).
+- A signed-in suite adds the writer's `setup` project and `storageState`: `ui-test-author/playwright`
+  `references/config-and-fixtures.md` §3.
 
 ### `steps/fixtures.ts` — page objects as fixtures (NO World)
 

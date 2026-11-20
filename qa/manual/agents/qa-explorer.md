@@ -25,7 +25,7 @@ Paths resolve against `${CLAUDE_PLUGIN_ROOT}/` installed, or the SkillsLibrary r
 
 1. **Orient.** Load `engineering-practices/agent-orientation-cache` and run its gate on `docs/agent-context/qa-explorer.md` (TRUST / DELTA / FULL, one line). The cache holds what a rerun should not rediscover: the screen map and how each screen is reached, the accounts by name and role, the never-touch list, the product's own names for things, and the findings still open with their ids. A new build keeps the map's paths and clears its "checked" marks.
 2. **Settle the mode** from the user's answers, and write it down before the first action. In doubt, look-only.
-3. **Check the driver.** Web: the Playwright MCP server, else `playwright-cli`. Native app: the Appium MCP server. With neither for the target, stop and give the user the registration command from `references/probes.md`.
+3. **Check the driver.** Web: the Playwright MCP server, else `playwright-cli`. Native app: the Appium MCP server. With neither for the target, stop and give the user the registration command (web: `qa/<stack>/skills/page-objects-from-url/SKILL.md`; native: `qa/<stack>/skills/mobile-screen-explorer`).
 4. **Collect the oracles.** Read what the user named, then look in the repo for more: `docs/features/`, `docs/test-cases/*-basis.md`, `docs/business-model/`, price lists, a copy deck. Note which rules and formulas each one states.
 
 ## Steps
@@ -35,9 +35,9 @@ Work one step at a time; don't start N+1 until N's gate passes.
 | # | Step | Load | Done when |
 |---|---|---|---|
 | 1 | Charter | `app-exploration`; `exploratory-charter-writer` for the mission form | Mission, scope, bounds, mode and never-touch list written as the report's first section |
-| 2 | Map | `references/probes.md` | Signed in where needed; primary navigation walked; the checked, frontier and blocked lists exist |
-| 3 | Check every screen | `references/checks.md` | Each reached screen has all seven classes run, or marked skipped with a reason, at each viewport |
-| 4 | Walk the journeys | `references/checks.md` (classes 5–7, the tours) | Each goal a user comes for is walked to its outcome (look-only: to its first write), every figure on the way recomputed |
+| 2 | Map | `qa/manual/app-exploration/references/probes.md` | Signed in where needed; primary navigation walked; the checked, frontier and blocked lists exist |
+| 3 | Check every screen | `qa/manual/app-exploration/references/checks.md` | Each reached screen has all seven classes run, or marked skipped with a reason, at each viewport |
+| 4 | Walk the journeys | `qa/manual/app-exploration/references/checks.md` (classes 5–7, the tours) | Each goal a user comes for is walked to its outcome (look-only: to its first write), every figure on the way recomputed |
 | 5 | Confirm | `app-exploration` | Every candidate reproduced from a clean start, minimised, sorted, grouped by cause, rated and classed |
 | 6 | Write up | `bug-report-writer` | Report saved; one full bug report per finding of Major or worse; test-case candidates listed; created records removed or listed |
 

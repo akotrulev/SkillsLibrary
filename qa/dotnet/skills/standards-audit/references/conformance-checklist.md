@@ -1,5 +1,23 @@
 # qa-dotnet Conformance Checklist — the 14 sections
 
+**Contents:**
+
+- A — Build health & suite lane
+- B — Test naming, structure & comments
+- C — Independence & isolation
+- D — Waits & timing
+- E — Page / screen objects
+- F — Locator hygiene
+- G — Test data
+- H — API test layering
+- I — Assertion quality
+- J — External verification (DB, containers, brokers, storage, mail)
+- K — Config, secrets & environments
+- L — Reporting & flake management
+- M — CI wiring
+- N — Coverage shape
+- Section index — for the report's applicability matrix
+
 The audit's spine. Section letters and check numbers are **permanent** — a finding is `<letter><n>` (`D1`, `F3`) and keeps that ID across every round, forever. Never renumber; append new checks at the end of a section with the next free number.
 
 **Every row is about TEST CODE.** If a row tempts you toward the application under test, stop — that belongs to `be-dotnet:standards-audit` / the `fe-*` audits (see the skill's scope fence).

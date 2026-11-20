@@ -1,5 +1,19 @@
 # Evidence capture — Playwright 1.64 (TypeScript)
 
+**Contents:**
+
+- 1. Screenshots
+- 2. Video
+- 3. Screencast — a recording you start and stop [1.59]
+- 4. Trace
+- 5. HAR
+- 6. Attachments
+- 7. error-context.md [1.53]
+- 8. Viewing and reading evidence
+- 9. Exploratory capture: Playwright MCP and playwright-cli
+- 10. Codegen's recorder
+- 11. Size and CI
+
 Every capture API, with the version it shipped in. `SKILL.md` decides what to capture and where it lands;
 this file is how. The fixtures below extend the `test` exported by
 `qa/typescript/skills/ui-test-author/playwright/assets/fixtures.ts`, so a spec imports `test` and `expect`

@@ -1,6 +1,6 @@
 ---
 name: auth0
-description: Use when adding or fixing Auth0 login in a Blazor Server or WASM app (OpenIdConnect with PKCE, session refresh, logout). Triggers "add Auth0 login". Not for tenant setup or OIDC theory.
+description: Use when adding or fixing Auth0 login in a Blazor Server or WASM app (OIDC with PKCE, session refresh, logout). Triggers "add Auth0 login". Not for tenant setup or OIDC theory (auth0-concepts).
 disable-model-invocation: true
 ---
 
@@ -312,16 +312,12 @@ public class CustomAuthorizationMessageHandler : AuthorizationMessageHandler
 
 ## What NOT to do
 
-- No omitting `audience` — silently produces opaque tokens
+The rules above state the rest; these add:
+
 - No storing access tokens in component state or `localStorage` manually — let the framework cache
-- No `Implicit Flow` (`response_type=token`) — code + PKCE only
 - No reading the ID Token to call the API — use the access token (Server: `GetTokenAsync("access_token")`; WASM: handler)
 - No `[AllowAnonymous]` on a page that touches user data
-- No client secret in WASM (`wwwroot/appsettings.json` ships to the browser)
-- No bypassing Auth0 logout — local sign-out alone leaves the SSO session alive in Auth0
 - No `HttpContext.GetTokenAsync` from circuit (interactive) code — circuits have no live `HttpContext`; use the session-cached token service
-- No relying on cookie expiry alone to end a Blazor Server session — circuits outlive the cookie; revalidate against the session registry
-- No un-namespaced custom claims
 - No mixing tenants across environments
 
 ## Generation steps

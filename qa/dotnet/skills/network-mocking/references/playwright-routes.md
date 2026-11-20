@@ -1,5 +1,24 @@
 # QA — Playwright Routing, Mocking and Traffic Assertions (.NET 10 / Microsoft.Playwright 1.63 + NUnit)
 
+**Contents:**
+
+- When to use
+- When NOT to use
+- Inputs needed
+- Decision matrix
+- 1. The route stub and the traffic probe
+- 2. Mocking a response
+- 3. Asserting a call — method and typed payload
+- 4. Asserting a call did NOT happen, and that the page raised no errors
+- 5. Security headers and TLS — at the routing layer
+- 6. Modifying traffic in flight
+- 7. HAR replay and update
+- 8. Offline, and a request held in flight
+- Rules
+- What NOT to do
+- Generation steps
+- Cross-references
+
 Intercepts, mocks, holds, asserts and shapes HTTP traffic in Playwright for .NET with NUnit. Every sample
 derives from `Example.UiTests.Support.BaseTest` (`qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs`),
 which owns the browser, a context and page per test, and the failure evidence. Route handlers and traffic

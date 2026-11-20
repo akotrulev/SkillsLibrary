@@ -4,9 +4,7 @@ description: Use when an app or marketing page needs its visual identity (palett
 disable-model-invocation: true
 ---
 
-# Frontend Design
-
-Approach this as the design lead at a small studio known for giving every client a visual identity that could not be mistaken for anyone else's. The client has already rejected proposals that felt templated, and is paying for a distinctive point of view: make deliberate, opinionated choices about palette, typography, and layout that are specific to *this* brief, and take one real aesthetic risk you can justify — where the lane below allows it.
+# Visual identity
 
 **Corpus authority.** The facts this skill decides with come from the [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** Query it before choosing a style, palette, or type pairing:
 
@@ -14,7 +12,7 @@ Approach this as the design lead at a small studio known for giving every client
 python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<product> <industry> <keywords>" --design-system -p "<Project>"
 ```
 
-That one call returns the resolved landing pattern, style profile (with its light/dark support, performance and accessibility risk), the full 17-slot semantic palette, the font pairing with its imports, the effects, and the anti-patterns to avoid — 88 styles, 192 product palettes, 192 product→style reasoning profiles and 74 pairings behind it. Supplement with `--domain style`, `--domain color`, `--domain typography`, `--domain product`, or `--domain google-fonts` (1934 families) when one dimension needs more options. **Never invent a palette or pairing this skill's judgment can instead be applied to.** The corpus supplies the candidates and their trade-offs; this skill picks the one direction, spends the boldness, and rejects the AI-default look.
+That one call returns the resolved landing pattern, style profile (with its light/dark support, performance and accessibility risk), the full semantic palette, the font pairing with its imports, the effects, and the anti-patterns to avoid behind it. Supplement with `--domain style`, `--domain color`, `--domain typography`, `--domain product`, or `--domain google-fonts` when one dimension needs more options. **Never invent a palette or pairing this skill's judgment can instead be applied to.** The corpus supplies the candidates and their trade-offs; this skill picks the one direction, spends the boldness, and rejects the AI-default look.
 
 ## Two lanes: marketing page vs application
 
@@ -29,7 +27,7 @@ A brief can hold both (a marketing site and the app behind it) — then the two 
 
 ## Native apps
 
-A mobile or desktop app is always the application lane: the corpus-sourced direction, the recipe below, Calibration, restraint and real content hold; the hero, composition, atmosphere, web-font imports and CSS mechanics do not. Type is the platform's system text styles, scaling with the user's text size (corpus `--domain web`: *Base Font Size*, *Dynamic Type Support*). The palette maps onto the platform's semantic colours — iOS and macOS semantic colours, Material 3 `colorScheme`, Windows theme resources. Glass the platform draws on its own chrome (Liquid Glass, Mica) is the stack `styling`'s to apply, not Calibration's look 2; glass added to content still is. Platform facts: the corpus (`--stack swiftui | jetpack-compose | react-native | winui | wpf`, `--domain web`, `references/pro-rules.md` for mobile) and the stack's `styling` — which also owns motion on desktop, where there is no `animation`.
+A mobile or desktop app is always the application lane: the corpus-sourced direction, the recipe below, Calibration, restraint and real content hold; the hero, composition, atmosphere, web-font imports and CSS mechanics do not. Type is the platform's system text styles, scaling with the user's text size (corpus `--domain web`: *Base Font Size*, *Dynamic Type Support*). The palette maps onto the platform's semantic colours — iOS and macOS semantic colours, Material 3 `colorScheme`, Windows theme resources. Glass the platform draws on its own chrome (Liquid Glass, Mica) is the stack `styling`'s to apply, not Calibration's look 2; glass added to content still is. Platform facts: the corpus (`--stack swiftui | jetpack-compose | react-native | winui | wpf`, `--domain web`, `design/ui-ux-pro-max/references/pro-rules.md` for mobile) and the stack's `styling` — which also owns motion on desktop, where there is no `animation`.
 
 ## Ground it in the subject
 
@@ -62,21 +60,21 @@ If the brief does not pin down what the product or subject is, pin it yourself b
 An application looks modern by being quiet and consistent, so the data and the actions are the loudest thing on the screen. Decide these values here; [`design/design-tokens`](../design-tokens/SKILL.md) gives them structure and the stack's `styling` renders them:
 
 - **A neutral surface scale** — base, raised, overlay — carrying nearly every pixel; tinted, not pure white or pure black.
-- **One accent**, spent on the primary action and the active nav item; the semantic status set (success / warning / danger / info) stays separate and is never the brand color.
+- **Colour as decided under *Color is a system*:** the one accent goes on the primary action and the active nav item.
 - **Three text tones** — primary, muted, disabled — and weight for emphasis; headings step the type scale, body text does not.
 - **Hairline borders over heavy shadows.** Elevation is reserved for what actually floats: menus, drawers, dialogs.
 - **A 4/8-px spacing rhythm**, one radius scale, one icon family at one stroke weight.
-- **A deliberate dark palette** — desaturated accent, no pure-black surface, contrast re-verified — never an inversion.
+- **Dark palette** per *Color is a system*, when the brief needs one.
 - **Typography restraint:** the body face does the work; at most one display face, used on page titles and the brand mark.
 - **The signature is a detail, not a stunt** — the empty-state illustration, the brand-mark treatment, one characterful transition — never an asymmetric grid or a hero on a list page.
 
-The three-AI-default-looks critique below applies to this lane too: a cream-and-terracotta admin panel is as templated as a cream-and-terracotta landing page.
+The default looks in *Calibration* apply to this lane too: a cream-and-terracotta admin panel is as templated as a cream-and-terracotta landing page.
 
 ## Process: brainstorm, explore, plan, critique, build, critique again
 
 **Calibration** *(perishable — this list is dated, and a stale one is worse than none: it waves through exactly what it exists to catch. **Reviewed 2026-08; re-check by 2027-08.** If today's generated work no longer looks like this, the list is the thing that is wrong.)*
 
-AI-generated and trend-following design right now clusters around six looks — three that arrived with the current image and code models, and three older ones that have not fully cleared:
+AI-generated and trend-following design right now clusters around the looks below — the first three arrived with the current image and code models, the rest are older and have not fully cleared:
 
 1. **Bento grid** — modular asymmetric tiles, one large feature block among smaller ones, applied to any content whether or not the tiles differ in weight.
 2. **Glassmorphism / Liquid Glass** — frosted translucent panels over a blurred backdrop, spread across cards, nav and page chrome alike. Apple's 2025 Liquid Glass announcement accelerated this precisely as the backlash began; the disciplined form ("Glassmorphism 2.0") keeps glass on the layer that genuinely floats — modals, floating toolbars, notification panels — and nowhere else.
@@ -85,15 +83,15 @@ AI-generated and trend-following design right now clusters around six looks — 
 5. A near-black background with a single bright acid-green or vermilion accent.
 6. A broadsheet layout with hairline rules, zero border-radius, and dense newspaper columns.
 
-All six are legitimate for *some* briefs, but they are defaults rather than choices, and they appear regardless of subject. Where the brief pins down a visual direction, follow it exactly — the brief's own words always win, including when it asks for one of these looks. Where it leaves an axis free, **don't spend that freedom on one of these defaults.** The test for the first three is the same one the whole skill runs on: **what does this effect do for the user here?** Glass on the modal that floats over content is depth doing a job; glass on every card is a filter. A bento grid whose tiles are genuinely different weights of content is structure; one whose tiles are all the same thing is a card grid wearing a costume. Like a hired human designer, balance doing what you're good at against treating each project as a chance to experiment.
+Each is legitimate for *some* briefs, but they are defaults rather than choices, and they appear regardless of subject. Where the brief pins down a visual direction, follow it exactly — the brief's own words always win, including when it asks for one of these looks. Where it leaves an axis free, **don't spend that freedom on one of these defaults.** The test for the first three is the same one the whole skill runs on: **what does this effect do for the user here?** Glass on the modal that floats over content is depth doing a job; glass on every card is a filter. A bento grid whose tiles are genuinely different weights of content is structure; one whose tiles are all the same thing is a card grid wearing a costume. Like a hired human designer, balance doing what you're good at against treating each project as a chance to experiment.
 
-**Work in two passes** ([`references/two-pass-process.md`](references/two-pass-process.md)): plan **color** (4–6 named hex values), **type** (2+ roles), **layout** and one **signature**; critique the plan against the brief and revise anything generic before any code; then build from it exactly. [`design/design-tokens`](../design-tokens/SKILL.md) structures the values; [`design/brand-import`](../brand-import/SKILL.md) is the fixed-brand path.
+**Work in two passes** ([`references/two-pass-process.md`](references/two-pass-process.md)): plan **color** (4–6 named hex values), **type** (2+ roles), **layout** and one **signature**; critique the plan against the brief and revise anything generic before any code; then build from it exactly. Done when the plan names color, type, layout and one signature, and Review checklist items 1–10 each pass or carry a stated reason. [`design/design-tokens`](../design-tokens/SKILL.md) structures the values; [`design/brand-import`](../brand-import/SKILL.md) is the fixed-brand path.
 
 ## Restraint and self-critique
 
-**Spend your boldness in one place.** (Marketing lane; in the application lane the boldness budget is the one accent and the signature detail.) Let the signature element be the one memorable thing; keep everything around it quiet and disciplined, and cut any decoration that doesn't serve the brief. Not taking a risk can be a risk itself. Build to a quality floor without announcing it: responsive down to mobile, visible keyboard focus, reduced motion respected.
+**Spend your boldness in one place.** (Marketing lane; in the application lane the boldness budget is the one accent and the signature detail.) Let the signature element be the one memorable thing; keep everything around it quiet and disciplined, and cut any decoration that doesn't serve the brief. Build to a quality floor without announcing it: responsive down to mobile, visible keyboard focus, reduced motion respected.
 
-**Critique your own work as you build** — take screenshots if the environment supports it; a picture is worth 1000 tokens. Apply Chanel's advice: before leaving the house, look in the mirror and **remove one accessory**. Human creators have memory and always try something new — if there's a space to jot notes about what you've tried, it helps future passes. (This restraint check is exactly the visual self-critique every stack agent runs in its Review step.)
+**Critique your own work as you build** — take screenshots if the environment supports it; a picture is worth 1000 tokens. Human creators have memory and always try something new — if there's a space to jot notes about what you've tried, it helps future passes. (This restraint check is exactly the visual self-critique every stack agent runs in its Review step.)
 
 ## Writing in design
 
@@ -105,7 +103,7 @@ The form `/design:audit` sweeps as section A. Numbered because audit finding ids
 
 1. The **lane is stated** (marketing or application), and an application carries no hero, layout stunt or atmosphere.
 2. Palette, style and type pairing **trace to a corpus query**; nothing was invented where a corpus row exists.
-3. The look is **not one of the six default looks** in *Calibration*, unless the brief asked for it by name.
+3. The look is **not one of the default looks** in *Calibration*, unless the brief asked for it by name.
 4. **One accent**, spent on the primary action and the signature; the status set is separate from the brand colours.
 5. **No meaning by colour alone**; a dark palette is designed, never an inversion.
 6. Type is a **deliberate pairing on one scale**, with at most one display face.

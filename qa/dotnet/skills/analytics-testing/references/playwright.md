@@ -1,5 +1,14 @@
 # Analytics and consent with Playwright .NET (Microsoft.Playwright 1.63 + NUnit)
 
+**Contents:**
+
+- 1. The probes
+- 2. Consent gating
+- 3. Advanced Consent Mode — the gcs value
+- 4. An event and its parameters
+- 5. Global Privacy Control
+- Anti-patterns
+
 Every sample derives from `Example.UiTests.Support.BaseTest`
 (`qa/dotnet/skills/ui-test-author/playwright/assets/BaseTest.cs`). Verified against Playwright 1.63 on Chromium and
 WebKit: a `navigator.sendBeacon` to `/g/collect` is caught by a context route as a `POST` whose `PostData` holds

@@ -7,12 +7,7 @@ shared shapes: the agent template, the standard itself and the 23 `rules` skills
 tasks fix their own files, and a gate task runs the lint, the size audit and the surface check over the
 whole library.
 
-**Status:** L1 landed on 2026-11-20: the owner answered all 24 questions, none deferred
-(`## Answered questions (2026-11-20)`). O12's answer added task C1 (D9), and no answer needs a lint
-task T2. Next: T1 and C1, side by side, then P1–P20 (any three at a time), then G1. **Unverified:** the
-audit's line numbers. About two thirds of A3's judgment rows and most of A4's Code rows were never
-re-read at their lines, so every task re-reads its rows first (§2, D6). **Metered:** about 24 sessions of
-subscription usage. The user starts the queue.
+**Status:** L1, T1, C1 and P1–P20 have landed (2026-11-20): the owner answered all 24 questions, none deferred (`## Answered questions (2026-11-20)`), and every per-plugin task's gate is green over its own paths. P20 registered O10 (b) as D22: the five authoring skills `/dev:refine` loads moved from `business-analysis` to `dev`. Next: G1, the whole-library sweep, which also renames the `business-analysis:<label>` references that D22 left outside P20's paths, and files the plan. **Unverified:** `dev` installed alone, with the moved skills (the surface check passes; no installed plugin was run), and the library-wide lint, size and surface sweep until G1. **Metered:** about 24 sessions of subscription usage.
 
 **Test design:** none. The plan serves no stories, and it changes skill text only. The check is
 `tools/skill-lint.py`, `tools/token-audit.py` and `tools/plugin-surface-check.py`, which already exist.
@@ -210,6 +205,70 @@ Cost: four files differ in shape from the other 19. P8 and P10 may therefore sti
 **D11 (2026-11-20) — T1 did not edit `security-governance.md:40`, so T1's gate shows one finding.** The
 lint scans the folder of a `SKILL.md` it is given, and finds the `TBD` marker P12 owns. The edit was refused
 as outside T1's files. Cost: T1's `0 findings` is not reachable until P12 lands. P12's row is unchanged.
+
+**D12 (2026-11-20) — P1 left `rules/plans.md` at 6,876 chars, not under R23's 6,000.** The plan says keep the
+constraints and point at plan-format for the procedure. P1 did that: it turned the close-out section into four
+constraint lines, the order, documentation and `TD` rows into pointers, and the stack-runs sentences into a
+pointer. What remains is the checkable constraints and C1's gate rule (O12), about 1,600 chars of it.
+
+| Option | Verdict | Why |
+|---|---|---|
+| Stop at 6,876; every remaining line is a constraint with a severity | chosen | A reviewer reads these lines as findings, and `plans.md` is the rule file for plans |
+| Cut below 6,000 | rejected | It drops a *blocker* or *major* constraint, or C1's O12 wording |
+| Treat `plans.md` as a non-core file with the 2,500 limit | rejected | The limit cannot hold the constraints of a plan |
+
+Cost: G1's R23 sweep still lists `plans.md` unless the owner reads the row as met by the pointers.
+
+**D14 (2026-11-20) — P7 went past the audit's rows in four small places.** The rows name `mobile-android:30` as an R15 defect but give no critique to name; `mobile-android:3` as R17 but only in the findings table's `:3, 17` shorthand; and the "(plan 003)" defect only for the Android `unit-testing` skill.
+Reading 1 (the plan): fix exactly the rows. Reading 2 (built): Android step 1 names the critique table, as the iOS and RN agents do, so its Done-when is checkable; the description loses its version pair; and the two sibling skills lose the same "(plan 003)" note. Cost: Android step 1 now asks for a critique table it did not ask for before; two sibling files were edited without a row.
+
+**D14 (2026-11-20) — P4 moved the guide's shape into a reference, and deleted `feature-docs.md`'s Shape section instead of moving it.** The plan says move the shape and procedure of `feature-docs.md:9–40` into the skill `be-feature-documenter` loads. Reading 1 (the plan): copy the text. Reading 2 (built): `doc-business-model` already states every Shape bullet, so a copy would be a second statement (R17). `feature-docs.md` keeps a one-line pointer and two bars. Separately, `doc-business-model` (27,914) could not reach 16,000 by deleting alone, so its guide shape moved to `references/guide-shape.md`. Every guide run needs that file, which R16 would keep inline.
+
+| Option | Verdict | Why |
+|---|---|---|
+| Move the shape to `guide-shape.md`, behind a "before writing or editing a guide body" pointer, named in both agents' Load cells | chosen | Meets D3 without dropping a rule, and the file is read on every guide run |
+| Keep the shape inline and cut other rules | rejected | D3 forbids cutting a rule only this body states |
+
+Cost: a run that skips the pointer writes a guide without the shape; the Load cells and the one-line summary in `SKILL.md` are the guard.
+
+
+**D15 (2026-11-20) — P6 moved and deleted more than the plan lists, because the listed rows left five bodies over 16,000.** The plan lists R2 for four bodies without a method, and R15, R16, R17, R19 for `error-handling` in place. Reading 1 (the plan): fix exactly those rows and record the overage under D3. Reading 2 (built): also move by branch (R16) and delete echo sections (§2 item 3). `error-handling` reached 16,013 only after its Validation and its notification wiring moved out; `ui-rules` §5–§7 moved, `## Rules` and `## Validation` went; `data-fetching`'s timeout paragraph became a pointer to the one copy in `error-handling`; `basics` lost a Blazor comparison table and a navigation section that restates `react.md`; `animation` lost its `## Rules` and `## What NOT to do` lists. No rule that only one body states was cut.
+
+| Option | Verdict | Why |
+|---|---|---|
+| Move by branch and delete the echo lists | chosen | Meets D3 with every rule kept in one place, and each moved file has a pointer that names its condition |
+| Record the overage under D3 | rejected | Five bodies would stay over 16,000 and `token-audit` would still print them |
+
+Cost: a run that skips a pointer misses the notification wiring, the validation scenarios, the nav/footer rules or the modal-or-route choice; the "Situational surfaces" table and the §5–§7 stubs are the guard.
+
+**D16 (2026-11-20) — P12 moved and deleted more than the plan lists, because the listed rows left three devops bodies over 16,000.** The plan lists R2 for `infra-controls-validation`, `container-runtime-security` and `cloud-posture` without a method, and R16 moves for `cloud-incident-response`. Reading 1 (the plan): fix exactly those rows and record the overage under D3. Reading 2 (built): also move by branch (R16) and delete echo sections (§2 item 3). Each of the three lost its `## Anti-patterns`, whose bullets restate the families, fences and rules above them; their `## Rules` shrank to what no other section states. `infra-controls-validation` moved its CI wiring and its OWASP/ATT&CK per-finding mapping to `references/ci-wiring.md` and `references/finding-mapping.md`. `cloud-posture` moved its CI wiring to `references/ci-wiring.md`. `container-runtime-security` pointed its kube-hunter and Falco sections at the existing `references/{kube-hunter,falco}.md`, which already held the flag table, the Job manifest, the Helm install and the custom rules; it ends at 10,243 bytes. `cloud-incident-response` pointed its per-cloud telemetry table and containment commands at `references/{aws,azure,gcp}-ir.md`, which held both. No rule that only one body states was cut. Cost: a run that skips a pointer misses the CI wiring, the finding mapping or the per-cloud commands; each pointer names its condition.
+
+**D17 (2026-11-20) — P11 moved and deleted more than the plan lists, because the listed rows left all three bodies over 16,000.** The plan lists R2 for `supply-chain-security` and `iac-security` without a method, and R16 for `k8s-security`'s per-tool sections and CI workflow. Reading 1 (the plan): fix exactly those rows and record the overage under D3. Reading 2 (built): also move by branch (R16) and delete echo sections (§2 item 3). Each of the three lost `## Anti-patterns` and `## Rules`, whose bullets restate the sections above them; every guardrail is stated once where its section teaches it (the live-cluster authorization callout in `k8s-security`; keyless-only signing, both verify flags and "sign the digest" in `supply-chain-security`; baseline-only-shrinks and the sensitive plan JSON in `iac-security`). The CI workflows moved to a new `references/ci-wiring.md` in each skill, behind "wiring this into a pipeline". `k8s-security`'s exception YAML moved to `references/exceptions.md`, its per-tool flags and catalogs into the three existing references, and the supply-chain provenance paths A and B, the admission policy and rollout ladder, the cosign v2→v3 notes and the framework mapping into `references/slsa-provenance.md` and `references/cosign-sigstore.md`. `iac-security` moved its flag table and `.checkov.yml` into `references/checkov.md`. No rule that only one body states was cut. Cost: a run that skips a pointer misses the CI wiring, the exceptions file or the per-tool commands; each pointer names its condition.
+
+**D18 (2026-11-20) — P14 went past the plan's rows in three places, and ran its gate with the agent files named one by one.** (1) The gate line passes the folder `qa/java/agents` to `skill-lint`, which exits with `no SKILL.md under qa/java/agents`, because the lint takes a skill folder, an agent `.md` or a rule file. Reading 1 (the plan): run the line as written. Reading 2 (built): pass the seven `qa/java/agents/*.md` files, and the line is otherwise as written. The P17 and P18 gate lines carry the same folder path and need the same change. (2) The plan lists no method for the R2 rows of `api-contract-testing` and `test-quality-check`. Reading 1: fix those rows alone and record the overage under D3. Reading 2 (built): move by branch (§2 item 3), the message-pact section to `references/message-pacts.md` and the separate-repo section to `references/separate-repo.md`, and replace the `## Rules` and `## What NOT to do` lists with seven positive guardrails. (3) T1's note says each agent's `Gate evidence` line belongs to its P task, but P14's list does not name it. Reading 1: leave it. Reading 2 (built): the seven qa-java agents carry the O18 wording. Cost: two new reference files that G1 reads, and the agents lost the per-agent evidence hints (the pass rate over N runs for `qa-llm-java`, the strict-threshold proof for `qa-performance-java`), which the Done-when cells still carry.
+
+
+**D19 (2026-11-20) — P16 deleted the closing lists of six scanner skills and named the `performance` heading its own way.** (1) The plan lists R2 for seven bodies without a method. Reading 1 (the plan): fix those rows alone and record the overage under D3. Reading 2 (built): apply §2 item 3. `image-infra-scan`, `code-scan`, `known-vuln-scan`, `active-scan`, `secrets-scan`, `certificate-scan` and `api-spec-assets` lost their `## Anti-patterns`, and the six scanners their `## Rules (hard constraints)`, whose bullets restate the sections above them. A rule only the list stated stayed, as `## Guardrails` (`active-scan`: bounded durations and the parsed-SARIF gate; `secrets-scan`: a live true-positive is rotated, never allowlisted; `certificate-scan` and `known-vuln-scan`: no secrets in scan config; `known-vuln-scan`: wait on readiness) or as one line in the body (`image-infra-scan`: no secrets in scan config). `api-spec-assets` moved its renamed-spec variant to `references/renamed-spec.md`. (2) The audit's R6 suggestion names "Profiler hand-off", but the flagged `performance` heading is "When NOT to use any of these tools", a list of other skills. Reading 1: rename it "Profiler hand-off". Reading 2 (built): "Work that belongs to other skills"; the real profiler section keeps its own heading. `contract-testing-pact` became one `## Choosing Pact` section with "Use Pact when" and "Use something else when" lists. Cost: a run that skips a pointer misses the renamed-spec commands.
+
+**D20 (2026-11-20) — P17 deleted the closing lists of five skills and applied O18 to all seven agents, beyond the plan's rows.** (1) The plan lists R2 for five bodies without a method. Reading 1 (the plan): fix those rows alone and record the overage under D3. Reading 2 (built): apply §2 item 3. `passive-scan`, `permission-testing` and `dependency-scan` lost their `## Rules (hard constraints)`, `api-tests-grpc` lost it and its `## Examples` and "Ported from" paragraph, and `failure-injection-testing` lost the same pair and its "port of the canonical" paragraph, because their bullets restate the sections above them. A rule only the list stated stayed: `failure-injection-testing` gained the anti-pattern "raw `proxy.Add(…)` in a `[Test]`", and `permission-testing` gained the line "tag each case with its OWASP API id and WSTG-ATHZ test id". The two programmatic listings of `passive-scan` moved to `references/programmatic-path.md`, and the API3 section of `permission-testing` to `references/object-property.md`, each behind a pointer that names the condition. (2) The plan's P17 rows list the Fix line and the O20 (b) clause for the agents but not the `Gate evidence` line. Reading 1: leave it. Reading 2 (built): the template's Close-out note says each agent's `Gate evidence` line belongs to its P task, so all seven carry the O18 wording. (3) `desktop-tests.md` needed 900 characters cut, more than the R23 row implies. The cuts: the driver pins (now "`desktop-project-setup`"), the window-switch commands (now "`desktop-window-objects`"), the "returns the destination's window object" clause (`page-objects.md` states it), and wording. Cost: a desktop rule file points at two skills for facts it used to carry. The `WEBVIEW2_USER_DATA_FOLDER` per-worker note left the rule file and stays in `desktop-project-setup`.
+
+**D21 (2026-11-20) — P19 renamed the knowledge base's *slice* in the body text of seven files, not only in the headings and table headers.** O3 (a) names the headings and headers. Reading 1 (the plan): rename those six lines and leave "slice id", "KB slice" and "the slice depth" in the prose, which then disagrees with its own headers. Reading 2 (built): rename the term in `cross-feature-test-design` (`SKILL.md`, `example-cancel-booking.md`), `requirements-breakdown` (`SKILL.md`, `connections.md`), `test-case-writer/SKILL.md:39`, `qa-test-case-designer.md` and `qa-test-planner.md`, so "cross-section id" and "`KB cross-section @ <date>`" read the same everywhere. `bug-report-writer/SKILL.md:23` ("the relevant slice" of a log) and the JavaScript `.slice(` calls in `probes.md` are not the knowledge-base term and stay. Cost: the `Built from:` line of a basis now says `KB cross-section @ <date>`, so a basis written before this edit says `KB slice`.
+
+**D12 (2026-11-20) — The flag D5 adds does not clear R3 or R6, so P2 rewrote the five descriptions and renamed three headings.** D5 and P2 read the flag as clearing both. `tools/skill-lint.py` still applies R3 (description shape) to a hidden skill and R6 (no routing heading) to it. Reading 1 (the plan): add the flag only, and the gate keeps 17 findings. Reading 2 (built): add the flag, then give each of the five a description of the shape `Use when …. Triggers "…". Not for … (sibling).`, and rename `## Handoffs` (`code-comments`, `agent-orientation-cache`) to `## Applied by` and `## Where else things live`, and `## When to Use WebFetch` (`claude-api`) to `## Fetching live documentation`. Cost: five descriptions lost their "Do NOT invoke directly" wording. The flag now states that. Another task that adds the flag to a skill must do the same, or change the lint.
+
+**D13 (2026-11-20) — P3 moved more of `delivery-plan` than the plan lists, because the listed moves left it near 38,000 chars.** The plan lists the shape and reconcile moves and the R17 and R19 cuts, and names the gate as no `token-audit` line. Reading 1 (the plan): make only those moves, and record the remaining overage under D3. Reading 2 (built): also move by branch, so the file ends at 14,790. New references: `references/task-block-rules.md` (frontend, rendering, signals, batch, `Q` and `TD` rules, read when a task is of that kind) and `references/self-check.md` (read before handing off). The inline `B3` and `Q1` task blocks, the plan template and the Mission Control block were deleted, because `references/example-delivery-plan.md` carries each filled. The "Tracking execution" section was deleted, because plan-format §7 owns it. `references/reconcile.md` is where `solution-planner.md:68` now points (P4's `:68` row, rewritten in its block). Cost: a planner follows two more pointers, and the Step 4 rules that apply to every task stay inline.
+
+**D22 (2026-11-20) — P20 bundled `requirements-author`'s skills into `dev` by moving five registrations, and the labels changed with them.** O10 (b) says bundle what the agent loads into `dev`. `plugin-surface-check` forbids a skill registered by two categories, so a bundle is a move, not a copy.
+
+| Option | Verdict | Why |
+|---|---|---|
+| Move `ba-scoping-writeup`, `ba-epic-writer`, `ba-story-writer`, `ba-story-quality-review` and `ba-project-memory` from `business-analysis` to `dev`, listed first in `dev`'s `skills` | chosen | `business-analysis` depends on `dev`, so it keeps all five, and `dev` alone now has what `/dev:refine` loads |
+| Also move `qa/manual/requirements-breakdown` | rejected | It is registered in `qa-java`, `qa-dotnet` and `qa-typescript` (category `qa`), and moving it renames `qa-<stack>:requirements-breakdown` in about a dozen qa files. The agent already loads it by its path, which resolves because the plugin root is the repo |
+| Also move the `rules` skill | rejected | `dev` has its own `rules`. The agent reads `business-analysis/skills/rules/` by path when the project has none |
+
+Reading 1 (the plan): list the bundle and make it, with no word on names. Reading 2 (built): the labels are `dev:scoping`, `dev:epics`, `dev:stories`, `dev:story-review` and `dev:knowledge-base`. P20 changed them in its own paths, in `README.md` and in `docs/skills-catalog.md`. About 20 files outside P20's paths still say `business-analysis:<label>`, and G1 renames them (P20's `As built`). Cost: `/business-analysis:stories` no longer exists, and `/dev:stories` does.
+
+**D23 (2026-11-20) — P20 went past the plan's rows in three small places.** (1) The gate line passes the folders `business-analysis/agents` and `training-data/agents`, which `skill-lint` rejects (D18). Reading 1 (the plan): run the line as written. Reading 2 (built): pass the agent files one by one. (2) The audit's R18 row for `business-analyst.md` names `:19` and `:60`, but `:19` holds a positive line ("Model only what a question demands") and only `:60` carries the prohibition. Reading 2: fix `:60` and leave `:19`. (3) The audit suggests `references/feature-slice.md`. O3 (a) renamed the term, so the file is `references/feature-cross-section.md`, its H1 is "Feature cross-section", and the `ba-project-memory` heading is "Connection cross-section". Cost: `ba-feature-conflict-check/SKILL.md:40` still says "feature slice" until G1.
 
 ## Answered questions (2026-11-20)
 
@@ -511,6 +570,19 @@ Then run `python3 tools/plugin-surface-check.py`.
 - **`engineering-practices/rules/plans.md`** (8,206 chars). R23: keep the constraints, and move procedure behind a pointer to plan-format.
 - **O12 is C1's.** C1 has already rewritten the gating rule in plan-format §5, `rules/plans.md`, `writing-plans` and `verify-before-done`. P1's R16, R17 and R23 edits keep that wording as C1 wrote it.
 - **Not in P1:** `engineering-practices/rules/SKILL.md` (T1), and `engineering-practices/rules/feature-docs.md` (P4).
+- **As built (2026-11-20):** every row is fixed or named below. Proof, from the repo root:
+  - `python3 tools/skill-lint.py` over the eight P1 paths prints `0 findings`. `python3 tools/token-audit.py --violations-only | grep -E 'writing-plans|systematic-debugging|verify-before-done|quality-constraints|source-grounding|notebooklm|brainstorming'` prints nothing. `writing-plans/SKILL.md` was 26,046 chars (25,659 body, after C1) and is 16,286 with frontmatter (under 16,000 body).
+  - `python3 tools/plugin-surface-check.py` prints one line, `dev: description of 'plan-experience' holds an unquoted ': ' (backend/_shared/experience-plan)`, and exits 1. That file is P3's, edited beside P1 (its description line differs from `HEAD`); P1 touched nothing there. It is unverified until P3 lands.
+  - R16 moves: `writing-plans` web-route rendering and self-review item 16 moved to `engineering-practices/writing-plans/references/web-routes.md`, behind "A web route in the plan → read …" in Step 1 and self-review item 15. `systematic-debugging` Step 1 item 4 moved, with its `# Layer` comments deleted (R21), to `engineering-practices/systematic-debugging/references/multi-component.md`, behind "The bug crosses component boundaries → read …".
+  - `writing-plans`: R17 pointers replace the two-closing-tasks bullet, the gate bullet, the close-out bullet, the halfway-stop paragraph and the test-first order bullet (plan-format §4, §5, §6, §7 and `rules/plans.md`). The stack list is gone (O2), as is the "eight" count. Self-review items are written as criteria (R20), and the two that restated plan-format §5 (gate, documentation) point at it. Steps 1–6 each end on a `Done when`. Added: `## When to use`, `## When NOT to use` (siblings `feature` and `/dev:plan-system`). R19: "DRY. YAGNI. Frequent commits.", "You reason best…", the worked budget example and the "In existing codebases" bullet are deleted.
+  - C1's gating wording kept in `plans.md` and `verify-before-done`. In `plans.md` the two sentences that listed what a non-frontend and a frontend task run are replaced by "What each stack runs is plan-format §5's", which states them (`plan-format.md` §5, lines 204–207 before the contents list).
+  - `plan-format.md` R9: a `**Contents:**` list of the nine `##` headings follows the H1.
+  - `systematic-debugging`: `(feature)` at `:3`; `## When NOT to use`; Steps 1–3 end on a `Done when`; the table column is "Done when"; R18 rewrites at `:27, 36, 105, 131, 148–149`; R19 deletes at `:28` and `:100`.
+  - `verify-before-done`: "The evidence check" (and `:14`'s "evidence check"); "Why This Matters", the `:12` sentence and the `:10` repeat deleted; `## When to use` and `## When NOT to use` added (the old "When To Apply" became the first).
+  - `quality-constraints`: rows 33, 34, 36, 38, 40 point at `CLAUDE.md` "Test code rules" or `plans.md`; the red-test rows say "a dated `D<n>` in the plan's open issues and the final message" (O6); "When a gate goes red" ends on a done-when; "check" became *gate* and *evidence* (`:10, 17, 42, 45`).
+  - `source-grounding`: Steps 1–4 each end on a `Done when`; the Overview and "Common mistakes" are deleted; the source list opens "Use only official docs…". `notebooklm`: `scripts/run.py` and `scripts/config.py` now point at `engineering-practices/bundled/notebooklm/scripts/…`, steps 1–4 end on a `Done when`, the pins point at `requirements.txt`, `:8` is deleted, `## When to use` and `## When NOT to use` are added. `brainstorming`: `:20` says "design approval", the design rules point at `CLAUDE.md` "Simplicity (KISS)" and the read-2–3-files rule.
+  - **Dropped row:** `systematic-debugging/SKILL.md:16` (R19). The row quotes "They often contain the exact solution", which is at `:28` and is deleted there; `:16` holds the "matters most when guessing is tempting" paragraph, which changes behaviour, so it stays.
+  - **Not met:** `rules/plans.md` is 6,876 chars (8,444 before), not 6,000. See D12.
 
 ### P2 — dev: the audit front doors and the unregistered skills
 
@@ -553,6 +625,14 @@ Then run `python3 tools/plugin-surface-check.py`.
   Then confirm that the lint no longer reads any of them as a front door.
 - **`engineering-practices/agents/code-auditor.md:51`, R13.** Add the template's `## Report` block, with a `Mode:` line.
 - **Not in P2:** `engineering-practices/rules/audits.md`, which is read only.
+- **As built (2026-11-20):** every deliverable line exists. Proof, from the repo root:
+  - `python3 tools/skill-lint.py` over the eight P2 paths prints `0 findings`. `python3 tools/token-audit.py --violations-only | grep -E 'spec-vs-code-audit|feature-audit'` prints nothing. `spec-vs-code-audit/SKILL.md` was 24,887 chars and `feature-audit/SKILL.md` 19,996. Both are under 16,000 now.
+  - Mode B of each moved whole, with its done-whens, to `engineering-practices/{spec-vs-code-audit,feature-audit}/references/re-audit.md`. Each `SKILL.md` carries a "A register and a prior report exist →" (feature-audit: "A prior report exists →") pointer under `## The two modes`.
+  - R15 done-whens are on Mode A steps 2–4 of `spec-vs-code-audit` and steps 2–5 of `feature-audit`, and on step 1 of Mode B and the Mode B report step in both reference files. R17 pointers name `audits.md` for the id, class, Resolved and section-summary rules. The class table stays in `spec-vs-code-audit`. `feature-audit` keeps only its "Typical here" column and points at that table. R19: the read-only restatements, the Evidence-rules repeat in each `## Rules`, and `standards-audit-engine`'s `## When uncertain` (all but the scope-ambiguity bullet) are deleted.
+  - `standards-audit-engine/SKILL.md` description is now "Use when a stack's `standards-audit` skill (`/<plugin>:audit`) or the `design-auditor` starts a conformance round. Triggers …" (O22). Line 8 names `design-auditor` beside the stack skill. Its severity table is replaced by the pointer to `CLAUDE.md` "Review behavior", and the impact-qualifier sentence stays.
+  - `disable-model-invocation: true` is in the five frontmatters. `code-auditor.md:51` now starts `Mode: A — BASELINE | B — RE-AUDIT round <N> · …`.
+  - **Divergence (D12):** the flag alone did not clear R3 and R6 in the lint. P2 fixed them in the five files too.
+  - `python3 tools/plugin-surface-check.py` prints `dev: description of 'plan-experience' holds an unquoted ': ' (backend/_shared/experience-plan)`, exit 1. That is P3's file, edited in this working tree while P2 ran. No P2 file is named. **Unverified:** that the check reads `OK` once P3 lands. G1 re-runs it.
 
 ### P3 — dev: `delivery-plan`, `session-budget`, `experience-plan`
 
@@ -581,6 +661,14 @@ Then run `python3 tools/plugin-surface-check.py`.
 - **`backend/_shared/session-budget/references/prompts-section-template.md`.** R9.
 - **`backend/_shared/experience-plan/SKILL.md`.** R2 (the description is 246 chars); R10 at `:159`, where the marker goes in a code span (014 D13).
 - **Not in P3:** any other `backend/_shared/` skill (P4).
+- **As built (2026-11-20):** all three folders lint `0 findings`, `token-audit` prints nothing for them, and `plugin-surface-check` prints `OK`.
+  - `delivery-plan/SKILL.md` 74,413 → 14,790 chars. Shapes are `references/shape-{feature-complete,agent-batched,platform-first}.md` behind the "Sequencing shape:" table in Step 2. The reconcile procedure is `references/reconcile.md`, behind the line after the prerequisites. The gate restatements, the §4 bullets, the preamble and the close-out paraphrase are one pointer each. "Out of scope" is `Not in <id>`. The stack list is "the `plan-format.md` §4 list" in Step 1, Step 4 and `self-check.md` item 5 (the `:687` row, O2). Extra moves are D13.
+  - Rows dropped: none. `:88` and `:421` still resolve (`SKILL.md` Output line, `task-block-rules.md`). The audit's `:559` parenthetical went with the "Tracking" section.
+  - `session-budget/SKILL.md` 17,140 → 15,949: the gate line and the close-out paragraph point at plan-format §5 and §7, and self-check item 6 and the `Rules` lead are shorter.
+  - `experience-plan`: the description is 186 chars, with no `: ` (the first draft broke YAML and `plugin-surface-check` caught it). `:159` has `[TBD]` in a code span.
+  - R9: `**Contents:**` lists in `example-delivery-plan.md` and `prompts-section-template.md`.
+  - Unverified: that a planner still reaches the `task-block-rules.md` rules. Nothing ran a plan through the slimmer skill.
+  - For G1: `backend/_shared/agents/solution-planner.md:68` and `docs/skills-catalog.md` still name the reconcile procedure by its old heading, which now sits in `references/reconcile.md`. The first is P4's row. `example-delivery-plan.md:571` says "Out of scope:" inside a prompt block, outside P3's row.
 
 ### P4 — dev: `solution-blueprint`, `business-documentation`, `feature-trace` and the planning and documenting agents
 
@@ -601,6 +689,14 @@ Then run `python3 tools/plugin-surface-check.py`.
 - **`backend/_shared/agents/be-feature-documenter.md:89`.** R13: add the `## Report` block with a `Mode:` line.
 - **`engineering-practices/rules/feature-docs.md`** (10,500 chars). R23: keep the constraints at `:9–40`. Move the document's shape and procedure into the skill `be-feature-documenter` loads for the shape, which its Steps table's Load cells name. Leave a one-line pointer behind.
 - **Not in P4:** `delivery-plan`, `session-budget` and `experience-plan` (P3), and `requirements-author` (P20).
+- **As built (2026-11-20):** every path in the gate lints `0 findings`, `token-audit` prints nothing for the four files, `feature-docs.md` is 5,962 bytes, and `plugin-surface-check` prints `OK`.
+  - `solution-blueprint/SKILL.md` 30,276 → 16,179 chars with frontmatter (body under 16,000). Three moves, each behind a condition: `references/architecture-style.md` (greenfield or a live architecture decision, Step 3), `references/key-flows-and-decisions.md` (a flow or a 3+-input rule, Step 3.5), `references/blueprint-template.md` (before writing `blueprint.md`). The rest is R17/R19 trimming.
+  - `business-documentation/SKILL.md` 27,914 → 14,146. The guide's skeleton, task format, sections, stamp and length limit are `references/guide-shape.md`; REFRESH/AREA/CAPTURE is `references/run-modes.md`. R3: the description now has `Triggers "…"` and ends `Not for tracing code (doc-feature-trace).`. The Reconcile section keeps one line per step and points at `references/reconcile.md`.
+  - `example-area.md` R8: the four sibling links are `(<bookings>.md)` and `(<scheduling>.md)`, patterns the lint skips, with one sentence in the intro saying so. `trace-recipes.md` R9: `**Contents:**` replaces the `Parts:` line.
+  - `be-documenter.md` 17,599 → 13,977: the delivery-chain diagram is a pointer to `solution-planner.md`, the mode paragraph is `business-documentation/references/run-modes.md`, plus R17 trims. `solution-planner.md` 16,835 → 13,977: the Step 9 cross-artifact checks are `solution-blueprint/references/pack-cross-checks.md` (named in the Step 9 Load cell), RESUME points at `delivery-plan/references/reconcile.md` (R12 at `:68` fixed; P3's note about the old heading is closed), and the chain bullets point at `plans.md`. `be-feature-documenter.md`: `## Report` opens with `Mode: WRITE | UPDATE | CAPTURE | DOC1`. Both documenter agents' Step Load cells name `references/guide-shape.md`.
+  - `feature-docs.md` 10,500 → 5,962 bytes. The Shape section was already stated in `doc-business-model`, so it became one pointer plus two kept bars (every role, no formula in a task). Its constraints, the language and screenshot rules and `paths:` are kept (D14).
+  - Unverified: that a documenter run reaches `guide-shape.md` from the Load cell, and that the blueprint, run through a planner, still finds its template. Nothing ran either skill.
+  - For G1: `docs/skills-catalog.md` may still describe the moved sections by their old headings (`The guide`, the blueprint template).
 
 ### P5 — design and fe-blazor
 
@@ -641,6 +737,16 @@ Then run `python3 tools/plugin-surface-check.py`.
 - **`frontend/blazor/skills/accessibility/SKILL.md:11`.** R8: name the QA skill without a link, or link `../../../../qa/<stack>/skills/accessibility-testing/SKILL.md`.
 - **O20 (b).** In frontend/blazor/agents/fe-blazor.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
 - **Not in P5:** `design/rules` and `frontend/blazor/skills/rules` (T1), and `standards-audit-engine` (P2).
+- **As built (2026-11-20):** every path in the gate lints `0 findings`, `token-audit` prints nothing for `frontend/blazor` or `auth0-blazor`, and `plugin-surface-check` prints `OK`. `pytest tools` gives 95 passed.
+  - `design-auditor.md`: the report-template pointer is the engine's full path, `## Report` opens `Mode: A — BASELINE | B — RE-AUDIT`, step 4 and 6 name states, the fourteen-skills count is gone, and the four "Never" lines carry their targets. The Claude-in-Chrome protocol is `design/ux-review/references/claude-in-chrome.md` (new), behind one Invariants line.
+  - The five `pro-rules` pointers (`design-tokens:23`, `iconography:23`, `motion:23`, `ux-patterns:31`, `visual-identity:32`) name `design/ui-ux-pro-max/references/pro-rules.md`.
+  - `visual-identity/SKILL.md` 16,199 → 15,528 bytes: heading `# Visual identity`; the studio paragraph, "Not taking a risk…" and the Chanel sentence are gone; every corpus count is gone, including "17-slot"; the recipe's accent and dark-palette bullets point at *Color is a system*; the process ends on "Done when the plan names color, type, layout and one signature, and Review checklist items 1–10 each pass or carry a stated reason"; "the six" is "the default looks in *Calibration*" at `:73`, `:79`, `:86`, checklist 3.
+  - `prototype/SKILL.md`: step 7 points at `references/in-app-handoff.md` (new, holds the five-item brief); `:8` sentence deleted.
+  - `fe-blazor.md` 9,950 chars: Read-the-rules is the template wording with `blazor.md` named; the rendering paragraph is one sentence plus the `rendering-strategy.md` pointer; Step 1 names the critique table in the decision record against `visual-identity` Calibration (no count); Step 3 names the `performance` budget table and a flow list; Fix line is the template's; the O20 (b) clause is gone and the read-only clause stays; `Gate evidence` is O18's wording.
+  - R2: `ui-rules` 21,122 → under 16,000 by moving §6 Navigation and Footers and §7 to `references/navigation-and-surfaces.md` (the §7 heading stays as a pointer, so `§7` citations still resolve), plus a shorter lead and Validation. `basics` 18,619 → under 16,000 by moving "Component architecture" to `references/component-layering.md`, leaving a pointer. `auth0-blazor` 16,035 → under 16,000 by deleting the six "What NOT to do" lines that restate Rules.
+  - `auth0-blazor` description ends `Not for tenant setup or OIDC theory (auth0-concepts).` at 193 chars. `accessibility:11` names `accessibility-testing` without a link.
+  - Unverified: that an agent loading `ui-rules` or `basics` still reaches the moved sections. Nothing ran a feature build through the slimmer skills. `ui-rules` Validation now ends on "every item in the reference that applies passes", which is looser than the two lines it replaced.
+  - For G1: `basics/SKILL.md` still has `name: concepts` and `auth0-blazor` has `name: auth0`, where R1 wants the topic and the folder name. Neither is in an audit row, so P5 left them.
 
 ### P6 — fe-react
 
@@ -674,6 +780,13 @@ Then run `python3 tools/plugin-surface-check.py`.
 - **`auth/auth0-react/SKILL.md`.** R3.
 - **O20 (b).** In frontend/react/agents/fe-react.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
 - **Not in P6:** `frontend/react/skills/rules` (T1). `rules/react.md` changes only under O14 (b).
+- **As built (2026-11-20):** every row is fixed or named below. Proof, from the repo root: `python3 tools/skill-lint.py` over the ten paths of the gate prints `0 findings`, `python3 tools/token-audit.py --violations-only | grep -E 'frontend/react'` prints nothing, and `python3 tools/plugin-surface-check.py` prints `OK`.
+  - **Bodies (file chars, was → now; `token-audit` counts the body without the frontmatter, so each is a few hundred lower there):** `error-handling` 33,390 → 15,949, `ui-rules` 23,086 → 15,967, `data-fetching` 20,054 → 16,051, `basics` 17,124 → 15,716, `animation` 16,679 → 14,676. `rules/react.md` and `react-data.md` are untouched (O14 (a) needs no rule-file change).
+  - **error-handling:** the R21 examples carry no comments, and the two "Wrong:" and "Right:" blocks are captioned in prose. The three-state example and the stale example fail only on `q.data === undefined` (O14), and the scope example passes `stale={q.isError && q.data !== undefined}`. The retry-test-id mismatch (`Orders.Retry` against `Orders.Error.Retry`) is now `Orders.Error.Retry` everywhere. R17: the retry, `Retry-After`, timeout-idempotency and notification position/dismissal/content restatements are one clause plus the pointer to `react.md` and `react-data.md`; the closing `## Rules` echo list is deleted and its rule-file pointer moved to the intro. R19: the "older never a toast rule" clause is gone. R16 and D15: `references/live-connection-grids-and-gone.md` (the socket and offline block, grids, "Gone, not broken"), `references/notifications.md` (the contract's extras, the library table, the raise-point, volume control) and `references/validation.md`, each behind a row of the "Situational surfaces" table. R15: every Validation line is one scenario and one observable state with its test id; the two bullets for surfaces no section teaches (`localStorage` quota, two tabs signing out) are dropped, and so are the double-click, idempotency-key, 409 and 422 clauses of the mutation line, which `references/writes-and-dependencies.md` already teaches.
+  - **ui-rules, data-fetching, basics, animation:** by D15. Deleted: `ui-rules` `## Rules` and `## Validation` (the first became one intro sentence); `data-fetching` `## Rules`, and its timeout paragraph now points at `error-handling` (Timeouts); `basics` "Comparison: React ↔ Blazor" and "Navigation" (a restatement of `react.md`); `animation` `## Rules` and `## What NOT to do`. Moved: `ui-rules` §5, §6 Navigation and Footers, and §7 to `references/{bulk-operations,navigation-and-footers,surface-choice}.md`, with the section numbers kept so `component-writer`'s "ui-rules §4" and the other `§` references still resolve.
+  - **R9, R6, R3:** the two reference files open with `**Contents:**` lists (16 and 20 bullets). `component-testing`'s `### Handoff` is `### Mutation grading`. `auth0-react`'s description ends `Not for tenant setup or OIDC theory (auth0-concepts).` (199 chars).
+  - **fe-react.md:** the rules line is the template wording naming `react.md` as the core file; the `:18` paragraph is one sentence plus the `rendering-strategy.md` pointer; the `:19` invariant is deleted; the Step 1 Done-when names the critique table against each default look in `visual-identity` Calibration (O11); the Step 3 Done-when names the rule-file sections and the `performance` Budgets table as its proof (R15); the Fix line carries the template's sweep wording; the O20 (b) clause is gone and the read-only clause stays; `Gate evidence:` is the template line (O18).
+  - **Held:** no deferred O. **Not edited, for G1:** `component-library/references/{chakra,mui,mantine,none}.md` and `seo/SKILL.md:42` carry inline example comments that cite `ui-rules` (R21); they are outside this task's paths. `animation/SKILL.md` called the motion library `animation` in 14 places (a rename artifact: `motion/react` is the import); P6 restored `motion`.
 
 ### P7 — mobile-react-native, mobile-ios, mobile-android
 
@@ -720,6 +833,14 @@ Then run `python3 tools/plugin-surface-check.py`.
 - **O20 (b).** In mobile/react-native/agents/mobile-react-native.md, mobile/ios/agents/mobile-ios.md and mobile/android/agents/mobile-android.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
 - **Not in P7:** the mobile `rules` skills (T1), and `mobile/_shared/` (no rows).
 
+- **As built (2026-11-20):** every path in the gate lints `0 findings`, `token-audit --violations-only | grep mobile/` prints nothing, and `plugin-surface-check` prints `OK`.
+  - The three agents: Read-the-rules is the template wording with the core file named (`react-native.md`, `swift.md`, `android.md`); the version asides at `mobile-react-native:16`, `mobile-ios:17` and `mobile-android:17` point at the core rule file and `CLAUDE.md` "Version policy" (no floor, no `targetSdk` number); the Fix line, the Step 3 and Step 5 Done-when cells, the `Gate evidence:` line and the O20 (b) clause are as the prompt lists. Step 1 names the critique table against the default looks in `visual-identity` Calibration (no count). `mobile-ios:39` now says "an older SDK" instead of "below the iOS 27 SDK".
+  - `mobile-android/unit-testing/SKILL.md` 16,967 → 12,664 chars. The Compose UI test v2 section moved to `references/compose-ui-tests.md` and the Kover setup to `references/coverage-kover.md` (both new, each behind a pointer naming its condition). Plan refs, "built but unverified", "unconfirmed" and "verified … 2026-10-10" are gone; `:75–78` and `:95–97` point at `android-tests.md`; Generation steps 1–4 end on "Done when"; `:96–97` say "a test client" and "a teardown registry".
+  - R9 contents lists are in the three `conformance-checklist.md` files (25, 24 and 24 entries, each including "Section index"). R3: the four descriptions end `Not for … (<sibling>).` (`mobile-ios`, `auth0-concepts` ×3).
+  - Unverified: that an agent working a Compose UI test reaches `references/compose-ui-tests.md` from the one-sentence pointer. The three agents' `Steps` table was not run end to end.
+  - Beyond the prompt (D14): Android step 1 gains the critique table; `mobile-android.md:3` drops "Kotlin 2.4, AGP 9.4"; "(plan 003)" is gone from `mobile/ios/skills/unit-testing` and `mobile/react-native/skills/component-testing` (the same defect as the Android row).
+  - For G1: `mobile-react-native.md:3, 8` still say "SDK 57" and `mobile-ios.md:3` "Xcode 27, Swift 6.4", which restate `CLAUDE.md` "Version policy" in a description and a heading. No audit row names them, so P7 left them.
+
 ### P8 — desktop-macos, desktop-windows
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -756,6 +877,15 @@ Then run `python3 tools/plugin-surface-check.py`.
 - **O20 (b).** In desktop/macos/agents/desktop-macos.md and desktop/windows/agents/desktop-windows.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
 - **Not in P8:** `mobile/ios/skills/rules/*`. They share file names, but they are within budget and have no rows.
 
+- **As built (2026-11-20):** every path in the gate lints `0 findings`, `plugin-surface-check` prints `OK`, `token-audit --violations-only` prints nothing for `desktop/` or `auth0-macos`/`auth0-windows`, and `wc -c` is under the budget for every listed rule file.
+  - Rule files, chars: `swift.md` 5,924 (core, ≤ 6,000); `swiftui-mac.md` 2,487, `xcode-config.md` 2,398, `mac-accessibility.md` 2,401, `swift-persistence.md` 2,308, `appkit.md` 2,070, `swift-networking.md` 1,912, `winui-xaml.md` 2,457, `cppwinrt.md` 2,492, `win-accessibility.md` 2,316. Every `paths:` is unchanged. Each trimmed file opens with a `Recipes:` pointer to the skills that already teach the cut how-to (`ui-components`, `windows-and-scenes`, `menus-and-commands`, `forms`, `accessibility`, `test-ids`, `appkit`, `networking`, `project-setup`, `shared/distribution`, `migration`, `cpp-winrt`); no skill gained text. `swift.md` points at `CLAUDE.md` "Simplicity (KISS)" and "Comments" instead of restating them.
+  - Cut with no new home, because no skill or rule needs it: contrast ratios and the 28 pt, 10 pt and 13 pt sizes in both accessibility files, the 20-item list threshold in `winui-xaml.md`, the `#Preview`, menu-bar-icon and `UtilityWindow` lines of `swiftui-mac.md`, and `swift-networking.md`'s forced-update and `404` rows. `xcode-config.md` drops the SwiftLint line and the CocoaPods trunk date (`migration` and `project-setup` keep the date).
+  - Agents: `desktop-macos.md` 10,069 and `desktop-windows.md` 11,015. Read-the-rules is the template wording with the core file named (`swift.md`; `csharp.md` for C#, `cppwinrt.md` for C++); `:17` points at the core rule file and `CLAUDE.md` "Version policy"; the "a view in a folder no glob covers" note stays. Step 3 and step 6 Done-when cells name the rule-file items, the `performance` skill's budget table (macOS) or *Measure first* figures (Windows) and "every `shared/distribution` row passed or waived with its reason"; Windows step 4 points at the floor in `unit-testing`. The Windows command table is now `## Where the commands live`, three pointer bullets (`project-setup`, `unit-testing`, `code-review`, plus the two `cpp-winrt/references/` files). The Fix line, `Gate evidence:` line and the O20 (b) clause are as the prompt lists; the read-only clause stays.
+  - `desktop/windows/skills/unit-testing/SKILL.md` 14,806 → 13,160. `## Test shape` and `## Rules` point at `CLAUDE.md` "Test code rules" and keep the NUnit forms; the version numbers and `(Learn, …)` notes are gone; the two tests are `Should_ShowTwoRows_When_LoadSucceeds` (asserts the row count) and `Should_BeOnSale_When_PriceIsReduced`; `## Telemetry` and the Dispatcher gotcha are deleted.
+  - R9: a `**Contents:**` list of all 22 `##` headings (including "Section index") is in both `conformance-checklist.md` files. R3: `desktop/_shared/security` ends `(qa-security).`; the two `auth0-*` descriptions end `(auth0-concepts).` and `auth0-macos` lost "native" to stay at 194 chars.
+  - Unverified: that a session loading a trimmed rule file still reaches the how-to from the one-line `Recipes:` pointer; neither desktop agent's `Steps` table was run end to end.
+  - For G1: `desktop-windows.md:27` still lists ".NET 8 or 9, Windows App SDK 1.x" as migration triggers, which restates `CLAUDE.md` "Version policy"; no audit row names it, so P8 left it.
+
 ### P9 — be-dotnet, be-java, be-node, be-python, be-rust
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -783,6 +913,16 @@ Then run `python3 tools/plugin-surface-check.py`.
 - **R3.** `auth/_shared/auth0-concepts/SKILL.md` and `auth/_shared/oidc-concepts/SKILL.md`.
 - **O20 (b).** In backend/{dotnet,java,node,python,rust}/agents/be-<stack>.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
 - **Not in P9:** `observability/` (P10), and the `be-*` `rules` skills (T1).
+
+- **As built (2026-11-20):** `skill-lint` over the 13 gate paths prints `0 findings`, `token-audit --violations-only | grep -E 'backend/(dotnet|java|node|python|rust)/'` prints nothing, `plugin-surface-check` prints `OK`.
+  - Agents (chars): `be-dotnet` 6,187, `be-java` 5,392, `be-node` 6,033, `be-python` 7,036, `be-rust` 7,115. Read-the-rules is the template wording with the core file named (`dotnet.md`, `java.md`, `node.md`, `python.md`, `rust.md`), keeping be-rust's `#[cfg(test)]` note and be-node's narrow `*.ts` globs. The version asides in step 2 read "the lane per the core rule file and `CLAUDE.md` 'Version policy'"; the "past support" sentences and `be-python`'s "Never raise `requires-python`" are gone. Steps 1 and 4 and the Fix line carry the R15 wording (the sweep is "every sibling sharing the defect's pattern fixed or listed in the report"). `be-python` step 1 and `be-rust` step 1 keep their stack-specific clauses (upload classes and limits; error variants and their HTTP status) after the earn-it criterion. O18: `Gate evidence: <the Gate: line's commands and results, including coverage>` in all five, with `be-python` and `be-rust` losing their stack-specific lists. O20 (b): the "stays red … dated `D<n>` … The close-out gate rules on it." clause is deleted from all five and the read-only clause stays.
+  - `be-python.md:16–17` now point at `python-pipeline.md:12` and `python-container.md:14`; the contract invariant stays. `be-java` O19: the `auth/_shared/{auth0-concepts,oidc-concepts}` row in step 2 and the telemetry-base line naming `observability-engineer-java`.
+  - Dropped row: the audit's `be-rust:8` version aside is the H1 `(stable; edition 2024 primary / 2021 supported)`, which is the template's own `(<Stack / version>)` slot and matches the other four H1s. It stays. Only `:17` changed.
+  - R2, chars: `java/unit-testing` 19,160 → 15,958, `dotnet/unit-testing` 18,327 → 15,732, `node/unit-testing` 18,014 → 15,830, `python/media-processing` 19,038 → 15,479, `rust/pattern-writer` 17,975 → 15,957. Order of cuts per §2 item 3: restatements of the rule file and `CLAUDE.md` first (the version-policy paragraphs now point at `CLAUDE.md` 'Version policy'; the `CLAUDE.md` mentions in the parameterized, naming and test-data lines are gone), then moves by branch. The coverage-gating sentences C1 wrote (the `Measure` lead-in and generation step 6) are untouched.
+  - New references: `java/unit-testing/references/{jacoco-coverage,seam-examples}.md`, `dotnet/unit-testing/references/{coverage-measure,seam-examples}.md`, `node/unit-testing/references/tsc-prerequisite.md`, `python/media-processing/references/photo-operations.md` (dominant colours, resize ladder), `rust/pattern-writer/references/crate-per-module.md`. Each is reached from a one-line pointer that names its condition.
+  - R3: `auth0-concepts` and `oidc-concepts` end `Not for … (sibling).`; both descriptions are ≤ 200 chars (198 and 197, counted without the `description:` key); `token-audit` lists neither.
+  - Unverified: that a session following a new pointer finds the moved how-to (no skill was run end to end); the rule-file wording was not re-read against the trimmed bullets in `rust/pattern-writer` beyond the lints and pinning sentences quoted there.
+  - For G1: `name: patterns-apply` sits in all five `backend/*/skills/pattern-writer/SKILL.md` front matters, whose folder is `pattern-writer`. No audit row names it, so P9 left it.
 
 ### P10 — data and observability
 
@@ -818,6 +958,15 @@ Then run `python3 tools/plugin-surface-check.py`.
 - **O20 (b).** In data/agents/data-architect.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
 - **Not in P10:** `data/rules` (T1).
 
+- **As built (2026-11-20):** `skill-lint` over the 10 gate paths prints `0 findings`, `token-audit --violations-only | grep -E 'data/(dynamodb|elasticsearch|cosmosdb)|logs-traces-setup'` prints nothing, `plugin-surface-check` prints `OK`. No commit was made: the queue commits.
+  - **`dynamodb`** 11,742 chars (was 19,539). `:105–207` moved to `references/connections.md` (the three client blocks, comments removed) and `references/security-iam.md` (IAM, `LeadingKeys`, KMS tier, PITR, global tables), behind two pointers in `## Connections and security`. R21 `:141, 234, 237` fixed (the `// Throws…` fact is now a sentence under the block). Data `:14, 24, 96` fixed. `## Rules` keeps nine rules no other section states; `## What NOT to do` is gone and its items are folded into positive rules. Generation steps 1–5 end on a checkable `Done when`. O15 at step 4: "Wrap it in a repository only when a second store or a test seam needs it."
+  - **`elasticsearch`** 16,806 to under 16,000 (token-audit counts the body): `## Rules` and `## What NOT to do` collapsed to the three rules stated nowhere else; the intro handoff paragraph, the observability bullets and the inline comments in two blocks tightened.
+  - **`cosmosdb`** 16,849 to 15,324 bytes: `## Rules` and `## What NOT to do` collapsed to two rules stated nowhere else (2 MB item limit, checkpointing a change-feed processor).
+  - **`migrations:63`** O4: the table header is `Steps`. Prose elsewhere in the skill still says "phase"; R11 reads headings and table headers only.
+  - **`logs-traces-setup`** 14,881 chars (was 17,321 in the audit, 16,869 at run start). Vector and Fluent Bit moved to `references/forwarders.md`, multi-tenant and Grafana Cloud to `references/multi-tenant-and-cloud.md`. Promtail is stated once, in the Alloy section; the `### Promtail` section and "River config" are gone. The Alloy block lost its step markers and YAML comments. O16: the trace-correlation table has a rust row (`trace_id`, from `with_span_list(true)`), and the smoke query is `{service="<app>", environment="<env>"}`. `## Rules` keeps two rules (pinned image tags, declarative data sources); steps 1–8 each end on `Done when`.
+  - **Agents.** `data-architect` `:24` is the template wording with `data.md` as the core file and keeps the "five engines have no rule file" note, now pointing at "the engine skill"; the Fix line is the template's sweep wording; the O20 (b) clause is gone and the read-only clause stays. The four `observability-engineer-*` Fix lines end on "every sibling service sharing the defect's pattern fixed or listed in the report".
+  - **For G1, outside P10's paths:** `data/cosmosdb/SKILL.md` Generation step 4 still says "a typed repository per logical entity", the same CLAUDE.md "Pattern application" conflict that O15 settled for DynamoDB. Other YAML blocks in `logs-traces-setup` (Tempo, Collector, data source) still carry inline comments.
+
 ### P11 — devops: the agent, `k8s-security`, `supply-chain-security`, `iac-security`
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -845,6 +994,11 @@ Then run `python3 tools/plugin-surface-check.py`.
 - **R2 bodies.** `devops/supply-chain-security/SKILL.md` (36,528 chars) and `devops/iac-security/SKILL.md` (31,022 chars).
 - **O20 (b).** In devops/agents/devops-engineer.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
 - **Not in P11:** the other devops skills (P12), and `devops/rules` (T1).
+
+- **As built (2026-11-20):** all three bodies are under 16,000 chars by `token-audit` (it counts the body without the frontmatter): `k8s-security` was 36,584, `supply-chain-security` 36,528, `iac-security` 31,022; none is over, so no D3 overage is recorded. `skill-lint` over the four gate paths prints `0 findings`, `token-audit --violations-only | grep -E 'devops/(k8s-security|supply-chain-security|iac-security)'` prints nothing, `plugin-surface-check` prints `OK`. No commit was made: the queue commits. See D17 for what moved where.
+  - **O13, checked through `dev:source-grounding` against kube-bench v0.16.0 (2026-08-05, the current release):** its `cfg/` tree bundles `eks-1.8.0`, `aks-1.8` and `gke-1.9.0` as the newest managed ids; `eks-1.5.0`, `aks-1.7`, `gke-1.6.0` and the skill's old `gke-1.2.0` and `aks-1.0` are all still bundled. `references/kube-bench.md` now holds the one table, with the newest ids, the `cis-1.10` / `1.11` / `1.12` map read from `cfg/config.yaml`, and the targets `node,policies,managedservices` for all three managed ids. The skill points at it. `--exit-code` exists in v0.16.0 (`cmd/root.go:162`), so the reference's old "there is no built-in `--exit-code`" line is gone.
+  - **Pins:** `k8s-security` states each image tag once, in its Setup. `references/ci-wiring.md` uses `<… from Setup>` placeholders, and `references/polaris.md` lost its stale `quay.io/fairwinds/polaris:10.2.2` and `kube-score:v1.20.0`.
+  - **`devops-engineer.md`:** `:22` is the template's rules wording naming `devops.md` as the core file, with no file list; row 2's done-when ends "…or the run stops with the map and proposal reported and nothing written"; `:16` and the Fix line state the target (the narrowest grant, keep the gate, the secret store); the Fix line ends in the sweep wording; the O20 (b) clause is gone and the read-only clause stays.
 
 ### P12 — devops, the rest, and security-governance
 
@@ -876,6 +1030,13 @@ Then run `python3 tools/plugin-surface-check.py`.
 - **R9.** `security/standards-audit/references/conformance-checklist.md`.
 - **Not in P12:** `security/rules-security-governance/SKILL.md` (T1), and the penetration-testing skills (P13).
 
+- **As built (2026-11-20):** every path in the gate lints `0 findings`, `token-audit --violations-only | grep -E 'infra-controls-validation|container-runtime-security|cloud-posture|cloud-incident-response'` prints nothing, and `plugin-surface-check` prints `OK`. T1's D11 finding is cleared: the `security/rules-security-governance` folder lints clean once `security-governance.md:40` is fixed. Method and extra moves are in D16. No commit was made: the queue commits.
+  - **R2 sizes (token-audit chars):** `infra-controls-validation` 25,703 to about 15,800; `container-runtime-security` 22,947 to about 10,200; `cloud-posture` 22,000 to about 15,900; `cloud-incident-response` 21,277 to about 15,400.
+  - **`security-architect.md`:** `:26` names the core file and says "each path-scoped file the artifacts the run writes touch"; step 6's Done-when reads "every register item cites a lane artifact path and round, every agent / framework / ATT&CK / CSF id resolves"; the "never run or sequence a lane" restatements at `:12`, `:42` and `:53` are gone and the Invariant at `:18` stays; `:21` gains `docs/audits/**` (O17).
+  - **`cloud-incident-response`:** Detect, Triage, Contain, Eradicate, Recover and Lessons-learned each end on a `Done when`; `## Anti-patterns` is deleted (R17, `runbooks.md` "Cloud incident response" owns the rules; the untested-backup line moved into Recover); the per-cloud telemetry table and containment commands sit behind "Know your telemetry" (R16); the "added there by task G1" progress note now says the BCDR crosswalk row "lives there".
+  - **R10 and R9:** `security-governance.md:40` and `conformance-checklist.md` K9 put `"TBD"` in a code span; `conformance-checklist.md` gains a `**Contents:**` list of its 17 `##` headings. `security-governance.md`'s size was not touched.
+  - **Outside my paths:** `security/agents/penetration-tester.md` shows as modified in the working tree; it is P13's, and this task did not edit it.
+
 ### P13 — penetration-testing
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -898,6 +1059,11 @@ Then run `python3 tools/plugin-surface-check.py`.
   - `security/cloud-attack-gcp/SKILL.md` (16,331)
 - **`security/metasploit-setup/SKILL.md`.** R2 (the description is 452 chars); R3.
 - **Not in P13:** the scope and authorization controls themselves. They stay, stated once each.
+
+- **As built (2026-11-20):** every named path lints `0 findings`, the `token-audit --violations-only | grep` line prints nothing, and `plugin-surface-check` prints `OK`.
+  - **`penetration-tester.md`:** `:18`'s "These nine controls are the design, not boilerplate..." is now "A run that cannot satisfy these nine controls does not start." (R19). `:62`'s "Re-read the scope file before each step and halt..." is deleted — control 1 (`:20`) already carries "re-read it before every step"; the halt behavior stays stated once, in control 9 (R17). Step 4's done-when is now "every host reached is in the action log and the scope file's in-scope list" (checkable positive, not the unfalsifiable "out-of-scope hosts never touched"); Step 3's reads "Escalation proven, or its absence evidenced by the attempts behind it"; RETEST's done-when now reads "every prior finding carries one of Resolved / Still open / Still open (regressed), each with the re-run's output" before the New-finding prefix rule (R15).
+  - **R2 bodies — method is R16 moves to new `references/` files, since each file's existing references already carried only the per-tool recipes, not the per-step narrative.** `cloud-attack-azure` 21,020 → 15,367 (3 new references: `identity-token-theft.md`, `rbac-privesc.md`, `detection-surface.md`). `cloud-attack-aws` 19,859 → 14,747 (2 new: `service-exploitation.md`, `detection-surface.md`; Step 2's inline 21-paths table trimmed since `references/pmapper.md` already carries it in full). `cloud-recon-enumeration` 18,538 → 15,742 (no new references — the IMDS and IAM-enumeration sections were trimmed to summaries since `references/metadata-service.md` and `references/enumerate-iam.md` already carry the full detail; the OIDC section was tightened in place). `atomic-simulation` 16,496 → 12,138 (3 new references: `atomic-red-team.md`, `caldera.md`, `stratus-vectr.md` — this skill had no `references/` folder before). `cloud-attack-gcp` 16,331 → 15,837 (no new references — Step 2's impersonation-primitives table trimmed to prose since `references/gcp-privesc.md` already carries it in full).
+  - **`metasploit-setup`:** description cut from 452 to 199 chars, reshaped to the `Use when … Triggers "…". Not for … (sibling).` form (R3).
 
 ### P14 — qa-java: the lane's agents, conventions, rule files, contents lists and three bodies
 
@@ -943,6 +1109,18 @@ Then run `python3 tools/qa-version-check.py`, and then `python3 tools/plugin-sur
   - `visual-regression/references/playwright-snapshots.md`
 - **O20 (b).** In qa/java/agents/qa-{ui,api,bdd,desktop,llm,mobile,performance}-java.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
 - **Not in P14:** `qa/java/skills/{data-driven-testing,failure-injection-testing,api-test-author/grpc,security-testing/*}` (P15), `qa/_shared` (P16) and `qa/java/skills/rules/SKILL.md` (T1).
+- **As built (2026-11-20):** every row is fixed or named below, and the gate is green. Proof, from the repo root:
+  - `python3 tools/skill-lint.py` over the gate's paths (the agents passed as the seven `qa/java/agents/*.md` files, see D18) prints `0 findings`. `token-audit --violations-only | grep -E 'qa/java/'` prints nothing. `qa-version-check.py` and `plugin-surface-check.py` print `OK`.
+  - `wc -c`: `desktop-tests.md` 2,490 and `qa-java-ui.md` 2,465. Bodies: `ai-feature-testing` 14,883 (from 21,319), `api-contract-testing` 14,259 (from 20,664), `test-quality-check` 11,300 (from 18,714).
+  - **`qa-ui-java.md`:** `:16` is the template's Read-the-rules wording with `qa-java.md` as the core file; `:25` points at `page-objects-from-url` "Prerequisites" with `--codegen=java` (the pin and the flags left the agent); the "ask, never guess" line is gone; `:21` and `:53` read "Ask as many clarifying questions as needed." (O21); the Fix line ends "then sweep: every sibling sharing the defect's pattern fixed or listed in the report." (`:44`); `:66` is the O18 `Gate evidence` line.
+  - **The six other agents:** the Fix line ends "then sweep: every <their sibling unit> … fixed or listed in the report", and `Gate evidence:` is the O18 wording. All seven lost the "stays red … `D<n>` … The close-out gate rules on it." clause (O20 (b)); `grep -n 'D<n>' qa/java/agents/*.md` prints nothing.
+  - **The MCP command:** `grep -rn 'playwright/mcp' qa/java` prints one line, `page-objects-from-url/SKILL.md:24`. `evidence-capture/SKILL.md` points at its "Prerequisites".
+  - **`inhouse-framework-conventions`:** the Rules list is one sentence pointing at `CLAUDE.md` "Test code rules" and `qa-java.md`; the Claude Code workflow section is deleted, with its mention in the intro and the `.claude/commands/` layout rows; the Quality bar keeps three Accelerator items; the anti-examples keep the three Accelerator rows (selector in code, `String` read, raw `page` in a test). O7 was answered (a), so the Java lane takes no URL exception: its `assertThat(page).hasURL(…)` row stays an anti-example and the audit's `:283` row is not applied.
+  - **`ai-feature-testing`:** rewritten at 14,883. The provenance (R19), the second statement of the four ideas, `## Rules`, the dependency block with its versions (the body names the project's TestNG, AssertJ and Jackson) and the anti-pattern bullets that repeated an idea section are gone; the surviving practices lead with the target and keep the key and PII guardrails. The four Java examples use an injected `llm` and a shared `mapper` from a `LlmTest` base class, `Should_X_When_Y` names, named constants and no inline comment.
+  - **R2 moves:** `api-contract-testing` moved its message-pact section to `references/message-pacts.md`, and its Rules and What-NOT-to-do lists became seven positive guardrails. `test-quality-check` moved its separate-repo section to `references/separate-repo.md`. Each body points at its file with the condition that fetches it.
+  - **R9:** a `**Contents:**` list after the H1 in each of the 21 reference files, by script.
+  - **Rule files:** `desktop-tests.md` lost its version pins (`desktop-project-setup` owns them) and the Mac2 native-strategy line (`desktop-screen-explorer` owns it), and points at three skills for recipes. `qa-java-ui.md` lost 76 chars.
+  - **Outside my paths, for G1:** `qa/java/skills/ai-feature-testing/references/details.md` still defines `Llm` as a static class (`:89–96`, `:146–160`), so its samples differ from the injected `LlmClient` that `SKILL.md` now shows. The new `references/message-pacts.md` and `references/separate-repo.md` are for G1's read of new reference files. The P17 and P18 gate lines (and their prompts) pass `qa/<lane>/agents` to `skill-lint`, which exits with a usage error (D18).
 
 ### P15 — qa-java: the remaining bodies
 
@@ -962,6 +1140,7 @@ Then run `python3 tools/qa-version-check.py`, and then `python3 tools/plugin-sur
   - `security-testing/dependency-scan/SKILL.md` (18,411)
   - `security-testing/permission-testing/SKILL.md` (17,613)
 - **Not in P15:** the `qa/_shared/security-testing/*` skills (P16).
+- **As built (2026-11-20):** all six bodies are under 16,000 chars; the gate is green (`skill-lint` → `0 findings`, the `token-audit` grep prints nothing, `qa-version-check` → OK, `plugin-surface-check` → OK). Chars now: `data-driven-testing` 15,508, `failure-injection-testing` 15,698, `api-test-author/grpc` 15,284, `security-testing/passive-scan` 15,786, `dependency-scan` 15,471, `permission-testing` 16,216 (the audit counts the body without the frontmatter). The plan gave no method, so §2 item 3 was applied. Every body lost its closing `## Rules`, which restates the sections above it; the one rule only that list stated moved into an `## Anti-patterns` bullet (`failure-injection-testing`: toxic wiring lives in `ChaosProxy`; `grpc`: the action holds no deserialization or assertion; `permission-testing`: tag each case with its OWASP and WSTG ids). The `Examples` end-to-end paragraphs that restated an idea were deleted. By branch (R16): `data-driven-testing` → `references/excel-source.md` (Excel source); `failure-injection-testing` → `references/details.md` (partial response, probabilistic toxics); `grpc` → `references/details.md` (client- and bidi-streaming); `passive-scan` → `references/auth-and-reporting.md`; `dependency-scan` → `references/parse-and-assert.md`; `permission-testing` → `references/policy-matrix.md`. Each pointer names its condition. No version pin moved. For G1, defects seen and left alone (R2 only): `passive-scan` has floating `7.+`/`3.+`/`1.+` test dependencies; `permission-testing` has a `switch` in `Should_DenyCrossUserAccess_…` and inline comments in the test bodies; `grpc`, `passive-scan` and `permission-testing` keep inline comments in code samples (`CLAUDE.md` "Comments").
 
 ### P16 — qa/_shared
 
@@ -989,6 +1168,8 @@ Then run `python3 tools/qa-version-check.py`, and then `python3 tools/plugin-sur
 - **`qa/_shared/webmcp-testing/SKILL.md:42`.** R10.
 - **R6.** `qa/_shared/contract-testing-pact/SKILL.md` and `qa/_shared/performance/SKILL.md`. Rename the routing headings to topic headings: "Choosing Pact", "Profiler hand-off".
 - **Not in P16:** each lane's own skills (P14, P15, P17, P18).
+
+- **As built (2026-11-20):** every row is fixed or named below. Proof, from the repo root: `skill-lint` over the six gate paths prints `0 findings`, `token-audit --violations-only | grep -E 'qa/_shared/'` prints nothing, `qa-version-check` prints `OK`, `plugin-surface-check` prints `OK`. `python-web-testing`: `## When to use` / `## When NOT to use` added (R7, the scope blockquote became those two), the Never/Instead table points at `qa/typescript/skills/rules/ui-tests.md`, `qa/dotnet/skills/rules/web-ui.md` and `qa/java/skills/rules/qa-java-ui.md` and keeps the Python spellings (R17), the pytest-playwright section moved to `references/pytest-check.md` behind "the same verification will run again" (R16), and "hand it to the `qa-ui-<stack>` agent" is written in two places (R22). The description, the `playwright==1.63.0` and `pytest-playwright==0.10.0` pins are unchanged. `webmcp-testing`: `` `TBD` `` in a code span (R10). Method, the `performance` heading and the R2 moves are in D19. No commit was made: the queue commits.
 
 ### P17 — qa-dotnet
 
@@ -1042,6 +1223,8 @@ Then run `python3 tools/qa-version-check.py`, and then `python3 tools/plugin-sur
 - **O20 (b).** In qa/dotnet/agents/qa-{ui,api,bdd,desktop,llm,mobile,performance}-dotnet.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
 - **Not in P17:** `qa/dotnet/skills/rules/SKILL.md` (T1), and `qa/_shared` (P16).
 
+- **As built (2026-11-20):** every row is fixed or named below. Proof, from the repo root: `skill-lint` over the gate's paths (the seven `qa/dotnet/agents/qa-*-dotnet.md` files named one by one, as D18 records) prints `0 findings`, `token-audit --violations-only | grep -E 'qa/dotnet/'` prints nothing, `wc -c` gives 2,487 (`desktop-tests.md`) and 2,484 (`web-ui.md`), `qa-version-check` prints `OK`, `plugin-surface-check` prints `OK` (it printed one `test-plan-writer` finding from a task running beside this one, and cleared by itself). **`qa-ui-dotnet.md`:** the Read-the-rules line is the template wording with `automation.md` as the core file (`qa-dotnet` has no `qa-dotnet.md`); `:17` points at the core rule file and `CLAUDE.md` "Version policy"; `:29` points at `page-objects-from-url` "Prerequisites" with `--codegen=csharp`; the Fix line says "the trace commands in `evidence-capture`" and ends "then sweep: every sibling page sharing the defect's pattern fixed or listed in the report"; `:55` is "Ask as many clarifying questions as needed." (O21), and the second "ask" bullet at `:32` was deleted as its duplicate. **The six other agents:** the Fix line ends "then sweep: every <their sibling unit> … fixed or listed in the report". All seven lost the "stays red … `D<n>` … The close-out gate rules on it." clause (O20 (b)), the read-only clause stays, and `Gate evidence:` is the O18 wording. `grep -rn 'D<n>' qa/dotnet/agents` prints nothing. **The MCP command:** its one home is `page-objects-from-url/SKILL.md:25`; `evidence-capture/SKILL.md` points at it. **`inhouse-framework-conventions`** (12,873 → 11,235 chars): the Claude Code workflow section and its mentions are gone (R19, R17); the Rules list is a pointer to `CLAUDE.md` "Test code rules" and `automation.md`; the Quality bar keeps four Accelerator items; the anti-examples keep four. O7 was answered (a): the example test asserts `Expect(_dashboardPage.Heading)` through a `DashboardPage` member, the `ToHaveURLAsync` bullet says a URL is never asserted in a test body, and the raw-`Page` anti-example replaces the glob row. `:239` says "a typed DTO, not `RestResponse`". **R3:** the two desktop descriptions end `Not for … (<sibling>).` and were shortened to stay ≤ 200. **R2:** method and moves are in D20. **R9:** the 26 files carry a `**Contents:**` list of their `##` headings (code spans written without backticks, as the lint reads them), generated by a throwaway script in `/tmp`. No commit was made: the queue commits.
+
 ### P18 — qa-typescript
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1089,6 +1272,17 @@ Then run `python3 tools/qa-version-check.py`, and then `python3 tools/plugin-sur
   - `realtime-stream-testing/references/details.md`
   - `test-login-tokens/references/details.md`
 - **Not in P18:** `qa/typescript/skills/rules/SKILL.md` (T1), and `qa/_shared` (P16).
+- **As built (2026-11-20):** every row is fixed or named below. Proof, from the repo root: `python3 tools/skill-lint.py` over the gate's paths prints `0 findings`, `python3 tools/token-audit.py --violations-only | grep -E 'qa/typescript/'` prints nothing, `wc -c qa/typescript/skills/rules/ui-tests.md` is 2,508, and `python3 tools/qa-version-check.py` prints `OK`. No commit was made: the queue commits.
+  - **Gate line, D18.** `skill-lint` takes the seven `qa/typescript/agents/*.md` files, not the folder.
+  - **`plugin-surface-check` is not `OK`.** It prints `description of 'test-plan-writer' holds an unquoted ': ' (qa/manual/test-plan-writer)` for the three qa plugins. That file is P19's and was modified beside this task, so I left it.
+  - **Agents.** `qa-ui-typescript.md` has the template's "Read the rules" (`:16`), the MCP command replaced by a pointer to `page-objects-from-url` "Prerequisites" (`:27`), the Fix sweep, and "Ask as many clarifying questions as needed" (`:53`); `:50` needed nothing (O20). The five other qa-typescript agents carry the template's sweep wording, and `qa-llm-typescript.md` and `qa-performance-typescript.md` did have an open sweep ("Sweep sibling cases…", "Sweep every scenario…"), so both now end "then sweep: every … fixed or listed in the report".
+  - **MCP command.** It now lives once in `page-objects-from-url/SKILL.md:25`; `evidence-capture/SKILL.md` points at it.
+  - **`inhouse-framework-conventions`.** Rules, Quality bar and Anti-examples now point at `CLAUDE.md` "Test code rules" and `qa-typescript.md` and keep the Accelerator rows (no literal selectors, Allure metadata, builder defaults, the `Locator` and `page.click` anti-examples). The "Claude Code workflow" keeps only the commands. `:155` is `withPassword(`Wrong-${crypto.randomUUID()}`)`, the rule at `:134` says `this.locator("key")`, and `LoginPage` wraps `goTo` and `signIn` in `test.step` (O9).
+  - **`ui-tests.md`.** 2,685 to 2,508 bytes: the severity and codebase-wins sentence points at `qa-typescript.md`, `retries: 0` is dropped because the core file states it, and nine bullets are shortened without changing a constraint.
+  - **R8.** `bdd-project-scaffold:132` and `review/SKILL.md:15` name `ui-test-author/playwright` on the same line as `references/config-and-fixtures.md`.
+  - **R6.** `benchmarks/SKILL.md` heading "Handoff to the profiler" is now "Profiling a slow function".
+  - **R2 (chars, before to after).** `failure-injection-testing` 20,074 to 15,819 (Rules section deleted, one anti-pattern deleted, retry, partial-response and probabilistic scenarios moved to the new `references/scenarios.md`); `passive-scan` 19,766 to 14,337 (Rules deleted, the programmatic path moved to the new `references/programmatic.md`); `dependency-scan` 17,020 to 15,972 (Rules deleted, two anti-patterns merged, one deleted); `data-driven-testing` 16,824 to 15,709 (the "Ported from" block deleted, streaming rows moved to the new `references/streaming-rows.md`); `grpc` 16,353 to 16,116 by `len()`, under 16,000 by `token-audit` (the "Composing" paragraph deleted). The three new reference files are for G1's read.
+  - **R9.** The 20 contents lists were generated by a throwaway script in `/tmp`, with backticks removed from the items because the lint compares plain heading text. Each list was spot-read once.
 
 ### P19 — qa/manual, qa/reporting, qa/cicd
 
@@ -1115,6 +1309,19 @@ Then run `python3 tools/qa-version-check.py`, and then `python3 tools/plugin-sur
 - **R9.** `qa/cicd/{dotnet,java,typescript}/skills/ci-pipelines/references/{azure-pipelines,github-actions,gitlab-ci}.md`.
 - **O20 (b).** In qa/reporting/agents/qa-reporting-dotnet.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
 - **Not in P19:** the lane plugins' own skills (P14–P18).
+- **As built (2026-11-20):** every row is fixed or named below. Proof, from the repo root: `python3 tools/skill-lint.py qa/manual qa/reporting qa/cicd` and the same over the nine agent files `qa/manual/agents/*.md qa/reporting/agents/*.md qa/cicd/agents/*.md` print `0 findings`; `python3 tools/token-audit.py --violations-only | grep -E 'qa/(manual|reporting|cicd)'` prints nothing; `python3 tools/qa-version-check.py` and `python3 tools/plugin-surface-check.py` print `OK`. `wc -c`: `qa-test-case-designer.md` 13,976, `qa-test-planner.md` 13,904, `qa-feature-spec-writer.md` 11,586, `test-plan-writer`'s description 195. No commit was made: the queue commits.
+  - **O3 was answered (a), not (b)**, so the R11 lines are renamed, not held (D21). The lint run over the three trees has no R11 finding.
+  - **`qa-feature-spec-writer.md`.** Steps is `# | Step | Load | Done when`. The old `Follows` and `Adds` cells went into `Load`, `Step`, or two short paragraphs (`Step 2 detail`, `Step 4 detail`). `## Report` opens with `Mode: BUILD | FIX | EXTEND — <one line>`.
+  - **`qa-explorer.md`.** `:28, 39, 40` name `qa/manual/app-exploration/references/{probes,checks}.md`. Line 28's registration command now points at `qa/<stack>/skills/page-objects-from-url/SKILL.md` (web) and `qa/<stack>/skills/mobile-screen-explorer` (native), because `probes.md` no longer holds it.
+  - **`probes.md`.** The `claude mcp add … @playwright/mcp@0.0.85` command and its three explanatory bullets became one sentence naming the lane's `page-objects-from-url` command, plus the one fact only this file needs: add `network` to `--caps`. `qa-version-check.py` pins no MCP version (`grep mcp tools/qa-version-check.py` finds none), so no expected pin lived only there. The contents list lists its five `##` headings.
+  - **R2, `qa-test-case-designer.md` 16,504 → 13,976 and `qa-test-planner.md` 14,972 → 13,904.** Each agent's copy of the delivery-chain diagram is now a pointer to `solution-planner.md` "The delivery chain", as `be-documenter.md:16` already does (R17), with the agent's own reads and writes in one sentence. The designer also lost restatements of `requirements-breakdown` and `test-design-techniques` (parentheticals and a repeated story rule). Its `Fix` line and the planner's end on the template's sweep wording.
+  - **`test-plan-writer`'s description** is 195 chars. It lost "scope" and "Definition of" for "Ready/Done", and it has no `: `, which `plugin-surface-check` rejects unquoted.
+  - **R10.** `[TBD]` is in a code span at `test-plan-writer/SKILL.md:130` and `test-strategy/SKILL.md:166`.
+  - **R8, `qa/reporting/*/skills/test-reports/SKILL.md:171, 178, 163`** now name `qa/<stack>/skills/ui-test-author/playwright/references/trace-correlation.md`. `cross-feature-test-design/SKILL.md:21` names `qa/manual/requirements-breakdown` on the line.
+  - **The Fix line.** The six reporting and CI/CD agents end on "then sweep: every sibling sharing the defect's pattern fixed or listed in the report" (the CI/CD ones say job or host reference for sibling).
+  - **O20 (b).** `qa-reporting-dotnet.md:43` keeps "Acceptance tests an earlier `Q` task wrote are read-only: never quarantine, skip or weaken one." and the clause after it is gone. `grep -rn believe qa/reporting/agents qa/cicd/agents qa/manual/agents` finds nothing.
+  - **R9.** The nine `qa/cicd/*/skills/ci-pipelines/references/*.md` files have a `**Contents:**` list straight after the H1, from a throwaway script in `/tmp`.
+  - **Outside my paths, for G1:** none found.
 
 ### P20 — business-analysis, training-data, tooling, and `/dev:refine`
 
@@ -1153,6 +1360,16 @@ Then run `python3 tools/plugin-surface-check.py`. It must give `OK`, and after a
 - **`tooling/_shared/capability-contract/SKILL.md`.** R17 at `:71–75, 112–115, 132–134, 149–151`; R15 at `:25–153`; R19 at `:9, 119, 150`; O23 at `:149`.
 - **O20 (b).** In business-analysis/agents/business-analyst.md, training-data/agents/dataset-engineer.md and tooling/agents/tooling-engineer.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
 - **Not in P20:** the `business-analysis`, `training-data` and `tooling` `rules` skills (T1), and `tooling/skills/rules/tool-contract.md` unless O23 (b).
+- **As built (2026-11-20):** every row is fixed or named below. Proof, from the repo root: `python3 tools/skill-lint.py` over the gate's paths (the two agent folders as the eight agent files, D23) prints `0 findings`; `wc -c business-analysis/skills/rules/*.md` gives `business-model.md` 5,992 and `backlog-epics.md` 2,500, `backlog-requirements.md` 2,426, `backlog-stories.md` 2,497; `python3 tools/plugin-surface-check.py` prints `OK` after the registration move; `python3 tools/token-audit.py --violations-only | grep -E 'business-analysis|training-data|tooling'` prints nothing; `pytest business-analysis/skills/ba-project-memory/scripts/test_kb_lint.py` passes 18.
+  - **O10 (b), D22.** `.claude-plugin/marketplace.json`: `dev` lists `ba-scoping-writeup`, `ba-epic-writer`, `ba-story-writer`, `ba-story-quality-review` and `ba-project-memory` first in `skills` (28 with `rules`), and `business-analysis` lost them (6 with `rules`). The two plugin descriptions say so. `README.md` (the `business-analysis` and `dev` rows, the status table) and `docs/skills-catalog.md` (the `dev` and `business-analysis` rows, the folder introduction and every `business-analysis:<label>` for the five) use the `dev:` labels. `engineering-practices/commands/refine.md` is unchanged.
+  - **`requirements-author.md`.** The 17-line delivery chain is two lines ("Your place in the lane"); AUDIT has its done-when; "every section of `ba-scoping-writeup`'s format, in order"; the three R18 lines name the owner (`solution-planner`) instead of prohibiting; the skill labels in Steps are `dev:`.
+  - **`business-analyst.md`.** `:38` is the template's rules wording; `:52` says "every class in the `ba-feature-conflict-check` taxonomy"; `:60` hands the breakdown to `qa-test-case-designer`; the Fix line ends on "every sibling sharing the defect's pattern fixed or listed in the report"; O20 (b) removed the red-test clause. `:19` was wrong at its line (D23).
+  - **`ba-project-memory`.** The tier table and the Read-first and Update-after lists are one line ("per `business-model.md`"); the INDEX example is one line per artifact type; the `active-context.md` skeleton is three lines; the lint paragraph points at `kb-lint.py --help`, which lists 22 rules (read first); "newest first…" is gone; the lookup moved to `references/feature-cross-section.md` behind "Connection cross-section" (O3, D23).
+  - **`example-dependency-map.md`.** Five `[TBD - …]` markers are in code spans.
+  - **R23.** `business-model.md` pointed its guide-shape and stamp bullets at `backend/_shared/business-documentation/references/guide-shape.md`, which states both. The three backlog files keep every constraint, with merged wording (the stories file merged the part, layer and fragment rules, and dropped "Not Given / When / Then", which `dev:stories` states). Their pointer line names `dev:<label>` and the `requirements-author` agent.
+  - **Training data.** `dataset-engineer.md` (rules reading, no-op clause, Fix line, O20 (b)); `dataset-auditor.md` `## Report` opens with `Mode: BASELINE | RE-AUDIT`. `td-dataset-formats/SKILL.md` is 5,469 chars (from 10,742): the envelope table, the `messages` rules, the card list and the split rules point at `datasets.md`, `eval-sets.md` and `dataset-docs.md`; the preference, pretraining and VLM records moved behind a stage → catalog section table; the O24 example is `synthetic:claude-sonnet-5-5` with `synthetic-review-required`, and `format-catalog.md:10` says `synthetic:<exact-model-id>`.
+  - **Tooling.** `tooling-engineer.md` (`:17` positive, the quoted no-op gone, coverage by pointer to `CLAUDE.md` 'Test code rules', the Fix line, O20 (b), the O18 `Gate evidence` line); `mcp-builder/SKILL.md:11` points at `tooling/_shared/capability-contract/SKILL.md`; `capability-contract/SKILL.md` has a `Done when` per step 1–6, the four `Rules:` lists replaced by pointers to `tool-contract.md` (O23: the destructive gate is the rule's), and the three R19 phrases gone. `tool-contract.md` is unchanged.
+  - **Outside my paths, for G1:** (1) `business-analysis:{scoping,epics,stories,story-review,knowledge-base}` is still the label in `backend/_shared/{agents/be-documenter.md,agents/be-feature-documenter.md,agents/solution-planner.md,business-documentation/SKILL.md,codebase-survey/SKILL.md,epic-map/SKILL.md,solution-blueprint/SKILL.md}`, `business-analysis/skills/{ba-decision-table,ba-entity-state-grid,ba-epic-writer,ba-feature-conflict-check,ba-story-quality-review,ba-story-writer}/SKILL.md`, `business-analysis/skills/rules/SKILL.md`, `engineering-practices/{agent-orientation-cache/SKILL.md,commands/document-system.md}`, `frontend/_shared/product-analytics/SKILL.md`, `qa/manual/agents/qa-test-planner.md` and `qa/manual/test-plan-writer/SKILL.md`: rename each to `dev:<label>` (`grep -rIl 'business-analysis:\(scoping\|epics\|stories\|story-review\|knowledge-base\)' .`). (2) `business-analysis/skills/ba-feature-conflict-check/SKILL.md:40` says "feature slice": rename it "feature cross-section" and point it at `ba-project-memory/references/feature-cross-section.md`. (3) The plan header's `Status:` line held two decision blocks (P2's D12 and P3's D13), put there when their anchor matched the `## Answered questions` text inside `Status:`. P20 moved both into `## Decisions` and left their numbers (the plan now has two D12, two D14 and no D12 for P2's pair). A task that inserts text by that anchor must match the line-start heading.
 
 ### G1 — Gate: the whole library once more, then filing
 
@@ -1245,1243 +1462,9 @@ session that runs the task. No prompt edits a file outside the paths it names (�
 | P20 | `docs` | `general-purpose` | L1, T1, C1 | P1–P19 | ~130k |
 | G1 | `docs` | `general-purpose` | L1, T1, C1, P1–P20 | — | ~110k |
 
-L1, C1 and T1 have landed. The 21 prompts of P1–P20 and G1 are live.
+L1, C1, T1, P1–P20 have landed. The one prompt of G1 is live.
 
 ---
-
-### P1 — dev: the planning and verification front doors (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P1 of docs/plans/015-skill-authoring-remediation.md. Fix audit 004's findings in dev's planning
-and verification front doors.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R7, R8, R15–R21, R23.
-2. The plan: §2, `## Answered questions` (O2, O6, O12), task P1, and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md. Find each row by grepping its path below; its Suggested fix
-   is the fix.
-4. engineering-practices/writing-plans/references/plan-format.md §4, §5 and §7: the targets of the
-   pointers you write.
-
-Fix, by path and rule:
-- engineering-practices/writing-plans/SKILL.md (25,316 chars):
-  - R2.
-  - :3, Data: "(design)" becomes "(feature)".
-  - :156–158 and :311, O2.
-  - R7.
-  - :68, 91, 108, 154, 174, 239, R15: steps 1–6 each get a done-when.
-  - :253 with :136–145 and :279–287, R17: one-line pointers to plan-format §5 and §7 and to
-    rules/plans.md.
-  - :14 and :98–99, R19.
-  - :82–89 and :341–344, R16: behind "a web route in the plan → read …".
-  - :38 and :297–344, R20: "task reports"; the self-review items become criteria.
-- engineering-practices/writing-plans/references/plan-format.md: R9.
-- engineering-practices/systematic-debugging/SKILL.md:
-  - :3, Data: "(design)" becomes "(feature)".
-  - R7.
-  - :22, 90, 112, 183–184, R15.
-  - :60–75, R21.
-  - :44–78, R16.
-  - :27, 36, 105, 131, 148–149, R18.
-  - :16, 28, 100, R19.
-  - :181, R20: the column becomes "Done when".
-- engineering-practices/verify-before-done/SKILL.md:
-  - R7.
-  - :18, R20: "The evidence check".
-  - :12 and :106–112, R19.
-- engineering-practices/quality-constraints/SKILL.md:
-  - :33, 34, 36, 38–40, R17.
-  - :45, R15.
-  - :10, 17, 42, 45, R20.
-  - :12, R19.
-  - :32 and :39, O6.
-- engineering-practices/source-grounding/SKILL.md:
-  - :27, 37, 52, 56, R15.
-  - :48, R18.
-  - :10 and :71–74, R19.
-- engineering-practices/notebooklm/SKILL.md:
-  - :23 and :40, R8: point into engineering-practices/bundled/notebooklm/scripts/.
-  - R7.
-  - :22–25, R15.
-  - :54, R17.
-  - :8, R19.
-- engineering-practices/brainstorming/SKILL.md:
-  - :62–64, R17.
-  - :20, R20: "design approval".
-- engineering-practices/rules/plans.md (8,206 chars), R23: keep the constraints, and point at
-  plan-format for the procedure. Keep its `paths:`.
-
-Traps:
-- Re-read each row at its line before editing (§2 item 1). The line numbers are mostly unverified.
-- R2 is met by R16 moves and R17/R19 deletions only (D3). A rule only writing-plans states stays.
-- engineering-practices/rules/SKILL.md is T1's, and rules/feature-docs.md is P4's: do not edit them.
-- C1 rewrote the gating rule (O12) in plan-format §5, rules/plans.md, writing-plans and
-  verify-before-done. Your trims keep its wording; a pointer you write points at it, never re-lists it.
-
-Gate: own tests.
-  python3 tools/skill-lint.py engineering-practices/writing-plans engineering-practices/systematic-debugging engineering-practices/verify-before-done engineering-practices/quality-constraints engineering-practices/source-grounding engineering-practices/notebooklm engineering-practices/brainstorming engineering-practices/rules/plans.md   → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'writing-plans|systematic-debugging|verify-before-done|quality-constraints|source-grounding|notebooklm|brainstorming'   → prints nothing
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P1 — dev planning and verification front doors`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P2 — dev: the audit front doors and the unregistered skills (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P2 of docs/plans/015-skill-authoring-remediation.md. Fix audit 004's findings in the two audit
-front doors, the audit engine, the five unregistered skills and code-auditor.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R3, R4, R7, R13,
-   R15–R19.
-2. The plan: §2, `## Answered questions` (O22), D5, task P2, and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md. Find each row by grepping its path below.
-4. engineering-practices/rules/audits.md (the target of the R17 pointers), and .skill-template/agent.md
-   `## Report`.
-
-Fix, by path and rule:
-- engineering-practices/spec-vs-code-audit/SKILL.md:
-  - R2.
-  - :147, 151, 175–177, 241–243, R15.
-  - :111, 114, 165–173, 247, 262–268, 333–339, R17: point at audits.md:15–27, and keep the verdict
-    table and the templates.
-  - :237–339, R16: Mode B moves to references/re-audit.md, behind "a register and a prior report exist".
-  - :10, 51, 343, 345, R19.
-- engineering-practices/feature-audit/SKILL.md:
-  - R2.
-  - :80, 84, 112, 175, R15.
-  - :100–108, 183, 187, 207, 285–289, R17: point at audits.md, and keep "Typical here".
-  - :177–289, R16: references/re-audit.md, behind "a prior report exists".
-  - :10, 50, 295, R19.
-- engineering-practices/standards-audit-engine/SKILL.md:
-  - :3, Data and R4: "Use when a stack's `standards-audit` skill (`/<plugin>:audit`) or the
-    `design-auditor` starts a conformance round."
-  - :120–127, R17: severities per CLAUDE.md "Review behavior"; keep the impact-qualifier rule.
-  - :158–164, R19.
-  - :3 and :10–16, O22.
-- D5 (R7, R3): add `disable-model-invocation: true` to the frontmatter of each of these:
-  - engineering-practices/agent-orientation-cache/SKILL.md
-  - engineering-practices/code-comments/SKILL.md
-  - engineering-practices/standards-audit-engine/SKILL.md
-  - ai-development/claude-api/SKILL.md
-  - ai-development/mcp-builder/SKILL.md
-- engineering-practices/agents/code-auditor.md:51, R13: the template's `## Report` block with a
-  `Mode:` line.
-
-Traps:
-- Re-read each row at its line first (§2 item 1).
-- Mode B moves whole, with its done-whens. Keep the pointer naming the condition in the SKILL.md.
-- audits.md is read-only to this task.
-
-Gate: own tests.
-  python3 tools/skill-lint.py engineering-practices/spec-vs-code-audit engineering-practices/feature-audit engineering-practices/standards-audit-engine engineering-practices/agent-orientation-cache engineering-practices/code-comments ai-development/claude-api ai-development/mcp-builder engineering-practices/agents/code-auditor.md   → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'spec-vs-code-audit|feature-audit'   → prints nothing
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P2 — dev audit front doors, audit engine, unregistered skills`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P3 — dev: delivery-plan, session-budget, experience-plan (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P3 of docs/plans/015-skill-authoring-remediation.md. Bring delivery-plan and session-budget under
-budget, and clear the rest of their findings.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R9, R10, R16, R17, R19,
-   R20.
-2. The plan: §2, `## Answered questions` (O2), D3, task P3, and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md: the rows for backend/_shared/delivery-plan (Code issues
-   A4, "The sample"), and its :687 row (Data issues A4).
-4. engineering-practices/writing-plans/references/plan-format.md §3, §4, §5 and §7: the targets of
-   the pointers.
-
-Fix, by path and rule:
-- backend/_shared/delivery-plan/SKILL.md (73,093 chars):
-  - R2.
-  - :51–67, 359–369, 510–512, 614–623, R17: one sentence plus "plan-format §5".
-  - :343–381 and :439–451, R17: keep Epic, Story, Stream, Order, Skills, Files and the routing map,
-    and cite §4 for the rest.
-  - :18–48 and :145, R17: one pointer line, keeping the epic/story binding.
-  - :486–489, 559, 614–625, R17: "copy plan-format §7 verbatim".
-  - :9–35, R19.
-  - :125, 175, 205, R20: `Not in <id>`.
-  - :157–227, R16: references/shape-<name>.md, behind "Sequencing shape: <name>".
-  - :563–598, R16: references/reconcile.md, behind "a plan and partly built code both exist".
-  - :687, Data and O2.
-- backend/_shared/delivery-plan/references/example-delivery-plan.md: R9.
-- backend/_shared/session-budget/SKILL.md (16,907 chars): R2.
-- backend/_shared/session-budget/references/prompts-section-template.md: R9.
-- backend/_shared/experience-plan/SKILL.md:
-  - R2: the description is 246 chars.
-  - :159, R10: the marker goes in a code span.
-
-Traps:
-- Re-read each row at its line first (§2 item 1). 014 A4 confirmed that :88 and :421 resolve; leave
-  them.
-- delivery-plan's own additions to plan-format stay. Only the restatements go.
-- The other backend/_shared skills are P4's.
-
-Gate: own tests.
-  python3 tools/skill-lint.py backend/_shared/delivery-plan backend/_shared/session-budget backend/_shared/experience-plan   → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'delivery-plan|session-budget|experience-plan'   → prints nothing
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P3 — delivery-plan, session-budget, experience-plan`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P4 — dev: solution-blueprint, business-documentation, feature-trace and the documenting agents (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P4 of docs/plans/015-skill-authoring-remediation.md. Bring the planning and documenting skills and
-agents under budget, and clear their lint findings and feature-docs.md's R23.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R3, R8, R9, R12, R13,
-   R16, R17, R23.
-2. The plan: §2, D3, task P4, and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md. Find each row by grepping its path below.
-4. .skill-template/agent.md (`## Report`, and the Fix line as T1 left it).
-
-Fix, by path and rule:
-- backend/_shared/solution-blueprint/SKILL.md (30,276 chars): R2.
-- backend/_shared/business-documentation/SKILL.md (27,914 chars): R2, R3.
-- backend/_shared/business-documentation/references/example-area.md:82, 139, 233, 234, R8:
-  `bookings.md` and `scheduling.md` are sample file names. Make the lint read them as patterns, or write
-  them without backticks.
-- backend/_shared/feature-trace/references/trace-recipes.md: R9.
-- backend/_shared/agents/be-documenter.md (17,599 chars): R2.
-- backend/_shared/agents/solution-planner.md (16,835 chars):
-  - R2.
-  - :68, R12: name the path to Read, `backend/_shared/delivery-plan`.
-- backend/_shared/agents/be-feature-documenter.md:89, R13: `## Report` with a `Mode:` line.
-- engineering-practices/rules/feature-docs.md (10,500 chars), R23: keep the constraints. Move the
-  document's shape and procedure (:9–40) into the skill that be-feature-documenter's Load cells name
-  for the shape, and leave a one-line pointer. Keep its `paths:`.
-
-Traps:
-- Re-read each row at its line first (§2 item 1).
-- An agent over 14,000 loses restatements and branch material to its skills' references/, never a
-  step or a boundary.
-- delivery-plan, session-budget and experience-plan are P3's. engineering-practices/rules/SKILL.md is
-  T1's.
-
-Gate: own tests.
-  python3 tools/skill-lint.py backend/_shared/solution-blueprint backend/_shared/business-documentation backend/_shared/feature-trace backend/_shared/agents/be-documenter.md backend/_shared/agents/solution-planner.md backend/_shared/agents/be-feature-documenter.md engineering-practices/rules/feature-docs.md   → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'solution-blueprint|business-documentation|be-documenter|solution-planner'   → prints nothing
-  wc -c engineering-practices/rules/feature-docs.md   → ≤ 6,000
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P4 — blueprint, business-documentation, documenting agents, feature-docs rule`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P5 — design and fe-blazor (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P5 of docs/plans/015-skill-authoring-remediation.md. Fix audit 004's findings in design and
-fe-blazor.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R3, R8, R13, R15–R20.
-2. The plan: §2, `## Answered questions` (O11, O18, O20), task P5, and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md. Find each row by grepping its path below; group rows that
-   name fe-blazor among many agents are in "Agents, shared defects".
-4. .skill-template/agent.md as T1 left it (the Fix line, `Gate evidence`, "Read the rules").
-
-Fix, by path and rule:
-- design/agents/design-auditor.md:
-  - :74, R8: engineering-practices/standards-audit-engine/references/report-template.md.
-  - :94, R13: `## Report` with `Mode:`.
-  - :73 and :75, R15.
-  - :18, R17: "the skills in the Sections table".
-  - :17, R16: the Chrome protocol moves to design/ux-review/references/claude-in-chrome.md (ux-review
-    is the live-UI skill the Sections table loads). Leave a pointer that names the condition "driving
-    Claude in Chrome → read …".
-  - :16, 17, 20, R18.
-- R8, with the target design/ui-ux-pro-max/references/pro-rules.md:
-  - design/design-tokens/SKILL.md:23
-  - design/iconography/SKILL.md:23
-  - design/motion/SKILL.md:23
-  - design/ux-patterns/SKILL.md:31
-  - design/visual-identity/SKILL.md:32
-- design/visual-identity/SKILL.md:
-  - :17, R17: drop every count.
-  - :75–90, R15.
-  - :48–52, 64–70, 106–115, R17.
-  - :9, 88, 94, 96, R19.
-  - :7, R20: "# Visual identity".
-  - :73, 79, 88, 108, O11.
-- design/prototype/SKILL.md:
-  - :32 and :49–57, R16: references/in-app-handoff.md.
-  - :8, R19.
-- frontend/blazor/agents/fe-blazor.md:
-  - :20, R17: the template's rules wording.
-  - :34 and :36, R15.
-  - :34, O11.
-  - :16, R17: one sentence plus backend/_shared/experience-plan/references/rendering-strategy.md.
-  - :14 and :16, R19.
-  - The Fix line: T1's wording.
-  - :65, O18: the line becomes `Gate evidence: <the Gate: line's commands and results, including coverage>`.
-- R2: frontend/blazor/skills/ui-rules/SKILL.md (21,122 chars) and frontend/blazor/skills/basics/SKILL.md
-  (18,619).
-- auth/auth0-blazor/SKILL.md (16,035 chars): R2, R3.
-- frontend/blazor/skills/accessibility/SKILL.md:11, R8.
-- O20 (b), in frontend/blazor/agents/fe-blazor.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
-
-Traps:
-- Re-read each row at its line first (§2 item 1).
-- design/rules and frontend/blazor/skills/rules are T1's. standards-audit-engine is P2's.
-- Under O11 (a) the agents name no count. They point at visual-identity's Calibration.
-
-Gate: own tests.
-  python3 tools/skill-lint.py design/agents/design-auditor.md design/design-tokens design/iconography design/motion design/ux-patterns design/visual-identity design/prototype design/ux-review frontend/blazor/agents/fe-blazor.md frontend/blazor/skills/ui-rules frontend/blazor/skills/basics frontend/blazor/skills/accessibility frontend/blazor/skills/component-testing auth/auth0-blazor   → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'frontend/blazor|auth0-blazor'   → prints nothing
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P5 — design and fe-blazor`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P6 — fe-react (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P6 of docs/plans/015-skill-authoring-remediation.md. Fix audit 004's findings in fe-react.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R3, R6, R9, R15–R21.
-2. The plan: §2, `## Answered questions` (O11, O14, O18, O20), task P6, and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md: the error-handling rows ("The sample"), its O14 row, and the
-   rows naming fe-react.
-4. frontend/react/skills/rules/react.md:65 and frontend/react/skills/rules/react-data.md:20, 24, as the
-   R17 targets. Also .skill-template/agent.md as T1 left it.
-
-Fix, by path and rule:
-- frontend/react/skills/error-handling/SKILL.md (33,390 chars):
-  - R2.
-  - :45, 49, 72–73, 130–135, 159–165, 188–194, 214–228, R21: caption "Wrong:" and "Right:" in prose.
-  - :77–79, 199, 245–256, 304–318, R17.
-  - :322–344, R15.
-  - :256, R19.
-  - :101–108 and :280–286, R16.
-  - :221–229 and :124–135, O14.
-- R2, in frontend/react/skills/:
-  - ui-rules/SKILL.md (23,086 chars)
-  - data-fetching/SKILL.md (20,054)
-  - basics/SKILL.md (17,124)
-  - animation/SKILL.md (16,679)
-- R9:
-  - frontend/react/skills/data-grid/references/feature-recipes.md
-  - frontend/react/skills/standards-audit/references/conformance-checklist.md
-- frontend/react/skills/component-testing/SKILL.md: R6.
-- frontend/react/agents/fe-react.md:
-  - :24, R17.
-  - :36 and :38, R15.
-  - :19 and :36, O11.
-  - :18, R17: one sentence plus the rendering-strategy.md pointer.
-  - :19, R17: delete the invariant.
-  - The Fix line.
-  - :65, O18: the line becomes `Gate evidence: <the Gate: line's commands and results, including coverage>`.
-- auth/auth0-react/SKILL.md: R3.
-- O20 (b), in frontend/react/agents/fe-react.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
-
-Traps:
-- Re-read each row at its line first (§2 item 1).
-- The examples must still obey CLAUDE.md "Frontend code rules (React)" once their comments go. Make
-  them right, not shorter.
-- rules/react.md changes only under O14 (b). The rules SKILL.md is T1's.
-
-Gate: own tests.
-  python3 tools/skill-lint.py frontend/react/agents/fe-react.md frontend/react/skills/error-handling frontend/react/skills/ui-rules frontend/react/skills/data-fetching frontend/react/skills/basics frontend/react/skills/animation frontend/react/skills/data-grid frontend/react/skills/standards-audit frontend/react/skills/component-testing auth/auth0-react   → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'frontend/react'   → prints nothing
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P6 — fe-react`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P7 — mobile-react-native, mobile-ios, mobile-android (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P7 of docs/plans/015-skill-authoring-remediation.md. Fix audit 004's findings in the three mobile
-plugins.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R3, R9, R15–R20.
-2. The plan: §2, `## Answered questions` (O11, O18, O20), task P7,
-   and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md: the rows naming mobile-react-native, mobile-ios,
-   mobile-android or mobile/android/skills/unit-testing.
-4. .skill-template/agent.md as T1 left it, and mobile/android/skills/rules/android-tests.md (an R17
-   target).
-
-Fix, by path and rule:
-- mobile/react-native/agents/mobile-react-native.md:
-  - :21, R17.
-  - :16, R17.
-  - :35 and :37, R15.
-  - :35, O11.
-  - :12, R18.
-  - The Fix line.
-  - :65, O18: the line becomes `Gate evidence: <the Gate: line's commands and results, including coverage>`.
-- mobile/ios/agents/mobile-ios.md:
-  - :16, R17: keep "a view in a folder no glob covers".
-  - :17 and :39, R17.
-  - :30 and :32, R15.
-  - :30, O11.
-  - :12, R18.
-  - The Fix line.
-  - :60, O18: the line becomes `Gate evidence: <the Gate: line's commands and results, including coverage>`.
-- mobile/android/agents/mobile-android.md:
-  - :17, Data: "below the `store-compliance` target is a finding", with no number.
-  - :16, :3 and :17, R17.
-  - :30, 32, 34, R15.
-  - :12, R18.
-  - The Fix line.
-  - :60, O18: the line becomes `Gate evidence: <the Gate: line's commands and results, including coverage>`.
-- mobile/android/skills/unit-testing/SKILL.md (16,505 chars):
-  - R2.
-  - :11, 20–22, 135, 183, Data.
-  - :75–78 and :95–97, R17.
-  - :210–215, R15.
-  - :113–163 and :173–208, R16: references/compose-ui-tests.md and references/coverage-kover.md.
-  - :96–97, R20.
-- R9: mobile/{android,ios,react-native}/skills/standards-audit/references/conformance-checklist.md.
-- R3:
-  - mobile/android/skills/kotlin-multiplatform/SKILL.md
-  - auth/auth0-android/SKILL.md
-  - auth/auth0-ios/SKILL.md
-  - auth/auth0-react-native/SKILL.md
-- O20 (b), in mobile/react-native/agents/mobile-react-native.md, mobile/ios/agents/mobile-ios.md and mobile/android/agents/mobile-android.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
-
-Traps:
-- Re-read each row at its line first (§2 item 1).
-- The version facts are kept by pointing at CLAUDE.md "Version policy" and the core rule file, never
-  by updating the number.
-- The mobile rules SKILL.md files are T1's.
-
-Gate: own tests.
-  python3 tools/skill-lint.py mobile/react-native/agents/mobile-react-native.md mobile/ios/agents/mobile-ios.md mobile/android/agents/mobile-android.md mobile/android/skills/unit-testing mobile/android/skills/kotlin-multiplatform mobile/ios/skills/unit-testing mobile/react-native/skills/component-testing mobile/android/skills/standards-audit mobile/ios/skills/standards-audit mobile/react-native/skills/standards-audit auth/auth0-android auth/auth0-ios auth/auth0-react-native   → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'mobile/'   → prints nothing
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P7 — mobile agents and skills`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P8 — desktop-macos, desktop-windows (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P8 of docs/plans/015-skill-authoring-remediation.md. Fix audit 004's findings in the two desktop
-plugins, including their oversized rule files.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R3, R9, R15–R21, R23.
-2. The plan: §2, `## Answered questions` (O18, O20), task P8, and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md: the rows naming desktop-macos, desktop-windows or
-   desktop/windows/skills/unit-testing, and the R23 rows.
-4. .skill-template/agent.md as T1 left it.
-
-Fix, by path and rule:
-- desktop/macos/agents/desktop-macos.md:
-  - :16 and :17, R17.
-  - :32 and :35, R15.
-  - :12, R18.
-  - The Fix line.
-  - :60, O18: the line becomes `Gate evidence: <the Gate: line's commands and results, including coverage>`.
-- desktop/windows/agents/desktop-windows.md:
-  - :16, R17.
-  - :55 and :58, R15.
-  - :31–40, R17: one pointer per row to project-setup, unit-testing or
-    cpp-winrt/references/testing-and-coverage.md.
-  - :42, R19.
-  - :12, R18.
-  - The Fix line.
-  - :38, 56, 83, O18: the line becomes `Gate evidence: <the Gate: line's commands and results, including coverage>`.
-- R23, trim each to its constraints and point at the skill for the recipe. In
-  desktop/macos/skills/rules/:
-  - swift.md (6,688 chars, the core file: ≤ 6,000)
-  - swiftui-mac.md (3,959)
-  - xcode-config.md (3,428)
-  - mac-accessibility.md (3,414)
-  - swift-persistence.md (2,940)
-  - appkit.md (2,547)
-  - swift-networking.md (2,502)
-
-  In desktop/windows/skills/rules/:
-  - winui-xaml.md (3,610)
-  - cppwinrt.md (3,571)
-  - win-accessibility.md (2,788)
-- desktop/windows/skills/unit-testing/SKILL.md:
-  - :94–101, 138–140, 169–177, R17.
-  - :18, 104, 132, R17: drop the numbers.
-  - :57 and :123, R21.
-  - :165–167 and :199, R19.
-- R9: desktop/{macos,windows}/skills/standards-audit/references/conformance-checklist.md.
-- R3:
-  - desktop/_shared/security/SKILL.md
-  - auth/auth0-macos/SKILL.md
-  - auth/auth0-windows/SKILL.md
-- O20 (b), in desktop/macos/agents/desktop-macos.md and desktop/windows/agents/desktop-windows.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
-
-Traps:
-- Re-read each row at its line first (§2 item 1).
-- A trimmed rule-file line keeps its constraint. Only the how-to moves, and only to a skill that
-  already teaches it or gains it in this task. Keep every `paths:`.
-- mobile/ios/skills/rules/* share file names and are not yours. The desktop rules SKILL.md files are
-  T1's.
-
-Gate: own tests.
-  python3 tools/skill-lint.py desktop/macos/agents/desktop-macos.md desktop/windows/agents/desktop-windows.md desktop/macos/skills/rules/swift.md desktop/macos/skills/rules/swiftui-mac.md desktop/macos/skills/rules/xcode-config.md desktop/macos/skills/rules/mac-accessibility.md desktop/macos/skills/rules/swift-persistence.md desktop/macos/skills/rules/appkit.md desktop/macos/skills/rules/swift-networking.md desktop/windows/skills/rules/winui-xaml.md desktop/windows/skills/rules/cppwinrt.md desktop/windows/skills/rules/win-accessibility.md desktop/windows/skills/unit-testing desktop/macos/skills/standards-audit desktop/windows/skills/standards-audit desktop/_shared/security auth/auth0-macos auth/auth0-windows   → 0 findings
-  wc -c desktop/macos/skills/rules/*.md desktop/windows/skills/rules/*.md   → swift.md ≤ 6,000, the rest named above ≤ 2,500
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P8 — desktop agents, rule files and unit-testing`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P9 — be-dotnet, be-java, be-node, be-python, be-rust (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P9 of docs/plans/015-skill-authoring-remediation.md. Fix audit 004's findings in the five backend
-plugins.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R3, R15, R17.
-2. The plan: §2, `## Answered questions` (O18, O19, O20), task P9,
-   and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md: the "Agents, shared defects" rows naming be-*, and the
-   be-python and be-java rows.
-4. .skill-template/agent.md as T1 left it.
-
-Fix, by path and rule:
-- In each of backend/{dotnet,java,node,python,rust}/agents/be-<stack>.md:
-  - R17, "Read the rules" (:16; :22 in be-python): the template wording. Keep be-rust's
-    `#[cfg(test)]` note and be-node's narrow `*.ts` globs.
-  - R17, the version asides (:17; :23 in be-python; :8 and :17 in be-rust): "the lane per the core
-    rule file and CLAUDE.md 'Version policy'".
-  - R15, Steps 1 and 4 (:25 and :28; :31 and :34 in be-python). Step 1: "the `pattern-guide` earn-it
-    criterion quoted against the code, or 'no pattern'". Step 4: "the `code-review` findings table has
-    no blocker or major row".
-  - The Fix line.
-  - O18: be-dotnet:54, be-java:52, be-node:52, be-python:59, be-rust:54: the line becomes `Gate evidence: <the Gate: line's commands and results, including coverage>`.
-- backend/python/agents/be-python.md:16–17, R17: pointers to python-pipeline.md:12 and
-  python-container.md:14.
-- backend/java/agents/be-java.md:26 and :30, O19.
-- R2:
-  - backend/java/skills/unit-testing/SKILL.md (19,052 chars)
-  - backend/dotnet/skills/unit-testing/SKILL.md (18,219)
-  - backend/node/skills/unit-testing/SKILL.md (17,906)
-  - backend/python/skills/media-processing/SKILL.md (19,038)
-  - backend/rust/skills/pattern-writer/SKILL.md (17,975)
-- R3: auth/_shared/auth0-concepts/SKILL.md and auth/_shared/oidc-concepts/SKILL.md.
-- O20 (b), in backend/{dotnet,java,node,python,rust}/agents/be-<stack>.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
-
-Traps:
-- Re-read each row at its line first (§2 item 1). The five agents are near-copies, so fix one, then
-  carry the same edit to the other four, line by line.
-- observability/ is P10's. The be-* rules SKILL.md files are T1's.
-
-Gate: own tests.
-  python3 tools/skill-lint.py backend/dotnet/agents/be-dotnet.md backend/java/agents/be-java.md backend/node/agents/be-node.md backend/python/agents/be-python.md backend/rust/agents/be-rust.md backend/dotnet/skills/unit-testing backend/java/skills/unit-testing backend/node/skills/unit-testing backend/python/skills/unit-testing backend/rust/skills/unit-testing backend/python/skills/media-processing backend/rust/skills/pattern-writer auth/_shared/auth0-concepts auth/_shared/oidc-concepts   → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'backend/(dotnet|java|node|python|rust)/'   → prints nothing
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P9 — be-* agents and skills`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P10 — data and observability (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P10 of docs/plans/015-skill-authoring-remediation.md. Fix audit 004's findings in data and
-observability.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R11, R15–R18, R21.
-2. The plan: §2, `## Answered questions` (O4, O15, O16, O20), task P10, and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md: the rows naming data/dynamodb,
-   observability/logs-traces-setup, data-architect and data/_shared/migrations.
-4. .skill-template/agent.md as T1 left it.
-
-Fix, by path and rule:
-- data/agents/data-architect.md:
-  - :24, R17.
-  - :42, the Fix line.
-- data/dynamodb/SKILL.md (19,149 chars):
-  - R2.
-  - :14, 24, 96, Data.
-  - :110–119, 141, 234, 237, R21.
-  - :302–308, R15.
-  - :274–300, R17.
-  - :289–300, R18.
-  - :105–207, R16: references/connections.md and references/security-iam.md.
-  - :307, O15.
-- R2: data/elasticsearch/SKILL.md (17,886 chars) and data/cosmosdb/SKILL.md (16,849).
-- data/_shared/migrations/SKILL.md:63, O4.
-- observability/logs-traces-setup/SKILL.md (16,869 chars):
-  - R2.
-  - :129 and :193, Data.
-  - :394–403, R15.
-  - :368–392, R17.
-  - :138–173, R21.
-  - :183–189 and :343–358, R16.
-  - :301–318 and :402, O16.
-- observability/agents/observability-engineer-{dotnet,java,node,rust}.md: the Fix line.
-- O20 (b), in data/agents/data-architect.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
-
-Traps:
-- Re-read each row at its line first (§2 item 1).
-- data/rules is T1's. The be-* agents are P9's.
-
-Gate: own tests.
-  python3 tools/skill-lint.py data/agents/data-architect.md data/dynamodb data/elasticsearch data/cosmosdb data/_shared/migrations observability/logs-traces-setup observability/agents/observability-engineer-dotnet.md observability/agents/observability-engineer-java.md observability/agents/observability-engineer-node.md observability/agents/observability-engineer-rust.md   → 0 findings (only O4's line if deferred)
-  python3 tools/token-audit.py --violations-only | grep -E 'data/(dynamodb|elasticsearch|cosmosdb)|logs-traces-setup'   → prints nothing
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P10 — data and observability`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P11 — devops: the agent, k8s-security, supply-chain-security, iac-security (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P11 of docs/plans/015-skill-authoring-remediation.md. Fix audit 004's findings in devops-engineer
-and the three largest devops skills.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R15–R19, R21.
-2. The plan: §2, `## Answered questions` (O13, O20), D3, task P11, and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md: the rows naming devops/k8s-security and devops-engineer.
-4. devops/k8s-security/references/{kube-bench,kubescape,polaris}.md (the R16 and R17 targets), and
-   .skill-template/agent.md as T1 left it.
-
-Fix, by path and rule:
-- devops/agents/devops-engineer.md:
-  - :22, R17.
-  - :50, R15.
-  - :16 and :52, R18.
-  - The Fix line.
-- devops/k8s-security/SKILL.md (36,584 chars):
-  - R2.
-  - :40–57 and :458–522, R17: delete `## Rules`.
-  - :79–114, 210–217, 400–456, R17.
-  - :82–83, 92–93, 125–139, 161–173, 192–204, 242–251, 268–273, 287–292, 364–381, 400–409, R21: keep
-    `# EXPECTED:` and the ticket-and-reason comments.
-  - :16–22, R19.
-  - :122–230 and :400–456, R16.
-  - :545, Data.
-  - :133–134, :462 and references/kube-bench.md:21–22, O13. Check the ids against kube-bench's
-    current release, through `dev:source-grounding`.
-- R2: devops/supply-chain-security/SKILL.md (36,528 chars) and devops/iac-security/SKILL.md (31,022).
-- O20 (b), in devops/agents/devops-engineer.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
-
-Traps:
-- Re-read each row at its line first (§2 item 1).
-- Keep the live-cluster authorization rule, stated once. It is a guardrail.
-- The other devops skills are P12's. devops/rules is T1's.
-
-Gate: own tests.
-  python3 tools/skill-lint.py devops/agents/devops-engineer.md devops/k8s-security devops/supply-chain-security devops/iac-security   → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'devops/(k8s-security|supply-chain-security|iac-security)'   → prints nothing
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P11 — devops agent, k8s, supply-chain and IaC security`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P12 — devops, the rest, and security-governance (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P12 of docs/plans/015-skill-authoring-remediation.md. Bring the remaining devops skills and
-cloud-incident-response under budget, and fix security-governance's findings.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R9, R10, R15–R17, R19.
-2. The plan: §2, `## Answered questions` (O17), D3, task P12, and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md: the rows naming security-architect,
-   security/cloud-incident-response, security-governance.md and security/standards-audit.
-4. security/rules-security-governance/runbooks.md "Cloud incident response", the R17 target.
-
-Fix, by path and rule:
-- R2:
-  - devops/infra-controls-validation/SKILL.md (25,703 chars)
-  - devops/container-runtime-security/SKILL.md (22,947)
-  - devops/cloud-posture/SKILL.md (22,000)
-- security/agents/security-architect.md:
-  - :26, R17.
-  - :40, R15.
-  - :12, 18, 42, 53, R19: keep the Invariant at :18.
-  - :21 and :44, O17.
-- security/cloud-incident-response/SKILL.md (21,277 chars):
-  - R2.
-  - :63–84, R15.
-  - :107–118, R17.
-  - :9–13, 63–64, 109–110, 126–128, R19.
-  - :47–59 and :69–75, R16.
-  - :131, Data.
-- R10: security/rules-security-governance/security-governance.md:40 and
-  security/standards-audit/references/conformance-checklist.md:253.
-- R9: security/standards-audit/references/conformance-checklist.md.
-
-Traps:
-- Re-read each row at its line first (§2 item 1).
-- security-governance.md is an always-loaded rule file. Edit only its :40 marker. Its size has no row.
-- security/rules-security-governance/SKILL.md is T1's. The penetration-testing skills are P13's.
-
-Gate: own tests.
-  python3 tools/skill-lint.py devops/infra-controls-validation devops/container-runtime-security devops/cloud-posture security/agents/security-architect.md security/cloud-incident-response security/rules-security-governance/security-governance.md security/standards-audit   → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'infra-controls-validation|container-runtime-security|cloud-posture|cloud-incident-response'   → prints nothing
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P12 — devops remainder and security-governance`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P13 — penetration-testing (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P13 of docs/plans/015-skill-authoring-remediation.md. Bring the penetration-testing skills under
-budget, and fix penetration-tester's findings.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R3, R15–R17, R19.
-2. The plan: §2, D3, task P13, and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md: the rows naming security/agents/penetration-tester.md.
-
-Fix, by path and rule:
-- security/agents/penetration-tester.md:
-  - :56 and :64, R15.
-  - :20 and :62, R17: each control once, in Invariants.
-  - :18, R19.
-- R2:
-  - security/cloud-attack-azure/SKILL.md (21,020 chars)
-  - security/cloud-attack-aws/SKILL.md (19,859)
-  - security/cloud-recon-enumeration/SKILL.md (18,538)
-  - security/atomic-simulation/SKILL.md (16,496)
-  - security/cloud-attack-gcp/SKILL.md (16,331)
-- security/metasploit-setup/SKILL.md:
-  - R2: the description is 452 chars.
-  - R3.
-
-Traps:
-- Re-read each row at its line first (§2 item 1).
-- Scope, authorization and logging controls are guardrails. Each one stays, stated once. Only
-  per-cloud or per-tool branch material moves to references/.
-
-Gate: own tests.
-  python3 tools/skill-lint.py security/agents/penetration-tester.md security/cloud-attack-azure security/cloud-attack-aws security/cloud-recon-enumeration security/atomic-simulation security/cloud-attack-gcp security/metasploit-setup   → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'security/(cloud-attack|cloud-recon|atomic-simulation|metasploit-setup)'   → prints nothing
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P13 — penetration-testing`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P14 — qa-java: the lane's agents, conventions, rule files, contents lists and three bodies (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P14 of docs/plans/015-skill-authoring-remediation.md. Fix audit 004's findings in the qa-java
-lane's agents, conventions skill, rule files and reference files, and in three bodies.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R9, R15–R21, R23.
-2. The plan: §2, `## Answered questions` (O7, O20, O21), D7, task P14, and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md: the rows naming qa-ui-java, the qa-java
-   inhouse-framework-conventions, qa/java/skills/ai-feature-testing, the R23 rows, and the MCP-command
-   row.
-4. .skill-template/agent.md as T1 left it.
-
-Fix, by path and rule:
-- qa/java/agents/qa-ui-java.md:
-  - :16, R17.
-  - :25, R17: the MCP command becomes a pointer to page-objects-from-url.
-  - :32 and :55, R18.
-  - :46, the Fix line.
-  - :21 and :55, O21: each becomes "Ask as many clarifying questions as needed."
-- The Fix line: qa/java/agents/qa-{api,bdd,desktop,llm,mobile,performance}-java.md.
-- The MCP command, R17: its one home is qa/java/skills/page-objects-from-url/SKILL.md, and
-  qa/java/skills/evidence-capture/SKILL.md points at it.
-- qa/java/skills/inhouse-framework-conventions/SKILL.md:
-  - :172–178, 263–275, 277–, R17.
-  - :249–261, R19.
-  - :283, only under O7 (b).
-- R23: qa/java/skills/rules/desktop-tests.md (3,636 chars) and qa/java/skills/rules/qa-java-ui.md
-  (2,523).
-- qa/java/skills/ai-feature-testing/SKILL.md (21,319 chars):
-  - R2.
-  - :237, 260–261, 274, R21.
-  - :234, 238, 255, 261–262, 277, R21.
-  - :236, 238, 259, 273, R21.
-  - :20–37, 86–89, 281–306, 321–339, R17.
-  - :9–20, R19.
-  - :64–72 and :281–306, R18.
-- R2: qa/java/skills/api-contract-testing/SKILL.md (20,664 chars) and
-  qa/java/skills/test-quality-check/SKILL.md (18,714).
-- R9, in qa/java/skills/:
-  - analytics-testing/references/playwright.md
-  - browser-cloud-setup/references/details.md
-  - email-testing/references/{gmail-imap,mailosaur,mailpit,sendgrid-sandbox}.md
-  - evidence-capture/references/playwright.md
-  - file-storage-testing/references/{azure-blob,s3}.md
-  - language-testing/references/details.md
-  - messaging-testing/references/{kafka,rabbitmq,service-bus,sqs}.md
-  - network-mocking/references/{cdp,playwright-routes,proxy}.md
-  - payment-testing/references/stripe-api.md
-  - realtime-stream-testing/references/details.md
-  - test-login-tokens/references/details.md
-  - visual-regression/references/playwright-snapshots.md
-- O20 (b), in qa/java/agents/qa-{ui,api,bdd,desktop,llm,mobile,performance}-java.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
-
-Traps:
-- Re-read each row at its line first (§2 item 1).
-- Test examples must still obey CLAUDE.md "Test code rules": Should_X_When_Y names, no inline
-  comments, injected clients. tools/qa-version-check.py must still find the Playwright pin where it
-  expects it.
-- data-driven-testing, failure-injection-testing, grpc and security-testing are P15's. qa/_shared is
-  P16's. The rules SKILL.md is T1's.
-
-Gate: own tests.
-  python3 tools/skill-lint.py qa/java/agents qa/java/skills/inhouse-framework-conventions qa/java/skills/rules/desktop-tests.md qa/java/skills/rules/qa-java-ui.md qa/java/skills/page-objects-from-url qa/java/skills/evidence-capture qa/java/skills/ai-feature-testing qa/java/skills/api-contract-testing qa/java/skills/test-quality-check qa/java/skills/analytics-testing qa/java/skills/browser-cloud-setup qa/java/skills/email-testing qa/java/skills/file-storage-testing qa/java/skills/language-testing qa/java/skills/messaging-testing qa/java/skills/network-mocking qa/java/skills/payment-testing qa/java/skills/realtime-stream-testing qa/java/skills/test-login-tokens qa/java/skills/visual-regression   → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'qa/java/skills/(ai-feature-testing|api-contract-testing|test-quality-check)/'   → prints nothing
-  wc -c qa/java/skills/rules/desktop-tests.md qa/java/skills/rules/qa-java-ui.md   → each ≤ 2,500
-  python3 tools/qa-version-check.py   → OK
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P14 — qa-java agents, conventions, rule files, references`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P15 — qa-java: the remaining bodies (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P15 of docs/plans/015-skill-authoring-remediation.md. Bring six qa-java skills under the
-16,000-char body budget.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R16, R17, R19.
-2. The plan: §2, D3, task P15, and "Close-out — every task".
-3. qa/java/skills/rules/*.md, the R17 targets: a restated rule becomes a pointer to them.
-
-Fix, R2, by path (all in qa/java/skills/):
-- data-driven-testing/SKILL.md (19,798 chars)
-- failure-injection-testing/SKILL.md (20,126)
-- api-test-author/grpc/SKILL.md (20,090)
-- security-testing/passive-scan/SKILL.md (19,923)
-- security-testing/dependency-scan/SKILL.md (18,411)
-- security-testing/permission-testing/SKILL.md (17,613)
-
-Traps:
-- These have no judgment rows in 004. Only R2 is to fix, by §2 item 3. Any other defect you see goes
-  into As built for G1.
-- A version pin moved to references/ must still be where tools/qa-version-check.py reads it.
-- qa/_shared/security-testing/* is P16's.
-
-Gate: own tests.
-  python3 tools/skill-lint.py qa/java/skills/data-driven-testing qa/java/skills/failure-injection-testing qa/java/skills/api-test-author/grpc qa/java/skills/security-testing/passive-scan qa/java/skills/security-testing/dependency-scan qa/java/skills/security-testing/permission-testing   → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'qa/java/skills/(data-driven-testing|failure-injection-testing|api-test-author/grpc|security-testing)/'   → prints nothing
-  python3 tools/qa-version-check.py   → OK
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P15 — qa-java bodies under budget`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P16 — qa/_shared (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P16 of docs/plans/015-skill-authoring-remediation.md. Bring the shared QA skills under budget, and
-fix python-web-testing, webmcp-testing and the two R6 skills.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R6, R7, R10, R16, R17,
-   R22.
-2. The plan: §2, D3, task P16, and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md: the rows naming qa/_shared/python-web-testing.
-4. qa/typescript/skills/rules/ui-tests.md:21, an R17 target.
-
-Fix, by path and rule:
-- R2, in qa/_shared/:
-  - security-testing/image-infra-scan/SKILL.md (19,111 chars)
-  - security-testing/code-scan/SKILL.md (18,476)
-  - security-testing/known-vuln-scan/SKILL.md (18,062)
-  - security-testing/active-scan/SKILL.md (16,788)
-  - security-testing/secrets-scan/SKILL.md (16,672)
-  - security-testing/certificate-scan/SKILL.md (16,258)
-  - api-spec-assets/SKILL.md (18,353)
-- qa/_shared/python-web-testing/SKILL.md:
-  - R7.
-  - :46–56, R17: point at the qa-* UI rule files, and keep the Python spellings.
-  - :134, R22: "hand it to the `qa-ui-<stack>` agent".
-  - :121–134, R16.
-- qa/_shared/webmcp-testing/SKILL.md:42, R10.
-- R6: qa/_shared/contract-testing-pact/SKILL.md and qa/_shared/performance/SKILL.md. Use topic
-  headings: "Choosing Pact", "Profiler hand-off".
-
-Traps:
-- Re-read each row at its line first (§2 item 1).
-- python-web-testing is a front door registered in all three qa-* plugins. Keep its description's
-  trigger.
-- tools/qa-version-check.py reads pins in python-web-testing and webmcp-testing. Keep them.
-
-Gate: own tests.
-  python3 tools/skill-lint.py qa/_shared/security-testing qa/_shared/api-spec-assets qa/_shared/python-web-testing qa/_shared/webmcp-testing qa/_shared/contract-testing-pact qa/_shared/performance   → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'qa/_shared/'   → prints nothing
-  python3 tools/qa-version-check.py   → OK
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P16 — qa/_shared`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P17 — qa-dotnet (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P17 of docs/plans/015-skill-authoring-remediation.md. Fix audit 004's findings in the qa-dotnet
-lane.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R3, R9, R15–R19, R23.
-2. The plan: §2, `## Answered questions` (O7, O20, O21), D7, task P17, and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md: the rows naming qa-ui-dotnet, the qa-dotnet
-   inhouse-framework-conventions, the R23 rows, and the MCP-command row.
-4. .skill-template/agent.md as T1 left it.
-
-Fix, by path and rule:
-- qa/dotnet/agents/qa-ui-dotnet.md:
-  - :16, R17.
-  - :17, R17.
-  - :29, R17: the MCP command becomes a pointer to page-objects-from-url.
-  - :46, R17: "the trace commands in `evidence-capture`".
-  - The Fix line.
-  - :55, O21: each becomes "Ask as many clarifying questions as needed."
-- The Fix line: qa/dotnet/agents/qa-{api,bdd,desktop,llm,mobile,performance}-dotnet.md.
-- The MCP command, R17: its one home is qa/dotnet/skills/page-objects-from-url/SKILL.md, and
-  qa/dotnet/skills/evidence-capture/SKILL.md points at it.
-- qa/dotnet/skills/inhouse-framework-conventions/SKILL.md:
-  - :239, Data: "a typed DTO, not `RestResponse`".
-  - :174–180, 263–, 278–, R17.
-  - :249–261, R19.
-  - :150 and :170–172, O7.
-- R23: qa/dotnet/skills/rules/desktop-tests.md (3,403 chars) and qa/dotnet/skills/rules/web-ui.md
-  (2,714).
-- R3: qa/dotnet/skills/desktop-screen-explorer/SKILL.md and
-  qa/dotnet/skills/desktop-window-objects/SKILL.md.
-- R2, in qa/dotnet/skills/:
-  - security-testing/passive-scan/SKILL.md (19,853 chars)
-  - api-test-author/grpc/SKILL.md (18,597)
-  - security-testing/permission-testing/SKILL.md (17,748)
-  - failure-injection-testing/SKILL.md (17,468)
-  - security-testing/dependency-scan/SKILL.md (17,014)
-- R9, in qa/dotnet/skills/:
-  - accessibility-testing/references/{axe-playwright,lighthouse-ci}.md
-  - ai-feature-testing/references/details.md
-  - analytics-testing/references/playwright.md
-  - api-test-author/writer/references/details.md
-  - browser-cloud-setup/references/details.md
-  - email-testing/references/{gmail-imap,mailosaur,mailpit,sendgrid-sandbox}.md
-  - evidence-capture/references/playwright.md
-  - file-storage-testing/references/{azure-blob,s3}.md
-  - language-testing/references/details.md
-  - messaging-testing/references/{kafka,rabbitmq,service-bus,sqs}.md
-  - network-mocking/references/{cdp,playwright-routes,proxy}.md
-  - payment-testing/references/stripe-api.md
-  - realtime-stream-testing/references/details.md
-  - standards-audit/references/conformance-checklist.md
-  - test-login-tokens/references/details.md
-  - visual-regression/references/playwright-snapshots.md
-- O20 (b), in qa/dotnet/agents/qa-{ui,api,bdd,desktop,llm,mobile,performance}-dotnet.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
-
-Traps:
-- Re-read each row at its line first (§2 item 1).
-- tools/qa-version-check.py must still find the Playwright 1.63.0 pin where it expects it.
-- qa/dotnet/skills/rules/SKILL.md is T1's. qa/_shared is P16's.
-
-Gate: own tests.
-  python3 tools/skill-lint.py qa/dotnet/agents qa/dotnet/skills/inhouse-framework-conventions qa/dotnet/skills/rules/desktop-tests.md qa/dotnet/skills/rules/web-ui.md qa/dotnet/skills/page-objects-from-url qa/dotnet/skills/evidence-capture qa/dotnet/skills/desktop-screen-explorer qa/dotnet/skills/desktop-window-objects qa/dotnet/skills/security-testing qa/dotnet/skills/api-test-author qa/dotnet/skills/failure-injection-testing qa/dotnet/skills/accessibility-testing qa/dotnet/skills/ai-feature-testing qa/dotnet/skills/analytics-testing qa/dotnet/skills/browser-cloud-setup qa/dotnet/skills/email-testing qa/dotnet/skills/file-storage-testing qa/dotnet/skills/language-testing qa/dotnet/skills/messaging-testing qa/dotnet/skills/network-mocking qa/dotnet/skills/payment-testing qa/dotnet/skills/realtime-stream-testing qa/dotnet/skills/standards-audit qa/dotnet/skills/test-login-tokens qa/dotnet/skills/visual-regression   → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'qa/dotnet/'   → prints nothing
-  wc -c qa/dotnet/skills/rules/desktop-tests.md qa/dotnet/skills/rules/web-ui.md   → each ≤ 2,500
-  python3 tools/qa-version-check.py   → OK
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P17 — qa-dotnet`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P18 — qa-typescript (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P18 of docs/plans/015-skill-authoring-remediation.md. Fix audit 004's findings in the
-qa-typescript lane.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R6, R8, R9, R17, R19,
-   R21, R23.
-2. The plan: §2, `## Answered questions` (O7, O8, O9, O20, O21), D7, task P18, and
-   "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md: the rows naming qa-ui-typescript, the qa-typescript
-   inhouse-framework-conventions, the R23 rows, and the MCP-command row.
-4. .skill-template/agent.md as T1 left it.
-
-Fix, by path and rule:
-- qa/typescript/agents/qa-ui-typescript.md:
-  - :16, R17.
-  - :27, R17: the MCP command becomes a pointer to page-objects-from-url.
-  - :44, the Fix line.
-  - :50, O20 (b): nothing to do, this agent already lacks the sentence.
-  - :53, O21: each becomes "Ask as many clarifying questions as needed."
-- The Fix line: qa/typescript/agents/qa-{api,bdd,desktop,mobile}-typescript.md. Also
-  qa-llm-typescript.md and qa-performance-typescript.md, if `grep -n "Fix"` shows an open-ended sweep
-  there.
-- The MCP command, R17: its one home is qa/typescript/skills/page-objects-from-url/SKILL.md, and
-  qa/typescript/skills/evidence-capture/SKILL.md points at it.
-- qa/typescript/skills/inhouse-framework-conventions/SKILL.md:
-  - :165–171, 237–, 251–, R17.
-  - :223–235, R19.
-  - :155, R21: withPassword(`Wrong-${crypto.randomUUID()}`).
-  - :134, O8.
-  - :208 and :109–114, O9.
-- R23: qa/typescript/skills/rules/ui-tests.md (2,685 chars).
-- R8: qa/typescript/skills/bdd-project-scaffold/SKILL.md:132 and
-  qa/typescript/skills/ui-test-author/review/SKILL.md:15. Name the skill owning
-  references/config-and-fixtures.md on the same line.
-- R6: qa/typescript/skills/benchmarks/SKILL.md.
-- R2, in qa/typescript/skills/:
-  - failure-injection-testing/SKILL.md (20,074 chars)
-  - security-testing/passive-scan/SKILL.md (19,766)
-  - security-testing/dependency-scan/SKILL.md (17,020)
-  - data-driven-testing/SKILL.md (16,824)
-  - api-test-author/grpc/SKILL.md (16,353)
-- R9, in qa/typescript/skills/:
-  - ai-feature-testing/references/details.md
-  - analytics-testing/references/playwright.md
-  - browser-cloud-setup/references/details.md
-  - email-testing/references/{gmail-imap,mailosaur,mailpit,sendgrid-sandbox}.md
-  - evidence-capture/references/playwright.md
-  - file-storage-testing/references/{azure-blob,s3}.md
-  - language-testing/references/details.md
-  - messaging-testing/references/{kafka,rabbitmq,service-bus,sqs}.md
-  - network-mocking/references/{playwright-routes,proxy}.md
-  - payment-testing/references/stripe-api.md
-  - realtime-stream-testing/references/details.md
-  - test-login-tokens/references/details.md
-
-Traps:
-- Re-read each row at its line first (§2 item 1).
-- This lane is Playwright 1.64. tools/qa-version-check.py must still find its pin.
-- qa/typescript/skills/rules/SKILL.md is T1's. qa/_shared is P16's.
-
-Gate: own tests.
-  python3 tools/skill-lint.py qa/typescript/agents qa/typescript/skills/inhouse-framework-conventions qa/typescript/skills/rules/ui-tests.md qa/typescript/skills/page-objects-from-url qa/typescript/skills/evidence-capture qa/typescript/skills/bdd-project-scaffold qa/typescript/skills/ui-test-author/review qa/typescript/skills/benchmarks qa/typescript/skills/failure-injection-testing qa/typescript/skills/security-testing qa/typescript/skills/data-driven-testing qa/typescript/skills/api-test-author/grpc qa/typescript/skills/ai-feature-testing qa/typescript/skills/analytics-testing qa/typescript/skills/browser-cloud-setup qa/typescript/skills/email-testing qa/typescript/skills/file-storage-testing qa/typescript/skills/language-testing qa/typescript/skills/messaging-testing qa/typescript/skills/network-mocking qa/typescript/skills/payment-testing qa/typescript/skills/realtime-stream-testing qa/typescript/skills/test-login-tokens   → 0 findings
-  python3 tools/token-audit.py --violations-only | grep -E 'qa/typescript/'   → prints nothing
-  wc -c qa/typescript/skills/rules/ui-tests.md   → ≤ 2,500
-  python3 tools/qa-version-check.py   → OK
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P18 — qa-typescript`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P19 — qa/manual, qa/reporting, qa/cicd (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P19 of docs/plans/015-skill-authoring-remediation.md. Fix audit 004's findings in the manual-QA,
-reporting and CI/CD trees.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R2, R8, R9, R10, R11, R13,
-   R15, R17.
-2. The plan: §2, `## Answered questions` (O3, O20), D7, task P19, and "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md: the rows whose Location starts qa/manual or qa/reporting.
-4. .skill-template/agent.md as T1 left it (Steps table, `## Report`, the Fix line).
-
-Fix, by path and rule:
-- qa/manual/agents/qa-feature-spec-writer.md:
-  - :33, R13: Steps becomes the template table.
-  - :100, R13: `## Report` with `Mode:`.
-- qa/manual/agents/qa-explorer.md:28, 39, 40, R8: qa/manual/app-exploration/references/probes.md and
-  …/checks.md.
-- qa/manual/cross-feature-test-design/SKILL.md:21, R8: name the owner on the line, as :11 does.
-- O3:
-  - qa/manual/cross-feature-test-design/SKILL.md:28, 30
-  - qa/manual/cross-feature-test-design/references/example-cancel-booking.md:9, 76, 103
-  - qa/manual/requirements-breakdown/references/connections.md:9
-- R10: qa/manual/test-plan-writer/SKILL.md:130 and qa/manual/test-strategy/SKILL.md:166.
-- R2:
-  - qa/manual/test-plan-writer/SKILL.md: the description is 232 chars.
-  - qa/manual/agents/qa-test-case-designer.md (16,323 chars), plus its Fix line.
-  - qa/manual/agents/qa-test-planner.md (14,847).
-- qa/manual/app-exploration/references/probes.md:
-  - R9.
-  - R17: the Playwright MCP command becomes a pointer to the lane's page-objects-from-url.
-- R8, the path qa/<stack>/skills/ui-test-author/playwright/references/trace-correlation.md:
-  - qa/reporting/dotnet/skills/test-reports/SKILL.md:171
-  - qa/reporting/java/skills/test-reports/SKILL.md:178
-  - qa/reporting/typescript/skills/test-reports/SKILL.md:163
-- The Fix line: qa/reporting/agents/qa-reporting-{dotnet,java,typescript}.md and
-  qa/cicd/agents/qa-cicd-{dotnet,java,typescript}.md.
-- R9: qa/cicd/{dotnet,java,typescript}/skills/ci-pipelines/references/{azure-pipelines,github-actions,gitlab-ci}.md.
-- O20 (b), in qa/reporting/agents/qa-reporting-dotnet.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
-
-Traps:
-- Re-read each row at its line first (§2 item 1).
-- probes.md loses its pin. Confirm with tools/qa-version-check.py that no expected pin lived only
-  there.
-- Under O3 (b), the R11 lines stay, and T2's lint exception clears them.
-
-Gate: own tests.
-  python3 tools/skill-lint.py qa/manual qa/reporting qa/cicd   → 0 findings (only O3's lines if deferred)
-  python3 tools/token-audit.py --violations-only | grep -E 'qa/manual/'   → prints nothing
-  python3 tools/qa-version-check.py   → OK
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P19 — qa/manual, qa/reporting, qa/cicd`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### P20 — business-analysis, training-data, tooling, and /dev:refine (general-purpose, docs)
-
-````
-Depends on: L1, T1, C1
-Agent: general-purpose · Stack: docs
-
-Task P20 of docs/plans/015-skill-authoring-remediation.md. Fix audit 004's findings in
-business-analysis, training-data and tooling, and apply O10 to /dev:refine.
-
-Read, in this order:
-1. engineering-practices/writing-for-agents/SKILL.md: the rule table rows R10, R12, R13, R15–R19, R23.
-2. The plan: §2, `## Answered questions` (O3, O10, O18, O20, O23, O24), task P20, and
-   "Close-out — every task".
-3. docs/audits/004-skill-authoring-r1.md: the rows naming requirements-author, business-analyst,
-   ba-project-memory, ba-dependency-map, the business-analysis R23 rows, dataset-engineer,
-   dataset-auditor, td-dataset-formats, tooling-engineer, mcp-builder and capability-contract.
-4. .skill-template/agent.md as T1 left it. Under O10 (a), also CONTRIBUTING.md "Names and registration".
-
-Fix, by path and rule:
-- business-analysis/agents/requirements-author.md:
-  - :14–30, R17: two lines.
-  - :56, R15.
-  - :67, R17.
-  - :36, 74, 86, R18.
-  - O10. Under (a): move engineering-practices/commands/refine.md into the business-analysis plugin's
-    commands, register it and the agent in business-analysis in .claude-plugin/marketplace.json,
-    remove both from dev, and update their rows in docs/skills-catalog.md and README.md. Under (b):
-    bundle what it loads into dev, listing it first.
-- business-analysis/agents/business-analyst.md:
-  - :38 and :52, R17.
-  - :19 and :60, R18.
-  - :56, the Fix line.
-- business-analysis/skills/ba-project-memory/SKILL.md:
-  - :34–58, R17.
-  - :66–111, R17: point at kb-lint.py after reading what it checks.
-  - :116–131, R16.
-  - :52, R19.
-  - :116, O3.
-- business-analysis/skills/ba-dependency-map/references/example-dependency-map.md:27, 38, 39, 79, 91,
-  R10: each marker goes in a code span.
-- R23, in business-analysis/skills/rules/:
-  - business-model.md (6,909 chars, the core file: ≤ 6,000)
-  - backlog-stories.md (4,065)
-  - backlog-epics.md (2,646)
-  - backlog-requirements.md (2,541)
-- training-data/agents/dataset-engineer.md:
-  - :23, R17.
-  - :18, R19.
-  - :45, the Fix line.
-- training-data/agents/dataset-auditor.md:60, R13: `## Report` with `Mode:`.
-- training-data/_shared/td-dataset-formats/SKILL.md:
-  - :13, 31–33, 52–58, 81, 96, 102–105, 124–134, R17.
-  - :60–98, R16.
-  - :22, 113, 134, R19.
-  - :22–23, O24.
-- tooling/agents/tooling-engineer.md:
-  - :44, R17.
-  - :17 and :19, R18 and R19.
-  - :51, the Fix line.
-  - Its `Gate evidence` line, O18: the line becomes `Gate evidence: <the Gate: line's commands and results, including coverage>`.
-- tooling/skills/mcp-builder/SKILL.md:11, R12.
-- tooling/_shared/capability-contract/SKILL.md:
-  - :71–75, 112–115, 132–134, 149–151, R17.
-  - :25–153, R15.
-  - :9, 119, 150, R19.
-  - :149, O23.
-- O20 (b), in business-analysis/agents/business-analyst.md, training-data/agents/dataset-engineer.md and tooling/agents/tooling-engineer.md: delete the clause that a test you believe is wrong stays red and is recorded as a dated `D<n>`, through "The close-out gate rules on it." Keep the read-only clause before it.
-
-Traps:
-- Re-read each row at its line first (§2 item 1).
-- A registration move is the one change here that plugin-surface-check judges. Run it after the move,
-  and fix every row it names before going on.
-- The rules SKILL.md files are T1's. tooling/skills/rules/tool-contract.md changes only under O23 (b).
-
-Gate: own tests.
-  python3 tools/skill-lint.py business-analysis/agents business-analysis/skills/ba-project-memory business-analysis/skills/ba-dependency-map business-analysis/skills/rules/business-model.md business-analysis/skills/rules/backlog-stories.md business-analysis/skills/rules/backlog-epics.md business-analysis/skills/rules/backlog-requirements.md training-data/agents training-data/_shared/td-dataset-formats tooling/agents/tooling-engineer.md tooling/skills/mcp-builder tooling/_shared/capability-contract   → 0 findings (only O3's line if deferred)
-  wc -c business-analysis/skills/rules/*.md   → business-model.md ≤ 6,000, the three backlog files ≤ 2,500
-  python3 tools/plugin-surface-check.py   → OK
-
-Commit: `docs(skills): 015 P20 — business-analysis, training-data, tooling, /refine`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### G1 — the whole library once more, then filing (general-purpose, docs)
 

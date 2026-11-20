@@ -1,5 +1,21 @@
 # Messaging Testing — Azure Service Bus (.NET 8 / NUnit) — **canonical stack**
 
+**Contents:**
+
+- Stack
+- The Service Bus model — entities, settlement, sub-queues
+- Local broker for tests — the Azure Service Bus emulator
+- Core pattern 1 — producer-assert (the SUT produced message X)
+- Core pattern 2 — consumer-assert (the SUT consumed → side-effect Y)
+- Peek-lock vs receive-and-delete — message settlement
+- Dead-letter-queue assertions
+- Topics, subscriptions & filters
+- Receiving a batch / draining
+- Anti-patterns
+- Examples
+- Rules (hard constraints)
+- Cross-references
+
 This is the **canonical** stack of the `qa/dotnet/skills/messaging-testing/` node, and it **opens the
 `messaging-testing` family** (service-bus → SQS → Kafka → RabbitMQ). **.NET leads here by
 judgment** (the same "lead where the tool is most authentic" call WireMock and dependency-scan

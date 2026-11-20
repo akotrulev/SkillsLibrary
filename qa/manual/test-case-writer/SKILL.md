@@ -36,7 +36,7 @@ An error-guessing case sits in the group whose behaviour it probes.
 
 ## Procedure
 
-1. **Sort the coverage items into the five groups.** One case per item, or per group of *valid* items that safely share a run; **never two invalid inputs in one case**. Each case keeps its technique, its source line and, for a cross-feature item, its slice id.
+1. **Sort the coverage items into the five groups.** One case per item, or per group of *valid* items that safely share a run; **never two invalid inputs in one case**. Each case keeps its technique, its source line and, for a cross-feature item, its cross-section id.
 2. **Write the journeys** (*Case forms*): one per actor goal, then the alternate and exception paths that end in a different business outcome.
 3. **Write the rules and calculations.** Compute every expected figure from the basis's formula and put the working in `### Worked numbers`.
 4. **Write states and permissions, then the connection groups.**

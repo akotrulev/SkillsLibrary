@@ -38,10 +38,6 @@ running app** (contrast DAST): it's a static, fast, every-PR pipeline gate.
 | **Remediate** an out-of-date / vulnerable dep automatically | Dependabot / Renovate | They *raise PRs to bump*; SCA *gates*. Complementary — gate + auto-fix |
 | Gate only the deps a PR **adds/changes** (diff-scoped) | `dependency-review-action` | PR-diff gate on GitHub; pairs with the full-tree scan here |
 
-**Rule of thumb:** SCA is your **dependency-tree CVE gate**; it complements — does not replace — DAST
-(`passive-scan`). Pair the gate with a *remediation* tool (Dependabot/Renovate) so findings get fixed, not just
-flagged.
-
 ## Setup — the OWASP Dependency-Check Gradle plugin
 
 ```kotlin
@@ -73,9 +69,7 @@ dependencyCheck {
 > `mvn verify` (or `mvn org.owasp:dependency-check-maven:check`). Identical discipline, different build
 > tool. New projects use Gradle Kotlin DSL per house default.
 
-The plugin's three tasks: **`dependencyCheckAnalyze`** (the scan + gate), **`dependencyCheckUpdate`**
-(refresh the NVD cache), **`dependencyCheckPurge`** (clear it). `dependencyCheckAggregate` rolls a
-multi-module build into one report.
+`dependencyCheckAggregate` rolls a multi-module build into one report.
 
 ## The SCA model — scan direct + transitive deps against a CVE feed
 
@@ -207,43 +201,7 @@ public final class DependencyCheckReport {
 
 ## Optional parse-and-assert test (the programmatic path)
 
-SCA is primarily a **build/CI gate** (`./gradlew dependencyCheckAnalyze`). When you want a test-level
-assertion independent of the Gradle gate — e.g. a custom threshold, or to surface the count in your test
-report — parse the JSON report (TestNG + AssertJ, mirroring `passive-scan`'s parsed-report gate):
-
-```java
-// src/test/java/security/DependencyCheckReport.java — a probe over the report
-public record DependencyCheckReport(JsonNode root) {
-    public static DependencyCheckReport read(Path path) throws IOException {
-        return new DependencyCheckReport(new ObjectMapper().readTree(Files.readString(path)));
-    }
-
-    public List<String> findingsAtOrAbove(double minimumCvss) {
-        List<String> findings = new ArrayList<>();
-        for (JsonNode dep : root.path("dependencies")) {
-            for (JsonNode vuln : dep.path("vulnerabilities")) {
-                double cvss = vuln.path("cvssv3").path("baseScore").asDouble(
-                        vuln.path("cvssv2").path("score").asDouble(0.0));
-                if (cvss >= minimumCvss) findings.add(vuln.path("name").asText() + " in " + dep.path("fileName").asText());
-            }
-        }
-        return findings;
-    }
-}
-
-// src/test/java/security/DependencyVulnerabilityTest.java
-public class DependencyVulnerabilityTest {
-    @Test
-    public void Should_have_no_high_severity_cves_When_dependencies_scanned() throws IOException {
-        DependencyCheckReport report = DependencyCheckReport.read(Path.of("build", "reports", "dependency-check-report.json"));
-
-        assertThat(report.findingsAtOrAbove(7.0)).as("High+ CVEs (CVSS >= 7.0) in the dependency tree").isEmpty();
-    }
-}
-```
-
-The `.NET`/TS siblings parse their own tool's JSON (`dotnet list package --vulnerable --format json` /
-`npm audit --json`) the same way.
+A test-level assertion independent of the Gradle gate (a custom threshold, the count in the test report) → read `references/parse-and-assert.md`.
 
 ## CI wiring — the gate, the NVD cache, the remediation complement
 
@@ -317,19 +275,3 @@ jobs:
 ## Deep-dive reference
 
 These sections live in `references/details.md` — **read it when the task touches them**: **Examples**.
-
-## Rules (hard constraints)
-
-- The gate is the **build failing** on a CVSS threshold (`failBuildOnCVSS`), optionally plus a
-  **parsed-report** assertion. One logical assertion per test; test names `Should_X_When_Y`.
-- Scan **direct + transitive** deps against a CVE feed — transitive coverage is the point. SCA reads the
-  **build graph** (no running app — contrast DAST).
-- Triage with a **ticketed suppression file**: scope each `<suppress>` to a specific `<cve>`, with a
-  `<notes>` ticket and an **`until=` expiry**. Gate **new** CVEs; shrink the file, never grow it (the
-  `axe-playwright`/`passive-scan` discipline). Prefer **forcing the patched (transitive) version** over suppressing.
-- **Cache the NVD DB** in CI (slow cold download) and pass the **`NVD_API_KEY` via env, lazily** — never
-  hard-coded (global rule: no secrets in code).
-- Emit **HTML/JSON/SARIF**: attach to **Allure**, upload as a CI artifact, feed **SARIF** to GitHub
-  code-scanning.
-- Pair the **gate** with a **remediation** tool (Dependabot/Renovate) and the **`dependency-review-action`**
-  PR-diff gate. A clean SCA ≠ "secure" — **run DAST too**: SCA and DAST are orthogonal layers.

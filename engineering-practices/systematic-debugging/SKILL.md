@@ -1,6 +1,6 @@
 ---
 name: debugging
-description: Use when hitting any bug, test failure or unexpected behavior, before proposing fixes; find the root cause. Triggers "this test is failing", "why is X breaking". Not for new work (design).
+description: Use when hitting any bug, test failure or unexpected behavior, before proposing fixes; find the root cause. Triggers "this test is failing", "why is X breaking". Not for new work (feature).
 ---
 
 # Systematic Debugging
@@ -9,11 +9,15 @@ description: Use when hitting any bug, test failure or unexpected behavior, befo
 
 **Find the root cause before proposing a fix.** A fix aimed at a symptom masks the defect, and a guessed fix that happens to work leaves you unable to say why — so the next change breaks it again. Until Step 1 below is complete, do not propose a fix.
 
-## When to Use
+## When to use
 
 Use for any technical issue: test failures, production bugs, unexpected behavior, performance problems, build failures, integration issues.
 
 It matters most when guessing is tempting: under time pressure, when one quick fix looks obvious, when earlier fixes did not work, or when you do not fully understand the issue. A simple-looking bug still has a root cause, and a systematic pass on it is short.
+
+## When NOT to use
+
+New work with no defect to explain: `feature` (brainstorming) designs it. Confirming a fix is finished is `verify`.
 
 ## The Four Steps
 
@@ -24,16 +28,14 @@ Complete each step before starting the next.
 Before attempting any fix:
 
 1. **Read Error Messages Carefully**
-   - Don't skip past errors or warnings
-   - They often contain the exact solution
-   - Read stack traces completely
+   - Read every warning and every line of the trace
    - Note line numbers, file paths, error codes
 
 2. **Reproduce Consistently**
    - Can you trigger it reliably?
    - What are the exact steps?
    - Does it happen every time?
-   - If not reproducible → gather more data, don't guess
+   - If not reproducible → gather more data
 
 3. **Check Recent Changes**
    - What changed that could cause this?
@@ -43,39 +45,7 @@ Before attempting any fix:
 
 4. **Gather Evidence in Multi-Component Systems**
 
-   When the system has multiple components (CI → build → signing, API → service → database), add diagnostic instrumentation before proposing fixes:
-   ```
-   For each component boundary:
-     - Log what data enters component
-     - Log what data exits component
-     - Verify environment/config propagation
-     - Check state at each layer
-
-   Run once to gather evidence showing where it breaks
-   Then analyze evidence to identify failing component
-   Then investigate that specific component
-   ```
-
-   **Example (multi-layer system):**
-   ```bash
-   # Layer 1: Workflow
-   echo "=== Secrets available in workflow: ==="
-   echo "IDENTITY: ${IDENTITY:+SET}${IDENTITY:-UNSET}"
-
-   # Layer 2: Build script
-   echo "=== Env vars in build script: ==="
-   env | grep IDENTITY || echo "IDENTITY not in environment"
-
-   # Layer 3: Signing script
-   echo "=== Keychain state: ==="
-   security list-keychains
-   security find-identity -v
-
-   # Layer 4: Actual signing
-   codesign --sign "$IDENTITY" --verbose=4 "$APP"
-   ```
-
-   **This reveals:** Which layer fails (secrets → workflow ✓, workflow → build ✗)
+   The bug crosses component boundaries (CI → build → signing, API → service → database) → read `references/multi-component.md` and add the diagnostic instrumentation before proposing a fix.
 
 5. **Trace Data Flow**
 
@@ -87,6 +57,8 @@ Before attempting any fix:
    - Keep tracing up until you find the source
    - Fix at source, not at symptom
 
+Done when the bug is reproduced and the failing component is named with its evidence line.
+
 ### Step 2: Pattern Analysis
 
 **Find the pattern before fixing:**
@@ -97,17 +69,18 @@ Before attempting any fix:
 
 2. **Compare Against References**
    - If implementing a pattern, read the reference implementation completely, not a skim — a partly understood pattern produces the bug you are chasing
-   - Understand the pattern fully before applying
 
 3. **Identify Differences**
    - What's different between working and broken?
    - List every difference, however small
-   - Don't assume "that can't matter"
+   - Treat each difference as a candidate cause
 
 4. **Understand Dependencies**
    - What other components does this need?
    - What settings, config, environment?
    - What assumptions does it make?
+
+Done when every difference between working and broken is listed.
 
 ### Step 3: Hypothesis and Testing
 
@@ -128,9 +101,11 @@ Before attempting any fix:
 
 4. **When You Don't Know**
    - Say "I don't understand X"
-   - Don't pretend to know
+   - Separate what you know from what you assume
    - Ask for help
    - Research more
+
+Done when one hypothesis is confirmed or refuted by a single-variable change.
 
 ### Step 4: Implementation
 
@@ -145,8 +120,7 @@ Before attempting any fix:
 2. **Implement Single Fix**
    - Address the root cause identified
    - One change at a time
-   - No "while I'm here" improvements
-   - No bundled refactoring
+   - Keep the change to the root cause; refactoring and "while I'm here" improvements go in a separate change
 
 3. **Verify Fix**
    - Test passes now?
@@ -178,11 +152,11 @@ Return to Step 1 when you notice any of these: a fix proposed before the data fl
 
 ## Quick Reference
 
-| Step | Key Activities | Success Criteria |
-|-------|---------------|------------------|
-| **1. Root Cause** | Read errors, reproduce, check changes, gather evidence | Understand what and why |
-| **2. Pattern** | Find working examples, compare | Identify differences |
-| **3. Hypothesis** | Form theory, test minimally | Confirmed or new hypothesis |
+| Step | Key Activities | Done when |
+|-------|---------------|-----------|
+| **1. Root Cause** | Read errors, reproduce, check changes, gather evidence | Bug reproduced, failing component named with its evidence line |
+| **2. Pattern** | Find working examples, compare | Every difference between working and broken listed |
+| **3. Hypothesis** | Form theory, test minimally | One hypothesis confirmed or refuted by a single-variable change |
 | **4. Implementation** | Create test, fix, verify | Bug resolved, tests pass |
 
 ## When Process Reveals "No Root Cause"

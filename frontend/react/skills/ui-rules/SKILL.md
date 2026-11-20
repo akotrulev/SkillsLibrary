@@ -6,9 +6,11 @@ disable-model-invocation: true
 
 # React — UI Conventions (data-driven correctness)
 
-Cross-cutting UI-correctness conventions for **any data-driven web application** — customer-facing or internal — wherever the app shows grids/lists, edits entities, or exposes state-changing actions. Every rule here traces to a real defect class, not taste. **Loaded on every feature build**, not conditionally: these are the rules that keep a hundred pages consistent instead of a hundred slightly-different pages.
+Cross-cutting UI-correctness conventions for **any data-driven web application**, wherever the app shows grids/lists, edits entities, or exposes state-changing actions. Every rule traces to a real defect class, not taste, and **loads on every feature build**: they keep a hundred pages consistent instead of a hundred slightly-different pages.
 
-**Version rule:** these are UI-correctness conventions, **version-agnostic** across React 18/19 and Next 14/15. Where a mechanism is version-sensitive (the route title via `metadata` vs `react-helmet`, RSC vs client rendering) the owning sibling skill carries the version note; this skill states the *convention*.
+The standards are the fe-react rule files `react.md` and `react-forms.md` (`.claude/rules/fe-react/` in the project, or `frontend/react/skills/rules/` until `/fe-react:rules` installs them); where they disagree with this skill, the rule files win. The sections below are the detail behind them, and own what they leave out: bulk operations, navigation, footers, the modal-or-route choice and the systemic fix.
+
+**Version rule:** the conventions are **version-agnostic** across React 18/19 and Next 14/15; the owning sibling skill carries the version note for a version-sensitive mechanism.
 
 ## What this skill owns vs. its siblings
 
@@ -123,11 +125,7 @@ The highest-severity defect class: an edit that **looks** like it worked and sil
 
 ## 5. Bulk operations
 
-- **Multi-select needs visible affordances:** a leading **checkbox column** (row-click-only selection is undiscoverable), a **tri-state select-all** header, selection styling stronger than hover (background tint + accent bar), and a persistent **selected-count**.
-- **Select-all scopes to the visible, filtered page** when filtering/paging is server-side — never silently select rows the user isn't looking at. Tooltip it: "Select all visible rows (respects current filters)."
-- **Where users grind row-by-row** (approve/cancel/resolve backlogs), provide **batch endpoints + bulk UI** — thirty click-confirm cycles for one logical operation is a workflow defect.
-- **Stable `data-testid` on selection controls** so UI automation can drive bulk flows ([`test-ids`](../test-ids/SKILL.md)).
-- **A bulk write reports per item.** "12 of 15 archived — 3 failed" with the three named, still selected, and retryable. A blanket success toast over a partial failure is the worse half of the defect (the user believes all 15 went through); a blanket failure hiding the 12 that worked is the other half ([`error-handling`](../error-handling/SKILL.md) owns the failure rendering).
+A multi-select or a bulk action in the task → read [`references/bulk-operations.md`](references/bulk-operations.md).
 
 ---
 
@@ -140,42 +138,15 @@ The highest-severity defect class: an edit that **looks** like it worked and sil
 - **Standardize the small stuff once:** one dialog-width scale, one page-header treatment, one date-range-filter component, one filter-trigger label.
 - **Delete dead pages and duplicate routes;** consolidate near-duplicate grids (two tables sharing ~12 fields with drifted column order → one column definition).
 
-### Navigation
+### Navigation and footers
 
-- **Always indicate the current location.** The single most common nav defect is failing to show where the user is now — highlight the active nav item with a **distinct state that isn't color alone** (weight, an indicator bar, `aria-current="page"`), and add breadcrumbs on deep hierarchies. (`NavLink`'s active state / `usePathname` is the hook; the not-color-alone + `aria-current` a11y side is [`accessibility`](../accessibility/SKILL.md)'s.)
-- **Group and label over count — the "7 items max" rule is a myth.** Menus rely on *recognition*, not recall; a well-grouped menu of 12–15 clear items beats a "clean" menu of 5 vague ones. The nav-group size budget (~7–10 *per group*) is about splitting groups that mix distinct concerns, not capping total items.
-- **Front-load labels with the distinguishing word and name content, not org structure** — "Pricing", not "Our pricing options"; "Reports", not the internal team that owns them. (The wording discipline is [`design/ux-writing`](../../../../design/ux-writing/SKILL.md); the IA requirement that labels map to content lives here.)
-- **Don't hide navigation when there's room to show it** — the desktop layout shows top-level items; the hamburger/drawer is a small-screen affordance, not a default (the breakpoint mechanics are [`responsive-design`](../responsive-design/SKILL.md)'s nav-collapse pattern).
+A nav menu, breadcrumbs or a footer in the task → read [`references/navigation-and-footers.md`](references/navigation-and-footers.md).
 
-### Footers
-
-The footer is the user's **last-resort lookup** — where they go for the things the header didn't surface. It's low-cost and high-value; give it real content in priority order:
-
-- **Utility links** (Contact, Privacy, Terms, support) on every site; **doormat navigation** (repeat the top nav) so a long page doesn't force a scroll back up; **secondary-audience tasks** (Careers, Investors, Press) on multi-audience sites; **link columns** (the "fat footer") only for large, deep sites; engagement (newsletter, social) and trust signals (certifications) where they earn their place.
-- **Fat footer for large multi-audience sites; slim utility footer for focused web apps** (version, status, help, legal) — don't bolt a marketing fat-footer onto an internal tool.
-- **Use the semantic `<footer>` element** (it creates the `contentinfo` landmark — [`accessibility`](../accessibility/SKILL.md)), group links into **explicitly labeled** columns ("Contact us", "Documentation" — never a vague "Resources"), keep it visible and legible, and on mobile trim to essentials, stacking into accordions only if it would otherwise run several screens tall.
+---
 
 ## 7. Choosing the surface — modal, page, or new tab
 
-Where a task happens is a correctness decision, not a styling one: the wrong surface hides the context the user needs or breaks the back button. Decide before you build.
-
-### Modal (overlay/drawer) or a separate route?
-
-Ask in order:
-1. **Does the task need the underlying screen's context?** Yes → an overlay/drawer over that screen, not a full navigation.
-2. **Is it short and self-contained?** Yes → modal candidate. Multi-step or long forms → a **separate route**.
-3. **Will the user reference or copy data from the background while working?** Yes → a **non-modal** side panel/drawer, never a blocking modal (which hides exactly what they need).
-4. **Is it a repeated, high-frequency task?** Then both a modal *and* a navigation add friction — prefer **inline editing** or expandable rows.
-
-- **Use a blocking modal only when the interruption itself is the value:** destructive/irreversible confirmations (§4 owns their content), a critical alert the user must acknowledge, or deliberately slowing input verification.
-- **Use a separate route when** the flow is multi-step, needs full attention, or benefits from a **URL** (bookmarkable, shareable, back-button- and deep-link-friendly) — a real route with a title (§6). In App Router, an **intercepting/parallel route** gives a modal that's *also* a real URL (deep-linkable, refresh-safe) — reach for it when a modal needs to survive a reload or share.
-- **Modal hygiene** (mechanics owned by [`accessibility`](../accessibility/SKILL.md) — cross-linked, not restated): an obvious exit (×, `Esc`, click-outside), focus trapped while open and restored on close, never stack modals, and **never open a modal the user didn't trigger** (unrequested pop-ups are the single most-disliked pattern).
-
-### Same tab or new tab?
-
-- **Default: open links in the same tab.** New tabs break the back button, disorient users who don't notice the switch, and are worst on mobile. Anyone who wants a new tab can ⌘/middle-click a real `<Link>`.
-- **Legitimate `target="_blank"` exceptions:** reference material needed *while completing the current task* (help docs, a spec beside a form), a link whose navigation would destroy unsaved work or interrupt a process (media playing, checkout), and non-HTML documents (PDFs) that would hijack the tab.
-- **If you do open a new tab, signal it** — a visible "opens in new tab" affordance plus a screen-reader hint, and `rel="noopener"`. The anchor mechanics (real `<a>`/`<Link>`, the affordance + `aria-label` suffix, `rel`) are [`component-writer`](../component-writer/SKILL.md)'s; the *decision* to open a new tab at all is this skill's.
+A modal, a drawer, or a link that may open a new tab in the task → read [`references/surface-choice.md`](references/surface-choice.md).
 
 ---
 
@@ -190,20 +161,3 @@ This is *why* the rules above are keepable at scale, not one-offs.
 - **Sweep, don't spot-fix.** Every hand-found defect ("this page crashes on a missing lookup key") is a *class* ("which other pages index that key?"). Audit the class before closing the ticket.
 
 ---
-
-## Rules
-
-The standards this skill's output must meet are the fe-react rule files `react.md` and `react-forms.md`, not a list here. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Where they and this skill disagree, the rule files win. Sections 1–8 above are the detail behind them, and own what the rule files leave out: bulk operations, navigation, footers, the modal-or-route choice and the systemic fix.
-
-## Validation
-
-- Grep for raw enum/`String(...)`/`[object Object]` in cells; every enum renders humanized in grid, filter, detail, and form.
-- One format helper per type; a page audit shows no ad-hoc inline formatting; timezones labeled.
-- No id/GUID visible where a lookup exists; pickers type-ahead by name.
-- Every list has a default server sort with a unique tiebreaker; refetch after an edit → no row jumps; page 2 has no dupes from page 1.
-- Mechanical form↔DTO↔mapper parity check passes; PKs read-only; no editable `Status`; full-replace sends `If-Match`.
-- Every destructive action shows a named-object confirmation; disabled actions have why-tooltips.
-- Bulk flows: checkbox column present, select-all scoped to filter, selected-count shown, batch endpoint used.
-- A title on every route; no duplicate titles for distinct concepts; nav groups within budget; no dead routes.
-- The active nav item is visibly marked (and not by color alone) on every page; desktop shows top-level nav, hamburger only below the breakpoint.
-- Footer is a `<footer>` with labeled columns; new-tab links carry a visible signal + `rel="noopener"`; no auto-opened modals.

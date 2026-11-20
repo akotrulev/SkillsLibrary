@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 An MCP server is a **projection of the capability contract**, nothing more. Every design question — what tools exist, what they accept, what they return, what they refuse — was answered in `docs/specs/<NNN>-<surface>-tool-contract.md`. This skill's job is to render that document into a server that compiles, validates its inputs, and returns the same envelope from every tool.
 
-**Prerequisite: a confirmed capability contract.** No contract, no server — run `tooling:capability-contract` first. Building tools from a vague description is how a surface ends up with an `execute(command: string)` tool.
+**Prerequisite: a confirmed capability contract.** No contract, no server — read `tooling/_shared/capability-contract/SKILL.md` and run it first. Building tools from a vague description is how a surface ends up with an `execute(command: string)` tool.
 
 **Read before writing code:** the contract's capability table, flows, and dependency section, plus `tooling/_shared/capability-contract/references/output-contract.md` — the envelope you are about to implement.
 

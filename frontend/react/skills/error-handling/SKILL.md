@@ -6,11 +6,11 @@ disable-model-invocation: true
 
 # React — Error Resilience
 
-Owns everything about **failing safely and recovering**: catching exceptions before they blank the app, retrying transient network faults, keeping live connections/offline states legible, and — the half most teams miss — **rendering failure and emptiness correctly in the UI** so a broken section never looks like an empty-but-fine section.
+Owns **failing safely and recovering**: catching exceptions before they blank the app, retrying transient network faults, and **rendering failure and emptiness correctly in the UI**, so a broken section never looks like an empty-but-fine one.
 
-Division of labor with [`data-fetching`](../data-fetching/SKILL.md): data-fetching **produces** a categorized error (RFC-7807 `ProblemDetails` → friendly message + correlation id, raw detail logged server-side, via one `problemError` helper). This skill **renders** that error — the three-state region, the retry, the inline grid error. Two skills, one seam.
+[`data-fetching`](../data-fetching/SKILL.md) **produces** a categorized error (RFC-7807 `ProblemDetails` → friendly message + correlation id, raw detail logged server-side, via one `problemError` helper). This skill **renders** it: the three-state region, the retry, the notification. The standards are the fe-react rule files `react.md` and `react-data.md` (`.claude/rules/fe-react/` in the project, or `frontend/react/skills/rules/` until `/fe-react:rules` installs them). Where this skill and a rule file disagree, the rule file wins.
 
-**Version rule:** detect the React/Next major first. Error boundaries, `react-error-boundary`, and TanStack Query retry are 18+. The **App Router** deltas are file conventions: `error.tsx` (per-segment boundary, must be a Client Component), `global-error.tsx` (wraps the root layout, its own `<html>`/`<body>`), and `not-found.tsx`. **React 19** adds root-level `onCaughtError`/`onUncaughtError` hooks for centralized reporting. The **Vite SPA** lane has no `error.tsx` — use `react-error-boundary` at the router/route level throughout (tagged below).
+**Version rule:** detect the React/Next major first. Boundaries and TanStack Query retry are 18+; **React 19** adds root-level `onCaughtError`/`onUncaughtError`. The **App Router** has the file conventions `error.tsx`, `global-error.tsx` and `not-found.tsx`; the **Vite SPA** lane places `react-error-boundary` at the app root and around each route element.
 
 ## The failure surfaces
 
@@ -20,325 +20,213 @@ Async data FETCH failed (transient/4xx/5xx)  → retry/backoff + categorized err
 Async data FETCH never answers (hung)        → timeout budget turns "loading forever" INTO a failure
 SESSION expired mid-work (401)               → refresh → replay → re-auth in place (never discard work)
 The BUILD changed under an open tab          → version-skew detection + one guarded reload
-Live CONNECTION dropped (WS/SSE) / OFFLINE   → connection-status UX (realtime owns the socket; consistency here)
+Live CONNECTION dropped (WS/SSE) / OFFLINE   → connection-status UX (realtime owns the socket)
 ```
 
-Each surface has its own mechanism; wire all six. A boundary won't recover a failed fetch's UX; a retry won't catch a render `undefined.map`; and **no state machine saves you from a request that never resolves** — that one is only fixed at the transport, with a deadline.
+Wire all six: a boundary won't recover a failed fetch's UX, a retry won't catch a render `undefined.map`, and only a deadline at the transport fixes a request that never resolves.
+
+## Situational surfaces
+
+A task that contains the situation in the first column reads the file in the second.
+
+| Situation | Where |
+|---|---|
+| A **write** fails (double-submit, idempotency keys, optimistic rollback, 409, partial bulk failure, unconfirmable outcome), or a **third party** fails (maps, payment iframes, analytics, feature flags) | [`references/writes-and-dependencies.md`](references/writes-and-dependencies.md) |
+| The **session expires** mid-work (refresh → replay → re-auth in place), or a **deploy** lands under an open tab (`ChunkLoadError`, RSC payload skew) | [`references/session-and-deploy.md`](references/session-and-deploy.md) |
+| A **WebSocket or SSE feed**, an **offline** requirement, a **data grid**, or a **detail page or region bound to a record** that can be deleted | [`references/live-connection-grids-and-gone.md`](references/live-connection-grids-and-gone.md) |
+| The **notification** is wired for the project's component library, or several regions can fail at once | [`references/notifications.md`](references/notifications.md) |
+| A change to error handling is **verified**: tests or a review pass | [`references/validation.md`](references/validation.md) |
 
 ---
 
 ## Error boundaries — catch exceptions, degrade the region
 
-An unhandled exception thrown during a component's render **unmounts the tree up to the nearest boundary**. Without one, the whole app (or route) goes blank. React error boundaries are still class components — but you almost never write one by hand: the App Router gives file conventions, and `react-error-boundary` gives a function-component API.
+An unhandled exception thrown during render **unmounts the tree up to the nearest boundary**; without one, the whole app or route goes blank. You almost never write the class component: use the App Router file conventions or `react-error-boundary`.
 
 **Placement — three tiers (App Router):**
 
-1. **`app/global-error.tsx`** — the last line of defense; wraps the **root layout** (so it must render its own `<html>`/`<body>`). Catches errors the layout itself throws. Friendly page-level message + reload — never a stack trace.
-
-2. **`app/<segment>/error.tsx`** — a **per-route** boundary (a Client Component) that catches errors from that segment's page/children and offers `reset()` to re-render the segment:
+1. **`app/global-error.tsx`** wraps the **root layout**, so it renders its own `<html>`/`<body>`, and shows a friendly page-level message with a reload.
+2. **`app/<segment>/error.tsx`** is a **per-route** Client Component that catches errors from that segment's page and children, and offers `reset()` to re-render the segment:
 
    ```tsx
    'use client';
    import { useEffect } from 'react';
 
    export default function OrdersError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
-     useEffect(() => { report(error); }, [error]);   // structured report, never console-only
+     useEffect(() => { report(error); }, [error]);
      return (
        <div role="alert" data-testid="Orders.Error">
          <p>Couldn’t load orders.</p>
-         {error.digest && <small>Ref: {error.digest}</small>}   {/* Next's server error digest — correlate, don't leak the message */}
+         {error.digest && <small>Ref: {error.digest}</small>}
          <button onClick={reset} data-testid="Orders.Error.Retry">Try again</button>
        </div>
      );
    }
    ```
 
-3. **Per-feature**, below the route — wrap an independently-failing region (a dashboard tile, a widget) in `react-error-boundary`'s `<ErrorBoundary FallbackComponent={…} onReset={…} onError={report}>` so one widget's crash doesn't blank the page around it. Reset via `resetKeys` (re-mount when the inputs change) or an explicit "try again".
+   `report` sends a structured entry, and `error.digest` is Next's server error digest, which correlates it without leaking the message.
+3. **Per feature**, below the route: wrap an independently failing region (a dashboard tile, a widget) in `react-error-boundary`'s `<ErrorBoundary FallbackComponent={…} onReset={…} onError={report}>`. Reset through `resetKeys` or an explicit "try again".
 
-**Rules for every boundary:** log/report with context (`onError`/`useEffect`), **never render `error.message`** or a stack trace (bodies may carry PII/JSON) — friendly text + a correlation id (`error.digest` on the server side) only, and offer a real recovery action (`reset`). React 19: centralize reporting via `onCaughtError` in the root instead of duplicating `onError` everywhere. **Vite SPA:** no `error.tsx`/`global-error.tsx` — place `react-error-boundary` at the app root and around each route element.
+**Every boundary** reports with context (`onError`/`useEffect`), renders friendly text plus a correlation id instead of `error.message` or a stack, and offers a real recovery action (`reset`). React 19 centralizes the reporting in the root `onCaughtError`.
 
-Error boundaries **do not** catch errors in event handlers, effects cleanup, or async code (a rejected `fetch`) — those you handle with try/catch → the three-state region below.
+Error boundaries **do not** catch errors in event handlers, effect cleanup or async code (a rejected `fetch`): handle those with try/catch, then the three-state region below.
 
 ---
 
 ## Fetch resilience — retry transient faults, only when safe
 
-Transient faults (a blip, a cold-start 503, a throttled 429) should be absorbed, not surfaced. **TanStack Query** does this on the client:
+Absorb a blip, a cold-start 503 or a throttled 429 rather than surface it. The retry, idempotency and `Retry-After` rules are in `react-data.md`. With **TanStack Query**, retry 5xx and network errors with capped exponential backoff:
 
 ```ts
 useQuery({
   queryKey: ['orders'],
   queryFn: getOrders,
-  retry: (count, err) => count < 3 && isTransient(err),   // 5xx/network only — never 4xx
-  retryDelay: (i) => Math.min(1000 * 2 ** i, 30_000),     // exponential backoff + cap
+  retry: (count, err) => count < 3 && isTransient(err),
+  retryDelay: (i) => Math.min(1000 * 2 ** i, 30_000),
 });
 ```
 
-- **Only retry idempotent operations** (GET/PUT/DELETE). **Never auto-retry a non-idempotent POST/mutation** — a retried create/charge double-submits. Mutations retry only with an idempotency key the server dedupes on.
-- **Don't retry 4xx** (except 408/429) — the request is wrong, retrying won't fix it.
-- **Honour `Retry-After` on a 429/503.** The server has told you when to come back; backing off less than it asked is how a throttle becomes a ban. Read the header (delta-seconds *or* an HTTP-date), wait at least that long, cap the attempts, and tell the user rather than looping silently: *"Too many requests — retrying in 30s."* Absent the header, fall back to the exponential schedule.
-- **Stop retrying at some point, and say so.** After *k* consecutive failures for the same key (3 is a reasonable default), **stop the automatic retries** and switch that region to manual-only: *"We've stopped retrying automatically."* with a Retry button. A polling query left auto-retrying through a 20-minute outage burns battery, fills logs, and hammers a service that is already down — the client is part of the incident.
-- **Server-side / RSC / Server Actions:** wrap the outbound call in a small retry-with-backoff helper for idempotent reads; let a failure throw a categorized error to the nearest `error.tsx`, or return a typed error result a Server Action surfaces. Consider a circuit-breaker (fail fast when a dependency is down) for hot paths.
-- The retry pairs with [`data-fetching`](../data-fetching/SKILL.md)'s `problemError`: once retries are exhausted, the categorized error flows to the three-state region below.
+- **Say when a throttle sends you away.** On a 429/503 with `Retry-After` tell the user, "Too many requests — retrying in 30s", rather than looping silently.
+- **Stop retrying at some point, and say so.** After *k* consecutive failures for one key (3 by default), switch that region to manual-only: *"We've stopped retrying automatically."* with a Retry button, and stop re-notifying. A polling query left retrying through an outage hammers a service that is already down.
+- **Server-side / RSC / Server Actions:** wrap the outbound call in a small retry-with-backoff helper for idempotent reads, and let a failure throw a categorized error to the nearest `error.tsx` or return a typed error result a Server Action surfaces.
 
-**Hydration mismatches are reportable, not cosmetic.** React recovers from most by re-rendering on the client (logging a recoverable error), and a severe one throws and blanks the route — either way it means the server and client disagreed about what to draw, usually from a browser read during render or locale/time formatting ([`basics`](../basics/SKILL.md) owns the causes). Capture recoverable errors too — React 19's root `onRecoverableError` — so they reach the same logs instead of dying in a console nobody has open.
-
-**Client-error reporting:** an unhandled client error that only lands in the browser console is invisible. Wire **Sentry** (or a lightweight `POST /api/client-errors`, rate-limited) from `global-error.tsx`/boundary `onError` and a top-level `window.onerror`/`onunhandledrejection` handler, so client faults reach the same structured logs/OTel as the server (`observability/opentelemetry-node`, external). Include the correlation id.
-
----
-
-## Situational surfaces — deep dives
-
-Four failures need more than a rule and are kept out of the main flow. **Read the file when the situation applies:**
-
-| Situation | Where |
-|---|---|
-| A **write** fails — double-submit, idempotency keys, optimistic rollback, 409 conflicts, partial bulk failure, unconfirmable outcomes | [`references/writes-and-dependencies.md`](references/writes-and-dependencies.md) |
-| A **third-party** fails — maps, payment iframes, analytics, feature flags (and which failures the user should *not* hear about) | [`references/writes-and-dependencies.md`](references/writes-and-dependencies.md) |
-| The **session expires** mid-work — the refresh → replay → re-auth-in-place ladder that keeps unsaved work | [`references/session-and-deploy.md`](references/session-and-deploy.md) |
-| A **deploy** lands under an open tab — `ChunkLoadError`, RSC payload skew, the guarded once-only reload | [`references/session-and-deploy.md`](references/session-and-deploy.md) |
-
-## Live-connection & offline UX
-
-React has **no persistent server circuit** (unlike Blazor) — so there's no circuit-reconnect modal. The analogous surfaces are the **live-data socket** and **network offline**:
-
-- **Live WS/SSE drop:** [`realtime`](../realtime/SKILL.md) owns the socket, its backoff reconnection, and exposes a connection status (`connecting`/`open`/`reconnecting`/`closed`). This skill owns making that status **legible and consistent** — a "reconnecting…" affordance on the live region, and **never showing stale live data as current** while the socket is down (dim it / mark it stale). Same disconnect event, two layers — keep them consistent.
-- **Offline:** gate optimistic actions on `navigator.onLine` + the `online`/`offline` events; show an offline banner; queue or block writes rather than failing them silently. TanStack Query pauses and resumes queries/mutations across offline→online — lean on it rather than hand-rolling.
+**Report what boundaries cannot see.** Capture a hydration mismatch ([`basics`](../basics/SKILL.md) owns the causes) with the root `onRecoverableError`. Send an unhandled client error to **Sentry** (or a rate-limited `POST /api/client-errors`) from `global-error.tsx`, the boundary `onError` and a top-level `window.onerror`/`onunhandledrejection` handler, with the correlation id, so it lands in the same logs and OTel as the server (`observability/opentelemetry-node`, external).
 
 ---
 
 ## UI-correctness: rendering failure & emptiness
 
-The rules below are the most-missed part of resilience — the app *handles* the error but *renders* it as an ambiguous blank. Each is a real defect class.
-
 ### One error helper; never leak raw errors
 
-Route every call through [`data-fetching`](../data-fetching/SKILL.md)'s `problemError` — it categorizes (ProblemDetails → friendly message; unknown → generic message + correlation id) and logs raw detail server-side. **This skill's rule: never render `error.message` or a raw response body to the user** (bodies may be JSON, stack traces, or PII). Render the categorized `{ message, correlationId }` — not the exception.
+Route every call through `data-fetching`'s `problemError` and render the categorized `{ message, correlationId }`, never the exception, `error.message` or a raw response body.
 
 ### Data-region states — loading / loaded / failed (+ stale)
 
-Every data region has **three** states, not two. The classic bug: a `try { … } catch {}` (or a swallowed `.then`) leaves the region empty, so an **outage is indistinguishable from "no data"**. Render the failed state **inline, with retry** — never only a toast (a toast disappears; the empty region stays and lies). With TanStack Query the three states fall out of the hook:
+Every data region has **three** states. The classic bug is a `try { … } catch {}` (or a swallowed `.then`) that leaves the region empty, so an **outage is indistinguishable from "no data"**. Render the failed state **inline, with retry**, because a toast alone disappears while the empty region stays and lies. With TanStack Query the states fall out of the hook, and the region is `failed` only when there is no data to show:
 
 ```tsx
 function OrdersRegion() {
   const q = useQuery({ queryKey: ['orders'], queryFn: getOrders });
 
   if (q.isPending) return <Skeleton data-testid="Orders.Loading" />;
-  if (q.isError)
+  if (q.data === undefined) {
+    const failure = toAppError(q.error);
     return (
       <div role="alert" data-testid="Orders.Error">
-        <p>{toAppError(q.error).message}</p>            {/* friendly — never q.error.message raw */}
-        {toAppError(q.error).correlationId && <small>Ref: {toAppError(q.error).correlationId}</small>}
-        <button onClick={() => q.refetch()} data-testid="Orders.Retry">Try again</button>
+        <p>{failure.message}</p>
+        {failure.correlationId && <small>Ref: {failure.correlationId}</small>}
+        <button onClick={() => q.refetch()} data-testid="Orders.Error.Retry">Try again</button>
       </div>
     );
-  if (q.data.length === 0) return <EmptyState kind="no-records" />;   // see below
+  }
+  if (q.data.length === 0) return <EmptyState kind="no-records" data-testid="Orders.Empty" />;
   return <OrdersTable orders={q.data} />;
 }
 ```
 
-In RSC, the **loading** state is the segment's `loading.tsx` (or a `<Suspense fallback>`), and the **failed** state is the segment's `error.tsx` — the same three states, expressed through the file conventions. Either way: three states, always.
+In RSC, **loading** is the segment's `loading.tsx` (or a `<Suspense fallback>`) and **failed** is its `error.tsx`.
 
-**A response the app can't read is a failure, not an emptiness.** A 200 whose body drifted (a field renamed, an object where an array was expected) must fail the Zod parse at the boundary ([`data-fetching`](../data-fetching/SKILL.md)) and land in **this** failed state — never fall through to `data = []` and render as "no records". Transport failure, auth failure, shape failure and timeout all render the same failed state; only the message differs.
+**A response the app can't read is a failure, not an emptiness.** A 200 whose body drifted fails the Zod parse at the boundary ([`data-fetching`](../data-fetching/SKILL.md)) and lands in **this** failed state, never in `data = []` rendered as "no records". Transport, auth, shape and timeout failures render the same failed state; only the message differs.
 
 ### The fourth state — stale, when a *refetch* fails
 
-The three states above describe a region that has **no data yet**. Once a region *has* rendered data, a later failure is a different situation and the failed body is the **wrong** answer: replacing a dashboard the user is reading with an error panel — because one 5s poll blipped — destroys information they still had.
-
-**Split the rule by whether data exists:**
+The three states describe a region with **no data yet**. Once a region has rendered data, replacing it with an error panel because one 5s poll blipped destroys information the user still had. Split the rule by whether data exists:
 
 | Situation | TanStack signal | Render |
 |---|---|---|
 | First load, in flight | `isPending` (no `data`) | **loading** skeleton |
-| First load, failed | `isError` && `data === undefined` | **failed** body + retry (§ above) |
-| Refresh in flight over existing data | `isFetching` && `data !== undefined` | **loaded**, with a subtle refreshing indicator — never a skeleton flash |
+| First load, failed | `data === undefined` after `isPending` ends | **failed** body + retry |
+| Refresh in flight over existing data | `isFetching` && `data !== undefined` | **loaded**, with a subtle refreshing indicator, never a skeleton flash |
 | Refresh failed, data still held | `isError` && `data !== undefined` | **stale**: keep rendering the data, mark it stale, notify |
 
 ```tsx
-const q = useQuery({ queryKey: ['orders', filters], queryFn: getOrders,
-  placeholderData: keepPreviousData });   // filter change keeps the old rows visible instead of flashing empty
+const q = useQuery({ queryKey: ['orders', filters], queryFn: getOrders, placeholderData: keepPreviousData });
 
-if (q.isPending)              return <Skeleton data-testid="Orders.Loading" />;
-if (q.isError && !q.data)     return <FailedBody error={toAppError(q.error)} onRetry={q.refetch} />;
+if (q.isPending) return <Skeleton data-testid="Orders.Loading" />;
+if (q.data === undefined) return <FailedBody error={toAppError(q.error)} onRetry={q.refetch} />;
 return (
   <>
-    {q.isError && (                       // ← the stale state: data is old, and we know it
-      <StaleBanner data-testid="Orders.Stale" asOf={q.dataUpdatedAt} onRetry={q.refetch} />
-    )}
+    {q.isError && <StaleBanner data-testid="Orders.Stale" asOf={q.dataUpdatedAt} onRetry={q.refetch} />}
     <OrdersTable rows={q.data} dimmed={q.isError} />
   </>
 );
 ```
 
-**Rules for the stale state**
+`keepPreviousData` keeps the old rows visible while a filter change loads, instead of flashing empty.
 
-- **Never downgrade rendered data to an error panel** on a refetch failure — keep the data, add the marker, keep the notification.
-- **Say how old it is** (`dataUpdatedAt` → "as of 14:02") and offer retry. Stale-but-labeled is honest; stale-shown-as-current is the defect ([`realtime`](../realtime/SKILL.md) holds the same line for a dropped socket — one rule, two transports).
-- **Data that is dangerous when stale is the exception** — a price, a balance, an availability count, anything the user is about to act on. Mark it stale *and* **disable the action that depends on it** ([`ui-rules`](../ui-rules/SKILL.md) disable-don't-hide, with the reason in the tooltip). Decide this per region; when in doubt, disable the write, keep the read.
-- **A background refetch failure still notifies** (once, deduped) — silence would make the staleness invisible, which is how a user acts on ten-minute-old numbers.
-- **A filter/param change is a first load for that key**, not a refresh — unless you opt into `keepPreviousData`, which is the right default for tables and pagination (no empty flash between pages).
+- **Say how old it is** (`dataUpdatedAt` → "as of 14:02") and offer retry. Stale-but-labeled is honest; stale-shown-as-current is the defect ([`realtime`](../realtime/SKILL.md) holds the same line for a dropped socket).
+- **Data that is dangerous when stale** (a price, a balance, an availability count) is marked stale *and* **disables the action that depends on it** ([`ui-rules`](../ui-rules/SKILL.md) disable-don't-hide, with the reason in the tooltip). When in doubt, disable the write and keep the read.
+- **A background refetch failure still notifies** (once, deduped); silence hides the staleness.
+- **A filter or param change is a first load for that key**, not a refresh, unless you opt into `keepPreviousData`, the right default for tables and pagination.
 
 ### Timeouts — a request that never answers
 
-The loading state is not a fourth failure surface, it is the **absence** of one: a request that never resolves leaves the region spinning **forever**. The browser will not save you — Chrome's own `fetch` deadline is ~300 seconds. A region with no deadline has a state the three-state rule can't express, and it reads to the user as "this app is broken" with nothing to click.
-
-**Every call gets a budget**, expressed as a signal rather than a `setTimeout` race:
+A request that never resolves leaves the region spinning **forever**, and Chrome's own `fetch` deadline is ~300 seconds. **Every call gets a budget**, from one helper, because the budget is a property of the endpoint and not of the call site:
 
 ```ts
-// one helper, one place — the budget is a property of the endpoint, not of the call site
 export function budget(ms: number, external?: AbortSignal) {
   return external ? AbortSignal.any([external, AbortSignal.timeout(ms)]) : AbortSignal.timeout(ms);
 }
 
 queryFn: ({ signal }) => api.get('/orders', { signal: budget(10_000, signal) }),
-//                                     ↑ TanStack's unmount/cancel signal, composed — not replaced
 ```
 
-`AbortSignal.timeout()` rejects with a **`TimeoutError`** `DOMException` (distinguishable from a user/unmount abort, which is an `AbortError` — and an `AbortError` is **not** a failure: it must not render a failed state or notify). `AbortSignal.any()` composes them; both are Baseline since 2024.
+Passing TanStack's unmount/cancel `signal` composes it with the timeout instead of replacing it. A timeout rejects with `TimeoutError`; a user or unmount abort is an `AbortError`, which renders no failed state and no notification.
 
-- **Set the budget per endpoint class**, not one global number: interactive reads ~8–10s · autocomplete/typeahead ~2–3s · reports/exports/uploads much longer or none (a 90s export killed at 10s is a self-inflicted failure). Put the numbers in the API client config so they're visible in one place.
-- **A timeout categorizes as its own error** — not a generic 5xx. It is the one failure where "try again" is genuinely likely to work, so the failed body leads with retry: *"This is taking longer than expected."*
-- **Retry a timeout only if the call is idempotent** — a timed-out POST may well have succeeded on the server; retrying it double-charges. Same rule as the retry section, and timeouts are exactly where it gets violated.
-- **Cross the soft threshold first.** At ~4s (well inside the budget) the skeleton should acknowledge itself — "still loading…", or a progress affordance — so the user knows the app is alive. A silent skeleton at second nine is why people double-click and submit twice.
-- **Server-side too:** RSC fetches and Server Actions need the same budget (`AbortSignal.timeout` on the outbound `fetch`), or a slow upstream holds the whole streamed response open.
+- **Set the budget per endpoint class**, and keep the numbers in the API client config: interactive reads ~8–10s · autocomplete/typeahead ~2–3s · reports, exports and uploads much longer or none (a 90s export killed at 10s is a self-inflicted failure).
+- **A timeout categorizes as its own error**, not a generic 5xx, and its failed body leads with retry: *"This is taking longer than expected."*
+- **Cross a soft threshold first.** At ~4s the skeleton acknowledges itself ("still loading…"), so the user does not double-click and submit twice.
+- **Server-side too:** RSC fetches and Server Actions take the same budget on the outbound `fetch`, or a slow upstream holds the whole streamed response open.
 
 ### Failure scope — degrade the smallest data-dependent subtree
 
-**The failure replaces only the part that depends on the response. Everything the user can still act on keeps rendering.**
+**The failure replaces only the part that depends on the response, and everything the user can still act on keeps rendering.** On a list page only the **rows** need the response, so a failed `GET /orders` leaves the header, search, filters, toolbar and paging usable, with the error **in the rows area**. A chart's canvas fails without its range picker, and a dashboard tile without the dashboard.
 
-Take a list page: header, search bar, filter controls, column headers, toolbar, paging — none of those need the response to exist. Only the **rows** do. So a failed `GET /orders` leaves the whole page usable (the user can change filters and retry the query) with the error rendered **in the rows area**, exactly where the data would have been. The same rule holds for every such element: a chart's canvas but not its legend/range picker, a detail pane but not the master list beside it, a dependent `<select>`'s options but not the form around it, a tile in a dashboard but not the dashboard.
-
-The defect this prevents is an early return in the container:
+Wrong: an early return in the container, where one failed call unmounts the search bar, the filters and the user's typed state with them.
 
 ```tsx
-// ✗ WRONG — one failed call unmounts the search bar, the filters, and the user's typed state with them
 if (q.isError) return <ErrorPanel error={q.error} onRetry={q.refetch} />;
-return (<><Filters …/><OrdersTable rows={q.data}/></>);
+return (<><OrdersSearchBar value={search} onChange={setSearch} /><OrdersTable rows={q.data} /></>);
+```
 
-// ✓ RIGHT — chrome renders unconditionally; the state branch lives at the data-dependent boundary
+Right: the chrome renders unconditionally and the state branch lives at the data-dependent boundary, where only the table body swaps state.
+
+```tsx
+const state = q.isPending ? 'loading' : q.data === undefined ? 'failed' : 'loaded';
+
 return (
   <section data-testid="Orders">
-    <OrdersSearchBar value={search} onChange={setSearch} />   {/* independent of the response */}
-    <OrdersFilters value={filters} onChange={setFilters} />   {/* independent of the response */}
+    <OrdersSearchBar value={search} onChange={setSearch} />
+    <OrdersFilters value={filters} onChange={setFilters} />
     <OrdersTable
       rows={q.data ?? []}
-      state={q.isPending ? 'loading' : q.isError ? 'failed' : 'loaded'}
-      error={q.isError ? toAppError(q.error) : undefined}
+      state={state}
+      stale={q.isError && q.data !== undefined}
+      error={q.error ? toAppError(q.error) : undefined}
       onRetry={q.refetch}
-    />                                                        {/* only the BODY swaps state */}
+    />
   </section>
 );
 ```
 
-**Scoping rules**
+- **The three-state branch sits at the data-dependent boundary**, not at a container that also owns the chrome; split such a component (container/presentation) instead of early-returning.
+- **Filter, search and sort state lives above the failing region**, or in the URL ([`state-management`](../state-management/SKILL.md)), so it survives the failure and "fix the filter and try again" works.
+- **An error boundary wraps the data-dependent subtree, not the route**, whenever the surrounding chrome is still meaningful.
+- **Partial failure is per region**: one 500 degrades one of three independent tiles.
+- **The failed body differs from the empty body**: failed carries the error text, the correlation id and a retry; empty carries the actionable message below.
 
-- The three-state branch sits at the **data-dependent boundary**, not at the container that also owns the chrome. If a component renders both, split it (container/presentation) rather than early-returning.
-- **Filter/search/sort state survives the failure** — it lives above the failing region (or in the URL, per [`state-management`](../state-management/SKILL.md)), so "fix the filter and try again" actually works. Unmounting the controls destroys what the user typed and is the real cost of the early return.
-- **Error boundaries follow the same scope:** wrap the data-dependent subtree, not the route, whenever the surrounding chrome is still meaningful. A route-level `error.tsx`/`global-error.tsx` remains the backstop for a chrome-level throw — not the first line of defense for a failed read.
-- **Partial failure is per-region**: three tiles fetching independently means three independent states — one 500 degrades one tile, and the other two still render their data.
-- **Never leave the failed region visually identical to its empty state** — the failed body carries the error text, the correlation id, and a retry; the empty body carries the actionable empty message (below).
+### The error notification
 
-### The error notification — persistent, top-right, user-dismissed
-
-The inline region says *this data is missing*; the notification says *why, and how to report it*. Both, always — they are not alternatives.
-
-**The contract:**
-
-| Property | Value |
-|---|---|
-| Position | **top-right** of the viewport, one stack, above app chrome, below modals |
-| Dismissal | **manual only** — an explicit close button (`aria-label="Close"`). **No auto-dismiss timeout, ever**, for an error |
-| Content | the categorized friendly message + the correlation id (copyable) + optionally a retry action — **never** `error.message`, a stack, or a raw body |
-| Semantics | container `aria-live="polite"` + `role="status"` for info, `role="alert"` for errors; the close button is keyboard-reachable and focus is not stolen from the user's current field |
-| Dedupe | key by `correlationId ?? (code + region)` — a retried-then-failed call updates the existing entry (with a count) instead of stacking five copies |
-| Scope | one provider mounted **once** at the root client island; features call a hook (`useNotify().error(appError)`), never mount their own portal |
-
-Success/info notifications may auto-dismiss (~4–6s). **Errors may not** — the user must be able to read it, copy the reference, and screenshot it. This is the one place this skill's older "never a toast" rule is refined: a toast is wrong *as the only surface* for a persistent region, and correct *in addition to* the inline state.
-
-Wire it with the project's component library rather than hand-rolling — [`component-library`](../component-library/SKILL.md) owns the mounting:
-
-| Library | Persistent-error call |
-|---|---|
-| MUI (notistack) | `enqueueSnackbar(msg, { variant: 'error', persist: true, anchorOrigin: { vertical: 'top', horizontal: 'right' }, action: closeButton })` |
-| Mantine | `notifications.show({ color: 'red', autoClose: false, withCloseButton: true })` + `<Notifications position="top-right" />` |
-| Chakra v3 | `toaster.error({ duration: null, meta: { closable: true } })`, toaster created with `placement: 'top-end'` |
-| **shadcn (sonner)** — default lane | `toast.error(msg, { duration: Infinity, closeButton: true })` + `<Toaster position="top-right" />` |
-| none | a small `NotificationProvider` context + a fixed-position `<ul aria-live="polite">` portal; same contract |
-
-Give the surface stable test ids ([`test-ids`](../test-ids/SKILL.md)): `Notifications.Region`, `Notifications.Error`, `Notifications.Error.Close`, `Notifications.Error.CorrelationId`.
-
-**Where it is raised:** one place per failure path — the query/mutation error handler (a TanStack Query `QueryCache.onError` / `MutationCache.onError` global handler covers every query for one change), a boundary's `onError`, or the Server-Action result handler. Do not `notify()` at the call site *and* in the global handler — that double-fires.
-
-**Volume control — an outage must not become a wall of toasts.** Dedupe-by-key handles the *same* error repeating; it does nothing about a backend outage failing six regions at once, each with its own correlation id. Three defenses, in order:
-
-1. **Cap the stack.** Show at most ~3 notifications; collapse the rest into one "+4 more issues" entry that expands. A stack taller than the viewport hides its own close buttons.
-2. **Roll up by cause, not by call.** Six regions failing on one 503 is **one** message ("Some data couldn't be loaded — the service is unavailable"), not six. Group on status/code + a short time window; the per-region inline states already say *which* regions are affected.
-3. **Let the retry circuit quiet it.** Once a region stops auto-retrying (the *k*-consecutive-failures rule in the retry section), it stops re-notifying — one persistent entry with a count, not one per attempt.
-
-**What does NOT get a notification:** field-level validation ([`forms`](../forms/SKILL.md) renders it on the field), an expected empty result, an aborted request (navigation cancels), and a transient fault absorbed by retry — only the final, surfaced failure notifies.
-
-### Inline error region **inside** grids
-
-A grid load failure renders its error **in the grid area**, not just a toast — an empty grid is indistinguishable from "no rows". Bind the loading + failed states on the **shared table/grid component** so every grid gets them for one change ([`ui-rules`](../ui-rules/SKILL.md) renderer unification) — don't reimplement per page.
-
-### Gone, not broken — the deleted entity
-
-A detail page whose record was deleted (or whose id was pasted wrong) comes back **404**, and rendering that as "something went wrong" sends the user retrying a thing that will never work. Treat it as its own outcome: *"This order no longer exists"*, with a way out — back to the list, or the search that found it. **[App]** the route-level form of this is `not-found.tsx` + `notFound()` ([`routing`](../routing/SKILL.md)); below the route, a region that lost its record renders the gone state in place, and any action bound to it is removed rather than left to fail. A list that still shows the deleted row until the next refetch is the paired defect — invalidate on delete.
+The inline region says *this data is missing*; the notification says *why*. Both, always: `react.md` states the contract (persistent, top-right, closed only by its close button). Raise it once per failure path, never for field-level validation ([`forms`](../forms/SKILL.md) renders that on the field), an expected empty result, an aborted request or a fault the retry absorbed. Wiring the provider, dedupe, the raise-point and the volume control for an outage → [`references/notifications.md`](references/notifications.md).
 
 ### Actionable empty states — three kinds
 
-"Empty" is three different situations; each needs a different message and a different action:
+"Empty" is three situations, each with its own message in the data area (not a toast) and its own action:
 
-| Situation | Message (in the data area, not a toast) | Action |
+| Situation | Message | Action |
 |---|---|---|
 | **No records exist yet** | "No orders yet." | offer the **create** action |
 | **No filter applied yet** | "Enter a filter to begin." | focus the filter |
 | **Filter matched nothing** | "No orders match these filters." | offer **clear filters** |
 
-A single generic "No data" for all three is a defect — it tells the user nothing about what to do next.
-
----
-
-## Rules
-
-The standards this skill's output must meet are the fe-react rule files `react.md` and `react-data.md`, not a list here. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Where they and this skill disagree, the rule files win. The data-region, notification, timeout, retry, 401 and version-skew rules live there.
-
-Beyond the rule files, this skill's own rules:
-
-- **Boundaries per tier**: `global-error.tsx` + `error.tsx` per route + a per-feature `react-error-boundary` around each independently failing region (Vite: `react-error-boundary` at the root and per route; never an App-Router-only file in a Vite SPA). Always offer `reset`/retry.
-- **Report caught and recoverable errors** (`onCaughtError`, `onRecoverableError`) with the correlation id — a hydration mismatch swallowed by the console is unreported.
-- **Stop auto-retrying after k consecutive failures** — switch the region to manual retry and stop re-notifying; no notification per retry attempt; no hand-rolled retry loop where TanStack Query's `retry` fits.
-- **Writes** ([details](references/writes-and-dependencies.md)): bulk writes report per item; a timed-out write says it is unconfirmed and refetches, never "failed", and is never blindly retried when non-idempotent.
-- **Third-party dependencies fail in their own boundary, with their own timeout** — analytics and flags fail silently (defaults, logged), maps and embeds fail to their region, payment and auth iframes fail loudly with a fallback; a flag provider never blocks first render.
-- **A 404 on a record is "gone", not "broken"** — its own message and a way out, the row invalidated from the list, no retry.
-- **Cap and roll up notifications** — ≤ ~3 visible with "+N more", grouped by cause and deduped by key, from one root-mounted provider with one raise-point per failure path.
-- **Version skew** ([details](references/session-and-deploy.md)): prompt rather than force-reload over unsaved work; one "new version available" affordance, shared with the service worker's.
-- **The 401 ladder** ([details](references/session-and-deploy.md)) is triggered only by your own API (never a third-party host's 401); 403 renders permission-denied; warn before the session deadline; `returnTo` the exact route; a `fetch` or Server Action gets a 401 JSON answer, never a redirect.
-- **Live-data status stays consistent** — "reconnecting", never stale live data as current while the socket is down (with [`realtime`](../realtime/SKILL.md)); offline handled explicitly.
-- **A soft "still loading" tier** before the timeout; no skeleton flash over existing rows (`keepPreviousData`); actions unsafe on stale data are disabled.
-- **Grid failures render inline in the grid**, loading and failed bound on the shared grid component.
-- **Actionable empty states** — no-records, no-filter and filter-matched-nothing are three messages, never one generic "No data".
-
-## Validation
-
-- Throw in a feature component → its boundary shows friendly content; the rest of the page still works; the report has the structured entry + correlation id; no `error.message` on screen.
-- Make a fetch 500 → the region shows the **failed** state inline with a working retry, not a blank grid; the retry recovers on the next success; a transient 503 is absorbed by backoff without surfacing.
-- With that 500 still failing: the **search bar, filters, and toolbar are still on screen and still interactive**, the filter text the user typed is intact, and only the rows area carries the error. Change a filter → the query re-runs.
-- Simultaneously, **one** notification appears top-right with the friendly message + correlation id; it is **still there after 60s**; it closes only on the close button; failing the same call three times leaves one entry, not three.
-- Mock a drifted response body (rename a field / return an object where an array is expected) → the region shows **failed** (not "no records") and notifies.
-- **Hang the endpoint** (delay the response past the budget) → the region leaves loading at the deadline with a timeout-specific failed state and a working retry — it does **not** spin indefinitely; the soft "still loading" tier appeared first. Navigate away mid-request → it aborts silently (no failed state, no notification).
-- **Load successfully, then fail the refetch** (poll or window-focus) → the rows are **still there**, marked stale with an "as of" time, one notification; the failed body never appears. Any action unsafe on stale data is disabled with a reason.
-- Change a filter / page → no empty flash between results (`keepPreviousData`), and the new key's first load shows the loading state, not a stale marker.
-- Fail two of three independent dashboard tiles → those two show failed states, the third still renders its data.
-- **Fail a mutation** with an optimistic update in play → the row reverts **and** a notification says what didn't happen; the form still holds what was typed. Double-click submit → one request. Retry a timed-out write → the server dedupes on the idempotency key (one record, not two). Return 409 → a choice, not a retry. Return 422 → errors on the fields, no toast.
-- **Break the backend entirely** (all endpoints 503) → the notification stack stays capped and rolled up (not one per region per attempt), auto-retry stops after k attempts with a manual Retry offered, and `Retry-After` is respected where sent.
-- **Simulate a deploy across an open tab** (build, deploy, then navigate to a lazy route in the tab opened before it — or delete a chunk from the served build): the app recovers onto the new build with **one** reload, never loops, and a tab with unsaved work is prompted rather than reloaded.
-- **Expire the session while a form is half-filled** (revoke the token / clock-skew the expiry), then trigger a save: the refresh fires **once** across all in-flight calls, the request replays, and the user sees nothing. Force the refresh to fail → the re-auth appears **in place**, the typed values are still there afterwards, and the original save completes. Confirm no second refresh loop on a repeated 401, and that a 403 shows permission-denied without touching the session.
-- Drop the network → offline UX appears; the live region shows "reconnecting" (not stale-as-current); restore → it recovers.
-- Empty each way (no records / no filter / filtered-out) → three distinct actionable messages.
-- Force a client error → it reaches the server log / Sentry (not just the browser console); force a hydration mismatch → it is *reported*, not only logged to the console.
-- Block the third-party hosts (flag provider, maps, analytics) at the network level → the app still renders, flags fall to their defaults, the map region shows its failed body, and **no** analytics toast appears.
-- Fill `localStorage` to quota (or run in private mode) → the app renders and works with persistence degraded, no crash.
-- Open the app in two tabs, sign out in one → the other stops rendering as signed-in.
-- Leave a tab backgrounded past `staleTime` and return → it revalidates rather than showing yesterday's numbers as current.
-- Delete a record in another tab, then act on its detail page → "no longer exists" with a way out, and the list no longer shows the row.
+A generic "No data" for all three tells the user nothing about what to do next.

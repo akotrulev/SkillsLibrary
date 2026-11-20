@@ -6,11 +6,6 @@ disable-model-invocation: true
 
 # QA — gRPC API Test Writer (.NET 8 / Grpc.Net.Client + NUnit)
 
-> **Ported from the canonical `qa-java:api-tests-grpc`.** The four ideas and the section order are
-> identical; only the runner (NUnit instead of TestNG), the client (`Grpc.Net.Client` instead of grpc-java), the
-> codegen (`Grpc.Tools` `.csproj` `<Protobuf>` items instead of `protobuf-gradle-plugin`), and the
-> async-all-the-way style change. See the Java file for the family rationale.
-
 Scaffolds black-box API tests in .NET against a deployed **gRPC** service. It completes the `api-test-author`
 **protocol trio** — REST (`qa-dotnet:api-tests`, HTTP+JSON, status-driven) → GraphQL
 (`qa-dotnet:api-tests-graphql`, one HTTP 200 carrying a `{ data, errors }` envelope) → **gRPC (this skill,
@@ -282,37 +277,3 @@ public abstract class BaseGrpcTest
 - **Hardcoding the target / committing the token.** *Fix:* env, read lazily, never logged; bearer via
   `qa-dotnet:test-login-tokens`. Reaching for this skill for **load** → `qa-dotnet:load-testing`; for a
   **Protobuf contract** → `qa-dotnet:api-contract-testing`.
-
-## Examples
-
-**End-to-end: a not-found RPC proves the status discipline.** A REST author writes
-`Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound))`; a GraphQL author writes
-`errors[0].extensions.code == "NOT_FOUND"`. The gRPC-correct version asserts
-`result.Code == StatusCode.NotFound` — same outcome, third location: the REST status line, the GraphQL `errors`
-envelope, the gRPC `Status`. One family, three result-location conventions.
-
-**Composing with the protocol-trio siblings.** REST `generator` is status-driven over HTTP+JSON; GraphQL ``api-test-author/graphql`` is
-one HTTP 200 carrying `{ data, errors }`; gRPC is proto/HTTP2 with the result in the `Status`. All three share the
-**Action + Test** spine and the "wrap the call so the test asserts success *or* failure uniformly" move (the gRPC
-`GrpcCallResult` is the GraphQL raw-envelope analogue). Only the transport, the codegen, and where-the-result-lives
-differ.
-
-## Rules (hard constraints)
-
-- **The gate is the gRPC `StatusCode`, not an HTTP status.** Assert `result.IsOk` (success) or the specific
-  failure `Code` (`NotFound` / `InvalidArgument` / `Unauthenticated` / `DeadlineExceeded` / …) — never a 200/404.
-- **The action never lets `RpcException` escape.** `CallAsync(...)` returns a `GrpcCallResult<T>` holding the
-  message **or** the status + trailers; the test decides whether a non-OK status was expected. No
-  `Assert.ThrowsAsync` in the assertion path, no deserialization or assertion inside the action.
-- **Rich errors assert the `google.rpc.Status` details** (`ErrorInfo.Reason`/`Domain`, `BadRequest` field
-  violations) via `GetRpcStatus()` — not a bare `StatusCode`.
-- **Assert on the typed generated message** — never hand-parse bytes; the `.proto` is the contract. Messages via
-  `qa-dotnet:api-models`.
-- **A write RPC test round-trips a read** to prove persistence; data created in a test is cleaned up in
-  `[TearDown]` (guarded so it can't mask a failure).
-- **Streaming = drain-then-assert on a bounded condition** — `await foreach` over `ResponseStream.ReadAllAsync()`
-  (server-streaming) or `await ResponseAsync` (client-streaming); bound unbounded streams with `deadline:`. **No
-  `Task.Delay`/`Thread.Sleep`, async all the way (no `.Result`).** Deep stream-lifecycle assertions →
-  `qa-dotnet:realtime-stream-testing`.
-- **One `GrpcChannel` per fixture** (`[OneTimeSetUp]` open, `[OneTimeTearDown]` shutdown + dispose); service stood
-  up via Testcontainers. **Target + token via env**, lazy, never logged. NUnit + Grpc.Net.Client.

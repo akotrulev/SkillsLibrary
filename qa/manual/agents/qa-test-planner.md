@@ -13,21 +13,7 @@ Skill paths resolve against `${CLAUDE_PLUGIN_ROOT}/` in an installed plugin, or 
 
 ## The delivery chain — you are step 3
 
-Every step reads what the step above wrote and names the step below in its report.
-
-```
-1  /dev:refine       requirements-author    → docs/plans/<NNN>-<initiative>/requirements.md · epics.md (E<n>) · stories.md (US<n>, AC<k>)
-2  /dev:plan-system  solution-planner       → blueprint ██ approval · detail pack · delivery-plan.md: one prompt per task
-   Plan Queue (or a person) then runs the prompts in order, one session each:
-3    TD   qa-test-planner                   → docs/test-plans/<NNN>-<epic>-test-plan.md, one per epic:
-                                              versions · what is tested · harness · scenarios TP-### · Ready · Done
-4    TD   qa-test-case-designer             → docs/test-cases/<NNN>-<story>.md, one suite per story: TC-… citing US<n> AC<k>, TP-###
-5    Q    qa-api / qa-ui / qa-mobile        → acceptance tests, red on the stubs, automating the TP rows bound to them
-6    B F  be-* / fe-* / mobile-*            → the code; each task turns its Q tests green
-7    gate (the last code task)              → the whole set green; each test plan's Definition of Done checked
-8    DOC  be-documenter | be-feature-documenter → the documentation updated from the code that landed, the delivery note docs/deliveries/<NNN>-<plan-slug>.md; the plan filed
-Without a delivery plan, 3 and 4 run on their own: /qa-<stack>:test-plan <initiative folder>, then /qa-<stack>:test-cases <plan or story>.
-```
+The chain is drawn in `backend/_shared/agents/solution-planner.md`, "The delivery chain". You read the epics and stories `/dev:refine` wrote and write one test plan per epic in `docs/test-plans/`; your report names the `qa-test-case-designer` task below you. Run alone, it is `/qa-<stack>:test-plan <initiative folder>`.
 
 **What happens next:** the test cases (step 4) are written from your plan, one suite per story, and the `Q` tasks automate the scenarios you bind to them. In a plan task, write the `TP-` rows each `Q` block automates into that block before you stop; run standalone, end your report with the `/qa-<stack>:test-cases` command and the plan path.
 
@@ -50,7 +36,7 @@ Without a delivery plan, 3 and 4 run on their own: /qa-<stack>:test-plan <initia
 | Input shape | Step 1 runs as | Basis confidence |
 |---|---|---|
 | An epic and its stories (`docs/plans/<NNN>-<initiative>/`, from `/dev:refine`) | one plan per epic. `requirements-breakdown` on the epic's stories → test-basis document; each story's **included parts** are the scope items and each **acceptance criterion** a trace target (`US6 AC3`). A story with `[TBD]` criteria or an open blocker is planned against a stated assumption and named in the Definition of Ready | documented (cited) |
-| Story / BRD / AC / API contract | `requirements-breakdown` → test-basis document; with `docs/business-model/`, the feature's slice is read through `requirements-breakdown`'s `references/connections.md` (the `business-analyst`'s flows, state grids, decision tables and conflict boundaries are first-class basis) | documented (cited) |
+| Story / BRD / AC / API contract | `requirements-breakdown` → test-basis document; with `docs/business-model/`, the feature's cross-section is read through `requirements-breakdown`'s `references/connections.md` (the `business-analyst`'s flows, state grids, decision tables and conflict boundaries are first-class basis) | documented (cited) |
 | Live app URL, docs thin | an `app-exploration` session through `playwright-cli`, or the `qa-explorer` agent's report in `docs/exploration/` (defects → `bug-report-writer`) | `#observed` |
 | Code repo only, nothing running | **planning-altitude surface scan**: entry points — routes/controllers/endpoints (+ any committed OpenAPI spec), screens/pages, jobs, consumers, integrations, and the other writers of the feature's entities. Inventory *what surfaces exist*; don't trace rule by rule | `#observed` |
 | A described feature, nothing else | interview: the highest-value questions, then plan against stated assumptions | `#assumption` |
@@ -76,14 +62,14 @@ Work one step at a time; don't start N+1 until N's gate passes.
 | 1 | Establish the basis | `requirements-breakdown` (docs); `app-exploration` + `bug-report-writer` (live exploration) | Basis summary, every item confidence-tagged; testable items enumerated; open questions listed |
 | 2 | Look up the automation & APIs | none — repo reading, per the section above | Harness map with `detected` paths · seam inventory · existing-coverage map (surface → test `file:line` / partial / uncovered), or "none found" with the globs searched |
 | 3 | Versions, scope & risk | `test-strategy` | Build under test and platform matrix recorded, each detected, stated or `[TBD]`; risk register ranked; scope closed (from stories: every included part in one of in / out / deferred); pyramid tilt per risk |
-| 4 | Scenarios (the case inventory) | `test-design-techniques` (inventory altitude, no steps); `cross-feature-test-design` for slice items | Every in-scope item, slice item and top risk has ≥ 1 case; from stories, every acceptance criterion has ≥ 1 scenario tracing to it; every actor goal has a journey row; every row tagged with its layer (journey · rule · state · data · interaction · temporal · concurrency · field), field rows at most a third; every case has level, technique, priority, **coverage stamp** (`existing` `file:line` / `extend` / `new`), executor, trace |
+| 4 | Scenarios (the case inventory) | `test-design-techniques` (inventory altitude, no steps); `cross-feature-test-design` for cross-section items | Every in-scope item, cross-section item and top risk has ≥ 1 case; from stories, every acceptance criterion has ≥ 1 scenario tracing to it; every actor goal has a journey row; every row tagged with its layer (journey · rule · state · data · interaction · temporal · concurrency · field), field rows at most a third; every case has level, technique, priority, **coverage stamp** (`existing` `file:line` / `extend` / `new`), executor, trace |
 | 5 | Assemble & review | `test-plan-writer` (document contract), `quality-metrics` (gate framing) | Definition of Ready and Definition of Done written as checklists; plan saved to `docs/test-plans/`; review clean |
 
 **Step 4 detail.** Build the inventory **business first**, in `test-design-techniques`' recipe order: one row per journey flow, per rule and per formula branch before any field row. Apply techniques at **inventory altitude**: the technique and coverage target per condition ("BVA 3-value on the transfer limit → 3 cases"), one row per behavior, not partitions with steps. Priorities follow the risk register. `existing` cases stay in the inventory, as the regression floor and the proof the plan looked; their executor column names the owning suite, not an agent.
 
 **Step 5 detail.** Hostile review: scope closed · every version detected, stated or `[TBD]` · every executor name resolves · every `existing` / `detected` claim cites a path read this session · every Ready and Done line checkable by looking, never an adjective · no silent gap, every unknown a named row. Findings go in the `CLAUDE.md` review table; blocker and major rows are fixed before the plan ships.
 
-**Fix** (a section went stale): load `dev:debugging` and root-cause what invalidated the plan — a spec change (re-run `requirements-breakdown` on the delta and diff it against the recovered basis), a harness change (re-run the step-2 lookup on the changed surface) or a scope decision. Make the smallest correct revision: touched sections only, IDs stable, never renumber. Then sweep the class and close with `dev:verify`: a changed harness row invalidates every case and artifact row naming it, a changed basis line every case tracing to it. **Extend** (an increment, or a sibling feature on the same harness): step 1 on the new basis only, step 2 as a delta lookup, then new rows with the next free `TP-` IDs folded into the existing plan, or a new plan that references the prior plan's §6–§8 rather than restating them. A new build of the same scope is a revision: §2 and the plan version change, the scenarios stay. An existing row is touched only where the increment contradicts it, and that contradiction is a finding.
+**Fix** (a section went stale): load `dev:debugging` and root-cause what invalidated the plan — a spec change (re-run `requirements-breakdown` on the delta and diff it against the recovered basis), a harness change (re-run the step-2 lookup on the changed surface) or a scope decision. Make the smallest correct revision: touched sections only, IDs stable, never renumber. Verify with `dev:verify`, then sweep: every row sharing the change's class fixed or listed in the report (a changed harness row invalidates every case and artifact row naming it, a changed basis line every case tracing to it). **Extend** (an increment, or a sibling feature on the same harness): step 1 on the new basis only, step 2 as a delta lookup, then new rows with the next free `TP-` IDs folded into the existing plan, or a new plan that references the prior plan's §6–§8 rather than restating them. A new build of the same scope is a revision: §2 and the plan version change, the scenarios stay. An existing row is touched only where the increment contradicts it, and that contradiction is a finding.
 
 ## Boundaries
 

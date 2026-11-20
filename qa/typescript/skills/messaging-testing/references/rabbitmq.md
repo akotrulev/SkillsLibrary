@@ -1,5 +1,22 @@
 # Messaging Testing — RabbitMQ / AMQP (Node 24 + TypeScript / Vitest)
 
+**Contents:**
+
+- The RabbitMQ model — exchange → binding → queue, manual ack, DLX (read this first)
+- Stack
+- Local broker for tests — RabbitMQ via Testcontainers
+- The test-side reader — RabbitProbe (the "drain" analogue)
+- Core pattern 1 — producer-assert (the SUT produced message X)
+- Core pattern 2 — consumer-assert (the SUT consumed → side-effect Y)
+- Manual ack / nack / reject — message settlement
+- Dead-letter-exchange assertions
+- Exchanges, routing keys & bindings
+- Receiving a batch / draining
+- Anti-patterns
+- Examples
+- Rules (hard constraints)
+- Cross-references
+
 This is the **TypeScript** sibling of the `qa/typescript/skills/messaging-testing/` node, the **fourth and final
 `messaging-testing` sibling** (service-bus → SQS → Kafka → **RabbitMQ**) — building it
 **closes the family**. The **canonical stack is .NET** (`qa-dotnet:messaging-testing`): RabbitMQ's

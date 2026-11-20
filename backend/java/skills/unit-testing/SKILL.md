@@ -8,13 +8,13 @@ disable-model-invocation: true
 
 Owns **dev-side unit tests of backend logic**: construct a class with `new`, drive it, assert on its return value or its observable effect on a fake collaborator. **No Spring context, no container, no real database, no broker, no filesystem, no clock.**
 
-**The boundary, one sentence:** if the test needs **any** annotation that starts an application context — `@SpringBootTest`, `@DataJpaTest`, `@WebMvcTest`, `@JsonTest`, `@ExtendWith(SpringExtension.class)` — it is not a unit test and it belongs to the **peer** [`qa-api-java`](../../../../qa/java/agents/qa-api-java.md).
+**The boundary:** if the test needs **any** annotation that starts an application context — `@SpringBootTest`, `@DataJpaTest`, `@WebMvcTest`, `@JsonTest`, `@ExtendWith(SpringExtension.class)` — it is not a unit test and it belongs to the **peer** [`qa-api-java`](../../../../qa/java/agents/qa-api-java.md).
 
-That line is worth stating twice, because Spring's slice-test annotations are routinely *called* unit tests. **A slice test is fast, not isolated.** It reads `application.yml`, builds a context, and fails for reasons unrelated to your logic. `@ExtendWith(MockitoExtension.class)` is this skill's extension; `SpringExtension` is the peer's.
+**A slice test is fast, not isolated**: it reads `application.yml`, builds a context, and fails for reasons unrelated to your logic. `@ExtendWith(MockitoExtension.class)` is this skill's extension; `SpringExtension` is the peer's.
 
-**Runner — house-default deviation, stated once.** `CLAUDE.md`'s Java test-runner default is **TestNG**, and that is correct for the **QA suite**. Dev-side unit tests use **JUnit 5**, because `spring-boot-starter-test` ships JUnit 5 + Mockito + AssertJ + Spring's own test support as one managed dependency, and every Boot 3.x recipe assumes the Jupiter lifecycle. Introducing TestNG into a Boot service means a second runner, a second lifecycle, and a manual dependency graph for zero gain. **Use JUnit 5 here; if the service already standardizes on TestNG, match it and don't fight it.** (Same shape as `fe-blazor:component-testing`'s xUnit-for-bUnit deviation.) `pattern-writer` previously said "plain TestNG + AssertJ" for this lane — that has been corrected to point here.
+**Runner — house-default deviation, stated once.** `CLAUDE.md`'s Java test-runner default is **TestNG**, correct for the **QA suite**. Dev-side unit tests use **JUnit 5**: `spring-boot-starter-test` ships JUnit 5 + Mockito + AssertJ as one managed dependency, and a second runner in a Boot service buys nothing. **Use JUnit 5 here; if the service already standardizes on TestNG, match it.**
 
-**This skill is not a licence to replace integration tests with mocks.** `CLAUDE.md`'s preference for real-DB integration tests over mocks governs the integration lane, which is the peer's. Some things are only provable against a real dependency:
+**This skill is not a licence to replace integration tests with mocks.** Some things are only provable against a real dependency:
 
 | Never unit-test this | Because | Belongs to |
 |---|---|---|
@@ -27,7 +27,7 @@ That line is worth stating twice, because Spring's slice-test annotations are ro
 
 ## Version policy
 
-**First act: detect the Java release and the Spring Boot BOM version** (`build.gradle.kts` / `pom.xml`). **Java 21 + Spring Boot 3.x.** Let the Boot BOM manage JUnit/Mockito/AssertJ versions — **do not pin them independently**; a hand-pinned Mockito against a Boot-managed JUnit is the most common "works on my machine" break in this lane. `java.time.Clock` is JDK-native, so the time seam needs no dependency at all.
+The lane per `CLAUDE.md` 'Version policy'. Let the Boot BOM manage JUnit/Mockito/AssertJ versions — **do not pin them independently**; a hand-pinned Mockito against a Boot-managed JUnit is the most common break in this lane.
 
 ## Stack
 
@@ -43,12 +43,12 @@ tasks.test { useJUnitPlatform() }
 | Concern | What | Notes |
 |---|---|---|
 | Runner | **JUnit 5 (Jupiter)** | Via `spring-boot-starter-test`; `useJUnitPlatform()` in the `test` task |
-| Doubles | **Mockito** | `mockito-junit-jupiter` for the extension. Mockito 5 uses the **inline** mock maker by default — `final` classes/methods are technically mockable now, which does **not** make mocking them a good idea (see traps) |
-| Assertions | **AssertJ** (`assertThat`) | House choice — fluent, one entry point, best `BigDecimal`/collection support |
-| Time | **`java.time.Clock`** | JDK-native; `Clock.fixed` / `Clock.offset`. No dependency |
-| Validation | `jakarta.validation` + the Hibernate Validator on the test classpath | Build a `Validator` directly — no Spring needed |
+| Doubles | **Mockito** | `mockito-junit-jupiter` for the extension; Mockito 5's inline maker can mock `final` types, which does not make it a good idea (traps) |
+| Assertions | **AssertJ** (`assertThat`) | House choice — one entry point, best `BigDecimal`/collection support |
+| Time | **`java.time.Clock`** | JDK-native; no dependency |
+| Validation | `jakarta.validation` + Hibernate Validator | Build a `Validator` directly — no Spring |
 
-**`spring-boot-starter-test` pulls in Spring test support. Using the dependency is fine; using its context-starting annotations in this project is not** — that's the fence, and it's a review point.
+Using `spring-boot-starter-test` is fine; its context-starting annotations are not — a review point.
 
 ## What deserves a unit test — the selection matrix
 
@@ -73,7 +73,7 @@ tasks.test { useJUnitPlatform() }
 
 ## Project layout & setup
 
-Match the repo first. Standard Gradle/Maven layout, mirroring the main source tree:
+Match the repo first. Mirror the main source tree:
 
 ```
 src/main/java/com/acme/ordering/PlaceOrderService.java
@@ -82,23 +82,18 @@ src/test/java/com/acme/ordering/fakes/InMemoryOrderRepository.java
 src/test/java/com/acme/ordering/builders/OrderBuilder.java
 ```
 
-- **One test class per class under test**, same package (package-private access without `@VisibleForTesting` hacks), named `<ClassName>Test`. Reserve `<ClassName>IT` for the peer's integration tests, and keep them in a separate source set / Gradle task so `test` stays fast.
-- Test classes and methods are **package-private** in JUnit 5 — no `public` needed.
+- **One test class per class under test**, same package, named `<ClassName>Test`. `<ClassName>IT` is the peer's, in a separate source set so `test` stays fast.
 - **No field injection into the class under test.** Construct it with `new` in `@BeforeEach` (or in the test). `@InjectMocks` is discouraged here: it fills fields reflectively, so a constructor-signature change compiles and silently leaves a `null` — the exact failure constructor injection exists to prevent.
-- **No shared mutable state between tests.** JUnit 5 creates a fresh instance per test method by default — do not defeat that with `static` fields or `@TestInstance(PER_CLASS)` plus mutation.
+- **No shared mutable state between tests**: no `static` fields, no `@TestInstance(PER_CLASS)` plus mutation.
 
 ## Naming
 
-`should_<Outcome>_when_<Condition>` (or the repo's existing convention), optionally with `@DisplayName` for a full sentence. The name states behavior, never implementation:
+`should_<Outcome>_when_<Condition>` (or the repo's existing convention), optionally with `@DisplayName`. The name states behavior (`should_CallRepository` asserts a mechanism):
 
 ```java
 @Test
 @DisplayName("rejects the order when the cart is empty")
 void should_RejectOrder_when_CartIsEmpty() { … }
-
-// bad
-void testPlaceOrder()          // says nothing
-void should_CallRepository()   // asserts a mechanism, not a behavior
 ```
 
 ## The five seams — what makes logic untestable
@@ -113,25 +108,7 @@ If you cannot write the test without one of these, **fix the seam first** — do
 | **Config** | `@Value` reads inside logic, `System.getenv` | a `@ConfigurationProperties` **record** | construct the record directly in the test |
 | **Outbound I/O** | `RestClient`/`WebClient`/`RestTemplate`, an SDK client, `Files.*` | your own port interface | a hand-written fake, or a Mockito mock of *your* interface |
 
-```java
-private static final Instant NOW = Instant.parse("2026-08-09T12:00:00Z");
-private final Clock clock = Clock.fixed(NOW, ZoneOffset.UTC);
-
-@Test
-void should_ReportExpired_when_ClockPassesExpiry() {
-    var service = new SubscriptionService(Clock.offset(clock, Duration.ofDays(31)));
-    assertThat(service.isExpired(new Subscription(NOW.plus(Duration.ofDays(30))))).isTrue();
-}
-```
-
-```java
-// Validation without Spring
-try (var factory = Validation.buildDefaultValidatorFactory()) {
-    var violations = factory.getValidator().validate(new CreateOrderRequest(null, 0));
-    assertThat(violations).extracting(v -> v.getPropertyPath().toString())
-                          .contains("customerId");
-}
-```
+A fixed-clock test and validation without Spring → read `references/seam-examples.md`.
 
 **Never mock a type you don't own** — no mocking `Clock` (use `Clock.fixed`), `EntityManager`, `RestClient`, or an SDK type. Wrap it in your own port and fake that.
 
@@ -171,20 +148,19 @@ class PlaceOrderServiceTest {
 }
 ```
 
-**Prefer a state assertion over a `verify()`** where both work: asserting on a fake's recorded state survives a refactor that `verify(publisher).publish(...)` does not.
+**Prefer a state assertion over a `verify()`** where both work: a fake's recorded state survives a refactor that `verify(...)` does not.
 
 ### Mockito traps
 
-- **`MockitoExtension` is STRICT_STUBS by default** — an unused `when(...)` fails the test with `UnnecessaryStubbingException`. That is a **feature**: it means the stub was describing a call that no longer happens. Delete the stub; don't reach for `lenient()`.
-- **`@InjectMocks` hides constructor changes** — prefer `new` (above).
+- **`MockitoExtension` is STRICT_STUBS by default** — an unused `when(...)` fails with `UnnecessaryStubbingException` because the stub describes a call that no longer happens. Delete the stub.
 - **Mocking `final` / static** — Mockito 5's inline maker makes it possible; it's still a design smell. `mockStatic` over your own static helper means the helper should be an injected collaborator.
 - **Don't `verify()` the logger** — logs aren't the contract, unless the class's only job is producing an audit record.
-- **`any()` matchers hide contracts** — `verify(publisher).publish(any())` proves almost nothing. Use `argThat` / an `ArgumentCaptor` and assert the payload.
-- **Never `spy()` the class under test** to stub one of its own methods — that's two responsibilities in one class. Split it.
+- **`any()` hides the contract** — use `argThat` / an `ArgumentCaptor` and assert the payload.
+- **Never `spy()` the class under test** — that's two responsibilities in one class. Split it.
 
 ## Parameterized tests
 
-`CLAUDE.md` forbids `if`/`for` driving assertions. Jupiter's data sources are the escape hatch:
+Jupiter's data sources replace `if`/`for` around assertions:
 
 ```java
 @ParameterizedTest
@@ -194,7 +170,7 @@ void should_RoundHalfUp_when_ThirdDecimalPresent(BigDecimal input, BigDecimal ex
 }
 ```
 
-`@MethodSource` for constructed cases, `@EnumSource` for exhausting an enum (which also fails when someone adds a constant — a useful alarm), `@ValueSource` for single values.
+`@MethodSource` for constructed cases, `@EnumSource` for exhausting an enum (it fails when someone adds a constant), `@ValueSource` for single values.
 
 ## Beyond example tests
 
@@ -209,26 +185,24 @@ assertThat(total).isEqualByComparingTo("2.5");        // value
 assertThat(total.scale()).isEqualTo(2);               // scale, when it's part of the contract
 ```
 
-Money: minor units or `BigDecimal` with an explicit `RoundingMode` — **never `double`**. The rounding mode is a business rule; assert it at the boundary (`.005`).
+Money: minor units or `BigDecimal` with an explicit `RoundingMode`, never `double`; assert the rounding at the boundary (`.005`).
 
 ## Test data
 
 - 1–3 fields: inline literals, named constants when the value carries meaning.
-- **4+ fields: a builder** (`CLAUDE.md`) with sane defaults, so a test overrides only its subject:
+- **4+ fields: a builder** with sane defaults, so a test overrides only its subject:
 
 ```java
 var order = anOrder().withStatus(SHIPPED).build();
 ```
 
-- Java records make defaults awkward — a static factory (`anOrder()`) plus `withX` returning a new builder is the cheapest readable shape.
-- Suite-scale data / ObjectMother → **peer** `qa-java:test-data-builder`.
+- Suite-scale data → **peer** `qa-java:test-data-builder`.
 
 ## Async & concurrency
 
-- `assertThatThrownBy(() -> …).isInstanceOf(X.class)` for expected failures; assert the **type**, not the message string.
+- `assertThatThrownBy(() -> …).isInstanceOf(X.class)` for expected failures; assert the **type**, not the message.
 - `CompletableFuture`: assert on `join()`/`get()` of an already-completed future, or use `assertThat(future).succeedsWithin(Duration.ofMillis(100))` (AssertJ). **No `Thread.sleep`.**
-- Virtual threads (Java 21) change nothing about unit tests — a unit test shouldn't need concurrency at all. If it does, the concurrency itself is the subject and probably belongs to the peer's lane with a real executor.
-- **Awaitility belongs to integration tests**, not here — if a unit needs polling, you're waiting on real I/O.
+- A unit test shouldn't need concurrency; if it does, the concurrency is the subject and belongs to the peer's lane with a real executor. **Awaitility belongs there too**: a unit that needs polling is waiting on real I/O.
 
 ## Rules
 
@@ -239,25 +213,11 @@ The standards a test must meet are the be-java rule file `java-tests.md`, not a 
 The tests cover **at least 80% of the branches in the code the change wrote**: every class it created, whole, and the methods it changed in a class that already existed. The scope is the change, never the repo — a legacy module's low number is not the excuse, and the repo-wide number is not the target.
 
 - **Design for every branch; 80% is what gets measured.** Before writing tests, list the branch outcomes in the code you wrote — each `if`/`else` arm, `switch` arm and its `default` (a pattern-matching `switch` with its `case null` too), ternary, short-circuit `&&`/`||`, guard-clause return, `catch`, a loop run zero times and many — and give each a test or a `@ParameterizedTest` row that asserts its effect. The slack under 100% is for branches no honest unit test reaches: the synthetic ones JaCoCo does not filter, and a guard the types already exclude.
-- **Only an asserting test counts.** A test that runs a branch without asserting what it did is a **major** finding — it moves the number and catches nothing. The tautology test applies; mutation score is how hollow coverage gets caught.
+- **Only an asserting test counts.** A test that runs a branch without asserting what it did is a **major** finding; mutation score catches hollow coverage.
 - **Leave out what the matrix says not to test, by name.** Records and DTOs with no behavior, entities without rules, `@Configuration` classes, Flyway migrations and generated code (MapStruct implementations, Lombok output) stay out of the measured class list, and the report names each one left out. Never reach 80% by lowering the number or by a JaCoCo exclusion over code that has behavior.
 - **Measure.** Inside a plan task, the `Gate:` line runs this over the files the task and the landed tasks above it touched. Outside a plan, run it before you report:
 
-  ```kotlin
-  // build.gradle.kts — once per project
-  plugins { jacoco }
-  tasks.jacocoTestReport {
-      dependsOn(tasks.test)
-      reports { csv.required = true }
-  }
-  ```
-
-  ```bash
-  ./gradlew test jacocoTestReport
-  grep -E ',(PlaceOrderHandler|PricingStrategyResolver),' build/reports/jacoco/test/jacocoTestReport.csv
-  ```
-
-  Branch coverage is `BRANCH_COVERED ÷ (BRANCH_COVERED + BRANCH_MISSED)` — the CSV's 7th and 6th columns — summed over the changed classes; for a method changed in an existing class, the class's page under `build/reports/jacoco/test/html/` shows its branches. On Maven, `jacoco-maven-plugin` (`prepare-agent` + `report`) writes the same CSV to `target/site/jacoco/jacoco.csv`.
+  The JaCoCo setup, the CSV command and the branch formula → read `references/jacoco-coverage.md`.
 - **Below 80%, write the missing tests.** The report's missed branches are the list.
 
 ## Generation steps

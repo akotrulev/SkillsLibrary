@@ -210,46 +210,7 @@ Emit **two** reports from the AF `report` jobs (shown in the plan): a **SARIF** 
 > for business-logic abuse. A clean active scan does **not** mean "secure" — it means the injection-class
 > automatable layer passed. State that in every report.
 
-## Anti-patterns
+## Guardrails
 
-- **Running the active scan against prod or a shared env.** It injects payloads and mutates/destroys data.
-  *Fix:* an authorized, **throwaway env you own** (Testcontainers/compose), spun on a readiness condition;
-  confirm authorization first. (The hard `qa-<stack>:security-foundations` rule.)
-- **Scanning before the app is ready** (sleep-then-scan). Races startup → false-clean / connection errors.
-  *Fix:* wait on a **condition** (`compose up --wait` / a Testcontainers wait strategy / an HTTP-health poll
-  loop) — never a fixed sleep.
-- **Container can't reach the target.** A `localhost` URL inside the ZAP container points at the *container*.
-  *Fix:* `--network host` on Linux CI / `http://host.docker.internal:<port>` on Mac/Windows / a shared Docker
-  network with the service name.
-- **Gating on every alert (or on the raw `2` exit) with no triage.** Every real app lights up; the gate gets
-  muted or flaps. *Fix:* `alertFilter` to flip ticketed FPs and raise must-fix rules, then gate on **new**
-  High/Medium from the parsed SARIF.
-- **Blanket-flipping alerts to "False Positive" to make it green.** Buries real findings. *Fix:* every
-  `alertFilter` FP carries a ticket + reason; shrink the list over time (the `qa-<stack>:security-foundations` discipline).
-- **Putting credentials/tokens in the committed `plan.yaml` / `*.context`.** *Fix:* `${ENV}` placeholders
-  resolved from process env, read lazily; pass secrets via CI secrets → container env.
-- **Treating a clean active scan as "secure."** It covers injection-class flaws on the crawled surface only —
-  blind to BOLA/IDOR/BFLA and business-logic abuse. *Fix:* pair with SCA, functional access-control tests,
-  and a manual pentest.
-- **Reaching for the legacy `zap-full-scan.py` when the AF fits.** The packaged scripts are legacy
-  (still supported); a `plan.yaml` is version-controllable, composable, and the recommended path. *Fix:* use
-  the AF unless you genuinely only need a one-shot script (then `zap-api-scan.py` for APIs).
-- **Letting the active scan run unbounded.** It can run for hours. *Fix:* set `maxScanDurationInMins` /
-  `maxRuleDurationInMins` and bound the spider durations.
-
-## Rules (hard constraints)
-
-- **Active scan = attack payloads + state mutation.** Never against prod or a shared env — only a throwaway
-  env you own and are **authorized** to attack, spun on a readiness condition (never a fixed sleep). Defer
-  the rule to `qa-<stack>:security-foundations`; obey it here.
-- **Prefer the YAML Automation Framework** (`zap.sh -cmd -autorun plan.yaml`) over the legacy packaged
-  scripts; reach for `zap-api-scan.py` only for the one-shot API convenience.
-- **No language SDK for the gate** — it is a `docker run` over a declarative plan; that is why this is one
-  shared skill. (`zap-clientapi` drives a long-running daemon — a different, heavier model.)
-- **Bound every duration** (`maxScanDurationInMins`, spider `maxDuration`); solve **container→target
-  reachability** explicitly (`--network host` / `host.docker.internal` / shared network).
-- **Triage with `alertFilter`** (FP/raise/lower), gate on **new** High/Medium from the **parsed SARIF/summary**
-  — the raw exit code (`0`/`1`/`2`) is too coarse on its own (issue #6928).
-- **No secrets in the plan/context** — `${ENV}` placeholders, read lazily; secrets via CI → container env.
-- **SARIF → code scanning**; HTML/JSON → Allure + CI artifact. A clean active scan ≠ "secure" — pair with
-  SCA, functional access-control tests, and manual pentest. Map findings to OWASP (A05/A02/A07 · API8).
+- Bound every duration: set `maxScanDurationInMins` and `maxRuleDurationInMins`, and the spider `maxDuration`.
+- Gate on the parsed SARIF or summary: the raw exit code (`0`/`1`/`2`) is too coarse on its own (ZAP issue #6928).

@@ -1,5 +1,22 @@
 # Messaging Testing — AWS SQS / SNS (.NET 8 / NUnit)
 
+**Contents:**
+
+- Stack
+- The SQS model — visibility timeout, redrive → DLQ, FIFO, SNS fan-out
+- Local broker for tests — LocalStack
+- Core pattern 1 — producer-assert (the SUT produced message X)
+- Core pattern 2 — consumer-assert (the SUT consumed → side-effect Y)
+- Visibility timeout — received-but-not-deleted → redelivery (the peek-lock analogue)
+- Redrive-policy DLQ assertions
+- Standard vs FIFO queues
+- SNS→SQS fan-out
+- Receiving a batch / draining
+- Anti-patterns
+- Examples
+- Rules (hard constraints)
+- Cross-references
+
 Ported from the **canonical** Azure Service Bus stack of the `qa/dotnet/skills/messaging-testing/` family (`service-bus`, where .NET
 also led), and **.NET leads this `sqs` node too — by the user's choice** (the house default would have been
 TypeScript; .NET was picked for this node, the same kind of judgment call Service Bus and WireMock

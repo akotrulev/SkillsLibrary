@@ -1,5 +1,15 @@
 # QA — GitHub Actions for TypeScript Test Suites
 
+**Contents:**
+- When to use
+- When NOT to use
+- Inputs needed
+- Decision matrix
+- Templates
+- Rules
+- Generation steps
+- Cross-references
+
 Authors `.github/workflows/*.yml` that run Vitest / Jest / Playwright / Testcontainers-backed integration tests on GitHub-hosted `ubuntu-latest` runners using Node 24 + TypeScript (strict), shard for speed via `strategy.matrix`, publish Allure (and Playwright's own HTML report) to GitHub Pages with history, fail on real failures, and pull secrets via OIDC federated credentials rather than PATs or stored cloud secrets.
 
 This is a port across two axes: the .NET GitHub Actions reference (`qa/cicd/dotnet/skills/ci-pipelines`, GitHub Actions idioms) and this skill's Azure Pipelines reference (`references/azure-pipelines.md`, Node/TS tooling). Same patterns — shard, OIDC, Allure history, JUnit upload, retry policy, perf gate — re-expressed for the Actions runtime. **TypeScript is the most Actions-native of the three stacks**: Playwright ships first-class `--shard=i/N` and an official `blob` reporter → `merge-reports` flow, so the UI job replaces the per-shard Allure-merge dance with a single merge step. k6 stays the perf tool (JS-native here, same exit-99 gate as the dotnet sibling).

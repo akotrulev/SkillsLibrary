@@ -24,7 +24,7 @@ What it demonstrates: one trigger, "a member cancels a booking" (EVT-002), reach
 | EVT-004 | Staff cancels a session | command | Staff | AREA-002 Scheduling | `SessionEndpoints.cs:49` `#observed` |
 | EVT-005 | Booking confirmed | event | RX-001 | AREA-003 Bookings | `BookingConfirmed.cs:6` `#observed` |
 | EVT-006 | Booking cancelled (by member/staff, hours of notice) | event | RX-002, RX-003, RX-005 | AREA-003 Bookings | `BookingCancelled.cs:8` `#observed` |
-| EVT-007 | Monthly posting | schedule | 1st of the month 00:00, timezone `?` | AREA-004 Credits & charges | `OverageChargeJob.cs:12` `#observed` · [TBD - timezone not configured anywhere] |
+| EVT-007 | Monthly posting | schedule | 1st of the month 00:00, timezone `?` | AREA-004 Credits & charges | `OverageChargeJob.cs:12` `#observed` · `[TBD - timezone not configured anywhere]` |
 
 ### Reactions
 
@@ -35,8 +35,8 @@ What it demonstrates: one trigger, "a member cancels a booking" (EVT-002), reach
 | RX-003 | EVT-003 | — | AREA-003 | ENT-002 Confirmed → Cancelled (by staff); Session.seats_taken −1 | EVT-006 | in request | rolls back | `BookingService.cs:112-127` `#observed` |
 | RX-004 | EVT-005 | — | AREA-004 | DEC-002; Member.credits_used +spent; creates Accrued charge (ENT-003 — → Accrued) when short | — | after commit, at-least-once | retried 3× then dead-letter — the booking stays confirmed and unpriced | `CreditPricingService.cs:31-61` `#observed` · retry count `Outbox.cs:22` `#observed` |
 | RX-005 | EVT-004 | — | AREA-002 | ENT-001 Scheduled → Cancelled; each Confirmed booking ENT-002 Confirmed → Cancelled (by staff) | EVT-006 per booking | in request | rolls back | `SessionService.cs:70-96` `#observed` |
-| RX-006 | EVT-006 | — | AREA-004 | DEC-003; Member.credits_used −returned; ENT-003 Accrued → Removed | — | after commit, at-least-once | ? | `BookingCancelledHandler.cs:19-33` `#observed` · [TBD - no failure path found] |
-| RX-007 | EVT-007 | every member | AREA-004 | ENT-003 Accrued → Posted; creates Charge; Member.credits_used := 0 | — | scheduled | ? (a re-run's behaviour is unknown) | `OverageChargeJob.cs:40-58` `#observed` · [TBD - no run marker found] |
+| RX-006 | EVT-006 | — | AREA-004 | DEC-003; Member.credits_used −returned; ENT-003 Accrued → Removed | — | after commit, at-least-once | ? | `BookingCancelledHandler.cs:19-33` `#observed` · `[TBD - no failure path found]` |
+| RX-007 | EVT-007 | every member | AREA-004 | ENT-003 Accrued → Posted; creates Charge; Member.credits_used := 0 | — | scheduled | ? (a re-run's behaviour is unknown) | `OverageChargeJob.cs:40-58` `#observed` · `[TBD - no run marker found]` |
 
 ---
 
@@ -76,7 +76,7 @@ What it demonstrates: one trigger, "a member cancels a booking" (EVT-002), reach
 |---|---|---|---|---|---|
 | INV-001 | Seats taken never exceed capacity | Session.seats_taken | RX-001 | RX-001: yes (conditional update) | `BookingService.cs:52` `#observed` |
 | INV-002 | Credits used is never negative | Member.credits_used | RX-006, RX-007 | RX-006: **no** — a booking priced last month and cancelled after RX-007's reset drives it below 0 | `BookingCancelledHandler.cs:30`; no floor (search: `Math.Max`, `NonNegative` under `src/Credits/`) `#observed` |
-| INV-003 | An accrual is charged at most once, and never after its booking was refunded | ENT-003 | RX-006, RX-007 | RX-006: **?** (Posted × EVT-006) · RX-007: **?** (re-run) | `OverageChargeJob.cs:44`, `BookingCancelledHandler.cs:33` `#inferred` · [TBD - confirm intended behaviour of a refund after posting] |
+| INV-003 | An accrual is charged at most once, and never after its booking was refunded | ENT-003 | RX-006, RX-007 | RX-006: **?** (Posted × EVT-006) · RX-007: **?** (re-run) | `OverageChargeJob.cs:44`, `BookingCancelledHandler.cs:33` `#inferred` · `[TBD - confirm intended behaviour of a refund after posting]` |
 | INV-004 | A booking's credits are spent exactly once and returned at most once | Member.credits_used, ENT-003 | RX-004, RX-006 | **?** — both are at-least-once, and no idempotency key was found | `Outbox.cs:22`; no key (search: `IdempotencyKey`, `Processed` under `src/`) `#observed` |
 
 ---
@@ -88,7 +88,7 @@ What it demonstrates: one trigger, "a member cancels a booking" (EVT-002), reach
 | State | Meaning | Initial? | Terminal? | Source |
 |---|---|---|---|---|
 | Accrued | a shortfall priced, not yet charged | yes | no | `CreditPricingService.cs:55` `#observed` |
-| Posted | charged in the monthly posting | no | ? | `OverageChargeJob.cs:44` `#observed` · [TBD - INV-003] |
+| Posted | charged in the monthly posting | no | ? | `OverageChargeJob.cs:44` `#observed` · `[TBD - INV-003]` |
 | Removed | returned on cancellation, never charged | no | yes | `BookingCancelledHandler.cs:31` `#observed` |
 
 Accrued is `Initial?` `yes` because RX-004's effect creates the accrual in it (`ENT-003 — → Accrued`). Columns are trigger ids from `events.md`. Cell = target state `(owning feature id)` · `—` = illegal by decision · `?` = unspecified (finding).

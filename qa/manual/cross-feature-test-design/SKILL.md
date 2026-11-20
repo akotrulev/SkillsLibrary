@@ -6,28 +6,28 @@ disable-model-invocation: true
 
 # QA — Cross-Feature Test Design
 
-Turns the basis's **§8 Connections** into coverage items. `test-design-techniques` covers what one feature does with its own fields, rules and states. This skill covers what the feature sets off elsewhere, what else can happen to the state it relies on, what it shares with other features, and what must always hold. It runs **after** `test-design-techniques` and produces the same coverage-item list (condition → technique → coverage items → target), where every item carries the **slice id** it came from.
+Turns the basis's **§8 Connections** into coverage items. `test-design-techniques` covers what one feature does with its own fields, rules and states. This skill covers what the feature sets off elsewhere, what else can happen to the state it relies on, what it shares with other features, and what must always hold. It runs **after** `test-design-techniques` and produces the same coverage-item list (condition → technique → coverage items → target), where every item carries the **cross-section id** it came from.
 
 The analysis half lives in `qa/manual/requirements-breakdown` (§8 and `references/connections.md`). This skill is the design half: §8 says what is connected; this skill says how many cases that deserves and of which kind.
 
 ## Inputs needed
 
 1. **The basis with §8** (the connections, each row sourced) and the coverage-item list `test-design-techniques` produced from §1–§7
-2. **Slice ids** — the KB ids in §8 (`EVT-`, `RX-`, `ENT-`, `DEC-`, `INV-`), or the document lines of a docs-only §8, which then give `#assumption` items
+2. **Cross-section ids** — the KB ids in §8 (`EVT-`, `RX-`, `ENT-`, `DEC-`, `INV-`), or the document lines of a docs-only §8, which then give `#assumption` items
 3. **Priorities** from the basis's risk ranking, where it has one
 
 ## Procedure
 
-1. **Read §8 table by table** and tag each row with its slice lookup (`L1`…`L8`, numbered as in `references/connections.md`). A slice id is the lookup plus the KB ids, such as `L2 RX-002 → EVT-006 → RX-006`. With no KB, §8 carries the Code-mode ids `T<n>`, `R<n>`, `S<n>`, `I<n>`, local to the basis and stated so in §8's header, and the slice id uses them (`L2 R1 → T2 → R3`); KB ids win whenever a KB exists.
+1. **Read §8 table by table** and tag each row with its cross-section lookup (`L1`…`L8`, numbered as in `qa/manual/requirements-breakdown` `references/connections.md`). A cross-section id is the lookup plus the KB ids, such as `L2 RX-002 → EVT-006 → RX-006`. With no KB, §8 carries the Code-mode ids `T<n>`, `R<n>`, `S<n>`, `I<n>`, local to the basis and stated so in §8's header, and the cross-section id uses them (`L2 R1 → T2 → R3`); KB ids win whenever a KB exists.
 2. **Pick the technique** for each row from the first table below.
-3. **Enumerate the coverage items** the technique defines. Pairs come from the slice, never from a cross product.
+3. **Enumerate the coverage items** the technique defines. Pairs come from the cross-section, never from a cross product.
 4. **Prioritize** (below).
 5. **Prune**: a case asserts the effects of one reaction, the behaviour of one owner. A scenario case chains reactions and attaches a check to each step the next step depends on.
-6. **Emit the coverage-item list**, one row per condition: slice id → technique → coverage items → target from the stopping table. An item that gets no case carries a stated reason (out of scope, deferred, blocked by an open question). A `?` or `unhandled` item becomes an **open-question case** or a stated deferral that names the question.
+6. **Emit the coverage-item list**, one row per condition: cross-section id → technique → coverage items → target from the stopping table. An item that gets no case carries a stated reason (out of scope, deferred, blocked by an open question). A `?` or `unhandled` item becomes an **open-question case** or a stated deferral that names the question.
 
-## Which technique, from which part of the slice
+## Which technique, from which part of the cross-section
 
-| Slice element | Technique | Coverage item |
+| Cross-section element | Technique | Coverage item |
 |---|---|---|
 | A trigger's reaction chain (L1–L3) | **Scenario-based**: the chain is the model, fan-out is a fork; main, extension and exception scenarios | Each path through the chain, including each reaction's *On failure* exit |
 | Another owner's trigger legal in a state the feature relies on (L4) | **State transition across owners**: 0-switch on foreign cells, 1-switch (own transition → foreign trigger), round-trip on lifecycle loops | Each (state, foreign trigger) cell, and each `—` and `?` cell in the rows the feature reaches, schedule columns included |
@@ -44,7 +44,7 @@ The analysis half lives in `qa/manual/requirements-breakdown` (§8 and `referenc
 
 | Technique | Done when |
 |---|---|
-| Scenario-based | Every path to the slice depth is covered. Every `unhandled`/`?` failure has a P1 open-question case, or a stated deferral naming the question and the missing hook |
+| Scenario-based | Every path to the cross-section depth is covered. Every `unhandled`/`?` failure has a P1 open-question case, or a stated deferral naming the question and the missing hook |
 | State transition across owners | Every foreign-legal cell and every `—`/`?` cell in those rows. 1-switch for money and irreversible paths |
 | CRUD consistency | Every operation in the row. For P1 entities, the rigorous form: after each U, every R |
 | Def-use | All-uses on P1 fields, all-defs elsewhere |
@@ -57,7 +57,7 @@ The analysis half lives in `qa/manual/requirements-breakdown` (§8 and `referenc
 ## Priority
 
 - **P1:** money, data integrity, an irreversible effect, `Enforced` = `no`/`?`, an `unhandled`/`?` failure, an open conflict.
-- **P2:** every other slice item.
+- **P2:** every other cross-section item.
 - **P3:** experience-based extras beyond the checklist rows above.
 
 ## An open question is an expected result
@@ -74,6 +74,6 @@ Where the business never decided the outcome, the case's expected result is `ope
 
 The input is `DELETE /bookings/{id}` plus the story. Bad response: seven cases — id missing, id malformed, id unknown, another member's booking, already cancelled, the happy path, maybe one late cancellation. Every AC is "covered", and no case looks at the credits, the freed seat, a staff cancellation of the whole session, or the monthly posting job.
 
-Also bad: a cross product of every feature with every other, or a case that asserts a returned credit and a freed seat and a notification in one go. Take pairs from the slice, one reaction per case.
+Also bad: a cross product of every feature with every other, or a case that asserts a returned credit and a freed seat and a notification in one go. Take pairs from the cross-section, one reaction per case.
 
-A filled example, slice to cases, is in `references/example-cancel-booking.md`.
+A filled example, cross-section to cases, is in `references/example-cancel-booking.md`.

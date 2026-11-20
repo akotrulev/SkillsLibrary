@@ -1,5 +1,22 @@
 # QA — Out-of-Browser MITM Proxy (TypeScript / `mockttp`)
 
+**Contents:**
+
+- Stack
+- When to use
+- When NOT to use
+- Inputs needed
+- Decision matrix — the mockttp moves
+- 1. ProxyControls — tests/support/proxy/ProxyControls.ts
+- 2. Pointing the client at the proxy — the fixtures
+- 3. Asserting a request was sent — method and payload
+- 4. Asserting a request was NOT sent
+- 5. Injecting a fault — and asserting on it
+- Rules
+- What NOT to do
+- Generation steps
+- Cross-references
+
 Stands up an **out-of-process MITM HTTP(S) proxy** with [`mockttp`](https://github.com/httptoolkit/mockttp)
 for clients that have **no Playwright `page`**: a Selenium WebDriver browser, an Appium driver, a native
 HTTP client, a multi-process system. Point the client at `proxy.url`, then **watch** what it sent, **assert**

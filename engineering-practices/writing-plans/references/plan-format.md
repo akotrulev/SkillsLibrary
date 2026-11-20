@@ -1,5 +1,17 @@
 # The plan document format
 
+**Contents:**
+
+- 1. The header
+- 2. The numbered sections
+- 3. Task ids
+- 4. The task block
+- 5. Every task gates its own work and the work landed above it
+- 6. ## Prompts — one per task
+- 7. The close-out every task runs
+- 8. A finished plan is moved to docs/plans/implemented/
+- 9. Never in a plan
+
 The shape every plan in this library is written in — the one the Plan Queue VS Code plugin queues, and
 the one `dev:plan-feature`, `dev:plan-delivery` and `dev:plan-session-budget` all produce, and the one
 `be-documenter` writes when documenting a system takes more than one session.

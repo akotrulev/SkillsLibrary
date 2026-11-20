@@ -24,15 +24,7 @@ pipeline*: fast, safe against a deployed/ephemeral env, CI-native.
 > against production or a shared environment**. This skill is the **baseline** gate; reach for the full
 > scan only against a throwaway env you own, on a slower cadence.
 
-> **⚠️ Tool-invoked-via-Docker — there is no Java ZAP SDK.** ZAP's baseline scan is a **Docker
-> invocation**, language-agnostic. Unlike axe-playwright where `com.deque.html.axe-core:playwright`
-> was a first-class artifact, here there is **no Maven/Gradle artifact to embed ZAP**. So Java is a
-> **CLI/Docker-driven** stack (the same port shape as lighthouse-ci): you **invoke the `zaproxy` image
-> as a subprocess** (`ProcessBuilder` → `docker run … passive-scan.py`) and **parse the JSON report**
-> (Jackson) to gate the pipeline. The structure (spin app → scan → assert on exit code/report) ports from
-> the TS canonical; the *invocation* is a `Process`, not an SDK call. Say so plainly to anyone reaching for
-> a dependency — there isn't one. (`org.zaproxy:zap-clientapi` exists to *drive a long-running ZAP daemon*,
-> not to run the baseline gate — that's a heavier, different model.)
+> **⚠️ Tool-invoked-via-Docker — there is no Java ZAP SDK.** The baseline scan is a Docker invocation: Java **invokes the `zaproxy` image as a subprocess** (`ProcessBuilder` → `docker run … passive-scan.py`) and **parses the JSON report** (Jackson) to gate the pipeline. There is no Maven/Gradle artifact to embed; `org.zaproxy:zap-clientapi` drives a long-running ZAP daemon, a heavier, different model.
 
 ## Decision matrix — where ZAP baseline fits
 
@@ -42,10 +34,6 @@ pipeline*: fast, safe against a deployed/ephemeral env, CI-native.
 | Deep active attack testing (SQLi/XSS/traversal payloads) on a throwaway env | `zap-full-scan.py` (out of scope here) | Active scanner mutates state — never prod/shared; slower cadence |
 | **Dependency / library** CVEs (vulnerable JARs, transitive CVEs) | dependency-scan | SCA reads your build graph; ZAP scans running HTTP — orthogonal layers |
 | Per-component **accessibility** rule assertions | axe-playwright | Different concern; same *ticketed-baseline triage* discipline applies |
-
-**Rule of thumb:** ZAP baseline is your **passive DAST PR gate** against a running app. It complements —
-does not replace — SCA dependency scanning: different layers (running-app HTTP surface vs your
-dependency tree). Run both; together they close Step 2's `security-testing` family.
 
 ## Setup — no Maven/Gradle artifact, just Docker (and optionally the GitHub Action)
 
@@ -161,10 +149,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-`target` (running app URL), `rules_file_name` (the `-c` config), `cmd_options` (extra flags), `fail_action`
-(`true` fails on any alert; default `false` → only `FAIL`-promoted rules fail via the exit code),
-`allow_issue_writing` (default `true`), `docker_name` (default `ghcr.io/zaproxy/zaproxy:stable`),
-`artifact_name`. The Java pipeline calls the same Action — it's language-agnostic.
+`fail_action: true` fails on any alert; the default `false` fails only on `FAIL`-promoted rules via the exit code. The other inputs are in the Action's README. The Java pipeline calls the same Action.
 
 > **Wait on a condition, never a sleep.** The app must be **ready** before the scan or you get
 > false-clean/exit-3 results. Use `docker compose up --wait` or a Testcontainers wait strategy — never
@@ -198,8 +183,6 @@ public final class ZapBaseline {
      */
     public static ZapResult run(String targetUrl, Path rulesTsvPath) throws Exception {
         Path work = Files.createTempDirectory("zap-");
-        // --network host lets the container reach a localhost target on Linux CI; on Mac/Windows use
-        // http://host.docker.internal:<port>. Reachability is the #1 gotcha — see Anti-patterns.
         Process proc = new ProcessBuilder(
                 "docker", "run", "--rm", "--network", "host",
                 "-v", work + ":/zap/wrk:rw",
@@ -250,7 +233,6 @@ public class ZapBaselineTest {
 
     @BeforeClass
     public void startApp() {
-        // Stand up the SUT. Wait on a readiness condition.
         app = new GenericContainer<>("myorg/web:latest")
             .withExposedPorts(8080)
             .waitingFor(Wait.forHttp("/health").forPort(8080));
@@ -266,7 +248,6 @@ public class ZapBaselineTest {
         var result = ZapBaseline.run(target, Path.of(".zap/rules.tsv"));
         ZapReportAttachment.attach(result);            // attach BEFORE asserting, so a failure carries the report
 
-        // The exit code IS the gate: 0 clean, 2 warnings-only (policy-pass), 1 means a FAIL-promoted rule fired.
         assertThat(result.exitCode()).isNotEqualTo(1); // one logical assertion = the build gate
     }
 
@@ -285,46 +266,9 @@ Two complementary gates: the **exit-code gate** (`isNotEqualTo(1)` — let `-c r
 `pluginId` filter — a test-level assertion independent of the rules file). The TS canonical / .NET sibling
 parse the same `site[].alerts[]` shape.
 
-## Authenticated scans (keep it light — the headline is the unauthenticated gate)
+## Authenticated scans and Allure reporting
 
-The baseline gate's sweet spot is the **unauthenticated** surface (headers, cookies, public pages). For
-behind-login pages, baseline can take a ZAP **context** file (`-n context.context`) or pass auth options
-through `-z`; full authenticated flows are really the **full scan's** job. If you do auth, inject any
-credentials via **env vars read lazily** (`System.getenv`), never in the committed context file or
-`cmd_options` (global rule: no secrets in code).
-
-## Reporting the gate — ZAP report into Allure + CI artifact
-
-`passive-scan.py` writes `report.json`/`.html`/`.xml` to the mounted work dir. Attach to Allure so a
-failing run names the alerts without re-scanning (cross-link `qa-java:test-reports`):
-
-```java
-// support/ZapReportAttachment.java
-import io.qameta.allure.Allure;
-import io.qameta.allure.AttachmentOptions;
-import java.io.ByteArrayInputStream;
-import java.nio.file.Files;
-import java.util.stream.Collectors;
-
-public final class ZapReportAttachment {
-    private ZapReportAttachment() {}
-
-    public static void attach(ZapBaseline.ZapResult result) throws Exception {
-        Allure.attachment("zap-report.html", "text/html",
-            new ByteArrayInputStream(Files.readAllBytes(result.reportHtmlPath())),
-            AttachmentOptions.withFileExtension("html"));
-        String summary = result.alerts().stream()
-            .map(a -> "[" + a.riskDesc() + "] " + a.alert() + " (rule " + a.pluginId() + ") x" + a.count())
-            .collect(Collectors.joining("\n"));
-        Allure.attachment("zap-alerts.txt", summary.isEmpty() ? "no alerts" : summary);
-    }
-}
-```
-
-- **Allure** — attach the HTML + a readable alert summary (rule id, risk, count).
-- **CI artifact** — the Action's `artifact_name` upload, or upload the work dir (cross-link
-  `qa-java:ci-pipelines`).
-- **Tracking issue** — `allow_issue_writing: true` opens/updates a GitHub issue.
+Baseline's sweet spot is the unauthenticated surface. A scan behind a login (`-n` context, `-z` auth options) or the Allure attachment of the ZAP report (`ZapReportAttachment`) → read `references/auth-and-reporting.md`.
 
 ## Anti-patterns
 
@@ -350,22 +294,3 @@ public final class ZapReportAttachment {
 ## Deep-dive reference
 
 These sections live in `references/details.md` — **read it when the task touches them**: **Examples**.
-
-## Rules (hard constraints)
-
-- The gate is the **process exit code** of `passive-scan.py` (`1` = `FAIL`-level alert → fail the build),
-  optionally plus a **parsed-report** assertion (`riskCode`/`pluginId` counts). One logical assertion per
-  test. Test names `Should_X_When_Y`.
-- **No native Java SDK** — invoke the `zaproxy` image as a subprocess (`ProcessBuilder`) and parse the JSON
-  report with Jackson. Use a **bounded** `proc.waitFor(timeout, unit)`; never `Thread.sleep`.
-- **Baseline = passive only** (safe in CI). Never run the **active** full scan against prod/shared env.
-- The app must be **ready** before scanning — wait on a **condition** (`compose up --wait` / a
-  Testcontainers wait strategy), never `Thread.sleep`.
-- Triage with a **ticketed `-c rules.tsv`**: promote real rules to `FAIL`, `IGNORE` only *documented,
-  ticketed* accepted risks; `OUTOFSCOPE <regex>` third-party URLs. Gate **new** findings; shrink the
-  IGNORE list (the `axe-playwright` discipline).
-- Solve **container→target reachability** explicitly (`--network host` / `host.docker.internal` / shared
-  Docker network).
-- **No secrets in code**: any auth context/credentials via env vars, read lazily.
-- Attach the JSON/HTML report to **Allure** + upload as a CI artifact. A clean baseline ≠ "secure" — pair
-  with SCA, a safe-env full scan, and manual pentest.

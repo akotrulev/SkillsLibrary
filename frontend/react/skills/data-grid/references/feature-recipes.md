@@ -1,5 +1,24 @@
 # Data Grid — feature recipes (TanStack Table v9 + Tailwind/shadcn)
 
+**Contents:**
+
+- 1. Base wiring — server-side by default
+- 2. The three states
+- 3. Sorting — accessible headers
+- 4. Filtering, global search, faceting
+- 5. Pagination
+- 6. Row selection across pages
+- 7. Column visibility, ordering, resizing, pinning
+- 8. Expanding, master-detail, tree data
+- 9. Grouping + aggregation
+- 10. Cell selection, clipboard, editing
+- 11. Virtualization
+- 12. Export
+- 13. Keyboard navigation
+- 14. Density
+- 15. URL state
+- 16. Composability across tables
+
 Depth for every row of the parity matrix in [`SKILL.md`](../SKILL.md). Read only the section for the feature you are adding. All snippets are **v9** (`useTable`, `tableFeatures`) — on a v8 project use `useReactTable` + `getCoreRowModel()` and the v8 names.
 
 ## 1. Base wiring — server-side by default
