@@ -11,8 +11,8 @@
   },
   "plugins": [
     {
-      "name": "dev",
-      "description": "The developer-workflow layer every other plugin depends on: the feature front door that interviews you in rounds and then writes the spec (/dev:feature), implementation plans (/dev:plan-feature), systematic debugging, verify-before-done, spec-vs-code and feature audits, and the whole-application planning lane — solution blueprint, data-model, experience, API-surface and integration plans, epic map, delivery plan and session budget (/dev:plan-system). Ships the requirements-author front door (/dev:refine) with the skills it runs (scoping, epics, stories, story-review, knowledge-base), the be-documenter and be-feature-documenter agents that reverse-engineer guides from existing code — the user's tasks for every role (administrators included), the analyst's rules and calculations, the product owner's summary, open questions with answers and a delivery note per plan, with screenshots when an environment is given (/dev:document-system, /dev:document-feature), and the read-only code-auditor engagement agent (/dev:audit) that saves versioned findings to docs/audits/. Also ships the working-discipline skills quality-constraints (the rules checked during the work), source-grounding (framework and version decisions cited to the version's official doc), writing-for-agents (the house standard for anything an agent reads: skills, agents, rule files, CLAUDE.md), domain-modeling (the project glossary and ADRs the interview writes while it runs) and notebooklm (source-grounded answers from the user's own NotebookLM notebooks). Installed automatically as a dependency of every qa-*, fe-*, mobile-*, be-* plugin, devops and business-analysis; install it on its own for planning, documentation and audits without a stack plugin.",
+      "name": "engineering",
+      "description": "The technical workflow every stack plugin depends on: systematic debugging, verify-before-done, quality-constraints (the rules checked during the work), source-grounding (framework and version decisions cited to the version's official doc), writing-for-agents (the house standard for anything an agent reads: skills, agents, rule files, CLAUDE.md), the spec-vs-code and feature audits, and the read-only code-auditor engagement agent (/engineering:audit) that saves versioned findings to docs/audits/. Installed automatically as a dependency of every qa-*, fe-*, mobile-*, desktop-*, be-* plugin, devops and product.",
       "source": "./",
       "strict": false,
       "author": {
@@ -22,55 +22,92 @@
       "license": "MIT",
       "keywords": [
         "workflow",
-        "planning",
+        "debugging",
+        "verification",
         "audit",
-        "documentation",
-        "requirements"
+        "standards"
       ],
       "category": "development",
       "skills": [
-        "./business-analysis/skills/ba-scoping-writeup",
-        "./business-analysis/skills/ba-epic-writer",
-        "./business-analysis/skills/ba-story-writer",
-        "./business-analysis/skills/ba-story-quality-review",
-        "./business-analysis/skills/ba-project-memory",
-        "./engineering-practices/brainstorming",
-        "./engineering-practices/writing-plans",
-        "./engineering-practices/systematic-debugging",
-        "./engineering-practices/verify-before-done",
-        "./engineering-practices/quality-constraints",
-        "./engineering-practices/source-grounding",
-        "./engineering-practices/writing-for-agents",
-        "./engineering-practices/domain-modeling",
-        "./engineering-practices/notebooklm",
-        "./engineering-practices/spec-vs-code-audit",
-        "./engineering-practices/feature-audit",
-        "./backend/_shared/solution-blueprint",
-        "./backend/_shared/data-model-plan",
-        "./backend/_shared/experience-plan",
-        "./backend/_shared/api-surface-plan",
-        "./backend/_shared/integration-plan",
-        "./backend/_shared/epic-map",
-        "./backend/_shared/delivery-plan",
-        "./backend/_shared/session-budget",
-        "./backend/_shared/codebase-survey",
-        "./backend/_shared/feature-trace",
-        "./backend/_shared/business-documentation",
-        "./engineering-practices/rules"
+        "./engineering/systematic-debugging",
+        "./engineering/verify-before-done",
+        "./engineering/quality-constraints",
+        "./engineering/source-grounding",
+        "./engineering/writing-for-agents",
+        "./engineering/spec-vs-code-audit",
+        "./engineering/feature-audit",
+        "./engineering/rules"
       ],
       "agents": [
-        "./engineering-practices/agents/code-auditor.md",
-        "./backend/_shared/agents/solution-planner.md",
-        "./backend/_shared/agents/be-documenter.md",
-        "./backend/_shared/agents/be-feature-documenter.md",
-        "./business-analysis/agents/requirements-author.md"
+        "./engineering/agents/code-auditor.md"
       ],
       "commands": [
-        "./engineering-practices/commands/refine.md",
-        "./engineering-practices/commands/plan-system.md",
-        "./engineering-practices/commands/document-system.md",
-        "./engineering-practices/commands/document-feature.md",
-        "./engineering-practices/commands/audit.md"
+        "./engineering/commands/audit.md"
+      ]
+    },
+    {
+      "name": "product",
+      "description": "Planning, documentation, requirements and business analysis for a project: the feature front door that interviews you in rounds and then writes the spec (/product:feature), implementation plans (/product:plan-feature), and the whole-application planning lane — solution blueprint, data-model, experience, API-surface and integration plans, epic map, delivery plan and session budget (/product:plan-system). Ships the requirements-author front door (/product:refine) with the skills it runs (scoping, epics, stories, story-review, knowledge-base), and the documenter and feature-documenter agents that reverse-engineer guides from existing code — the user's tasks for every role (administrators included), the analyst's rules and calculations, the product owner's summary, open questions with answers and a delivery note per plan, with screenshots when an environment is given (/product:document-system, /product:document-feature). Also the business-analysis reasoning lane that checks features against the WHOLE project: a persistent per-project business-model knowledge base (docs/business-model/), BPMN-disciplined flows, one state × event lifecycle grid per entity, DMN-style decision tables, a dependency map and the feature-conflict sweep, run step by step by the business-analyst agent (/product:business-analysis); its artifacts and boundary conditions are first-class test-basis inputs for QA. Plus domain-modeling (the project glossary and ADRs the interview writes while it runs) and notebooklm (source-grounded answers from the user's own NotebookLM notebooks). Enable it per project; it depends on engineering.",
+      "source": "./",
+      "strict": false,
+      "author": {
+        "name": "Aleksandar Kotrulev",
+        "email": "alexandur.kotrulev@gmail.com"
+      },
+      "license": "MIT",
+      "keywords": [
+        "planning",
+        "documentation",
+        "requirements",
+        "business-analysis",
+        "user-stories",
+        "modeling"
+      ],
+      "category": "development",
+      "dependencies": [
+        "engineering"
+      ],
+      "skills": [
+        "./product/skills/brainstorming",
+        "./product/skills/writing-plans",
+        "./product/skills/domain-modeling",
+        "./product/skills/notebooklm",
+        "./product/skills/solution-blueprint",
+        "./product/skills/data-model-plan",
+        "./product/skills/experience-plan",
+        "./product/skills/api-surface-plan",
+        "./product/skills/integration-plan",
+        "./product/skills/epic-map",
+        "./product/skills/delivery-plan",
+        "./product/skills/session-budget",
+        "./product/skills/codebase-survey",
+        "./product/skills/feature-trace",
+        "./product/skills/business-documentation",
+        "./product/skills/ba-scoping-writeup",
+        "./product/skills/ba-epic-writer",
+        "./product/skills/ba-story-writer",
+        "./product/skills/ba-story-quality-review",
+        "./product/skills/ba-project-memory",
+        "./product/skills/ba-process-flow-diagram",
+        "./product/skills/ba-entity-state-grid",
+        "./product/skills/ba-decision-table",
+        "./product/skills/ba-dependency-map",
+        "./product/skills/ba-feature-conflict-check",
+        "./product/skills/rules"
+      ],
+      "agents": [
+        "./product/agents/solution-planner.md",
+        "./product/agents/documenter.md",
+        "./product/agents/feature-documenter.md",
+        "./product/agents/requirements-author.md",
+        "./product/agents/business-analyst.md"
+      ],
+      "commands": [
+        "./product/commands/refine.md",
+        "./product/commands/plan-system.md",
+        "./product/commands/document-system.md",
+        "./product/commands/document-feature.md",
+        "./product/commands/business-analysis.md"
       ]
     },
     {
@@ -136,7 +173,7 @@
       ],
       "category": "testing",
       "dependencies": [
-        "dev"
+        "engineering"
       ],
       "skills": [
         "./qa/_shared/bdd/feature-file-writer",
@@ -292,7 +329,7 @@
       ],
       "category": "testing",
       "dependencies": [
-        "dev"
+        "engineering"
       ],
       "skills": [
         "./qa/_shared/bdd/feature-file-writer",
@@ -451,7 +488,7 @@
       ],
       "category": "testing",
       "dependencies": [
-        "dev"
+        "engineering"
       ],
       "skills": [
         "./qa/_shared/bdd/feature-file-writer",
@@ -607,7 +644,7 @@
       ],
       "category": "development",
       "dependencies": [
-        "dev",
+        "engineering",
         "design"
       ],
       "skills": [
@@ -683,42 +720,6 @@
       ]
     },
     {
-      "name": "business-analysis",
-      "description": "Senior business-analysis plugin for the REASONING lane: it checks features against the WHOLE project. It keeps a persistent per-project business-model knowledge base (docs/business-model/ — read-first / update-after, stable IDs, source traceability), maps flows in BPMN-disciplined Mermaid, builds one state × event lifecycle grid per business entity with all features overlaid, merges DMN-style decision tables with declared hit policies and mechanical completeness/overlap checks, keeps a dependency map (triggers, reactions, shared data, invariants), and runs the taxonomy-driven feature-conflict sweep (11 conflict classes, mandatory boundary conditions, severity-tabled findings, resolutions recorded as business decisions). Also ships the step-by-step business-analyst orchestrator agent (analyze / extend / fix / model / audit modes). Sits upstream of QA test design — its artifacts and boundary conditions are first-class test-basis inputs. The authoring lane (requirements-author: refine → requirements → epics → stories, /dev:refine) with its scoping, epics, stories, story-review and knowledge-base skills, and the reverse-documentation agents (/dev:document-system, /dev:document-feature) arrive through the `dev` plugin this one depends on.",
-      "source": "./",
-      "strict": false,
-      "author": {
-        "name": "Aleksandar Kotrulev",
-        "email": "alexandur.kotrulev@gmail.com"
-      },
-      "license": "MIT",
-      "keywords": [
-        "business-analysis",
-        "requirements",
-        "user-stories",
-        "feature-interaction",
-        "modeling"
-      ],
-      "category": "development",
-      "dependencies": [
-        "dev"
-      ],
-      "skills": [
-        "./business-analysis/skills/ba-process-flow-diagram",
-        "./business-analysis/skills/ba-entity-state-grid",
-        "./business-analysis/skills/ba-decision-table",
-        "./business-analysis/skills/ba-dependency-map",
-        "./business-analysis/skills/ba-feature-conflict-check",
-        "./business-analysis/skills/rules"
-      ],
-      "commands": [
-        "./business-analysis/commands/business-analysis.md"
-      ],
-      "agents": [
-        "./business-analysis/agents/business-analyst.md"
-      ]
-    },
-    {
       "name": "fe-react",
       "description": "Self-contained senior frontend React developer plugin for React 19/18 + TypeScript (Next.js App Router / RSC primary, Vite SPA fallback; shadcn/ui + Tailwind default). Covers the full FE build lifecycle end-to-end: project scaffold and rendering-strategy choice, architecture foundations (RSC/'use client' boundary, App Router route topology, state, component library, styling, responsive design), feature build (pages/components/forms with React Hook Form + Zod, API + live/realtime data via RSC fetch/Server Actions/TanStack Query/SSE/WebSocket, motion, UX writing, data-testids, and a house data grid on TanStack Table + Tailwind/shadcn), quality layers (accessibility, performance, error resilience, SEO, i18n, PWA/offline), and dev-side tests at both altitudes (Vitest + React Testing Library for components and hooks, plain Vitest for Zod schemas, formatters, stores and extracted async-RSC fetches) — plus version migration (React 18→19, Next 14→15, Pages→App Router), a distinctive-visual-design critique loop, and a one-call read-only conformance audit (/fe-react:audit) that sweeps an existing codebase against every convention above into a saved, re-runnable findings report. Bundles the Auth0 React auth skills and the step-by-step fe-react orchestrator agent. The stack-agnostic design-craft skills (the ui-ux-pro-max design-intelligence corpus that is the source of truth for every design fact, plus visual-identity, tokens, charts, ux-patterns, motion, ux-review, accessible-by-design and the rest) arrive through the `design` plugin, and the developer-workflow skills (design, plan-feature, audits, session budgets) through the `dev` plugin — this plugin depends on both, so installing it is enough.",
       "source": "./",
@@ -736,7 +737,7 @@
       ],
       "category": "development",
       "dependencies": [
-        "dev",
+        "engineering",
         "design"
       ],
       "skills": [
@@ -794,7 +795,7 @@
       ],
       "category": "development",
       "dependencies": [
-        "dev",
+        "engineering",
         "design"
       ],
       "skills": [
@@ -855,7 +856,7 @@
       ],
       "category": "development",
       "dependencies": [
-        "dev",
+        "engineering",
         "design"
       ],
       "skills": [
@@ -916,7 +917,7 @@
       ],
       "category": "development",
       "dependencies": [
-        "dev",
+        "engineering",
         "design"
       ],
       "skills": [
@@ -979,7 +980,7 @@
       ],
       "category": "development",
       "dependencies": [
-        "dev",
+        "engineering",
         "design"
       ],
       "skills": [
@@ -1040,7 +1041,7 @@
       ],
       "category": "development",
       "dependencies": [
-        "dev",
+        "engineering",
         "design"
       ],
       "skills": [
@@ -1100,7 +1101,7 @@
       ],
       "category": "development",
       "dependencies": [
-        "dev"
+        "engineering"
       ],
       "skills": [
         "./backend/dotnet/skills/pattern-guide",
@@ -1149,7 +1150,7 @@
       ],
       "category": "development",
       "dependencies": [
-        "dev"
+        "engineering"
       ],
       "skills": [
         "./backend/java/skills/pattern-guide",
@@ -1196,7 +1197,7 @@
       ],
       "category": "development",
       "dependencies": [
-        "dev"
+        "engineering"
       ],
       "skills": [
         "./backend/node/skills/pattern-guide",
@@ -1245,7 +1246,7 @@
       ],
       "category": "development",
       "dependencies": [
-        "dev"
+        "engineering"
       ],
       "skills": [
         "./backend/python/skills/pattern-guide",
@@ -1286,7 +1287,7 @@
       ],
       "category": "development",
       "dependencies": [
-        "dev"
+        "engineering"
       ],
       "skills": [
         "./backend/rust/skills/pattern-guide",
@@ -1336,7 +1337,7 @@
       ],
       "category": "development",
       "dependencies": [
-        "dev"
+        "engineering"
       ],
       "skills": [
         "./devops/docker",

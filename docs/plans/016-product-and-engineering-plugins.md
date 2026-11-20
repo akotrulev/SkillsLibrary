@@ -12,10 +12,12 @@ library moves to the new paths and names. A project switches over through the mi
 M3 writes.
 
 **Status:** Written 2026-11-20 from the owner's interview (`## Answered questions (2026-11-20)`).
-Nothing is built.
+M1 is built (2026-11-20): `product/` and `engineering/` hold the moved tree, the manifest registers both,
+the surface check prints OK. Built but unverified: Claude Code loading the two new plugins, which needs a
+restart. Text still calls the old names, so `skill-lint` shows 31 R8 findings (baseline 0) until M2.
 - **Starts after 015 merges into `master`.** 015 edits many of the files this plan moves. Running both
   at once would turn every 015 edit into a conflict on a moved path (D6).
-- **Next:** M1, then M2, M3 and G1, one at a time.
+- **Next:** M2, then M3 and G1, one at a time.
 - **Known conflict:** branch `plan-queue/010-agents-md-dual-harness-b58e49` has 2 commits touching 2
   files this plan moves. Whichever of 010 and 016 merges second resolves them against the new paths.
 - **Metered:** about 4 sessions of subscription usage. The user starts the queue.
@@ -305,6 +307,33 @@ writes the per-project switch and edits the owner's `~/.claude/CLAUDE.md`. Owner
   - The surface check passes on paths alone, so text that still says `dev:verify` is expected after M1
     (§5 halfway stop).
 
+- **As built (2026-11-20):**
+  - Baseline before any change: `python3 tools/skill-lint.py | tail -1` → `0 findings`. After M1 it is
+    `31 findings`, all R8 and all from moved paths: relative links crossing a moved folder
+    (`../../../engineering-practices/…`, `…/backend/_shared/experience-plan/…`) and three `references/…`
+    pointers that resolved through a code-span skill path now stale (`product/agents/documenter.md:43`,
+    `devops/agents/devops-auditor.md:36`, `qa/manual/agents/qa-feature-spec-writer.md:23`). M2 fixes them
+    (its gate is at or below 0).
+  - The move: 44 `git mv` steps run from a scratchpad script (not in the repo), then
+    `engineering-practices/` → `engineering/` whole. `business-analysis/` and `backend/_shared/agents/`
+    are gone; `backend/_shared/` holds `code-review/` and `pattern-guide/` only. The old
+    `business-analysis/skills/rules/SKILL.md` is deleted (merged into `product/skills/rules/SKILL.md`).
+  - `.claude-plugin/marketplace.json`: `engineering` (8 skills, `code-auditor`, `/audit`, no
+    dependencies) and `product` (25 skills, 5 agents, 5 commands, depends on `engineering`) replace `dev`
+    and `business-analysis`. 16 stack and cross-category plugins plus `product` list `engineering`
+    (that is the plan's "17"); nothing lists `product`.
+  - `product/skills/rules/SKILL.md` lists all eleven files with their `paths:`; step 5 retires
+    `.claude/rules/dev/{plans,feature-docs}.md` and `.claude/rules/business-analysis/*`.
+    `engineering/rules/SKILL.md` is `audits.md` only, step 5 retires `.claude/rules/dev/audits.md`.
+    For a differing old file, `replace` deletes it; `keep`, `beside` and nobody-to-ask keep it and list it.
+  - `tools/plugin-surface-check.py` FRONT_DOORS split; `tools/skill-lint.py:2` and
+    `tools/test_skill_lint.py:92` re-pathed.
+  - Gate: `python3 tools/plugin-surface-check.py` → `OK`; `python3 -m pytest tools/test_skill_lint.py -q`
+    → `95 passed`; `python3 tools/skill-lint.py product engineering | tail -1` → `1 finding`
+    (`product/skills/writing-plans/references/web-routes.md:7`, an M2 path). `token-audit
+    --violations-only` exit 0 and `qa-version-check` OK.
+  - Not committed by this session: the Plan Queue commits the work (the session was told not to commit).
+
 ### M2 — Every reference to a moved path or a renamed name
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -480,63 +509,9 @@ session that runs the task.
 | G1 | `docs` | `general-purpose` | M3 | — | ~90k |
 | — | restart, try `/product:refine`, switch projects per README | **the user** | G1 | — | — |
 
-All four prompts are live.
+M1 has landed. M2, M3 and G1 are live.
 
 ---
-
-### M1 — The two folders, the manifests, the rules skills and the lint scripts (general-purpose, docs)
-
-````
-Depends on: none
-Agent: general-purpose · Stack: docs
-
-Task M1 of docs/plans/016-product-and-engineering-plugins.md. The goal: `product/` and `engineering/`
-hold every file §2 maps to them, `.claude-plugin/marketplace.json` registers `engineering` and
-`product` and no `dev` or `business-analysis`, and `python3 tools/plugin-surface-check.py` prints OK.
-
-First check that plan 015 has merged into `master`:
-  git log --oneline master | grep -m1 "merge 015"
-If 015 has not merged, stop and say so. Do not start (D6).
-
-Read, in this order:
-1. CLAUDE.md: "Repository map".
-2. The plan: §2, §3, §4, D4, D5, task M1, and "Close-out — every task".
-3. .claude-plugin/marketplace.json: the `dev` and `business-analysis` entries, and one stack entry's
-   `dependencies`.
-4. tools/plugin-surface-check.py, lines 1–60.
-5. engineering-practices/rules/SKILL.md and business-analysis/skills/rules/SKILL.md.
-
-Do:
-- Record the baseline in As built first: `python3 tools/skill-lint.py | tail -1`.
-- Write a script in the scratchpad that runs §2's table as `git mv`, then removes the emptied
-  `backend/_shared/agents/` and `business-analysis/`. Never commit the script.
-- Write product/skills/rules/SKILL.md and engineering/rules/SKILL.md per §3, including the step that
-  deletes old rule files identical to the plugin's copy and asks about the ones that differ.
-- Replace the `dev` and `business-analysis` manifest entries with `engineering` and `product` (§2).
-  Write each description from the two old ones, keeping only what moved into that plugin. Replace `dev`
-  with `engineering` in all 17 `dependencies` arrays. `product` depends on `engineering`, and nothing
-  depends on `product`.
-- In tools/plugin-surface-check.py, split FRONT_DOORS["dev"] into "engineering" and "product" as the M1
-  task block lists.
-- Fix the moved-folder paths in tools/skill-lint.py:2 and tools/test_skill_lint.py:92 only.
-
-Traps:
-- Do not rewrite references in text. That is M2. After M1, `dev:verify` in text points nowhere, and that
-  is expected (§5).
-- `backend/_shared/code-review/` and `pattern-guide/` stay. The `be-*` plugins bundle them.
-- The synthetic `dev` marketplaces in tools/test_skill_lint.py and tools/fixtures/ stay as they are.
-  The tests assert on them.
-- The two `rules` skills merge into one `product:rules`. Two skills named `rules` in one plugin fail the
-  surface check.
-
-Gate: own tests.
-  python3 tools/plugin-surface-check.py
-  python3 -m pytest tools/test_skill_lint.py -q
-  python3 tools/skill-lint.py product engineering | tail -1
-
-Commit: `refactor: 016 M1 — product/ and engineering/ folders, manifests, rules skills`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### M2 — Every reference to a moved path or a renamed name (general-purpose, docs)
 
@@ -557,6 +532,11 @@ Do:
   `be-feature-documenter` before `be-documenter`. Run it, then read the diff summary.
 - Change the `name:` frontmatter of product/agents/documenter.md and feature-documenter.md to match the
   file names.
+- M1 left 31 R8 findings in `python3 tools/skill-lint.py` (baseline 0). Fix each by hand where the
+  script cannot: a relative link whose depth changed (`../../../backend/_shared/experience-plan/…` is
+  `../../experience-plan/…` from `product/skills/writing-plans/references/`), and the stale
+  skill-path code spans on the same line as `references/…` in product/agents/documenter.md:43,
+  devops/agents/devops-auditor.md:36 and qa/manual/agents/qa-feature-spec-writer.md:23.
 - By hand:
   - Each `dev:rules` mention becomes `product:rules` (plans, feature docs) or `engineering:rules`
     (audits).

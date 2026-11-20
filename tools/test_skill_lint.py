@@ -89,7 +89,7 @@ def test_should_give_each_rule_its_table_severity_when_reporting():
     ("qa/vendor/lib/", True),
     ("frontend/react/bundled/reference/", True),
     ("auth/auth0-react/", False),
-    ("engineering-practices/debugging/", False),
+    ("engineering/debugging/", False),
 ])
 def test_should_exclude_by_name_when_a_path_is_out_of_scope(rel, expected):
     assert skill_lint.excluded(rel) is expected

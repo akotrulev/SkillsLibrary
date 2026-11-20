@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Lint for the mechanical rules of the authoring standard (engineering-practices/writing-for-agents).
+"""Lint for the mechanical rules of the authoring standard (engineering/writing-for-agents).
 
 Judgment rules (R2, R4, R5, R15-R23) stay with token-audit, plugin-surface-check and review; this
 script checks only the ones a regex can decide:
