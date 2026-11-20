@@ -26,6 +26,10 @@ Read by both documenter agents before their first step. It holds every rule the 
 - **Screens — ask once, never block.** Unless the request or plan prompt gives them, ask for a running non-production environment and a test login per role (administrators included) in the run's first message to the person; carry on. No environment: write every guide in full, record `**Screenshots:** pending — <why>` and repeat the need in the report. Only the person can waive screenshots (`waived — <their reason>`). A no-screen system or feature needs no environment — say so.
 - **Before reporting**, update the orientation cache per `engineering/agent-orientation-cache`: correct what the run disproved, re-stamp, prepend a session-log line.
 
+## Session estimate
+
+A session costs `85,000` fixed (harness, skills, references, rule file, working overhead) **plus, per area or feature in it, traced source lines × 12 + 25,000** (its guide written and re-read, its screenshots captured when an environment is given). Traced lines are the files its entry points and screens reach, counted with `wc -l`. A session stays ≤ 135k of its 150k budget, the margin being for reading output back; a scope over it is split first (the survey splits the area, a feature run proposes a tighter fence). When the orientation cache records a real run's figure, estimate from that instead.
+
 ## As `DOC1` — the last task of a delivery plan
 
 The prompt block is the spec, `## Close-out — every task` the close-out, `Gate:` what runs. Nobody is watching: Plan Queue runs the task unattended.

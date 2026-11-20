@@ -41,7 +41,7 @@ In scope: <entry point> — <file:line> · <HTTP | event | job | flag | UI> · <
 Out of scope (adjacent): <module> — <why>
 Candidate ambiguity: none | <competing readings>
 Screens: <screens the tasks name> · environment: given | asked for (screenshots pending) | none needed
-Estimate: ≈ <n>k tokens (85,000 + traced lines × 12 + 25,000) — over 135k: propose a tighter fence
+Estimate: ≈ <n>k tokens (invariants, *Session estimate*) — over 135k: propose a tighter fence
 ```
 
 No match: show the searches, never document the nearest-sounding thing. Scope growing mid-trace: stop, propose a tighter fence or a `documenter` run (as `DOC1`: the invariants' *A scope past the session*). **Updating an existing guide:** re-trace only the entry points the change touched, reconcile, re-capture every task whose screen or steps changed; close with `doc-lint.py --kept-from <old sha> --dir docs/features`. **Capture pass:** a request to capture the screenshots for a guide whose `**Screenshots:**` is `pending`, given an environment, runs Every-run items 1–3 and 5 and Step 4 alone, no re-trace: sign in as each role, check every bold label against the screen (the screen wins: fix the guide, raise an open question), capture, replace the line. No environment: ask and stop.

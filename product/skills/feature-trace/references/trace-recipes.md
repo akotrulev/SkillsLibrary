@@ -164,6 +164,63 @@ grep -rn "message: ['\"]\|{ message\|i18n\.t(\|\bt(['\"]\|new \w*Exception(['\"]
 
 Prisma's `schema.prisma` is a single high-value read: constraints, defaults, cascades and the full relational model in one file.
 
+### Rust — axum 0.8 (actix-web where the project uses it) + sqlx
+
+`<crates>` is where the workspace keeps its code (`src/`, `crates/`); never `target/`.
+
+```bash
+# entry points — axum routers (0.8 writes paths `/{id}`; 0.7 and older `/:id`), actix-web attribute macros
+grep -rn 'Router::new()\|\.route(\|\.nest(\|\.merge(\|#\[\(get\|post\|put\|patch\|delete\)(' --include='*.rs' <crates>
+# authorization — custom extractors, middleware and tower layers
+grep -rn 'FromRequestParts\|middleware::from_fn\|route_layer(\|\.layer(\|Claims\|Permission\|Role::' --include='*.rs' <crates>
+# validation — validator / garde derives, TryFrom newtypes
+grep -rn '#\[validate(\|#\[garde(\|\.validate()\|impl TryFrom<' --include='*.rs' <crates>
+# business rules — error enums, early returns, anyhow's bail!/ensure!
+grep -rn '#\[error(\|return Err(\|bail!(\|ensure!(\|StatusCode::\(BAD_REQUEST\|CONFLICT\|FORBIDDEN\|UNPROCESSABLE_ENTITY\)' --include='*.rs' <crates>
+# scheduled work + consumers
+grep -rn 'tokio::spawn\|time::interval(\|JobScheduler\|Job::new_async\|StreamConsumer\|basic_consume\|\.subscribe(\|receive_message()' --include='*.rs' <crates>
+# persistence rules — the migrations hold the constraints; the macros hold the SQL a job selects with
+grep -rni 'check *(\|unique\|default \|references \|on delete\|create trigger' migrations/
+grep -rn 'query!(\|query_as!(\|query_scalar!(\|DeriveEntityModel\|#\[sea_orm(\|diesel::table!' --include='*.rs' <crates>
+# silent rules
+grep -rn '\.round()\|round_dp(\|Utc::now()\|Local::now()\|OffsetDateTime::now_utc()\|\.first()\|\.sort\|unwrap_or(' --include='*.rs' <crates>
+# GraphQL + gRPC entry points — only if the survey found these surfaces
+grep -rn '#\[Object\]\|SimpleObject\|async_graphql::\|#\[tonic::async_trait\]\|tonic::transport::Server' --include='*.rs' <crates>
+# client vocabulary — Fluent / i18n files, error Display text, templates
+find . -path ./target -prune -o \( -name '*.ftl' -o -path '*locales*' -name '*.y*ml' -o -path '*templates*' -name '*.html' \) -print
+grep -rn '#\[error("\|t!("\|#\[template(' --include='*.rs' <crates>
+```
+
+`migrations/*.sql` is the single high-value read: `CHECK`, `UNIQUE`, defaults and foreign keys in one place. Rounding is a convention to record: `f64::round` rounds half away from zero, `rust_decimal`'s `round_dp` rounds half to even.
+
+### Python 3.12–3.14 — FastAPI, Flask, Django / DRF
+
+`<pkg>` is the project's package root (`src/<pkg>/` or `<pkg>/`); never `.venv/`.
+
+```bash
+# entry points — FastAPI and Flask decorators, Django URLconfs and DRF views
+grep -rn '@\(app\|router\|bp\|api\)\.\(get\|post\|put\|patch\|delete\|route\)(\|APIRouter(\|urlpatterns\|re_path(\|@api_view\|ViewSet)\|@action(' --include='*.py' <pkg>
+# authorization
+grep -rn 'Depends(\|Security(\|@login_required\|@permission_required\|permission_classes\|has_permission\|has_object_permission' --include='*.py' <pkg>
+# validation — pydantic, DRF serializers, marshmallow
+grep -rn 'Field(\|@field_validator\|@model_validator\|Annotated\[\|def validate_\|validate=' --include='*.py' <pkg>
+# business rules
+grep -rn 'raise \w*\(Error\|Exception\|Denied\)\|raise HTTPException\|abort(4\|status_code=4' --include='*.py' <pkg>
+# scheduled work + consumers — Celery, APScheduler, Dramatiq, Kafka / RabbitMQ / SQS clients
+grep -rn '@shared_task\|@\w*\.task\|beat_schedule\|crontab(\|add_job(\|scheduled_job\|@dramatiq\.actor\|AIOKafkaConsumer\|basic_consume\|receive_message(' --include='*.py' <pkg>
+# persistence rules — SQLAlchemy / Alembic, Django models and migrations
+grep -rn 'CheckConstraint\|UniqueConstraint\|unique=True\|server_default\|ondelete=\|on_delete=\|constraints = \[\|create_check_constraint\|create_unique_constraint' --include='*.py' <pkg> migrations/ alembic/ 2>/dev/null
+# silent rules
+grep -rn 'round(\|quantize(\|ROUND_\|datetime\.now()\|datetime\.utcnow()\|date\.today()\|sorted(\|\[0\]' --include='*.py' <pkg>
+# GraphQL + gRPC entry points — only if the survey found these surfaces
+grep -rn '@strawberry\.\|graphene\.\|ariadne\|_to_server(\|grpc\.aio\.server' --include='*.py' <pkg>
+# client vocabulary — gettext catalogues, model labels and choices, error detail text, templates
+find . -path ./.venv -prune -o \( -name '*.po' -o -path '*templates*' -name '*.html' \) -print
+grep -rn 'gettext(\|_("\|verbose_name\|choices=\|TextChoices\|detail="\|message="' --include='*.py' <pkg>
+```
+
+Rounding is a convention to record: `round()` rounds half to even (`round(2.5) == 2`), and `Decimal.quantize` uses the context's rounding unless `rounding=` is passed.
+
 ---
 
 ## Part 3a — Where people do things: screens, navigation, labels, forms
@@ -246,6 +303,18 @@ grep -rn "@GET(\|@POST(\|@PUT(\|@PATCH(\|@DELETE(\|httpClient\.\(get\|post\|put\
 
 Read the route to the screen that holds the control and the navigation entry that reaches it; the path is `<menu or screen title> › <control text>`. A control whose text lives in a translation file is cited by the file's value for the project's default language. **Screen to entry point:** follow the control's handler to the client call and match its method and path (or action name) to the backend entry point; that pair is a Tasks row's *Entry points it calls*. When the client app is in another repository, the backend alone shows no screen: record the negative search per task.
 
+### Server-rendered pages — Razor, Thymeleaf, Django / Jinja, askama
+
+```bash
+# screens — the page or view, and the route that serves it
+find . \( -name '*.cshtml' -o -path '*templates*' -name '*.html' -o -name '*.jinja*' \) -not -path '*/node_modules/*' -not -path './.venv/*' -not -path './target/*'
+grep -rn '@page\|return View(\|"redirect:\|render(request\|render_template(\|TemplateResponse(\|#\[template(' .
+# labels and forms — the template's literals and form fields, then the server-side validation text
+grep -rn '<label\|<button\|<a \|asp-for=\|th:text=\|{% trans\|{{ _(\|{{ form\.' --include='*.cshtml' --include='*.html' --include='*.jinja*' .
+```
+
+A server-rendered form posts to the route that rendered it, or to its `action=`: that route is the entry point the Tasks row names.
+
 ---
 
 ## Part 3b — Following a seam (the Edges inventory)
@@ -305,6 +374,36 @@ grep -rn '<field>' --include='*.ts' src/
 ```
 
 A Node `EventEmitter` is synchronous and in-process: its handlers run `in request` unless the emit sits after the commit. A queue's own retry settings (BullMQ `attempts`, `backoff`) are the visible retry; without them the guarantee is `?`.
+
+### Rust
+
+```bash
+# consumers — in-process channels and broker consumers
+grep -rn 'broadcast::channel\|mpsc::channel\|\.recv()\|StreamConsumer\|basic_consume\|\.subscribe(' --include='*.rs' <crates>
+# dispatch moment — sent inside the transaction, after tx.commit(), or by an outbox relay
+grep -rn '\.send(\|\.commit()\|\.begin()\|outbox\|FutureProducer\|basic_publish' --include='*.rs' <crates>
+# retry and idempotency evidence
+grep -rni 'backoff\|retry\|on conflict\|idempotenc\|processed_' --include='*.rs' --include='*.sql' <crates> migrations/
+# readers of a field — the column name inside query!/query_as! SQL as well as the struct field
+grep -rn '<field>' --include='*.rs' --include='*.sql' <crates> migrations/
+```
+
+A `tokio::spawn` after `commit()` runs `after commit` with no retry: the task dies with the process, so the guarantee is `?` and the possible loss is a finding.
+
+### Python
+
+```bash
+# consumers — Django signals, Celery / Dramatiq tasks, broker consumers
+grep -rn '@receiver(\|post_save\|pre_save\|@shared_task\|@\w*\.task\|@dramatiq\.actor\|AIOKafkaConsumer\|basic_consume' --include='*.py' <pkg>
+# dispatch moment — inside the atomic block, or on commit
+grep -rn '\.delay(\|\.apply_async(\|send_task(\|on_commit(\|\.send(\|publish(\|outbox' --include='*.py' <pkg>
+# retry and idempotency evidence
+grep -rn 'autoretry_for\|retry_backoff\|max_retries\|self\.retry(\|acks_late\|idempotenc\|processed_' --include='*.py' <pkg>
+# readers of a field, including tasks and reports
+grep -rn '<field>' --include='*.py' <pkg>
+```
+
+A Django `post_save` receiver runs `in request`, inside the save's transaction; `transaction.on_commit(...)` is `after commit`. A `.delay()` inside an atomic block can run before the commit and miss the row, which is a finding. Celery acknowledges on receipt unless `acks_late` is set: without it a worker crash loses the task, so the guarantee is `?`.
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: doc-feature-trace
-description: Use when one area of an existing backend must be traced in depth into file:line-evidenced inventories. Triggers "trace how this area works". Not for writing the docs (doc-business-model).
+description: Use when one area of an existing system must be traced in depth into file:line-evidenced inventories. Triggers "trace how this area works". Not for writing the docs (doc-business-model).
 disable-model-invocation: true
 ---
 
@@ -165,4 +165,4 @@ Header: `**Traced:** YYYY-MM-DD · **Depth:** full | shallow · **Profile:** ful
 
 ## Version policy
 
-Rules hide in **stack- and version-specific** places; `references/trace-recipes.md` has the per-stack searches, keyed to `CLAUDE.md`'s Stack defaults: **.NET 10 / 8-9** · **Java 21 + Spring Boot 3.x** · **Node 24 / 22**; for screens, **React 19 / 18** (Next.js App Router, Vite + React Router) · **Blazor** · **React Native / Expo Router (SDK 57 primary)** · **SwiftUI** · **Jetpack Compose**. Take stack and version from orientation; idioms the version lacks under-report rules.
+Rules hide in **stack- and version-specific** places; `references/trace-recipes.md` has the per-stack searches, keyed to `CLAUDE.md`'s Stack defaults: **.NET 10 / 8-9** · **Java 21 + Spring Boot 3.x** · **Node 24 / 22** · **Rust, edition 2024 / 2021** (axum 0.8, sqlx) · **Python 3.13 / 3.12, 3.14** (FastAPI, Flask, Django); for screens, **React 19 / 18** (Next.js App Router, Vite + React Router) · **Blazor** · **React Native / Expo Router (SDK 57 primary)** · **SwiftUI** · **Jetpack Compose** · server-rendered templates. Take stack and version from orientation; idioms the version lacks under-report rules.

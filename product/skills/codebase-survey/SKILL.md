@@ -1,12 +1,12 @@
 ---
 name: doc-codebase-survey
-description: Use when splitting an existing backend into functional areas by business capability before documenting it. Triggers "split this codebase into areas". Not for tracing one area (doc-feature-trace).
+description: Use when splitting an existing system, its screens included, into functional areas by business capability before documenting it. Triggers "split this codebase into areas". Not for tracing one area (doc-feature-trace).
 disable-model-invocation: true
 ---
 
 # Codebase Survey — the area map and the reading plan
 
-Breadth before depth. A backend of any size cannot be read end-to-end in one pass, and reading it in file order produces notes rather than understanding. This skill produces two things: a **map of functional areas** a business person would recognise, and a **plan for reading them** — which order, from which evidence, to what depth.
+Breadth before depth. A system of any size cannot be read end-to-end in one pass, and reading it in file order produces notes rather than understanding. This skill produces two things: a **map of functional areas** a business person would recognise, and a **plan for reading them** — which order, from which evidence, to what depth.
 
 It also produces the thing that keeps the whole exercise honest: a **coverage ledger** where every entry point in the system is assigned to exactly one area or explicitly parked. Without it, "we documented the system" means "we documented the parts we happened to open".
 
@@ -33,6 +33,7 @@ You are looking for **every way the system can be made to do something**. Miss a
 | **Auth surfaces** | Policies, roles, scopes, permission attributes/guards | The actor model, recoverable from nowhere else this cheaply |
 | **Feature flags & config** | Flag definitions, options classes, environment config | Behavior that differs per tenant/environment — an area may be half-live |
 | **Admin/back-office paths** | Internal-only routes, seeded admin roles, CLI/management commands | A whole class of user nobody thinks to document |
+| **Screens & navigation** | Web and mobile route tables, navigation menus, server-rendered pages (`product:doc-feature-trace`'s `references/trace-recipes.md`, Part 3a) | Some capabilities never reach the server: a calculation in the browser, a setting kept on the device, a screen that only reads. They live only here |
 
 Useful, stack-agnostic first cuts:
 
@@ -42,9 +43,13 @@ git ls-files | sed 's|/[^/]*$||' | sort | uniq -c | sort -rn | head -40   # wher
 grep -rlE '\[Route|\[Http(Get|Post|Put|Patch|Delete)|MapGet|MapPost|@RestController|@RequestMapping|@(Get|Post|Put|Patch|Delete)Mapping|@(Get|Post|Put|Patch|Delete)\(|router\.(get|post|put|patch|delete)|app\.(get|post|put|patch|delete)' . | head -60
 grep -rlE '@Scheduled|BackgroundService|IHostedService|RecurringJob|cron|@Cron' . | head -30
 grep -rlE '@KafkaListener|IConsumer<|SqsListener|ServiceBusProcessor|@EventPattern|@RabbitListener|@SqsListener' . | head -30
+grep -rlE 'Router::new\(\)|\.route\(|#\[(get|post|put|patch|delete)\(' --include='*.rs' . | head -30        # Rust: axum, actix-web
+grep -rlE '@(app|router|bp|api)\.(get|post|put|patch|delete|route)\(|APIRouter\(|urlpatterns|@api_view' --include='*.py' . | head -30   # Python: FastAPI, Flask, Django
+grep -rlE '@shared_task|beat_schedule|add_job\(|@dramatiq|JobScheduler|time::interval\(|StreamConsumer|basic_consume' --include='*.py' --include='*.rs' . | head -30
+find . \( -name 'page.tsx' -o -name '_layout.tsx' -o -name '*.razor' -o -name '*.cshtml' -o -path '*templates*' -name '*.html' \) -not -path '*/node_modules/*' | head -40   # screens
 ```
 
-Adapt to what the stack actually uses — the orientation pass already told you which. **Record counts**, not just presence: 4 controllers and 120 controllers imply completely different reading plans.
+Adapt to what the stack actually uses — the orientation pass already told you which; Part 3 and 3a of the trace recipes hold each stack's fuller searches, mobile screens (SwiftUI, Compose, Expo Router) included. **Record counts**, not just presence: 4 controllers and 120 controllers imply completely different reading plans.
 
 ### Step 2 — Derive the functional areas
 
@@ -66,6 +71,7 @@ Rules that make the map hold up:
 - **Cross-cutting concerns are not areas.** Auth, logging, config, error handling, telemetry — they are *how* the system works, not *what it does for someone*. Record them once in a Foundations section; do not give them an `areas/` file.
 - **Aim for 4–10 areas.** Beyond ~12, either several belong together or the system is really several systems, and that is itself the most valuable finding in the survey.
 - **An area with no user is a finding.** Either you have not found its caller, or it is dead. Say which.
+- **A screen with no entry point behind it** belongs to the area whose people use it, or is an area of its own when it is a capability a person would name (a price calculator, an offline checklist).
 
 ### Step 3 — Build the coverage ledger
 
@@ -77,6 +83,7 @@ Every surface from Step 1 gets assigned. This is what makes a later coverage cla
 | `OrderExpiryJob` | Scheduled | Ordering | runs nightly |
 | `PaymentWebhookController` | HTTP (inbound webhook) | Billing | anonymous, signature-verified |
 | `LegacyImportController` | HTTP | **parked** | no route registration found — likely dead `#observed` |
+| `Your basket › Apply discount code` | Screen | Ordering | calculated in the browser, no server call — searched `fetch\|apiClient` in `app/basket/` |
 
 Parking is legitimate; parking silently is not. Every parked row states **why** (dead, out of scope for this run, owned by another team, deferred to a later session).
 
@@ -102,7 +109,7 @@ Then, per area, state the plan:
 
 Ordering (≈ 4,500 lines) alone estimates 164k, over the cap, so it is split by sub-flow before it is scheduled.
 
-**Estimate each session's cost** with the rule of thumb `85,000 fixed (harness, skills, references, rule file, working overhead — once per session) + per area in it: traced source lines × 12 + 25,000 (its guide written and re-read, and its screenshots captured when an environment is given)` (traced lines: the files the area's entry points reach, counted with `wc -l`), and **schedule areas so each session stays ≤ 135k tokens** — the session budget is 150k, and the margin is for reading output back. An area whose own estimate exceeds 135k (more than about 2,000 traced lines) is split before it is scheduled; in practice most areas are one session each. When the orientation cache records a real run's actual figure, estimate from it instead.
+**Estimate each session's cost** by the *Session estimate* in `business-documentation/references/documenter-invariants.md` (the one place the formula lives), and **schedule areas so each session stays ≤ 135k tokens**. An area whose own estimate exceeds 135k (more than about 2,000 traced lines) is split before it is scheduled; in practice most areas are one session each.
 
 **Depth is a real choice.** `full` (every rule, every branch, every failure path) for areas where the business logic lives; `shallow` (capabilities and actors only) for pass-through, read-only, or CRUD-only areas. Documenting a read-only reporting area to the same depth as a pricing engine wastes the run's budget on the part with the fewest rules.
 
@@ -173,4 +180,4 @@ If the human has no opinion (common — they may know the business but not the c
 
 ## Version policy
 
-Surface detection is **stack-keyed**, per `CLAUDE.md`'s Stack defaults: **.NET** (attribute routing vs minimal APIs vs `MapGroup`; `IHostedService`/`BackgroundService`; `IConsumer<T>`) · **Java + Spring Boot 3.x** (`@RestController`/`@RequestMapping`, `@Scheduled`, `@KafkaListener`, `@RabbitListener`) · **Node 24/22** (Express/Fastify routers, Nest `@Controller`/`@EventPattern`/`@Cron`, serverless handler manifests). Take the stack and version from the orientation pass and search the idioms that version actually uses — a survey that greps for the wrong idiom silently under-reports entry points, which is the worst failure this skill can have.
+Surface detection is **stack-keyed**, per `CLAUDE.md`'s Stack defaults: **.NET** (attribute routing vs minimal APIs vs `MapGroup`; `IHostedService`/`BackgroundService`; `IConsumer<T>`) · **Java + Spring Boot 3.x** (`@RestController`/`@RequestMapping`, `@Scheduled`, `@KafkaListener`, `@RabbitListener`) · **Node 24/22** (Express/Fastify routers, Nest `@Controller`/`@EventPattern`/`@Cron`, serverless handler manifests) · **Rust, edition 2024 / 2021** (axum 0.8 `Router::new().route` with `/{id}` paths, 0.7 and older `/:id`; actix-web `#[get]`; `tokio::spawn` loops, `tokio-cron-scheduler`, broker consumers) · **Python 3.13 / 3.12, 3.14** (FastAPI / Flask decorators, Django `urlpatterns` and DRF viewsets; Celery tasks and beat, APScheduler, Dramatiq); screens per the trace recipes' Part 3a (React / Next.js, Blazor, Expo Router, SwiftUI, Compose, server-rendered templates). Take the stack and version from the orientation pass and search the idioms that version actually uses — a survey that greps for the wrong idiom silently under-reports entry points, which is the worst failure this skill can have.
