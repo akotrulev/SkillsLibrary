@@ -8,11 +8,11 @@ ADRs that the interview writes while it runs. Add `design:prototype`, which rend
 different variants of a screen in the project's design language. When the project has no design
 language, it first interviews you on style through the `ui-ux-pro-max` corpus.
 
-**Status:** A1, A2, B1, P1 and R1 landed: the standard (`engineering-practices/writing-for-agents/`),
-`tools/skill-lint.py` with its tests, `dev:feature` with `domain-modeling`, `design:prototype`, and their
-registration (`marketplace.json`, `FRONT_DOORS`, every live reference renamed; `plugin-surface-check.py`
-prints `OK`). Next: G1. Unverified: the whole set together (G1), the library sweep (A3), and
-`/dev:feature` and `/design:prototype` in a real project session.
+**Status:** A1, A2, B1, P1, R1 and G1 landed: the standard (`engineering-practices/writing-for-agents/`),
+`tools/skill-lint.py` with its tests (99% branch), `dev:feature` with `domain-modeling`, `design:prototype`,
+and their registration; G1 ran the whole set green and found every cross-reference resolving. Next: A3,
+the library sweep. Built but unverified: `/dev:feature` and `/design:prototype` untried in a real project
+session, and their trigger phrases untested.
 
 **Test design:** none. The plan serves no stories. Its only code is `tools/skill-lint.py`, which A2
 covers with unit tests.
@@ -662,6 +662,24 @@ git diff --name-only "$(git log --diff-filter=A --format=%h -1 -- docs/plans/014
 - `token-audit.py` already exits non-zero on violations that predate this plan (e.g.
   `security-governance`). Only a line naming this plan's files is a failure.
 - **Not in G1:** the library-wide sweep (A3), and any feature work.
+- **As built (2026-11-20):** the whole set ran once, green on the first pass, so the fix loop had
+  nothing to fix and no earlier task's work changed. `plugin-surface-check.py` → `OK`; pytest over
+  both suites → `104 passed`; coverage → `tools/skill-lint.py 336 stmts, 160 branches, 99%`;
+  `skill-lint.py` over the four folders → `0 findings`, exit 0; the `token-audit` grep → nothing
+  (exit 1); the `git diff` lists 53 files, all A1–R1's (the deleted `meta/writing-skills/*` and
+  `decision-interview/SKILL.md` among them). Cross-reference read, beyond the lint: every
+  `${CLAUDE_PLUGIN_ROOT}/…` path in the changed skills, agents, `CONTRIBUTING.md`, `README.md` and
+  the catalog resolves; every repo path naming `brainstorming`, `domain-modeling`,
+  `writing-for-agents` or `design/prototype` outside `docs/plans/` exists; every quoted section
+  pointer lands on a real heading (`design-language.md` "Style interview" and "Partial language",
+  `html-shell.md` "Done when", the prototype's "Structural variants" and "In-app hand-off",
+  `feature`'s "The two modes", `knowledge-base` "Initializing a KB", plan-format's "Answered
+  questions", `CONTRIBUTING.md` "The three-layer model" and "Names and registration", and the six
+  `skill-mechanics.md` sections `CONTRIBUTING.md` names). The only remaining `writing-skills`
+  mention is `README.md:476`, which states its retirement. Close-out step 6: `master` has no commit
+  beyond this branch (`git log HEAD..master` empty), so there was nothing to merge.
+  **Unverified:** `/dev:feature` and `/design:prototype` untried in a real project session; their
+  trigger phrases untested.
 
 ### A3 — Audit round 1: the lint sweep and the front doors
 
@@ -767,49 +785,9 @@ three; then G1, A3, A4 and A5 run in sequence.
 | A5 | `docs` | `general-purpose` | A4 | — | ~110k |
 | — | try `/dev:feature`, `/design:prototype` in a real project | **the user** | G1 | — | — |
 
-A1, A2, B1, P1 and R1 have landed; four prompts are live.
+A1, A2, B1, P1, R1 and G1 have landed; three prompts are live.
 
 ---
-
-### G1 — gate, the whole set once more (general-purpose, infra)
-
-````
-Depends on: R1, A2
-Agent: general-purpose · Stack: infra
-
-Task G1 of docs/plans/014-authoring-standard-domain-language-feature-prototype.md: the plan's gate.
-Run the whole set once more across the plan, fix what fails, and record what is unverified.
-
-Read, in this order:
-1. CLAUDE.md (repo root).
-2. The plan: header, §3, §4, task G1, every As built note, and "Close-out — every task".
-3. engineering-practices/writing-plans/references/plan-format.md §5, "The last task's fix loop".
-
-Gate (this is the last runnable task, so it runs the whole set once more across the plan, in order):
-  python3 tools/plugin-surface-check.py
-  python3 -m pytest tools/test_skill_lint.py business-analysis/skills/ba-project-memory/scripts/test_kb_lint.py -q
-  python3 -m coverage run --branch -m pytest tools/test_skill_lint.py -q && python3 -m coverage report --include=tools/skill-lint.py
-  python3 tools/skill-lint.py engineering-practices/writing-for-agents engineering-practices/brainstorming engineering-practices/domain-modeling design/prototype
-  python3 tools/token-audit.py --violations-only | grep -E "writing-for-agents|brainstorming|domain-modeling|prototype"
-  git diff --name-only "$(git log --diff-filter=A --format=%h -1 -- docs/plans/014-authoring-standard-domain-language-feature-prototype.md)" HEAD
-Expect: OK; all pass; branch ≥ 80%; exit 0; nothing printed; the plan's file list.
-
-Then read each changed SKILL.md once for cross-references the lint cannot see (a pointer to a
-section that moved or was renamed).
-
-Traps:
-- token-audit exits non-zero for violations that predate this plan; only a line naming this plan's
-  files fails the gate.
-- Fix by the fix loop: the narrowest command per failure, then only the failed rerun, then the
-  whole set once more. A failure may belong to A1–R1; fix it and name the task in As built.
-- Do not run the no-argument library sweep; A3 owns it.
-
-Record in Status (built but unverified): /dev:feature and /design:prototype untried in a real
-project session; trigger phrases untested.
-
-Commit: `chore: 014 gate, the whole set green (014 G1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### A3 — audit round 1, the lint sweep and the front doors (general-purpose, docs)
 
