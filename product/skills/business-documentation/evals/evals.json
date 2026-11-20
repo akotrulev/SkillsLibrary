@@ -211,6 +211,28 @@
         "The facts the guide held are kept: £6.00, £5.00, 8 and 16 credits, 24 hours, the 1st at 00:00, the three refusal texts, and the example's arithmetic (3 − 2 = 1; 1 × £6.00 = £6.00) are still there and still correct",
         "Read-only on the codebase: only docs/features/** and docs/agent-context/feature-documenter.md were written; the application was not built or run"
       ]
+    },
+    {
+      "id": 7,
+      "prompt": "Run task DOC1 of docs/plans/001-session-credits/delivery-plan.md. Its prompt block under `## Prompts — one per task` is your brief; the plan's `## Close-out — every task` section is your close-out.",
+      "expected_output": "documenter runs the documentation task of a delivery plan, unattended, on a project with no documentation yet (a git-committed copy of evals/fixture/ with evals/fixture-delivery/ and then evals/fixture-delivery-system/ copied on top). It runs FULL scoped to the areas the plan touched without waiting at the survey gate or writing a documentation plan, starts the business model, writes the delivery note and closes out and files the plan.",
+      "files": [
+        "evals/fixture/",
+        "evals/fixture-delivery/",
+        "evals/fixture-delivery-system/"
+      ],
+      "expectations": [
+        "Never blocked: the run ended with the work done, not with a question; its report's Mode line says FULL and DOC1, its Step line is PASSED (never BLOCKED or PLANNED), and the area table is in the report rather than put to a person for confirmation",
+        "No documentation plan was written: no `docs/plans/NNN-document-*.md` exists anywhere, and docs/plans/ holds nothing new besides the filing move",
+        "Scope: docs/business-model/areas/ holds one guide per area the plan's code touched (the credits domain, in one or two areas named from the plan's epics), and the report lists nothing outside src/Workshops.Api's credits, plans, bookings and sessions code as surveyed or documented",
+        "The knowledge base exists: docs/business-model/ holds system-overview.md, INDEX.md with one line per area guide written, glossary.md and active-context.md, and at least one flow, entity or decision file citing a fixture path that exists, every row tiered `#observed` or `#inferred`, never `#confirmed`",
+        "`python3 scripts/doc-lint.py --dir docs/business-model` exits 0 and its only finding is `screenshots-pending`; every guide records `**Screenshots:** pending —` and holds no image",
+        "`python3 scripts/doc-lint.py --dir docs/deliveries` exits 0, and the delivery note exists at docs/deliveries/001-session-credits.md with a stamp comment whose `source:` is `documenter @ <sha>`; its `Read more` links point into `../business-model/areas/` at files and task headings that exist",
+        "`## Not delivered` in the delivery note has a row each for US3 AC12 (nothing sets or clears a member's personal overage rate), US4 AC14 (posted on the 1st at 00:00, not the last day) and US4 AC16 (unused credits are lost), and no row for a criterion the code does as written; the plan's B2 As built line was not taken as evidence",
+        "Purpose from a story: the cancellation cut-off's purpose (giving the studio a day to offer the seat to another member) is stated in a guide and not asked as an open question",
+        "Close-out and filing as in eval 5: a dated As built bullet on DOC1, the Status line rewritten, the DOC1 prompt block deleted, the whole initiative folder moved with `git mv` to docs/plans/implemented/001-session-credits/, and a follow-up commit `docs: delete DOC1's prompt (001-session-credits)`",
+        "Read-only on the codebase: `git diff --name-only <the commit before the run> HEAD` lists only paths under docs/; no build, test run or start of the application happened"
+      ]
     }
   ]
 }

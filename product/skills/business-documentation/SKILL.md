@@ -13,7 +13,7 @@ Every area (and every feature) is written **once, as a guide**: what each person
 | `<name>.md` | Every user of the product, business analysts, the client, product owner, support | `shareable` | Plain. No technical talk at all | Who uses this, what can I do here, where, what happens, which rules apply, how it is calculated, what is open |
 | `docs/deliveries/<NNN>-<plan-slug>.md` | Product owner | `shareable` | Plain. Same language rules | What a plan delivered, what works differently now, what was planned and is not there |
 
-**Load by condition:** writing or editing a guide body → [`references/guide-shape.md`](references/guide-shape.md); `system-overview.md` → [`references/system-overview.md`](references/system-overview.md); a delivery note (the `DOC1` run of a plan) → [`references/delivery-note.md`](references/delivery-note.md); tone or shape against a model → the golden example, [`references/example-area.md`](references/example-area.md).
+**Load by condition:** writing or editing a guide body → [`references/guide-shape.md`](references/guide-shape.md); `system-overview.md` → [`references/system-overview.md`](references/system-overview.md); a delivery note (the `DOC1` run of a plan) → [`references/delivery-note.md`](references/delivery-note.md); tone or shape against a model → the golden example, [`references/example-area.md`](references/example-area.md). The rules `documenter` and `feature-documenter` share, `DOC1` included, are in [`references/documenter-invariants.md`](references/documenter-invariants.md); the agents read it, a guide body never needs it.
 
 Six disciplines:
 

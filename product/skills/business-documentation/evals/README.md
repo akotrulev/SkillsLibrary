@@ -1,6 +1,6 @@
 # doc-business-model evals
 
-Regression evals for `product:doc-business-model`, run through `feature-documenter` (evals 1, 4, 5, 6) and `documenter` (eval 2 in FULL mode, eval 3 as a plan-writing run).
+Regression evals for `product:doc-business-model`, run through `feature-documenter` (evals 1, 4, 5, 6) and `documenter` (eval 2 in FULL mode, eval 3 as a plan-writing run, eval 7 as `DOC1` on a project with no documentation).
 
 | # | Agent and run | Protects against |
 |---|---|---|
@@ -10,11 +10,13 @@ Regression evals for `product:doc-business-model`, run through `feature-document
 | 4 | `feature-documenter`, no environment and no waiver | Blocking on screenshots, a guide without `pending`, an image invented without a screen, the app being started |
 | 5 | `feature-documenter` as `DOC1` of a delivery plan with stories | A purpose not taken from a story, a story the code does not do written up as built, a missing or wrong delivery note, a plan left unfiled |
 | 6 | `feature-documenter`, a guide with two answered questions | An answer folded wrongly (or not at all), an answer the code contradicts silently accepted, a guide rewritten instead of updated |
+| 7 | `documenter` as `DOC1`, unattended, no documentation yet | A `DOC1` run that stops at the survey gate or writes a documentation plan, surveys past what the plan touched, or skips the delivery note and the filing |
 
 The fixture is an API with no runnable screens, so evals 1, 2 and 6 waive the screenshots in their prompts (6 already carries the waiver in the guide); the screenshot rules themselves are covered by the lint's unit tests and the golden example.
 
 - `fixture/` — a small .NET 8 minimal-API / EF Core codebase for the workshop-booking credits domain: plans (Basic 8 credits at £6.00, Plus 16 credits at £5.00), tiers 1/2/3, booking and cancellation endpoints, the 24-hour late-cancel rule, monthly posting, at-least-once pricing. It is the **only** source for evals 1–4. The golden examples (`../references/example-*.md`) describe the same domain over an imagined codebase and deliberately differ from the fixture in several facts.
 - `fixture-delivery/` — an overlay for eval 5: `docs/plans/001-session-credits/` holding a delivery plan whose only live prompt is `DOC1`, and the initiative's `requirements.md`, `epics.md` and `stories.md` (US1–US4, AC1–AC16).
+- `fixture-delivery-system/` — an overlay for eval 7, copied after `fixture-delivery/`: only `delivery-plan.md`, with `DOC1` given to `documenter` and the project keeping no documentation yet.
 - `fixture-folding/` — an overlay for eval 6: `docs/features/001-credit-pricing-and-overage.md`, a complete guide in the current shape whose open questions hold one agreeing and one contradicted answer.
 - `evals.json` — the prompts and their rule-based expectations (skill-creator format). Expectations are never line-exact. An eval that needs an overlay lists it in `files` after `evals/fixture/`; the schema has no overlay field, so the order is the instruction: copy them in that order.
 
@@ -35,6 +37,7 @@ This README sits outside the fixtures, so the agent under test never sees it.
 - Eval 4 only: the agent asks once for the environment and logins and does not stop; the guide is written in full with `**Screenshots:** pending —`, no image; the lint's only finding is `screenshots-pending`; the report says what the capture pass needs; the app is never built or started.
 - Eval 5 only: the stories are read as the source of purpose (the cut-off's purpose is stated, no open question asks it, `stories:` in the stamp, no story id in the body); the delivery note is at `docs/deliveries/001-session-credits.md` in the contract's shape, its `New` rows link real guide tasks, and `Not delivered` holds exactly the three planted differences — **US3 AC12** (personal rate: nothing sets it), **US4 AC14** (built differently: charged on the 1st, not the last day) and **US4 AC16** (roll-over: credits are lost) — while the plan's own B2 `As built` line overstates ("US3 and US4 covered"), so a run that trusts it fails; the close-out is done as the plan format says (As built, Status, prompt deleted, whole folder moved to `implemented/`, two commits).
 - Eval 6 only: Q1 (answer agrees with the code) is folded into the body as one sentence and its row removed, its id never reused; Q2 (answer the code contradicts) stays with its answer and the report escalates both readings; the guide is updated in place (same file, same `**Created:**`, `**Last updated:**` added, the stamp's sha is the run's HEAD); `Answers folded: 1`.
+- Eval 7 only: the run never waits for a person (no confirmation of the area split, no documentation plan), surveys only the code the plan touched, starts the KB (overview, `INDEX.md`, models), and then does what eval 5 checks for the delivery note, the planted *Not delivered* rows, the story purpose and the filing, with the links pointing into `docs/business-model/areas/`.
 
 **How the comprehension expectations are graded.** The grader is given the produced guide (or the overview, or the delivery note, as each question says) and nothing else: not the fixture, not the report, not the agent's reasoning. It answers each question from that text and compares with the expectation's `Correct:` answer; a document that does not say, or says it differently, fails. Only then does it read the grader note to see where the answer comes from. A failure means the guide cannot be understood by its reader, which is a defect of the guide even when every fact in it is true.
 
