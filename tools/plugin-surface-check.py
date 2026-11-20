@@ -39,10 +39,10 @@ BANNED_SUFFIXES = ("-java", "-dotnet", "-typescript", "-node", "-python", "-shar
 STACK_CATEGORIES = ("qa", "fe", "be", "mobile", "desktop")
 
 FRONT_DOORS = {
-    "dev": frozenset("""
-        feature plan-feature debugging verify quality-constraints source-grounding writing-for-agents
-        notebooklm audit-spec audit-feature
+    "engineering": frozenset("""
+        debugging verify quality-constraints source-grounding writing-for-agents audit-spec audit-feature
     """.split()),
+    "product": frozenset("feature plan-feature notebooklm".split()),
     "design": frozenset(("prototype",)),
     "qa":frozenset(("inhouse-framework-conventions", "python-web-testing")),
 }

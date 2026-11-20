@@ -5,5 +5,5 @@
 node_modules/tools/mission-control/
 .claude/settings.local.json
 
-engineering-practices/bundled/notebooklm/data/
-engineering-practices/bundled/notebooklm/.venv/
+product/bundled/notebooklm/data/
+product/bundled/notebooklm/.venv/

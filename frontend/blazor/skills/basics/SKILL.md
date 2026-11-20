@@ -38,7 +38,7 @@ Rules:
 - Auto has a real cost: data access must be abstracted behind an interface with a server-direct and an HTTP implementation. Pay it deliberately, not by default.
 - Live/push-heavy surfaces favor Interactive Server (the circuit is already a WebSocket); API-consuming surfaces favor WASM or static SSR.
 - **Interactive Server holds a SignalR circuit per user**, so it suits internal tools with modest concurrency. Public traffic takes InteractiveWebAssembly or InteractiveAuto.
-- Which mode a route gets is a planning decision: the plan's `rendering_plan`, mapped to these modes by [`rendering-strategy.md`](../../../../backend/_shared/experience-plan/references/rendering-strategy.md).
+- Which mode a route gets is a planning decision: the plan's `rendering_plan`, mapped to these modes by [`rendering-strategy.md`](../../../../product/skills/experience-plan/references/rendering-strategy.md).
 
 ## Component composition
 

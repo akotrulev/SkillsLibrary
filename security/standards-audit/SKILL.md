@@ -12,9 +12,9 @@ Audit an existing repo's **defensive-security artifacts** against the convention
 
 ## Read before sweeping
 
-1. **[`engineering-practices/standards-audit-engine`](../../engineering-practices/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 steps, the hostile self-review. **Read it first.**
+1. **[`engineering/standards-audit-engine`](../../engineering/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 steps, the hostile self-review. **Read it first.**
 2. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 14 lettered sections (A–N), 127 checks, the **absence rule**, and the pinned-standards table. **Read end-to-end** before Step 2.
-3. `engineering-practices/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Step 3.
+3. `engineering/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Step 3.
 4. The project's installed security-governance rule files, `.claude/rules/security-governance/`, when present (`/security-governance:rules` installs them; the plugin's copy is `security/rules-security-governance/`). They are the per-file form of these checks. A rule the team edited or deleted there is the project's convention: a check that contradicts it is a noted deviation, not a finding.
 
 Load the **owning skill** (named per section in the checklist) whenever a check is ambiguous, version-keyed, or you are about to write its fix direction. When the checklist and a rule file or skill disagree on a *rule*, **the rule file, then the skill, wins** — and report the disagreement. The one exception, stated in the checklist's version-lane block: where a skill cites a **standard version or identifier that the pinned table contradicts**, the table wins and the skill text becomes an open question for the maintainer.
@@ -32,8 +32,8 @@ The object is the **governance artifact**: a Sigma rule and its test fixtures, a
 | Job | Owner |
 |---|---|
 | Reviewing one diff, inline, no artifact | the stack plugin's own `code-review` skill — this plugin has no per-diff sibling, because a policy or a detection is reviewed as a whole artifact, not as a hunk |
-| Code vs a written spec / stories / ACs | `dev:audit-spec` (or the `code-auditor` agent) |
-| "How does feature X actually work / where is it defective" | `dev:audit-feature` |
+| Code vs a written spec / stories / ACs | `engineering:audit-spec` (or the `code-auditor` agent) |
+| "How does feature X actually work / where is it defective" | `engineering:audit-feature` |
 | **Detecting** a vulnerability or a committed secret | **peer** `qa-security` (SAST/DAST/SCA/`secrets-scan`) — section H audits the *hardening*, it is not a scanner |
 | **Proving** a weakness is exploitable, or running a kill chain | **peer** `penetration-tester` — the offensive lane produces proof, not conformance findings |
 | **Proving** an authored detection actually fires | **peer** `purple-team-engineer` — section D9 reports *authored vs validated*; it never validates |

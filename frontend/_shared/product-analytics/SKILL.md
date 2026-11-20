@@ -77,7 +77,7 @@ Write `docs/analytics/tracking-plan.md` **before any SDK call**. One row per eve
 
 **The hard gate: no event ships without a named metric or decision in that column.** "Might be useful later" is how a namespace rots into 400 events nobody trusts. An event you cannot name a consumer for is not instrumentation, it is exhaust.
 
-The metrics in that column should trace to the initiative's measurable success metrics — `business-analysis/skills/ba-scoping-writeup` produces exactly that list, and is the correct upstream source when one exists.
+The metrics in that column should trace to the initiative's measurable success metrics — `product/skills/ba-scoping-writeup` produces exactly that list, and is the correct upstream source when one exists.
 
 ### 2. Naming: `object_action`, snake_case, fixed strings
 
@@ -195,7 +195,7 @@ They meet in exactly one place: a user-facing failure should be traceable from a
 
 ## Workflow
 
-1. **Write the tracking plan first** — `docs/analytics/tracking-plan.md`, one row per event, each with a named metric/decision. Source the metrics from `dev:scoping` output when it exists. **Do not open an SDK doc yet.**
+1. **Write the tracking plan first** — `docs/analytics/tracking-plan.md`, one row per event, each with a named metric/decision. Source the metrics from `product:scoping` output (the `product` plugin) when it exists. **Do not open an SDK doc yet.**
 2. **Choose the tool** via the decision tree; record the reason in one line. Settle **data residency + consent posture now** — both are architectural.
 3. **Read the one `references/<tool>.md`** — packages, provider wiring, the route-change subscription, identify/alias, replay + masking config, proxy setup.
 4. **Build the typed emitter** (`analytics/events.ts` + `analytics/track.ts`): the event union, the consent gate, the PII scrub, the single vendor import.
@@ -224,7 +224,7 @@ They meet in exactly one place: a user-facing failure should be traceable from a
 - `data-testid` naming and placement (the identity source for Rule 6) → the stack's `test-ids` / `testability` skill
 - Consent-banner UX, microcopy, preference-centre IA → `design/ux-writing` + the stack's `ui-rules`
 - Dashboards, funnels, charts built on this data → `design/charts` (product) — **not** `observability/dashboards` (ops)
-- Success metrics that populate the plan's metric column → `business-analysis/skills/ba-scoping-writeup`
+- Success metrics that populate the plan's metric column → `product/skills/ba-scoping-writeup`
 - Verifying masking, consent gating, and third-party data flow → `qa-security` (peer, invoked separately)
 - Feature-flag testing when the tool doubles as a flag provider (PostHog) → `qa/<stack>/skills/feature-flag-testing`
 - Engineering/delivery metrics (DORA, escape rate) → `qa/manual/quality-metrics`

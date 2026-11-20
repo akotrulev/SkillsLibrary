@@ -5,12 +5,12 @@ feature has: the API calls, schedules, timeouts, webhooks and internal events th
 sets off, the data it shares with other features, and the invariants those writes can break. It then
 designs test cases for those connections, not only for field constraints. The connections are recorded
 once in the project's business-model knowledge base (`docs/business-model/`) as a **dependency map**.
-The map is built from specs by `business-analyst` or from code by `be-documenter`, and any later
+The map is built from specs by `business-analyst` or from code by `documenter`, and any later
 session looks the connections up there instead of re-deriving them. The three `qa-api-<stack>` agents
 then automate the new case kinds. They run scheduled jobs on demand, control the clock at a time
 boundary, fire concurrent requests, and deliver a message or webhook twice.
 
-**Status:** K1, D1, Q1, Q2, A1, A2 and A3 landed 2026-10-11; only H1 (the user) remains. K1: `business-analysis:dependency-map`, its golden example, the KB contract and feature slice. D1: `dev:doc-feature-trace` has the seventh inventory (Edges), area and feature documents have *How it connects*, `be-documenter` writes the dependency map. Q1/Q2: `requirements-breakdown` writes §8 Connections, `cross-feature-test-design` exists in all three `qa-*` plugins, `qa-test-case-designer` runs five steps with Code mode and the depth gate (D14, D15). A1–A3: `time-and-concurrency-testing` in `qa-typescript`, `qa-java` and `qa-dotnet` (each only in its own plugin), the three `qa-api-*` wirings and the three review checks. A3 also wrote the catalog and README, and ran §11: `python3 -m json.tool` exit 0; `claude plugin validate .` `✔ Validation passed`; `plugin-surface-check.py` OK; `token-audit.py --violations-only` 0 / 89 / 0 / 53 with none of the five new SKILL.md files listed; `qa-version-check.py` OK; id cross-check 0 missing of 23 known ids; arithmetic recomputed, 0 mismatches; format sweep clean (D17 records one fix the gate forced). Built but unverified: no code sample in any `time-and-concurrency-testing` skill has been compiled or run, and whether the suites get deeper and the patterns run on a real project is H1's verdict. Next: H1.
+**Status:** K1, D1, Q1, Q2, A1, A2 and A3 landed 2026-10-11; only H1 (the user) remains. K1: `product:dependency-map`, its golden example, the KB contract and feature slice. D1: `product:doc-feature-trace` has the seventh inventory (Edges), area and feature documents have *How it connects*, `documenter` writes the dependency map. Q1/Q2: `requirements-breakdown` writes §8 Connections, `cross-feature-test-design` exists in all three `qa-*` plugins, `qa-test-case-designer` runs five steps with Code mode and the depth gate (D14, D15). A1–A3: `time-and-concurrency-testing` in `qa-typescript`, `qa-java` and `qa-dotnet` (each only in its own plugin), the three `qa-api-*` wirings and the three review checks. A3 also wrote the catalog and README, and ran §11: `python3 -m json.tool` exit 0; `claude plugin validate .` `✔ Validation passed`; `plugin-surface-check.py` OK; `token-audit.py --violations-only` 0 / 89 / 0 / 53 with none of the five new SKILL.md files listed; `qa-version-check.py` OK; id cross-check 0 missing of 23 known ids; arithmetic recomputed, 0 mismatches; format sweep clean (D17 records one fix the gate forced). Built but unverified: no code sample in any `time-and-concurrency-testing` skill has been compiled or run, and whether the suites get deeper and the patterns run on a real project is H1's verdict. Next: H1.
 plan, as tasks A1–A3. The plan changes skills and agents only, so the gate (§11) proves structure, not
 quality. The new stack skills' code samples are never compiled. Whether the suites actually get deeper,
 and whether the automation patterns run, is unverified until H1 runs the lane on a real project.
@@ -21,15 +21,15 @@ and whether the automation patterns run, is unverified until H1 runs the lane on
 
 | Need | Today | Gap |
 |---|---|---|
-| A persisted model of what sets off what across features | The KB holds flows, one state × event grid per entity with the owning feature on each transition, merged decision tables and the interaction map (`business-analysis/skills/ba-project-memory/SKILL.md:30-39`). The grids' event columns are free text (`ba-entity-state-grid/SKILL.md:33`). `process-flow` asks "who else reacts to this?" but keeps the answer only in one flow's timeline (`ba-process-flow-diagram/SKILL.md:47`) | `events.md`: every trigger (command, schedule, timeout, external, event) and every reaction, with what it emits, its mode and its failure behaviour (§4.1, K1) |
+| A persisted model of what sets off what across features | The KB holds flows, one state × event grid per entity with the owning feature on each transition, merged decision tables and the interaction map (`product/skills/ba-project-memory/SKILL.md:30-39`). The grids' event columns are free text (`ba-entity-state-grid/SKILL.md:33`). `process-flow` asks "who else reacts to this?" but keeps the answer only in one flow's timeline (`ba-process-flow-diagram/SKILL.md:47`) | `events.md`: every trigger (command, schedule, timeout, external, event) and every reaction, with what it emits, its mode and its failure behaviour (§4.1, K1) |
 | Which features share which data | Nothing. `conflict-check` classifies "resource" claims during normalization and does not persist them (`ba-feature-conflict-check/SKILL.md:47`) | `shared-data.md`: a CRUD matrix plus the shared fields (§4.2, K1) |
 | Cross-feature invariants | Classified as "invariant" during normalization, then discarded (same line) | `invariants.md`: each invariant, the reactions that threaten it, and whether each one enforces it (§4.3, K1) |
 | A lookup for "everything connected to feature X" | `conflict-check` §2 builds a pair list by reasoning, once per run (`ba-feature-conflict-check/SKILL.md:51`) | The feature slice: eight grep-able lookups over stable ids (§5, K1) |
-| Connections derived from code | `feature-trace` records the events an area emits but not who reacts to them (`backend/_shared/feature-trace/SKILL.md:52`). Its six inventories have none for edges (`:57`) | A seventh inventory, **Edges**, which follows every emitted event and every shared field one hop outside the area (§8.1, D1) |
-| Reverse documentation shows connections | Area and feature documents have one flow per trigger but no section on what crosses into other areas (`backend/_shared/business-documentation/SKILL.md:58`) | An optional **How it connects** section, and `be-documenter` writes the dependency map (§8.3–§8.4, D1) |
+| Connections derived from code | `feature-trace` records the events an area emits but not who reacts to them (`product/skills/feature-trace/SKILL.md:52`). Its six inventories have none for edges (`:57`) | A seventh inventory, **Edges**, which follows every emitted event and every shared field one hop outside the area (§8.1, D1) |
+| Reverse documentation shows connections | Area and feature documents have one flow per trigger but no section on what crosses into other areas (`product/skills/business-documentation/SKILL.md:58`) | An optional **How it connects** section, and `documenter` writes the dependency map (§8.3–§8.4, D1) |
 | The test basis captures connections | `requirements-breakdown` writes seven single-feature sections (`qa/manual/requirements-breakdown/SKILL.md:83`). Its OpenAPI walk writes one validation row per schema keyword (`:67-69`) | A §8 **Connections** section. Schema constraints move to the data dictionary, and validation rows are kept for business validations (§7.1–§7.2, Q1) |
 | Test-design techniques for interactions | The default recipe is EP → BVA → decision table → state transition → use-case → error guessing (`qa/manual/test-design-techniques/SKILL.md:225`). There is no CRUD, scenario-based, round-trip, def-use, temporal or concurrency technique | `cross-feature-test-design` (§6, Q1) |
-| Test design from code | The designer's inputs are story, BRD, contract, state diagram, rules table or URL (`qa/manual/agents/qa-test-case-designer.md:43-50`). The planner lists surfaces and deliberately does not trace rules (`qa/manual/agents/qa-test-planner.md:44`) | A Code mode that loads `dev:doc-feature-trace` (§7.3, Q2) |
+| Test design from code | The designer's inputs are story, BRD, contract, state diagram, rules table or URL (`qa/manual/agents/qa-test-case-designer.md:43-50`). The planner lists surfaces and deliberately does not trace rules (`qa/manual/agents/qa-test-planner.md:44`) | A Code mode that loads `product:doc-feature-trace` (§7.3, Q2) |
 | Depth is measured | Coverage is AC → TC (`qa-test-case-designer.md:117`). Forty field cases and two happy paths "cover every AC" | A Connection → TC matrix, counts by layer, and a depth gate (§7.4, Q2) |
 | Suites stay readable when field validation is large | One case per coverage item (`qa/manual/test-case-writer/SKILL.md:38`) | One parameterized case per field and direction, with cases grouped by layer (§7.5, Q2) |
 | What QA learns flows back | Only BA → QA, as "boundary conditions double as BVA seeds" (`ba-feature-conflict-check/SKILL.md:73`) | QA hands **KB candidates** to `business-analyst` (§7.6, K1 + Q2) |
@@ -67,8 +67,8 @@ Five causes, each traced to a line in §1:
 
 | The project has | Run | What lands in `docs/business-model/` |
 |---|---|---|
-| Code and no requirements | `/dev:document-system` (`be-documenter`) | Areas, flows, grids, decisions, plus `events.md`, `shared-data.md` and `invariants.md`, all `#observed`/`#inferred` with `file:line` |
-| One feature in code | `/dev:document-feature` (`be-feature-documenter`) | Nothing in the KB. The feature document gains **How it connects** (one hop out), which is test basis in its own right |
+| Code and no requirements | `/product:document-system` (`documenter`) | Areas, flows, grids, decisions, plus `events.md`, `shared-data.md` and `invariants.md`, all `#observed`/`#inferred` with `file:line` |
+| One feature in code | `/product:document-feature` (`feature-documenter`) | Nothing in the KB. The feature document gains **How it connects** (one hop out), which is test basis in its own right |
 | Specs and stories | `/business-analysis` (`business-analyst`, ANALYZE or EXTEND) | The same artifacts, `#confirmed` where a source states them |
 
 Each new story then goes through `business-analyst` EXTEND, and the map grows with the product.
@@ -97,7 +97,7 @@ slower, and nothing is kept.
 
 ## 4. The dependency map — three new KB artifacts
 
-The skill `business-analysis:dependency-map` owns all three files. They sit beside the existing ones
+The skill `product:dependency-map` owns all three files. They sit beside the existing ones
 and follow every rule in `knowledge-base`: stable ids, sources, the annotation grammar, the
 header/provenance lines, read-first and update-after. Where a cell names a feature, it uses the
 feature-identity rule (`E<n>` or `AREA-nnn` with a label).
@@ -106,7 +106,7 @@ feature-identity rule (`E<n>` or `AREA-nnn` with a label).
 
 ```markdown
 # Events & reactions
-**Created:** … · **Owned by:** `business-analysis:dependency-map`
+**Created:** … · **Owned by:** `product:dependency-map`
 
 ## Triggers
 | ID | Trigger | Kind | Fired by | Owner | Source |
@@ -300,7 +300,7 @@ Nothing is lost. EP and BVA still read every constraint from the dictionary.
 | # | Step | Skills | Exit gate |
 |---|---|---|---|
 | 1 | Analyze the test basis | `requirements-breakdown` (§1–§7) | As today |
-| 2 | **Map the connections** | `requirements-breakdown` (§8 + `references/connections.md`). Code mode adds `dev:doc-feature-trace` | Every trigger of the feature has its chain to the slice depth. Every state the feature relies on lists the foreign triggers legal there. Every shared field lists its other writers and readers. Every invariant on touched data is listed. Unknowns are open questions. KB candidates are listed. §8 conditions are ranked P1/P2/P3 |
+| 2 | **Map the connections** | `requirements-breakdown` (§8 + `references/connections.md`). Code mode adds `product:doc-feature-trace` | Every trigger of the feature has its chain to the slice depth. Every state the feature relies on lists the foreign triggers legal there. Every shared field lists its other writers and readers. Every invariant on touched data is listed. Unknowns are open questions. KB candidates are listed. §8 conditions are ranked P1/P2/P3 |
 | 3 | Design | `test-design-techniques`, then `cross-feature-test-design` when §8 has entries | The coverage-item list, with each cross-feature item carrying its slice id |
 | 4 | Assemble the suite | `test-case-writer` | As today, plus layer grouping |
 | 5 | Review & coverage | `test-case-writer`, `quality-metrics` | AC → TC **and** Connection → TC matrices, counts by layer, and the depth gate (§7.4) with no unresolved blocker or major |
@@ -309,7 +309,7 @@ Nothing is lost. EP and BVA still read every constraint from the dictionary.
 
 | Input | What happens |
 |---|---|
-| A feature in the code (name, path, endpoint, job) | **Code mode**: `dev:doc-feature-trace` over the feature's entry points of every kind, plus the Edges inventory one hop out (§8.1). Everything is `#observed` with `file:line`. Intent becomes `#assumption` plus a question. Defects go to `bug-report-writer`. Where code and docs disagree, it is a finding |
+| A feature in the code (name, path, endpoint, job) | **Code mode**: `product:doc-feature-trace` over the feature's entry points of every kind, plus the Edges inventory one hop out (§8.1). Everything is `#observed` with `file:line`. Intent becomes `#assumption` plus a question. Defects go to `bug-report-writer`. Where code and docs disagree, it is a finding |
 | A feature the KB models (`E<n>`, `AREA-nnn`, `EVT-nnn`) | The slice comes first. Code mode runs only for what the KB lacks, or where the KB's provenance commit is behind the code it cites |
 
 ### 7.4 The depth gate (Step 5)
@@ -427,7 +427,7 @@ annotation or option, and its barrier primitive.
 - A negative claim names its search. A mode or guarantee the code does not show is `?`.
 - The self-check gains three lines, one each for reactors, readers and mode.
 - "six inventories" becomes "seven" everywhere it is cited: the skill and its description,
-  `be-documenter.md:121`, `be-feature-documenter.md:33` and `:57`, and the catalog.
+  `documenter.md:121`, `feature-documenter.md:33` and `:57`, and the catalog.
 
 ### 8.2 `trace-recipes.md` — following a seam
 
@@ -450,13 +450,13 @@ It has three short lists:
 - **Shares:** which data other areas also change or read.
 
 Evidence rows in the closing table cite the `EVT-` and `RX-` ids. The section is dropped when nothing
-crosses the area boundary, and the negative search becomes an evidence row. `be-feature-documenter`
+crosses the area boundary, and the negative search becomes an evidence row. `feature-documenter`
 writes it from the one-hop Edges, because its document is the only place that feature's connections land.
 
-### 8.4 `be-documenter` writes the dependency map
+### 8.4 `documenter` writes the dependency map
 
 - Step 2 extracts seven inventories.
-- Step 3 path-loads `business-analysis/skills/ba-dependency-map` and writes `events.md`,
+- Step 3 path-loads `product/skills/ba-dependency-map` and writes `events.md`,
   `shared-data.md` and `invariants.md` from the Edges inventories. Every row is `#observed` or
   `#inferred`, with the provenance stamp. It never writes `#confirmed`.
 - Step 5 (Consolidate) runs the map's checks: unconsumed events, orphans, CRUD completeness and
@@ -467,7 +467,7 @@ writes it from the one-hop Edges, because its document is the only place that fe
 ## 9. Worked example — "a member cancels a booking", before and after
 
 The toy is the inherited **workshop-booking** codebase from
-`backend/_shared/business-documentation/references/example-area.md`. That file is AREA-004 *Session
+`product/skills/business-documentation/references/example-area.md`. That file is AREA-004 *Session
 credits & charges*: the Basic plan is 8 credits and £6.00 per overage credit; tiers are Standard 1,
 Workshop 2, Masterclass 3; the cut-off is 24 h; staff cancellations always return credits; posting runs
 on the 1st at 00:00. The other areas are AREA-002 Scheduling and AREA-003 Bookings.
@@ -584,7 +584,7 @@ violations and 53 agent-file violations.
 - A file already over budget may grow only by the net amount its task bullet allows. Where the bullet
   says so, the growth is paid for by moving the file's Example to `references/`. Those files are
   `test-case-writer`, `test-design-techniques`, `qa-test-case-designer`, `qa-test-planner`,
-  `business-analyst`, `business-documentation`, `be-documenter`, `be-feature-documenter`, and the three
+  `business-analyst`, `business-documentation`, `documenter`, `feature-documenter`, and the three
   `qa-api-<stack>` agents, which may each grow by ≤ 800 characters net.
 - Each `time-and-concurrency-testing` SKILL.md stays under 16,000 characters. Per-broker or
   per-scheduler detail that would push it over goes to the skill's `references/`.
@@ -604,14 +604,14 @@ Run from the repo root, in this order. Fix whatever fails, because a failure may
 6. **Id cross-check.** A scratchpad script, not committed, checks that every `EVT-`, `RX-`, `INV-`,
    `ENT-` and `DEC-` id in `qa/manual/cross-feature-test-design/references/*.md` and
    `qa/manual/requirements-breakdown/references/*.md` exists in
-   `business-analysis/skills/ba-dependency-map/references/example-dependency-map.md` or in
-   `backend/_shared/business-documentation/references/example-area.md`. Zero missing.
+   `product/skills/ba-dependency-map/references/example-dependency-map.md` or in
+   `product/skills/business-documentation/references/example-area.md`. Zero missing.
 7. **Arithmetic.** Recompute every number in the QA golden example against §9 and Ana's month in
    `example-area.md`, and record the result in A3's As built.
 8. **Format sweep.** Outside `docs/plans/implemented/`:
    - `grep -rn "six inventories"` has zero matches.
    - `events.md`, `shared-data.md`, `invariants.md`, `EVT-`, `RX-` and `INV-` each appear in both
-     `business-analysis/skills/ba-project-memory/SKILL.md` and
+     `product/skills/ba-project-memory/SKILL.md` and
      `qa/manual/requirements-breakdown/references/connections.md`.
    - Every `Step <n>` inside `qa/manual/agents/qa-test-case-designer.md`, and in other files that cite
      it, matches the five-step table.
@@ -630,7 +630,7 @@ current documentation. Whether they run is part of H1, and the Status line says 
 |---|---|---|
 | A QA-owned `docs/test-model/` | rejected | It would duplicate the grids and decision tables, and two truths drift |
 | Connections only inside each test basis | rejected | They would be re-derived on every run, and nothing could be looked up |
-| Extend `docs/business-model/` | **chosen** | The grids, decisions, conflicts and feature ids are already there. The map joins them, and `be-documenter` and `business-analyst` already write the KB |
+| Extend `docs/business-model/` | **chosen** | The grids, decisions, conflicts and feature ids are already there. The map joins them, and `documenter` and `business-analyst` already write the KB |
 
 Cost: QA reads a format that a plugin from another category owns. The coupling is visible on both
 sides. `dependency-map`'s handoffs name `requirements-breakdown/references/connections.md` as a
@@ -675,8 +675,8 @@ concurrency rows are experience-based checklists keyed to the catalog's *Mode* c
 says so. It is not grown into `test-design-techniques`, which is already over its budget at 18,135
 characters.
 
-**D7 — QA gets a code route by loading `dev:doc-feature-trace`.** The alternative was to send the user
-to `/dev:document-feature` first. `dev` is already a dependency of every `qa-*` plugin, and the trace is
+**D7 — QA gets a code route by loading `product:doc-feature-trace`.** The alternative was to send the user
+to `/product:document-feature` first. `engineering` is a dependency of every `qa-*` plugin but `product` is not, so QA loads the trace by path, which resolves with or without `product` enabled; the trace is
 the library's one procedure for reading code. Cost: a code-derived basis is `#observed`, which shows
 what *is* rather than what *should be*. A disagreement with the docs is a finding, and unrecoverable
 intent is a question. Exploration mode already accepts the same trade.
@@ -751,14 +751,14 @@ No question is open.
 to pass `claude plugin validate` or the checkers at every task boundary, and the plan cannot be stopped
 halfway and trusted. A3 runs §11 once for everything.
 
-### K1 — business-analysis: the dependency map, its golden example, and the KB contract
+### K1 — product: the dependency map, its golden example, and the KB contract
 
 **Stack:** `docs` · **Agent:** `general-purpose`
-**Deliverable:** The KB has a connection layer. `business-analysis:dependency-map` defines `events.md`,
+**Deliverable:** The KB has a connection layer. `product:dependency-map` defines `events.md`,
 `shared-data.md` and `invariants.md` with a golden workshop-booking example. `knowledge-base` carries
 their ids and the §5 feature slice. `state-grid`, `process-flow`, `conflict-check` and the
 `business-analyst` agent all read and write through the new layer, and the skill is registered in the
-`business-analysis` plugin.
+`product` plugin.
 **Depends on:** —
 **Budget:** ~95k:
 - CLAUDE.md, the global rules and the system prompt: ~22k
@@ -767,14 +767,14 @@ their ids and the §5 feature slice. `state-grid`, `process-flow`, `conflict-che
   `ba-process-flow-diagram` 2.7k, `ba-feature-conflict-check` 2.7k, `business-analyst.md` 5.3k): ~16k
 - `ba-decision-table` as the skill pattern: 2.5k
 - `example-area.md` for the toy domain: 6k
-- the `business-analysis` marketplace entry: 1k
+- the `product` marketplace entry: 1k
 - writes (the skill ~4.5k, the example ~4k, the edits ~8k): ~17k
 - reasoning: ~15k
 
 **Gate: none** — this plan gates once, in A3. Do not run `claude plugin validate`,
 `tools/plugin-surface-check.py`, `tools/token-audit.py` or any check script.
 
-- **New skill.** `business-analysis/skills/ba-dependency-map/SKILL.md` with `name: dependency-map`
+- **New skill.** `product/skills/ba-dependency-map/SKILL.md` with `name: dependency-map`
   and the §4.5 description; count it and confirm ≤ 500 characters. Use the CONTRIBUTING outline:
   When to use · When NOT to use · Contract with the KB · Procedure (§4.4) · the three file formats
   (§4.1–§4.3, normative) · the checks (unconsumed event, orphan reaction, cycle, CRUD completeness,
@@ -782,7 +782,7 @@ their ids and the §5 feature slice. `state-grid`, `process-flow`, `conflict-che
   Quality bar · Anti-example · Handoffs. The Handoffs name the QA consumer,
   `qa/manual/requirements-breakdown/references/connections.md`, and state that a format change updates
   it in the same commit. Stay under 16,000 characters.
-- **Golden example.** `business-analysis/skills/ba-dependency-map/references/example-dependency-map.md`
+- **Golden example.** `product/skills/ba-dependency-map/references/example-dependency-map.md`
   is §9.1 as the three KB files would hold it, with the header and provenance lines, plus the ENT-003
   grid with trigger-id columns and DEC-003. Use exactly §9.1's ids, effects and enforcement values,
   because Q1's QA example cites them and the gate cross-checks them. Domain facts must match
@@ -816,25 +816,25 @@ their ids and the §5 feature slice. `state-grid`, `process-flow`, `conflict-che
   - EXTEND accepts **KB candidates** handed over by `qa-test-case-designer` and checks each one against
     its source before folding it in.
   - The Related agents entry for `qa-test-case-designer` says it reads the slice and sends candidates back.
-- **Marketplace.** Add `./business-analysis/skills/ba-dependency-map` to the `business-analysis`
+- **Marketplace.** Add `./product/skills/ba-dependency-map` to the `product`
   plugin's `skills`, after `ba-decision-table`. Add "a dependency map (triggers, reactions, shared data,
   invariants)" to that plugin's description.
 - **Not in K1:** the code route (D1), anything under `qa/` (Q1, Q2, A1–A3), README and the catalog (A3).
 
 **As built (2026-10-11):** as planned, with no divergence and no §9.1 id changed.
-- `business-analysis/skills/ba-dependency-map/SKILL.md` (`name: dependency-map`, ~9.8k bytes; description 490 characters, counted by script) and `references/example-dependency-map.md` (EVT-001…007, RX-001…007, INV-001…004, ENT-003 grid with trigger-id columns, DEC-003; header and `Derived from: code by be-documenter @ a3f9c21` lines).
+- `product/skills/ba-dependency-map/SKILL.md` (`name: dependency-map`, ~9.8k bytes; description 490 characters, counted by script) and `references/example-dependency-map.md` (EVT-001…007, RX-001…007, INV-001…004, ENT-003 grid with trigger-id columns, DEC-003; header and `Derived from: code by documenter @ a3f9c21` lines).
 - `ba-project-memory/SKILL.md`: layout, ids, INDEX `## Dependencies`, `## Feature slice` (§5 table and depth rule), handoff; 14,979 bytes.
 - `ba-entity-state-grid`, `ba-process-flow-diagram`, `ba-feature-conflict-check`: edits per the bullets; the state-grid file-format example now shows `EVT-` column headers.
 - `business-analyst.md`: net +464 characters (19,538 → 20,002), paid partly by two trims.
 - `.claude-plugin/marketplace.json`: skill registered after `ba-decision-table`; plugin description names the dependency map.
 - Unverified: no checker was run.
 
-### D1 — dev: trace edges, "How it connects", and the documenters write the dependency map
+### D1 — product: trace edges, "How it connects", and the documenters write the dependency map
 
 **Stack:** `docs` · **Agent:** `general-purpose`
-**Deliverable:** `dev:doc-feature-trace` produces a seventh inventory, **Edges**, which follows every
+**Deliverable:** `product:doc-feature-trace` produces a seventh inventory, **Edges**, which follows every
 emitted event and every shared field one hop outside the area with `file:line` evidence. Area and
-feature documents carry an optional **How it connects** section. `be-documenter` writes `events.md`,
+feature documents carry an optional **How it connects** section. `documenter` writes `events.md`,
 `shared-data.md` and `invariants.md` from the edges.
 **Depends on:** K1, for the three file formats and the ids.
 **Budget:** ~100k:
@@ -843,7 +843,7 @@ feature documents carry an optional **How it connects** section. `be-documenter`
 - the `dependency-map` skill and example as K1 landed them: ~9k
 - `feature-trace` 3.5k and `trace-recipes.md` ~4k
 - `business-documentation` 5.6k and `example-area.md` 6k
-- `be-documenter.md` 6k and `be-feature-documenter.md` 4k
+- `documenter.md` 6k and `feature-documenter.md` 4k
 - the consumers/jobs part of `codebase-survey`: ~1k
 - writes: ~16k
 - reasoning: ~12k
@@ -851,7 +851,7 @@ feature documents carry an optional **How it connects** section. `be-documenter`
 **Gate: none** — this plan gates once, in A3. Do not run `claude plugin validate`, the checkers,
 `tools/token-audit.py` or any script.
 
-- **`backend/_shared/feature-trace/SKILL.md`:**
+- **`product/skills/feature-trace/SKILL.md`:**
   - Stop 7 records reads and writes as `Entity.field`.
   - Stop 9 becomes "Events emitted — and who reacts", with §8.1's one-hop rule.
   - "The six inventories" becomes "The seven inventories", with **7. Edges** in §8.1's columns.
@@ -859,13 +859,13 @@ feature documents carry an optional **How it connects** section. `be-documenter`
   - The self-check gains three items: every emitted event has its reactors or a named negative search;
     every written field another area reads is listed; mode and failure behaviour are stated or `?`.
   - The description says "seven"; keep it ≤ 500 characters.
-  - The Handoffs gain `business-analysis:dependency-map`, because Edges become `events.md`,
+  - The Handoffs gain `product:dependency-map`, because Edges become `events.md`,
     `shared-data.md` and `invariants.md`.
-- **`backend/_shared/feature-trace/references/trace-recipes.md`:** a "Following a seam" section per
+- **`product/skills/feature-trace/references/trace-recipes.md`:** a "Following a seam" section per
   stack, as §8.2 describes.
-- **`backend/_shared/business-documentation/SKILL.md`** (already over budget; net ≤ 1,500 characters):
+- **`product/skills/business-documentation/SKILL.md`** (already over budget; net ≤ 1,500 characters):
   - The area shape gains the optional `## How it connects`, after *How it works*, as §8.3 describes.
-  - The output table gains a row: the three map files are owned by `business-analysis:dependency-map`,
+  - The output table gains a row: the three map files are owned by `product:dependency-map`,
     so they are "not yours" and are produced in Step 3.
   - The self-check gains "How it connects is present, or its negative search is an evidence row".
 - **`example-area.md`:** add *How it connects* for AREA-004, from §9.1.
@@ -875,23 +875,23 @@ feature documents carry an optional **How it connects** section. `be-documenter`
   - **Shares:** it reads bookings owned by Bookings.
   - Add the evidence rows citing `EVT-`/`RX-` ids. Keep the tone and the language discipline of the
     rest of the file.
-- **`backend/_shared/agents/be-documenter.md`** (already over budget; net ≤ 1,500 characters):
+- **`product/agents/documenter.md`** (already over budget; net ≤ 1,500 characters):
   - Step 2 says seven inventories (line 121).
-  - Step 3 path-loads `business-analysis/skills/ba-dependency-map` and writes the three files: rows
+  - Step 3 path-loads `product/skills/ba-dependency-map` and writes the three files: rows
     `#observed`/`#inferred`, the provenance stamp, never `#confirmed`.
   - Step 5 runs the map's checks.
   - The report gains counts of triggers, reactions and invariants, and of map findings.
-- **`backend/_shared/agents/be-feature-documenter.md`:** "six" becomes "seven" (lines 33 and 57). The
+- **`product/agents/feature-documenter.md`:** "six" becomes "seven" (lines 33 and 57). The
   document includes *How it connects* from the one-hop Edges. It still writes no KB.
-- **Not in D1:** anything under `qa/`; editing `business-analysis/` (read only); the audit lane
-  (`dev:audit-feature` could use Edges later, but not here); README and the catalog (A3).
+- **Not in D1:** anything under `qa/`; editing the `ba-*` skills (read only); the audit lane
+  (`engineering:audit-feature` could use Edges later, but not here); README and the catalog (A3).
 
 **As built (2026-10-11):** as planned, with no divergence; Q1's and Q2's prompts needed no rewrite.
-- `backend/_shared/feature-trace/SKILL.md`: stop 7 and stop 9 reworded, `### 7. Edges` (§8.1's columns, one example row, the `?`-unless-visible rule and the named-negative-search rule), `### Edges` in the record shape, self-check items 8–10, handoff to `business-analysis:dependency-map`; description 492 characters (counted by hand).
+- `product/skills/feature-trace/SKILL.md`: stop 7 and stop 9 reworded, `### 7. Edges` (§8.1's columns, one example row, the `?`-unless-visible rule and the named-negative-search rule), `### Edges` in the record shape, self-check items 8–10, handoff to `product:dependency-map`; description 492 characters (counted by hand).
 - `references/trace-recipes.md`: new `## Part 3b — Following a seam`: a mode table (what the code shows → mode → guarantee, `?` unless a retry, ack or key is visible) and per-stack search blocks for .NET, Java and Node.
 - `business-documentation/SKILL.md`: `## How it connects` in the shape and as a section, an output-table row for the three map files, self-check item 12; net +782 characters.
 - `example-area.md`: `## How it connects` for AREA-004 and six evidence rows citing EVT-004/005/006 and RX-004/005/006/007, INV-004; no existing text or number changed.
-- `be-documenter.md`: seven inventories (Step 2), Step 3 writes the three files, Step 5 runs the map's checks, report counts in both shapes; net +582 characters. `be-feature-documenter.md`: seven (lines 33, 57), `## How it connects` in the document contract, still no KB writes.
+- `documenter.md`: seven inventories (Step 2), Step 3 writes the three files, Step 5 runs the map's checks, report counts in both shapes; net +582 characters. `feature-documenter.md`: seven (lines 33, 57), `## How it connects` in the document contract, still no KB writes.
 - Unverified: no checker was run, and the sizes are counted by hand; the Part 3b search patterns were not run against a real codebase (H1).
 
 ### Q1 — qa/manual: the Connections basis section and the cross-feature test-design skill
@@ -918,7 +918,7 @@ and it is registered in all three `qa-*` plugins.
 
 - **`qa/manual/requirements-breakdown/SKILL.md`:**
   - The input-shape table: the KB row adds "and the §8 slice"; the feature-document row maps
-    *How it connects* to §8; a new row covers code-trace evidence (`dev:doc-feature-trace`, run by the
+    *How it connects* to §8; a new row covers code-trace evidence (`product:doc-feature-trace`, run by the
     agent's Code mode).
   - The OpenAPI walk follows §7.2: no validation row per schema keyword.
   - §4 holds business validations only. §6 gains `On violation`.
@@ -936,7 +936,7 @@ and it is registered in all three `qa-*` plugins.
      open question, and an offer to build the KB.
   4. The KB-candidate rule.
 
-  It states that it reads `docs/business-model/` as data, in the format `business-analysis:dependency-map`
+  It states that it reads `docs/business-model/` as data, in the format `product:dependency-map`
   and `knowledge-base` define, and that QA never writes there.
 - **New skill.** `qa/manual/cross-feature-test-design/SKILL.md` with `name: cross-feature-test-design`
   and the §6.4 description; confirm ≤ 500 characters.
@@ -1005,8 +1005,8 @@ and it is registered in all three `qa-*` plugins.
 - **`qa/manual/agents/qa-test-case-designer.md`** (already over budget; net ≤ 2,000 characters):
   - The input table gains §7.3's two rows.
   - A **Code mode** section goes after Exploration mode, in the same shape and ≤ about 1,200
-    characters. It loads `backend/_shared/feature-trace/SKILL.md` (`dev:doc-feature-trace`, available
-    through the `dev` dependency).
+    characters. It loads `product/skills/feature-trace/SKILL.md` (`product:doc-feature-trace`, loaded by path,
+    so `product` need not be enabled).
   - The steps table becomes §7.3's five steps, with a Step 2 detail paragraph.
   - Step 3 loads `cross-feature-test-design`. Step 5 carries the Connection → TC matrix, counts by
     layer and §7.4's depth gate.
@@ -1156,7 +1156,7 @@ carries §7.8's three checks.
 - current-docs lookups (`TimeProvider`/`FakeTimeProvider` and their package; Hangfire and Quartz.NET
   trigger APIs; NUnit `[Repeat]`): ~8k
 - skill writes: ~10k
-- the catalog, grep-scoped (line 7, line 20, the business-analysis catalog, the `qa/manual` bullets,
+- the catalog, grep-scoped (line 7, line 20, the product catalog, the `qa/manual` bullets,
   the stack-skill list near line 100, line 264): ~8k; README lines 84, 201, 300, 353: ~3k; doc writes ~5k
 - gate output: ~6k
 - the fix loop: ~15k
@@ -1180,14 +1180,14 @@ carries §7.8's three checks.
 - **`qa/dotnet/skills/api-test-author/review/SKILL.md`:** §7.8's three checks.
 - **Marketplace.** Register `./qa/dotnet/skills/time-and-concurrency-testing` in `qa-dotnet` only.
 - **`docs/skills-catalog.md`:**
-  - The scope paragraph and the business-analysis row: 10 skills.
-  - The business-analysis reasoning lane gains a `dependency-map` bullet and the KB-layout mention.
+  - The scope paragraph and the product row: 10 `ba-*` skills.
+  - The product catalog's reasoning lane gains a `dependency-map` bullet and the KB-layout mention.
   - The `qa/manual/` list gains `cross-feature-test-design`, the Code mode and the five steps.
   - The stack-skill list near line 100 gains `time-and-concurrency-testing — java · dotnet · typescript`.
   - The reverse lane, line 264: seven inventories, How it connects, and the dependency map.
 - **`README.md`:**
-  - The business-analysis bullet becomes 10 skills (line 84).
-  - The skills list gains `/business-analysis:dependency-map` (line 201).
+  - The product bullet becomes 10 `ba-*` skills (line 84).
+  - The skills list gains `/product:dependency-map` (line 201).
   - The stack-skill table near line 300 gains a `time-and-concurrency-testing` row.
   - The status row is updated (line 353), and any `qa/manual` list gains `cross-feature-test-design`.
 - **Run §11 and fix what it finds.** Record its output in `Status` and in As built.
@@ -1197,7 +1197,7 @@ carries §7.8's three checks.
 **As built (2026-10-11):** as planned; §11 passed after one fix (D17).
 - `qa/dotnet/skills/time-and-concurrency-testing/SKILL.md`: 15,720 characters (`wc -m`); description 488 characters. A2's layout: `references/helpers.md` holds `CronJobRunner` (kubectl, no catch), `ApiFactory` (`FakeTimeProvider` through `ConfigureTestServices`) with the base fixture that rewinds the clock, and `Race.StartTogetherAsync` (ready signal, `TaskCompletionSource` gate, `Task.WhenAll`) with a `[Repeat(20)]` example.
 - `qa/dotnet/agents/qa-api-dotnet.md`: Step 3 entry plus a Mode B paragraph (seam or named deferral to `be-dotnet`); net +455 characters. `qa/dotnet/skills/api-test-author/review/SKILL.md`: three checks (blocker / major / major) before the 401 row. Marketplace: registered in `qa-dotnet` only (sweep: one folder per plugin, three in all).
-- Docs: `docs/skills-catalog.md` (10 BA skills, `dependency-map` bullet and KB layout and ids, `cross-feature-test-design`, five steps and Code mode, `time-and-concurrency-testing` bullet, seven inventories plus the dependency map in the reverse lane) and `README.md` (10 skills, `/business-analysis:dependency-map`, the stack-skill row, the `qa` status row: 35 code-producing nodes, 8 process skills, the unverified note).
+- Docs: `docs/skills-catalog.md` (10 BA skills, `dependency-map` bullet and KB layout and ids, `cross-feature-test-design`, five steps and Code mode, `time-and-concurrency-testing` bullet, seven inventories plus the dependency map in the reverse lane) and `README.md` (10 skills, `/product:dependency-map`, the stack-skill row, the `qa` status row: 35 code-producing nodes, 8 process skills, the unverified note).
 - APIs checked 2026-10-11: `TimeProvider` (base library from .NET 8) and `Microsoft.Extensions.TimeProvider.Testing` (Learn page of 2026-02-26 shows 10.0.0; `FakeTimeProvider` members from the library's `main` source, so not pinned to a package version: `SetUtcNow`/`Advance` forward-only and throwing backwards, `AdjustTime` rewinds, `SetLocalTimeZone`) · Hangfire 1.7.31 changelog (`TriggerJob` added, `RecurringJob.Trigger` obsolete; 1.8.x not checked) · Quartz.NET 3.x and 4.0.1 (`TriggerJob(JobKey, JobDataMap?, CancellationToken)` from the 4.x remarks; the 4.x return type was not read, `await` works either way) · NUnit 4 `[Repeat]` (stops at first failure; `StopOnFailure` since 4.3.0, `RequiredPassPercentage` NUnit 5; per-repetition `[SetUp]` is inferred from the attribute's design, not a doc sentence). Unchecked: Hangfire's `IRecurringJobManager.TriggerJob` signature on 1.8.x, `WebApplicationFactory` on .NET 8 versus 10 beyond what the skill already assumes.
 - Gate output (§11): steps 1–5 as in `Status`. Step 6: `/tmp/a3/ids.py`, 23 known ids, 0 missing. Step 7: every number in `example-cancel-booking.md` §6 recomputed against §9 and Ana's month (25 h, 24 h 00 m 00 s / 23 h 59 m 59 s / 24 h 00 m 01 s, 8 → 6, 7 → 5, £12.00, £18.00, 52 h, 18 h): 0 mismatches. Step 8: `grep "six inventories"` has matches only in this plan (it quotes the check); the KB terms appear in both files; the designer's `Step <n>` citations match the five-step table; `time-and-concurrency-testing` is in Step 3 of all three `qa-api-*` agents and all three review skills.
 - Unverified: no sample was compiled or run; the .NET `[Repeat]` and `AdjustTime` behaviour is from documentation and source only.
@@ -1264,10 +1264,10 @@ One block is live (H1). K1, D1, Q1, Q2, A1, A2 and A3 have landed (their blocks 
 
 ````
 H1 of docs/plans/005-cross-feature-test-design.md — your checklist. Run it in a work repo that enables
-`qa-<stack>`, `dev` and `business-analysis`.
+`qa-<stack>` and `product`.
 
 1. Pick one feature that has a schedule or an event consumer (a job, a webhook, a message handler).
-2. Optional, stage 1: `/dev:document-feature <feature>` (or `/dev:document-system` for its area) and
+2. Optional, stage 1: `/product:document-feature <feature>` (or `/product:document-system` for its area) and
    check that How it connects lists what starts it, what it sets off, and what it shares — and, for the
    system run, that docs/business-model/events.md, shared-data.md and invariants.md exist.
 3. `/qa-<stack>:test-cases <feature name, path or story>` and check:

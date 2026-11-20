@@ -43,9 +43,9 @@ A, B, C, G, I, K, L, M, N (minus the tagged rows above) are **universal** — ev
 
 ## Read before sweeping
 
-1. **[`engineering-practices/standards-audit-engine`](../../../../engineering-practices/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 steps, the hostile self-review. **Read it first.**
+1. **[`engineering/standards-audit-engine`](../../../../engineering/standards-audit-engine/SKILL.md)** — the engine: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping/coverage policy, the 5 steps, the hostile self-review. **Read it first.**
 2. [`references/conformance-checklist.md`](references/conformance-checklist.md) — the 14 lettered sections (A–N) and every check. **Read end-to-end** before Step 2.
-3. `engineering-practices/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Step 3.
+3. `engineering/standards-audit-engine/references/report-template.md` — the Round-1 / Round-N skeletons. Read before Step 3.
 4. The qa-dotnet rule files the reviewers check against: the project's `.claude/rules/qa-dotnet/`, or `qa/dotnet/skills/rules/` when `/qa-dotnet:rules` has not installed them. Where the project's edited copy and the checklist disagree, the project's copy wins; report the disagreement.
 
 Load the **owning skill** (named per section in the checklist) whenever a check is ambiguous, tool-keyed, or you are about to write its fix direction. When checklist and skill disagree, **the skill wins** — and report the disagreement.
@@ -61,7 +61,7 @@ Report path: `docs/audits/<NNN>-qa-dotnet-conformance-r<N>.md`.
 | Test-case design coverage from requirements | **peer** `qa-test-case-designer` (+ `qa/manual/requirements-breakdown`) — section N reports *suite shape*, not requirement coverage |
 | Filing a defect the suite exposed | `qa/manual/bug-report-writer` |
 | Running a security scan | **peer** `qa-security` — section K inventories secret hygiene in test code only |
-| Code vs a written spec, or a feature trace | `dev:audit-spec` / `dev:audit-feature` / the `code-auditor` agent |
+| Code vs a written spec, or a feature trace | `engineering:audit-spec` / `engineering:audit-feature` / the `code-auditor` agent |
 | Applying any fix found here | the matching `qa-api-dotnet` / `qa-ui-dotnet` / `qa-mobile-dotnet` / `qa-reporting-dotnet` / `qa-cicd-dotnet` agent |
 
 ## Step 0 — the suite lane *(never skip)*

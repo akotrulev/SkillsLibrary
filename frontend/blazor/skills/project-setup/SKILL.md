@@ -39,7 +39,7 @@ dotnet new blazor -o MyApp --interactivity None
 
 ## Render-mode decision — per surface, not per app
 
-**Static SSR is the default. Interactivity is opt-in per surface.** A content page, an API-consuming dashboard, and a live ticker do not share a render mode. The route's rendering mode comes from the plan's `rendering_plan` (`experience-plan.md` §4a), or, with no plan, from the decision procedure in [`rendering-strategy.md`](../../../../backend/_shared/experience-plan/references/rendering-strategy.md). It maps to Blazor like this:
+**Static SSR is the default. Interactivity is opt-in per surface.** A content page, an API-consuming dashboard, and a live ticker do not share a render mode. The route's rendering mode comes from the plan's `rendering_plan` (`experience-plan.md` §4a), or, with no plan, from the decision procedure in [`rendering-strategy.md`](../../../../product/skills/experience-plan/references/rendering-strategy.md). It maps to Blazor like this:
 
 | Plan mode | Blazor mechanism |
 |---|---|

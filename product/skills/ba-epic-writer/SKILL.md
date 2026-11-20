@@ -1,0 +1,196 @@
+---
+name: epics
+description: Use when slicing a requirements document into capability-sized epics (measurable goal, route, stories included). Triggers "write an epic for X", "slice this into epics". Not for stories (stories).
+disable-model-invocation: true
+---
+
+# Epic Writer
+
+The middle of the **requirements → epics → stories** chain. Takes a scoped requirements document and produces one or more epics. An epic is **one capability a person gets**, and it answers the same three questions a story does, one level up: **what the goal is** (one measurable sentence, and the same thing in plain English), **how we get there** (the route across its stories) and **what is included** (the stories, each a whole feature). "Accounts" is an epic; "Authentication" is a story inside it.
+
+**An epic is a capability, not a calendar unit.** Inside the delivery lane every initiative gets epics, however small — `E1..En` are what `solution-planner`'s epic map and delivery plan cite — so an initiative with one capability has one epic, never zero.
+
+## Inputs needed
+
+1. **The requirements document** (`requirements.md` from `product:scoping`, ideally) — its §4 capabilities are what the epics cover, exactly once each
+2. **Success measures** — from `requirements.md` §6, or the epic's own where one capability has its own signal
+3. **Constraints that affect the route** — from `requirements.md` §5; compliance, contractual sequencing, a deadline
+4. **Known dependencies** — work that must complete before, or alongside
+5. **Delivery window and teams**, only where the user has them — they shape sizing and the deferred column, never the goal
+
+## Procedure
+
+1. **Write the plain-English section first.** Section 2 is the epic in the language of the person who asked for it — who it is for and why, what gets built, and how it fits with what already exists. It is not a summary of the sections below and not a translation of them: it is the epic as it was understood, and the rest of the document is the working-out. **If you cannot write it without naming a technology, you do not yet have an epic** — you have a technical task, and the fix is upstream in the requirements, not a better paragraph. Where it disagrees with a section further down, one of the two is wrong; find out which before shipping the epic.
+2. **Then the goal line — an epic has exactly one.** If you can't write it in one sentence using a user / business term and a measurable change, it's two epics. Where the requirements carry no measure, the goal line carries `[TBD — <who decides>]` in the measurable slot and the gap is the epic's first open question; never an invented number, and never a reason to stop.
+3. **Cut epics by goal, then by actor.** Two epics each delivering a usable capability beat one epic where one half blocks the other for two months.
+4. **Spell out the value increment.** What's better for the user or business when the epic is done vs at the start. Vague "platform improvements" with no goal is a tech-debt item, not an epic.
+5. **Write how we get there before listing the stories.** The route across the epic: the axis the stories are cut along (workflow steps, user roles, data variations, read-before-write) and why that one, which story comes first and why a person can already use the capability once it lands, what each later story adds, and any decision already taken or option set aside. A reader finishes it knowing the plan, not just the destination. It carries no technology.
+6. **Then list what is included: the stories.** Each is one whole feature a person would name, with the parts it holds ("Booking a place: book, see my bookings, drop out"). The axis decides where one feature ends and the next begins, never how to cut a feature into fragments. Layers ("the API", "the screen") are never epics or stories — they are cut at task level by `solution-planner`.
+7. **Every epic is usable end to end when done**, and its first story delivers the thinnest complete capability a person can try.
+8. **Out-of-scope is part of the epic.** What is *deliberately* deferred to a follow-up epic, with the reason.
+9. **Risks at the epic level**, not just per story. A risk that affects the whole initiative needs naming early.
+10. **Where a delivery window is stated, hold it.** An epic that threatens to exceed it is split or descoped — never silently extended.
+
+## Output format
+
+```markdown
+# E<n> — <short, goal-shaped title>
+
+**Status:** Draft / Approved / In progress / Done
+**Covers:** requirements.md §4 — <the capability lines this epic delivers>
+**Delivery window:** <only where the user stated one; otherwise omit the line>
+
+## 1. Goal (one sentence)
+When this epic is done, **<who>** can **<do what>** so that **<measurable change>**.
+
+## 2. In plain English
+<No technology anywhere in this section. No table, endpoint, service, component, library,
+ queue or framework — not even by implication. If it cannot be written without one, the
+ epic is a technical task wearing an epic's clothes. Delete this note in the written epic.>
+
+**Who it is for and why**
+<One to three sentences, said the way the person who asked would say it: who needs this, what
+they want to be able to do, and why it matters to them. No numbers — the goal line above
+carries the measurement.>
+
+**What gets built**
+<2–4 sentences describing what will exist, told the way you would tell the person who is going
+to use it. What they will be able to do that they cannot do today, and what it will feel like
+to do it. No mechanism.>
+
+**How it fits with everything else**
+<2–4 sentences placing this epic in the whole. What already exists that this leans on, what it
+adds to, what becomes possible afterwards that was not before, and which other epics a person
+would notice this one connecting to — named by what they are, not by their ids alone
+("the timetable members already browse", not "E1"). Where the epic is the first of its kind in
+the system, say that instead: what it establishes that nothing else has yet.>
+
+## 3. Why now
+<1–3 sentences: why this initiative, what not doing it costs>
+
+## 4. Success measures
+- **Primary:** <measure with baseline → target> (e.g. "Time-to-first-export drops from 4 min to <1 min for 80% of users")
+- **Secondary:** <measure>
+
+## 5. How we get there
+<The route across the stories, a short paragraph or a few bullets: the axis they are cut along
+(workflow / role / read-before-write / data variation) and why; which story comes first and what
+a person can already do once it lands; what each later story adds; decisions already taken and
+options set aside. No technology.>
+
+## 6. What is included (the stories)
+| # | Story | What it holds | Adds |
+|---|-------|---------------|------|
+| 1 | The timetable | see the classes, filter by day, see the places left | First: the capability to read |
+| 2 | Booking a place | book, see my bookings, drop out | The action |
+| 3 | The waiting list | join a full class, be offered a freed place | The full-class case |
+| ... | ... | ... | ... |
+
+These are anticipated, not committed — `product/skills/ba-story-writer` writes each one out in full (goal, how we get there, what is included, acceptance criteria). Each line is a feature a person would name with the parts it holds, never a layer or a component.
+
+## 7. In scope / out of scope / deferred
+| In scope | Out of scope | Deferred (next epic) |
+|----------|--------------|----------------------|
+
+## 8. Dependencies
+- **Blocked by:** <epic / external decision>
+- **Blocks:** <epic>
+- **Parallel:** <epic that touches the same capability; coordinate>
+
+## 9. Risks
+| Risk | L | I | Mitigation |
+|------|---|---|------------|
+
+## 10. Definition of Done (epic-level)
+- [ ] Primary success measure is measurable, and measured once live
+- [ ] All in-scope stories `Done`
+- [ ] Out-of-scope explicitly handed to the next epic or accepted as won't-do
+```
+
+Nothing technical belongs in the document: no cross-team contract section, no API list, no data shapes. Those are `solution-planner`'s artifacts (`api-surface.md`, `data-model.md`) and they cite the epic, not the other way round.
+
+## Standards
+
+What an epic must and must never contain (one measurable goal, the plain-English section with no technology, no tech-only or goal-less epics, a route with a named axis, stories that are whole features and never layers, reasoned out-of-scope, two-way dependencies, the epic's own risks, a binary Definition of Done, a held delivery window, never an invented number) is the product rule file `backlog-epics.md`, not a list here. Read the project's copy in `.claude/rules/product/`, or the plugin's in `product/skills/rules/` when the project has not installed them (`/product:rules` does). Where they and this skill disagree, the rule files win.
+
+## Examples — goal lines
+
+| ✅ Strong | ❌ Weak |
+|---|---|
+| When this epic is done, **finance ops** can **reconcile partner payouts** so that **monthly reconciliation drops from 5 days to <1 day** | We will improve the payouts area |
+| When this epic is done, **mobile users** can **complete onboarding offline** so that **drop-off on Signup step 3 falls from 22% to <10%** | Offline support for mobile |
+| When this epic is done, **support agents** can **issue partial refunds in one click** so that **refund time-to-resolution p95 drops from 12 min to <3 min** | Refund flow improvements |
+
+The pattern: **WHO** + **CAN DO WHAT** + **SO THAT MEASURABLE CHANGE**. If any of the three is missing, the epic isn't ready.
+
+## Example — goal, route and stories, filled
+
+`E2 Booking`, from the workshop-booking initiative. Its goal line reads *"When this epic is done,
+**members** can **book and manage a place on a session** so that **no-show rate falls from 18% to
+under 8%**"* — accurate, measurable, and not something you would read aloud to the studio owner.
+Section 2 is what you would read aloud; sections 5 and 6 say how the epic gets there and what is in it:
+
+```markdown
+## 2. In plain English
+
+**Who it is for and why**
+Gym members want to know they have a place on a class before they turn up, and to be able to
+change their mind without phoning anyone. The studio wants to know who to expect.
+
+**What gets built**
+A member browsing the timetable can take a place on any class that still has room, in one action,
+and see straight away that it worked. Their own upcoming classes are collected in one place, so
+they can check what they signed up for and drop out of something they can no longer make. If a
+class fills up before they get to it, they are told that plainly rather than being allowed to
+book and disappointed later.
+
+**How it fits with everything else**
+It builds directly on the timetable members can already browse — booking is the action that
+timetable was missing, and it lives on the class the member is already looking at. It is also the
+first thing in the system that belongs to an individual member rather than to the studio, which is
+what the confirmation email later hangs off, and what makes a member's own history worth keeping.
+Nothing the studio does to the timetable changes; staff still publish classes exactly as before.
+
+## 5. How we get there
+- The stories follow what a member does, in order: take a place first, then deal with a class
+  that is full.
+- Booking a place comes first and is usable on its own: a member can book, see their bookings and
+  drop out, and a full class simply says it is full.
+- The waiting list is added second, because it only matters once classes fill, and it needs a
+  booking to give a freed place to.
+- Paying for a class at the moment of booking was considered and set aside: places are covered by
+  the membership (decided by the studio owner).
+
+## 6. What is included (the stories)
+| # | Story | What it holds | Adds |
+|---|-------|---------------|------|
+| 1 | Booking a place | book a class with room, see my bookings, drop out | First: the whole capability for a class with room |
+| 2 | The waiting list | join a full class, be offered a freed place, accept or pass | The full-class case |
+```
+
+Read what it does not contain: no endpoint, no table, no screen name, no capacity constraint, no
+percentage outside section 1. The mechanism is `solution-planner`'s, and the studio owner can tell
+you whether this is the thing they asked for and whether the order makes sense.
+
+## Sizing heuristics
+
+An epic is one capability a person gets. Size follows from that, not from a calendar:
+
+| Symptom | Shape |
+|---|---|
+| One capability, one or a few stories | **One epic** — small is fine; the epic still exists so the plan can cite it |
+| One capability with several actors or data variations | **One epic**, its stories cut by actor or variation |
+| Two capabilities that happen to share an area | **Two epics** — one goal each, "parallel" dependency noted |
+| A capability spanning several delivery windows | **Split by window**, each part usable on its own and with its own goal line |
+
+## Generation steps
+
+1. Read the requirements document. If it is unscoped, route back to `product/skills/ba-scoping-writeup`. If it merely lacks a success measure, proceed — the measure becomes `[TBD — who decides]` and an open question
+2. Write the plain-English section (§2): who it is for and why, what gets built, how it fits. **Read it back with every technical noun removed** — if a sentence stops making sense, rewrite the sentence, do not reinstate the noun
+3. Draft the one-sentence goal from it — iterate with the user until WHO / DO WHAT / SO THAT MEASURABLE CHANGE all pass the sniff test
+4. Write how we get there (§5): the axis, the first story and why it is usable alone, what each later one adds, decisions taken
+5. List what is included (§6): each story, the parts it holds, what it adds — anticipated, not committed
+6. Mark in-scope / out-of-scope / deferred with rationale
+7. Surface epic-level risks and dependencies
+8. Write the Definition of Done as a binary checklist
+9. Hand off to `product/skills/ba-story-writer`

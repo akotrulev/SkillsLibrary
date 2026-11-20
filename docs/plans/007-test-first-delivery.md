@@ -8,15 +8,15 @@
 
 | Need | Today | Gap |
 |---|---|---|
-| Acceptance tests are written before the implementation | QA authoring is a separate pass at the end: "Live/E2E/integration test runs … belong to a separate QA pass owned by a `qa-*` peer" (`backend/_shared/delivery-plan/SKILL.md:361`), and the agent-batched order puts "the QA pass" in the verification batch (`:177`) | A `Q` task family between the contract tasks and the implementation (§2, §3.2) |
+| Acceptance tests are written before the implementation | QA authoring is a separate pass at the end: "Live/E2E/integration test runs … belong to a separate QA pass owned by a `qa-*` peer" (`product/skills/delivery-plan/SKILL.md:361`), and the agent-batched order puts "the QA pass" in the verification batch (`:177`) | A `Q` task family between the contract tasks and the implementation (§2, §3.2) |
 | `Q` tasks have something to test against | Contract-wave stubs return "an explicit not-implemented response" (`delivery-plan/SKILL.md:191`), shape unspecified; the OpenAPI asset is generated "after the last endpoint task" (`:110`) | One stub response, defined once; the asset generated from the stubs by the contract task (§4.1, D3, D6) |
-| Tests trace to requirements | Stories carry acceptance criteria as met-or-not bullets with stable ids `AC1..ACn` (`business-analysis/skills/ba-story-writer/SKILL.md:50`), cited as `US13 AC2` in `ba-story-quality-review`; `api-surface.md` endpoint blocks and `experience-plan.md` journeys do not cite them | An `Acceptance:` line on each endpoint block and each journey (§4.2, §4.3) |
-| Journey tests can be written before the screens | Test ids are authored with the components (`frontend/*/skills/test-ids`); `experience-plan.md` screen blocks carry none (`backend/_shared/experience-plan/SKILL.md:68-90`) | A `Test ids:` line per screen: the names the page objects and the screen both bind to (§4.3) |
-| Implementers see red turn green | The plan gates once and every earlier task runs nothing (`engineering-practices/writing-plans/references/plan-format.md` §5); 58 agents carry the identical "`Gate: none` … runs no build, test suite" bullet | A `Gate: own tests` form: a filtered run of the task's own tests (§3.1, D1) |
+| Tests trace to requirements | Stories carry acceptance criteria as met-or-not bullets with stable ids `AC1..ACn` (`product/skills/ba-story-writer/SKILL.md:50`), cited as `US13 AC2` in `ba-story-quality-review`; `api-surface.md` endpoint blocks and `experience-plan.md` journeys do not cite them | An `Acceptance:` line on each endpoint block and each journey (§4.2, §4.3) |
+| Journey tests can be written before the screens | Test ids are authored with the components (`frontend/*/skills/test-ids`); `experience-plan.md` screen blocks carry none (`product/skills/experience-plan/SKILL.md:68-90`) | A `Test ids:` line per screen: the names the page objects and the screen both bind to (§4.3) |
+| Implementers see red turn green | The plan gates once and every earlier task runs nothing (`product/skills/writing-plans/references/plan-format.md` §5); 58 agents carry the identical "`Gate: none` … runs no build, test suite" bullet | A `Gate: own tests` form: a filtered run of the task's own tests (§3.1, D1) |
 | Implementers cannot pass a test by changing it | No rule; the gate task "fixes what it finds" (`plan-format.md` §5), tests included | Acceptance tests are read-only to implementation tasks (§3.3, D2) |
 | The QA agents can write tests against stubs | `qa-api-<stack>` Mode A builds from a spec and assumes a working service (`qa/dotnet/agents/qa-api-dotnet.md:37`); nothing expects red | A shared `qa/_shared/test-first` skill the nine qa-api/ui/mobile agents cite (§6, D5) |
 | Behaviour a change must keep is pinned before the change | Only the unit-level re-entry "the logic is right, the tests are missing" (`backend/dotnet/agents/be-dotnet.md:55`) | A pin task ahead of any change to behaviour no test pins (§5.3, D7) |
-| A plan's tests and code share one worktree | Plan Queue makes one worktree per plan, of one repo; the coverage floor diffs one repo's history (`plan-format.md` §5); the blueprint says nothing about repo layout (`backend/_shared/solution-blueprint/SKILL.md` §3) | A repository-layout line in the blueprint, and test-first plans that stay inside one repo (§2.1, D8) |
+| A plan's tests and code share one worktree | Plan Queue makes one worktree per plan, of one repo; the coverage floor diffs one repo's history (`plan-format.md` §5); the blueprint says nothing about repo layout (`product/skills/solution-blueprint/SKILL.md` §3) | A repository-layout line in the blueprint, and test-first plans that stay inside one repo (§2.1, D8) |
 | The default architecture stays cheap to split | The blueprint's default is a modular monolith whose stated cost is "module boundaries need discipline to survive" (`solution-blueprint/SKILL.md:94`), with no rule or test enforcing them; the data model skips the ownership map for a monolith (`data-model-plan/SKILL.md` Step 6); the planner says "under ~4 functional areas" (`solution-planner.md:88`) where the blueprint says "< ~6" | Four boundary rules, an architecture test and the split triggers (§4.5, D9) |
 | Services are observable while they are built | The planner schedules telemetry last — "Last \| The OpenAPI asset, telemetry, …" (`delivery-plan/SKILL.md:161`, `:177`, `:206`) — and the blueprint's routing example runs it "after the first capability's tasks land" (`solution-blueprint/SKILL.md:212`); the `be-*` agents never instrument, the `observability-engineer-<stack>` peer does it afterwards | The telemetry base in the foundation, every implementation task instruments what it builds, and the gate proves the signals arrive (§4.6, D10) |
 | A plan says which tasks can run at the same time | Plan Queue is gaining parallel tasks: a `Depends on: T1, T2` line in a task's prompt starts it as soon as those are done, and `Depends on: none` starts it at once. No planning skill writes that line. A task block's `**Depends on:**` lists prerequisites only — not the file overlaps that make two concurrent tasks collide — and position stands in for every other ordering; `solution-planner` packs carry streams instead (`delivery-plan/SKILL.md` Step 3) | A `Depends on:` line in every prompt block, naming its prerequisites and every earlier task it shares files or a build with; the preamble says what runs together; a close-out that is safe while another task runs (§3.7, D11) |
@@ -26,8 +26,8 @@
 
 | # | Step | Who | Produces | Tests |
 |---|---|---|---|---|
-| 1 | Define the feature | `requirements-author` (`/dev:refine`) | `stories.md`: one story per feature, AC as met-or-not bullets, cited `US7 AC2` | — |
-| 2 | Agree the contracts | `solution-planner` (`/dev:plan-system`) | approved `blueprint.md`; `data-model.md`; `api-surface.md` with `Acceptance:` per endpoint; `experience-plan.md` with `Test ids:` per screen and `Acceptance:` per journey; `delivery-plan.md` in the test-first order | — |
+| 1 | Define the feature | `requirements-author` (`/product:refine`) | `stories.md`: one story per feature, AC as met-or-not bullets, cited `US7 AC2` | — |
+| 2 | Agree the contracts | `solution-planner` (`/product:plan-system`) | approved `blueprint.md`; `data-model.md`; `api-surface.md` with `Acceptance:` per endpoint; `experience-plan.md` with `Test ids:` per screen and `Acceptance:` per journey; `delivery-plan.md` in the test-first order | — |
 | 3 | Contract tasks `C` | `be-<stack>`, plus `data-architect` for schema depth, `fe-<stack>` for the shell, and `observability-engineer-<stack>` for the telemetry base | schema and migrations, the module folders with a schema each and the architecture test, entities, DTOs, error envelope, auth wiring, **every endpoint routed and answering `501 not-implemented`**, the OpenAPI asset generated from the stubs, the app shell with a placeholder per screen route, and **the telemetry base**: OpenTelemetry, structured logs carrying the trace id, the local Grafana stack | compile; nothing to run |
 | 4 | Acceptance tasks `Q` | `qa-api-<stack>`, then `qa-ui-<stack>` / `qa-mobile-<stack>` | API tests from the endpoint blocks, the validation catalog and the ACs; journey tests on the agreed test ids | **red**, each on `not-implemented` |
 | 5 | Implementation tasks `B`, `F` | `be-*`, then `fe-*` / `mobile-*` | the logic, with unit tests at the 80% branch floor, **instrumented as it is built** — the spans, decision-point logs and business metrics its task names | the task's acceptance tests turn **green**; they are read-only |
@@ -63,7 +63,7 @@ A plan runs in one Plan Queue worktree, which is one repo, and the coverage floo
 
 ## 3. The plan format
 
-Files: `engineering-practices/writing-plans/references/plan-format.md`, `engineering-practices/writing-plans/SKILL.md`, and the Planning section of `CLAUDE.md`.
+Files: `product/skills/writing-plans/references/plan-format.md`, `product/skills/writing-plans/SKILL.md`, and the Planning section of `CLAUDE.md`.
 
 ### 3.1 `Gate: own tests` (D1)
 
@@ -203,7 +203,7 @@ Today the planner puts telemetry after the features, and only the `observability
 
 ## 5. The planner
 
-### 5.1 `backend/_shared/delivery-plan/SKILL.md`
+### 5.1 `product/skills/delivery-plan/SKILL.md`
 
 - **Step 1 table, two new rows:** endpoint blocks + the validation catalog + the `Acceptance:` lines → **API acceptance tasks** (`qa-api-<stack>`, one per resource group that fits a session); journeys + `Test ids:` → **journey tasks** (`qa-ui-<stack>` / `qa-mobile-<stack>`). The OpenAPI-asset row (`:110`) changes: in a test-first plan, the contract task generates the asset from the stubs.
 - **Step 2, every shape:** the `Q` tasks sit after the contract tasks and before the implementation they specify.
@@ -225,13 +225,13 @@ The example (agent-batched, .NET API + web client) gains `Q1` (the Bookings API 
 
 Behaviour the plan must **not** change, that no test pins, gets a **pin task** before the first task that touches it: `qa-api-<stack>` pins what the API shows, and the `be-<stack>` agent pins logic with unit tests (the "logic is right, the tests are missing" re-entry). Deliverable: "the current behaviour of <area> is pinned by N tests, green on today's code." Pin tests are read-only like acceptance tests. Behaviour the plan **does** change gets `Q` tests for the new behaviour instead, never a pin.
 
-### 5.4 `backend/_shared/session-budget/SKILL.md` and `references/prompts-section-template.md`
+### 5.4 `product/skills/session-budget/SKILL.md` and `references/prompts-section-template.md`
 
 - The read-back table: **10k** for an own-tests task.
 - A `Q` block shape. Its reading list: the endpoint blocks by section, the validation catalog's standard set, the ACs, and the OpenAPI asset's path from the contract task's `As built`. Its traps: §3.4, never assert the stub, bind to the contract and the test ids, never to code. Its gate: `own tests`, expecting red.
 - The implementation block: §3.3 verbatim, and `Gate: own tests` expecting green.
 
-### 5.5 `backend/_shared/agents/solution-planner.md`
+### 5.5 `product/agents/solution-planner.md`
 
 - Step 1's question batch: test-first is the default where there is an API surface or a journey (D4); ask only whether to opt out, and record the answer beside the execution model. The repository layout is proposed per §4.4.
 - The routing map includes the `qa-*` agents for `Q` tasks, with `qa-<stack>:test-first`.
@@ -268,7 +268,7 @@ In all 58 it becomes, verbatim:
 
 > - **Inside a plan task, the prompt block's `Gate:` line decides what you run.** A `Gate: none` task writes its code and tests and runs nothing. A `Gate: own tests` task runs exactly the command its block names — its own tests and the acceptance tests it writes or must turn green — and nothing else: no full suite, no other tree's build, no lint or typecheck. Only the task that carries the plan's gate runs the whole set, whatever an exit criterion below says.
 
-The three variants — `qa/manual/agents/qa-test-case-designer.md`, `qa/manual/agents/qa-feature-spec-writer.md:36` and `engineering-practices/verify-before-done/SKILL.md:14` — get the same meaning in their own words.
+The three variants — `qa/manual/agents/qa-test-case-designer.md`, `qa/manual/agents/qa-feature-spec-writer.md:36` and `engineering/verify-before-done/SKILL.md:14` — get the same meaning in their own words.
 
 ### 7.2 The read-only rule
 
@@ -293,7 +293,7 @@ From the SkillsLibrary root, in order:
 5. `python3 tools/qa-version-check.py` reports OK.
 6. ``grep -rlF 'A `Gate: own tests` task runs exactly the command its block names' --include='*.md' . | grep -v docs/plans | wc -l`` is 59 (the 57 replaced bullets plus the two qa-manual variants that use the same sentence); `grep -rlF "the acceptance tests are the spec, and they are read-only to you" --include='*.md' . | grep -v docs/plans | wc -l` is 10; the old bullet's text appears nowhere outside `docs/plans/`.
 7. `qa/_shared/test-first` is registered in exactly the three `qa-*` plugins, and every citation of `qa-<stack>:test-first` or `qa/_shared/test-first` resolves.
-8. Built to be split (M1): `grep -c "~4 functional areas" backend/_shared/agents/solution-planner.md` prints 0; the blueprint's default row reads "built to be split later"; `backend/{dotnet,java,node}/skills/pattern-writer/SKILL.md` each have a module-boundaries section naming ArchUnitNET, Spring Modulith (or ArchUnit) and dependency-cruiser respectively, and none recommends NetArchTest.Rules.
+8. Built to be split (M1): `grep -c "~4 functional areas" product/agents/solution-planner.md` prints 0; the blueprint's default row reads "built to be split later"; `backend/{dotnet,java,node}/skills/pattern-writer/SKILL.md` each have a module-boundaries section naming ArchUnitNET, Spring Modulith (or ArchUnit) and dependency-cruiser respectively, and none recommends NetArchTest.Rules.
 9. Observable from the first task (L1): no `Last` row in `delivery-plan/SKILL.md` names telemetry, and all three shapes carry the telemetry base in their foundation rows; `plan-format.md` §5 names the telemetry smoke; `grep -l "Instrument what you build" backend/{dotnet,java,node}/agents/be-*.md` lists three files.
 10. Parallel tasks (P1): `plan-format.md` §6 requires a `Depends on:` line in every prompt block, the `Runs beside` column and the preamble's runs-together line; §4 says the line names overlap edges; §7 carries the two close-out additions; the prompts template shows the line in every block; `writing-plans/SKILL.md` Self-Review checks the overlap edges.
 11. Format sweep over the changed files: no `TODO` or `FIXME`; every `file:line` this plan cites still points at the text it names.
@@ -418,7 +418,7 @@ H1 replaces rules 5 and 6 of `~/.claude/CLAUDE.md` § "How features are broken d
    at once), so independent tasks run in parallel. **Two tasks close a plan: the gate task, then
    the documentation task** (2026-11-13). The gate task writes no product documentation and
    merges the default branch into the plan's branch. The plan's last task is `DOC1`: stack
-   `docs`, agent `be-documenter` (`be-feature-documenter` where the project documents per
+   `docs`, agent `documenter` (`feature-documenter` where the project documents per
    feature), depending on the gate task. It updates the documentation from the code that
    landed, never from the plan; its gate is the doc lint; it files the plan. It is left out only
    with `Documentation task: none — <why>` in the plan header. Every task still runs the plan's
@@ -614,8 +614,8 @@ H2 of docs/plans/007-test-first-delivery.md — your checklist.
 
 0. In SkillsLibrary: `git push origin master`, then `claude plugin marketplace update skills-library`.
    Answer O4 and O5 in the plan first; they decide the project and where its acceptance tests live.
-1. In the chosen project, take one small feature — one resource and one screen. Run `/dev:refine`,
-   then `/dev:plan-system`. Check the delivery plan before queueing it:
+1. In the chosen project, take one small feature — one resource and one screen. Run `/product:refine`,
+   then `/product:plan-system`. Check the delivery plan before queueing it:
    - the contract task stubs every endpoint with `501 not-implemented` and generates the OpenAPI
      asset from the stubs;
    - the contract wave holds the module folders with the architecture test, and the telemetry

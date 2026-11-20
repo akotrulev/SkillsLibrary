@@ -1,0 +1,110 @@
+---
+name: dependency-map
+description: Use when mapping a business model's connections (triggers, cross-feature reactions, shared data, invariants). Triggers "what else happens when X". Not for one entity's lifecycle (state-grid).
+disable-model-invocation: true
+---
+
+# BA — Dependency Mapper
+
+Records how features connect: what **starts** each piece of behavior (a trigger), what **happens next** (a reaction), which **data** several features write or read, and what must **always hold** across those writes. The entity grids say what may happen to one entity; the decision tables say which outcome a rule set yields. Neither says that cancelling a booking also returns credits, removes an accrual and frees a seat, in three features, after commit, at-least-once. That is the connection layer, and it lives in three files of the KB.
+
+A reaction that nobody fires, an event that nobody consumes, a field two features write with no rule between them: each is invisible inside one feature's spec and visible the moment the connections sit in one place.
+
+## Contract with the KB
+
+Per `product/skills/ba-project-memory`: **read first** (`INDEX.md`, the three files if they exist, and the entity grids and decision files the feature touches), **update after** (the three files, `INDEX.md`, `active-context.md`). New rows join the existing files; a second events file for one feature is the anti-pattern.
+
+Where a cell names a feature, it uses the feature-identity rule: `E<n>` or `AREA-nnn` with a label. Every row carries a source and a confidence tag, in the KB's annotation grammar.
+
+## Procedure
+
+1. **Read the KB first**: `INDEX.md`, `events.md`, `shared-data.md`, `invariants.md`, and the grids and decisions the feature touches.
+2. **List the triggers**, all five kinds. Every event column of every entity grid must appear here.
+3. **List the reactions**: when, guard, owner, effects, emits, mode, on failure.
+4. **Follow the chains.** Check for unconsumed events, orphan reactions and cycles.
+5. **Build the shared data.** Fields read by a schedule's selection count as reads. Run the completeness check.
+6. **Record the invariants and resource limits**, with who threatens each and whether each is enforced.
+7. **Hand every finding to `conflict-check`** with a boundary condition, then update the KB.
+
+## `events.md` — triggers and reactions
+
+```markdown
+# Events & reactions
+
+**Created:** <YYYY-MM-DD>
+**Owned by:** `product:dependency-map`
+
+## Triggers
+| ID | Trigger | Kind | Fired by | Owner | Source |
+
+## Reactions
+| ID | When | Guard | Owner | Effects | Emits | Mode | On failure | Source |
+```
+
+- **Kind** is one of five values:
+  - `command`: an actor asks, through an API call, a screen or an admin tool.
+  - `schedule`: a clock fires it. *Fired by* carries the schedule and its timezone.
+  - `timeout`: a deadline relative to an entity, such as "15 min after a reservation".
+  - `external`: an inbound webhook, callback, file drop or partner message.
+  - `event`: an internal past-tense fact. *Fired by* lists the `RX-` ids that emit it.
+- **Effects** use four forms, separated by `;`:
+  - `ENT-nnn From → To`
+  - `DEC-nnn` (the decision evaluated)
+  - `Entity.field +n | −n | := v`, or `creates <Entity>`
+  - `notifies <who>`, which is terminal
+- **Mode** is one of four values:
+  - `in request`: the same transaction as the trigger.
+  - `after commit, <at-least-once | at-most-once | exactly-once | ?>`
+  - `scheduled`: runs inside a schedule over the selection named in *Guard*.
+  - `best effort`: loss is acceptable, and *Source* names the decision that says so.
+- **On failure** is one of: `rolls back` · `retried <n>× then <dead-letter | alert | drop>` · `compensates: <what>` · `unhandled` · `?`. The last two are findings.
+- The rules every row must meet (grid columns are triggers, consumed events, fired reactions, broken cycles) are in `business-model-connections.md` (below).
+
+## `shared-data.md` — the CRUD matrix and the shared fields
+
+```markdown
+## CRUD matrix — entities touched by two or more features
+| Entity | Create | Read | Update | Delete | Completeness |
+
+## Shared fields
+| Field | Written by | Read by | Note |
+```
+
+- Cells list `RX-` ids. A human reader is named plainly (`screen: my balance`, `report: monthly revenue`). A schedule's selection counts as a read.
+- Only entities that two or more features touch get a matrix row. Only fields with two or more writers, or a writer in one feature and a reader in another, get a shared-field row. Anything else is a schema dump.
+- **Completeness** is the static half of CRUD testing (ISTQB CTAL-TA v4.0 §3.2.1). A missing operation is either `by decision (<source>)` or a finding.
+
+## `invariants.md` — what must always hold
+
+```markdown
+| ID | Invariant | Fields | Threatened by | Enforced | Source |
+```
+
+- An invariant is an always/never statement or a resource limit, such as capacity, quota or budget. `conflict-check` finds them while normalizing (its §1); from then on they are kept here.
+- *Threatened by* lists every reaction that writes any of the invariant's fields, taken from `shared-data.md`.
+- *Enforced* is stated per threatening reaction: `yes (<how>)`, or `no` / `?`, both of which are findings.
+
+## The checks
+
+| Check | Finding when | Boundary condition names |
+|---|---|---|
+| Unconsumed event | an `event` trigger has no reaction and no `terminal by decision` | the emitting reaction and what the missing consumer would have done |
+| Orphan reaction | a reaction's *When* is fired by nothing | the state in which the reaction would be expected to run |
+| Cycle | reactions emit and consume each other with no breaking guard | the first trigger and the entity state that repeats |
+| CRUD completeness | a matrix cell is empty without `by decision` | the operation and the entity state in which it is expected |
+| Unenforced invariant | a threatening reaction is `no` or `?` | the concrete sequence of reactions that breaks it |
+| Unsafe failure or mode | *On failure* is `unhandled` or `?`, or *Mode* is `?` | the failed or repeated delivery and the data left behind |
+
+Every finding goes to `product/skills/ba-feature-conflict-check` for severity and resolution recording; none is resolved here. An edge a source is silent on is `[TBD - source silent]`, never a guessed `yes` or `in request`.
+
+## Standards
+
+The quality bar for the three files is the product rule files, not a list here: `business-model-connections.md` (closed vocabularies for kind, effects, mode and on-failure; every reaction column filled; the shared-data and invariant limits; silence as `[TBD - source silent]`) plus the core `business-model.md`. Read the project's copy in `.claude/rules/product/`, or the plugin's in `product/skills/rules/` when the project has not installed them (`/product:rules` does). Where they and this skill disagree, the rule files win. Neither file holds test cases, techniques or coverage.
+
+## Anti-example
+
+Bad: the bookings spec says a cancellation frees a seat; the credits spec says credits come back on cancellation. Each is correct alone and neither lists the other. The map records the cancellation as one trigger with reactions in both features, plus the second event (cancelled by staff, from a session cancellation) that reaches the same credit reaction. The reaction's mode (at-least-once) and the missing idempotency key become visible as an unenforced invariant, instead of a double refund found in production.
+
+Also bad: one row per field of every table. The shared-data file holds only what two features touch.
+
+A filled example is in `references/example-dependency-map.md`.

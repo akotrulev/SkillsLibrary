@@ -22,7 +22,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 ## Every run, before writing anything
 
 1. **Read the rules.** `.claude/rules/training-data/` in the project: `datasets.md`, `eval-sets.md` and `dataset-docs.md` are the checklist the sections below apply. When the project has none, read `training-data/skills/rules/` and tell the user `/training-data:rules` installs them.
-2. **Orient.** Load `engineering-practices/agent-orientation-cache` and run its gate on `docs/agent-context/dataset-auditor.md` (TRUST / DELTA / FULL, one line). The audit spine (which sections apply to this stage and modality, the eval targets) is cacheable; a finding's `id` or `file:line` is only ever produced by reading it this round.
+2. **Orient.** Load `engineering/agent-orientation-cache` and run its gate on `docs/agent-context/dataset-auditor.md` (TRUST / DELTA / FULL, one line). The audit spine (which sections apply to this stage and modality, the eval targets) is cacheable; a finding's `id` or `file:line` is only ever produced by reading it this round.
 3. **Read what already exists in `docs/datasets/audits/`** for this dataset: no earlier round means BASELINE (Round 1); otherwise RE-AUDIT, Round N+1, reloading the last round's findings and ids.
 4. **Read the manifest and the card**: they are the claims you will verify against the bytes.
 
@@ -32,7 +32,7 @@ Ask at most two or three questions up front (the eval or benchmark targets to de
 
 | # | Step | Load | Done when |
 |---|---|---|---|
-| 1 | Applicability gate | `engineering-practices/standards-audit-engine` (round machinery, evidence rules, severity); `training-data/_shared/td-dataset-formats` | Mode, round, evidence mode and the sections that apply are stated (pretraining weights B, C, F and skips the chat shape in A; VLM adds the image checks of `training-data/skills/td-vision-language-data` under A–D) |
+| 1 | Applicability gate | `engineering/standards-audit-engine` (round machinery, evidence rules, severity); `training-data/_shared/td-dataset-formats` | Mode, round, evidence mode and the sections that apply are stated (pretraining weights B, C, F and skips the chat shape in A; VLM adds the image checks of `training-data/skills/td-vision-language-data` under A–D) |
 | 2 | Sweep | Per section below | Every applicable section has a verdict and severity-tabled findings with evidence read this round |
 | 3 | Report | `standards-audit-engine` report shape | Each section closes with a 2–4 sentence rollup (state, pattern, next action); a leverage-ordered priority table routes each finding to `dataset-engineer` with its section id; the round file is saved |
 | 4 | Self-review | — | Every finding re-read hostile: evidence present, severity justified, no fix applied |

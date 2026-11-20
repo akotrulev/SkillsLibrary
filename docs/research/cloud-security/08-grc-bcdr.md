@@ -1,6 +1,6 @@
 # 08 — Cloud GRC & BCDR (course module M14)
 
-*Scope:* research notes for course module **M14 — Cloud Governance, Risk & Compliance (deep dive)**. Most of M14 is a **cross-reference** to artifacts the library already owns — `security/compliance-evidence-mapping` (SOC 2 / PCI DSS 4.0.1 / ISO 27001:2022 / GDPR, bridged by ASVS) holds the control crosswalk, and `engineering-practices/standards-audit` runs the benchmark/standards gap-assessment. The **one genuine gap is BCDR**: there is no business-continuity / disaster-recovery reference anywhere in the library. That gap lands as a new file, **`security/cloud-incident-response/references/cloud-resilience.md`**, plus one crosswalk row added to `compliance-evidence-mapping`. Governance, risk, and the standards catalog in this file are reference material to point the two existing skills at, not new skills.
+*Scope:* research notes for course module **M14 — Cloud Governance, Risk & Compliance (deep dive)**. Most of M14 is a **cross-reference** to artifacts the library already owns — `security/compliance-evidence-mapping` (SOC 2 / PCI DSS 4.0.1 / ISO 27001:2022 / GDPR, bridged by ASVS) holds the control crosswalk, and `engineering/standards-audit` runs the benchmark/standards gap-assessment. The **one genuine gap is BCDR**: there is no business-continuity / disaster-recovery reference anywhere in the library. That gap lands as a new file, **`security/cloud-incident-response/references/cloud-resilience.md`**, plus one crosswalk row added to `compliance-evidence-mapping`. Governance, risk, and the standards catalog in this file are reference material to point the two existing skills at, not new skills.
 
 ---
 
@@ -65,7 +65,7 @@ The frameworks M14 names, what each actually covers, and where the cloud evidenc
 **Cross-reference, not new content.** The crosswalk between these frameworks **already exists** in `security/compliance-evidence-mapping` (SOC 2 / PCI DSS 4.0.1 / ISO 27001:2022 / GDPR, bridged by ASVS). M14's standards work is **pointing that skill at the cloud-control layer**, not rebuilding a crosswalk.
 
 > **Recommended cross-reference wording** (for the top of this file's "standards & compliance" use, and for the M14 module note):
-> *"Framework-to-control mapping is owned by `security/compliance-evidence-mapping`; add the cloud-control dimension there (CIS cloud Foundations Benchmarks, ISO 27017/27018, CSA CCM v4) rather than authoring a parallel crosswalk. Benchmark gap-assessment against a target (CIS/NIST CSF 2.0) is owned by `engineering-practices/standards-audit`. This module adds exactly one row set — BCDR → SOC 2 A1.2/A1.3 · ISO 27001:2022 A.5.29/A.5.30 · NIST CSF 2.0 RECOVER — because BCDR is the only framework area neither skill currently covers."*
+> *"Framework-to-control mapping is owned by `security/compliance-evidence-mapping`; add the cloud-control dimension there (CIS cloud Foundations Benchmarks, ISO 27017/27018, CSA CCM v4) rather than authoring a parallel crosswalk. Benchmark gap-assessment against a target (CIS/NIST CSF 2.0) is owned by `engineering/standards-audit`. This module adds exactly one row set — BCDR → SOC 2 A1.2/A1.3 · ISO 27001:2022 A.5.29/A.5.30 · NIST CSF 2.0 RECOVER — because BCDR is the only framework area neither skill currently covers."*
 
 ---
 
@@ -166,7 +166,7 @@ Mapping notes to carry into the skill:
 **Cross-reference wording — `security/compliance-evidence-mapping`** (add the G1 crosswalk rows + a pointer):
 > *"Availability/resilience (SOC 2 A1.2/A1.3, ISO 27001:2022 A.5.29/A.5.30, NIST CSF 2.0 RECOVER, 800-53 CP) is the BCDR dimension of this crosswalk; the control-to-cloud-evidence detail lives in `security/cloud-incident-response/references/cloud-resilience.md`. Cloud-config benchmarks (CIS Foundations), ISO 27017/27018 and CSA CCM v4 extend the existing crosswalk to the cloud-control layer — add them as columns here, not as a new skill."*
 
-**Cross-reference wording — `engineering-practices/standards-audit`**:
+**Cross-reference wording — `engineering/standards-audit`**:
 > *"Cloud benchmark gap-assessment targets: CIS AWS/Azure/GCP Foundations Benchmarks (L1/L2) and NIST CSF 2.0 (six functions incl. GOVERN). BCDR findings map to the CP/Availability controls catalogued in `compliance-evidence-mapping`; the resilience reference is `cloud-incident-response/references/cloud-resilience.md`."*
 
 **Governance/risk material** in this file is reference context for those two skills (landing-zone guardrail table, shared-responsibility risk, risk-register cloud rows) — not a new skill; cite it when an assessment needs the per-cloud guardrail names.

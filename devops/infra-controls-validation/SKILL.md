@@ -181,7 +181,7 @@ environments with required reviewers, the GitLab and Azure Pipelines equivalents
 3. **Retest by id.** Re-run the *same script* (never a hand-check of the specific instance — a fix that
    patched one workflow and missed three siblings must show up), and prefix each result
    **Resolved / Resolved (differently) / Still open / Still open (regressed) / New**, per
-   `engineering-practices/standards-audit-engine`'s Mode B vocabulary. Save round N beside round 1; **never overwrite**.
+   `engineering/standards-audit-engine`'s Mode B vocabulary. Save round N beside round 1; **never overwrite**.
 4. **Only re-reading the control proves resolution.** A merged PR, a green deploy and a closed ticket are
    leads; a `PASS` line produced *this round* is evidence.
 5. **Promote the passing checks into the deploy pipeline** so the fix cannot silently regress — the
@@ -209,4 +209,4 @@ The harness, authorization and retest sections above are the hard constraints: e
 - `observability-engineer-{dotnet,java,node}` + `observability/{logs-traces-setup,metrics-setup,queries}` — the telemetry backend family 3 asserts against, and the owner of the fix when there is no detection surface; `queries` owns the LogQL/PromQL the canary runs.
 - `devops-engineer` applies every fix; `devops:{github-actions,gitlab-ci,azure-pipelines}` own the pipeline this skill hardens and the deploy pipeline the gate runs in.
 - `devops:iac-security` · `devops:kubernetes-security` · `devops:container-runtime-security` · `devops:supply-chain-security` · `devops:threat-modeling` — the infra-security siblings; threat-modeling supplies *which* controls matter, supply-chain owns signing and provenance (family 4's pinning checks stop at the reference, not the attestation).
-- `engineering-practices/standards-audit-engine` — the Mode A/B round vocabulary the retest workflow borrows.
+- `engineering/standards-audit-engine` — the Mode A/B round vocabulary the retest workflow borrows.

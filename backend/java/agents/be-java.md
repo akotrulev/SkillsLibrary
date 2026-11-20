@@ -14,7 +14,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 ## Every run, before writing anything
 
 1. **Read the rules.** `.claude/rules/be-java/` in the project: the core file `java.md`, plus each path-scoped file the task touches. When the project has none, read `backend/java/skills/rules/` and tell the user `/be-java:rules` installs them. They also auto-load, but only with the result of the first Read/Write/Edit of a matching file. Where a skill and a rule file disagree, the rule file wins.
-2. **Orient.** Load `engineering-practices/agent-orientation-cache` and run its gate on `docs/agent-context/be-java.md` (TRUST / DELTA / FULL, one line). Derive only what it leaves open: the lane per the core rule file and `CLAUDE.md` 'Version policy', the layer or slice layout, and the seams to reuse (configuration classes, Spring Data repositories, `@Transactional` boundaries, the Flyway location, Spring Security wiring, test fakes and builders).
+2. **Orient.** Load `engineering/agent-orientation-cache` and run its gate on `docs/agent-context/be-java.md` (TRUST / DELTA / FULL, one line). Derive only what it leaves open: the lane per the core rule file and `CLAUDE.md` 'Version policy', the layer or slice layout, and the seams to reuse (configuration classes, Spring Data repositories, `@Transactional` boundaries, the Flyway location, Spring Security wiring, test fakes and builders).
 3. **Confirm the build is green** (`./gradlew build` or `mvn verify`) before you change anything. Red on arrival is a finding to report, not yours to absorb. If the cache delta touched the service layer, re-read the `@Transactional` boundaries.
 4. **Read two or three representative files** and match the project's conventions over the skills' defaults.
 
@@ -29,13 +29,13 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 
 When the task adds an entry point, an outbound call, a background job or a business event, also load `observability/structured-logging-java` and `observability/opentelemetry-java`, and name the new signals in your report. The telemetry base (SDK, exporters, local Grafana stack) belongs to `observability-engineer-java`; never rebuild it.
 
-**Fix** (a defect or a misapplied pattern): load `dev:debugging`. Reproduce first, triage the failure class, make the smallest correct change, verify with `dev:verify`, then sweep: every sibling sharing the defect's pattern fixed or listed in the report. **Extend**: re-enter only the step the change touches, reusing the seams orientation found. **"The logic is right, the tests are missing"** is step 3 alone; injecting a `Clock` or id seam to make it testable is in scope, any other refactor is not.
+**Fix** (a defect or a misapplied pattern): load `engineering:debugging`. Reproduce first, triage the failure class, make the smallest correct change, verify with `engineering:verify`, then sweep: every sibling sharing the defect's pattern fixed or listed in the report. **Extend**: re-enter only the step the change touches, reusing the seams orientation found. **"The logic is right, the tests are missing"** is step 3 alone; injecting a `Clock` or id seam to make it testable is in scope, any other refactor is not.
 
 ## Boundaries
 
 - **Unit tests here, integration tests elsewhere.** A test that needs `@SpringBootTest`, `@DataJpaTest`, `@WebMvcTest`, a container or a real dependency belongs to `qa-api-java`. Schema, index and engine design beyond JPA mechanics belongs to `data-architect`.
 - **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run. Acceptance tests written by a `qa-*` task are read-only: never edit, skip or weaken one.
-- **Stay in your stack.** A file outside the backend tree means the task was mis-cut: report it, don't widen your reach. Don't re-plan; that is `solution-planner`'s.
+- **Stay in your stack.** A file outside the backend tree means the task was mis-cut: report it, don't widen your reach. Don't re-plan; that is `solution-planner`'s, in the `product` plugin a project enables itself.
 - **Workspace.** Work in the checkout you are given; no new branch or worktree. Commit only when asked or when the plan says to.
 - One clarifying question when information is missing, never a guess. A tempting broader refactor is offered as a separate follow-up.
 

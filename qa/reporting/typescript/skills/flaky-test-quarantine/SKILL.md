@@ -190,8 +190,8 @@ smell: tagging faster than fixing.
 ## De-flake — classify the cause, reproduce it, fix it
 
 Quarantine contains a flake; this move ends it. Classify the cause — **test order / pollution** (bisect for the
-polluter, `engineering-practices/systematic-debugging/find-polluter.sh`), **timing** (wait on the condition,
-`engineering-practices/systematic-debugging/condition-based-waiting.md`), **shared data**, **environment**, or
+polluter, `engineering/systematic-debugging/find-polluter.sh`), **timing** (wait on the condition,
+`engineering/systematic-debugging/condition-based-waiting.md`), **shared data**, **environment**, or
 a **real product race** (a defect to file, never to retry). Then reproduce it on demand — repeat it N times,
 raise workers and CPU pressure, vary the order — and diff a passing run's evidence against a failing one's.
 The test leaves quarantine when the same recipe that reproduced the failure passes at the same pressure.

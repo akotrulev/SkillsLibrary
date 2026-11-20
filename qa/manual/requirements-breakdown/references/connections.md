@@ -2,7 +2,7 @@
 
 How `requirements-breakdown` fills the basis's §8 (**Connections**). Four parts, in the order they are tried: the KB cross-section, the code trace, the docs, then the hand-back.
 
-**This guide reads `docs/business-model/` as data**, in the format `business-analysis:dependency-map` and `knowledge-base` define (`events.md`, `shared-data.md`, `invariants.md`, plus the grids, decision files and `interaction-map.md`). **QA never writes there.** A format change in those skills updates this file in the same commit.
+**This guide reads `docs/business-model/` as data**, in the format `product:dependency-map` and `knowledge-base` define (`events.md`, `shared-data.md`, `invariants.md`, plus the grids, decision files and `interaction-map.md`). **QA never writes there.** A format change in those skills updates this file in the same commit.
 
 The ids are the KB's: `EVT-` triggers, `RX-` reactions, `INV-` invariants, `ENT-` entities, `DEC-` decisions, `E<n>` / `AREA-nnn` owners. Restate an id in §8; never copy a row. With no KB (Code mode), the ids are `T<n>` trigger, `R<n>` reaction, `S<n>` shared field and `I<n>` invariant, local to one basis and stated to be local in §8's header; KB ids win whenever a KB exists.
 
@@ -28,7 +28,7 @@ Input: an owner id (`E<n>`, `AREA-nnn`) or a trigger id (`EVT-nnn`). Read `INDEX
 
 ## 2. Trace Edges → §8
 
-When the KB lacks the feature, or is stale, the agent's Code mode runs `dev:doc-feature-trace` at profile `full`; a `guide`-profile trace records no Reads, Writes, Also written by or Mode, and those cells are `?`. Its **Edges** inventory maps column by column:
+When the KB lacks the feature, or is stale, the agent's Code mode runs `product:doc-feature-trace` at profile `full`; a `guide`-profile trace records no Reads, Writes, Also written by or Mode, and those cells are `?`. Its **Edges** inventory maps column by column:
 
 | Edges column | §8 |
 |---|---|
@@ -50,11 +50,11 @@ With no KB and no code, read the ACs, flows and feature documents for sentences 
 
 - Every such edge is `#assumption` with a row in the open questions: what fires it, when, and what happens on failure.
 - *Built from:* `docs only (thin) — <what was missing>`.
-- Say once, at the end of §8, that a dependency map would replace these guesses, and offer `business-analysis:business-analyst` to build it from the specs.
+- Say once, at the end of §8, that a dependency map would replace these guesses, and offer `product:business-analyst` to build it from the specs (`product` plugin; when the project does not enable it, say so and name the gap).
 
 ## 4. KB candidates
 
-An edge found in the code or the docs that the KB does not have goes under **KB candidates**: the trigger or reaction, its owner, its effects, its source. It is not written to `docs/business-model/`. The suite's hand-off notes give the list to `business-analysis:business-analyst`, whose EXTEND mode checks each one against its source before folding it in.
+An edge found in the code or the docs that the KB does not have goes under **KB candidates**: the trigger or reaction, its owner, its effects, its source. It is not written to `docs/business-model/`. The suite's hand-off notes give the list to `product:business-analyst` (`product` plugin; when the project does not enable it, say so and name the gap), whose EXTEND mode checks each one against its source before folding it in.
 
 - A candidate that only restates a KB row is not a candidate.
 - A candidate found by code trace is `#observed`; one from the docs is `#assumption`.

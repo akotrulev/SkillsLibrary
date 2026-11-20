@@ -86,5 +86,5 @@ The rows **G1** adds to `security/compliance-evidence-mapping`, with the cloud e
 
 ## Handoffs
 - **→ `security-governance:compliance-evidence-mapping`** — the BCDR crosswalk row (added by G1) points here for the control-to-cloud-evidence detail.
-- **→ `engineering-practices/standards-audit`** — BCDR findings map to the CP / Availability controls; cloud benchmark gap-assessment (CIS Foundations, NIST CSF 2.0) is owned there.
+- **→ `engineering/standards-audit`** — BCDR findings map to the CP / Availability controls; cloud benchmark gap-assessment (CIS Foundations, NIST CSF 2.0) is owned there.
 - **↔ `security/cloud-incident-response`** (this skill) — the RECOVER step of the IR runbook escalates into these DR patterns when recovery is from a disaster, not just an incident.

@@ -14,9 +14,9 @@ State the mode, Mode A (baseline) or Mode B (re-audit), the lanes covered and th
 
 ## Read before sweeping
 
-1. **[`engineering-practices/standards-audit-engine`](../../../../engineering-practices/standards-audit-engine/SKILL.md)**: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping and coverage policy, the five steps, the hostile self-review. **Read it first**; this file adds only what is specific to Windows.
+1. **[`engineering/standards-audit-engine`](../../../../engineering/standards-audit-engine/SKILL.md)**: Mode A/B rounds, the artifact contract, evidence rules, severity semantics, grouping and coverage policy, the five steps, the hostile self-review. **Read it first**; this file adds only what is specific to Windows.
 2. [`references/conformance-checklist.md`](references/conformance-checklist.md): sections A–X and every check; the section index at its end. **Read end-to-end** before Step 2.
-3. `engineering-practices/standards-audit-engine/references/report-template.md`: the Round-1 / Round-N skeletons. Read before Step 3.
+3. `engineering/standards-audit-engine/references/report-template.md`: the Round-1 / Round-N skeletons. Read before Step 3.
 4. The fragments for sections K, L, U: `desktop/_shared/{security,distribution,observability}/references/audit-checks.md`, rows whose `Platforms` column names `windows`.
 
 Load the **owning skill** (named per section in the checklist) whenever a check is ambiguous, version-keyed, or you are about to write its fix direction. When checklist and skill disagree, **the skill wins**, and report the disagreement.
@@ -28,8 +28,8 @@ Report path: `docs/audits/<NNN>-desktop-windows-conformance-r<N>.md`.
 | Job | Owner |
 |---|---|
 | Review one diff, inline table, no artifact, screenshot pass | [`code-review`](../code-review/SKILL.md): this skill reuses its rows at repo scale |
-| Code vs a written spec / stories | `dev:audit-spec` (or the `code-auditor` agent) |
-| How one feature works, where it is defective | `dev:audit-feature` |
+| Code vs a written spec / stories | `engineering:audit-spec` (or the `code-auditor` agent) |
+| How one feature works, where it is defective | `engineering:audit-feature` |
 | Proof of package capabilities, signing, SmartScreen behaviour, on-disk data, IPC abuse on a built app | **peer** `qa-security`: a row a static read cannot prove is reported **unverified**, never passed |
 | E2E suites, window journeys | **peer** `qa-desktop-java` / `qa-desktop-dotnet` / `qa-desktop-typescript` |
 | Design heuristics on windows | `design/ux-review` on window screenshots |
