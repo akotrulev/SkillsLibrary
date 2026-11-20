@@ -304,7 +304,7 @@ Per platform:
 
 ## Repository map
 
-Each top-level folder owns a domain, is **stack-first and domain-encapsulated** (a folder's skills are loaded only by its own agents), and ships as one or more marketplace plugins (24 in all). **Bundle within a category, depend across categories:** sharing inside `qa-*`, `fe-*`, `mobile-*` or `be-*` is bundled, and anything several categories use lives in one plugin they declare in `dependencies` (`engineering`, `design`). Full per-skill detail is in [`docs/skills-catalog.md`](docs/skills-catalog.md).
+Each top-level folder owns a domain, is **stack-first and domain-encapsulated** (a folder's skills are loaded only by its own agents), and ships as one or more marketplace plugins (24 in all). **Bundle within a category, depend across categories:** sharing inside `qa-*`, `fe-*`, `mobile-*`, `desktop-*` or `be-*` is bundled, and anything several categories use lives in one plugin they declare in `dependencies` (`engineering`, `design`). Every `qa-*`, `fe-*`, `mobile-*`, `desktop-*`, `be-*`, `devops` and `product` plugin depends on `engineering`; `fe-*`, `mobile-*` and `desktop-*` also on `design`. `product` is enabled per project and nothing depends on it: a stack file that hands off to a `product` skill or command names the plugin and stops when it is off. Full per-skill detail is in [`docs/skills-catalog.md`](docs/skills-catalog.md).
 
 | Folder | Domain | Plugin(s) |
 |---|---|---|

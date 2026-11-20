@@ -12,15 +12,13 @@ library moves to the new paths and names. A project switches over through the mi
 M3 writes.
 
 **Status:** Written 2026-11-20 from the owner's interview (`## Answered questions (2026-11-20)`).
-M1 and M2 are built (2026-11-20): `product/` and `engineering/` hold the moved tree, the manifest registers
-both, and every path and name in the tree now uses the new ones (§5's two greps print nothing, `skill-lint`
-is back to 0 findings). Built but unverified: Claude Code loading the two new plugins, which needs a
-restart. M2 also did part of M3's wording (the `CLAUDE.md` rows, the README plugin rows and command
-sections, the catalog's plugin and command tables): M3 checks and finishes it, then does the catalog
-sections, the README switch section and `~/.claude/CLAUDE.md`.
+M1, M2 and M3 are built (2026-11-20): `product/` and `engineering/` hold the moved tree, the manifest
+registers both, every path and name uses the new ones, and the catalog, `README.md` (with the switch
+section), `CONTRIBUTING.md`, `CLAUDE.md` and the owner's `~/.claude/CLAUDE.md` describe them. Built but
+unverified: Claude Code loading the two new plugins (needs a restart), and any project switched over.
 - **Starts after 015 merges into `master`.** 015 edits many of the files this plan moves. Running both
   at once would turn every 015 edit into a conflict on a moved path (D6).
-- **Next:** M3, then G1, one at a time.
+- **Next:** G1.
 - **Known conflict:** branch `plan-queue/010-agents-md-dual-harness-b58e49` has 2 commits touching 2
   files this plan moves. Whichever of 010 and 016 merges second resolves them against the new paths.
 - **Metered:** about 4 sessions of subscription usage. The user starts the queue.
@@ -242,6 +240,19 @@ old `dev` plugin registered the same five skills (015 O10), so text called them 
 Leaving them would have left about 64 calls that reach nothing. They became `product:<name>`. Reading A (§3 as
 written) keeps them as `dev:`; reading B (built) renames them. A `dev:` name that is not ours (`dev:run`)
 stays. Cost: none beyond the diff.
+
+**D10 — (2026-11-20, M3) `product` registers 26 skills, not 25.** M1's As built and the catalog's plugin
+table (M2) said 25. The manifest lists 26: `brainstorming`, `writing-plans`, `domain-modeling`,
+`notebooklm`, the eleven planning and documentation skills, the ten `ba-*` skills and `rules`, which is
+§2's own list. Reading A (25) was a miscount; reading B (26, built) is what `marketplace.json` holds. M3
+corrected the catalog and README. Cost: none.
+
+**D11 — (2026-11-20, M3) The README switch section avoids the colon forms of the old names.** §3 and §5's
+second grep treat `dev:rules`, `business-analysis:` and `rules/dev/` as stale anywhere outside the plan.
+The migration section has to name the old plugins, so it names them as the `dev` and `business-analysis`
+plugins and the folders `.claude/rules/dev` and `.claude/rules/business-analysis` (no trailing slash), and
+gives the prefix change in prose. Reading A (write `dev:verify` in a table) fails G1's grep; reading B (built)
+passes it and reads as well. Cost: no example of an old typed name.
 
 ## Answered questions (2026-11-20)
 
@@ -468,6 +479,32 @@ says it needs `product` enabled (§4).
     explicitly".
 - **Not in M3:** any skill text (M1, M2), and switching any project over (the owner, per README).
 
+- **As built (2026-11-20):**
+  - `docs/skills-catalog.md`: `## Engineering catalog` (`:427`) and `## Product catalog` (`:454`) replace the
+    two old sections. Engineering holds the 8 registered skills, `code-auditor`, the audit lanes and the
+    unregistered orientation-cache, code-comments and standards-audit-engine. Product has four parts: Part 1
+    the chain (`product:feature`, `product:plan-feature`, `domain-modeling`, `notebooklm`), Part 2 the planning
+    lane, Part 3 the documentation lane, Part 4 the business-analysis authoring and reasoning lanes. Parts 2
+    and 3 were the `solution-planner` and `documenter` text in the Backend catalog: moved whole, and the
+    Backend catalog keeps a one-paragraph pointer. Scope line, plugin table (24 plugins, unchanged) and
+    command table checked; the scope line now says 26 skills.
+  - `CLAUDE.md`: the repo-map rows, the `backend/` row and the "Planning" prose were already right from M2;
+    the intro line under "Repository map" now says which plugins depend on `engineering` and `design`, and
+    that nothing depends on `product`.
+  - `README.md`: plugin rows, the dependency table and the command sections were right from M2. Added the
+    D4 sentence after the dependency table (a stack brings `engineering`, not `product`), the `product`
+    bullet's opening, and the section "Switching from `dev` and `business-analysis`" before "Typing names": a
+    was/is table, the three steps, and the line that every old rules copy differs and so is asked about
+    (D9). `communication/` in the layout block no longer says BA and user stories.
+  - `CONTRIBUTING.md`: paths and names were right from M2; added the sentence on `product` being enabled per
+    project and never a dependency.
+  - `~/.claude/CLAUDE.md` (outside the repo, not committed, D8): the four replacements. Lines 10-11, 23-25.
+  - Gate: `skill-lint | tail -1` → `0 findings`; `token-audit --violations-only` exit 0, no violations; the
+    catalog-heading grep prints nothing; `plugin-surface-check` → `OK`; both §5 greps print nothing under
+    `bash`.
+  - Not committed by this session: the Plan Queue commits the work. Not verified: Claude Code loading the
+    two plugins, and no project has been switched over.
+
 ### G1 — The whole sweep, and filing the plan
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -546,70 +583,9 @@ session that runs the task.
 | G1 | `docs` | `general-purpose` | M3 | — | ~90k |
 | — | restart, try `/product:refine`, switch projects per README | **the user** | G1 | — | — |
 
-M1 and M2 have landed. M3 and G1 are live.
+M1, M2 and M3 have landed. G1 is live.
 
 ---
-
-### M3 — The catalog, README, CONTRIBUTING, CLAUDE.md and the migration (general-purpose, docs)
-
-````
-Depends on: M2
-Agent: general-purpose · Stack: docs
-
-Task M3 of docs/plans/016-product-and-engineering-plugins.md. The goal:
-- docs/skills-catalog.md has an "Engineering catalog" and a "Product catalog", and neither old section.
-- The CLAUDE.md repo map has `engineering/` and `product/` rows.
-- README.md has a "Switching from `dev` and `business-analysis`" section.
-- The owner's ~/.claude/CLAUDE.md names the new rules skills.
-
-Read, in this order:
-1. CLAUDE.md: the intro line, "Planning" and "Repository map".
-2. The plan: §1, §2, §3, D4, D8, the As built notes of M1 and M2, task M3, and "Close-out — every task".
-3. docs/skills-catalog.md: the scope line at :7, the plugin list, and the two sections that start at
-   "## Engineering-practices catalog" and "## Business-analysis catalog". Read only those.
-4. README.md: the plugin table and the install section.
-5. CONTRIBUTING.md and ~/.claude/CLAUDE.md.
-
-Do:
-- The catalog:
-  - Merge the old sections into "Engineering catalog" (the technical workflow, the audits, the
-    unregistered path-loaded skills).
-  - Add a "Product catalog" with four parts: the chain from the feature interview to the plan, the
-    planning lane, the documentation lane, and the business-analysis authoring and reasoning lanes.
-  - Fix the scope line and every plugin count.
-- CLAUDE.md:
-  - Replace the `engineering-practices/` and `business-analysis/` rows with `engineering/` and
-    `product/`.
-  - Drop planning and reverse-docs from the `backend/` row.
-  - Say which plugins depend on which.
-- README.md:
-  - Replace the two plugin rows.
-  - Add the three-step switch from the M3 task block.
-- CONTRIBUTING.md: fix every path and plugin name.
-- ~/.claude/CLAUDE.md: make the four replacements listed in the M3 task block.
-
-Traps:
-- ~/.claude/CLAUDE.md is outside the repo. Edit it, and do not commit it (D8).
-- Stacks no longer bring `product` with them (D4). The README says so where it lists what a stack
-  plugin installs.
-- Read only the catalog sections named. The whole file is about 55k tokens.
-- M2 already did part of this in wording: the `CLAUDE.md` repo-map rows and the `backend/` row, the README
-  plugin table, install lines, command sections and state-table rows, and the catalog's plugin table,
-  scope line and command table. Check each against the target and finish the rest: the two catalog
-  sections (still headed "Engineering-practices catalog" and "Business-analysis catalog"), the catalog's
-  plugin counts, the README switch section, CONTRIBUTING and `~/.claude/CLAUDE.md`.
-- The retire step of `product:rules` and `engineering:rules` deletes an old rules copy only when it is
-  identical to the plugin's (D9 note in M2's As built). Say in the switch section that every old copy
-  will differ, so each is asked about.
-
-Gate: own tests.
-  python3 tools/skill-lint.py | tail -1    (at or below M1's baseline)
-  python3 tools/token-audit.py --violations-only
-  grep -nE 'Engineering-practices catalog|Business-analysis catalog' docs/skills-catalog.md    (prints nothing)
-
-Commit: `docs: 016 M3 — catalog, README, CONTRIBUTING and CLAUDE.md for product and engineering`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### G1 — The whole sweep, and filing the plan (general-purpose, docs)
 
@@ -637,7 +613,9 @@ Traps:
   do nothing. Delete `.pytest_cache` after the pytest run, because the greps read the whole tree.
 - `qa/manual/agents/qa-test-planner.md` and `qa-test-case-designer.md` sit at 13,971 and 13,988 of the
   14,000-character agent budget: an edit there must be neutral in length.
-- The plan file itself names the old paths on purpose. §5's greps exclude it.
+- The plan file itself names the old paths on purpose. §5's greps exclude it. The README's switch section
+  names the `dev` and `business-analysis` plugins on purpose, worded so §5's greps pass (D11): leave it.
+- `product` registers 26 skills (D10), not the 25 in M1's As built.
 - Status names as unverified that no session has loaded `engineering` or `product`. The user restarts,
   types `/product:refine` and `/engineering:audit`, and runs `product:rules` in one project.
 
