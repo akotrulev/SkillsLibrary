@@ -7,12 +7,25 @@
 - A stack-agnostic skill for **changing code that has no tests**.
 - Each stack's mechanically checkable house rules **named as lint rules**, so a gate catches them.
 
-**Status:** As of 2026-11-21, A1, FX1, R1, U1, L1–L5 and C1 have landed; G1 (the whole set, the blind fixture run, filing) is next.
-- **Built but unverified:** the lint tables are proven in scratch projects only, never in a real project. Limits L5 records: the
-  `qa-java` `@Test` suppression keys on the annotation's simple name and Maven wiring was not run; `.features-gen/**` is ignored by
-  the library's own description of `bddgen`, not by a run of it. L5 left no row unverified; the items L2 lists as unverified stand (see its As built).
-- **Only the user can do:** restart after G1 and type `/engineering:audit` on a real project. Run one
-  stack's `<plugin>:rules` in a real project to see its lint-gap report.
+**Status:** Filed 2026-11-21. All tasks (A1, FX1, R1, U1, L1–L5, C1, G1) landed. Delivered: the ARCHITECTURE lane of `code-auditor`
+(`engineering:audit-architecture`, 16 checks); the entry-point rule in `CLAUDE.md` and twelve tests rule files; the
+`engineering:untested-code` skill; the `Enforced by the build` tables and the lint-gap step in all 15 stacks' `rules` skills; the catalog
+and README. G1 ran every §8 item twice, green both times, and the one blind fixture run passed on the first try (P1–P5 reported under
+their ids, N1–N3 not findings), so the run was not repeated and stays blind.
+- **Built but unverified:**
+  - No session has loaded the two new skills by description.
+  - The lane has run once, on a TypeScript fixture of 35 files; it has never run on a real repository (D5).
+  - Every lint row an L task listed as unverified: the lint tables are proven in scratch projects only. L2: the `tsc` row on TypeScript 7
+    (typescript-eslint declares it unsupported), the `@react-navigation/*` row on a project not on Expo Router, Next 15 beyond the four hook
+    ids. L5: the `qa-java` `@Test` suppression keys on the annotation's simple name and Maven wiring was not run; `.features-gen/**` is
+    ignored by the library's own description of `bddgen`, not by a run of it. L4: the `SWIFT_VERSION` and
+    `SWIFT_TREAT_WARNINGS_AS_ERRORS` rows ran as `xcodebuild` overrides, not `.xcconfig` keys, and SwiftLint ran in a Linux image. L1: no
+    WinUI app project was built for the Windows rows.
+  - No `rules` skill has reported lint gaps in a real project.
+- **Follow-ups outside the plan** (G1 `As built`): the `B3`, `D3` and `E3` Locate recipes in the checklist use `\b`, which macOS
+  `git grep -E` does not support, so they match nothing there; the A2 probe matches every import when `<module>` is a plain name.
+- **Only the user can do:** restart and type `/engineering:audit` on a real project. Run one stack's `<plugin>:rules` in a real project to
+  see its lint-gap report.
 
 **Test design:** none. The plan serves no stories and changes skill text, rule files, the manifest and
 one lint script. The checks are the four scripts in `tools/`, the scratch-project proofs in §7 and the
@@ -985,6 +998,13 @@ the ten items of §8.
   has reported lint gaps in a real project.
 - **Not in G1:** new checks or new lint rows. A finding outside §8 goes into `Status:` as a follow-up.
 
+**As built (2026-11-21):**
+- Items 1–9 of §8 were green on the first pass with no fix, and green again on the second: `plugin-surface-check.py` prints `OK`; `skill-lint.py | tail -1` prints `0 findings`; `token-audit.py --violations-only` exits 0; `pytest tools/test_skill_lint.py` 95 passed (`.pytest_cache` deleted); `qa-version-check.py` prints `OK`; the manifest check prints `OK` (10 engineering skills, both new ones); item 7 prints nothing for all 15 stacks. Item 8: the twelve tests rule files each carry one line tagged *major* and a v2 header, read in `git diff 0dafd75d..HEAD`. Item 9: every file name a `rules/SKILL.md` gives exists beside it (the two names that do not, `CLAUDE.md` and `qa/java`'s `java-tests.md`, are the project's and the be-java plugin's files, not siblings); the SKILL.md files list their rule files by "every `*.md` in the folder", so the lint-table files are covered. No failure belonged to an earlier task.
+- Item 10, the blind run, passed on the first run: it was run once, blind, so `Status` does not carry the "no longer blind" caveat. `code-auditor` was adopted through `engineering/commands/audit.md`, root `tools/fixtures/architecture-audit/course-platform/`, task "architecture audit of the whole project". The report is `tools/fixtures/architecture-audit/course-platform/docs/audits/001-architecture-conformance-r1.md` (16 checks, 9 conforming, 6 findings: 5 major, 1 minor). Compared with `EXPECTED.md` afterwards: P1 `C1` major at `submit-course.ts:6-60` / `duplicate-course.ts:6-57`, title check `:31-33`; P2 `B2` major at `enrollment-service.ts:4-22`; P3 `B3` major at `catalog/index.ts:4-5`; P4 `D1` and `D3` major at `tests/pricing/discount-rules.test.ts:2`; P5 `E1` minor at `student-progress.ts:1`. N1–N3 sit in the report's "Noted deviations (not findings)" table and in no findings table. No checklist change was needed. The report also grouped C2 under C1 (same two functions), a choice the checklist leaves open.
+- `course-platform/docs/agent-context/` was written for the orientation gate and deleted after the run; the fixture's code was not touched. `master` was at `0dafd75d`, an ancestor of the branch, so close-out step 6 (`git merge master`) printed `Already up to date.`
+- Follow-ups outside §8, not done here: (1) the `B3`, `D3` and `E3` Locate recipes in `engineering/architecture-audit/references/checklist.md` use `\b`, which the macOS `git grep -E` does not support; on this Mac they match nothing, and the run re-ran them with `-w` or `([^A-Za-z]|$)` before trusting an empty result. A reader on macOS who does not notice gets a false "conforms". (2) The checklist's A2 probe, `$IMPORTS.*<module>[/.][A-Za-z_]+`, matches every import in the project when `<module>` is a plain name, so the run narrowed it to `from .\.\./[a-z]+/`.
+- Not committed: the queue commits, as the task prompt's own commit line is overridden by the queue. No divergence from the plan, so no new `D<n>`.
+
 ## Close-out — every task
 
 Before you stop, in this order, in this file. Another task may be running in this working tree:
@@ -1044,55 +1064,4 @@ the task.
 | G1 | `docs` | `general-purpose` | C1, FX1 | — | ~120k |
 | — | restart, run `/engineering:audit` and one `<plugin>:rules` on a real project | **the user** | G1 | — | — |
 
-A1, FX1, R1, U1, L1, L2, L3, L4, L5 and C1 have landed; their prompts are deleted. The blocks below are the live ones.
-
----
-
-### G1 — The whole set, the blind fixture run, and filing the plan (general-purpose, docs)
-
-````
-Depends on: C1, FX1
-Agent: general-purpose · Stack: docs
-
-Task G1 of docs/plans/017-architecture-audit-untested-code-and-lint-enforcement.md. The goal: every
-command in the plan's §8 passes on the merged tree, the architecture lane is run blind on the fixture and
-compared with its answer key, and the plan is filed.
-
-Do NOT open the plan's §4 or tools/fixtures/architecture-audit/EXPECTED.md until your audit report is
-saved. The run is only evidence if it is blind.
-
-Read, in this order:
-1. CLAUDE.md: "Planning".
-2. The plan: §8, D5, every task's As built note, task G1, and "Close-out — every task". Skip §4.
-3. For the blind run only: engineering/commands/audit.md, then what it tells you to read.
-
-Do:
-- Run items 1–9 of §8 once. Fix each failure at the narrowest file, rerun only what failed, then run
-  items 1–9 once more.
-- The blind run: follow engineering/commands/audit.md by path, with
-  tools/fixtures/architecture-audit/course-platform/ as the project root and the task "architecture audit
-  of the whole project". Save the report where the lane says, inside the fixture.
-- Now read §4 and EXPECTED.md, and compare. P1–P5 must each be reported under the expected id with a
-  `file:line` in the named file. N1–N3 must not be findings.
-- On a miss or a reported decoy: fix the checklist, never the fixture and never EXPECTED.md. Delete the
-  failed report, record in As built what was missed and what changed, and run again.
-- Delete course-platform/docs/agent-context/ after the run. Commit the report.
-- Merge `master` into the plan's branch (close-out step 6).
-
-Traps:
-- A second run is not blind. Say so in Status.
-- The audit is read-only on the fixture's code. Its only writes are the report and the cache you delete.
-- Delete `.pytest_cache` after item 4.
-- A failure may belong to any earlier task. It is yours to fix, and As built names the task.
-- New checks and new lint rows are not yours. A finding outside §8 goes into Status as a follow-up.
-
-Gate (this is the last task, so it runs the whole set once more across the plan, in order): the ten
-items of §8.
-
-Status, when filing, names as unverified: no session has loaded the two new skills by description; the
-lane has run once, on a fixture; every lint row an L task listed as unverified; no `rules` skill has
-reported lint gaps in a real project.
-
-Commit: `docs: 017 G1 — whole set green, blind fixture run`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
+Every task has landed and every prompt is deleted. The plan is filed in `docs/plans/implemented/`.
