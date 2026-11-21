@@ -6,7 +6,7 @@ paths:
   - "**/*_{test,tests}.rs"
 ---
 
-<!-- be-rust rules v1 (2026-11-03): tests. Installed by /be-rust:rules; edit to fit this project. An inline #[cfg(test)] module matches no glob: the core file and the be-rust skills point here. -->
+<!-- be-rust rules v2 (2026-11-21): tests. Installed by /be-rust:rules; edit to fit this project. An inline #[cfg(test)] module matches no glob: the core file and the be-rust skills point here. -->
 
 # Rust test standards
 
@@ -19,6 +19,7 @@ Severity tags as in the core Rust rules: **blocker**, **major**, **minor**, **ni
 - Both arms of every `Result`; every error variant reached by a test. *major*
 - No sleep to wait: `start_paused` and `advance`, or await the `JoinHandle` / `oneshot` / `Notify`. *major*
 - Time, ids, randomness and config are passed in; never `set_var`. *major*
+- Never make an item `pub` or `pub(crate)` for a test; an in-module `#[cfg(test)]` test may see private items, which is the language's design, and still asserts the return value or the effect on a fake, never a call on a collaborator the module owns. *major*
 - Hand-written fakes before `mockall`; never mock a type the crate does not own (`PgPool`, `reqwest::Client`); no expectations pinning a call order that is not the contract. *major; minor for order*
 - No SQLite or mocked pool standing in for Postgres. *major*
 - Tests are independent: no shared `static`, no order dependence. *major*

@@ -1,5 +1,5 @@
 ---
-description: Run a read-only audit engagement — spec/stories vs code, or a spec-less feature deep-dive, saved to docs/audits/
+description: Run a read-only audit engagement — spec/stories vs code, a spec-less feature deep-dive, or a structure sweep, saved to docs/audits/
 argument-hint: [the spec, stories, feature, or area to audit]
 disable-model-invocation: true
 ---
@@ -14,4 +14,4 @@ Adopt the **`code-auditor` stack-agnostic senior codebase auditor** role for thi
 
 $ARGUMENTS
 
-If no task was given above, check `docs/audits/` for existing artifacts (enter **Mode B** if any exist for the subject, **Mode A** otherwise), run the orientation pass on the repo, and ask which spec, story set, feature, or area to audit.
+If no task was given above, check `docs/audits/` for existing artifacts (enter **Mode B** if any exist for the subject, **Mode A** otherwise), run the orientation pass on the repo, and ask which spec, story set, feature, or area to audit. A question about structure, duplication or module boundaries with no spec and no single feature runs the third lane, ARCHITECTURE (`engineering/architecture-audit`).

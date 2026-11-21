@@ -49,10 +49,12 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
    - networking: `git grep -l -e 'HttpClient' -e 'ClientWebSocket' -e 'IHttpClientFactory' -- '*.cs'` (`dotnet-networking.md`)
    - persistence: `git grep -l -e 'ApplicationData' -e 'PasswordVault' -e 'DbContext' -e 'ProtectedData' -e 'SqliteConnection' -- '*.cs'` (`win-persistence.md`)
    - tests: `git grep -l -e 'NUnit' -e 'UITestMethod' -e 'gtest/gtest.h' -- '*.cs' '*.cpp'` (`win-tests.md`)
+   - analyzer config: `git ls-files -- '*.editorconfig' '*.globalconfig' '*Directory.Build.props' '*BannedSymbols*.txt'` (`package-config.md` matches `.editorconfig` and `Directory.Build.props` at any depth; propose a glob only for a `.globalconfig` that holds the analyzer severities)
 
    For each file a search lists that its rule file's globs miss, propose the narrowest directory globs that cover them (for example `"**/Features/*/Views/**/*.cs"` or `"**/src/Orders.Core/Networking/**/*.cs"`) and add them to the installed copy with the user's agreement. Prefer a folder glob to `**/*.cs`, which would load every view rule into model and service work. A project with a lane it does not use (no WPF, no C++) keeps that lane's file installed and idle; deleting it is the user's choice. A solution with C# and C++ projects keeps `cppwinrt.md` scoped to the C++ folders, so the C++ rules never load beside C# files. With nobody to ask, change no path and list each proposed glob under `Waiting for the user:` in the report. Done when every file each command lists is matched by an installed glob, or a glob is proposed for it.
 6. **Check it will be committed**: `git check-ignore -q <root>/.claude/rules/desktop-windows/csharp.md`. If it is ignored, say so; the rules then apply on this machine only.
 7. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`) for C#, XAML or C++ rules that contradict these files and list them. A written contradiction is the user's to settle. Done when each contradiction is listed, or the report says none.
+8. **Report lint gaps** (C# lanes only; the C++/WinRT rules are the compiler's `/W4 /WX`). Read the `## Enforced by the build` table in `<root>/.claude/rules/desktop-windows/package-config.md`, then the project's `.editorconfig`, `.globalconfig`, `Directory.Build.props` and every `BannedSymbols*.txt`. A row is enforced when its id is set to `error` (or its setting is present) and, for an `RS0030` row, its symbol is in a banned-symbols file the project references. List every other row under `Not enforced by the build:` with its id and house rule. Never edit the project's config: the user, or a stack agent they ask, turns the rule on. Done when each table row is enforced or listed.
 
 ## Report
 
@@ -62,6 +64,7 @@ Path: <root>/.claude/rules/desktop-windows/
 Paths: default | widened: <file> += <globs>   (one line per widened file)
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md: none | <one line each>
+Not enforced by the build: none | <id: house rule>   (one line per row)
 Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 

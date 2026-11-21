@@ -33,9 +33,11 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
    - **Persistence**: `git grep -l -e ': DbContext' -e 'IEntityTypeConfiguration<' -- '*.cs'`, and every `Migrations/` folder.
    - **Unit tests**: test projects (`NUnit`, `xunit` or `MSTest` referenced) that reference none of `Microsoft.AspNetCore.Mvc.Testing`, `Testcontainers`, `Microsoft.Playwright`, `Selenium`, `Appium`, `bunit`, `Reqnroll`, `SpecFlow` or `RestSharp`. Those others are qa-dotnet's or fe-blazor's lane.
    - **Endpoints**: `git grep -l -e '\[ApiController\]' -e 'MapGet(' -e 'MapPost(' -e 'MapGroup(' -- '*.cs'`.
+   - **Analyzer config**: `git ls-files -- '*.editorconfig' '*.globalconfig' '*Directory.Build.props' '*BannedSymbols*.txt'`. `dotnet-lint.md` matches `.editorconfig`, `Directory.Build.props` and `BannedSymbols*.txt` at any depth; propose a glob only for a `.globalconfig` or `.ruleset` file that holds the analyzer severities.
    For each project or file a default glob misses, propose a directory glob (for example `"src/Shop/**/*.cs"` for `dotnet.md` and `"src/Shop/appsettings*.json"` for `dotnet-config.md` when the API host is `src/Shop`, `"src/Shop/Orders/Storage/**/*.cs"` for `dotnet-persistence.md`) and add it to the installed copy with the user's agreement. Never widen `dotnet.md` to `**/*.cs` in a repo that also holds Blazor or qa-dotnet projects. With nobody to ask, change no path and list each proposed glob under `Waiting for the user:` in the report. Done when every file each command lists is matched by an installed glob, or a glob is proposed for it.
 6. **Check it will be committed**: `git check-ignore -q <root>/.claude/rules/be-dotnet/dotnet.md`. If it is ignored, say so; the rules then apply on this machine only.
 7. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`), `.editorconfig` and `Directory.Build.props` for C# rules that contradict these files and list them. A written contradiction is the user's to settle. Done when each contradiction is listed, or the report says none.
+8. **Report lint gaps.** Read the `## Enforced by the build` table in `<root>/.claude/rules/be-dotnet/dotnet-lint.md`, then the project's `.editorconfig`, `.globalconfig`, `Directory.Build.props` and every `BannedSymbols*.txt`. A row is enforced when its id is set to `error` (or its setting is present) and, for an `RS0030` row, its symbol is in a banned-symbols file the project references. List every other row under `Not enforced by the build:` with its id and house rule. Never edit the project's config: the user, or a stack agent they ask, turns the rule on. Done when each table row is enforced or listed.
 
 ## Report
 
@@ -46,6 +48,7 @@ Paths: default | widened with <globs, per file>
 Left to other stacks: <Blazor or qa-dotnet projects not covered, or none>
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md: none | <one line each>
+Not enforced by the build: none | <id: house rule>   (one line per row)
 Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 

@@ -165,7 +165,9 @@ MyApp.Client/
 </Project>
 ```
 
-**`.editorconfig`** at the root — one style contract shared by the server and `.Client` projects (indentation, `var` rules, `this.` preferences, analyzer severities). With `TreatWarningsAsErrors` + `EnforceCodeStyleInBuild`, style drift fails the build, not review.
+**`.editorconfig`** at the root — one style contract shared by the server and `.Client` projects (indentation, `var` rules, `this.` preferences). With `TreatWarningsAsErrors` + `EnforceCodeStyleInBuild`, style drift fails the build, not review.
+
+**Analyzer rules** — write the analyzer config from the `## Enforced by the build` table in `blazor-lint.md`: the packages in `Directory.Build.props`, the severities in a root `.globalconfig`, the banned symbols in `BannedSymbols*.txt`. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them. The table is the list; this skill keeps no copy of it.
 
 ## Config hygiene (folds in ui-rules seed §18)
 
@@ -176,11 +178,11 @@ MyApp.Client/
 
 ## Rules
 
-The standards this skill's output must meet are the fe-blazor rule files, not a list here: `blazor.md` and `blazor-config.md`. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the fe-blazor rule files, not a list here: `blazor.md`, `blazor-config.md` and `blazor-lint.md`. Read the project's copy in `.claude/rules/fe-blazor/`, or the plugin's in `frontend/blazor/skills/rules/` when the project has not installed them (`/fe-blazor:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Validation (exit gate)
 
 - `dotnet build` — **0 warnings** (warnings-as-errors makes this real).
 - App **boots**: `dotnet run`, home page renders.
 - **One page per chosen render mode renders** — a static SSR page, and one interactive page per interactivity model in use (confirm the WASM page hydrates and the Server page opens a circuit, `curl -s <route>` returns the static SSR content in the HTML, and each island's root gains `data-hydrated="true"`).
-- CPM resolves (no version on any `PackageReference`); `.editorconfig` present and enforced.
+- CPM resolves (no version on any `PackageReference`); `.editorconfig` present and enforced; every row of the `blazor-lint.md` table configured.

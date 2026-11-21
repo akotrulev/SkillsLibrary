@@ -4,7 +4,7 @@ paths:
   - "**/*.{native,ios,android}.test.{ts,tsx}"
 ---
 
-<!-- mobile-react-native rules v1 (2026-11-03): tests. Installed by /mobile-react-native:rules; widen the paths above to this project's Jest test files. -->
+<!-- mobile-react-native rules v2 (2026-11-21): tests. Installed by /mobile-react-native:rules; widen the paths above to this project's Jest test files. -->
 
 # React Native test standards (Jest + RNTL)
 
@@ -21,5 +21,6 @@ Severity tags as in the core rules: **blocker**, **major**, **minor**, **nit**. 
 - A fresh `QueryClient` per test; every test runs alone and in any order. *major*
 - No whole-screen snapshot, no query by style or host type, no testing the library. *minor*
 - Test data with four or more fields comes from a builder. *minor*
+- Assert what renders and what a handler prop was called with, never component internals, state or refs. *major*
 - Test logic, not markup: `*.test.ts` for logic that does not render. Device journeys belong to `qa-mobile-typescript`; no router mocked into a fake journey. *minor*
 - New code ships with tests covering at least 80% of the branches it wrote (`jest --coverage`); only an asserting test counts. *major*

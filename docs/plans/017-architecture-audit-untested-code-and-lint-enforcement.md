@@ -394,6 +394,33 @@ stack agent still has to turn the rules on.
 **D11 — No scheduled audit.** The guide runs its architecture skill from a cron job that also refactors.
 Here an audit is started by a person and fixes nothing. Cost: decay is found only when someone asks.
 
+**D12 — A1 built the checklist rows with a `Locate` column and a sixth "never a finding" bullet
+(2026-11-21).** §3's table has `Check`, `Bad sign` and `Severity`; the checklist adds `Locate`, the
+recipe the engine's Step 2 asks a checklist owner for, and shares two shell variables (`$IMPORTS`,
+`$PUBLIC`) set once per language lane. The "never a finding" list gains Rust's in-file `#[cfg(test)]`
+module and Swift's `@testable import`, which D7 already allows for the entry-point rule. Cost: two
+language-specific patterns to maintain; visibility widened only for a test stays D1.
+
+**D13 — FX1 added tests for four more modules, a `package.json` and a `tsconfig.json` to the fixture
+(2026-11-21).** §4 names only `tests/pricing/`. Left alone, `courses`, `enrollment`, `catalog` and
+`progress` hold rules and no test, which D3 ("a module with rules has a test through its surface") can
+read as four more findings beside P4. So each of the four has one test file through its index, and the
+four tests use no internal import. The plan's P4 line "No test imports `src/pricing/index.ts`" still
+holds. `package.json` (name, `private`, `type`, no dependencies) and a strict `tsconfig.json` tell an
+audit the language lane; the SDK behind N1 is the bare import `@acme/payments-sdk`, which resolves to
+nothing because nothing is installed. Cost: the fixture is 35 files, not about 20, and G1 reads all of them.
+
+**D14 — `fe-blazor` sets its analyzer severities in a `.globalconfig`, not a `.editorconfig`
+(2026-11-21).** §7 names `.editorconfig` for every .NET stack. In a scratch Razor project an
+`RS0030` severity written in `.editorconfig`, even in a `[*]` section, stayed a warning inside a `.razor`
+`@code` block, and the same line in a `.globalconfig` (`is_global = true`) made it an error. The Razor
+source generator's files are not under the project folder, so no `.editorconfig` section matches them.
+`be-dotnet` and `desktop-windows` keep `.editorconfig`: their code is all handwritten `.cs`. Cost:
+`fe-blazor` has one more config file beside the `.editorconfig` that already holds its style. The
+alternative, a `.editorconfig` for the rows and a `.globalconfig` for `RS0030` alone, would split one table
+across two files. Every later task checks whether its tool skips generated code, or configures it
+separately, before it names the file the severities live in.
+
 ## Answered questions (2026-11-21)
 
 **O1 — Which of the guide's six items join the plan: all six.** The untested-code skill and the lint
@@ -453,6 +480,22 @@ run the unfiltered `skill-lint`.
   `tools/plugin-surface-check.py`: `audit-architecture` in `FRONT_DOORS`.
 - **Not in A1:** the fixture (FX1), the catalog and the README (C1), and any run of the lane (G1).
 
+**As built (2026-11-21):**
+- Built: `engineering/architecture-audit/SKILL.md` (`audit-architecture`, 193-char description, 6,532-char
+  body, front door, `When to use` / `When NOT to use`) and `references/checklist.md` (16 checks A1–E3, a
+  Locate recipe per row). The engine's lane table and "Artifacts" line, `code-auditor` (step 4, the Steps
+  table, description 351 chars, file 8,748), `commands/audit.md`, `feature-audit` (a "When NOT to use"
+  row and the glossary sentence), `backend/_shared/code-review/SKILL.md` ("Module depth and duplication"
+  and Procedure step 6, "Produce the table" is now 7), `marketplace.json` and `FRONT_DOORS` carry the
+  lane.
+- Gate, all green: `python3 tools/plugin-surface-check.py` prints `OK`; `skill-lint engineering
+  backend/_shared/code-review` ends `0 findings`; `token-audit --violations-only` exits 0 with 0
+  violations; `pytest tools/test_skill_lint.py` 95 passed.
+- Recipes: run once on this repository for syntax only (`git grep`, `git ls-files`, `sort`, `uniq`, `cksum`
+  all ran); none ran on the fixture. Whether they find the seeded defects is G1's blind run.
+- Not committed: the queue commits, as the task prompt's own commit line is overridden by the queue.
+- Divergences are D12.
+
 ### FX1 — The seeded fixture and its answer key
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -481,6 +524,30 @@ the self-review in the last bullet.
   `Student` is under `Avoid` in the glossary. Each decoy matches its "why it is fine".
 - **Not in FX1:** reading `engineering/architecture-audit/`. The fixture is written from §3 and §4 alone.
 
+**As built (2026-11-21):**
+- `tools/fixtures/architecture-audit/course-platform/` is 35 files: `package.json` (no dependencies),
+  a strict `tsconfig.json`, `docs/business-model/glossary.md`, 25 files under `src/` and 7 under `tests/`.
+  `EXPECTED.md` sits beside it. Divergences are D13: a test file per rule-bearing module beside
+  `tests/pricing/`, and the two config files.
+- Planted at: P1 `src/courses/submit-course.ts:7-59` against `duplicate-course.ts:6-56`, the title check
+  at `submit-course.ts:31-33`; P2 `src/enrollment/enrollment-service.ts:4-22`; P3
+  `src/catalog/index.ts:4-5`; P4 `tests/pricing/discount-rules.test.ts:2`; P5
+  `src/progress/student-progress.ts:1`. Decoys: N1 `src/payments/payment-gateway.ts:13-27`, N2
+  `src/pricing/index.ts:6-10`, N3 `src/courses/find-course.ts:8-11` and
+  `src/enrollment/enroll-learner.ts:23-26`.
+- Self-review, each line held: a `diff` of the two P1 files with their names normalised shows four
+  differences (the `MAX_TITLE_LENGTH` constant, the title check, `sourceCourseId`, `duplicatedFrom`), 55
+  of 57 lines identical; only `submit-course.ts` has a title-length check. All four methods of
+  `enrollment-service.ts` return `this.repository.<same name>(<same arguments>)`.
+  `src/pricing/index.ts` exports `quote` and nothing else; no file under `tests/` imports it
+  (`git grep -n --untracked "pricing'" -- tests` is empty). The glossary's `Learner` row has `Student`
+  under `Avoid`; `git grep -n --untracked -i student` hits only `src/progress/` and
+  `tests/progress/progress.test.ts`, which use `StudentProgress`. No comment: `git grep -n --untracked
+  -E "^\s*(//|\*|/\*)"` over the fixture is empty.
+- Unverified: the fixture was never typechecked or run, by design (D5). The tests are written to be
+  valid Vitest, and the SDK shape in `payment-gateway.ts` is an invented one.
+- Not committed: the queue commits, as the task prompt's own commit line is overridden by the queue.
+
 ### R1 — Unit tests go through the entry point, in CLAUDE.md and the tests rule files
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -502,6 +569,25 @@ files in §5 holds its line, tagged *major*.
 - Where a rule file has a version comment in its header, raise the version and the date.
 - **Not in R1:** any unit-test skill's text, the QA rule files, and section D of the architecture
   checklist (A1).
+- **As built (2026-11-21):** `CLAUDE.md` "Test code rules" holds the §5 bullet word for word, directly above
+  the coverage bullet (`git grep -n "goes through the unit's public entry point" CLAUDE.md`). Each of the
+  twelve rule files holds one new or extended line tagged *major*, and its header comment is raised from
+  `v1 (2026-11-03)` to `v2 (2026-11-21)` (`v1 (2026-11-15)` for the three desktop files).
+  - **Where the skills won (§5 rule):** `.NET`, Java and Node unit-test skills allow `Received()` /
+    `verify()` / `toHaveBeenCalledWith` when the call is the contract (an event published, an email sent), and
+    the Rust skill allows `mockall` for call counts. So those lines ban a call assertion only on *a collaborator
+    the unit owns* and say a call that is the contract may be asserted. Windows already allowed a mock library
+    for a call sequence that is the behaviour; its line is worded the same way.
+  - **Node:** the old `@ts-expect-error` clause came out of the *minor* line and now sits in a *major* line of its
+    own, with the un-exported-file import and the owned-collaborator call assertion.
+  - **Rust:** the line also bans `pub(crate)` widening, and keeps in-module `#[cfg(test)]` access (D7).
+  - **Android:** names `internal` and `@VisibleForTesting` as the widenings.
+  - **Outside R1's files:** `tools/token-audit.py --violations-only` was red before R1 touched anything
+    (`product/skills/codebase-survey/SKILL.md` description at 217 chars, over the 200 budget, from commit
+    6ede62fd). Shortened to 196 chars, wording otherwise unchanged, so the gate is green.
+  - **Gate:** `python3 tools/skill-lint.py backend frontend mobile desktop | tail -1` → `0 findings`;
+    `python3 tools/token-audit.py --violations-only` → exit 0.
+  - **Not committed:** the queue commits, so there is no `docs: 017 R1` commit from this session.
 
 ### U1 — The untested-code skill
 
@@ -534,6 +620,12 @@ run the unfiltered `skill-lint`.
 - `backend/dotnet/skills/unit-testing/references/risk-hotspots.md:47`: a pointer to the skill.
 - **Not in U1:** pointers in stack agents (D6), and the catalog (C1).
 
+**As built (2026-11-21):**
+- Built: `engineering/untested-code/SKILL.md` (`untested-code`, 187-char description, front door, `When to use` / `When NOT to use`): the six steps of §6, each with a "done when"; the evidence; the three pointers. Step 5's check is two things per behaviour called wrong (a test whose name says it pins current behaviour, and a findings row) plus a production diff since step 4 with no fixing edit.
+- Wired: `./engineering/untested-code` in the `engineering` skills of `marketplace.json`, `untested-code` in `FRONT_DOORS` (`tools/plugin-surface-check.py`), and `risk-hotspots.md:47` ends with a pointer. The plugin description now names the architecture audits (A1 had not) and `untested-code`. No stack agent was touched (D6).
+- Gate, all green: `plugin-surface-check.py` prints `OK`; `skill-lint engineering backend/dotnet/skills/unit-testing` ends `0 findings`; `token-audit --violations-only` exits 0 with 0 violations; `pytest tools/test_skill_lint.py` 95 passed.
+- Not committed: the queue commits. No divergence from the plan.
+
 ### L1 — Lint tables for the .NET stacks, and the shape the other four tasks copy
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -563,6 +655,28 @@ not run the unfiltered `skill-lint`.
 - **Before stopping, rewrite the L2–L5 prompt blocks** wherever the shape landed differently from §7: a
   heading, a column, the wording of the lint-gap step.
 - **Not in L1:** `qa-dotnet` (L5), and writing any custom analyzer.
+
+**As built (2026-11-21):**
+- Built: `backend/dotnet/skills/rules/dotnet-lint.md` (new, 15 rows), `frontend/blazor/skills/rules/blazor-lint.md` (new, 5 rows) and an `## Enforced by the build` section at the end of `desktop/windows/skills/rules/package-config.md` (10 rows, `**/.editorconfig` added to its `paths:`, header now v2). Setup pointers: `frontend/blazor/skills/project-setup/SKILL.md` ("Analyzer rules" beside `.editorconfig`, plus the rules line and the exit gate) and `desktop/windows/skills/project-setup/SKILL.md` (a bullet after "Directory.Build.props and central packages"). Checklist rows: `N13` (be-dotnet) and `B13` (desktop-windows, index row now `B1–B13`), each appended after the section's last row, never renumbered. Lint-gap step: step 8 `Report lint gaps` in the three `rules/SKILL.md`, a bullet for the config files in step 5, and the report line `Not enforced by the build: none | <id: house rule>   (one line per row)`. The two `code-review/SKILL.md` that list their rule files name the new file.
+- The shape L2–L5 copy: the table row is `| House rule (file, section) | Tool | Rule id or setting | Level |`, `Level` is `error` or `setting`; under it the two severity lines, each on its own line; then `How the rows are wired:` bullets (where the severity lives, caveats a user hits); then the tool's own config file, in a fenced block, when the rows need one (`BannedSymbols.txt`). A new file's header comment reads `<plugin> rules v1 (2026-11-21): <topic>. Ids checked against the analyzers' documentation on 2026-11-21 (<versions>). Installed by …`. An existing file goes v1 → v2 with the same sentence.
+- Candidate ids (§7), checked against the docs fetched 2026-11-21 (`learn.microsoft.com` source in `dotnet/docs`, `microsoft.github.io/vs-threading`, `roslyn-analyzers` help, `nunit.analyzers`, `dotnet/efcore` source) and each fired: `VSTHRD002`, `CA2254`, `CA2016`, `RS0030` (`Thread.Sleep`), `<Nullable>`, `<TreatWarningsAsErrors>`. None dropped. Ids added from the stack's own rules: `VSTHRD100`, `CA2200`, `CA1031`, `EF1002`, `EF1003`, `NUnit1012`, and `RS0030` for `new HttpClient()`, time and ids, lazy loading, `Migrate`/`EnsureCreated`, `UseInMemoryDatabase`, `Task.Delay`.
+- Dropped for failing D9 (named so L5 does not re-add them): `CA2211` (flags only externally visible static fields, so "no static mutable state" is half-detected); `CA5359` (covers only `ServicePointManager.ServerCertificateValidationCallback`, not the `HttpClientHandler` callback `dotnet-networking.md` bans); no analyzer for constructor injection, a service locator, `!`/`#nullable disable`, `dynamic`, one assertion per test, or an empty `catch` of a specific type. `EF1003` exists only from EF Core 10 (`EF1002` is in 8, 9 and 10), so the row says so. `TreatWarningsAsErrors` is a row only on desktop-windows, where `csharp.md` tags it *major*; `be-dotnet` does not tag it and `blazor-config.md` tags it *minor*, so those two have no such row.
+- Surprises that changed the text: `VSTHRD100` flags an event handler too (desktop-windows: each permitted handler carries a `[SuppressMessage]` with a `Justification`, proven to silence it). `Microsoft.VisualStudio.Threading.Analyzers` turns `VSTHRD200` on as a warning, so each table says the project sets it to `suggestion`. Roslyn skips Razor-generated code for `VSTHRD002`, `VSTHRD100` and `CA2016` (nothing fires in a `@code` block; `.razor.cs` is checked), and only `RS0030` reaches it, but only when its severity is in a `.globalconfig`, never a `.editorconfig` section (D14). `RS0030` with `M:Type.Member` and no parameter list matches the parameterless overload only: each overload is its own line.
+- Proof, `dotnet build` (SDK 10.0.301) in `$TMPDIR/017-L1/{dotnet,blazor,windows}`, ids at `error` in the config and `TreatWarningsAsErrors` off except on windows (scratch kept out of the repo). The windows project is a `net10.0-windows10.0.26100.0` library built with `EnableWindowsTargeting`; no WinUI app project was built on this Mac. One output line per id (be-dotnet; the other two print the same ids):
+  - `src/Violations.cs(7,46): error VSTHRD002: Synchronously waiting on tasks or awaiters may cause deadlocks. Use await or JoinableTaskFactory.Run instead.`
+  - `src/Handler.cs(7,23): error VSTHRD100: Avoid "async void" methods, because any exceptions not handled by the method will crash the process`
+  - `src/Violations.cs(19,15): error CA2016: Forward the 'ct' parameter to the 'ReadToEndAsync' method or pass in 'CancellationToken.None' explicitly to indicate intentionally not propagating the token`
+  - `src/Violations.cs(13,67): error CA2254: The logging message template should not vary between calls to 'LoggerExtensions.LogInformation(ILogger, string?, params object?[])'`
+  - `src/Violations.cs(25,48): error CA2200: Re-throwing caught exception changes stack information`
+  - `src/Violations.cs(31,9): error CA1031: Modify 'Blanket' to catch a more specific allowed exception type, or rethrow the exception`
+  - `src/Persistence.cs(13,66): error EF1002: Method 'FromSqlRaw' inserts interpolated strings directly into the SQL, without any protection against SQL injection.` and `(15,66): error EF1003: Method 'FromSqlRaw' inserts concatenated strings …`
+  - `tests/ViolationTests.cs(8,6): error NUnit1012: The async test method must have a non-void return type`
+  - `RS0030`, one line per banned symbol, all fired: `HttpClient.HttpClient()`, `DateTime.UtcNow`, `DateTime.Now`, `DateTimeOffset.Now`, `DateTimeOffset.UtcNow`, `Guid.NewGuid()`, `ProxiesExtensions`, `RelationalDatabaseFacadeExtensions.Migrate(DatabaseFacade)`, `…MigrateAsync(DatabaseFacade, CancellationToken)`, `DatabaseFacade.EnsureCreated()`, `…EnsureCreatedAsync(CancellationToken)`, and in the test list `Thread.Sleep(int)`, `Thread.Sleep(TimeSpan)`, `Task.Delay(int)`, `Task.Delay(TimeSpan)`, `InMemoryDbContextOptionsExtensions`. Example: `src/Violations.cs(36,30): error RS0030: The symbol 'DateTime.UtcNow' is banned in this project: Inject TimeProvider`.
+  - `<Nullable>`: `src/Violations.cs(42,20): warning CS8600: Converting null literal or possible null value to non-nullable type.` (an `error` under `TreatWarningsAsErrors`, shown on the windows project: `src/Violations.cs(32,20): error CS8600`).
+  - fe-blazor: `src/Details.razor.cs(5,47): error VSTHRD002`, `(7,24): error VSTHRD100`, `(12,15): error CA2016`; `src/Orders.razor(13,36): error RS0030: The symbol 'HttpClient.HttpClient()' is banned in this project`; `tests/WaitTests.cs(8,29): error RS0030: The symbol 'Thread.Sleep(int)'`, `(11,46): … 'Task.Delay(int)'`.
+  - desktop-windows: `src/Violations.cs(26,28): error RS0030: The symbol 'Thread.Sleep(int)' is banned in this project: The UI thread never blocks`, plus the ids above.
+- Gate, all green: `python3 tools/skill-lint.py backend/dotnet frontend/blazor desktop/windows | tail -1` prints `0 findings`; `python3 tools/token-audit.py --violations-only` exits 0 with 0 violations; the proof above.
+- Not committed: the queue commits. Nothing unverified: every table row fired. The one decision that differs from §7 is D14.
 
 ### L2 — Lint tables for the TypeScript stacks
 
@@ -790,266 +904,9 @@ the task.
 | G1 | `docs` | `general-purpose` | C1, FX1 | — | ~120k |
 | — | restart, run `/engineering:audit` and one `<plugin>:rules` on a real project | **the user** | G1 | — | — |
 
-All eleven prompts are live. None has landed.
+A1, FX1, R1, U1 and L1 have landed; their prompts are deleted. The blocks below are the live ones.
 
 ---
-
-### A1 — The architecture lane, its checklist and its entry through code-auditor (general-purpose, docs)
-
-````
-Depends on: none
-Agent: general-purpose · Stack: docs
-
-Task A1 of docs/plans/017-architecture-audit-untested-code-and-lint-enforcement.md. The goal:
-- `engineering:audit-architecture` is registered and is a front door.
-- `code-auditor` routes a structure question to it.
-- engineering/architecture-audit/references/checklist.md holds the 16 checks of the plan's §3, each with
-  a Locate recipe.
-
-Do NOT read the plan's §4 or anything under tools/fixtures/architecture-audit/. The checklist must not be
-written with the fixture in view.
-
-Read, in this order:
-1. CLAUDE.md: "Simplicity", "Review behavior", "Test code rules".
-2. The plan: §1, §2, §3, D1–D4, task A1, and "Close-out — every task".
-3. engineering/standards-audit-engine/SKILL.md and its references/report-template.md.
-4. engineering/agents/code-auditor.md, engineering/commands/audit.md, engineering/feature-audit/SKILL.md.
-5. The pattern: backend/dotnet/skills/standards-audit/SKILL.md and the first 60 lines of its
-   references/conformance-checklist.md.
-6. backend/_shared/code-review/SKILL.md.
-7. engineering/writing-for-agents/SKILL.md, its references/skill-mechanics.md ("Front door or hidden",
-   "The description", "Names"), and .skill-template/reviewer.SKILL.md.
-8. The `engineering` entry of .claude-plugin/marketplace.json, and FRONT_DOORS in
-   tools/plugin-surface-check.py (line 41).
-
-Do:
-- engineering/architecture-audit/SKILL.md: name `audit-architecture`, listed to the model, with
-  `When to use` and `When NOT to use`. It supplies the language lane (step 0), the applicability probes
-  (step 1), what a module is, and the fence. It reads the engine by path and copies none of it.
-- references/checklist.md: sections A–E with the ids, bad signs and severities of §3, a Locate recipe per
-  row, the owner per section, the "never a finding" list and the fix-direction rule (D3).
-- The engine: its lane table names the architecture checklist as a CONVENTION-lane rule set, and
-  "Artifacts" allows `docs/audits/<NNN>-architecture-conformance-r<N>.md`.
-- code-auditor: step 4 gains the ARCHITECTURE lane. The Steps table says what A1–A3 mean for it. The
-  description and the Report block name it.
-- commands/audit.md: the description and the closing paragraph name the third lane.
-- feature-audit: a "When NOT to use" row for structure questions, and the one glossary sentence under
-  "Functionality narrative" (task A1 in the plan has the wording).
-- backend/_shared/code-review/SKILL.md: a "Module depth and duplication" section pointing at sections B
-  and C of the checklist, and one Procedure step. Copy no row.
-- marketplace.json: add `./engineering/architecture-audit`. plugin-surface-check.py: add
-  `audit-architecture` to FRONT_DOORS.
-
-Traps:
-- Budgets: a description is at most 200 characters with no colon followed by a space; a SKILL.md body at
-  most 16,000 characters; the agent at most 14,000 and its description at most 360.
-- The skill's folder is `architecture-audit` and its name is `audit-architecture`, like
-  `feature-audit` / `audit-feature`.
-- This repo's `grep` is ugrep and misses lines. Search with `git grep`, adding `--untracked` for new
-  files.
-- A locate recipe finds leads. Each one must work with read-only shell (`git grep`, `ls`, `git log`).
-
-Gate: own tests.
-  python3 tools/plugin-surface-check.py    (prints OK)
-  python3 tools/skill-lint.py engineering backend/_shared/code-review | tail -1    (0 findings)
-  python3 tools/token-audit.py --violations-only    (exit 0)
-  python3 -m pytest tools/test_skill_lint.py -q
-Do not run the unfiltered skill-lint: other tasks are writing beside you.
-
-Commit: `docs: 017 A1 — architecture audit lane, checklist and code-auditor routing`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### FX1 — The seeded fixture and its answer key (general-purpose, docs)
-
-````
-Depends on: none
-Agent: general-purpose · Stack: docs
-
-Task FX1 of docs/plans/017-architecture-audit-untested-code-and-lint-enforcement.md. The goal: a small
-TypeScript project with five planted structural defects and three decoys, plus an answer key outside it.
-A later task audits it blind.
-
-Do NOT read engineering/architecture-audit/. The fixture is written from the plan alone.
-
-Read, in this order:
-1. CLAUDE.md: "Code quality rules", "Comments", "Test code rules".
-2. The plan: the check table in §3, all of §4, D5, task FX1, and "Close-out — every task".
-3. product/skills/domain-modeling/references/glossary-format.md.
-
-Do:
-- tools/fixtures/architecture-audit/course-platform/: `docs/business-model/glossary.md`, `src/` with the
-  modules courses, enrollment, catalog, pricing, progress and payments, and `tests/pricing/`.
-- Plant P1–P5 and N1–N3 exactly as §4's two tables describe, in the files they name.
-- tools/fixtures/architecture-audit/EXPECTED.md: §4's two tables with line numbers added, and the pass
-  bar.
-- Run the self-review in the plan's FX1 task block, line by line, before you stop.
-
-Traps:
-- No comment anywhere in the fixture, and no file or identifier name that hints at a defect.
-- Outside the planted defects, the code follows the house rules. An accidental ninth problem makes the
-  comparison ambiguous.
-- EXPECTED.md sits beside `course-platform/`, never inside it.
-- The fixture is never installed or built. It needs no `node_modules` and no lockfile.
-
-Gate: none. The fixture is read and never built, and no script in tools/ runs over it. The check is the
-self-review.
-
-Commit: `docs: 017 FX1 — seeded fixture for the architecture audit`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### R1 — Unit tests go through the entry point, in CLAUDE.md and the tests rule files (general-purpose, docs)
-
-````
-Depends on: none
-Agent: general-purpose · Stack: docs
-
-Task R1 of docs/plans/017-architecture-audit-untested-code-and-lint-enforcement.md. The goal: CLAUDE.md
-"Test code rules" holds the entry-point bullet, and each of twelve tests rule files holds its one line,
-tagged *major*.
-
-Read, in this order:
-1. CLAUDE.md: "Test code rules".
-2. The plan: §5, D7, task R1, and "Close-out — every task".
-3. The twelve files in §5's table.
-4. For each stack, the doubles and seams parts of its unit-test skill:
-   backend/{dotnet,java,node,python,rust}/skills/unit-testing/SKILL.md,
-   frontend/{react,blazor}/skills/component-testing/SKILL.md,
-   mobile/react-native/skills/component-testing/SKILL.md,
-   mobile/{ios,android}/skills/unit-testing/SKILL.md,
-   desktop/{macos,windows}/skills/unit-testing/SKILL.md.
-
-Do:
-- Add §5's bullet to CLAUDE.md word for word, directly above the coverage bullet ("Code an agent writes
-  ships with unit tests…").
-- For each row of §5's table, add or extend the one line, in that stack's idiom.
-- Where a rule file's header comment carries a version and a date, raise both.
-
-Traps:
-- Rust's in-module `#[cfg(test)]` tests and Swift's `@testable import` stay allowed (D7). The line bans
-  widening visibility for a test, never the language's own access.
-- Where a unit-test skill contradicts a line you are about to write, the skill wins. Write the line to
-  match it and record it in As built.
-- One line per file. Do not restate the CLAUDE.md bullet in full.
-- Search with `git grep`; this repo's `grep` misses lines.
-
-Gate: own tests.
-  python3 tools/skill-lint.py backend frontend mobile desktop | tail -1    (0 findings)
-  python3 tools/token-audit.py --violations-only    (exit 0)
-Do not run the unfiltered skill-lint.
-
-Commit: `docs: 017 R1 — unit tests go through the entry point`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### U1 — The untested-code skill (general-purpose, docs)
-
-````
-Depends on: A1
-Agent: general-purpose · Stack: docs
-
-Task U1 of docs/plans/017-architecture-audit-untested-code-and-lint-enforcement.md. The goal:
-`engineering:untested-code` is registered, is a front door, and teaches the six steps of the plan's §6,
-each with its "done when".
-
-Read, in this order:
-1. CLAUDE.md: "Test code rules", "Simplicity".
-2. The plan: §5, §6, D6, task U1, A1's As built note, and "Close-out — every task".
-3. engineering/writing-for-agents/SKILL.md and its references/skill-mechanics.md ("Front door or
-   hidden", "The description").
-4. The patterns: engineering/quality-constraints/SKILL.md and engineering/verify-before-done/SKILL.md.
-5. backend/dotnet/skills/unit-testing/references/risk-hotspots.md.
-6. .skill-template/: pick the template that fits a procedure skill.
-7. The `engineering` entry of .claude-plugin/marketplace.json and FRONT_DOORS in
-   tools/plugin-surface-check.py, as A1 left them.
-
-Do:
-- engineering/untested-code/SKILL.md: name `untested-code`, listed to the model, with `When to use` and
-  `When NOT to use`. The six steps of §6, the evidence at the end, and the three pointers: the stack's
-  unit-testing skill, `engineering:quality-constraints`, `engineering:verify`.
-- `When NOT to use`: code that already has tests, a red gate (`quality-constraints`), finding a bug's
-  cause (`debugging`).
-- marketplace.json: add `./engineering/untested-code`, and name both new skills in the plugin's
-  description. plugin-surface-check.py: add `untested-code` to FRONT_DOORS.
-- risk-hotspots.md line 47: point to the skill.
-
-Traps:
-- The description is at most 200 characters with no colon followed by a space. §6 has a draft; count it.
-- Step 5 is the one a model skips: a behaviour that looks wrong is pinned and reported, never fixed in
-  the same change. Give it a checkable "done when".
-- Point to the other skills; copy nothing from them.
-- No pointer goes into any stack agent (D6).
-
-Gate: own tests.
-  python3 tools/plugin-surface-check.py    (prints OK)
-  python3 tools/skill-lint.py engineering backend/dotnet/skills/unit-testing | tail -1    (0 findings)
-  python3 tools/token-audit.py --violations-only    (exit 0)
-  python3 -m pytest tools/test_skill_lint.py -q
-Do not run the unfiltered skill-lint.
-
-Commit: `docs: 017 U1 — untested-code skill`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### L1 — Lint tables for the .NET stacks, and the shape the other four tasks copy (general-purpose, docs)
-
-````
-Depends on: none
-Agent: general-purpose · Stack: docs
-
-Task L1 of docs/plans/017-architecture-audit-untested-code-and-lint-enforcement.md. The goal: be-dotnet,
-fe-blazor and desktop-windows each name the analyzer rules that enforce their *major* house rules, and
-each rule id is proven to fire. You land the shape that L2–L5 copy.
-
-Read, in this order:
-1. CLAUDE.md: "Code quality rules", "Backend code rules", "Frontend code rules (Blazor)", "Desktop code
-   rules".
-2. The plan: §7, D8–D10, task L1, and "Close-out — every task".
-3. The rule files, for rules tagged *major* or *blocker* that an analyzer could detect:
-   backend/dotnet/skills/rules/*.md, frontend/blazor/skills/rules/*.md,
-   desktop/windows/skills/rules/{csharp,package-config,dotnet-networking,win-tests}.md.
-4. The three rules/SKILL.md files, for the procedure a new step joins and the path proposals in step 5.
-5. frontend/blazor/skills/project-setup/SKILL.md lines 140–190 and
-   desktop/windows/skills/project-setup/SKILL.md lines 55–100.
-6. The tooling rows of backend/dotnet/skills/standards-audit/references/conformance-checklist.md (A6, N8)
-   and of desktop/windows/skills/standards-audit/references/conformance-checklist.md.
-7. engineering/source-grounding/SKILL.md, then the official documentation of each analyzer id you use.
-
-Do, per stack: mine the rule files, check each candidate id of §7 and any other you find, prove it, then
-write the four placements:
-- The `## Enforced by the build` table, in new backend/dotnet/skills/rules/dotnet-lint.md, new
-  frontend/blazor/skills/rules/blazor-lint.md, and desktop/windows/skills/rules/package-config.md (add
-  the `.editorconfig` glob to its `paths:`). Below each table, the two severity lines of §7.
-- The setup pointer, in the two project-setup skills.
-- One check row in each of the two checklists.
-- The lint-gap step in each of the three rules/SKILL.md, with the report heading
-  `Not enforced by the build:`.
-
-The proof: in "$TMPDIR/017-L1/<stack>/", a minimal project, the config with the table's rows, and one
-file that breaks each row. `dotnet build` must report every id. Quote one output line per id in As built.
-
-Traps:
-- §7's candidate ids are unverified. Drop or replace one you cannot find in the documentation, and name
-  it in As built.
-- desktop-windows is C# lanes only. Leave the C++/WinRT `/W4 /WX` rule where it is.
-- A row needs all four tests of §7. Constructor injection has no off-the-shelf analyzer: it gets no row.
-- No custom analyzer, and no second copy of the list in a project-setup skill.
-- A new rule file is added to step 5's path proposals in that stack's rules skill.
-- Never commit the scratch project. Search with `git grep`.
-
-Before you stop, rewrite the L2, L3, L4 and L5 prompt blocks wherever the shape landed differently from
-§7: the heading, a column, the wording of the lint-gap step, the pattern file's path.
-
-Gate: own tests.
-  python3 tools/skill-lint.py backend/dotnet frontend/blazor desktop/windows | tail -1    (0 findings)
-  python3 tools/token-audit.py --violations-only    (exit 0)
-  the scratch-project proof above
-Do not run the unfiltered skill-lint.
-
-Commit: `docs: 017 L1 — lint-enforced house rules for the .NET stacks`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### L2 — Lint tables for the TypeScript stacks (general-purpose, docs)
 
@@ -1063,9 +920,10 @@ the shape L1 landed, and each rule id is proven to fire.
 
 Read, in this order:
 1. CLAUDE.md: "Code quality rules", "Frontend code rules (React)", "Mobile code rules".
-2. The plan: §7, D8–D10, L1's As built note, task L2, and "Close-out — every task".
-3. The pattern L1 landed: backend/dotnet/skills/rules/dotnet-lint.md, and the lint-gap step in
-   backend/dotnet/skills/rules/SKILL.md.
+2. The plan: §7, D8–D10, D14, L1's As built note, task L2, and "Close-out — every task".
+3. The pattern L1 landed: backend/dotnet/skills/rules/dotnet-lint.md (the table, the two severity
+   lines, `How the rows are wired:`, the config block), and step 8 `Report lint gaps` with its report
+   line in backend/dotnet/skills/rules/SKILL.md.
 4. The rule files, for *major* or *blocker* rules ESLint could detect: backend/node/skills/rules/*.md,
    frontend/react/skills/rules/*.md, mobile/react-native/skills/rules/*.md.
 5. The three rules/SKILL.md files.
@@ -1081,7 +939,26 @@ Do, per stack: mine, check each candidate id, prove it, then write the four plac
   mobile/react-native/skills/rules/react-native-lint.md, each with `paths:` on `eslint.config.*`.
 - The setup pointer, in the two project-setup skills.
 - One check row in each of the two checklists.
-- The lint-gap step in each of the three rules/SKILL.md.
+- The lint-gap step (step 8) in each of the three rules/SKILL.md.
+
+The shape L1 landed (copy it; D14 and L1's As built say why):
+- The table is `## Enforced by the build`: `| House rule (file, section) | Tool | Rule id or setting | Level |`,
+  `Level` being `error` or `setting`. Under it, the two severity lines, each on its own line (*minor* when
+  the config does not enforce a row; *major* when one is turned off to pass a gate). Then `How the rows
+  are wired:` bullets (where each severity lives, what the tool skips, the noise it adds). Then the
+  tool's own config in a fenced block, where the rows need one.
+- A new rule file's header comment reads `<plugin> rules v1 (<today>): <topic>. Ids checked against the
+  tool's documentation on <today> (<versions>). Installed by …`; an existing file goes v1 → v2 with the
+  same sentence. Add a new file to the list of rule files in that stack's `code-review/SKILL.md`.
+- The setup pointer is one paragraph or bullet, as in frontend/blazor/skills/project-setup/SKILL.md
+  ("Analyzer rules"): write the config from the table, which is the list, with no copy of it; and add the
+  table's file to that skill's exit gate.
+- The check row is appended after the last row of the section that holds the tooling rows, with the next
+  free number (L1 added `N13` and `B13`), never renumbered. `Sev` is `minor`; the violation text says
+  *major* when a row was turned off to pass a gate. Update the section's row range in the index.
+- The lint-gap step is step 8, `Report lint gaps`, in each rules/SKILL.md, with a step-5 bullet naming the
+  lint config files and the report line `Not enforced by the build: none | <id: house rule>   (one line
+  per row)`. Copy the wording of backend/dotnet/skills/rules/SKILL.md and name the stack's own config files.
 
 The proof: in "$TMPDIR/017-L2/<stack>/", a minimal package, a flat config with the table's rows, and one
 file that breaks each row. `npx eslint` must report every id. Quote one output line per id in As built.
@@ -1093,6 +970,8 @@ Traps:
 - mobile-react-native builds on `eslint-config-expo/flat`. A row the preset already turns on is listed as
   provided by the preset.
 - No Biome row unless the stack already names Biome as its linter. No custom rule.
+- Does the tool skip generated code, or take that code's severity from another file (D14)? Prove one
+  violation in generated code where the stack has any, and say so in the table.
 - Never commit the scratch project. Search with `git grep`.
 
 Gate: own tests.
@@ -1117,9 +996,10 @@ and each rule id is proven to fire.
 
 Read, in this order:
 1. CLAUDE.md: "Code quality rules", "Backend code rules", "Mobile code rules" (Android).
-2. The plan: §7, D8–D10, L1's As built note, task L3, and "Close-out — every task".
-3. The pattern L1 landed: backend/dotnet/skills/rules/dotnet-lint.md, and the lint-gap step in
-   backend/dotnet/skills/rules/SKILL.md.
+2. The plan: §7, D8–D10, D14, L1's As built note, task L3, and "Close-out — every task".
+3. The pattern L1 landed: backend/dotnet/skills/rules/dotnet-lint.md (the table, the two severity
+   lines, `How the rows are wired:`, the config block), and step 8 `Report lint gaps` with its report
+   line in backend/dotnet/skills/rules/SKILL.md.
 4. The rule files: backend/java/skills/rules/*.md, and
    mobile/android/skills/rules/{android,android-build,android-data,android-tests}.md.
 5. The two rules/SKILL.md files.
@@ -1134,7 +1014,26 @@ Do, per stack: mine, check each candidate id, prove it, then write the four plac
   the Checkstyle config) and in mobile/android/skills/rules/android-build.md.
 - The setup pointer, in Android's project-setup skill.
 - One check row in the Android checklist.
-- The lint-gap step in both rules/SKILL.md.
+- The lint-gap step (step 8) in both rules/SKILL.md.
+
+The shape L1 landed (copy it; D14 and L1's As built say why):
+- The table is `## Enforced by the build`: `| House rule (file, section) | Tool | Rule id or setting | Level |`,
+  `Level` being `error` or `setting`. Under it, the two severity lines, each on its own line (*minor* when
+  the config does not enforce a row; *major* when one is turned off to pass a gate). Then `How the rows
+  are wired:` bullets (where each severity lives, what the tool skips, the noise it adds). Then the
+  tool's own config in a fenced block, where the rows need one.
+- A new rule file's header comment reads `<plugin> rules v1 (<today>): <topic>. Ids checked against the
+  tool's documentation on <today> (<versions>). Installed by …`; an existing file goes v1 → v2 with the
+  same sentence. Add a new file to the list of rule files in that stack's `code-review/SKILL.md`.
+- The setup pointer is one paragraph or bullet, as in frontend/blazor/skills/project-setup/SKILL.md
+  ("Analyzer rules"): write the config from the table, which is the list, with no copy of it; and add the
+  table's file to that skill's exit gate.
+- The check row is appended after the last row of the section that holds the tooling rows, with the next
+  free number (L1 added `N13` and `B13`), never renumbered. `Sev` is `minor`; the violation text says
+  *major* when a row was turned off to pass a gate. Update the section's row range in the index.
+- The lint-gap step is step 8, `Report lint gaps`, in each rules/SKILL.md, with a step-5 bullet naming the
+  lint config files and the report line `Not enforced by the build: none | <id: house rule>   (one line
+  per row)`. Copy the wording of backend/dotnet/skills/rules/SKILL.md and name the stack's own config files.
 
 The proof: in "$TMPDIR/017-L3/<stack>/", a minimal Gradle project, the config with the table's rows, and
 one file that breaks each row. Gradle is not on PATH: run
@@ -1149,6 +1048,8 @@ Traps:
 - ArchUnit is a test, not a lint. It gets no row.
 - An Android scratch project needs the Android SDK. Where the image has none, prove the detekt rows in a
   plain Kotlin JVM project and list the Android Lint rows as unverified.
+- Does the tool skip generated code, or take that code's severity from another file (D14)? Prove one
+  violation in generated code where the stack has any, and say so in the table.
 - Never commit the scratch project. Search with `git grep`.
 
 Gate: own tests.
@@ -1173,9 +1074,10 @@ each rule id is proven to fire.
 
 Read, in this order:
 1. CLAUDE.md: "Code quality rules", "Mobile code rules" (iOS), "Desktop code rules" (macOS).
-2. The plan: §7, D8–D10, L1's As built note, task L4, and "Close-out — every task".
-3. The pattern L1 landed: backend/dotnet/skills/rules/dotnet-lint.md, and the lint-gap step in
-   backend/dotnet/skills/rules/SKILL.md.
+2. The plan: §7, D8–D10, D14, L1's As built note, task L4, and "Close-out — every task".
+3. The pattern L1 landed: backend/dotnet/skills/rules/dotnet-lint.md (the table, the two severity
+   lines, `How the rows are wired:`, the config block), and step 8 `Report lint gaps` with its report
+   line in backend/dotnet/skills/rules/SKILL.md.
 4. The rule files: mobile/ios/skills/rules/{swift,xcode-config,swift-tests}.md,
    desktop/macos/skills/rules/{swift,xcode-config,swift-tests}.md,
    backend/python/skills/rules/{python,python-project,python-tests}.md,
@@ -1191,7 +1093,26 @@ Do, per stack: mine, check each candidate id, prove it, then write the four plac
   backend/python/skills/rules/python-project.md and in backend/rust/skills/rules/cargo.md.
 - The setup pointer, in the two Swift project-setup skills.
 - One check row in each of the two Swift checklists.
-- The lint-gap step in each of the four rules/SKILL.md.
+- The lint-gap step (step 8) in each of the four rules/SKILL.md.
+
+The shape L1 landed (copy it; D14 and L1's As built say why):
+- The table is `## Enforced by the build`: `| House rule (file, section) | Tool | Rule id or setting | Level |`,
+  `Level` being `error` or `setting`. Under it, the two severity lines, each on its own line (*minor* when
+  the config does not enforce a row; *major* when one is turned off to pass a gate). Then `How the rows
+  are wired:` bullets (where each severity lives, what the tool skips, the noise it adds). Then the
+  tool's own config in a fenced block, where the rows need one.
+- A new rule file's header comment reads `<plugin> rules v1 (<today>): <topic>. Ids checked against the
+  tool's documentation on <today> (<versions>). Installed by …`; an existing file goes v1 → v2 with the
+  same sentence. Add a new file to the list of rule files in that stack's `code-review/SKILL.md`.
+- The setup pointer is one paragraph or bullet, as in frontend/blazor/skills/project-setup/SKILL.md
+  ("Analyzer rules"): write the config from the table, which is the list, with no copy of it; and add the
+  table's file to that skill's exit gate.
+- The check row is appended after the last row of the section that holds the tooling rows, with the next
+  free number (L1 added `N13` and `B13`), never renumbered. `Sev` is `minor`; the violation text says
+  *major* when a row was turned off to pass a gate. Update the section's row range in the index.
+- The lint-gap step is step 8, `Report lint gaps`, in each rules/SKILL.md, with a step-5 bullet naming the
+  lint config files and the report line `Not enforced by the build: none | <id: house rule>   (one line
+  per row)`. Copy the wording of backend/dotnet/skills/rules/SKILL.md and name the stack's own config files.
 
 The proof: in "$TMPDIR/017-L4/<stack>/". Python: `uvx ruff check` and `uvx mypy --strict`. Rust: clippy
 through a `rust` image in Docker, since `cargo` is not installed. Swift: SwiftLint is not installed; try
@@ -1205,6 +1126,8 @@ Traps:
 - mobile-ios and desktop-macos get the same Swift rows, each in its own file (D8).
 - Swift 6 strict concurrency is the compiler, not a lint. It gets a setting row, never a SwiftLint id.
 - Never raise a toolchain pin, and never add a linter a stack does not name.
+- Does the tool skip generated code, or take that code's severity from another file (D14)? Prove one
+  violation in generated code where the stack has any, and say so in the table.
 - Never commit the scratch project. Search with `git grep`.
 
 Gate: own tests.
@@ -1229,9 +1152,10 @@ L1 landed, and each rule id is proven to fire.
 
 Read, in this order:
 1. CLAUDE.md: "Test code rules".
-2. The plan: §7, D8–D10, L1's As built note, task L5, and "Close-out — every task".
-3. The pattern L1 landed: backend/dotnet/skills/rules/dotnet-lint.md, and the lint-gap step in
-   backend/dotnet/skills/rules/SKILL.md.
+2. The plan: §7, D8–D10, D14, L1's As built note, task L5, and "Close-out — every task".
+3. The pattern L1 landed: backend/dotnet/skills/rules/dotnet-lint.md (the table, the two severity
+   lines, `How the rows are wired:`, the config block), and step 8 `Report lint gaps` with its report
+   line in backend/dotnet/skills/rules/SKILL.md.
 4. The suite-wide rule files only: qa/dotnet/skills/rules/{automation,suite-config}.md,
    qa/java/skills/rules/{qa-java,qa-java-suite}.md,
    qa/typescript/skills/rules/{qa-typescript,ui-tests}.md.
@@ -1246,10 +1170,27 @@ Do, per stack: mine, check each candidate id, prove it, then write the placement
   qa/java/skills/rules/qa-java-suite.md, and new qa/typescript/skills/rules/qa-typescript-lint.md with
   `paths:` on `eslint.config.*`.
 - One check row in the qa-dotnet checklist.
-- The lint-gap step in each of the three rules/SKILL.md.
+- The lint-gap step (step 8) in each of the three rules/SKILL.md.
 
 The rows come from "Test code rules": no sleep, no `waitForTimeout`, no branch, loop or `try` in a test
 body, no focused test, no skipped test without a reason, no empty `catch`.
+
+The shape L1 landed (copy it; D14 and L1's As built say why):
+- The table is `## Enforced by the build`: `| House rule (file, section) | Tool | Rule id or setting | Level |`,
+  `Level` being `error` or `setting`. Under it, the two severity lines, each on its own line (*minor* when
+  the config does not enforce a row; *major* when one is turned off to pass a gate). Then `How the rows
+  are wired:` bullets (where each severity lives, what the tool skips, the noise it adds). Then the
+  tool's own config in a fenced block, where the rows need one.
+- A new rule file's header comment reads `<plugin> rules v1 (<today>): <topic>. Ids checked against the
+  tool's documentation on <today> (<versions>). Installed by …`; an existing file goes v1 → v2 with the
+  same sentence. Add a new file to the list of rule files in that stack's `code-review/SKILL.md` where it
+  has one.
+- The check row is appended after the last row of the section that holds the tooling rows, with the next
+  free number (L1 added `N13` and `B13`), never renumbered. `Sev` is `minor`; the violation text says
+  *major* when a row was turned off to pass a gate. Update the section's row range in the index.
+- The lint-gap step is step 8, `Report lint gaps`, in each rules/SKILL.md, with a step-5 bullet naming the
+  lint config files and the report line `Not enforced by the build: none | <id: house rule>   (one line
+  per row)`. Copy the wording of backend/dotnet/skills/rules/SKILL.md and name the stack's own config files.
 
 The proof: in "$TMPDIR/017-L5/<stack>/". .NET: `dotnet build`. TypeScript: `npx eslint`. Java: the
 `gradle:9.6.0-jdk21` image. Quote one output line per id in As built.
@@ -1257,11 +1198,19 @@ The proof: in "$TMPDIR/017-L5/<stack>/". .NET: `dotnet build`. TypeScript: `npx 
 Traps:
 - §7's candidate ids are unverified.
 - A scratch .NET project that references Allure.NUnit builds with `-p:AspectInjector_Enabled=false`.
+- L1 already proved, for the .NET unit-test lane, `RS0030` for `Thread.Sleep` and `Task.Delay` (the
+  `BannedSymbols.Tests.txt` lines are in backend/dotnet/skills/rules/dotnet-lint.md) and `NUnit1012`.
+  Copy them for qa-dotnet, and prove every other id yourself. A `M:Type.Member` ban with no parameter
+  list matches the parameterless overload only: one line per overload.
+- If a row uses `Microsoft.VisualStudio.Threading.Analyzers`, `VSTHRD200` (the `Async` suffix) comes on as
+  a warning; the table says the project sets it to `suggestion`.
 - Playwright rule ids must exist in the eslint-plugin-playwright release that supports the versions
   tools/qa-version-check.py pins.
 - "One assertion states one condition" and "page objects expose intent" have no off-the-shelf lint. They
   get no row (D9).
 - Leave the per-lane rule files alone: API, BDD, mobile, desktop.
+- Does the tool skip generated code, or take that code's severity from another file (D14)? Prove one
+  violation in generated code where the stack has any, and say so in the table.
 - Never commit the scratch project. Search with `git grep`.
 
 Gate: own tests.

@@ -98,6 +98,7 @@ tests/OrdersApp.Core.Tests/  NUnit
 
 - **Every version lives in `Directory.Packages.props`;** a `Version=` in a `.csproj` is a finding. The analyzer's version is read from NuGet, not copied from this page.
 - Pin the Extensions packages to the **runtime major** (10 on .NET 10).
+- **Analyzer rules.** Write the analyzer config from the `## Enforced by the build` table in `package-config.md`: the packages in `Directory.Build.props` and `Directory.Packages.props`, the severities in `.editorconfig`, the banned symbols in `BannedSymbols*.txt`. Read the project's copy in `.claude/rules/desktop-windows/`, or the plugin's in `desktop/windows/skills/rules/` when the project has not installed them. The table is the list; this skill keeps no copy of it.
 
 ## The WinUI app project
 

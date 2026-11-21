@@ -78,6 +78,7 @@ If the repo gitignores generated sources (`*.g.cs`, `*.g.i.cs`, `Generated Files
 | B10 | No static mutable state, no `null!` suppressions | A `static` field assigned after load; `Ioc.Default` / `App.Current` used as a locator; `!` used to silence nullable outside tests | `rg -n "static (?!readonly)[A-Za-z<>\[\]?]+ _?[a-z]\w* *(=\|;)" -g '*.cs' --pcre2`; `rg -n "null!\|Ioc\.Default" -g '*.cs'` | major |
 | B11 | Time comes from `TimeProvider`, not `DateTime.Now` / `UtcNow` | `DateTime.Now` or `DateTimeOffset.UtcNow` in logic a test must control | `rg -n "DateTime(Offset)?\.(Utc)?Now" -g '*.cs'` | minor |
 | B12 | The C++ build is strict and the language is not raised `[C++]` | `/W4`, `/WX` or `/permissive-` missing on a project; `LanguageStandard` raised, or `WarningLevel` lowered, with no recorded decision; `#pragma warning(disable` in own code | `rg -n "WarningLevel\|TreatWarningAsError\|ConformanceMode\|LanguageStandard" -g '*.vcxproj' -g '*.props'`; `rg -n "pragma warning" -g '*.cpp' -g '*.h'` | major |
+| B13 | Every row of the `## Enforced by the build` table in `package-config.md` is on at error level | A table id missing from `.editorconfig`, or set below `error`; a `BannedSymbols*.txt` no C# project references; `<Nullable>` or `TreatWarningsAsErrors` missing. Major when a row was turned off to pass a gate | `rg -n "dotnet_diagnostic\.\w+\.severity" -g '.editorconfig' -g '.globalconfig'`; `rg -n "BannedSymbols\|Analyzers" -g '*.csproj' -g '*.props'`; compare each id with the table in the project's `.claude/rules/desktop-windows/package-config.md` | minor |
 
 ---
 
@@ -457,7 +458,7 @@ Not applicable without P/Invoke, COM or C++ projects.
 | § | Section | Rows | Owner |
 |---|---|---|---|
 | A | Version lane, toolchain & migration hygiene | A1–A7 | `project-setup`, `migration`, `basics` |
-| B | Project structure, strictness & language standard | B1–B12 | `project-setup`, `basics` |
+| B | Project structure, strictness & language standard | B1–B13 | `project-setup`, `basics` |
 | C | Architecture, state & DI | C1–C12 | `architecture` |
 | D | UI components & platform conventions | D1–D23 | `ui-components`, `wpf`, `winforms` |
 | E | Styling, theming, motion & adaptive layout | E1–E11 | `styling` |

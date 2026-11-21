@@ -4,7 +4,7 @@ paths:
   - "**/__tests__/**/*.{tsx,jsx}"
 ---
 
-<!-- fe-react rules v1 (2026-11-03): component and logic tests. Installed by /fe-react:rules; add this app's *.test.ts paths above, scoped to the web app. -->
+<!-- fe-react rules v2 (2026-11-21): component and logic tests. Installed by /fe-react:rules; add this app's *.test.ts paths above, scoped to the web app. -->
 
 # React component and logic test standards
 
@@ -19,5 +19,6 @@ Severity tags as in the core React rules: **blocker**, **major**, **minor**, **n
 - Fakes over mock-everything: mock at the module boundary, MSW for the network, mocks reset between tests. *major*
 - A Zod error is asserted on `issues[].path` / `code`, never the message. *major*
 - Never render an async Server Component: extract and test its fetch; the page is an E2E test. Real navigation is not faked by mocking `next/navigation`. *major*
+- Assert what renders and what a handler prop was called with, never component internals, state or refs. *major*
 - Assert through the DOM, not `result.current` of a rendered component; do not test React, the form library or the component library. *minor*
 - New code ships with tests covering at least 80% of the branches it wrote; only an asserting test counts. *major*

@@ -5,7 +5,7 @@ paths:
   - "**/*.{controller,service,guard,interceptor,resolver,repository}.{test,spec}.ts"
 ---
 
-<!-- be-node rules v1 (2026-11-03): tests. Installed by /be-node:rules; edit the paths above to where this project keeps its backend tests. -->
+<!-- be-node rules v2 (2026-11-21): tests. Installed by /be-node:rules; edit the paths above to where this project keeps its backend tests. -->
 
 # Node backend test standards (Vitest)
 
@@ -19,7 +19,8 @@ Severity tags as in the core be-node rules: **blocker**, **major**, **minor**, *
 - Inject the clock, ids, randomness, config and outbound ports instead of `vi.mock`. Never mock a type you don't own (`fetch`, `PrismaClient`, an SDK), the module under test, or a method of the class under test. *major*
 - No `any` or `as unknown as` to force a fake; narrow the interface instead. *major*
 - Both branches of every `Result` are tested. A Zod test asserts `issues[].path` and `code`, never the message. *major*
-- No snapshot as the only assertion, no assertion on the logger, no test of the framework, no `@ts-expect-error` into private state. *minor*
+- No snapshot as the only assertion, no assertion on the logger, no test of the framework. *minor*
+- A test imports only what its module exports: no import of an un-exported file, no `@ts-expect-error` or cast into private state, no `toHaveBeenCalledWith` on a collaborator the unit owns (a call that is the contract, such as a message published, may be asserted); extract the class instead. *major*
 - `vi.useFakeTimers()` is paired with `vi.useRealTimers()`; no `it.skip` without a linked issue. *minor*
 - Test data with four or more fields comes from a builder or a factory with a partial override. *minor*
 - New code ships with unit tests covering at least 80% of the branches it wrote, measured with `vitest --coverage`; only an asserting test counts, and no `/* v8 ignore */` over code with behaviour. *major*

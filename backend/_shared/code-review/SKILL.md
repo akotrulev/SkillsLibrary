@@ -75,6 +75,10 @@ Reviews codebases or proposed designs at the pattern / architecture altitude —
 | Transaction boundaries explicit | `@Transactional` / `using transaction` sprinkled inconsistently | major |
 | Retry / timeout / circuit-breaker policies declared centrally | Each call site invents its own retry loop | minor |
 
+### Module depth and duplication
+
+Sections B and C of [`engineering/architecture-audit/references/checklist.md`](../../../engineering/architecture-audit/references/checklist.md) own the rows for a module that exposes more than it hides, a forwarding layer, a decision encoded in two modules and duplicated logic. Walk those rows over the files in scope and cite their ids; the fix direction is a merge, never a new layer.
+
 ### Comments & self-documentation
 
 Load **[`engineering/code-comments`](../../../engineering/code-comments/SKILL.md)** for the rule itself, the complex-flow test that earns a doc comment, the never-comment trivia list, and the severity mapping. This section supplies only the mechanics that differ here. The rule is language-agnostic; the doc-comment syntax is not, so at this altitude judge the *discipline*, not the syntax.
@@ -120,4 +124,5 @@ Load **[`engineering/code-comments`](../../../engineering/code-comments/SKILL.md
 3. Walk pattern-stacking; flag the heaviest stacking
 4. Walk abstraction (under and over)
 5. Cross-stack: pick one representative class from each service and check consistency
-6. Produce the table; do **not** rewrite
+6. Module depth and duplication: walk sections B and C of the architecture checklist over the scope
+7. Produce the table; do **not** rewrite
