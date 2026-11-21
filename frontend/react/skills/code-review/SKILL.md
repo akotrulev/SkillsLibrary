@@ -10,7 +10,7 @@ Reviews React code (React 19/18 + TypeScript — Next.js App Router / RSC primar
 
 ## The checklist is the rule files
 
-Every check, and the severity it reports, lives in one place: the fe-react rule files `react.md` (core), `react-data.md`, `react-forms.md`, `react-tests.md` and `react-styling.md`.
+Every check, and the severity it reports, lives in one place: the fe-react rule files `react.md` (core), `react-data.md`, `react-forms.md`, `react-tests.md`, `react-styling.md` and `react-lint.md`.
 
 1. **The project's copies first**: `.claude/rules/fe-react/` at the project root. The team may have edited them (and may have scoped their paths to the web app), and its edits win.
 2. **Otherwise the plugin's copies**: `frontend/react/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/fe-react:rules` installs them.

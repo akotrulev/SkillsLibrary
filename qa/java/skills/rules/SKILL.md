@@ -36,10 +36,12 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
    - Data: `git grep -l -e NamedParameterJdbcTemplate -e org.testcontainers -e 'class .*Builder' -- '*.java'` within the test modules, for `qa-java-data.md`.
    - Perf: `git grep -l io.gatling.javaapi -- '*.java'`, for `qa-java-perf.md`.
    - CI: `git grep -l -e 'gradlew' -e 'mvn ' -e allure -- '.github/workflows' '*pipelines*' '.gitlab-ci.yml'`, for `qa-java-ci.md`.
+   - Lint: `git ls-files -- '*checkstyle*.xml'`, for `qa-java-suite.md`, which matches `config/checkstyle/*.xml`; a Checkstyle config kept elsewhere gets its path added.
 
    For each file a search lists that its rule file's globs miss, propose the directory glob that covers it (for example `"**/checkout-tests/src/test/java/**/*.java"`) and add it to the installed copy with the user's agreement. Never widen a glob onto production source. With nobody to ask, change no path and list each proposed glob under `Waiting for the user:` in the report. Done when every file each command lists is matched by an installed glob, or a glob is proposed for it.
 6. **Check it will be committed**: `git check-ignore -q <root>/.claude/rules/qa-java/qa-java.md`. If it is ignored, say so; the rules then apply on this machine only.
 7. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`) and any installed `.claude/rules/be-java/java-tests.md` for test rules that contradict these files, and list them. A written contradiction is the user's to settle. Done when each contradiction is listed, or the report says none.
+8. **Report lint gaps.** Read the `## Enforced by the build` table in `<root>/.claude/rules/qa-java/qa-java-suite.md`, then the project's Checkstyle config (`git ls-files -- '*checkstyle*.xml'`) and the build file that runs it. A row is enforced when its module or id is in the config at `error` severity and the build runs `checkstyleTest` (or the Maven plugin) over the test sources. List every other row under `Not enforced by the build:` with its id and house rule. Never edit the project's config: the user, or a stack agent they ask, turns the rule on. Done when each table row is enforced or listed.
 
 ## Report
 
@@ -49,6 +51,7 @@ Path: <root>/.claude/rules/qa-java/
 Suite paths: default | widened with <file>: <globs>   (one line per widened file)
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md or be-java rules: none | <one line each>
+Not enforced by the build: none | <id: house rule>   (one line per row)
 Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 

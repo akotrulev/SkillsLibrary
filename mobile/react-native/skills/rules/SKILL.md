@@ -33,11 +33,13 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
    - routes: the folder that holds the root `_layout.tsx` (`git ls-files -- '*_layout.tsx'`), as `<that folder>/**/*.tsx`.
    - tests: `<app>/**/*.test.{ts,tsx}` and `<app>/**/__tests__/**`.
    - Expo config: `<app>/{ios,android}/**` and `<app>/modules/*/{ios,android}/**` when `<app>` is not the root, and the folder of any config plugin `app.json` names that is not `plugins/with*`.
+   - Lint config: `git ls-files -- '*eslint.config.*' '*.eslintrc*' '*tsconfig*.json'`. `react-native-lint.md` matches `eslint.config.*` and `tsconfig*.json` at any depth; propose a glob only for a shared lint-config package whose files carry other names.
    - **Collisions.** When `<app>` is the repo root, `**/*` globs are safe only if no other `package.json` belongs to a web, server or test package (`next`, `react-dom`, `vite`, `express`, `@nestjs/core`, `@playwright/test`); otherwise list each app folder rather than `**`. When a root `app/` or `src/app/` belongs to another package (a Next.js app), remove the default `app/**` and `src/app/**` globs from every installed file, or that app's pages load these rules.
 
    With nobody to ask, change no path and list each proposed glob under `Waiting for the user:` in the report. Done when every file each command lists is matched by an installed glob, or a glob is proposed for it.
 6. **Check it will be committed**: `git check-ignore -q <root>/.claude/rules/mobile-react-native/react-native.md`. If it is ignored, say so; the rules then apply on this machine only.
 7. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`) for React Native rules that contradict these files and list them. A written contradiction is the user's to settle. Done when each contradiction is listed, or the report says none.
+8. **Report lint gaps.** Read the `## Enforced by the build` table in `<root>/.claude/rules/mobile-react-native/react-native-lint.md`, then the project's `eslint.config.*` (and any shared config it imports) and `tsconfig*.json`. A row is enforced when its rule id is `error` in a config object that matches the files the rule is about and, for a `no-restricted-*` row, its selector, import or global is in that rule's options; a row marked as provided by the preset counts when `eslint-config-expo/flat` is in the config; a `tsc` row is enforced when its option is `true` in `tsconfig.json`. A project still on `.eslintrc*` has no flat config, so every row is listed. List every other row under `Not enforced by the build:` with its id and house rule. Never edit the project's config: the user, or a stack agent they ask, turns the rule on. Done when each table row is enforced or listed.
 
 ## Report
 
@@ -47,6 +49,7 @@ Path: <root>/.claude/rules/mobile-react-native/
 App roots: <folders found>   Paths: default | widened with <globs> | defaults removed (<why>)
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md: none | <one line each>
+Not enforced by the build: none | <id: house rule>   (one line per row)
 Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 

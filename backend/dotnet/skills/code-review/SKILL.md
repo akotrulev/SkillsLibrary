@@ -10,7 +10,7 @@ Reviews C# / .NET backend code against the be-dotnet rule files and produces a f
 
 ## The checklist is the rule file
 
-Every check, and the severity it reports, lives in one place: the be-dotnet rule files `dotnet.md` (core), `dotnet-persistence.md`, `dotnet-api.md`, `dotnet-tests.md` and `dotnet-config.md`.
+Every check, and the severity it reports, lives in one place: the be-dotnet rule files `dotnet.md` (core), `dotnet-persistence.md`, `dotnet-api.md`, `dotnet-tests.md`, `dotnet-config.md` and `dotnet-lint.md`.
 
 1. **The project's copies first**: `.claude/rules/be-dotnet/` at the project root. The team may have edited them, and its edits win.
 2. **Otherwise the plugin's copies**: `backend/dotnet/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/be-dotnet:rules` installs them.

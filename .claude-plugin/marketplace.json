@@ -12,7 +12,7 @@
   "plugins": [
     {
       "name": "engineering",
-      "description": "The technical workflow every stack plugin depends on: systematic debugging, verify-before-done, quality-constraints (the rules checked during the work), source-grounding (framework and version decisions cited to the version's official doc), writing-for-agents (the house standard for anything an agent reads: skills, agents, rule files, CLAUDE.md), the spec-vs-code and feature audits, and the read-only code-auditor engagement agent (/engineering:audit) that saves versioned findings to docs/audits/. Installed automatically as a dependency of every qa-*, fe-*, mobile-*, desktop-*, be-* plugin, devops and product.",
+      "description": "The technical workflow every stack plugin depends on: systematic debugging, verify-before-done, quality-constraints (the rules checked during the work), source-grounding (framework and version decisions cited to the version's official doc), writing-for-agents (the house standard for anything an agent reads: skills, agents, rule files, CLAUDE.md), the spec-vs-code, feature and architecture audits, untested-code (pin today's behaviour before changing code that has no tests), and the read-only code-auditor engagement agent (/engineering:audit) that saves versioned findings to docs/audits/. Installed automatically as a dependency of every qa-*, fe-*, mobile-*, desktop-*, be-* plugin, devops and product.",
       "source": "./",
       "strict": false,
       "author": {
@@ -36,6 +36,8 @@
         "./engineering/writing-for-agents",
         "./engineering/spec-vs-code-audit",
         "./engineering/feature-audit",
+        "./engineering/architecture-audit",
+        "./engineering/untested-code",
         "./engineering/rules"
       ],
       "agents": [

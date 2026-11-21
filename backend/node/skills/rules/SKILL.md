@@ -32,11 +32,13 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
    - **Backend packages**: `git grep -l -E '"(express|@nestjs/core|fastify|hono|koa)"' -- '*package.json'`. Each hit's folder is a backend package root. When it is the root `package.json` of a single-package service, `<pkg>` below is `src` for code, `{src,test}` for tests and nothing for config, never `**`, which would also cover scripts and tooling.
    - **Schema and data access**: `git ls-files '*.prisma'`, `git grep -l -E 'pgTable\(|mysqlTable\(|@Entity\(|new PrismaClient' -- '*.ts'`.
    - **Leave out** a package that also depends on `react`, `react-native`, `expo` or `next`: propose only its server folders (`src/server/**`, `app/api/**`, `pages/api/**`), never the whole package. A package whose only test dependencies are `@playwright/test`, `webdriverio` or `@cucumber/cucumber` is a QA suite, never a backend. A Drizzle `sqliteTable` in an Expo app is mobile code, not this plugin's.
+   - **Lint config**: `git ls-files -- '*eslint.config.*' '*.eslintrc*' '*tsconfig*.json'`. `node-lint.md` matches `eslint.config.*` and `tsconfig*.json` at any depth; propose a glob only for a shared lint-config package whose files carry other names.
    - For each backend package root `<pkg>` that no default glob covers, propose `"<pkg>/**/*.ts"` for `node.md`, `"<pkg>/**/*.{test,spec}.ts"` for `node-tests.md` and `"<pkg>/{package.json,tsconfig*.json,vitest.config.*,.env*}"` for `node-config.md`. For each schema or data-access file the persistence globs miss, propose the narrowest directory glob that covers it for `node-persistence.md`. Show the list and add the globs to the installed copies with the user's agreement.
 
    With nobody to ask, change no path and list each proposed glob under `Waiting for the user:` in the report. Done when every file each command lists is matched by an installed glob, or a glob is proposed for it.
 6. **Check it will be committed**: `git check-ignore -q <root>/.claude/rules/be-node/node.md`. If it is ignored, say so; the rules then apply on this machine only.
 7. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`) for TypeScript or Node rules that contradict these files and list them. A written contradiction is the user's to settle. Done when each contradiction is listed, or the report says none.
+8. **Report lint gaps.** Read the `## Enforced by the build` table in `<root>/.claude/rules/be-node/node-lint.md`, then the project's `eslint.config.*` (and any shared config it imports) and `tsconfig*.json`. A row is enforced when its rule id is `error` in a config object that matches the files the rule is about and, for a `no-restricted-*` row, its property, selector or global is in that rule's options; a `tsc` row is enforced when its option is `true` in `tsconfig.json`. A project still on `.eslintrc*` has no flat config, so every row is listed. List every other row under `Not enforced by the build:` with its id and house rule. Never edit the project's config: the user, or a stack agent they ask, turns the rule on. Done when each table row is enforced or listed.
 
 ## Report
 
@@ -46,6 +48,7 @@ Path: <root>/.claude/rules/be-node/
 Backend paths: default | widened with <globs>   (left out: <frontend/mobile/QA packages found>)
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md: none | <one line each>
+Not enforced by the build: none | <id: house rule>   (one line per row)
 Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 

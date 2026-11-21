@@ -1,6 +1,6 @@
 ---
 name: doc-codebase-survey
-description: Use when splitting an existing system, its screens included, into functional areas by business capability before documenting it. Triggers "split this codebase into areas". Not for tracing one area (doc-feature-trace).
+description: Use when splitting an existing system, screens included, into functional areas by capability before documenting it. Triggers "split this codebase into areas". Not for one area (doc-feature-trace).
 disable-model-invocation: true
 ---
 

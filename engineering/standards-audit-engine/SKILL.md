@@ -14,7 +14,7 @@ This engine is the **CONVENTION lane**, the third of the library's three read-on
 |---|---|---|
 | **SPEC** | A requirement register consolidated from *the user's* spec / stories / ACs | `engineering:audit-spec` (via the `code-auditor` agent) |
 | **FEATURE** | A lettered surface decomposition of one feature, no spec in hand | `engineering:audit-feature` |
-| **CONVENTION** | *The plugin's own* fixed rule set, swept across the whole codebase | **this engine** + a stack checklist |
+| **CONVENTION** | *The plugin's own* fixed rule set, swept across the whole codebase | **this engine** + a stack checklist, or `engineering/architecture-audit/references/checklist.md` for the ARCHITECTURE lane (`engineering:audit-architecture`, via `code-auditor`) |
 
 ## Division of labour
 
@@ -47,7 +47,7 @@ Every run writes one file to `docs/audits/` on the current branch:
 docs/audits/<NNN>-<plugin>-conformance-r<N>.md
 ```
 
-`<plugin>` is the stack plugin's name as the marketplace lists it (the fe-react, be-dotnet or qa-dotnet plugin, …). Rounds are additive — never overwrite or regenerate a previous round. **The report is its own register:** section letters, finding IDs, and defect families are the stable spine every later round reuses. There is no separate requirements file — the requirements here *are* the plugin's rules.
+`<plugin>` is the stack plugin's name as the marketplace lists it (the fe-react, be-dotnet or qa-dotnet plugin, …); the architecture lane writes `docs/audits/<NNN>-architecture-conformance-r<N>.md`. Rounds are additive — never overwrite or regenerate a previous round. **The report is its own register:** section letters, finding IDs, and defect families are the stable spine every later round reuses. There is no separate requirements file — the requirements here *are* the plugin's rules.
 
 `<NNN>` is a zero-padded sequential number, scoped to `docs/audits/`: list the folder, take the highest existing `NNN` prefix, use `highest + 1` (start at `001` if the folder is empty or doesn't exist yet). It is minted **once per plugin lineage** at `r1` and every later round for that plugin reuses the same `NNN` — never renumbered, never reused for a different lineage.
 

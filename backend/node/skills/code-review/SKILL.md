@@ -10,7 +10,7 @@ Reviews Node + TypeScript (strict mode) backend code against the be-node rule fi
 
 ## The checklist is the rule files
 
-Every check, and the severity it reports, lives in one place: the be-node rule files `node.md` (core), `node-persistence.md`, `node-tests.md` and `node-config.md`.
+Every check, and the severity it reports, lives in one place: the be-node rule files `node.md` (core), `node-persistence.md`, `node-tests.md`, `node-config.md` and `node-lint.md`.
 
 1. **The project's copies first**: `.claude/rules/be-node/` at the project root. The team may have edited them, and its edits win.
 2. **Otherwise the plugin's copies**: `backend/node/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/be-node:rules` installs them.

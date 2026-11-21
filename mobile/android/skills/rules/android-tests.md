@@ -4,14 +4,14 @@ paths:
   - "**/src/*Test/**/*.kt"
 ---
 
-<!-- mobile-android rules v1 (2026-11-03): tests. Installed by /mobile-android:rules; edit to fit this project. -->
+<!-- mobile-android rules v2 (2026-11-21): tests. Installed by /mobile-android:rules; edit to fit this project. -->
 
 # Android dev-side test standards
 
 Severity tags as in the core rules: **blocker**, **major**, **minor**, **nit**. The codebase wins where it consistently does otherwise.
 
 - JUnit 4 and fakes; JUnit 5 only where its Android plugin is present; no mock framework added, and no mock of Room, DataStore, Retrofit, a repository or a ViewModel. *major*
-- Time, ids, randomness, configuration and dispatchers enter through the constructor; no interface created only for a test. *major*
+- Time, ids, randomness, configuration and dispatchers enter through the constructor; no interface created only for a test, and no visibility widened (`internal`, `@VisibleForTesting`) for a test: assert `uiState`, the returned value or a fake's recorded state. *major*
 - `runTest` with `StandardTestDispatcher`, advancing the clock explicitly; `UnconfinedTestDispatcher` carries a reason. *major; minor for the dispatcher*
 - No `Thread.sleep` or `delay` to make a test pass; tests are independent and order-free. *major*
 - One behaviour per test, one expected value per assertion, never "this or that"; no `if` / `for` driving assertions, parameterize instead. *major*

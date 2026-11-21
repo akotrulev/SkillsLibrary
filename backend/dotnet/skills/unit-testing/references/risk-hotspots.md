@@ -44,7 +44,7 @@ dotnet tool run reportgenerator -reports:"TestResults/*/coverage.cobertura.xml" 
 
 | Hotspot | Action |
 |---|---|
-| High CRAP, high complexity, near-zero coverage | **Test first.** Write characterization tests that pin today's behaviour (the snapshot reference fits a large output), then refactor under them |
+| High CRAP, high complexity, near-zero coverage | **Test first.** Write characterization tests that pin today's behaviour (the snapshot reference fits a large output), then refactor under them; `engineering:untested-code` is the procedure |
 | High complexity, already well covered | Its CRAP is near its complexity: a refactoring candidate, not a testing one. Split it when it is next changed |
 | High CRAP on a method the selection matrix says not to unit-test (a `DbContext` query, a controller) | Not a unit-test target: route it to the integration lane, or move the logic out to where a unit test reaches it |
 | Generated code, migrations | Exclude them with the filters; never test them to lower a number |

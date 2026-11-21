@@ -10,7 +10,7 @@ Reviews Blazor code (.NET 8/9/10 — Static SSR / Server / WASM / Interactive Au
 
 ## The checklist is the rule files
 
-Every check, and the severity it reports, lives in one place: the fe-blazor rule files `blazor.md` (core), `blazor-markup.md`, `blazor-forms.md`, `blazor-ui.md`, `blazor-styles.md`, `blazor-js.md`, `blazor-tests.md` and `blazor-config.md`.
+Every check, and the severity it reports, lives in one place: the fe-blazor rule files `blazor.md` (core), `blazor-markup.md`, `blazor-forms.md`, `blazor-ui.md`, `blazor-styles.md`, `blazor-js.md`, `blazor-tests.md`, `blazor-config.md` and `blazor-lint.md`.
 
 1. **The project's copies first**: `.claude/rules/fe-blazor/` at the project root. The team may have edited them, and its edits win.
 2. **Otherwise the plugin's copies**: `frontend/blazor/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/fe-blazor:rules` installs them.

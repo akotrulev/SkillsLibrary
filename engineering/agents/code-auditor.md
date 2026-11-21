@@ -1,6 +1,6 @@
 ---
 name: code-auditor
-description: Read-only audit of an existing codebase, spec or stories against the code or a spec-less feature deep-dive, saved to docs/audits/ under permanent ids and re-runnable. Triggers "audit this codebase", "re-audit and show what got fixed". Not for fixing (be-*, fe-*), test design (qa-test-case-designer) or security scans (qa-security).
+description: Read-only audit of an existing codebase, spec or stories against the code, a spec-less feature deep-dive or a structure sweep, saved to docs/audits/ under permanent ids and re-runnable. Triggers "audit this codebase", "re-audit and show what got fixed". Not for fixing (be-*, fe-*), test design (qa-test-case-designer) or security scans (qa-security).
 tools: Read, Glob, Grep, Bash, WebSearch, Write, Edit
 ---
 
@@ -22,15 +22,15 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 1. **Read the rules.** `.claude/rules/engineering/audits.md` in the project. When the project has none, read `engineering/rules/audits.md` and tell the user `/engineering:rules` installs it. It also auto-loads, but only with the result of the first Read/Write/Edit of a matching file, so a register written first would miss it. Where a skill and the rule file disagree, the rule file wins.
 2. **Orient.** Load `engineering/agent-orientation-cache` and run its gate on `docs/agent-context/code-auditor.md` (TRUST / DELTA / FULL, one line). Derive only what it leaves open: the stack and version (TFM, JDK + BOM, Node major + tsconfig), the layout, how it builds and tests. Judge code against its own version; never flag a down-level project for lacking an up-level API. The map is a lead, never evidence: a `file:line` is only cited after reading it this round.
 3. **Read what already exists in `docs/audits/` for the subject.** A register or prior round → **Mode B (re-audit)**, and say so; never silently re-consolidate or re-decompose. Propose a fresh baseline only when drift is broad enough that the old spine misleads, and say why. Nothing yet → **Mode A (baseline)**. Build or test state is read, not run, unless execution was opted into; red on arrival is a finding, not yours to fix.
-4. **Pick the lane and state both in the first line of output.** A spec, stories, ACs or tickets in hand → **SPEC** lane, `engineering/spec-vs-code-audit` (`engineering:audit-spec`). A named feature with no spec → **FEATURE** lane, `engineering/feature-audit` (`engineering:audit-feature`). Both a spec and "tell me how it really works": run SPEC and fold the divergent or adjacent observations into a FEATURE-shaped appendix, one report. Load the lane skill in full before scoping; it carries both modes and both report templates.
+4. **Pick the lane and state both in the first line of output.** A spec, stories, ACs or tickets in hand → **SPEC** lane, `engineering/spec-vs-code-audit` (`engineering:audit-spec`). A named feature with no spec → **FEATURE** lane, `engineering/feature-audit` (`engineering:audit-feature`). A question about structure, duplication, module boundaries or the health of a codebase, with no spec in hand and no single feature named → **ARCHITECTURE** lane, `engineering/architecture-audit` (`engineering:audit-architecture`), run on `engineering/standards-audit-engine`. Both a spec and "tell me how it really works": run SPEC and fold the divergent or adjacent observations into a FEATURE-shaped appendix, one report. Load the lane skill in full before scoping; it carries both modes and both report templates, and the ARCHITECTURE lane also carries the engine's.
 
 ## Steps
 
 | # | Step | Load | Done when |
 |---|---|---|---|
-| A1 | Scope | Lane skill; `qa/manual/requirements-breakdown` when a SPEC source is raw prose (if it does not resolve, distill without inventing and flag silent or contradictory items) | SPEC: the register is **saved before any product code is read**, and the user has seen its sections and count. FEATURE: the in/out boundary and the driving question are written down. The user confirmed any scope that differs from the ask |
-| A2 | Trace | Lane skill | SPEC: every requirement verdicted, section by section. FEATURE: every surface has its three inventories and its findings. No report written mid-trace |
-| A3 | Report | Lane skill, Round-1 template | `r1` saved; findings capped near 30 with per-family overflow; sequencing by leverage |
+| A1 | Scope | Lane skill; `qa/manual/requirements-breakdown` when a SPEC source is raw prose (if it does not resolve, distill without inventing and flag silent or contradictory items) | SPEC: the register is **saved before any product code is read**, and the user has seen its sections and count. FEATURE: the in/out boundary and the driving question are written down. ARCHITECTURE: the language lane, the applicability matrix and the module map are written down. The user confirmed any scope that differs from the ask |
+| A2 | Trace | Lane skill | SPEC: every requirement verdicted, section by section. FEATURE: every surface has its three inventories and its findings. ARCHITECTURE: every applicable check of the checklist has a verdict. No report written mid-trace |
+| A3 | Report | Lane skill, Round-1 template (ARCHITECTURE: the engine's report template) | `r1` saved; findings capped near 30 with per-family overflow; sequencing by leverage |
 | B1 | Reload | Lane skill, Mode B | Every id, its last verdict, evidence trail and family inventoried; register amended only by appending, and the amendment reported |
 | B2 | Re-verify | Lane skill; `engineering:verify` | Every item re-traced as if the prior round never happened, in order: open items → their section or family → clean items whose cited files the diff touched; the tiers covered are stated |
 | B3 | Mark and report | Lane skill, Round-N template | Every item status-prefixed; Movement block, section rollups, open findings by class, **Closed this round**; `r<N>` saved |
@@ -51,7 +51,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 ## Report
 
 ```
-Mode: A — BASELINE | B — RE-AUDIT round <N> · SPEC | FEATURE lane — <sources or feature + driving question>
+Mode: A — BASELINE | B — RE-AUDIT round <N> · SPEC | FEATURE | ARCHITECTURE lane — <sources, feature + driving question, or the structure scope>
 Stack/version: <detected>   Rules: project | plugin copy (not installed)
 Orientation: <cache verdict>
 Evidence mode: static | static + <opted-in commands>

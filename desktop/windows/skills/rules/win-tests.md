@@ -6,7 +6,7 @@ paths:
   - "**/*{Tests,Test}.cpp"
 ---
 
-<!-- desktop-windows rules v1 (2026-11-15): tests. Installed by /desktop-windows:rules; edit the paths above to where this project keeps its tests. -->
+<!-- desktop-windows rules v2 (2026-11-21): tests. Installed by /desktop-windows:rules; edit the paths above to where this project keeps its tests. -->
 
 # Windows test standards
 
@@ -19,6 +19,7 @@ Severity tags as in the core C# rules: **blocker**, **major**, **minor**, **nit*
 - No `try`/`catch` in a test body: `Assert.ThrowsAsync<T>` for an expected error; cleanup is registered in `[TearDown]`. *major*
 - No `Thread.Sleep`, `Task.Delay` or polling loop; wait on a condition. No `async void` test. *major*
 - Time goes through `TimeProvider` (`FakeTimeProvider`); identity, randomness, I/O and dispatcher enter through the constructor. *major*
+- No `InternalsVisibleTo` or reflection to reach private behaviour; extract the class. Assert the return value, the state changed or the message sent, never a call on a collaborator the class owns. *major*
 - Fakes over mocks, asserting outcomes rather than call order; no interface created only for a test; no in-memory stand-in for a shipped database, and network tests use a stub handler, never a live host. *major*
 - Tests are independent and order-free: no shared mutable state. *major*
 - Test data with four or more fields comes from a builder. *minor*

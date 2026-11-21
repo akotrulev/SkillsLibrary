@@ -40,7 +40,7 @@ STACK_CATEGORIES = ("qa", "fe", "be", "mobile", "desktop")
 
 FRONT_DOORS = {
     "engineering": frozenset("""
-        debugging verify quality-constraints source-grounding writing-for-agents audit-spec audit-feature
+        debugging verify quality-constraints source-grounding writing-for-agents audit-spec audit-feature audit-architecture untested-code
     """.split()),
     "product": frozenset("feature plan-feature notebooklm".split()),
     "design": frozenset(("prototype",)),

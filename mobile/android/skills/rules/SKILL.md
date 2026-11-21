@@ -31,10 +31,12 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
    - **Narrow** when Kotlin or Gradle files exist outside those modules (a Ktor or Spring service, a Gradle plugin): `git ls-files '*.kt' '*.gradle.kts'` and list what falls outside. Propose prefixing each glob with the module folders (`"{app,feature,core}/**/src/main/**/*.kt"`) so a backend file never loads the Android rules.
    - **Widen** for sources the defaults miss: product-flavour or build-type source sets (`git ls-files '*/src/*/*' | cut -d/ -f1-3 | sort -u`, e.g. `src/free/`, `src/staging/`) go into `android.md`; composables outside the UI globs (`git grep -l '@Composable' -- '*.kt'`) into the three `android-ui*.md` files; Room, DataStore and HTTP code outside the data globs (`git grep -l -e '@Dao' -e '@Database' -e '@Entity' -e 'Retrofit.Builder' -e 'OkHttpClient' -e 'DataStore<' -- '*.kt'`) into `android-data.md`; Fragments and adapters (`git grep -l -e ': Fragment(' -e 'ListAdapter<' -e 'RecyclerView.Adapter' -- '*.kt'`) into `android-views.md`; permission, notification and background-work code (`git grep -l -e 'rememberLauncherForActivityResult' -e 'NotificationCompat' -e 'CoroutineWorker' -e 'BiometricPrompt' -- '*.kt'`) into `android-platform.md`. Propose the directory glob that covers each cluster (`"**/orders/impl/**/*.kt"`), not one glob per file.
    - A lane the project does not have (no `res/layout`, no `commonMain`) needs no change: its file simply never loads.
+   - **Lint config**: `git ls-files -- '*detekt*.yml' '*lint.xml' '*.gradle.kts'`. `android-build.md` matches `detekt.yml`, `lint.xml` and the Gradle build files at any depth; propose a glob only for a detekt config kept under another name.
 
    With nobody to ask, change no path and list each proposed glob under `Waiting for the user:` in the report. Done when every file each command lists is matched by an installed glob, or a glob is proposed for it.
 6. **Check it will be committed**: `git check-ignore -q <root>/.claude/rules/mobile-android/android.md`. If it is ignored, say so; the rules then apply on this machine only.
 7. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`) for Android or Kotlin rules that contradict these files and list them. A written contradiction is the user's to settle. Done when each contradiction is listed, or the report says none.
+8. **Report lint gaps.** Read the `## Enforced by the build` table in `<root>/.claude/rules/mobile-android/android-build.md`, then the project's detekt config (`config/detekt/detekt.yml` or the file the `detekt` block names), every `lint.xml`, and the `lint { }` and `detekt { }` blocks of the module build files. A row is enforced when its detekt rule is `active: true` (and, for `ForbiddenMethodCall`, the table's method is in `methods`), its Lint id is `severity="error"` in `lint.xml`, or its setting is present; a detekt row that needs type resolution also needs a `classpath` on the `detekt` task. List every other row under `Not enforced by the build:` with its id and house rule. Never edit the project's config: the user, or a stack agent they ask, turns the rule on. Done when each table row is enforced or listed.
 
 ## Report
 
@@ -45,6 +47,7 @@ Android modules: <folders>
 Paths: default | narrowed to <modules> | widened with <globs>
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md: none | <one line each>
+Not enforced by the build: none | <id: house rule>   (one line per row)
 Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 

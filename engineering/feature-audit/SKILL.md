@@ -45,6 +45,7 @@ This skill is the **FEATURE lane** of the `code-auditor` agent, and carries both
 - A spec exists and the ask is "does the code meet it" → `engineering:audit-spec`
 - The ask is really "find security vulnerabilities" → `qa-security` agent (this audit *inventories* authz gates; it doesn't attack them)
 - The ask is whole-codebase health, not one feature → decompose first; audit one area at a time
+- The ask is about structure: shallow modules, duplicated logic, module boundaries, tests tied to internals → `engineering:audit-architecture`
 - The user wants the findings fixed → the owning `be-*`/`fe-*` agent; never edit product code here
 
 ## Evidence policy — static-first, execute opt-in
@@ -85,7 +86,7 @@ Map the feature's territory: entry points (endpoints, handlers, jobs, consumers,
 
 Read the code — 2–3 representative files first to calibrate the project's conventions, then the surface's actual paths. Collect:
 
-- **Functionality narrative** — what the surface actually does, traced, in a few sentences per path. Where the code and its naming/docs disagree, the code wins and the disagreement is a finding.
+- **Functionality narrative** — what the surface actually does, traced, in a few sentences per path. Where the code and its naming/docs disagree, the code wins and the disagreement is a finding. Where `docs/business-model/glossary.md` exists, an identifier that uses an `Avoid` term is a finding, a code issue, minor, citing the glossary row.
 - **Validations & gates** — every check the surface enforces: input validation, guards/preconditions, authn/authz checks, feature flags, idempotency keys, concurrency/locking, rate limits, error paths and what each failure does. Also record the *absences* the driving question makes relevant, each naming the search.
 - **Integration map** — who calls it, what it calls, events published/consumed, shared tables/contracts, config it reads. Note the *trust assumptions* at each boundary (what inbound data is assumed already-validated/normalized — the classic audit payload). Done when every surface has its three inventories.
 

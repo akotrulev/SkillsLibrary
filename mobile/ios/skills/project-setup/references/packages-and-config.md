@@ -61,23 +61,7 @@ The app target builds the client at the composition root and passes it in (initi
 
 ## `.swiftlint.yml`
 
-```yaml
-included: [App, Packages]
-excluded: [.build, "**/.build", DerivedData]
-opt_in_rules: [force_unwrapping, unused_import, unused_declaration, closure_spacing]
-disabled_rules: [trailing_whitespace, line_length]
-custom_rules:
-  no_print:
-    regex: '\b(print|NSLog|debugPrint|dump)\('
-    message: Use os.Logger.
-    severity: error
-  no_gcd_main:
-    regex: 'DispatchQueue\.main'
-    message: Use @MainActor or await MainActor.run.
-    severity: error
-```
-
-`disabled_rules` hands whitespace and line length to swift-format so the two tools do not fight.
+The rules and the file are the `## Enforced by the build` table and its config block in `xcode-config.md`; this reference keeps no copy.
 
 ## CI order
 

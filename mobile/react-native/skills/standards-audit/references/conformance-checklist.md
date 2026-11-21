@@ -80,6 +80,7 @@ If the repo gitignores a generated native folder (`ios/`, `android/` under CNG) 
 | B10 | Fonts load through the `expo-font` plugin | `Font.loadAsync` / `useFonts` in a render path with no plugin entry | `rg -n 'loadAsync\|useFonts' $SRC -g '*.tsx'`; `rg -n 'expo-font' app.json app.config.*` | minor |
 | B11 | One lockfile, one package manager | Two lockfiles, or a missing `packageManager` field | `ls *lock* pnpm-lock.yaml; rg -n 'packageManager' package.json` | minor |
 | B12 | `[monorepo]` Native dependencies live in the app package; one version per dependency | A native library hoisted to a shared package, or two versions of one dependency across workspaces | `rg -n 'react-native' packages/*/package.json` | minor |
+| B13 | Every row of the `## Enforced by the build` table in `react-native-lint.md` (the project's copy in `.claude/rules/mobile-react-native/`) is on at error level | A table id missing from `eslint.config.*`, or set to `warn` or `off`; a `no-restricted-*` entry the config lacks; no test-file block; `eslint-plugin-react-native` not registered; `strict` off. Major when a row was turned off to pass a gate | `rg -n "react-native/\|react/\|react-hooks/\|no-restricted\|no-floating-promises\|no-explicit-any" eslint.config.*`; `rg -n '"strict"' tsconfig*.json`; compare each id with the table | minor |
 
 ---
 
@@ -472,7 +473,7 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/in-
 | § | Section | Rows | Owner |
 |---|---|---|---|
 | A | Version lane, toolchain & migration hygiene | A1–A7 | `project-setup`, `migration`, `basics` |
-| B | Project structure, strictness & language standard | B1–B12 | `project-setup`, `basics` |
+| B | Project structure, strictness & language standard | B1–B13 | `project-setup`, `basics` |
 | C | Architecture, state & DI | C1–C10 | `architecture` |
 | D | UI components & platform conventions | D1–D19 | `ui-components`, `component-library` |
 | E | Styling, theming & adaptive layout | E1–E12 | `styling` |

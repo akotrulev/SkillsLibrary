@@ -10,7 +10,7 @@ Reviews Java + Spring Boot code against the be-java rule file and produces a fin
 
 ## The checklist is the rule file
 
-Every check, and the severity it reports, lives in one place: the be-java rule files `java.md` (core), `java-persistence.md`, `java-tests.md` and `spring-config.md`.
+Every check, and the severity it reports, lives in one place: the be-java rule files `java.md` (core), `java-persistence.md`, `java-tests.md`, `spring-config.md` and `java-lint.md`.
 
 1. **The project's copies first**: `.claude/rules/be-java/` at the project root. The team may have edited them, and its edits win.
 2. **Otherwise the plugin's copies**: `backend/java/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/be-java:rules` installs them.

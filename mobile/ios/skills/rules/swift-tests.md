@@ -4,7 +4,7 @@ paths:
   - "**/*{Tests,Test}.swift"
 ---
 
-<!-- mobile-ios rules v1 (2026-11-03): tests. Installed by /mobile-ios:rules; edit to fit this project. -->
+<!-- mobile-ios rules v2 (2026-11-21): tests. Installed by /mobile-ios:rules; edit to fit this project. -->
 
 # Swift test standards
 
@@ -17,6 +17,7 @@ Severity tags as in the core Swift rules: **blocker**, **major**, **minor**, **n
 - One behaviour per test, and each assertion expects one value: never `#expect(a == x || a == y)`. *major*
 - No `Task.sleep`, `sleep` or `DispatchQueue` timing; wait on a condition. *major*
 - Time, identity, randomness, configuration and I/O enter through the initializer; fakes over mocks, asserting outcomes rather than call order; no protocol created only for a test. *major; minor for mocks*
+- `@testable import` is the access a test gets; never raise an access level (`private` to `internal`, `internal` to `public`) for a test. *major*
 - Network tests use a `URLProtocol` stub on an ephemeral session, never `URLSession.shared` or a live host; no real Keychain or system clock. *blocker*
 - Tests are independent and order-free: no shared mutable state, no `.serialized` to hide one. *major*
 - Names state behaviour; test data with four or more fields comes from a builder. *minor*

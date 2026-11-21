@@ -16,11 +16,11 @@ The repo is a Claude Code plugin marketplace of **24 plugins**. Add it once, the
 | `fe-*` · `mobile-*` · `desktop-*` | `engineering` + `design` |
 | `data` · `tooling` · `training-data` · `penetration-testing` · `security-governance` | nothing |
 
-`engineering` is the technical workflow (debugging, verification, audits); `product` is planning, documentation, requirements and business analysis, enabled per project; `design` is the visual/UX craft layer with the `ui-ux-pro-max` design corpus. Installing a plugin installs its dependencies too; enabling them per project is covered below. **A stack plugin brings `engineering` (and `design` for `fe-*`, `mobile-*` and `desktop-*`), not `product`.** Enable `product` in a project that plans, documents or writes requirements; without it, a stack agent that hands off to `/product:refine`, `product:feature` or `solution-planner` says so and stops, while the files it loads by path (such as the plan format) still resolve.
+`engineering` is the technical workflow (debugging, verification, audits, changing untested code); `product` is planning, documentation, requirements and business analysis, enabled per project; `design` is the visual/UX craft layer with the `ui-ux-pro-max` design corpus. Installing a plugin installs its dependencies too; enabling them per project is covered below. **A stack plugin brings `engineering` (and `design` for `fe-*`, `mobile-*` and `desktop-*`), not `product`.** Enable `product` in a project that plans, documents or writes requirements; without it, a stack agent that hands off to `/product:refine`, `product:feature` or `solution-planner` says so and stops, while the files it loads by path (such as the plan format) still resolve.
 
 ```shell
 /plugin marketplace add akotrulev/SkillsLibrary
-/plugin install engineering@skills-library         # technical workflow: debugging, verification, audits
+/plugin install engineering@skills-library         # technical workflow: debugging, verification, audits, untested code
 /plugin install product@skills-library             # planning, documentation, requirements, business analysis: refine, feature, plan, document
 /plugin install design@skills-library              # visual/UX craft layer + ui-ux-pro-max corpus + design audit
 /plugin install qa-java@skills-library             # complete Java 21 QA toolkit
@@ -79,7 +79,7 @@ A model can run them too: asked to "set up this project", it reads `enabledPlugi
 | `/training-data:rules` | dataset `*.jsonl` and manifests, dataset cards and audits |
 | `/tooling:rules` | `docs/specs/*-tool-contract.md` |
 
-Each install also finds where the project really keeps those files and proposes wider globs, and lists any line of the project's `CLAUDE.md` that disagrees; the project wins. `penetration-testing` has no rules: its engagement records are gated by its agents. A rule shows in `/memory` once the session has read a matching file.
+Each install also finds where the project really keeps those files and proposes wider globs, and lists any line of the project's `CLAUDE.md` that disagrees; the project wins. In the `be-*`, `fe-*`, `mobile-*`, `desktop-*` and `qa-*` plugins the rules also name the lint rule or compiler setting that enforces each house rule it can, in an `Enforced by the build` table (a rule file of its own, or a section of the stack's config rules); `<plugin>:rules` reports any house rule the table cannot enforce as `Not enforced by the build`. `penetration-testing` has no rules: its engagement records are gated by its agents. A rule shows in `/memory` once the session has read a matching file.
 
 ### Switching from `dev` and `business-analysis`
 
@@ -133,7 +133,7 @@ So installing a single plugin gives you the stack's authoring/verification skill
 
 ### The `engineering` and `product` plugins and the always-on internals
 
-`engineering` registers 8 skills (`debugging`, `verify`, the spec-compliance / feature audit pair `audit-spec` and `audit-feature`, the working-discipline skills `quality-constraints` and `source-grounding`, `writing-for-agents` — the house standard for anything an agent reads — and `rules`), the `code-auditor` agent and `/engineering:audit`.
+`engineering` registers 10 skills (`debugging`, `verify`, the audits `audit-spec`, `audit-feature` and `audit-architecture` — code against a spec, one feature traced without a spec, and a codebase's structure (shallow modules, forwarding layers, duplicated logic, tests tied to internals, drift from the glossary) — the working-discipline skills `quality-constraints` and `source-grounding`, `untested-code` — pin today's behaviour with tests before changing code that has none — `writing-for-agents` — the house standard for anything an agent reads — and `rules`), the `code-auditor` agent, which runs the three audit lanes, and `/engineering:audit`.
 
 `product` registers 26 skills, 5 agents and 5 commands: the authoring lane `/product:refine` runs (`scoping`, `epics`, `stories`, `story-review` and the `knowledge-base` protocol), the five reasoning skills, the feature-then-plan pair (`/product:feature`, `/product:plan-feature`), the eleven planning and documentation skills (`plan-delivery`, `plan-data-model`, `doc-feature-trace`, …), `notebooklm`, the hidden `domain-modeling` (the project glossary and ADRs, loaded by `product:feature` and `solution-planner`), `rules`, and the agents `solution-planner`, `documenter`, `feature-documenter`, `requirements-author` and `business-analyst`.
 
@@ -268,7 +268,7 @@ The ten skills (`/product:scoping`, `/product:epics`, `/product:stories`, `/prod
 
 | Command | Argument | Runs |
 |---|---|---|
-| `/engineering:audit` | spec, stories, feature, or area | read-only audit engagement (the `code-auditor` agent), saved to `docs/audits/` — owns both the spec-vs-code and spec-less feature lanes; `engineering:audit-spec` / `engineering:audit-feature` remain invocable for a one-off |
+| `/engineering:audit` | spec, stories, feature, area, or the whole codebase's structure | read-only audit engagement (the `code-auditor` agent), saved to `docs/audits/` — owns the spec-vs-code, spec-less feature and architecture lanes; `engineering:audit-spec` / `engineering:audit-feature` / `engineering:audit-architecture` remain invocable for a one-off |
 
 `/product:feature` (describe one feature → an interview in rounds, then an approved technical design/spec in `docs/specs/`; a spec or plan with open questions → the interview only, each answer written back into it; a loose or multi-capability ask → `/product:refine`) and `/product:plan-feature` (approved spec → a self-contained plan document in `docs/plans/`: the gap table, the decisions, one flat ordered task list, and one paste-ready prompt per task) are **skills** in `product`, typed the same way.
 
@@ -493,7 +493,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the templates in [`.skill-template/
 | devops                | authored + shipped — 9 cloud/CI-keyed skills (docker, kubernetes, infrastructure-as-code, aws-deployment, azure-deployment, github-actions, gitlab-ci, azure-pipelines, environment-config) + the `devops-engineer` (build) and `devops-auditor` (read-only conformance audit, `/devops:audit`) agents, both gated on a tool-stack confirmation before any skill loads; `devops` plugin |
 | observability         | authored + shipped — 6 skills (per-stack `opentelemetry-*` / `structured-logging-*` + stack-agnostic loki-tempo, prometheus-mimir, queries, dashboards) + `observability-engineer-{dotnet,java,node,rust}` agents; bundled within the category into the `be-*` plugins |
 | qa                    | authored — 35 code-producing nodes (mostly ×3 stacks; Playwright 1.64 on TypeScript and 1.63 on Java / .NET / Python, Appium 3, plus a TypeScript-only Maestro lane) + 9 process skills (incl. `cross-feature-test-design`). Unverified: no `time-and-concurrency-testing` sample (any stack) has been compiled or run; no Appium or Maestro flow has run on a device or emulator, and no WebMCP test has run against a site that registers tools. `qa-dotnet` additionally ships the `standards-audit` self-audit skill + `/qa-dotnet:audit` |
-| engineering           | authored + shipped — `debugging`, `verify`, the audits, `quality-constraints`, `source-grounding` and `writing-for-agents`, registered in the `engineering` plugin (3 internals and the bundled tree are loaded by path only) |
+| engineering           | authored + shipped — `debugging`, `verify`, the audits, `untested-code`, `quality-constraints`, `source-grounding` and `writing-for-agents`, registered in the `engineering` plugin (3 internals and the bundled tree are loaded by path only) |
 | meta                  | authored (skill-creator); `writing-skills` retired by plan 014 (D12) for `engineering:writing-for-agents` |
 | documents             | authored + shipped |
 | design                | authored + shipped, plus `html-video` routing to HyperFrames — the `design` plugin, a dependency of `fe-*` and `mobile-*` |

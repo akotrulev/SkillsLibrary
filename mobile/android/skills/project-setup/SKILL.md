@@ -149,9 +149,10 @@ android {
 ## detekt and ktlint
 
 - **ktlint 1.8** formats (the `ktlint-gradle` plugin or the CLI in CI); `.editorconfig` holds `ktlint_code_style = ktlint_official` and `max_line_length = 120`. Compose function naming is allowed by `ktlint_function_naming_ignore_when_annotated_with = Composable`.
-- **detekt 1.23.8** is the last stable (2.0 is alpha; Kotlin 2.4 compatibility unverified — check before adopting 2.0). It lints semantics, not whitespace. Commit `config/detekt/detekt.yml` with `buildUponDefaultConfig = true`; turn on `ForbiddenMethodCall` for `println`, `Log.*` (use the project logger) and `GlobalScope`.
+- **detekt 1.23.8** is the last stable (2.0 is alpha; Kotlin 2.4 compatibility unverified — check before adopting 2.0). It lints semantics, not whitespace. Commit `config/detekt/detekt.yml` with `buildUponDefaultConfig = true`; turn on `ForbiddenMethodCall` for `println` and `Log.*` (use the project logger).
 - **Android Lint** runs with `warningsAsErrors = true`, `abortOnError = true`, a committed `lint.xml` and a baseline only for pre-existing findings. Add **compose-lints** (`slack-lints`' Compose rules, or the compose-rules ruleset for detekt) for `modifier` order, unstable parameters and `remember` misuse.
 - Formatter, detekt and Lint run on the same tree; none auto-fixes in a build phase.
+- **Lint rules** — write `config/detekt/detekt.yml`, `lint.xml` and the `classpath` wiring of the `detekt` task from the `## Enforced by the build` table in `android-build.md`. Read the project's copy in `.claude/rules/mobile-android/`, or the plugin's in `mobile/android/skills/rules/` when the project has not installed them. The table is the list; this skill keeps no copy of it.
 
 ## Single activity, edge-to-edge, predictive back
 
@@ -177,4 +178,5 @@ The standards this skill's output must meet are the mobile-android rule files, n
 - [ ] No version string in a `build.gradle.kts`; BOM carries Compose
 - [ ] Release type: minify + shrink on, no blanket keep rule
 - [ ] `.editorconfig`, `detekt.yml`, `lint.xml` committed
+- [ ] Every row of the `android-build.md` lint table is configured, and the `detekt` task has a `classpath`
 - [ ] `enableEdgeToEdge()` and `enableOnBackInvokedCallback` present; no orientation lock

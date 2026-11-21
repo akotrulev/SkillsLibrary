@@ -4,7 +4,7 @@ paths:
   - "**/*{Tests,Test}.swift"
 ---
 
-<!-- desktop-macos rules v1 (2026-11-15): tests. Installed by /desktop-macos:rules; edit to fit this project. -->
+<!-- desktop-macos rules v2 (2026-11-21): tests. Installed by /desktop-macos:rules; edit to fit this project. -->
 
 # Swift test standards (macOS)
 
@@ -17,6 +17,7 @@ Severity tags as in the core Swift rules: **blocker**, **major**, **minor**, **n
 - One behaviour per test, and each assertion expects one value: never `#expect(a == x || a == y)`. *major*
 - No `Task.sleep`, `sleep` or `DispatchQueue` timing; wait on a condition. *major*
 - Time, identity, randomness, configuration, I/O, wake and activation notifications enter through the initializer; fakes over mocks, asserting outcomes rather than call order; no protocol created only for a test. *major; minor for mocks*
+- `@testable import` is the access a test gets; never raise an access level (`private` to `internal`, `internal` to `public`) for a test. *major*
 - Network tests use a `URLProtocol` stub on an ephemeral session, never `URLSession.shared` or a live host; no real Keychain, panel, bookmark resolution or system clock. *blocker*
 - `UserDefaults` tests use a throwaway suite removed in `deinit`, never `.standard`. *major*
 - Tests are independent and order-free: no shared mutable state, no `.serialized` to hide one. *major*
