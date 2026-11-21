@@ -7,8 +7,7 @@
 - A stack-agnostic skill for **changing code that has no tests**.
 - Each stack's mechanically checkable house rules **named as lint rules**, so a gate catches them.
 
-**Status:** As of 2026-11-21, A1, FX1, R1, U1 and L1–L5 have landed; C1 (catalog and README) is next, then G1 (the whole set,
-the blind fixture run, filing).
+**Status:** As of 2026-11-21, A1, FX1, R1, U1, L1–L5 and C1 have landed; G1 (the whole set, the blind fixture run, filing) is next.
 - **Built but unverified:** the lint tables are proven in scratch projects only, never in a real project. Limits L5 records: the
   `qa-java` `@Test` suppression keys on the annotation's simple name and Maven wiring was not run; `.features-gen/**` is ignored by
   the library's own description of `bddgen`, not by a run of it. L5 left no row unverified; the items L2 lists as unverified stand (see its As built).
@@ -948,6 +947,14 @@ tree is settled), `python3 tools/token-audit.py --violations-only`,
   L task left unverified is not described as enforced.
 - **Not in C1:** `CLAUDE.md` (R1 made its one edit), `CONTRIBUTING.md` (nothing in it changes).
 
+**As built (2026-11-21):**
+- `docs/skills-catalog.md`: the plugin row (line 13) and the Engineering catalog intro say 10 skills, named; `engineering:untested-code` has its own bullet after `source-grounding`; the Audit block says `code-auditor` owns three lanes (SPEC, FEATURE, ARCHITECTURE) and has an `engineering:audit-architecture` bullet (the five sections A–E, the report path, the fences, the fixture path). The former "third lane — CONVENTION" paragraph is now "The CONVENTION lane", since ARCHITECTURE took the count; it says the new lane runs on that engine. The command row (line 46) names no lanes and did not change. Each stack section (QA, Blazor, React, Mobile, Desktop, Backend) ends with one `**Lint enforcement.**` paragraph naming the rule file of each plugin. `git grep -n "8 skills (\`engineering" -- docs/skills-catalog.md` prints nothing.
+- `README.md`: the `engineering` sentence (line 19) and install comment (line 23), the `engineering` registration paragraph (10 skills, the three audit lanes, `untested-code`), the rules-table note (the `Enforced by the build` tables and the `Not enforced by the build` report), the `/engineering:audit` command row, and the status-table row for `engineering`.
+- Caveats written into the catalog, not described as enforced: Next 15 was run for the four hook rules only (React); the two compiler-setting rows ran as `xcodebuild` overrides, not `.xcconfig` keys (iOS); no WinUI app project was built for the Windows rows. The `tsc` row on TypeScript 7 and the React Native `@react-navigation/*` row off Expo Router (L2's unverified items) are not claimed in the catalog.
+- The prompt said the README audit bullets were "from line 110"; they sit at lines 136–142 and 271, the file having shifted. Counts of rows per table are left out of both files, so they cannot go stale.
+- Gate, all green: `python3 tools/skill-lint.py | tail -1` prints `0 findings`; `python3 tools/token-audit.py --violations-only` exits 0; the `8 skills` grep prints nothing; `python3 tools/plugin-surface-check.py` prints `OK`.
+- Not committed: the queue commits. No divergence from the plan.
+
 ### G1 — The whole set, the blind fixture run, and filing the plan
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -1037,48 +1044,9 @@ the task.
 | G1 | `docs` | `general-purpose` | C1, FX1 | — | ~120k |
 | — | restart, run `/engineering:audit` and one `<plugin>:rules` on a real project | **the user** | G1 | — | — |
 
-A1, FX1, R1, U1, L1, L2, L3, L4 and L5 have landed; their prompts are deleted. The blocks below are the live ones.
+A1, FX1, R1, U1, L1, L2, L3, L4, L5 and C1 have landed; their prompts are deleted. The blocks below are the live ones.
 
 ---
-
-### C1 — The catalog and the README (general-purpose, docs)
-
-````
-Depends on: A1, U1, R1, L1, L2, L3, L4, L5
-Agent: general-purpose · Stack: docs
-
-Task C1 of docs/plans/017-architecture-audit-untested-code-and-lint-enforcement.md. The goal:
-docs/skills-catalog.md and README.md describe what the eight tasks above landed: ten `engineering`
-skills, the ARCHITECTURE lane of `code-auditor`, `untested-code`, and each stack's lint table.
-
-Read, in this order:
-1. The plan: §1, §2, every task's As built note, task C1, and "Close-out — every task".
-2. What landed: engineering/architecture-audit/SKILL.md, engineering/untested-code/SKILL.md, and one
-   lint table (backend/dotnet/skills/rules/dotnet-lint.md).
-3. docs/skills-catalog.md: line 13 (the `engineering` plugin row), line 46 (the command row), the
-   engineering section, and the rules line of each stack section. Find them with `git grep -n`; read only
-   those.
-4. README.md lines 15–125.
-
-Do:
-- The catalog: `engineering` has 10 skills, named. The audit lanes are three for `code-auditor`. Each
-  stack section says in one sentence that its rules name their lint enforcement and where.
-- README.md: the `engineering` line, the rules table from line 75, the audit bullets from line 110.
-
-Traps:
-- Describe what landed, from the files and the As built notes. A lint row a task listed as unverified is
-  not described as enforced.
-- The catalog is about 55k tokens. Read only the lines named.
-- CLAUDE.md and CONTRIBUTING.md are not yours to edit here.
-
-Gate: own tests.
-  python3 tools/skill-lint.py | tail -1    (0 findings; every writer has landed, so the whole tree is settled)
-  python3 tools/token-audit.py --violations-only    (exit 0)
-  git grep -n "8 skills (\`engineering" -- docs/skills-catalog.md    (prints nothing)
-
-Commit: `docs: 017 C1 — catalog and README for the architecture lane, untested-code and lint tables`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### G1 — The whole set, the blind fixture run, and filing the plan (general-purpose, docs)
 
