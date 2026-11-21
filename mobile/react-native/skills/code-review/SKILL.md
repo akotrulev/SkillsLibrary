@@ -10,7 +10,7 @@ A **hostile review of one diff** against the mobile-react-native rule files, the
 
 ## The checklist is the rule files
 
-Every check, and the severity it reports, lives in one place: the mobile-react-native rule files `react-native.md` (core), `react-native-ui.md`, `react-native-a11y.md`, `react-native-forms.md`, `react-native-data.md`, `react-native-routes.md`, `react-native-tests.md` and `expo-config.md`.
+Every check, and the severity it reports, lives in one place: the mobile-react-native rule files `react-native.md` (core), `react-native-ui.md`, `react-native-a11y.md`, `react-native-forms.md`, `react-native-data.md`, `react-native-routes.md`, `react-native-tests.md`, `expo-config.md` and `react-native-lint.md`.
 
 1. **The project's copies first**: `.claude/rules/mobile-react-native/` at the project root. The team may have edited them, and its edits win.
 2. **Otherwise the plugin's copies**: `mobile/react-native/skills/rules/` (under `${CLAUDE_PLUGIN_ROOT}` in an installed plugin). Say in the report that the project has no installed rules and that `/mobile-react-native:rules` installs them.

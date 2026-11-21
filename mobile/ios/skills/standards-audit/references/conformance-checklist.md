@@ -96,6 +96,7 @@ If the repo gitignores generated sources (R.swift, Sourcery, SwiftGen output) yo
 | B22 | `PrivacyInfo.xcprivacy` exists in the app target and in each package that uses a Required Reason API | No manifest, or a package calling `UserDefaults` / file-timestamp / disk-space APIs with none | `fd PrivacyInfo.xcprivacy`; `rg -n "UserDefaults\|systemUptime\|NSFileCreationDate\|volumeAvailableCapacity" $SRC -g '*.swift'` | major |
 | B23 | A String Catalog exists and literals extract to it | No `.xcstrings`; `LOCALIZATION_PREFERS_STRING_CATALOGS` absent | `fd -e xcstrings`; `rg -n "LOCALIZATION_PREFERS_STRING_CATALOGS" -g '*.pbxproj' -g '*.xcconfig'` | minor |
 | B24 | Generated projects are edited through the manifest `[Tuist]` | A hand edit in a `.pbxproj` that `Project.swift` / `project.yml` regenerates | `git log --stat -- '*.pbxproj'` on a repo with `Project.swift` | major |
+| B25 | Every row of the `## Enforced by the build` table in `xcode-config.md` (the project's copy in `.claude/rules/mobile-ios/`) is on at error level | A SwiftLint id missing from `.swiftlint.yml`, left at its default `warning` or turned off; `SWIFT_VERSION` or `SWIFT_TREAT_WARNINGS_AS_ERRORS` missing from the xcconfig and the package manifests; a generated folder missing from `excluded`. Major when a row was turned off to pass a gate | `rg -n "force_unwrapping\|force_cast\|force_try\|implicitly_unwrapped_optional\|no_empty_block\|no_print\|no_gcd_main\|severity" .swiftlint.yml`; `rg -n "SWIFT_VERSION\|SWIFT_TREAT_WARNINGS_AS_ERRORS\|swiftLanguageModes\|treatAllWarnings" -g '*.xcconfig' -g 'Package.swift'`; compare each id with the table | minor |
 
 ---
 
@@ -491,7 +492,7 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/in-
 | § | Section | Rows | Owner |
 |---|---|---|---|
 | A | Version lane, toolchain & migration hygiene | A1–A11 | `project-setup`, `migration`, `basics` |
-| B | Project structure, strictness & language standard | B1–B24 | `project-setup`, `basics` |
+| B | Project structure, strictness & language standard | B1–B25 | `project-setup`, `basics` |
 | C | Architecture, state & DI | C1–C10 | `architecture` |
 | D | UI components & platform conventions | D1–D20 | `ui-components`, `uikit` |
 | E | Styling, theming & adaptive layout | E1–E12 | `styling` |

@@ -246,7 +246,7 @@ Add one ArchUnit rule per ordered module pair when ArchUnit is the tool; Spring 
 
 ## Rules
 
-The standards this skill's output must meet are the be-java rule files, not a list here: `java.md`. Read the project's copy in `.claude/rules/be-java/`, or the plugin's in `backend/java/skills/rules/` when the project has not installed them (`/be-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the be-java rule files, not a list here: `java.md` and `java-lint.md`. Read the project's copy in `.claude/rules/be-java/`, or the plugin's in `backend/java/skills/rules/` when the project has not installed them (`/be-java:rules` does). Where they and this skill's recipes disagree, the rule files win.
 
 ## Generation outputs
 
@@ -264,5 +264,5 @@ After scaffolding, run the checks below:
 
 - `./gradlew build` — 0 warnings (Gradle `compileJava` set to `-Werror`)
 - `./gradlew test` — generated tests pass
-- `./gradlew checkstyleMain spotlessCheck` — formatting clean
+- `./gradlew checkstyleMain checkstyleTest spotlessCheck` — formatting clean, every `java-lint.md` row passing
 - Sweep old call sites that the new pattern replaces; remove dead code

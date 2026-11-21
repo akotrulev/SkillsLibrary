@@ -7,8 +7,11 @@
 - A stack-agnostic skill for **changing code that has no tests**.
 - Each stack's mechanically checkable house rules **named as lint rules**, so a gate catches them.
 
-**Status:** Not started. Next: A1, FX1, R1 and L1, which can run beside each other.
-- **Built but unverified:** nothing is built.
+**Status:** As of 2026-11-21, A1, FX1, R1, U1 and L1–L5 have landed; C1 (catalog and README) is next, then G1 (the whole set,
+the blind fixture run, filing).
+- **Built but unverified:** the lint tables are proven in scratch projects only, never in a real project. Limits L5 records: the
+  `qa-java` `@Test` suppression keys on the annotation's simple name and Maven wiring was not run; `.features-gen/**` is ignored by
+  the library's own description of `bddgen`, not by a run of it. L5 left no row unverified; the items L2 lists as unverified stand (see its As built).
 - **Only the user can do:** restart after G1 and type `/engineering:audit` on a real project. Run one
   stack's `<plugin>:rules` in a real project to see its lint-gap report.
 
@@ -421,6 +424,73 @@ alternative, a `.editorconfig` for the rows and a `.globalconfig` for `RS0030` a
 across two files. Every later task checks whether its tool skips generated code, or configures it
 separately, before it names the file the severities live in.
 
+**D15 — L4 kept the rows its stacks already named, and counts a lint's own regex config as no new
+rule (2026-11-21).** §7 admits a row only for a *major* or *blocker* prose rule detected by a rule the
+linter ships, and writes no custom lint rule. Three rows fail that: SwiftLint `no_print` (prose *minor*)
+and `no_gcd_main`, both `custom_rules` regexes that `project-setup` already told both Swift stacks to
+write, and the ruff `PTH` family (prose *minor*), named in `python-project.md`. L4's own instruction was to
+move lines the stacks already name into the table, so they became rows and the prose that listed them is
+gone. Cost: three rows rest on a *minor* tag, and two are regexes the project keeps in `.swiftlint.yml`.
+The reading that dropped them would have removed a documented behaviour from the setup skills. A row stays
+only where the rule detects the whole construct the prose names: `PLW0603` is the `global` statement the
+prose lists, `PGH003` is a `# type: ignore` without a code; L1's `CA2211`, which sees only externally
+visible static fields, stays dropped.
+
+**D16 — The `pattern-writer` scaffolds of `be-python` and `be-rust` disagree with the new tables, and
+the tables win (2026-11-21).** The Python scaffold writes `ignore = ["ANN401"]`, and the Rust scaffold
+writes `print_stdout`, `print_stderr` and `allow_attributes_without_reason` at `warn`. L4 did not edit them
+(they are outside its files and carry a full config the table would then duplicate). Each table says in its
+wired notes that it wins over a scaffold. Cost: a project scaffolded before a later edit starts with a
+config the table calls a gap, and its first `rules` run lists the rows.
+
+**D17 — L2 cites the checklist for two React Native rows, puts a `tsc` row in each lint file, and runs
+the React proofs on ESLint 9 (2026-11-21).** §7 and D9 take a row from a *major* tag in the stack's rule
+files, and name the table's `paths:` as `eslint.config.*`. Three readings differ. (1) `mobile-react-native`'s
+rule files carry no TypeScript rule, but its conformance checklist tags `B1` (strict) and `B2` (no `any`)
+*major*, so those two rows cite the checklist; the alternative was no `any` row and no `strict` row in the one
+stack whose audit already checks both. (2) Each of the three tables has one `setting` row for `tsc`
+(`strict`, and for be-node `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`), the analogue of L1's
+`<Nullable>`, so each file's `paths:` also matches `tsconfig*.json` and step 8 reads `tsconfig`; the
+alternative left a *major* rule of `node-config.md` and `react.md` without a row. (3) `fe-react` and
+`mobile-react-native` prove on ESLint 9.39.5 because `eslint-plugin-react` and `eslint-plugin-jsx-a11y`
+peer ESLint 9 at most; `be-node` proves on 10.15.0. The tables name the version beside each proof. Cost: three
+rule files load on every `tsconfig` read in a monorepo, about 2k tokens each, and a project on ESLint 10 that
+wants the React rows must wait for the plugins.
+
+**D18 — L3 proves the Android Lint rows in a real project, carries detekt's type-resolution wiring in the
+table, and edits `pattern-writer` of `be-java` (2026-11-21).** The L3 prompt expected an Android scratch
+project to need an SDK the image lacks, and the Android Lint rows to stay unverified. Three readings differ.
+(1) The host has an Android SDK whose licences the user already accepted. A copy of its platform and
+build-tools, mounted into `gradle:9.6.0-jdk21` run as `linux/amd64` (AGP's `aapt2` is an x86-64 binary and
+does not start in the arm64 image), builds AGP 9.4.1, so every Android Lint row fired and none is
+unverified. (2) detekt 1.23.8's Gradle plugin registers only `detekt` on AGP 9, and without a `classpath`
+it skips type-resolution rules without a failure. Five of the seven detekt rows are such rules, so the
+table carries the `classpath` and `jvmTarget` wiring and step 8 says those rows need it. The alternative,
+rows with no such note, would let an audit pass while the rules ran on nothing. (3) The `be-java`
+`pattern-writer` is outside §7's list for that stack. Its Rules sentence now names `java-lint.md` and its
+validation line runs `checkstyleTest`, so the scaffold's own gate runs the two test rows. Android's
+`project-setup` lost "and `GlobalScope`" from its `ForbiddenMethodCall` sentence, because `GlobalCoroutineUsage`
+in the table detects it. Cost: a project on detekt 1.23.8 carries about fifteen lines of classpath wiring,
+detekt 2 (alpha) is unverified, and the proof depends on the host's SDK copy.
+
+**D19 — L5 builds the Java sleep, branch and `try` rows from Checkstyle's regex and token checks, gives
+`qa-java` no Error Prone row, and leaves `.NET` rows out where no analyzer exists (2026-11-21).** Three
+readings differ. (1) L3's note says neither Error Prone nor Checkstyle has a stock check for `Thread.sleep`, so
+it gets no row. Checkstyle does ship `RegexpSinglelineJava`, a stock module configured with a regex, and D15
+already counts a lint's own regex config as no new rule. The sleep row is on L5's own list, so `qa-java` has
+`NoSleep`, `NoDependsOnMethods` and `ConfigAlwaysRun` as three configured instances of it. Cost: `NoSleep`
+misses a statically imported `sleep(…)`, and `ConfigAlwaysRun` flags `alwaysRun = true` written on the next
+line. (2) §7 names Error Prone for `qa-java`, and `qa-java-suite.md` names no Error Prone row: `EmptyCatch`
+passes a block holding only a comment, so `EmptyCatchBlock` with `commentFormat` `^$` detects more, and
+`CatchFail` did not fire on TestNG's `Assert.fail`. The alternative, two rows on one prose rule, would write
+it twice. (3) The L5 prompt lists no sleep, no branch, no focused test, no skipped test without a reason and no
+empty `catch` for all three stacks. `qa-dotnet` has the sleep row only: no stock analyzer detects a branch, a
+loop or a `try` in a test body, a skip reason or an empty `catch` of a named type, and NUnit has no focus. Its
+other rows come from mining `automation.md`. The `qa-typescript` file matches `tsconfig*.json` as well as
+`eslint.config.*` and carries a `strict` row, as D17 did for the TypeScript stacks; §7 names only
+`eslint.config.*`. Cost: a project that installs `qa-dotnet` finds no lint for the linear-test rule, which
+stays a review finding (`B4` in the checklist).
+
 ## Answered questions (2026-11-21)
 
 **O1 — Which of the guide's six items join the plan: all six.** The untested-code skill and the lint
@@ -707,6 +777,20 @@ run the unfiltered `skill-lint`.
   provided by the preset.
 - **Not in L2:** `qa-typescript` (L5), and a second formatter or linter the stack does not already name.
 
+**As built (2026-11-21):**
+- Built: `backend/node/skills/rules/node-lint.md` (new, 15 rows), `frontend/react/skills/rules/react-lint.md` (new, 22 rows) and `mobile/react-native/skills/rules/react-native-lint.md` (new, 15 rows). Each has `paths:` on `eslint.config.*` and `tsconfig*.json` (the last for its `tsc` `setting` row), the header comment v1 (2026-11-21) with the versions, the two severity lines, `How the rows are wired:`, and the stack's `eslint.config` in a fenced block. The proof ran the block extracted from each file, not a hand copy. Setup pointers: `frontend/react/skills/project-setup/SKILL.md` ("Lint rules" bullet in the quality gates, the `Rules` line and the exit-gate line) and `mobile/react-native/skills/project-setup/SKILL.md` ("Lint rules" bullet in "Quality gates every project ships with"; that skill has no exit gate, so the bullet is the gate). Checklist rows `S13` (fe-react; its index has no row ranges) and `B13` (mobile-react-native, index now `B1–B13`), each appended after the section's last row. Step 8 `Report lint gaps`, a step-5 lint-config bullet and the report line in the three `rules/SKILL.md`; the three `code-review/SKILL.md` name the new file.
+- Candidate ids (§7), checked against tagged sources fetched 2026-11-21 (typescript-eslint v8.73.0 `docs/rules`, ESLint v10.15.0 `docs/src/rules`, eslint-plugin-react v7.37.5, eslint-plugin-jsx-a11y v6.10.2, eslint-plugin-eslint-comments v4.8.1, the react-hooks 7.1.1 README and `react.dev/reference/eslint-plugin-react-hooks`, eslint-plugin-react-native v5.0.0, the `eslint-config-expo` 57.0.2 README and its loaded config, Next 15.5.29 `03-eslint.mdx`) and each fired: `@typescript-eslint/no-explicit-any`, the five `no-unsafe-*`, `no-floating-promises`, `no-misused-promises`, `ban-ts-comment` with `allow-with-description`, `@eslint-community/eslint-comments/require-description`, `react-hooks/rules-of-hooks`, `react-hooks/exhaustive-deps`, `react/no-array-index-key`. None dropped. One replaced: `react/no-unstable-nested-components` by `react-hooks/static-components`, since both fire on a component defined in a component and the second is already in the plugin's `recommended` set at `error`, so a project gets one report, not two. `playwright/*` stays with L5.
+- Ids added from the stacks' own rules: `@typescript-eslint/no-non-null-assertion`, `switch-exhaustiveness-check` with `allowDefaultCaseForExhaustiveSwitch: false`, `no-console`, `no-alert`; `no-restricted-properties` for `process.env` and `$queryRawUnsafe`/`$executeRawUnsafe`; `no-restricted-syntax` for `as unknown as`, for a test body's control flow, for `container.querySelector`, for `allowFontScaling={false}` and for the `'use client'` directive; `no-restricted-globals` for `setTimeout` and `vi` in tests and `window`/`document` in the app; `no-restricted-imports` for `@react-navigation/*`, `TouchableOpacity`, `Image`, `vitest` and the DOM Testing Library; `react-hooks/set-state-in-effect`; `react/jsx-no-constructed-context-values`, `react/jsx-no-target-blank`, `react/jsx-no-leaked-render`; `jsx-a11y/{no-static-element-interactions,click-events-have-key-events,alt-text,label-has-associated-control,tabindex-no-positive}`; `react-native/no-raw-text`; and `tsc` `setting` rows (`strict`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`).
+- Dropped for failing D9 (named so L5 does not re-add them): `@typescript-eslint/no-unsafe-type-assertion` (flags every narrowing `as`, so it is wider than "no `as unknown as`", which is a `no-restricted-syntax` selector instead); `react-hooks/purity` (sees `Date.now()` and `Math.random()` only, the prose bundles `window` and `localStorage`); core `no-empty` (an empty `catch`, not one that returns `null`); `react-native-a11y/*` (3.5.1 peers ESLint 8, and predates the `role`/`aria-*` props the rule prescribes); `eslint-plugin-testing-library` (no stack skill names it); `react-hooks/exhaustive-deps` for mobile-react-native (only `project-setup` says "keep it on", untagged); module reach-in for be-node (the stack already names dependency-cruiser, not a lint).
+- Surprises that changed the text: ESLint 10.15 installs with typescript-eslint and not beside eslint-plugin-react or eslint-plugin-jsx-a11y (peer 9 at most, `ERESOLVE`), so the React and React Native proofs ran on ESLint 9.39.5 and the Node one on 10.15.0; typescript-eslint 8.73 declares TypeScript below 6.1, so the scratch pinned 6.0.3 (latest is 7.0.2). `eslint-config-next` 16.4.6 sets `exhaustive-deps` and `alt-text` to `warn` and `jsx-no-target-blank` to `off`, ignores `.next/**`, and ships react-hooks 7; `eslint-config-next@15.5.29` ships react-hooks 5.2.0 (no `set-state-in-effect`, no `static-components`) and works with react-hooks 7.1.1 registered after `FlatCompat`. `react/jsx-no-target-blank` flags `rel="noopener"` alone unless `allowReferrer: true`, and the house rule says `noopener`. `eslint-config-expo` 57.0.2 sets `rules-of-hooks`, `set-state-in-effect` and `static-components` to `error`, `exhaustive-deps` to `warn`, ignores only `android/app/build`, and does not register `eslint-plugin-react-native`. `no-restricted-syntax`, `no-restricted-properties` and `no-restricted-globals` take one options array per file and a later config object replaces it, so the test and config-folder blocks repeat the entries. A type-aware rule never silently skips: a file outside the `tsconfig` `include` fails with a parsing error (shown for `.expo/types/router.d.ts` and `expo-env.d.ts`).
+- D14 answer: ESLint does not skip generated code. It lints every file `ignores` does not name (only `node_modules` and `.git` by default), and dot folders count. A `src/generated/client.ts` with an `any` reported `no-explicit-any` in all three scratch projects until the folder was in `ignores`; `.expo/types/router.d.ts` did the same in the Expo one. The Next preset ignores `.next/**` on its own. The severity is not read from another file: it is the same `eslint.config.*`. Each table says so and each config block lists the folders.
+- Proof, `npx eslint` in `$TMPDIR/017-L2/{node,react,rn}` (Node 22.23.4; kept out of the repo). One line per id, quoted from the run of the extracted config block:
+  - be-node (ESLint 10.15.0, typescript-eslint 8.73.0): `src/violations.ts:5:38 error Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any`; `:11:9 Unsafe assignment of an `any` value  no-unsafe-assignment`; `:19:8 Unsafe argument of type `any` assigned to a parameter of type `string`  no-unsafe-argument`; `:18:3 Unsafe call of an `any` typed value  no-unsafe-call`; `:12:19 Unsafe member access .id on an `any` value  no-unsafe-member-access`; `src/strict-violations.ts:2:3 Unsafe return of a value of type `any`  no-unsafe-return`; `:23:10 Forbidden non-null assertion  no-non-null-assertion`; `:27:11 Switch is not exhaustive. Cases not matched: "tri"` and `:44:5 The switch statement is exhaustive, so the default case is unnecessary  switch-exhaustiveness-check`; `src/orders.test.ts:23:3 Promises must be awaited, end with a call to .catch …  no-floating-promises`; `:59:17 Promise returned in function argument where a void return was expected  no-misused-promises`; `:70:3 Use "@ts-expect-error" instead of "@ts-ignore" …` and `:72:3 Include a description after the "@ts-expect-error" directive …  ban-ts-comment`; `:74:0 Unexpected undescribed directive comment …  @eslint-community/eslint-comments/require-description`; `src/orders.test.ts:18:3 Unexpected console statement  no-console`; `:87:10 'process.env' is restricted from being used. Read configuration through loadConfig()`, `:91:9 '$queryRawUnsafe' is restricted …` and `:92:9 '$executeRawUnsafe' is restricted …  no-restricted-properties` (`src/config/config.ts` reads `process.env` and reports nothing); `:50:10 No as unknown as X` and `src/orders.test.ts:6:3 A test body is linear …  no-restricted-syntax`; `src/orders.test.ts:22:34 Unexpected use of 'setTimeout'  no-restricted-globals`. `tsc --noEmit` (TypeScript 6.0.3): `src/strict-violations.ts(1,29): error TS7006`, `(7,10): error TS18048: 'first' is possibly 'undefined'`, `(14,14): error TS2375 … 'exactOptionalPropertyTypes: true'`.
+  - fe-react (Next 16.4.6 preset, ESLint 9.39.5, react-hooks 7.1.1): `src/Violations.tsx:10:5 React Hook "useState" is called conditionally  react-hooks/rules-of-hooks`; `:15:6 React Hook useEffect has a missing dependency: 'value'  react-hooks/exhaustive-deps`; `:14:5 Error: Calling setState synchronously within an effect can trigger cascading renders  react-hooks/set-state-in-effect`; `:23:15 Error: Cannot create components during render  react-hooks/static-components`; `:27:51 Do not use Array index in keys  react/no-array-index-key`; `:31:31 The object passed as the value prop to the Context provider changes every render  react/jsx-no-constructed-context-values`; `:37:7 Using target="_blank" without rel="noreferrer" or rel="noopener" …  react/jsx-no-target-blank`; `:38:7 Avoid non-native interactive elements …  jsx-a11y/no-static-element-interactions` and `Visible, non-interactive elements with click handlers must have at least one keyboard listener  jsx-a11y/click-events-have-key-events`; `:39:7 img elements must have an alt prop …  jsx-a11y/alt-text`; `:40:7 A form label must be associated with a control  jsx-a11y/label-has-associated-control`; `:41:24 Avoid positive integer values for tabIndex  jsx-a11y/tabindex-no-positive`; `:38:27 Unexpected confirm  no-alert`; `:6:34 Unexpected any  no-explicit-any`; `src/unsafe.ts:13:14 no-unsafe-argument`, `:8:3 no-unsafe-call`, `:7:19 no-unsafe-member-access`, `:9:3 no-unsafe-return` and `Violations.tsx:46:14 no-unsafe-assignment`; `Violations.tsx:49:10 No as unknown as X`, `src/Violations.test.tsx:8:3 A test body is linear …` and `:26:18 Query by role or label, never by selector  no-restricted-syntax`; `src/Violations.test.tsx:25:34 Unexpected use of 'setTimeout'  no-restricted-globals`; `:27:3 Promises must be awaited … ` on an unawaited `userEvent.setup()` call, `no-floating-promises`; `:53:3 Use "@ts-expect-error" instead of "@ts-ignore"  ban-ts-comment`; `:57:0 Unexpected undescribed directive comment  require-description`. `tsc`: `src/s.tsx(1,19): error TS7006`. The Vite lane (no preset, `reactHooks.configs.flat.recommended` plus the plugins registered) fired all 20 ids; Next 15.5.29 with `FlatCompat` and react-hooks 7.1.1 fired the four hook ids.
+  - mobile-react-native (`eslint-config-expo` 57.0.2, ESLint 9.39.5, `@testing-library/react-native` 14.1.0): `src/Violations.tsx:14:5 Error: Calling setState synchronously within an effect …  react-hooks/set-state-in-effect` (provided by the preset); `:17:11 Raw text (some text) cannot be used outside of a <Text> tag  react-native/no-raw-text`; `:19:8 Potential leaked value that might cause unintentionally rendered values or rendering crashes  react/jsx-no-leaked-render`; `:24:46 Do not use Array index in keys  react/no-array-index-key`; `:8:34 Unexpected any  no-explicit-any`; `src/Violations.test.tsx:26:3 Promises must be awaited …` on an unawaited RNTL 14 `render(...)`, `no-floating-promises`; `no-restricted-imports`: `:1:1 'vitest' import is restricted`, `:2:1 '@testing-library/react' import is restricted`, `Violations.tsx:2:10 'Image' import from 'react-native' is restricted`, `:2:17 'TouchableOpacity' …`, `:3:1 '@react-navigation/native' import is restricted … by a pattern`, and `'@testing-library/dom' import is restricted` in a second file; `no-restricted-globals`: `Violations.tsx:30:22 Unexpected use of 'window'`, `:31:21 … 'document'`, `src/Violations.test.tsx:25:34 … 'setTimeout'`, and `Unexpected use of 'vi'` in a file with no import; `no-restricted-syntax`: `Violations.tsx:1:1 'use client' is a web directive`, `:21:15 Text scales with the system setting; never lock it`, `Violations.test.tsx:9:3 A test body is linear …`. `tsc`: `src/s.tsx(1,19): error TS7006`.
+- Gate, all green: `python3 tools/skill-lint.py backend/node frontend/react mobile/react-native | tail -1` prints `0 findings`; `python3 tools/token-audit.py --violations-only` exits 0; the proof above.
+- Not committed: the queue commits. Verified: every row fired. Unverified: the `tsc` row's behaviour on TypeScript 7 (typescript-eslint declares it unsupported, so the typed rows were not run there); the mobile row for `@react-navigation/*` on a project that is not on Expo Router (the table says to drop it); Next 15 beyond the four hook ids.
+
 ### L3 — Lint tables for the JVM stacks
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -732,6 +816,15 @@ through Docker, or is listed as unverified.
 - detekt rule names changed between majors. Use the names of the major the Android skills pin.
 - ArchUnit is a test, not a lint. It gets no row.
 - **Not in L3:** `qa-java` (L5).
+
+**As built (2026-11-21):**
+- Built: `backend/java/skills/rules/java-lint.md` (new, 9 rows, `paths:` on the Gradle build files and `config/checkstyle/*.xml`); an `## Enforced by the build` section at the end of `mobile/android/skills/rules/android-build.md` (18 rows: 2 `setting`, 16 `error`; header now v2; `paths:` gained `**/detekt.yml` and `**/lint.xml`; line 25 became the two `setting` rows and a shorter ktlint line). Android pointer: a "Lint rules" bullet in `project-setup/SKILL.md` plus an exit-gate line. Check row `A20` (index `A1–A20`). Step 8 `Report lint gaps`, a step-5 bullet and the report line in both `rules/SKILL.md`. `java-lint.md` added to the list in `backend/java/skills/code-review/SKILL.md`. Also `backend/java/skills/pattern-writer/SKILL.md` (D18).
+- Candidates (§7) checked against the docs (errorprone.info/bugpatterns, checkstyle.org 14.4, detekt.dev 1.23.8) and each fired: `IllegalCatch`, `UnsafeCallOnNullableType`, `GlobalCoroutineUsage`, `InjectDispatcher`. Not used: `SwallowedException` (its prose rule, a typed reason and never `message`, is wider than what it detects, and it was not run). Ids added from the stacks' own rules: Error Prone `NonFinalStaticField`, `SystemOut`, `CatchAndPrintStackTrace`, `EmptyCatch`, `UnusedException`, `InterruptedExceptionSwallowed`; Checkstyle `IllegalInstantiation`, `IllegalType`, `IllegalImport`, `IllegalToken`; detekt `SleepInsteadOfDelay`, `SuspendFunSwallowedCancellation`, `EmptyCatchBlock`, `ForbiddenMethodCall`; Android Lint `UnspecifiedImmutableFlag`, `UnsafeIntentLaunch`, `ExportedContentProvider`, `ExportedService`, `InsecureBaseConfiguration`, `AcceptsUserCertificates`, `WakelockTimeout`, `NotifyDataSetChanged`, `HardcodedText`, `PxUsage`, `ContentDescription`, `ModifierParameter`, `CoroutineCreationDuringComposition`.
+- Dropped for failing D9 (named so L5 does not re-add them): no stock check for `Thread.sleep` in Java (Error Prone 2.53 has none, Checkstyle has no method-call ban, `MatchXpath` and `RegexpSingleline` are custom rules), `@Autowired` on a field, `@Transactional` self-invocation, SQL by concatenation, Lombok `@Data` on an entity, `@Enumerated(STRING)`, `BigDecimal` compared with `isEqualTo` (`BigDecimalEquals` sees only `.equals`), "domain classes carry no Spring annotations" (ArchUnit). Android: `CleartextTraffic` and `UsesCleartextTraffic` are not ids in Lint 32.4 (`Unknown issue id`), so `usesCleartextTraffic="true"` has no row.
+- Surprises that changed the text: detekt 1.23.8's plugin registers only `detekt` on AGP 9 and, with no `classpath`, skips its type-resolution rules without a failure (D18); Error Prone checks every compiled source, annotation-processor output and a class marked `@Generated` included, and `excludedPaths` is the only way out; Checkstyle reads a generated directory added to `sourceSets.main.java` and never annotation-processor output; Android Lint (`checkGeneratedSources` off) and detekt (`src/main`, `src/test` only) skip generated code; `@SuppressWarnings("checkstyle:illegalcatch")` works only with `SuppressWarningsFilter` and `SuppressWarningsHolder`; `IllegalType` with `memberModifiers` skips locals and parameters are unaffected; `warningsAsErrors` makes `GradleDependency`, `OldTargetApi` and `UnusedResources` fail a fresh project.
+- Proof. Java: `gradle:9.6.0-jdk21` in `$TMPDIR/017-L3/java`, Error Prone 2.53.0 (plugin 5.2.0), Checkstyle 14.4.0. One line per id: `Violations.java:7: error: [NonFinalStaticField] Static fields should almost always be final.`, `:18: error: [SystemOut] Production code should not print to standard out or standard error.`, `:25: error: [CatchAndPrintStackTrace] Logging or rethrowing exceptions should usually be preferred to catching and calling printStackTrace`, `:32: error: [EmptyCatch] Caught exceptions should not be ignored`, `:39: error: [UnusedException] This catch block catches an exception and re-throws another, but swallows the caught exception`, `:47: error: [InterruptedExceptionSwallowed] This catch block appears to be catching an explicitly declared InterruptedException as an Exception/Throwable`; Checkstyle `Violations.java:48:11: Catching 'Exception' is not allowed. [IllegalCatch]`, `:63:16: Instantiation of java.lang.Thread should be avoided. [IllegalInstantiation]`, `:9:19`, `:11:27`, `:66:26: Usage of type 'Optional' is not allowed. [IllegalType]` (field, parameter, record component; the two local `Optional`s were not flagged), and in `checkstyleTest` `ViolationTest.java:4:1: Illegal import - org.springframework.boot.test.context.SpringBootTest. [IllegalImport]` (also `MockBean`, `DataJpaTest`, `WebMvcTest`) and `:16:11: Using 'catch' is not allowed. [IllegalToken]`. Both suppressions silenced their line; `excludedPaths` and the `checkstyleMain` `exclude` removed the generated-code findings (11 Error Prone errors with generated code, 7 without).
+- Proof. Android: AGP 9.4.1 (Kotlin 2.2.10 built in), detekt 1.23.8, Lint 32.4.1 in `$TMPDIR/017-L3/android`, run with `docker run --platform linux/amd64` and a copy of the host's Android SDK (platform 37.0). Lint with the ids at `error` in `lint.xml` and `warningsAsErrors = false`: `MainActivity.kt:18: Error: Missing PendingIntent mutability flag [UnspecifiedImmutableFlag]`, `MainActivity.kt:13: Error: This intent could be coming from an untrusted source. … [UnsafeIntentLaunch]`, `AndroidManifest.xml:13: Error: Exported content providers can provide access to potentially sensitive data [ExportedContentProvider]`, `:17: Error: Exported service does not require permission [ExportedService]`, `network_security_config.xml:3: Error: Insecure Base Configuration [InsecureBaseConfiguration]`, `:6: Error: The Network Security Configuration allows the use of user certificates in the release version of your app [AcceptsUserCertificates]`, `MainActivity.kt:22: Error: Provide a timeout when requesting a wakelock with PowerManager.Wakelock.acquire(long timeout). … [WakelockTimeout]`, `Adapter.kt:13: Error: It will always be more efficient to use more specific change events if you can. … [NotifyDataSetChanged]`, `screen.xml:9: Error: Hardcoded string "Hello", should use @string resource [HardcodedText]`, `:13: Error: Avoid using "px" as units; use "dp" instead [PxUsage]`, `:15: Error: Missing contentDescription attribute on image [ContentDescription]`, `Screen.kt:11: Error: Modifier parameter should be the first optional parameter [ModifierParameter from androidx.compose.ui]`, `Screen.kt:18: Error: Calls to launch should happen inside a LaunchedEffect and not composition [CoroutineCreationDuringComposition from androidx.compose.runtime]`. The same flag-less `PendingIntent` in a generated source (`Gen.kt`) was not reported. detekt with `classpath` set: `Kotlin.kt:16:37: Calling !! on a nullable type … [UnsafeCallOnNullableType]`, `:20:9: This use of GlobalScope should be replaced by CoroutineScope or coroutineScope. [GlobalCoroutineUsage]`, `:47:53: Dispatcher IO is used without dependency injection. [InjectDispatcher]`, `:30:16: This use of Thread.sleep() inside a suspend function should be replaced by delay(). [SleepInsteadOfDelay]`, `:33:45: The runCatching has suspend call inside. … [SuspendFunSwallowedCancellation]`, `:43:44: Empty catch block detected. … [EmptyCatchBlock]`, `:23:27: The method kotlinx.coroutines.runBlocking has been forbidden: Blocks the calling thread [ForbiddenMethodCall]`, `:26:16: … java.lang.Thread.sleep …`, `:50:58: … androidx.compose.runtime.collectAsState …`, and `SampleTest.kt:7:16: … java.lang.Thread.sleep … [ForbiddenMethodCall]` in test code (a `!!` in the same test file was not flagged). `Analysis failed with 19 weighted issues.` with `maxIssues: 0`; without a `classpath` only `GlobalCoroutineUsage` and `EmptyCatchBlock` of these ran.
+- Gate, all green: `python3 tools/skill-lint.py backend/java mobile/android | tail -1` prints `0 findings`; `python3 tools/token-audit.py --violations-only` exits 0; the proof above. Not committed: the queue commits. Nothing unverified. `ktlint` has no row and was not run.
 
 ### L4 — Lint tables for the Swift, Python and Rust stacks
 
@@ -761,6 +854,22 @@ unfiltered `skill-lint`.
 - `mobile-ios` and `desktop-macos` get the same Swift rows, each in its own file (D8).
 - **Not in L4:** raising a toolchain pin or adding a linter a stack does not name.
 
+**As built (2026-11-21):**
+- Built, per stack. `mobile-ios` and `desktop-macos`: an `## Enforced by the build` section at the end of each `xcode-config.md` (9 rows: 5 SwiftLint, 2 `custom_rules`, 2 compiler settings; `**/.swiftlint.yml` added to `paths:`; header v1 → v2), the `.swiftlint.yml` and the tests-folder child config in a fenced block. `be-python`: the table in `python-project.md` (19 rows, header v1 → v2). `be-rust`: the table in `cargo.md` (18 rows, header v1 → v2), `Cargo.toml` and `clippy.toml` blocks. Setup pointers: `mobile/ios/skills/project-setup/SKILL.md` and `desktop/macos/skills/project-setup/SKILL.md` (the "Format and lint" paragraph now points at the table, and each exit gate says every row is configured); `mobile/ios/skills/project-setup/references/packages-and-config.md` lost its second `.swiftlint.yml` copy. Check rows: `B25` (mobile-ios, index `B1–B25`) and `B18` (desktop-macos, `B1–B18`), appended, nothing renumbered. Lint-gap step: step 8 `Report lint gaps` in the four `rules/SKILL.md`, a step-5 bullet naming each stack's lint config, and the report line `Not enforced by the build: none | <id: house rule>   (one line per row)`. No `code-review/SKILL.md` edit: no new rule file.
+- Prose moved into the tables and deleted: `python-project.md` (the ruff `S`/`ANN`/`PTH`/`T20` line), `cargo.md` (the "lint table denies `unwrap_used`…" line; the "Lints live once" line stays, the table has a setting row for it), the SwiftLint sentence in both `project-setup` skills. Dropped with it, because no house rule asks for it: `unused_import` (an analyzer rule, which `swiftlint lint` never runs), `unused_declaration`, `closure_spacing` and `explicit_acl`.
+- Dropped candidates, named so L5 does not re-add them. Swift: `accessibility_trait_for_button` (accepts `.onTapGesture` with a trait, the house rule bans it), `accessibility_label_for_image` (*minor*), `todo` (*minor*), `unhandled_throwing_task`. Python: `PLR1714` (rewrites `a == x or a == y` to `in (…)`, which the tests rule bans), `S105`–`S107` (match identifier names only, so "no secret in code" is not what they detect), `PT011`, `ASYNC251`, `F403`. Rust: `indexing_slicing` and `arithmetic_side_effects` (flag every index and sum, not the input-derived ones), `wildcard_enum_match_arm` (flags enums the crate does not own), `expect_used`, `as_conversions`. §7's candidates: `force_unwrapping`, `force_cast`, `force_try`, `G004`, `BLE001`, `unwrap_used` all kept and fired; none dropped.
+- Docs checked 2026-11-21: `realm.github.io/SwiftLint/<id>.html` (each id 200, `force_unwrapping` and `implicitly_unwrapped_optional` default `warning`), `uvx ruff rule <id>` and `docs.astral.sh/ruff/rules/` (ruff 0.17.6), mypy 2.4.1 `config_file` and `command_line` pages, and the clippy 1.100.0 lint index (every id present; `unused_result_ok` added in 1.82, `allow_attributes` in 1.70, `let_underscore_lock` deny by default, `disallowed_*` style, the rest `restriction`/`pedantic`/`suspicious`).
+- Surprises that changed the text. `BLE001` skips an `except Exception` that re-raises or calls `logger.exception`; `S110` flags only `except Exception: pass`. `TID251` bans a module's submodules too (`urllib.parse`) and attributes (`time.sleep`). `unused_result_ok` suggests `let _ = …`, which `let_underscore_must_use` forbids, so the pair leaves only handling the error. `treatAllWarnings(as:)` is unavailable below `swift-tools-version: 6.2`. `// swiftlint:disable all` trips `blanket_disable_command`, so generated Swift is excluded by path. Clippy lints an `include!`d `OUT_DIR` file with the crate's table (`#[expect(…, reason)]` on the including module silences it); a workspace member without `[lints] workspace = true` gets no rule and no warning. In edition 2024 `std::env::set_var` is `unsafe`, so `unsafe_code = "forbid"` already stops it.
+- Proof, in `$TMPDIR/017-L4/{swift,swift-compiler,swiftpm,xcode,python,rust}`, never in the repo. SwiftLint 0.65.1 through `ghcr.io/realm/swiftlint:latest` (the first pull was denied by a stale `ghcr.io` credential; `docker logout ghcr.io` fixed it), `lint --strict`. The macOS stack has the same rows and the same tool, so it ran once:
+  - `Packages/Core/Sources/Core/Violations.swift:7:21: error: Force Unwrapping Violation: Force unwrapping should be avoided (force_unwrapping)`; `:11:22: … Force Cast Violation … (force_cast)`; `:15:16: … Force Try Violation … (force_try)`; `:4:15: … Implicitly Unwrapped Optional Violation … (implicitly_unwrapped_optional)`; `:21:17: … No Empty Block Violation … (no_empty_block)`; `:26:9: error: no_print Violation: Use os.Logger. (no_print)`; `:31:9: error: no_gcd_main Violation: Use MainActor isolation. (no_gcd_main)`.
+  - Child config: the same file copied under `Tests/` printed `force_cast` and the rest, and no `force_unwrapping` or `force_try`. `**/Generated` in `excluded` silenced `Generated/G.swift:3:28`; without it, `error: Force Unwrapping Violation`. An `@IBOutlet var label: UILabel!` was not flagged.
+  - Compiler, `xcodebuild -scheme App -destination 'platform=macOS' SWIFT_VERSION=6 SWIFT_TREAT_WARNINGS_AS_ERRORS=YES build` (Xcode 27.0, Swift 6.4): `Sources/App/Generated.swift:2:16: error: static property 'cache' is not concurrency-safe because it is nonisolated global shared mutable state [#MutableGlobalVariable]` and `Sources/App/Counter.swift:3:13: error: initialization of immutable value 'unused' was never used`. With neither setting the same package prints those as `warning:` and `** BUILD SUCCEEDED **`. SwiftPM at tools 6.2 with `swiftLanguageModes: [.v6]` and `.treatAllWarnings(as: .error)`: `Sources/App/Generated/Strings.swift:2:16: error: static property 'cache' is not concurrency-safe …`.
+  - ruff 0.17.6 (`uvx ruff check . --output-format concise`), file `src/worker/violations.py`: `19:26: ANN401 Dynamically typed expressions (typing.Any) are disallowed in `value``; `70:19: PGH003 Use specific rule codes when ignoring type issues`; `59:5: PTH123 `open()` should be replaced by `Path.open()``; `60:5: PTH118`; `24:40: B006 Do not use mutable data structures for argument defaults`; `48:12: PLW0603 Using the global statement to update `_state` is discouraged`; `35:5: E722 Do not use bare `except``; `39:12: BLE001 Do not catch blind exception: `Exception``; `39:5: S110 `try`-`except`-`pass` detected`; `59:5: SIM115 Use a context manager for opening files`; `53:5: S602`, `78:5: S604 Function call with `shell=True` parameter identified`, `54:5: S605`; `55:5: S307`; `56:5: S102 Use of `exec` detected`; `57:5: S301`; `58:5: S506 Probable use of unsafe `yaml.load``; `20:17: G004 Logging statement uses f-string`; `21:5: T201 `print` found`; `TID251`: `61:5 `time.sleep` is banned: Never sleep to synchronise.`, `62:5 `signal.alarm``, `63:5 `threading.Timer``, `11:8 `requests``, `5:8 `socket``, `13:1 `urllib``, and `httpx` in a second file. `tests/test_violations.py` (an `assert`, no annotations) printed nothing.
+  - mypy 2.4.1: with the table, `src/worker/mypyviolations.py:1: error: Function is missing a type annotation  [no-untyped-def]` and `:10: error: Statement is unreachable  [unreachable]`; with no `[tool.mypy]`, `Success: no issues found`; with `strict = true` only, the first error alone. A `case _` after an exhaustive `match`: `matchcase.py:24: error: Statement is unreachable  [unreachable]`.
+  - clippy 0.1.100 (rustc 1.100.0) in `rust:latest` plus `rustup component add clippy`, `cargo clippy --workspace --all-targets --keep-going`, edition 2024: `app/src/lib.rs:15: clippy::unwrap_used: used `unwrap()` on an `Option` value`; `19 let_underscore_must_use`; `23 unused_result_ok: ignoring a result with `.ok()` is misleading`; `27 let_underscore_lock: non-binding let on a synchronization lock`; `31 map_err_ignore`; `35 exit: usage of `process::exit``; `39 cast_possible_truncation: casting `u64` to `u8` may truncate the value`; `43 string_slice`; `49 await_holding_lock: this `MutexGuard` is held across an await point`; `55 print_stdout`, `56 print_stderr`; `60 undocumented_unsafe_blocks: unsafe block missing a safety comment` and `60 unsafe_code: usage of an `unsafe` block`; `63 allow_attributes: #[allow] attribute found`, `66 allow_attributes_without_reason`; `70 disallowed_methods … `std::thread::sleep``, `71 … `std::env::var``, `72 … `std::env::var_os``; `8 disallowed_macros … `lazy_static::lazy_static``; `disallowed_types` for `once_cell::sync::Lazy`, `sync::OnceCell`, `unsync::Lazy`, `unsync::OnceCell`; `legacy/src/lib.rs:2 disallowed_methods … `std::env::set_var`` (edition 2021 crate). A `#[cfg(test)]` `Some(1).unwrap()` printed no `unwrap_used`; member `plain`, with no `[lints] workspace = true`, printed nothing; `target/…/out/generated.rs:1: clippy::unwrap_used` fired in the `include!`d file until `#[expect(clippy::unwrap_used, reason = …)]` went on the module.
+- Gate, all green: `python3 tools/skill-lint.py mobile/ios desktop/macos backend/python backend/rust | tail -1` prints `0 findings`; `python3 tools/token-audit.py --violations-only` exits 0; the proof above.
+- Nothing is unverified. Two limits: the `SWIFT_VERSION` and `SWIFT_TREAT_WARNINGS_AS_ERRORS` rows ran as `xcodebuild` build-setting overrides on a SwiftPM package, not as keys in an `.xcconfig` of a real `.xcodeproj`; SwiftLint ran in a Linux image, so it checked syntax only, without importing UIKit or AppKit. The `swift-format` block in `packages-and-config.md` still carries `NeverForceUnwrap` and `NeverUseForceTry`, which duplicate `force_unwrapping` and `force_try`; left as the stack named them. Not committed: the queue commits. One divergence from §7: D15 and D16. The Rust header cites 1.100 as the toolchain the proof ran on; no pin was raised (the version policy in `CLAUDE.md` still reads 1.99, which is not L4's to change).
+
 ### L5 — Lint tables for the three QA stacks
 
 **Stack:** `docs` · **Agent:** `general-purpose`
@@ -788,6 +897,30 @@ scratch-project proof with `dotnet build`, `npx eslint` and the Gradle image. Do
 - A scratch .NET project that references Allure.NUnit builds with `-p:AspectInjector_Enabled=false`.
 - Playwright rule ids are for the versions `tools/qa-version-check.py` pins.
 - **Not in L5:** the per-lane rule files (API, BDD, mobile, desktop). Only the suite-wide ones are mined.
+
+**As built (2026-11-21):**
+- Built. `qa-dotnet`: an `## Enforced by the build` section at the end of `qa/dotnet/skills/rules/suite-config.md` (11 rows, `**/.editorconfig` added to `paths:`, header v1 → v2) with the `BannedSymbols.txt` block, check row `A11` appended after `A10` in `qa/dotnet/skills/standards-audit/references/conformance-checklist.md` (the index row for section A carries no row range, so nothing to update), and step 8 `Report lint gaps` plus a step-5 sentence for the analyzer config and the report line in `qa/dotnet/skills/rules/SKILL.md`. `qa-java`: the section at the end of `qa/java/skills/rules/qa-java-suite.md` (7 Checkstyle rows, `**/config/checkstyle/*.xml` added to `paths:`, header v1 → v2) with the `checkstyle.xml` block, step 8 and a step-5 bullet in `qa/java/skills/rules/SKILL.md`. `qa-typescript`: new `qa/typescript/skills/rules/qa-typescript-lint.md` (18 rows, `paths:` on `eslint.config.*` and `tsconfig*.json`, header v1) with the `eslint.config.mjs` block, step 8 and a step-5 bullet in `qa/typescript/skills/rules/SKILL.md`. None of the three stacks has a `code-review/SKILL.md`, so no list of rule files changed.
+- Rows, with the ids checked on 2026-11-21 against the NUnit.Analyzers index, the vs-threading and roslyn-analyzers help, the `eslint-plugin-playwright` README and rule pages (every id in the table is in 2.12.2, which asks only for ESLint 8.40), the Checkstyle 14.4 check pages and the Error Prone 2.53 bug-pattern pages. §7's candidates for these stacks: `RS0030` for `Thread.Sleep`, `playwright/no-wait-for-timeout` and `playwright/no-conditional-in-test` all fired and stayed; none was dropped. Added from the suite-wide files: .NET `RS0030` (`Task.Delay` and `WaitForTimeoutAsync` per overload, `ClassicAssert`/`StringAssert`/`CollectionAssert`/`FileAssert`/`DirectoryAssert`, FluentAssertions, `OrderAttribute`, `RetryAttribute`, `N:Newtonsoft.Json`), `VSTHRD002`, `VSTHRD100`, `VSTHRD110`, `CS4014`, `NUnit1012`, `CA1031`, `<Nullable>`; TypeScript the rest of the table; Java `IllegalToken`, `EmptyCatchBlock`, `IllegalCatch` and three `RegexpSinglelineJava` ids.
+- Dropped for failing D9, named so nobody re-adds them. .NET: no analyzer detects a branch, loop or `try` in a test body, an empty `catch` of a named type, a skipped test without a reason or a focused test (NUnit has no focus), so `qa-dotnet` has none of those four rows. `CA2200` fired but no qa-dotnet prose names `throw ex`; `NUnit2059` sees only an un-awaited `Assert.ThrowsAsync`; `CA2211` stays dropped (L1); `[Ignore]`/`[Explicit]` reasons are *minor* prose. TypeScript: `no-nth-methods` and `no-raw-locators` flag more than the locator rule bans; `no-console` is *minor*. Java: Error Prone gets no row (D19), `System.out` and `printStackTrace()` are *minor* in `qa-java.md`, `enabled = false` without a ticket cannot be read from the annotation, and a static `WebDriver` is only half-detected by any regex.
+- Surprises that changed the text. `CS4014` (compiler) fires in an async method and `VSTHRD110` in a sync one, so the row names both. A `RS0030` line whose package the project does not reference (Playwright, FluentAssertions, Newtonsoft.Json) is ignored without a warning. `Allure.NUnit` 2.15.0 depends on `Newtonsoft.Json` 13.0.4, so a project that pins 13.0.3 fails with `NU1605`. `no-conditional-in-test` flags `if`, `switch` and the ternary but not `||` or `&&` inside `expect(…)`, so "one expected value" stays prose. `prefer-web-first-assertions` skips `expect(page.url())`, so that row carries a `no-restricted-syntax` selector too. Dropping the plugin's `recommended` preset also drops the plugin registration: the spec block needs `plugins: { playwright }`. `SuppressionXpathSingleFilter` is a child of `TreeWalker`, not `Checker`, and `IllegalToken` has no `message` property. Error Prone `EmptyCatch` passes a block holding only a comment; `EmptyCatchBlock` with `commentFormat` `^$` flags it. Error Prone `CatchFail` did not fire on TestNG's `Assert.fail`.
+- Generated code (D14). .NET: an `<auto-generated>` file under the project folder got `RS0030` at the `.editorconfig` severity and nothing from `VSTHRD002` or `CA1031`; Reqnroll writes `A.feature.cs` beside the feature with that header, and a Reqnroll.NUnit 3.3.4 project built with 0 warnings and 0 errors under the severities. TypeScript: ESLint lints generated code unless `ignores` names it. Java: Checkstyle lints a generated `srcDir`, and `exclude("gen/**")` on `checkstyleTest` silences it. All three are in the tables.
+- Proof, in `$TMPDIR/017-L5/{dotnet,reqn,plain,ts,java}`, never in the repo.
+  - .NET, `dotnet build -p:AspectInjector_Enabled=false` (SDK 10.0.301, BannedApiAnalyzers 5.6.0, Threading.Analyzers 18.12.1, NUnit.Analyzers 4.15.0, NUnit 4.6.1, Microsoft.Playwright.NUnit 1.63.0, Allure.NUnit 2.15.0), every id at `error` in `.editorconfig`:
+    - `ViolationTests.cs(14,9): error RS0030: The symbol 'Thread.Sleep(int)' is banned in this project: Wait on a condition`; the same message for `Thread.Sleep(TimeSpan)` (15), `Task.Delay(int)` (16), `Task.Delay(int, CancellationToken)` (17), `Task.Delay(TimeSpan)` (18), `Task.Delay(TimeSpan, CancellationToken)` (19), `Task.Delay(TimeSpan, TimeProvider)` (20), `Task.Delay(TimeSpan, TimeProvider, CancellationToken)` (21), `IPage.WaitForTimeoutAsync(float)` (26), `IFrame.WaitForTimeoutAsync(float)` (27).
+    - `(33,9): error RS0030: The symbol 'ClassicAssert' is banned in this project: Use Assert.That with a constraint`; `StringAssert` (34,9), `CollectionAssert` (35,9), `FileAssert` (36,9), `DirectoryAssert` (37,9), `AssertionExtensions` (38,9); `(41,12): … 'NUnit.Framework.OrderAttribute' … A test runs alone and in any order`; `(44,12): … 'NUnit.Framework.RetryAttribute'`; `(48,55): … The symbol 'Newtonsoft.Json' is banned in this project: Use System.Text.Json`.
+    - `(50,6): error NUnit1012: The async test method must have a non-void return type`; `(51,23): error VSTHRD100: Avoid "async void" methods`; `(56,28)` and `(57,36): error VSTHRD002: Synchronously waiting on tasks or awaiters may cause deadlocks`; `(64,9): error CS4014: Because this call is not awaited`; `(99,9): error VSTHRD110: Observe the awaitable result of this method call`; `(74,9): error CA1031: Modify 'Should_Swallow' to catch a more specific allowed exception type` (and `(76,9)` for the bare `catch`); `(90,20): warning CS8600: Converting null literal or possible null value to non-nullable type` for `<Nullable>`.
+    - `suite/obj/Gen/Generated.cs(7,34): error RS0030: The symbol 'Thread.Sleep(int)' is banned`, and nothing for `VSTHRD002` or `CA1031` in the same file. `plain/T.cs(7,34): error RS0030` was the only line from a project with NUnit alone, and `[SuppressMessage("ApiDesign", "RS0030:Do not use banned APIs", Justification = …)]` on a `[Retry(2)]` test printed nothing.
+  - TypeScript, `npx eslint tests -f json` (ESLint 9.39.5, typescript-eslint 8.73.0, eslint-plugin-playwright 2.12.2, TypeScript 6.0.3, `@playwright/test` 1.64.0, eslint-comments 4.8.1, Node 22.12), the table's config, every id appeared:
+    - `violations.spec.ts:8:9 playwright/no-wait-for-timeout — Unexpected use of page.waitForTimeout()`; `9:28 no-restricted-globals — Unexpected use of 'setTimeout'`; `11:9 no-restricted-properties — 'browser.pause' is restricted`; `2:1 no-restricted-imports — 'node:timers/promises' import is restricted`.
+    - `16:3`, `19:13`, `20:3 playwright/no-conditional-in-test — Avoid having conditionals in tests`; `34:5 playwright/no-conditional-expect — Avoid calling `expect` conditionally`; `25:3`, `28:3`, `31:3`, `40:3 no-restricted-syntax — A test body is linear: no loop or try`; `39:31 no-restricted-syntax — A caught error is handled or reaches the runner, never swallowed`; `42:11 no-empty — Empty block statement`; `84:13 no-restricted-syntax — No as unknown as X`; `webfirst.spec.ts:7:10 no-restricted-syntax — Assert the URL with await expect(page).toHaveURL()`.
+    - `46:6 playwright/no-focused-test`; `50:6 … no-skipped-test — Unexpected use of the `.skip()` annotation` and `54:6` for `.fixme()`; `59:3 playwright/require-annotation-reason — The `.skip()` annotation should say why`; `63:1 playwright/expect-expect — Test has no assertions`; `69:38 playwright/no-networkidle`; `70:27 playwright/no-force-option`; `71:9 playwright/no-wait-for-navigation`; `72:3` and `webfirst.spec.ts:5:3 playwright/prefer-web-first-assertions — Replace textContent() with toHaveText()`; `webfirst.spec.ts:8:27 playwright/prefer-to-have-count — Use toHaveCount() instead`; `await.spec.ts:4:3 playwright/missing-playwright-await — 'toHaveURL' must be awaited or returned`.
+    - `floating.ts:3:3 @typescript-eslint/no-floating-promises — Promises must be awaited`; `77:12 @typescript-eslint/no-explicit-any — Unexpected any`; `78:3` and `80:3 @typescript-eslint/ban-ts-comment`; `82:0 @eslint-community/eslint-comments/require-description — Unexpected undescribed directive comment`; `npx tsc -p tsconfig.json`: `tests/strict.ts(1,14): error TS2322: Type 'null' is not assignable to type 'string'`.
+    - `src/generated/api.ts:1:17 @typescript-eslint/no-explicit-any` under `--no-ignore`; with the config's `ignores`, `npx eslint src` says every file matching `src` is ignored. A bare `test.skip()` printed `no-skipped-test` and `require-annotation-reason`; `test.skip(browserName === 'firefox', 'WET-204 layout breaks')` printed nothing; `expect(flag || x)` and `expect(flag && page)` printed nothing.
+  - Java, `docker run … gradle:9.6.0-jdk21 gradle checkstyleTest -x compileTestJava` (Gradle 9.6.0, JDK 21, Checkstyle 14.4.0, `net.ltgt.errorprone` 5.2.0 with Error Prone 2.53.0, TestNG 7.12.0, Playwright 1.63.0), the `checkstyle.xml` copied out of the rule file: `ViolationTests.java:20: Wait on a condition, never sleep [NoSleep]` (`Thread.sleep`; 21 `TimeUnit.SECONDS.sleep`, 22 `waitForTimeout`); `:27:9: Using 'if' is not allowed. [TestBodyLinear]` (`else` 29:11, `?` 32:23, `switch` 33:9, `for` 39:9 and 42:9, `while` 45:9, `do` 48:9); `:55:9: Using 'try' is not allowed. [TestHasNoTry]` (and `:94:9` inside a `@BeforeMethod`); `:66:70: Empty catch block. [EmptyCatchBlock]` (and `:96:43`, a block holding only a comment); `:70:11: Catching 'Exception' is not allowed. [IllegalCatch]` (`Throwable` at 75:11); `:89: A test runs alone and in any order [NoDependsOnMethods]`; `:12: A TestNG configuration method is alwaysRun = true [ConfigAlwaysRun]`.
+    - Not flagged, as the table says: a `DriverFactory` with `if` and `try` outside any `@Test`; an `if` inside a `@BeforeMethod`; a `catch (Exception)` under `@SuppressWarnings("checkstyle:IllegalCatch")`; a statically imported `sleep(3)`. A false positive: `@BeforeMethod(` with `alwaysRun = true)` on the next line (`ViolationTests.java:106`).
+    - Error Prone, `error("EmptyCatch")`: `ViolationTests.java:66: error: [EmptyCatch] Caught exceptions should not be ignored`, nothing at 96, nothing for `CatchFail`. Generated: `generated-src/gen/Gen.java:5: Wait on a condition, never sleep [NoSleep]`, and 0 lines from `generated-src` after `exclude("gen/**")`; Error Prone reported `Gen.java:8: error: [EmptyCatch]` until `excludedPaths` named the folder.
+- Gate, all green: `python3 tools/skill-lint.py qa/dotnet qa/java qa/typescript | tail -1` prints `0 findings`; `python3 tools/token-audit.py --violations-only` exits 0; `python3 tools/qa-version-check.py` prints `OK`; the proof above.
+- Nothing is unverified. Limits: the `@Test` suppression keys on the annotation's simple name; Maven wiring of Checkstyle was not run; Playwright .NET proof is against 1.63.0 only and ESLint proof against ESLint 9 only; `.features-gen/**` is in `ignores` by the library's own description of `bddgen` (`qa/typescript/skills/bdd-project-scaffold/SKILL.md:35`), not by a run of it. Not committed: the queue commits. Divergences from §7 and the L5 prompt are D19.
 
 ### C1 — The catalog and the README
 
@@ -904,325 +1037,9 @@ the task.
 | G1 | `docs` | `general-purpose` | C1, FX1 | — | ~120k |
 | — | restart, run `/engineering:audit` and one `<plugin>:rules` on a real project | **the user** | G1 | — | — |
 
-A1, FX1, R1, U1 and L1 have landed; their prompts are deleted. The blocks below are the live ones.
+A1, FX1, R1, U1, L1, L2, L3, L4 and L5 have landed; their prompts are deleted. The blocks below are the live ones.
 
 ---
-
-### L2 — Lint tables for the TypeScript stacks (general-purpose, docs)
-
-````
-Depends on: L1
-Agent: general-purpose · Stack: docs
-
-Task L2 of docs/plans/017-architecture-audit-untested-code-and-lint-enforcement.md. The goal: be-node,
-fe-react and mobile-react-native each name the ESLint rules that enforce their *major* house rules, in
-the shape L1 landed, and each rule id is proven to fire.
-
-Read, in this order:
-1. CLAUDE.md: "Code quality rules", "Frontend code rules (React)", "Mobile code rules".
-2. The plan: §7, D8–D10, D14, L1's As built note, task L2, and "Close-out — every task".
-3. The pattern L1 landed: backend/dotnet/skills/rules/dotnet-lint.md (the table, the two severity
-   lines, `How the rows are wired:`, the config block), and step 8 `Report lint gaps` with its report
-   line in backend/dotnet/skills/rules/SKILL.md.
-4. The rule files, for *major* or *blocker* rules ESLint could detect: backend/node/skills/rules/*.md,
-   frontend/react/skills/rules/*.md, mobile/react-native/skills/rules/*.md.
-5. The three rules/SKILL.md files.
-6. frontend/react/skills/project-setup/SKILL.md around line 129, and
-   mobile/react-native/skills/project-setup/SKILL.md around line 104.
-7. The tooling rows of the fe-react and mobile-react-native standards-audit checklists.
-8. engineering/source-grounding/SKILL.md, then the rule documentation of typescript-eslint,
-   eslint-plugin-react-hooks, eslint-plugin-react and eslint-config-expo.
-
-Do, per stack: mine, check each candidate id, prove it, then write the four placements of §7:
-- The table, in new backend/node/skills/rules/node-lint.md, new
-  frontend/react/skills/rules/react-lint.md and new
-  mobile/react-native/skills/rules/react-native-lint.md, each with `paths:` on `eslint.config.*`.
-- The setup pointer, in the two project-setup skills.
-- One check row in each of the two checklists.
-- The lint-gap step (step 8) in each of the three rules/SKILL.md.
-
-The shape L1 landed (copy it; D14 and L1's As built say why):
-- The table is `## Enforced by the build`: `| House rule (file, section) | Tool | Rule id or setting | Level |`,
-  `Level` being `error` or `setting`. Under it, the two severity lines, each on its own line (*minor* when
-  the config does not enforce a row; *major* when one is turned off to pass a gate). Then `How the rows
-  are wired:` bullets (where each severity lives, what the tool skips, the noise it adds). Then the
-  tool's own config in a fenced block, where the rows need one.
-- A new rule file's header comment reads `<plugin> rules v1 (<today>): <topic>. Ids checked against the
-  tool's documentation on <today> (<versions>). Installed by …`; an existing file goes v1 → v2 with the
-  same sentence. Add a new file to the list of rule files in that stack's `code-review/SKILL.md`.
-- The setup pointer is one paragraph or bullet, as in frontend/blazor/skills/project-setup/SKILL.md
-  ("Analyzer rules"): write the config from the table, which is the list, with no copy of it; and add the
-  table's file to that skill's exit gate.
-- The check row is appended after the last row of the section that holds the tooling rows, with the next
-  free number (L1 added `N13` and `B13`), never renumbered. `Sev` is `minor`; the violation text says
-  *major* when a row was turned off to pass a gate. Update the section's row range in the index.
-- The lint-gap step is step 8, `Report lint gaps`, in each rules/SKILL.md, with a step-5 bullet naming the
-  lint config files and the report line `Not enforced by the build: none | <id: house rule>   (one line
-  per row)`. Copy the wording of backend/dotnet/skills/rules/SKILL.md and name the stack's own config files.
-
-The proof: in "$TMPDIR/017-L2/<stack>/", a minimal package, a flat config with the table's rows, and one
-file that breaks each row. `npx eslint` must report every id. Quote one output line per id in As built.
-
-Traps:
-- §7's candidate ids are unverified. Check each against the major the stack's skills name.
-- Type-checked rules need `parserOptions.projectService` or a `project`. A rule that silently does not
-  run is the usual false pass: the proof must show the id in the output.
-- mobile-react-native builds on `eslint-config-expo/flat`. A row the preset already turns on is listed as
-  provided by the preset.
-- No Biome row unless the stack already names Biome as its linter. No custom rule.
-- Does the tool skip generated code, or take that code's severity from another file (D14)? Prove one
-  violation in generated code where the stack has any, and say so in the table.
-- Never commit the scratch project. Search with `git grep`.
-
-Gate: own tests.
-  python3 tools/skill-lint.py backend/node frontend/react mobile/react-native | tail -1    (0 findings)
-  python3 tools/token-audit.py --violations-only    (exit 0)
-  the scratch-project proof above
-Do not run the unfiltered skill-lint.
-
-Commit: `docs: 017 L2 — lint-enforced house rules for the TypeScript stacks`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### L3 — Lint tables for the JVM stacks (general-purpose, docs)
-
-````
-Depends on: L1
-Agent: general-purpose · Stack: docs
-
-Task L3 of docs/plans/017-architecture-audit-untested-code-and-lint-enforcement.md. The goal: be-java and
-mobile-android each name the lint rules that enforce their *major* house rules, in the shape L1 landed,
-and each rule id is proven to fire.
-
-Read, in this order:
-1. CLAUDE.md: "Code quality rules", "Backend code rules", "Mobile code rules" (Android).
-2. The plan: §7, D8–D10, D14, L1's As built note, task L3, and "Close-out — every task".
-3. The pattern L1 landed: backend/dotnet/skills/rules/dotnet-lint.md (the table, the two severity
-   lines, `How the rows are wired:`, the config block), and step 8 `Report lint gaps` with its report
-   line in backend/dotnet/skills/rules/SKILL.md.
-4. The rule files: backend/java/skills/rules/*.md, and
-   mobile/android/skills/rules/{android,android-build,android-data,android-tests}.md.
-5. The two rules/SKILL.md files.
-6. backend/java/skills/pattern-writer/SKILL.md around line 267, and the lint part of
-   mobile/android/skills/project-setup/SKILL.md.
-7. The tooling rows of mobile/android/skills/standards-audit/references/conformance-checklist.md.
-8. engineering/source-grounding/SKILL.md, then the rule documentation of Error Prone, Checkstyle, detekt
-   and Android Lint.
-
-Do, per stack: mine, check each candidate id, prove it, then write the four placements of §7:
-- The table, in new backend/java/skills/rules/java-lint.md (with `paths:` on the Gradle build files and
-  the Checkstyle config) and in mobile/android/skills/rules/android-build.md.
-- The setup pointer, in Android's project-setup skill.
-- One check row in the Android checklist.
-- The lint-gap step (step 8) in both rules/SKILL.md.
-
-The shape L1 landed (copy it; D14 and L1's As built say why):
-- The table is `## Enforced by the build`: `| House rule (file, section) | Tool | Rule id or setting | Level |`,
-  `Level` being `error` or `setting`. Under it, the two severity lines, each on its own line (*minor* when
-  the config does not enforce a row; *major* when one is turned off to pass a gate). Then `How the rows
-  are wired:` bullets (where each severity lives, what the tool skips, the noise it adds). Then the
-  tool's own config in a fenced block, where the rows need one.
-- A new rule file's header comment reads `<plugin> rules v1 (<today>): <topic>. Ids checked against the
-  tool's documentation on <today> (<versions>). Installed by …`; an existing file goes v1 → v2 with the
-  same sentence. Add a new file to the list of rule files in that stack's `code-review/SKILL.md`.
-- The setup pointer is one paragraph or bullet, as in frontend/blazor/skills/project-setup/SKILL.md
-  ("Analyzer rules"): write the config from the table, which is the list, with no copy of it; and add the
-  table's file to that skill's exit gate.
-- The check row is appended after the last row of the section that holds the tooling rows, with the next
-  free number (L1 added `N13` and `B13`), never renumbered. `Sev` is `minor`; the violation text says
-  *major* when a row was turned off to pass a gate. Update the section's row range in the index.
-- The lint-gap step is step 8, `Report lint gaps`, in each rules/SKILL.md, with a step-5 bullet naming the
-  lint config files and the report line `Not enforced by the build: none | <id: house rule>   (one line
-  per row)`. Copy the wording of backend/dotnet/skills/rules/SKILL.md and name the stack's own config files.
-
-The proof: in "$TMPDIR/017-L3/<stack>/", a minimal Gradle project, the config with the table's rows, and
-one file that breaks each row. Gradle is not on PATH: run
-`docker run --rm -v "$P:/w" -w /w gradle:9.6.0-jdk21 gradle <task>`. Quote one output line per id in
-As built.
-
-Traps:
-- §7's candidate ids are unverified. detekt renamed rules between majors: use the major the Android
-  skills pin.
-- android-build.md line 25 already says detekt, ktlint and Lint fail the build. Move it into the table's
-  form and do not state it twice.
-- ArchUnit is a test, not a lint. It gets no row.
-- An Android scratch project needs the Android SDK. Where the image has none, prove the detekt rows in a
-  plain Kotlin JVM project and list the Android Lint rows as unverified.
-- Does the tool skip generated code, or take that code's severity from another file (D14)? Prove one
-  violation in generated code where the stack has any, and say so in the table.
-- Never commit the scratch project. Search with `git grep`.
-
-Gate: own tests.
-  python3 tools/skill-lint.py backend/java mobile/android | tail -1    (0 findings)
-  python3 tools/token-audit.py --violations-only    (exit 0)
-  the scratch-project proof above
-Do not run the unfiltered skill-lint.
-
-Commit: `docs: 017 L3 — lint-enforced house rules for the JVM stacks`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### L4 — Lint tables for the Swift, Python and Rust stacks (general-purpose, docs)
-
-````
-Depends on: L1
-Agent: general-purpose · Stack: docs
-
-Task L4 of docs/plans/017-architecture-audit-untested-code-and-lint-enforcement.md. The goal: mobile-ios,
-desktop-macos, be-python and be-rust each carry their lint rules as a table in the shape L1 landed, and
-each rule id is proven to fire.
-
-Read, in this order:
-1. CLAUDE.md: "Code quality rules", "Mobile code rules" (iOS), "Desktop code rules" (macOS).
-2. The plan: §7, D8–D10, D14, L1's As built note, task L4, and "Close-out — every task".
-3. The pattern L1 landed: backend/dotnet/skills/rules/dotnet-lint.md (the table, the two severity
-   lines, `How the rows are wired:`, the config block), and step 8 `Report lint gaps` with its report
-   line in backend/dotnet/skills/rules/SKILL.md.
-4. The rule files: mobile/ios/skills/rules/{swift,xcode-config,swift-tests}.md,
-   desktop/macos/skills/rules/{swift,xcode-config,swift-tests}.md,
-   backend/python/skills/rules/{python,python-project,python-tests}.md,
-   backend/rust/skills/rules/{rust,cargo,rust-tests}.md.
-5. The four rules/SKILL.md files.
-6. The "Format and lint" sections of mobile/ios/skills/project-setup/SKILL.md (line 102) and
-   desktop/macos/skills/project-setup/SKILL.md (line 115).
-7. The tooling rows of the mobile-ios and desktop-macos standards-audit checklists.
-8. engineering/source-grounding/SKILL.md, then the rule documentation of SwiftLint, ruff and clippy.
-
-Do, per stack: mine, check each candidate id, prove it, then write the four placements of §7:
-- The table, in each Swift stack's xcode-config.md (add the `.swiftlint.yml` glob to `paths:`), in
-  backend/python/skills/rules/python-project.md and in backend/rust/skills/rules/cargo.md.
-- The setup pointer, in the two Swift project-setup skills.
-- One check row in each of the two Swift checklists.
-- The lint-gap step (step 8) in each of the four rules/SKILL.md.
-
-The shape L1 landed (copy it; D14 and L1's As built say why):
-- The table is `## Enforced by the build`: `| House rule (file, section) | Tool | Rule id or setting | Level |`,
-  `Level` being `error` or `setting`. Under it, the two severity lines, each on its own line (*minor* when
-  the config does not enforce a row; *major* when one is turned off to pass a gate). Then `How the rows
-  are wired:` bullets (where each severity lives, what the tool skips, the noise it adds). Then the
-  tool's own config in a fenced block, where the rows need one.
-- A new rule file's header comment reads `<plugin> rules v1 (<today>): <topic>. Ids checked against the
-  tool's documentation on <today> (<versions>). Installed by …`; an existing file goes v1 → v2 with the
-  same sentence. Add a new file to the list of rule files in that stack's `code-review/SKILL.md`.
-- The setup pointer is one paragraph or bullet, as in frontend/blazor/skills/project-setup/SKILL.md
-  ("Analyzer rules"): write the config from the table, which is the list, with no copy of it; and add the
-  table's file to that skill's exit gate.
-- The check row is appended after the last row of the section that holds the tooling rows, with the next
-  free number (L1 added `N13` and `B13`), never renumbered. `Sev` is `minor`; the violation text says
-  *major* when a row was turned off to pass a gate. Update the section's row range in the index.
-- The lint-gap step is step 8, `Report lint gaps`, in each rules/SKILL.md, with a step-5 bullet naming the
-  lint config files and the report line `Not enforced by the build: none | <id: house rule>   (one line
-  per row)`. Copy the wording of backend/dotnet/skills/rules/SKILL.md and name the stack's own config files.
-
-The proof: in "$TMPDIR/017-L4/<stack>/". Python: `uvx ruff check` and `uvx mypy --strict`. Rust: clippy
-through a `rust` image in Docker, since `cargo` is not installed. Swift: SwiftLint is not installed; try
-a SwiftLint image, and list the Swift rows as unverified if none runs. Quote one output line per id in
-As built.
-
-Traps:
-- These stacks already name lint rules: cargo.md lines 18–19, python-project.md line 14,
-  desktop/macos project-setup line 117. Move those lines into the table's form, and delete a prose line
-  the table now states.
-- mobile-ios and desktop-macos get the same Swift rows, each in its own file (D8).
-- Swift 6 strict concurrency is the compiler, not a lint. It gets a setting row, never a SwiftLint id.
-- Never raise a toolchain pin, and never add a linter a stack does not name.
-- Does the tool skip generated code, or take that code's severity from another file (D14)? Prove one
-  violation in generated code where the stack has any, and say so in the table.
-- Never commit the scratch project. Search with `git grep`.
-
-Gate: own tests.
-  python3 tools/skill-lint.py mobile/ios desktop/macos backend/python backend/rust | tail -1    (0 findings)
-  python3 tools/token-audit.py --violations-only    (exit 0)
-  the scratch-project proof above
-Do not run the unfiltered skill-lint.
-
-Commit: `docs: 017 L4 — lint-enforced house rules for the Swift, Python and Rust stacks`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### L5 — Lint tables for the three QA stacks (general-purpose, docs)
-
-````
-Depends on: L1
-Agent: general-purpose · Stack: docs
-
-Task L5 of docs/plans/017-architecture-audit-untested-code-and-lint-enforcement.md. The goal: qa-dotnet,
-qa-java and qa-typescript each name the lint rules that enforce the house test-code rules, in the shape
-L1 landed, and each rule id is proven to fire.
-
-Read, in this order:
-1. CLAUDE.md: "Test code rules".
-2. The plan: §7, D8–D10, D14, L1's As built note, task L5, and "Close-out — every task".
-3. The pattern L1 landed: backend/dotnet/skills/rules/dotnet-lint.md (the table, the two severity
-   lines, `How the rows are wired:`, the config block), and step 8 `Report lint gaps` with its report
-   line in backend/dotnet/skills/rules/SKILL.md.
-4. The suite-wide rule files only: qa/dotnet/skills/rules/{automation,suite-config}.md,
-   qa/java/skills/rules/{qa-java,qa-java-suite}.md,
-   qa/typescript/skills/rules/{qa-typescript,ui-tests}.md.
-5. The three rules/SKILL.md files.
-6. The tooling rows of qa/dotnet/skills/standards-audit/references/conformance-checklist.md.
-7. tools/qa-version-check.py, for the pinned Playwright versions.
-8. engineering/source-grounding/SKILL.md, then the rule documentation of NUnit.Analyzers,
-   Microsoft.CodeAnalysis.BannedApiAnalyzers, eslint-plugin-playwright, Error Prone and Checkstyle.
-
-Do, per stack: mine, check each candidate id, prove it, then write the placements of §7:
-- The table, in qa/dotnet/skills/rules/suite-config.md (add the `.editorconfig` glob to `paths:`),
-  qa/java/skills/rules/qa-java-suite.md, and new qa/typescript/skills/rules/qa-typescript-lint.md with
-  `paths:` on `eslint.config.*`.
-- One check row in the qa-dotnet checklist.
-- The lint-gap step (step 8) in each of the three rules/SKILL.md.
-
-The rows come from "Test code rules": no sleep, no `waitForTimeout`, no branch, loop or `try` in a test
-body, no focused test, no skipped test without a reason, no empty `catch`.
-
-The shape L1 landed (copy it; D14 and L1's As built say why):
-- The table is `## Enforced by the build`: `| House rule (file, section) | Tool | Rule id or setting | Level |`,
-  `Level` being `error` or `setting`. Under it, the two severity lines, each on its own line (*minor* when
-  the config does not enforce a row; *major* when one is turned off to pass a gate). Then `How the rows
-  are wired:` bullets (where each severity lives, what the tool skips, the noise it adds). Then the
-  tool's own config in a fenced block, where the rows need one.
-- A new rule file's header comment reads `<plugin> rules v1 (<today>): <topic>. Ids checked against the
-  tool's documentation on <today> (<versions>). Installed by …`; an existing file goes v1 → v2 with the
-  same sentence. Add a new file to the list of rule files in that stack's `code-review/SKILL.md` where it
-  has one.
-- The check row is appended after the last row of the section that holds the tooling rows, with the next
-  free number (L1 added `N13` and `B13`), never renumbered. `Sev` is `minor`; the violation text says
-  *major* when a row was turned off to pass a gate. Update the section's row range in the index.
-- The lint-gap step is step 8, `Report lint gaps`, in each rules/SKILL.md, with a step-5 bullet naming the
-  lint config files and the report line `Not enforced by the build: none | <id: house rule>   (one line
-  per row)`. Copy the wording of backend/dotnet/skills/rules/SKILL.md and name the stack's own config files.
-
-The proof: in "$TMPDIR/017-L5/<stack>/". .NET: `dotnet build`. TypeScript: `npx eslint`. Java: the
-`gradle:9.6.0-jdk21` image. Quote one output line per id in As built.
-
-Traps:
-- §7's candidate ids are unverified.
-- A scratch .NET project that references Allure.NUnit builds with `-p:AspectInjector_Enabled=false`.
-- L1 already proved, for the .NET unit-test lane, `RS0030` for `Thread.Sleep` and `Task.Delay` (the
-  `BannedSymbols.Tests.txt` lines are in backend/dotnet/skills/rules/dotnet-lint.md) and `NUnit1012`.
-  Copy them for qa-dotnet, and prove every other id yourself. A `M:Type.Member` ban with no parameter
-  list matches the parameterless overload only: one line per overload.
-- If a row uses `Microsoft.VisualStudio.Threading.Analyzers`, `VSTHRD200` (the `Async` suffix) comes on as
-  a warning; the table says the project sets it to `suggestion`.
-- Playwright rule ids must exist in the eslint-plugin-playwright release that supports the versions
-  tools/qa-version-check.py pins.
-- "One assertion states one condition" and "page objects expose intent" have no off-the-shelf lint. They
-  get no row (D9).
-- Leave the per-lane rule files alone: API, BDD, mobile, desktop.
-- Does the tool skip generated code, or take that code's severity from another file (D14)? Prove one
-  violation in generated code where the stack has any, and say so in the table.
-- Never commit the scratch project. Search with `git grep`.
-
-Gate: own tests.
-  python3 tools/skill-lint.py qa/dotnet qa/java qa/typescript | tail -1    (0 findings)
-  python3 tools/token-audit.py --violations-only    (exit 0)
-  python3 tools/qa-version-check.py    (prints OK)
-  the scratch-project proof above
-Do not run the unfiltered skill-lint.
-
-Commit: `docs: 017 L5 — lint-enforced test-code rules for the QA stacks`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### C1 — The catalog and the README (general-purpose, docs)
 

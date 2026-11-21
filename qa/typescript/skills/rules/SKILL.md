@@ -32,10 +32,12 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
    - API suites: `git grep -l -e 'from .zod.' -- '*.spec.ts' '*.test.ts'` together with the folders holding `*Client.ts` built on the suite's base client, and its `actions/` and `models/` folders when they sit outside `tests/` (`src/actions/` is not a default: front-end apps use the name).
    - BDD: `git ls-files '*.feature'` and the `steps` / `import` globs in `playwright.config.*` or `wdio*.conf.*`.
    - k6: `git grep -l "from 'k6" -- '*.js' '*.ts'`; evals: `git ls-files '*promptfooconfig*'`.
+   - ESLint: `git ls-files '*eslint.config.*' '*tsconfig*.json'`; `qa-typescript-lint.md` matches both at any depth, and a project that keeps its config elsewhere gets that path added.
 
    For every folder found that no default glob covers, propose a directory glob (for example `"**/qa/web/**/*.ts"`) for the core file and for the matching suite file, and add it to the installed copies with the user's agreement. Never widen to `**/*.ts` or `**/*.spec.ts`: app unit tests would then load these rules. If a default glob matches app code here (a `tests/integration/` the backend owns, a `.github/workflows/` with no test jobs), offer to drop it. With nobody to ask, change no path and list each proposed glob under `Waiting for the user:` in the report. Done when every file each command lists is matched by an installed glob, or a glob is proposed for it.
 6. **Check it will be committed**: `git check-ignore -q <root>/.claude/rules/qa-typescript/qa-typescript.md`. If it is ignored, say so; the rules then apply on this machine only.
 7. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`) for test rules that contradict these files and list them. A written contradiction is the user's to settle. Done when each contradiction is listed, or the report says none.
+8. **Report lint gaps.** Read the `## Enforced by the build` table in `<root>/.claude/rules/qa-typescript/qa-typescript-lint.md`, then the project's `eslint.config.*` and `tsconfig.json`. A row is enforced when each of its ids is set to `error` for the files the row names (a rule the preset turns on counts), for a `no-restricted-*` row its selector, global, property or import is in the options, and the `tsc` row is enforced when `tsconfig.json` has the option. List every other row under `Not enforced by the build:` with its id and house rule. Never edit the project's config: the user, or a stack agent they ask, turns the rule on. Done when each table row is enforced or listed.
 
 ## Report
 
@@ -45,6 +47,7 @@ Path: <root>/.claude/rules/qa-typescript/
 Suite paths: default | widened with <globs> | dropped <globs>
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md: none | <one line each>
+Not enforced by the build: none | <id: house rule>   (one line per row)
 Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 

@@ -73,6 +73,7 @@ If the repo gitignores generated sources (KSP / Room / Hilt output under `build/
 | A17 | `EncryptedSharedPreferences`, `EncryptedFile` and `MasterKey` are not in new code | Any use outside a dated one-release migration read path | `rg -n "EncryptedSharedPreferences\|EncryptedFile\|MasterKey\|security-crypto" $SRC -g '*.kt' -g '*.kts' -g 'libs.versions.toml'` | major |
 | A18 | LiveData and RxJava are not in new code | `MutableLiveData`, `asLiveData()` or an `io.reactivex` import in a module already migrated; `SingleLiveEvent` anywhere | `rg -n "LiveData\|asLiveData\|io\.reactivex\|SingleLiveEvent" $SRC -g '*.kt'` | major |
 | A19 | A migration lands as one move per change | One commit / PR that changes AGP and Room, or Hilt and Navigation, or raises `targetSdk` beside a library move | `git log --stat -- gradle/libs.versions.toml`; read the change description | minor |
+| A20 | Every row of the `android-build.md` lint table is on at error level in the project's detekt and Lint config | A table row missing from `detekt.yml` or `lint.xml`, a Lint row below `error`, `maxIssues` above 0, the `detekt` task with no `classpath` (its type-resolution rows skipped), or a row turned off to pass a gate (*major*) | `rg -n "maxIssues\|active: true" config/detekt/detekt.yml`; `rg -n "issue id" -g lint.xml`; `rg -n "classpath" -g '*.kts'` | minor |
 
 ---
 
@@ -518,7 +519,7 @@ This section holds no rows of its own. The rows are those of `mobile/_shared/in-
 
 | § | Section | Rows | Owner |
 |---|---|---|---|
-| A | Version lane, toolchain & migration hygiene | A1–A19 | `project-setup`, `migration`, `basics` |
+| A | Version lane, toolchain & migration hygiene | A1–A20 | `project-setup`, `migration`, `basics` |
 | B | Project structure, strictness & language standard | B1–B20 | `project-setup`, `basics` |
 | C | Architecture, state & DI | C1–C13 | `architecture` |
 | D | UI components & platform conventions | D1–D25 | `ui-components`, `views-interop` |

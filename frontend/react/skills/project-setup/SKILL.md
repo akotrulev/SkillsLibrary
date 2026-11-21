@@ -127,6 +127,7 @@ Feature folders answer *"which capability owns this?"*; a reuse-level taxonomy a
 ```
 
 - **ESLint (flat config)** — `next/core-web-vitals` + `@typescript-eslint` (type-checked rules) + `eslint-plugin-react-hooks` (the exhaustive-deps + rules-of-hooks gate). **Prettier** for formatting (or Biome for both). Wire them into a `lint`/`format` script and CI — style drift fails the build, not review.
+- **Lint rules** — write the ESLint config from the `## Enforced by the build` table in `react-lint.md`, after the framework preset: the plugins, the severities, the test-file block and the `ignores` for generated code. Read the project's copy in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them. The table is the list; this skill keeps no copy of it.
 - **Locked package manager** — commit the lockfile; pin the manager with `"packageManager": "pnpm@x.y.z"` in `package.json` (or Corepack). pnpm is the house default (strict, fast); npm/yarn are fine if the repo already uses them — match, don't convert.
 - **React Compiler** — enable it in a new Next 15 app (`experimental.reactCompiler` / the stable flag for your version) so `useMemo`/`useCallback` are mostly automatic; [`performance`](../performance/SKILL.md) says where you still hand-memoize.
 - **Absolute imports** via the `@/*` alias — no `../../../` climbs.
@@ -140,7 +141,7 @@ Feature folders answer *"which capability owns this?"*; a reuse-level taxonomy a
 
 ## Rules
 
-The standards this skill's output must meet are the fe-react rule files `react.md` and `react-data.md`, not a list here. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Where they and this skill disagree, the rule files win.
+The standards this skill's output must meet are the fe-react rule files `react.md`, `react-data.md` and `react-lint.md`, not a list here. Read the project's copies in `.claude/rules/fe-react/`, or the plugin's in `frontend/react/skills/rules/` when the project has not installed them (`/fe-react:rules` does). Where they and this skill disagree, the rule files win.
 
 Beyond the rule files, this skill's own rules:
 
@@ -155,4 +156,4 @@ Beyond the rule files, this skill's own rules:
 - The `build` script, run with the package manager `packageManager` names — **clean** (type errors and lint errors fail it).
 - App **boots**: the `dev` script, home route renders.
 - **One route per chosen mode renders**: a static content route, one dynamic/personalised route, and (if used) a streamed route with its `loading.tsx`. Confirm a client island hydrates, a Server Component ships no JS for its subtree, `curl -s <route>` returns the route's server-rendered content in the HTML, and `<body data-hydrated="true">` appears after hydration.
-- Lockfile committed; `@/*` alias resolves; typed env parses at boot.
+- Lockfile committed; `@/*` alias resolves; typed env parses at boot; every row of the `react-lint.md` table configured.

@@ -114,7 +114,7 @@ Shared, committed schemes per environment. Values reach code through `Info.plist
 
 ## Format and lint
 
-`xcrun swift-format` is the formatter: commit `.swift-format`, run `xcrun swift-format lint --strict --recursive App Packages` in CI. **SwiftLint** (0.65) is the linter, not a second formatter: opt-in `force_unwrapping`, `force_cast`, `force_try`, `unused_import`, and custom rules forbidding `print(`, `NSLog(` and `DispatchQueue.main`. Both are CI steps or build-tool plugins, never a run-script that mutates files.
+`xcrun swift-format` is the formatter: commit `.swift-format`, run `xcrun swift-format lint --strict --recursive App Packages` in CI. **SwiftLint** (0.65) is the linter, not a second formatter: write `.swiftlint.yml`, and the child `.swiftlint.yml` for each tests folder, from the `## Enforced by the build` table in `xcode-config.md`. Read the project's copy in `.claude/rules/desktop-macos/`, or the plugin's in `desktop/macos/skills/rules/` when the project has not installed them. The table is the list; this skill keeps no copy of it. Both are CI steps or build-tool plugins, never a run-script that mutates files.
 
 ## Test plans
 
@@ -136,5 +136,5 @@ The standards this skill's output must meet are the desktop-macos rule files (`x
 - [ ] The entitlements file holds only keys with a recorded reason
 - [ ] The deployment target and `ARCHS` follow the lane table and the choice is stated
 - [ ] Each environment has an xcconfig, a configuration and a shared scheme
-- [ ] `.swift-format` and `.swiftlint.yml` committed and passing; `Unit` and `UI` plans exist
+- [ ] `.swift-format` and `.swiftlint.yml` committed and passing, every row of the `xcode-config.md` table configured; `Unit` and `UI` plans exist
 - [ ] `Localizable.xcstrings` and `PrivacyInfo.xcprivacy` in the app target; no secret in any xcconfig or plist

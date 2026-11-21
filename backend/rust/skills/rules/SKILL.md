@@ -33,9 +33,11 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
    - **Tests.** List the sibling test files: `git grep -l '#\[cfg(test)\]' -- '*.rs'` and look for `mod tests;` declarations that point at a separate file. Propose globs for any such file the `rust-tests.md` globs miss. Inline test modules stay with the pointer in `rust.md`; say so.
    - **Where the Rust lives.** If the repo holds several stacks, `git ls-files '*.rs' | cut -d/ -f1-2 | sort -u` shows the Rust roots. `**/*.rs` is already narrow, so only propose a prefix (`"services/**/*.rs"`) when the user asks for one.
 
+   - **Lint config.** `git ls-files '*Cargo.toml' '*clippy.toml' '*.cargo/config*'`; `cargo.md` matches all three. List the member crates that do not inherit the table: `git grep -L '^workspace = true' -- '*/Cargo.toml'` shows a member with no `[lints] workspace = true`, which gets none of the rows.
    With nobody to ask, change no path and list each proposed glob under `Waiting for the user:` in the report. Done when every file each command lists is matched by an installed glob, or a glob is proposed for it.
 6. **Check it will be committed**: `git check-ignore -q <root>/.claude/rules/be-rust/rust.md`. If it is ignored, say so; the rules then apply on this machine only.
 7. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`) and its `[lints]` tables for Rust rules that contradict these files (a lint the project allows that the rules deny, a different test-naming scheme) and list them. A written contradiction is the user's to settle. Done when each contradiction is listed, or the report says none.
+8. **Report lint gaps.** Read the `## Enforced by the build` table in `<root>/.claude/rules/be-rust/cargo.md`, then the workspace `Cargo.toml` (`[workspace.lints]`, or each crate's `[lints]`), every `clippy.toml` and `.cargo/config.toml`. A clippy or rustc row is enforced when its lint is `deny` or `forbid` in a table that every member inherits, and, for a `disallowed_*` row, its path is in `clippy.toml`. `unused_result_ok` needs a `rust-version` of 1.82 or later; below that it is not a gap. List every other row under `Not enforced by the build:` with its id and house rule. Never edit the project's config: the user, or a stack agent they ask, turns the rule on. Done when each table row is enforced or listed.
 
 ## Report
 
@@ -46,6 +48,7 @@ Persistence paths: default | widened with <globs>
 Test paths: default | widened with <globs>; inline #[cfg(test)] modules: <count> (covered by the pointer in rust.md)
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md / [lints]: none | <one line each>
+Not enforced by the build: none | <id: house rule>   (one line per row)
 Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 

@@ -102,6 +102,7 @@ Route files are thin: they compose feature organisms from `src/features/*`; busi
 
 - **Strict TS** and `typedRoutes: true` for compile-checked `<Link href>`.
 - **ESLint flat config** — `eslint-config-expo/flat` in `eslint.config.js`; `pnpm expo lint` runs it. Keep `react-hooks` exhaustive-deps on.
+- **Lint rules** — write the rows of the `## Enforced by the build` table in `react-native-lint.md` into `eslint.config.js`, after the preset: the plugin, the severities, the test-file block and the `ignores` for generated code. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them. The table is the list; this skill keeps no copy of it. Every row configured is part of this gate.
 - **`npx expo-doctor`** clean — it checks versions, config and React Native Directory compatibility.
 - **Prettier** shared config.
 - **Env:** `EXPO_PUBLIC_*` is inlined into the bundle in plain text — public only. A real secret never ships in the bundle (`mobile-<stack>:security`); tokens live in `expo-secure-store` at runtime.
@@ -124,4 +125,4 @@ Keep **native dependencies in the app package** (`bundled/.../rules/monorepo-nat
 
 ## Rules
 
-The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `expo-config.md` and `react-native.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.
+The standards this skill's output must meet are the mobile-react-native rule files, not a list here: `expo-config.md`, `react-native.md` and `react-native-lint.md`. Read the project's copy in `.claude/rules/mobile-react-native/`, or the plugin's in `mobile/react-native/skills/rules/` when the project has not installed them (`/mobile-react-native:rules` does). Where they and this skill's recipes disagree, the rule files win.

@@ -30,9 +30,11 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
    - **Find the worker package(s)**: `git ls-files '*pyproject.toml'`; a worker's `pyproject.toml` depends on Pillow, defusedxml, rembg or vtracer. Then `git ls-files '*.py'`. If every Python file sits under a worker directory, keep `**/*.py`. Otherwise propose narrowing `python.md` to `"<worker-dir>/**/*.py"`, `python-tests.md` to `"<worker-dir>/tests/**/*.py"` (plus any other test folder it has) and `python-project.md` to `"<worker-dir>/pyproject.toml"`, and name the Python left out.
    - **Find the pipeline modules**: `git grep -l -e 'from PIL' -e 'import PIL' -e defusedxml -e rembg -e vtracer -- '*.py'`. If a file it lists matches none of the `python-pipeline.md` globs (a flat layout with no `src/`), propose the directory glob that covers it, such as `"<worker-dir>/upload_worker/**/*.py"`.
    - **Find the images**: `git ls-files '*Dockerfile*' '*compose*.yml' '*compose*.yaml'`. If the repo builds images other than the worker's, propose narrowing `python-container.md` to the worker's Dockerfile and the compose or manifest file that defines its service.
+   - **Lint config**: `git ls-files '*pyproject.toml' '*ruff.toml' '*mypy.ini'`. `python-project.md` matches `pyproject.toml`; propose a glob for a `ruff.toml`, `.ruff.toml` or `mypy.ini` that holds the lint settings.
    Change the installed copies only with the user's agreement. With nobody to ask, change no path and list each proposed glob under `Waiting for the user:` in the report. Done when every file each command lists is matched by an installed glob, or a glob is proposed for it.
 6. **Check it will be committed**: `git check-ignore -q <root>/.claude/rules/be-python/python.md`. If it is ignored, say so; the rules then apply on this machine only.
 7. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`) for Python or worker rules that contradict these files and list them. A written contradiction is the user's to settle. Done when each contradiction is listed, or the report says none.
+8. **Report lint gaps.** Read the `## Enforced by the build` table in `<root>/.claude/rules/be-python/python-project.md`, then the project's `pyproject.toml`, `ruff.toml`, `.ruff.toml` and `mypy.ini`. A ruff row is enforced when its id is selected, directly or through its family (`S`, `PTH`), and is in no `ignore` or `per-file-ignores` entry that covers the worker's `src`; a `TID251` row also needs its modules or attributes in `banned-api`. A mypy row is enforced when its key is true under `[tool.mypy]`. List every other row under `Not enforced by the build:` with its id and house rule. Never edit the project's config: the user, or a stack agent they ask, turns the rule on. Done when each table row is enforced or listed.
 
 ## Report
 
@@ -42,6 +44,7 @@ Path: <root>/.claude/rules/be-python/
 Worker paths: default | narrowed to <globs> | widened with <globs>
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md: none | <one line each>
+Not enforced by the build: none | <id: house rule>   (one line per row)
 Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 

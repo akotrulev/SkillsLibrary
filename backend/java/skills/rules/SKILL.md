@@ -27,8 +27,11 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
 
    With nobody to ask and no argument, write the plugin's copy beside it. Done when each file already present is up to date, replaced, kept or written beside as `<name>.plugin`.
 5. **Fit the persistence paths to this project.** The default globs follow common naming. Find where the entities and repositories actually live: `git grep -l -e '@Entity' -e 'extends JpaRepository' -e 'extends CrudRepository' -- '*.java'`. If a file it lists matches none of the `java-persistence.md` globs, propose the directory globs that would cover them (for example `"**/orders/infrastructure/jpa/**/*.java"`) and add them to the installed copy with the user's agreement. Do the same for test sources outside `src/test` and `src/integrationTest`. With nobody to ask, change no path and list each proposed glob under `Waiting for the user:` in the report. Done when every file each command lists is matched by an installed glob, or a glob is proposed for it.
+
+   **Lint config**: `git ls-files -- '*build.gradle.kts' '*build.gradle' '*checkstyle*.xml'`. `java-lint.md` matches the Gradle build files and `config/checkstyle/*.xml` at any depth; propose a glob only for a Checkstyle file kept elsewhere.
 6. **Check it will be committed**: `git check-ignore -q <root>/.claude/rules/be-java/java.md`. If it is ignored, say so; the rules then apply on this machine only.
 7. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`) for Java rules that contradict these files and list them. A written contradiction is the user's to settle. Done when each contradiction is listed, or the report says none.
+8. **Report lint gaps.** Read the `## Enforced by the build` table in `<root>/.claude/rules/be-java/java-lint.md`, then the project's `build.gradle.kts` and `build.gradle` files and every Checkstyle config they name. A row is enforced when its Error Prone id is in `error(…)` (or `-Xep:<id>:ERROR`) of the `JavaCompile` options, or its Checkstyle module is in the config the matching task uses (`checkstyleMain`, or `checkstyleTest` for the two test rows) with `severity` `error` and, for `IllegalInstantiation`, `IllegalType`, `IllegalImport` and `IllegalToken`, the table's class or token. List every other row under `Not enforced by the build:` with its id and house rule. Never edit the project's config: the user, or a stack agent they ask, turns the rule on. Done when each table row is enforced or listed.
 
 ## Report
 
@@ -38,6 +41,7 @@ Path: <root>/.claude/rules/be-java/
 Persistence paths: default | widened with <globs>
 Committed: yes | ignored by git
 Conflicts with CLAUDE.md: none | <one line each>
+Not enforced by the build: none | <id: house rule>   (one line per row)
 Waiting for the user: none | <one line each: the file or path change, and the question>
 ```
 

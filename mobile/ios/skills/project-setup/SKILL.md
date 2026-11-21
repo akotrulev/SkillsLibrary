@@ -102,7 +102,7 @@ API_BASE_URL = https:/$()/api.staging.example.com
 ## Format and lint
 
 - **`xcrun swift-format`** ships in the toolchain — it is the formatter. Commit a `.swift-format` (JSON; 4-space indent, `lineLength` 120 is typical) and run `xcrun swift-format lint --strict --recursive App Packages` in CI; `format --in-place` locally.
-- **SwiftLint** (0.65) is the linter, **not** a second formatter. Commit `.swiftlint.yml` with `opt_in_rules` for `force_unwrapping`, `force_cast`, `force_try`, `unused_import`, `explicit_acl` off; `custom_rules` forbidding `print(` / `NSLog(` and `DispatchQueue.main`. Run as a build-tool plugin or a CI step, never an Xcode run-script that mutates files.
+- **SwiftLint** (0.65) is the linter, **not** a second formatter. Write `.swiftlint.yml`, and the child `.swiftlint.yml` for each tests folder, from the `## Enforced by the build` table in `xcode-config.md`. Read the project's copy in `.claude/rules/mobile-ios/`, or the plugin's in `mobile/ios/skills/rules/` when the project has not installed them. The table is the list; this skill keeps no copy of it. Run as a build-tool plugin or a CI step, never an Xcode run-script that mutates files.
 - Both run on the same paths; the formatter owns whitespace and the linter owns semantics, so the two never argue. Config detail: [`references/packages-and-config.md`](references/packages-and-config.md).
 
 ## Test plans
@@ -132,7 +132,7 @@ The standards this skill's output must meet are the mobile-ios rule files, not a
 
 - [ ] `SWIFT_VERSION`, `SWIFT_TREAT_WARNINGS_AS_ERRORS` and isolation are in the xcconfig and `rg -n "SWIFT_VERSION" -g '*.pbxproj'` shows no stray `5.0` on a new module
 - [ ] Each environment has an xcconfig, a configuration and a shared scheme
-- [ ] `.swift-format` and `.swiftlint.yml` committed; both pass on the tree
+- [ ] `.swift-format` and `.swiftlint.yml` committed; both pass on the tree; every row of the `xcode-config.md` table configured
 - [ ] `Unit` and `UI` test plans exist and the scheme references them
 - [ ] Launch screen and scene lifecycle in place; `Localizable.xcstrings` and `PrivacyInfo.xcprivacy` in the app target
 - [ ] No secret in any xcconfig or plist

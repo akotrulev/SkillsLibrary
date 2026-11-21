@@ -85,6 +85,7 @@ If the repo gitignores generated sources (SwiftGen, Sourcery output) you still n
 | B15 | Logging uses `Logger` with privacy annotations; no secret or document path logged | A `Logger` call interpolating a token, email, URL with a query or a user file path with no `.private` | `rg -n "Logger\.\w+\.\w+\(" $SRC -g '*.swift'`; read each interpolation | major |
 | B16 | A `protocol` has more than one conformer | An interface introduced for one caller and one implementation | `rg -n "^(public \|internal )?protocol \w+" $SRC -g '*.swift'`; count conformers per hit | major |
 | B17 | Formatter and linter are configured and clean | No `.swift-format` or `.swiftlint.yml`; a lint rule set that allows `print(` or `DispatchQueue.main` | `rg --files -g '.swift-format' -g '.swiftlint.yml'` | minor |
+| B18 | Every row of the `## Enforced by the build` table in `xcode-config.md` (the project's copy in `.claude/rules/desktop-macos/`) is on at error level | A SwiftLint id missing from `.swiftlint.yml`, left at its default `warning` or turned off; `SWIFT_VERSION` or `SWIFT_TREAT_WARNINGS_AS_ERRORS` missing from the xcconfig and the package manifests; a generated folder missing from `excluded`. Major when a row was turned off to pass a gate | `rg -n "force_unwrapping\|force_cast\|force_try\|implicitly_unwrapped_optional\|no_empty_block\|no_print\|no_gcd_main\|severity" .swiftlint.yml`; `rg -n "SWIFT_VERSION\|SWIFT_TREAT_WARNINGS_AS_ERRORS\|swiftLanguageModes\|treatAllWarnings" -g '*.xcconfig' -g 'Package.swift'`; compare each id with the table | minor |
 
 ---
 
@@ -485,7 +486,7 @@ This section is not applicable on macOS: there is no P/Invoke, COM or C++/WinRT 
 | § | Section | Rows | Owner |
 |---|---|---|---|
 | A | Version lane, toolchain & migration hygiene | A1–A9 | `project-setup`, `migration`, `basics` |
-| B | Project structure, strictness & language standard | B1–B17 | `project-setup`, `basics` |
+| B | Project structure, strictness & language standard | B1–B18 | `project-setup`, `basics` |
 | C | Architecture, state & DI | C1–C10 | `architecture` |
 | D | UI components & platform conventions | D1–D20 | `ui-components`, `appkit` |
 | E | Styling, theming, motion & adaptive layout | E1–E13 | `styling` |
