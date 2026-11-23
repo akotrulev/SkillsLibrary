@@ -12,15 +12,19 @@ front doors.
 Every skill that is only a step inside one of the two front doors is hidden: neither the model nor the
 user can call it on its own.
 
-**Status:** S1, S2 and F1 landed (2026-11-23). S1: `system-plan-format.md`, the four section skills and
+**Status:** S1, S2, F1 and F2 landed (2026-11-23). S1: `system-plan-format.md`, the four section skills and
 `rules/system-plans.md`. S2: `solution-planner` runs NEW / EXISTING / EXTEND and writes
 `docs/plans/<NNN>-<system>-system.md`, `/product:plan-system` routes to it, and `requirements-author`,
 `/product:refine` and `delivery-plan` are gone from the tree and the manifest. F1: `/product:plan-feature`
 (`brainstorming`) runs SYSTEM / NEW / SHAPED through spec, acceptance criteria, implementation plan,
 write-back and on hold; `writing-plans` is hidden from the model and loaded by path; `TD` is keyed to a
-spec's acceptance criteria in `plan-format.md` and `plans.md`. Next: F2. Unverified: no run of
-`/product:plan-feature` in a scratch repo; the four design skills still describe a `blueprint.md` and
-files of their own until F2; the rest of the library still names the deleted lane until K1 and M1.
+spec's acceptance criteria in `plan-format.md` and `plans.md`. F2: `data-model-plan`, `experience-plan`,
+`api-surface-plan` and `integration-plan` write the spec's `## Data model`, `## Experience` (with
+`### Rendering plan`), `## API surface` and `## Integrations`, on top of §3 and earlier specs; their
+examples are sections of one toy spec (D24). Next: K1. Unverified: no run of `/product:plan-feature` in a
+scratch repo; the rest of the library still names the deleted lane and the old design files until K1
+and M1; follow-up for G1: S1's §3 example picks a Vite SPA where `rendering-strategy.md` would give
+`ssr` (F2 As built).
 
 **Test design:** none. The plan serves no stories and changes skill text, agent text, the manifest and
 one lint script. The checks are `tools/plugin-surface-check.py`, `tools/skill-lint.py`,
@@ -364,6 +368,21 @@ lint R6 bars routing headings on a skill with `disable-model-invocation: true`, 
 were tightened to keep the body under 16,000 chars. Cost: a plan written before F1 carries the old §7
 clause in its close-out, harmless now; M1 has three fewer hits to rewrite.
 
+**D24 (2026-11-23, F2) — The design examples take new names and spec 006, and the validation catalog's project copy lives in `docs/specs/`.**
+- The bullet said to rewrite each `example-*.md` in place. Their old names (`example-data-model.md`,
+  `example-api-surface.md`, `example-integrations.md`, `example-experience-plan.md`) match F2's own grep,
+  so they were renamed `example-<section>-section.md`, as D21 did for S1.
+- The bullet named the toy spec `docs/specs/004-booking-cancellation-design.md`. The system-plan-format
+  example S1 wrote already names F3's spec draft `docs/specs/006-booking-cancellation-design.md` (004 is
+  the system plan, 005 F1's spec), so the examples use 006 and add F2's spec as 007.
+- The old skill copied the catalog into the initiative folder; no folder exists after D2. Both readings:
+  copy it into every spec's folder per feature (rejected: one copy per spec in one folder), or the first
+  spec with an `## API surface` copies it to `docs/specs/validation-catalog.md` and every spec cites
+  that copy (chosen).
+- Cost: K1 and M1 point `test-first` and `tooling-engineer` at `docs/specs/validation-catalog.md`; a
+  project whose specs live elsewhere (the user's preference wins, `plan-feature`'s Output format) keeps
+  the copy beside them.
+
 ## Answered questions (2026-11-23)
 
 - **O1 — How much design does the system command do up front:** a thin skeleton (D3).
@@ -703,6 +722,37 @@ the feature spec and the system plan's §3 as input and write their section of t
   other.
 - **Not in F2:** files outside these four skills that cite `experience-plan.md` §4a or `api-surface.md`
   (M1).
+- **As built (2026-11-23):**
+  - The four `SKILL.md` files rewritten, `name:` kept (D14), each with `## Input` (the spec so far, the
+    system plan's §3 and the specs of the features it depends on; standalone, the code), `## Output`
+    (its spec section and the subsections in order), `## Scope` (this feature only; what §3 or an
+    earlier spec defined is a `### Builds on` row and a delta, never redefined; a §3 change is put to
+    the user as "this changes the system plan's §3 <line>") and a `## Section template`. No approved
+    `blueprint.md` gate: step 8's section approval and step 9's spec approval are the gate.
+    `data-model-plan/SKILL.md:8-27`, `api-surface-plan/SKILL.md:8-31`, `experience-plan/SKILL.md:8-29`,
+    `integration-plan/SKILL.md:8-32`. Every "Delivery task" column became "the implementation plan
+    assigns it"; a blocking unknown's third place is a human prerequisite task `writing-plans` writes.
+    `**Acceptance:**` lines cite the spec's own `AC<k>`.
+  - `experience-plan`: the rendering plan is the spec's `### Rendering plan` (Step 5), same contract;
+    `references/rendering-strategy.md` changed only at :3, :84, :93 and :129 (`RESUME` → "an existing
+    app"). `api-surface-plan`: the spec cites `docs/specs/validation-catalog.md`, copied there by the
+    first spec with an API surface (D24); `references/validation-catalog.md` changed only at its
+    `data-model.md` / `api-surface.md` / `integrations.md` / `product:plan-integrations` references
+    (:67, :94, :133, :149, :170, :171, :190, :198).
+  - The examples were renamed `example-data-model-section.md`, `example-experience-section.md`,
+    `example-api-surface-section.md`, `example-integrations-section.md` (D24) and rewritten as filled
+    sections of `docs/specs/006-booking-cancellation-design.md`, F3 of the system-plan-format example
+    `docs/plans/004-workshop-booking-system.md` (D24), sharing AC1–AC6 (listed in the data-model
+    example), spec 005's tables and spec 007's screens and endpoints.
+  - `state-grid` is named by path (`product/skills/ba-entity-state-grid/SKILL.md`), not as
+    `product:state-grid`. The integration description was shortened to 194 chars for token-audit.
+  - Gate: `skill-lint.py product` → `0 findings`; `token-audit.py --violations-only` → exit 0; the F2
+    grep prints nothing; `plugin-surface-check.py` → `OK`.
+  - Follow-up, outside F2's files: S1's §3 example (`system-plan-format.md` §9, `example-skeleton.md`)
+    puts the app on a Vite SPA, while `rendering-strategy.md` gives signed-in pages that are not
+    long-session tools `ssr`. The experience example shows it as a §3 question the owner settled (all
+    `csr` kept); G1 decides whether the §3 example should say Next.js instead.
+  - Unverified: no `/product:plan-feature` run has loaded these four files and written a spec section.
 
 ### K1 — QA and the documenter read the feature spec
 
@@ -933,47 +983,9 @@ session that runs the task.
 | G1 | `docs` | `general-purpose` | C1 | — | ~90k |
 | — | restart, run `/product:plan-system` in a scratch repo, check the hidden skills and Plan Queue | **the user** | G1 | — | — |
 
-S1, S2 and F1 have landed, and their prompts are deleted.
+S1, S2, F1 and F2 have landed, and their prompts are deleted.
 
 ---
-
-### F2 — The four design skills write sections of a feature spec (general-purpose, docs)
-
-````
-Depends on: F1
-Agent: general-purpose · Stack: docs
-
-Task F2 of docs/plans/018-product-system-to-feature-lane.md: rescope data-model-plan, experience-plan,
-api-surface-plan and integration-plan from whole-system files to sections of one feature's spec.
-
-Deliverable: data-model-plan, experience-plan, api-surface-plan and integration-plan each take the
-feature spec and the system plan's §3 as input and write their section of the spec (## Data model,
-## Experience with ### Rendering plan, ## API surface, ## Integrations). None of them names blueprint.md,
-a pack file or a US<n>. Each example is a filled spec section.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §4, §6, D3, D6, task F2 and the As built notes above it, and "Close-out — every task".
-3. product/skills/brainstorming/SKILL.md: the spec format and step 8, as F1 left them.
-4. The four skills, each SKILL.md then its references.
-
-Build: the task's bullets, in order. If the session runs long, finish data-model-plan and
-api-surface-plan, commit, and leave a "Picking up from:" line for the other two.
-
-Traps:
-- Keep rendering-strategy.md's and validation-catalog.md's content. Only their references to plan
-  files change: fe-react and fe-blazor read rendering-strategy.md by path.
-- An entity, endpoint or screen the system plan's §3 owns is referenced, never redefined.
-- The four examples share one toy spec, so their names and ids agree.
-
-Gate:
-  python3 tools/skill-lint.py product | tail -1      → 0 findings
-  python3 tools/token-audit.py --violations-only     → exit 0
-  grep -rnE 'blueprint\.md|data-model\.md|experience-plan\.md|api-surface\.md|integrations\.md|epic-map\.md|delivery-plan|US[0-9<]' product/skills/{data-model-plan,experience-plan,api-surface-plan,integration-plan}   → prints nothing
-
-Commit: `product: the four design skills write feature spec sections (018 F2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### K1 — QA and the documenter read the feature spec (general-purpose, docs)
 
@@ -1007,6 +1019,10 @@ Traps:
 - A story backlog stays a valid basis everywhere: add the spec first, don't delete the story path.
 - Leave product/skills/business-documentation/evals/ unchanged.
 - The QA files are shared by the three qa-* plugins: change the text, not the registration.
+- A spec's ## API surface cites the project's copy of the validation catalog at
+  docs/specs/validation-catalog.md (F2, D24): test-first's error-slug line points there. Journeys and
+  test ids are in the spec's ## Experience (### Journeys, ### Screens), the rendering entries in its
+  ### Rendering plan.
 
 Gate:
   python3 tools/skill-lint.py qa/manual qa/_shared/test-first product | tail -1   → 0 findings
@@ -1044,6 +1060,10 @@ Traps:
 - A hidden skill is named by path and read, never "invoke product:<name>" (lint R12).
 - docs/skills-catalog.md, README.md and CLAUDE.md are C1's. Leave their hits.
 - Run the grep under bash: in zsh the unquoted $X is not split.
+- F2 renamed the four design examples to example-<section>-section.md and put the validation
+  catalog's project copy at docs/specs/validation-catalog.md (D24). A hit naming the plan's
+  validation-catalog.md (tooling/agents/tooling-engineer.md:56) points there; experience-plan.md §4a
+  is the spec's ### Rendering plan.
 
 Gate:
   python3 tools/plugin-surface-check.py              → OK

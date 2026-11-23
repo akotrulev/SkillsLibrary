@@ -1,98 +1,98 @@
 ---
 name: plan-api-surface
-description: Use when a planned data model needs its API surface specified (endpoints, typed bodies, errors, paging). Triggers "plan the API surface", "what endpoints do we need". Not for tables (plan-data-model).
+description: Use when a feature spec needs its ## API surface section (endpoints, typed bodies, errors, paging). Triggers "what endpoints does this feature need". Not for tables (plan-data-model).
 disable-model-invocation: true
 ---
 
-# API Surface Plan — the contract, before the code
+# API Surface — the feature spec's `## API surface` section
 
-What a Swagger document would say, written at plan time and in a form a human can review: three levels (**service → resource → endpoint**), a one-line purpose and auth requirement per endpoint, typed request and response bodies, and every error the endpoint can return — most of them inherited from a **catalog defined once** rather than re-listed 40 times.
+What a Swagger document would say about one feature, written at design time in a form a human can review: three levels (**service → resource → endpoint**), a one-line purpose and auth requirement per endpoint, typed request and response bodies, and every error the endpoint can return, most of them inherited from a **catalog defined once** rather than re-listed per endpoint.
 
-The document has two audiences and both matter: the `be-<stack>` agent that implements it, and the `qa-api-<stack>` agent that writes contract tests against it. The validation catalog is, on purpose, a ready-made negative-test matrix.
+The section has two audiences and both matter: the `be-<stack>` agent that implements it, and the `qa-api-<stack>` agent that writes contract tests against it. The validation catalog is, on purpose, a ready-made negative-test matrix.
 
-**Prerequisites:** an approved `blueprint.md` and a written `data-model.md` — plus `experience-plan.md` when the initiative has a frontend. Resources derive from entities; state-conflict rules derive from lifecycle diagrams; duplicate rules derive from unique constraints; **response shapes derive from what the screens need** (`experience-plan.md` §4's data-needed lines — an aggregate the tables lack, such as `bookedCount`, becomes a computed field decided here). On finishing, fill the experience plan's §5 screen ↔ endpoint matrix and hand the file back.
+`/product:plan-feature` reads this file in its step 8 when the feature adds or changes an endpoint, after the `## Data model`, and presents the result as one section of the spec. The user's approval of that section, then of the spec, is the gate; there is no other.
 
-**Read `references/validation-catalog.md` before writing any endpoint block.** It is the standard set every endpoint inherits, and the per-endpoint blocks are only meaningful as deltas against it.
+## Input
+
+- **The spec so far:** the goal, the decisions from the interview, `## Acceptance criteria`, the `## Data model` (resources derive from its entities, state-conflict rules from its state diagrams, duplicate rules from its unique constraints) and, when the feature has screens, the `## Experience` (**response shapes derive from what the screens need**: an aggregate the tables lack, such as `seatsLeft`, becomes a computed field decided here).
+- **The system plan's §3, when the feature came from one:** the error envelope, ids, pagination, auth and roles, and the modules (`Service` comes from them). Read the specs of the features this one depends on: their `## API surface` holds the API-wide contract, the shared schemas and the endpoints already designed.
+- **Standalone (no system plan):** the existing API, from its OpenAPI document or its route definitions. What is there is `#observed` with `file:line`.
+
+**Read [`references/validation-catalog.md`](references/validation-catalog.md) before writing any endpoint block.** It is the standard set every endpoint inherits, and the per-endpoint blocks are only meaningful as deltas against it.
 
 ## Output
 
-**`docs/plans/<NNN>-<initiative>/api-surface.md`** in the initiative folder.
+The `## API surface` section of `docs/specs/NNN-<feature>-design.md`, with these subsections in this order: `### Builds on` · `### API-wide contract` · `### Endpoint map` · `### Shared schemas` · `### Validation & error contract` · `### Endpoints` · `### Pagination, filtering & sorting` · `### Versioning & deprecation` · `### Outbound webhooks` · `### Consumers` · `### Open questions`. A subsection with nothing to say is one line saying so. When the spec has an `## Experience`, also fill its `### Screen ↔ endpoint matrix`.
 
-**A filled golden example is at `references/example-api-surface.md`** (the shared `001-workshop-booking` pack — shapes normative, domain content illustrative).
+[`references/example-api-surface-section.md`](references/example-api-surface-section.md) is a filled section from the toy spec all four design skills share: its shapes are normative, its domain content illustrative.
+
+## Scope
+
+**This feature only, on top of what exists.** An endpoint, a shared schema or an API-wide decision that §3 or an earlier feature's spec defined is **referenced, never redefined**: a row in `### Builds on` naming where it is defined. A change the feature makes to one (a response field added, a new error) is a delta block under `### Endpoints`, headed with where the endpoint is defined, holding only what changes; a breaking change to it is a question to the user, never a quiet edit. A change to §3 itself (the error envelope, the pagination style, the auth model) is put to the user as "this changes the system plan's §3 <line>: keep it or change it?", and `plan-feature`'s close-out records an approved change.
 
 ---
 
 ## Procedure
 
-### Step 1 — Establish the API-wide contract
+### Step 1 — The API-wide contract: inherit, then state deviations
 
-Decide once, at the top; every endpoint inherits it and only deviations are stated:
+The contract is §3's and the earlier specs'; list it in one line per source and add only what nothing above decided. Where nothing did (the first feature with an API, or a standalone feature in a new repo), decide it here, once:
 
 | Decision | Default | Note |
 |---|---|---|
 | **Base path & versioning** | `/api/v1/...`, major version in the path | URL versioning is the cheapest to route and test. Header versioning only if the org already does it |
-| **Auth scheme** | Bearer JWT, per the blueprint's provider | Name the claim that carries permissions and the one that carries tenant |
+| **Auth scheme** | Bearer JWT, per §3's provider | Name the claim that carries permissions or roles, and the one that carries tenant |
 | **Error body** | RFC 9457 `application/problem+json` | One shape for every failure, including validation. See the catalog |
-| **List envelope** | `{ items, page, pageSize, total }` or cursor `{ items, nextCursor }` | Pick one for the whole API — a mixed API is a permanent client tax |
+| **List envelope** | `{ items, page, pageSize, total }` or cursor `{ items, nextCursor }` | One for the whole API; a mixed API is a permanent client tax |
 | **Casing** | `camelCase` JSON | Match the existing API if there is one |
 | **Dates** | ISO 8601, UTC, `Z` suffix | Local-time fields are separate and explicitly named |
-| **Idempotency** | `Idempotency-Key` on non-idempotent POSTs that create money or side effects | Not on every POST — say which and why |
-| **Concurrency** | `ETag` + `If-Match` on resources with a version column | Ties directly to `data-model.md`'s concurrency choice |
+| **Idempotency** | `Idempotency-Key` on non-idempotent POSTs that move money or cause side effects | Not on every POST; say which and why |
+| **Concurrency** | `ETag` + `If-Match` on resources with a version column | Ties to the `## Data model` concurrency choice |
 | **Correlation** | `traceparent` accepted and propagated | The observability handshake |
 
-In an existing API, **the existing convention wins**, even where it differs from these defaults. Record what it does.
+In an existing API, **the existing convention wins**, even where it differs from these defaults.
 
-### Step 2 — The three-level table
+### Step 2 — The endpoint map
 
-The map of the whole surface, readable in one screen. One row per endpoint:
+One row per endpoint this feature adds, and one per existing endpoint it changes, marked `changed`:
 
 | Service | Resource | Method | Path | Name | Description | Auth | Idempotent | Success |
 |---|---|---|---|---|---|---|---|---|
-| Ordering | Orders | GET | `/api/v1/orders` | List orders | Paged orders for the caller's tenant, filterable by status | `orders:read` | yes | 200 |
 | Ordering | Orders | POST | `/api/v1/orders` | Place order | Creates a pending order from a cart | `orders:write` | via key | 201 |
-| Ordering | Orders | GET | `/api/v1/orders/{orderId}` | Get order | Single order with its lines | `orders:read` | yes | 200 |
 | Ordering | Orders | POST | `/api/v1/orders/{orderId}/cancel` | Cancel order | Moves `pending\|paid` → `cancelled` | `orders:write` | no | 200 |
 
-Rules:
-
-- **`Service` is the deployable** (or the module, in a monolith) — it comes from the blueprint, not from invention.
-- **Model state transitions as actions on sub-paths**, not as a `PATCH` that sets a status field. `POST /orders/{id}/cancel` is checkable, auditable, and maps to one permission; `PATCH {status: "cancelled"}` puts the state machine in the client.
-- **`Auth` is a specific permission or scope**, not "authenticated". "Any logged-in user" is a real answer and should say so explicitly. This column is `qa-security`'s starting map for BOLA/BFLA testing, so a vague value costs a real test.
-- **Every resource that can be listed needs a stated default sort**, or paging is nondeterministic.
-- **Cover the whole lifecycle** for each entity: create, read one, list, update, the state transitions from the state diagram, delete (and whether delete is soft, per `data-model.md`).
-- **No endpoint without a consumer.** If nothing in the blueprint or a frontend plan calls it, either name the consumer or drop it. Speculative endpoints are the cheapest thing to add and the most expensive to keep.
+- **`Service` is the deployable** (or the module, in a monolith), taken from §3, not invented.
+- **Model state transitions as actions on sub-paths**, not as a `PATCH` that sets a status field. `POST /orders/{id}/cancel` is checkable, auditable and maps to one permission; `PATCH {status: "cancelled"}` puts the state machine in the client.
+- **`Auth` is a specific permission, scope or role**, not "authenticated". "Any signed-in user" is a real answer and says so explicitly. This column is `qa-security`'s starting map for BOLA/BFLA testing.
+- **Every resource that can be listed has a stated default sort**, or paging is nondeterministic.
+- **Cover the lifecycle the feature adds:** each transition in the `## Data model` state diagram that this feature introduces has an endpoint.
+- **No endpoint without a consumer.** A screen in `## Experience`, a background job or a named integration calls it, or it is dropped.
 
 ### Step 3 — Per-endpoint contract blocks
 
-One block per endpoint. The typed tables are the Swagger equivalent — enough to generate DTOs from, without hand-writing OpenAPI:
+One block per new endpoint; one delta block per changed one. The typed tables are the Swagger equivalent, enough to generate DTOs from:
 
 ````markdown
 #### POST `/api/v1/orders` — Place order
 **Purpose:** creates a `pending` order from the caller's cart and reserves stock.
 **Auth:** `orders:write`; tenant taken from the token, never from the body.
-**Acceptance:** US7 AC1, US7 AC2
+**Acceptance:** AC1, AC2
 **Idempotency:** `Idempotency-Key` header required; a repeat within 24h returns the original 201 body.
 
 **Request body**
 | Field | Type | Required | Constraints | Notes |
 |---|---|---|---|---|
 | `customerId` | uuid | yes | must exist, same tenant, `active` | → `customers.id` |
-| `currency` | string(3) | yes | ISO 4217, in the tenant's enabled set | |
 | `lines` | array | yes | 1–100 items | |
 | `lines[].productId` | uuid | yes | must exist, same tenant, `sellable` | → `products.id` |
 | `lines[].quantity` | int | yes | 1–999 | |
-| `note` | string | no | ≤ 500 chars | |
 
 **Response 201**
 | Field | Type | Notes |
 |---|---|---|
 | `id` | uuid | |
-| `orderNumber` | string | tenant-unique, generated |
 | `status` | enum | always `pending` here |
 | `totalMinor` | int64 | server-computed; a client-supplied total is ignored, not trusted |
-| `currency` | string(3) | |
-| `lines[]` | object[] | `productId`, `quantity`, `unitPriceMinor`, `lineTotalMinor` |
-| `placedAt` | datetime | |
 
 `Location: /api/v1/orders/{id}` · `ETag: "<version>"`
 
@@ -101,102 +101,92 @@ One block per endpoint. The typed tables are the Swagger equivalent — enough t
 |---|---|---|
 | 409 | product out of stock | `insufficient-stock` |
 | 409 | idempotency key reused with a different body | `idempotency-conflict` |
-| 422 | currency not enabled for the tenant | `currency-not-enabled` |
 ````
 
 Rules:
 
-- **Every endpoint names the acceptance criteria it proves** on an `**Acceptance:**` line under `**Auth:**`, cited as `US7 AC2` from `stories.md`. Every AC with an outcome visible at the API lands on at least one endpoint; an endpoint with no AC is either a missing story or an endpoint nobody asked for. This is what a `Q` task writes its tests from.
+- **Every endpoint names the acceptance criteria it proves** on an `**Acceptance:**` line under `**Auth:**`, citing the spec's own `AC<k>`. Every criterion with an outcome visible at the API lands on at least one endpoint; an endpoint with no criterion is either a missing criterion or an endpoint nobody asked for. A `Q` task writes its tests from this line, citing `<spec path> AC<k>`.
 - **The `not-implemented` stub response (catalog V8.6) is never listed per endpoint.** It is part of the standard set and exists only while a contract-task stub does.
-- **"Standard set, plus —" is the required form.** Never re-list 401/403/404/400 per endpoint; state only what is *additional or different*. If an endpoint deliberately omits part of the standard set (a public health check has no 401), say so explicitly — that is a delta too.
-- **Every request field maps to something real** — a column in `data-model.md`, a computed value, or a named external input. A field that maps to nothing is either a missing table or a field nobody needs.
-- **Every screen data need maps to a response field** — walk `experience-plan.md` §4 line by line; a need with no field is a missing endpoint or a computed field you have not declared, and a response field no screen and no integration reads is a candidate for removal.
-- **Server-computed fields are marked as such and are never trusted from the client.** Totals, statuses, timestamps, ids, tenant. This is a security rule, not a style one.
-- **Response fields are chosen, not dumped.** Say what is deliberately not returned (password hashes, internal ids, other tenants' data, soft-deleted rows).
-- **Nested objects get their own field table** if they appear more than once — define a shared schema block near the top and reference it.
+- **"Standard set, plus —" is the required form.** Never re-list 401/403/404/400 per endpoint; state only what is *additional or different*. A deliberate omission (a public health check has no 401) is a delta too.
+- **Every request field maps to something real:** a column in `## Data model`, a computed value or a named external input.
+- **Every screen data need maps to a response field:** walk `## Experience`'s data-needed lines; a need with no field is a missing endpoint or an undeclared computed field, and a response field nothing reads is a candidate for removal.
+- **Server-computed fields are marked and never trusted from the client:** totals, statuses, timestamps, ids, tenant. A security rule, not a style one.
+- **Response fields are chosen, not dumped.** Say what is deliberately not returned (password hashes, internal ids, other tenants' data).
 
 ### Step 4 — Shared schemas
 
-Any object shape used by more than one endpoint gets defined once in a **Shared schemas** section (`Money`, `Address`, `PagedResult<T>`, `ProblemDetails`, `AuditStamp`) and is referenced by name. Repeating a shape inline in six endpoints guarantees they drift.
+An object shape used by more than one endpoint is defined once (`Money`, `PagedResult<T>`, `ProblemDetails`) and referenced by name. A shape an earlier spec defined is cited there, never copied.
 
 ### Step 5 — Apply the validation catalog
 
-**First, copy `references/validation-catalog.md` into the initiative folder** as `docs/plans/<NNN>-<initiative>/validation-catalog.md`, and have the plan cite that copy. The plan's readers — the QA agents, Mission Control, the human — read the initiative folder, not this skill's directory; a skill-relative path in the written artifact resolves to nothing for them.
+**The spec cites a copy of the catalog the project's readers can open**, never this skill's `references/` path, which resolves to nothing in their repo. The first spec in the project that writes an `## API surface` copies `references/validation-catalog.md` to `docs/specs/validation-catalog.md` and commits it with the spec; every later spec cites that copy and never copies it again.
 
-Then read the catalog and state, in the document's own **Validation & error contract** section:
+Then state, in `### Validation & error contract`:
 
-1. Which parts of the standard set apply API-wide (essentially all of it).
-2. The concrete instantiation of the parameterized rules for *this* API: the permission model, the not-found-vs-forbidden disclosure policy, the referential-integrity rule (a referenced id must exist **and** be visible to the caller **and** be in a valid state — all three, in that order), the state-transition rules taken from `data-model.md`'s state diagrams, and the uniqueness rules taken from its unique constraints.
-3. The rate-limit policy, if any, and where it is enforced.
+1. Which parts of the standard set apply (essentially all of it), and the open choices the catalog's last section lists, unless an earlier spec already made them: cite it.
+2. This feature's instantiation of the parameterized rules: the referential-integrity rule for each id it accepts (exists → visible to the caller → in a valid state, in that order), the state-transition rules from the `## Data model` state diagrams, and the uniqueness rules from its unique constraints.
+3. The rate-limit policy, if the feature changes it.
 
 The per-endpoint blocks then carry deltas only.
 
-### Step 6 — Cross-cutting sections
+### Step 6 — Cross-cutting
 
-- **Pagination, filtering, sorting** — the exact parameter names, defaults, maximums, and the stable-sort rule. One contract for every list endpoint.
-- **Versioning & deprecation** — how a breaking change ships, what notice consumers get, how a deprecated endpoint announces itself (`Deprecation` / `Sunset` headers).
-- **Webhooks the API emits**, if any — event names, payload shapes, delivery guarantees, signature scheme, retry policy. (Webhooks the API *receives* are `product:plan-integrations`'s.)
-- **Consumers** — which frontend, service, or partner uses which resource. This is what makes a later breaking-change assessment possible.
+- **Pagination, filtering, sorting:** the parameter names, defaults, maximums and the stable-sort rule, or "per <source>" when inherited.
+- **Versioning & deprecation:** how a breaking change ships (`Deprecation` / `Sunset` headers).
+- **Webhooks the API emits**, if any: event names, payloads, delivery guarantees, signature scheme, retries. Webhooks the API *receives* belong to `## Integrations` (`product/skills/integration-plan`).
+- **Consumers:** which frontend, service or partner uses which resource.
 
 ---
 
-## API surface template
+## Section template
 
 ```markdown
-# <Initiative> — API Surface Plan
+## API surface
 
-**Date:** YYYY-MM-DD · **Written by:** `product:plan-api-surface`
-**Blueprint:** `./blueprint.md` · **Data model:** `./data-model.md`
-
-## 1. API-wide contract
-| Decision | Choice | Note |
+### Builds on
+| What | Defined in | This feature |
 |---|---|---|
 
-## 2. Endpoint map
+### API-wide contract
+<"Per §3 and <spec>." plus each decision nothing above made, with its reason>
+
+### Endpoint map
 | Service | Resource | Method | Path | Name | Description | Auth | Idempotent | Success |
 |---|---|---|---|---|---|---|---|---|
 
-## 3. Shared schemas
-<!-- Money, Address, PagedResult<T>, ProblemDetails, … — defined once -->
+### Shared schemas
+<new shapes defined once; inherited ones cited>
 
-## 4. Validation & error contract
-**Standard set:** `./validation-catalog.md` (the copy in this folder), applied API-wide.
-**This API's instantiation:**
-- Permission model: …
-- Not-found vs forbidden disclosure: …
-- Referential integrity: exists → visible to caller → in a valid state
-- State transitions (from `data-model.md`): …
-- Uniqueness (from `data-model.md`): …
-- Rate limiting: …
+### Validation & error contract
+**Standard set:** `docs/specs/validation-catalog.md`, applied to every endpoint below.
+**This feature's instantiation:** referential integrity per id · state transitions (from `## Data model`) · uniqueness (from `## Data model`) · rate limiting
 
-## 5. Endpoints
-<!-- one contract block per endpoint: purpose, auth, idempotency, request table, response table, headers, "standard set, plus —" errors -->
+### Endpoints
+<one contract block per new endpoint; one delta block per changed endpoint, headed with where it is defined>
 
-## 6. Pagination, filtering & sorting
-## 7. Versioning & deprecation
-## 8. Outbound webhooks
-## 9. Consumers
+### Pagination, filtering & sorting
+### Versioning & deprecation
+### Outbound webhooks
+### Consumers
 | Consumer | Resources used | Notes |
 |---|---|---|
 
-## 10. Open questions
+### Open questions
 | # | Question | Blocks | Owner |
 |---|---|---|---|
 ```
 
-## Self-check before handing off
+## Self-check before presenting the section
 
-1. Every entity in `data-model.md` that clients touch has a full endpoint set; every entity with none is deliberately internal, and said to be.
-2. Every state-diagram transition has an endpoint; every non-transition is a `409` rule in section 4.
-3. Every unique constraint has a `409 duplicate` rule; every FK has an "exists / visible / valid state" rule.
-4. Every endpoint has an auth value that names a permission, or explicitly says "any authenticated user" / "anonymous".
-5. Every request field maps to a column, a computed value, or a named external input; every server-computed response field is marked.
-6. No endpoint re-lists the standard error set. No endpoint lacks a consumer.
-7. Every shape used twice is a shared schema.
-8. Every table in `data-model.md` is written or read by at least one endpoint, background job, or integration — list any orphans; a deliberately internal table counts, named as such.
-9. When `experience-plan.md` exists: every §4 data need resolves to a response field, and §5 is filled — every user-facing endpoint on at least one screen, or named machine-to-machine.
-9. The validation catalog is copied into the initiative folder and the plan cites the copy, not the skill's `references/` path.
+1. Every endpoint, schema or contract decision defined elsewhere is in `### Builds on`, and nothing defined elsewhere is redefined; every change to one is a delta block.
+2. Every transition the feature adds to a `## Data model` state diagram has an endpoint; every non-transition is a `409` rule in the validation contract.
+3. Every unique constraint the feature adds has a `409 duplicate` rule; every id it accepts has an "exists / visible / valid state" rule.
+4. Every endpoint has an auth value naming a permission or role, or explicitly "any signed-in user" / "anonymous", and an `**Acceptance:**` line; every API-visible criterion lands on an endpoint.
+5. Every request field maps to a column, a computed value or a named external input; every server-computed response field is marked.
+6. No endpoint re-lists the standard error set; no endpoint lacks a consumer; every shape used twice is a shared schema.
+7. When the spec has an `## Experience`: every data need resolves to a response field, and the screen ↔ endpoint matrix is filled.
+8. The validation contract cites `docs/specs/validation-catalog.md`, copied there by this spec or an earlier one, not the skill's path.
 
 ## Version policy
 
-The contract itself is version-agnostic; the **framework idioms it implies** are not. Keyed to `CLAUDE.md`'s Stack defaults — **.NET 10 primary / 8-9** (minimal APIs vs controllers is the project's existing choice, not a plan decision) · **Java 21 + Spring Boot 3.x** · **Node 24 / 22**. RFC 9457 `application/problem+json` is the error shape across all three; on .NET that is the built-in `ProblemDetails`, on Spring `ProblemDetail`, on Node a hand-rolled shape — the plan states the contract, the executing agent picks the mechanism.
+The contract itself is version-agnostic; the **framework idioms it implies** are not. Keyed to `CLAUDE.md`'s Stack defaults: **.NET 10 primary / 8-9** (minimal APIs vs controllers is the project's existing choice, not a design decision) · **Java 21 + Spring Boot 3.x** · **Node 24 / 22**. RFC 9457 `application/problem+json` is the error shape across all three; on .NET that is the built-in `ProblemDetails`, on Spring `ProblemDetail`, on Node a hand-rolled shape. The spec states the contract; the executing agent picks the mechanism.
