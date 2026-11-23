@@ -156,7 +156,7 @@ For request preprocessing (auth → throttle → validate → handle): use ASP.N
 
 ## Module boundaries
 
-For a modular monolith built to be split later (blueprint `Modules:` line) — one folder per module, one schema, one public surface, one architecture test. An existing codebase keeps the architecture it has; apply this to new modules only where the project already has module folders.
+For a modular monolith built to be split later (the system plan skeleton's `Modules:` line) — one folder per module, one schema, one public surface, one architecture test. An existing codebase keeps the architecture it has; apply this to new modules only where the project already has module folders.
 
 - **One public API per module.** `I<Module>Api` and its DTO records live in the module's root namespace (`Shop.Modules.Orders`); an entity never crosses it. Every other type is `internal` and sits in `Shop.Modules.Orders.Internal`. `internal` only stops a reach-in across assemblies, so a single-assembly monolith leans on the architecture test below; split a module into its own project when the compiler should enforce it.
 - **One schema and one `DbContext` per module.** `modelBuilder.HasDefaultSchema("orders")` and `o.MigrationsHistoryTable("__EFMigrationsHistory", "orders")`. A module holds another module's id as a plain column — no navigation property to a foreign entity, no foreign key into its schema, no `Include` across modules.

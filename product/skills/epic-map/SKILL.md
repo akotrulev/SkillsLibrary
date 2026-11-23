@@ -2,6 +2,7 @@
 name: plan-epic-map
 description: Use when writing a system plan's §5, which features can be specced and built side by side, from dependencies and disjoint trees. Triggers "which features can run in parallel". Not for epics (epics).
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # Features side by side — the system plan's §5

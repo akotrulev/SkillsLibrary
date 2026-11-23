@@ -77,10 +77,10 @@ Both live beside the project's other process docs, on the current branch:
 
 | File | Written by | Rewritten? |
 |---|---|---|
-| `docs/audits/<NNN>-<slug>-requirements.md` | Mode A, step 1 | **Never** — amended in place only (§1.4) |
+| `docs/audits/<NNN>-<slug>-register.md` | Mode A, step 1 | **Never** — amended in place only (§1.4) |
 | `docs/audits/<NNN>-<slug>-audit-r<N>.md` | Mode A (`r1`) and every Mode B run (`r2`, `r3`…) | Never — each round is a new file |
 
-**Naming — `<NNN>-<slug>`.** `<NNN>` is zero-padded and scoped to `docs/audits/`: the highest existing prefix plus one (`001` when the folder is empty or absent), minted once per audit subject at the first file written for it (here the `requirements.md`) and reused by every later round. `<slug>` is a short kebab-case subject (`checkout-rewrite`). Create `docs/audits/` if absent; where the repo keeps audits another way, follow it and say so.
+**Naming — `<NNN>-<slug>`.** `<NNN>` is zero-padded and scoped to `docs/audits/`: the highest existing prefix plus one (`001` when the folder is empty or absent), minted once per audit subject at the first file written for it (here the register) and reused by every later round. `<slug>` is a short kebab-case subject (`checkout-rewrite`). Create `docs/audits/` if absent; where the repo keeps audits another way, follow it and say so.
 
 ## Procedure — Mode A (baseline)
 
@@ -177,7 +177,7 @@ Organized **by register section**, each closed with a rollup — the same shape 
 ```markdown
 # Spec-Compliance Audit — <feature> — Round 1
 
-**Register:** `docs/audits/<...>-requirements.md`  **Scope:** <repo/service audited>  **Date:** <YYYY-MM-DD>
+**Register:** `docs/audits/<...>-register.md`  **Scope:** <repo/service audited>  **Date:** <YYYY-MM-DD>
 **Written by:** `engineering:audit-spec` (via `code-auditor`)
 **Evidence mode:** static | static + <commands run>
 **Requirements:** <n> verdicted · <n> out of audit scope

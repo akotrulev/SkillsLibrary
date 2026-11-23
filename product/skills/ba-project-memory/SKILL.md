@@ -88,7 +88,7 @@ Building one feature's connection cross-section (its triggers, reactions, states
 When no `docs/business-model/` exists and the user wants one:
 
 1. Confirm the path (default `docs/business-model/`; respect an existing docs convention if the project has one).
-2. Create `INDEX.md`, `glossary.md`, `active-context.md`, `interaction-map.md` with headers and empty sections (`events.md`, `shared-data.md` and `invariants.md` are created by `product:dependency-map` on first use) — plus the `areas/`, `flows/`, `entities/`, `decisions/` directories. A `glossary.md` that already exists, written by a `product:feature` interview before the KB, is adopted as it is and listed in `INDEX.md`, never recreated.
+2. Create `INDEX.md`, `glossary.md`, `active-context.md`, `interaction-map.md` with headers and empty sections (`events.md`, `shared-data.md` and `invariants.md` are created by `product:dependency-map` on first use) — plus the `areas/`, `flows/`, `entities/`, `decisions/` directories. A `glossary.md` that already exists, written by a `/product:plan-feature` interview before the KB, is adopted as it is and listed in `INDEX.md`, never recreated.
 3. Do **not** backfill the whole model speculatively. The KB accretes as features are analyzed; seed it only with what the current task's analysis actually produces.
 4. Offer `/product:rules`, so the KB's standards load in every later session that edits it.
 

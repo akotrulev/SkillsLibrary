@@ -8,7 +8,7 @@ argument-hint: "[replace | keep | beside]"
 
 Plugins cannot ship Claude Code rules, so this skill copies them into the project. Each rule file carries `paths:` frontmatter, and Claude Code loads it only once the session reads or edits a matching file. A session that edits an audit round keeps it consistent even when no audit skill or agent is running.
 
-The one file is `audits.md`, loaded for `docs/audits/*-requirements.md` and `docs/audits/*-audit-r*.md`.
+The one file is `audits.md`, loaded for `docs/audits/*-register.md` and `docs/audits/*-audit-r*.md`.
 
 The source folder is `${CLAUDE_SKILL_DIR}`. The target is `<root>/.claude/rules/engineering/`.
 
@@ -34,7 +34,7 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
    - Any other file in the `dev` folder is left alone (`plans.md` and `feature-docs.md` belong to `product:rules`).
 
    Remove the `dev` folder once it is empty. Done when the old file is deleted, listed as kept, or absent.
-6. **Fit the paths to where this project keeps its audits.** The default assumes `docs/audits/`. Find the real place: `git ls-files '*-audit-r*.md' '*-requirements.md'`. For each document found that no default glob covers, propose the glob that would cover it and add it to the installed copy with the user's agreement. Never widen to `**/*.md`: every README and design doc would load these rules. With nobody to ask, change no path and list each proposed glob under `Waiting for the user:` in the report. Done when every audit round found is matched by an installed glob, or a glob is proposed for it.
+6. **Fit the paths to where this project keeps its audits.** The default assumes `docs/audits/`. Find the real place: `git ls-files '*-audit-r*.md' '*-register.md' '*-requirements.*'` (a register written before 2026-11-23 is named `-requirements`). For each document found that no default glob covers, propose the glob that would cover it and add it to the installed copy with the user's agreement. Never widen to `**/*.md`: every README and design doc would load these rules. With nobody to ask, change no path and list each proposed glob under `Waiting for the user:` in the report. Done when every audit round found is matched by an installed glob, or a glob is proposed for it.
 7. **Check it will be committed**: `git check-ignore -q <root>/.claude/rules/engineering/audits.md`. If it is ignored, say so; the rules then apply on this machine only.
 8. **Check for conflicts**: read the project's `CLAUDE.md` (root and `.claude/`) for audit rules that differ from `audits.md` (where rounds are saved, how they are numbered, the finding classes) and list them. The rule file already says the project wins; the list tells the user which installed lines to edit so the two never read differently. Done when each contradiction is listed, or the report says none.
 

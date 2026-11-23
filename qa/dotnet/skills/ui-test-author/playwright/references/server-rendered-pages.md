@@ -1,6 +1,6 @@
 # Server-rendered pages — hydration and raw HTML
 
-Read this when the app under test serves HTML from the server (SSG, ISR, SSR, streamed SSR, Blazor prerender). The source of truth is [`product/skills/experience-plan/references/rendering-strategy.md`](../../../../../../product/skills/experience-plan/references/rendering-strategy.md) (§ Verification); the routes and their modes are the experience plan's `rendering_plan` (§4a of `experience-plan.md`). A browser test passes on the hydrated DOM whether or not the server rendered anything, so server-rendered content is proved on the raw HTML.
+Read this when the app under test serves HTML from the server (SSG, ISR, SSR, streamed SSR, Blazor prerender). The source of truth is [`product/skills/experience-plan/references/rendering-strategy.md`](../../../../../../product/skills/experience-plan/references/rendering-strategy.md) (§ Verification); the routes and their modes are the `rendering_plan` in the feature spec's `### Rendering plan` (under `## Experience`). A browser test passes on the hydrated DOM whether or not the server rendered anything, so server-rendered content is proved on the raw HTML.
 
 ## 1. Wait for hydration, never for visibility
 

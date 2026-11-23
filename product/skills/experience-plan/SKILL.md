@@ -2,6 +2,7 @@
 name: plan-experience
 description: Use when a feature spec needs its ## Experience section (tasks, journeys, screens, SSR/CSR per route). Triggers "plan the screens", "SSR or CSR for this route". Not for endpoints (plan-api-surface).
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # Experience — the feature spec's `## Experience` section

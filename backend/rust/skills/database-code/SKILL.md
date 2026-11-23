@@ -189,7 +189,7 @@ The standards this skill's output must meet are the be-rust rule files, not a li
 ## Generation steps
 
 1. Detect the persistence crate and version; on a new service, add sqlx with the features above and `store::connect`.
-2. Write the migration (schema from `data-model.md` or from `data-architect`).
+2. Write the migration (schema from the feature spec's `## Data model` or from `data-architect`).
 3. Write the queries with `query!` / `query_as!`, newtypes via `sqlx::Type`, and a transaction where more than one statement must succeed together.
 4. Run `cargo sqlx prepare` and commit `.sqlx/`.
 5. Unit-test the logic around the queries (`unit-testing`); write `#[sqlx::test]` tests only when the task asks for them (see *Testing the queries*).

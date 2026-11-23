@@ -14,7 +14,7 @@ Skill paths resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin, or t
 ## Invariants
 
 - **`design/ui-ux-pro-max` is the source of truth for every design fact**; the rest of the `design/*` layer queries it.
-- **An experience plan is the IA decision, already made.** When `docs/plans/<NNN>-*/experience-plan.md` exists, its app shell, nav map, journeys and screen catalog replace your Step-1 information architecture: validate them against the running code, never redesign. A disagreement is a dated `## Decisions` entry in the plan, never a silent override.
+- **A spec's `## Experience` is the IA decision, already made.** When the feature spec has an `## Experience`, its app shell, nav map, journeys and screen catalog replace your Step-1 information architecture: validate them against the running code, never redesign. A disagreement is a dated `## Decisions` entry in the plan, never a silent override.
 - **The plan decides each route's rendering; you build to it and never change a `mode`.** With no plan, run `product/skills/experience-plan/references/rendering-strategy.md` and record the result in the Step-1 decision record.
 - **A version jump is `migration`'s job**, one major per PR, never inside feature work.
 

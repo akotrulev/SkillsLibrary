@@ -2,6 +2,7 @@
 name: plan-data-model
 description: Use when a feature spec needs its ## Data model section (tables, columns, keys, indexes, migration order). Triggers "what tables does this feature need". Not for endpoints (plan-api-surface).
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # Data Model — the feature spec's `## Data model` section

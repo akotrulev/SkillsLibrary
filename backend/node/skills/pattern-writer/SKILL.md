@@ -257,7 +257,7 @@ export class OrderService {
 
 ## Module boundaries
 
-For a modular monolith built to be split later (blueprint `Modules:` line) — one folder per module, one schema, one public surface, one architecture test. An existing codebase keeps the architecture it has.
+For a modular monolith built to be split later (the system plan skeleton's `Modules:` line) — one folder per module, one schema, one public surface, one architecture test. An existing codebase keeps the architecture it has.
 
 - **One public API per module.** `src/modules/<name>/index.ts` exports the module's facade functions (or a Nest provider), its DTO types and the events it publishes; an entity or repository is never exported. Everything else is internal to the folder.
 - **One schema per module.** Set it in the ORM mapping — Drizzle `pgSchema('orders')`, Prisma `@@schema("orders")` with `multiSchema` — with migrations per module. A module holds another module's id as a plain column: no relation to a foreign table, no foreign key into its schema.

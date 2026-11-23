@@ -2,6 +2,7 @@
 name: plan-api-surface
 description: Use when a feature spec needs its ## API surface section (endpoints, typed bodies, errors, paging). Triggers "what endpoints does this feature need". Not for tables (plan-data-model).
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # API Surface — the feature spec's `## API surface` section

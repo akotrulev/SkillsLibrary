@@ -27,7 +27,7 @@ they disagree, the `As built` notes are right.
 | **A block opens with `Depends on: <ids>`** | Ids only, comma-separated, or `none` — a program starts the task when those are done. It holds the task's prerequisites and every earlier task it shares files or a build tree with (a stream task adds its stream predecessor and cross-stream edges); a missing line is never relied on |
 | **A block is a prompt, not a summary** | It is pasted verbatim into an empty session. Anything the session needs that is not in the block is something it will invent or go looking for |
 | **One block names one task** | A block handing over two tasks gets half-done, and the second half is re-derived from scratch by whoever picks it up |
-| **Sections, never whole artifacts** | `api-surface.md` §5.3, not `api-surface.md`. This is the single biggest lever on the budget holding — a session told to read the pack reads the pack |
+| **Sections, never whole artifacts** | The spec's `## API surface` endpoint block, not the spec. This is the single biggest lever on the budget holding — a session told to read the spec reads the spec |
 | **Exact agent name, exact skill names** | The block is a binding, not a suggestion. An invented name is the most damaging defect here, same as in the plan |
 | **Every block carries its traps** | The two to four things specific to that task. This is what the prompt adds to the task block, and it is what earns it its place |
 | **Every block carries a gate line** | `Gate: own tests` with its filtered commands on every block that writes code or tests: a `Q` block expects red, any other expects green, and every block runs its own work and the work landed above it: the tests it wrote, the acceptance tests bound to its own deliverable, the tests of the landed tasks above it and the coverage floor over the files they touched, on a small core budget and ports of its own, never under the test lock, and never another plan's tests, the smoke suite or the unfiltered suite. `Gate: none` only on a block with nothing runnable, saying so. The last block carries the whole set, in run order, its fix loop, and the instruction to fix what it finds |
@@ -56,11 +56,11 @@ do — "none of them may start a real run; the user starts it.">
 
 **Gates run <where>.** <Where to commit, and whether to ask before pushing.>
 
-| # | Task | Epic | Story | Stack | Stream | Agent | Budget | Depends on | Runs beside |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | C1 | `E0` | — | `be` | `contract` | `be-dotnet` | ~120k | none | — |
-| 2 | B1 | `E1` | `US3` | `be` | `timetable-api` | `be-dotnet` | ~112k | C1 | — |
-| — | the sandbox credentials | — | — | `human` | — | **the user** | — | — | — |
+| # | Stack | Agent | Depends on | Runs beside | Budget |
+|---|---|---|---|---|---|
+| C1 | `be` | `be-dotnet` | none | — | ~120k |
+| B1 | `be` | `be-dotnet` | C1 | — | ~112k |
+| — | the sandbox credentials | **the user** | — | — | — |
 
 **`<ids>` have landed, and their prompts are deleted** — a prompt for a finished task is a thing
 someone runs by mistake. `<ids>` are live.
@@ -80,8 +80,8 @@ Read your agent definition, then load exactly these skills: `<skill>`, `<skill>`
 
 Read, in this order — these sections only, not the whole artifacts:
 1. CLAUDE.md, including <the rule that bites this task>.
-2. The plan: §3 task B1 (your task block), §<n.n> of <artifact> — <what it gives you>, and
-   §<n.n> — <…>.
+2. The plan: §3 task B1 (your task block); the spec `docs/specs/<NNN>-<feature>-design.md`:
+   <its section and block> — <what it gives you>, and <…>.
 3. <exact paths to the existing code this task must match> — <the seam, the convention, the sibling
    module, and why: "match them, do not introduce a second convention">.
 4. The plan's "Close-out — every task".
@@ -124,23 +124,24 @@ Close out per the plan's "Close-out — every task" before you stop.
 
 ---
 
-### TD1 — <title: the test plan for <epics>> (qa-test-planner, qa)
+### TD1 — <title: the test plan for <the feature>> (qa-test-planner, qa)
 
 ````
 Depends on: <the stub task's id; ids only>
 Agent: qa-test-planner · Stack: qa
 
 You are `qa-test-planner`. Task TD1 of docs/plans/<NNN>-<feature>.md: write the test
-plan for <E2 Booking | each of E1–E3>, one document per epic, before the acceptance tests exist.
+plan for <the feature>, one document, before the acceptance tests exist.
 
 Read your agent definition, then load exactly these skills: `<qa-stack>:requirements-breakdown`,
 `<qa-stack>:test-strategy`, `<qa-stack>:test-design-techniques`, `<qa-stack>:test-plan-writer`.
 
 Read, in this order — these sections only, not the whole artifacts:
 1. CLAUDE.md.
-2. The plan: §3 task TD1; `epics.md` <E ids> — §1 goal, §5 how we get there, §6 the stories;
-   `stories.md` <US ids> — whole: the included parts are the scope items, the ACs the trace targets.
-3. `api-surface.md` §<n.n> and `experience-plan.md` <J ids> for those stories — what surfaces exist.
+2. The plan: §3 task TD1; the spec `docs/specs/<NNN>-<feature>-design.md`: its goal and decisions,
+   and `## Acceptance criteria` whole — the criteria are the scope items and the trace targets.
+3. The spec's `## API surface` endpoint map and `## Experience` `### Journeys` <J ids> — what surfaces
+   exist.
 4. The repo, for the harness: the test projects and their manifests, the CI lane, the OpenAPI asset
    (its path is in <the stub task>'s `As built` note), any page objects and fixtures.
 5. The plan's "Close-out — every task".
@@ -148,23 +149,23 @@ Read, in this order — these sections only, not the whole artifacts:
 Deliverable: <copied verbatim from the task block — it names each plan file and what it holds>.
 
 Build:
-- One `docs/test-plans/<NNN>-<epic-slug>-test-plan.md` per epic, in `test-plan-writer`'s shape: `Covers`
-  and plan version; §2 Versions; §3 scope closed over every included part of every story; §6–§7 harness
-  and existing automation as `detected` rows with paths; §10 a scenario for every AC, each with its
-  executor; §11 the Definition of Ready and the Definition of Done.
+- One `docs/test-plans/<NNN>-<feature-slug>-test-plan.md`, in `test-plan-writer`'s shape: `Covers`
+  (the spec) and plan version; §2 Versions; §3 scope closed over every acceptance criterion; §6–§7
+  harness and existing automation as `detected` rows with paths; §10 a scenario for every AC, each with
+  its executor; §11 the Definition of Ready and the Definition of Done.
 - <the task's own bullets, copied>
 
 Out of scope: the test cases with steps (<TD2>, `qa-test-case-designer`); the automated acceptance tests
-(<the Q tasks>); editing `epics.md` or `stories.md` — a gap in a story is an open question in the plan's
-§12 and a Definition-of-Ready line.
+(<the Q tasks>); editing the spec — a gap in a criterion is an open question in the test plan's §12
+and a Definition-of-Ready line.
 
 Traps:
 - Versions are detected or stated, never guessed: the build under test is `[TBD — <who>]` until a build
   exists, and that is a Definition-of-Ready line, not a blank.
-- Executors must be the agents this delivery plan actually binds: a scenario for the API goes to
+- Executors must be the agents this plan actually binds: a scenario for the API goes to
   <qa-api-stack>, a journey to <qa-ui-stack | qa-mobile-stack>, a manual case to `qa-test-case-designer`.
-- <the per-task trap: the greenfield repo with no harness yet (rows are `proposed`, and say so), the story
-  with a `[TBD]` criterion, the platform matrix nobody has stated>
+- <the per-task trap: the greenfield repo with no harness yet (rows are `proposed`, and say so), the
+  `[TBD]` criterion, the platform matrix nobody has stated>
 
 Gate: none — a test plan is a document; your step-5 review (scope closed, every AC traced, every executor
 resolves, every Ready and Done line checkable) is the check.
@@ -178,39 +179,42 @@ Close out per the plan's "Close-out — every task" before you stop.
 
 ---
 
-### TD2 — <title: the test cases for <stories>> (qa-test-case-designer, qa)
+### TD2 — <title: the test cases for <the feature>> (qa-test-case-designer, qa)
 
 ````
 Depends on: <TD1; ids only>
 Agent: qa-test-case-designer · Stack: qa
 
-You are `qa-test-case-designer`. Task TD2 of docs/plans/<NNN>-<feature>.md: write one
-test-case suite per story for <US6–US10>, from the stories and the test plan.
+You are `qa-test-case-designer`. Task TD2 of docs/plans/<NNN>-<feature>.md: write the
+test-case suite for <the feature>, from the spec's acceptance criteria and the test plan.
 
 Read your agent definition, then load exactly these skills: `<qa-stack>:requirements-breakdown`,
 `<qa-stack>:test-design-techniques`, `<qa-stack>:cross-feature-test-design`, `<qa-stack>:test-case-writer`.
 
 Read, in this order — these sections only, not the whole artifacts:
 1. CLAUDE.md.
-2. The plan: §3 task TD2; `stories.md` <US ids> — whole.
-3. The test plan(s) for those stories — the paths are in TD1's `As built` note: §2 versions and §8
+2. The plan: §3 task TD2; the spec `docs/specs/<NNN>-<feature>-design.md`: `## Acceptance criteria`
+   whole, and `## Experience` `### Journeys`.
+3. The test plan — its path is in TD1's `As built` note: §2 versions and §8
    environment (they become each suite's Setup), §10 the `TP-` rows bound to `qa-test-case-designer`.
-4. `docs/business-model/` for the stories' entities and decisions, where it exists.
+4. `docs/business-model/` for the feature's entities and decisions, where it exists.
 5. The plan's "Close-out — every task".
 
 Deliverable: <copied verbatim from the task block — it names the suites>.
 
 Build:
-- Per story, a basis `docs/test-cases/<NNN>-<slug>-basis.md` and a suite `docs/test-cases/<NNN>-<slug>.md`:
-  journeys first (one per included part), then rules and calculations, states, connections, fields last.
-- Every case's `Source` carries the `US<n> AC<k>` it proves and its `TP-` row; every AC has a case.
+- A basis `docs/test-cases/<NNN>-<slug>-basis.md` and a suite `docs/test-cases/<NNN>-<slug>.md`:
+  journeys first (one per journey the spec describes), then rules and calculations, states,
+  connections, fields last.
+- Every case's `Source` carries the `AC<k>` it proves (the spec named once in the header) and its `TP-`
+  row; every AC has a case.
 - <the task's own bullets, copied>
 
 Out of scope: executing the cases; automation (<the Q tasks>); Gherkin (`qa-bdd-<stack>`).
 
 Traps:
-- One suite per story, never one per epic: a suite that covers two stories cannot be traced or re-run alone.
-- An expected figure is computed from the story's rule, with its working; a number the story does not
+- One suite per feature: a suite that covers two specs cannot be traced or re-run alone.
+- An expected figure is computed from the spec's rule, with its working; a number the spec does not
   give is a question for the author, never invented.
 - <the per-task trap>
 
@@ -238,10 +242,11 @@ Read your agent definition, then load exactly these skills: `<qa-stack>:test-fir
 
 Read, in this order — these sections only, not the whole artifacts:
 1. CLAUDE.md, including the Test code rules.
-2. The plan: §3 task Q1; `api-surface.md` §<n.n> — the endpoint blocks this task tests; §4 — the
-   validation catalog's standard set (V8.6 is the stub response); `stories.md` <US ids> — the ACs
-   each test cites; for journeys, `experience-plan.md` <J ids> and the screens' `Test ids:` lines.
-   Where the plan has `TD` tasks: the epic's test plan §10 — the `TP-` rows bound to you (the path is
+2. The plan: §3 task Q1; the spec `docs/specs/<NNN>-<feature>-design.md`: `## API surface` — the
+   endpoint blocks this task tests; `docs/specs/validation-catalog.md` — the standard set (V8.6 is the
+   stub response); `## Acceptance criteria` <AC ids> — each test is tagged `SPEC<NNN>-AC<k>`; for
+   journeys, `## Experience` `### Journeys` <J ids> and the screens' `Test ids:` lines.
+   Where the plan has `TD` tasks: the test plan's §10 — the `TP-` rows bound to you (the path is
    in the test-plan task's `As built` note); each test carries its `TP-` id beside its AC id.
 3. The OpenAPI asset the contract task generated from the stubs — its path is in <the contract task>'s
    `As built` note — and the existing acceptance-test project, if any, as the fixture pattern.
@@ -337,9 +342,9 @@ Read, in this order:
 2. The plan: its `Status:` line, §3 task DOC1, and the `As built` notes of every task above — they say
    what landed and where. They are leads: every statement you write is backed by code you read this session.
 3. The existing documents for <the areas | the features> in <docs/business-model/ | docs/features/>.
-4. The plan's initiative folder `docs/plans/<NNN>-<initiative>/`: `requirements.md`, `epics.md` and
-   `stories.md` <US ids> — the source of purpose (what a rule is for, what a capability is for) and the
-   words the business uses; never evidence of what was built.
+4. The spec `docs/specs/<NNN>-<feature>-design.md` (or the story backlog the plan was built from) — the
+   source of purpose (what a rule is for, what a capability is for) and the words the business uses;
+   never evidence of what was built.
 5. The plan's "Close-out — every task".
 
 Deliverable: <copied verbatim from the task block — it names the documents and the delivery note>.
@@ -367,7 +372,7 @@ Traps:
 - The plan is not the evidence. Where an `As built` note and the code disagree, the code wins and the
   disagreement is a line in your report.
 - What `Status:` lists as built but unverified is documented as built, with the unverified part said.
-- A story the code does not do, or does differently, is a row of the delivery note's *Not delivered*
+- An acceptance criterion the code does not meet, or meets differently, is a row of the delivery note's *Not delivered*
   table and a line of your report — never a sentence of a guide, and never a judging word.
 - <the per-task trap: the area whose worked example changes because a rule's number changed, the feature
   that moved between areas>
@@ -378,7 +383,7 @@ Gate: own tests — `<the documenter's doc-lint command over the documents this 
 Commit: `<the commit message>`.
 
 You delete the last prompt block, so the filing is yours: rewrite `Status:` one final time and move
-<this plan | the initiative folder> to `docs/plans/implemented/`. <Where a blocked task still holds a
+this plan to `docs/plans/implemented/`. <Where a blocked task still holds a
 block below: the plan stays in `docs/plans/` until it clears.>
 Close out per the plan's "Close-out — every task" before you stop.
 ````
@@ -394,13 +399,13 @@ names it actually settles on. Writing it is a bullet on B2 and a line in B2's ow
 
 ### H1 — <title> (the user)
 
-**Blocked on** the SendGrid sending domain being verified (`integrations.md` §5) — owned by the studio
+**Blocked on** the SendGrid sending domain being verified (the spec's `## Integrations` X1) — owned by the studio
 owner, since 2026-08-04. Nothing to start here until that clears.
 `````
 
 ## Filled example
 
-The **workshop-booking** pack, caught after the contract wave has landed (its
+The **workshop-booking** plan, caught after the contract task has landed (its
 `## Close-out — every task` section, verbatim from plan format §7, sits directly above this one):
 
 `````markdown
@@ -414,14 +419,14 @@ updates the documentation from the merged code and files the plan.
 
 **Gates run locally.** Commit locally; ask before `git push`.
 
-| # | Task | Epic | Story | Stack | Stream | Agent | Budget | Depends on | Runs beside |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | H1 | — | — | `human` | — | **the user** | — | none | — |
-| 2 | C1 | `E0` | — | `be` | `contract` | `be-dotnet` | ~120k | none | — |
-| 3 | B1 | `E1` | `US3` | `be` | `timetable-api` | `be-dotnet` | ~112k | C1 | — |
-| 4 | B2 | `E3` | `US9` | `be` | `profile` | `be-dotnet` | ~95k | C1 | — |
-| 5 | F4 | `E1` | `US3` | `fe` | `timetable-ui` | `fe-react` | ~150k | B1, B2 | — |
-| 6 | DOC1 | — | — | `docs` | `docs` | `documenter` | ~110k | F4 | — |
+| # | Stack | Agent | Depends on | Runs beside | Budget |
+|---|---|---|---|---|---|
+| H1 | the SendGrid domain | **the user** | none | — | — |
+| C1 | `be` | `be-dotnet` | none | — | ~120k |
+| B1 | `be` | `be-dotnet` | C1 | — | ~112k |
+| B2 | `be` | `be-dotnet` | B1 | — | ~95k |
+| F4 | `fe` | `fe-react` | B1, B2 | — | ~150k |
+| DOC1 | `docs` | `documenter` | F4 | — | ~110k |
 
 **H1 and C1 have landed, and their prompts are deleted.** B1, B2, F4 and DOC1 are live.
 
@@ -441,9 +446,10 @@ Read your agent definition, then load exactly these skills: `be-dotnet:patterns-
 
 Read, in this order — these sections only, not the whole artifacts:
 1. CLAUDE.md, including the Backend code rules and the Comments rules.
-2. The plan: §3 task B1; `api-surface.md` §5.1–§5.2 (the Workshops and Sessions endpoint blocks);
-   `api-surface.md` §4 (the standard validation set — the deltas are in §5.1/§5.2);
-   `data-model.md` §2.1–§2.2 (the `Workshop` and `Session` entity specs).
+2. The plan: §3 task B1; the spec `docs/specs/003-workshop-booking-design.md`: `## API surface` —
+   the Workshops and Sessions endpoint blocks; `docs/specs/validation-catalog.md` (the standard
+   validation set — the deltas are in those blocks); `## Data model` — the `workshops` and `sessions`
+   table blocks.
 3. `src/Shared/IEndpointModule.cs` and `src/Shared/ProblemDetailsMiddleware.cs` — the seam and the
    error envelope C1 built. Match them; do not introduce a second convention.
 4. The plan's "Close-out — every task".
@@ -454,11 +460,11 @@ else can.
 Build:
 - Create `src/Scheduling/Domain/Workshop.cs`, `Domain/Session.cs`, `SchedulingService.cs`,
   `SessionEndpoints.cs`, `SchedulingConfiguration.cs`; modify `src/Scheduling/DependencyInjection.cs`.
-- Every endpoint matches `api-surface.md` §5.1–§5.2 exactly: paths, request/response fields, status
+- Every endpoint matches the spec's Workshops and Sessions blocks exactly: paths, request/response fields, status
   codes.
 - The standard validation set applies; the two deltas (`session-overlaps`,
   `workshop-not-published`) return their documented `type` slugs.
-- A non-admin token gets 403 on every write; reads are public, per §5.1's auth column.
+- A non-admin token gets 403 on every write; reads are public, per the Workshops block's auth line.
 - Sessions register through `IEndpointModule` — no edit to `src/Api/Program.cs`.
 - Unit tests in `tests/Scheduling.Tests/SchedulingServiceTests.cs` cover every validation branch and
   the publish state transition. In-process: no `WebApplicationFactory`, no container, no real DB.
@@ -467,7 +473,7 @@ Out of scope: the timetable and admin screens (F4, `fe-react`), contract and int
 (`qa-api-dotnet`), the booking side of a session's capacity (B3).
 
 Traps:
-- `Session` overlaps are checked in local studio time, not UTC — `data-model.md` §2.2 says why, and
+- `Session` overlaps are checked in local studio time, not UTC — the spec's `sessions` block says why, and
   the existing `src/Shared/StudioClock.cs` is how.
 - `ProblemDetailsMiddleware` already owns the envelope. Returning `BadRequest(new { error })` from an
   endpoint bypasses it and produces a second error shape.
@@ -491,8 +497,8 @@ Close out per the plan's "Close-out — every task" before you stop.
 - **Write the block from the task, not from memory of the task.** Its deliverable, files, bullets and
   out-of-scope are copied from the task block. A block that paraphrases drifts, and the session trusts
   the block.
-- **Name the sections you actually checked exist.** A prompt pointing at `api-surface.md` §5.7 when the
-  artifact stops at §5.4 sends the session hunting, and it will read the whole file to find it.
+- **Name the sections you actually checked exist.** A prompt pointing at an endpoint block the spec
+  does not have sends the session hunting, and it will read the whole file to find it.
 - **Cite existing code the task must match**, with paths — the seam, the convention, the sibling
   module. This is what stops a session inventing a second way of doing something the repo already does,
   and it is the cheapest few thousand tokens in the block.

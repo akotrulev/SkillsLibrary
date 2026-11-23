@@ -24,8 +24,11 @@ spec's acceptance criteria in `plan-format.md` and `plans.md`. F2: `data-model-p
 examples are sections of one toy spec (D24). K1: `qa-test-planner`, `test-plan-writer`,
 `qa-test-case-designer`, `/qa-…:test-plan` and `test-first` take a spec's acceptance criteria first (tag
 `SPEC<NNN>-AC<k>`, D25) and still accept a story backlog; the documenter reads the spec as the source of
-purpose; `business-analyst` has `BACKLOG AUDIT`. Next: M1. Unverified: no run of `/product:plan-feature` in a
-scratch repo; the rest of the library still names the deleted lane and the old design files until M1; follow-up for G1: S1's §3 example picks a Vite SPA where `rendering-strategy.md` would give
+purpose; `business-analyst` has `BACKLOG AUDIT`. M1: the twelve step skills set `user-invocable: false`, surface-check rule 10 enforces it, every §7 hit outside
+C1's files is rewritten, `session-budget` is re-keyed to the spec, and the audit register is renamed (D26).
+Next: C1. Unverified: no run of `/product:plan-feature` in a scratch repo; Claude Code hiding the
+twelve skills (D13); the catalog, README, `CLAUDE.md` and the product manifest description still name the
+deleted lane until C1; follow-up for G1: S1's §3 example picks a Vite SPA where `rendering-strategy.md` would give
 `ssr` (F2 As built).
 
 **Test design:** none. The plan serves no stories and changes skill text, agent text, the manifest and
@@ -394,6 +397,18 @@ clause in its close-out, harmless now; M1 has three fewer hits to rewrite.
   one test plan or suite a row cites `AC<k>` alone, the spec named once in **Covers** or the header.
 - Cost: a project whose specs live outside `docs/specs/` numbers them its own way; the tag still takes the
   spec's `NNN`.
+
+**D26 (2026-11-23, M1) — The engineering audit register is renamed `<NNN>-<slug>-register.md`.**
+- The §7 grep's `requirements\.md` matches `spec-vs-code-audit`'s register, `docs/audits/<NNN>-<slug>-requirements.md`,
+  which has nothing to do with the deleted product lane. Both readings: leave it and let G1's grep carry
+  three known hits (rejected: the deliverable is a grep that prints nothing), or rename the register
+  (chosen: the file is already headed **Register:**).
+- `spec-vs-code-audit/SKILL.md`, `engineering/rules/SKILL.md` and `engineering/rules/audits.md` (rules v2,
+  `paths:` `docs/audits/*-register.md`) changed. `engineering:rules` step 6 also searches
+  `'*-requirements.*'`, so a project's older registers are still found and a glob proposed for them.
+- Cost: a project that re-installs the engineering rules loses the default glob for its old
+  `*-requirements.md` registers until step 6's proposed glob is accepted; this repo's own
+  `docs/audits/` holds none.
 
 ## Answered questions (2026-11-23)
 
@@ -904,6 +919,36 @@ findings over `qa` and `product`.
   read, never called as `product:<name>`.
 - **Not in M1:** `docs/skills-catalog.md`, `README.md` and `CLAUDE.md` (C1), and `docs/plans/implemented/`
   and `docs/audits/`, which are records and are never edited.
+- **As built (2026-11-23):**
+  - Hidden: the twelve skills set `user-invocable: false` on the line after `disable-model-invocation: true`
+    (e.g. `product/skills/epic-map/SKILL.md:5`). `tools/plugin-surface-check.py` gains `HIDDEN` (keyed by
+    the skills' `name:` values: `writing-plans plan-session-budget plan-blueprint scoping epics
+    plan-epic-map plan-data-model plan-api-surface plan-experience plan-integrations stories
+    story-review`) and rule 10 with D13's citation in the docstring. Proved: removing the line from
+    `epic-map` printed `product: hidden skill 'plan-epic-map' must set user-invocable: false and
+    disable-model-invocation: true`; restored, `OK`.
+  - References: every §7 hit outside C1's files rewritten per §6. Experience, data-model and API-surface
+    readers (design, fe, mobile, desktop, qa server-rendered pages and the three `qa-ui-*` agents,
+    tooling, data-architect, backend rust) now cite the spec's `## Experience` / `### Rendering plan`,
+    `## Data model`, `## API surface` and `docs/specs/validation-catalog.md`; `product-analytics` takes
+    metrics from the system plan's §2 `### Success`; `ba-story-writer`, its example and
+    `rules/backlog-stories.md` (rules v6) cite §2 `What it must do` / `Constraints` and are read by
+    `business-analyst`; `feature-trace` takes stated intent from the spec's criteria, the system plan's
+    §2 or a backlog; `tools/MISSION-CONTROL-MOVED.md` says the delivery-plan ingestion format is gone.
+  - Beyond the grep: `session-budget` (SKILL.md and `references/prompts-section-template.md`) re-keyed
+    to the spec: TD1/TD2/Q1/DOC1 templates read `## Acceptance criteria` and tag `SPEC<NNN>-AC<k>` (D25),
+    one test plan and one suite per feature, the task table takes `plan-format.md` §6's columns (Epic,
+    Story and Stream dropped), the filled example cites spec blocks. The four backend `pattern-writer`
+    files say "the system plan skeleton's `Modules:` line", not "blueprint". The seven stack-plugin
+    manifest descriptions name `/product:plan-system, /product:plan-feature`.
+  - Engineering audit register renamed (D26).
+  - Gate: `plugin-surface-check` OK; `skill-lint` 0 findings; `token-audit --violations-only` exit 0;
+    `pytest tools/test_skill_lint.py` 95 passed; `qa-version-check` OK. §7 grep: 58 hits, all in C1's
+    files — `docs/skills-catalog.md` 40, `README.md` 16, `CLAUDE.md` 1, and the `product` description at
+    `.claude-plugin/marketplace.json:52` (C1's manifest bullet).
+  - Left for later, outside §7: `documenter`, `business-documentation`, `codebase-survey` and
+    `documenter-invariants.md` still say "a delivery plan's `DOC1`" (generic for an implementation plan,
+    harmless).
 
 ### C1 — The catalog, the README, `CLAUDE.md` and the manifest description
 
@@ -1035,57 +1080,9 @@ session that runs the task.
 | G1 | `docs` | `general-purpose` | C1 | — | ~90k |
 | — | restart, run `/product:plan-system` in a scratch repo, check the hidden skills and Plan Queue | **the user** | G1 | — | — |
 
-S1, S2, F1, F2 and K1 have landed, and their prompts are deleted.
+S1, S2, F1, F2, K1 and M1 have landed, and their prompts are deleted.
 
 ---
-
-### M1 — Every remaining reference, and the hidden skills (general-purpose, docs)
-
-````
-Depends on: F2, K1
-Agent: general-purpose · Stack: docs
-
-Task M1 of docs/plans/018-product-system-to-feature-lane.md: hide the step-only product skills, enforce
-it in the surface check, and rewrite every remaining reference to a removed or renamed name.
-
-Deliverable: The §7 grep prints nothing. Every skill in §5 marked "Hidden" sets both
-disable-model-invocation: true and user-invocable: false, and plugin-surface-check enforces it (rule 10).
-skill-lint reports 0 findings over the whole library.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §5, §6, §7, D13, task M1 and the As built notes above it, and "Close-out — every task".
-3. tools/plugin-surface-check.py.
-4. The §7 grep's output: run it first, then edit each hit at its line.
-
-Build: the task's bullets, in order.
-
-Traps:
-- Never edit docs/plans/ (live or implemented), docs/audits/, auth/cognito-*, communication/ or
-  product/skills/business-documentation/evals/.
-- A hidden skill is named by path and read, never "invoke product:<name>" (lint R12).
-- docs/skills-catalog.md, README.md and CLAUDE.md are C1's. Leave their hits.
-- Run the grep under bash: in zsh the unquoted $X is not split.
-- F2 renamed the four design examples to example-<section>-section.md and put the validation
-  catalog's project copy at docs/specs/validation-catalog.md (D24). A hit naming the plan's
-  validation-catalog.md (tooling/agents/tooling-engineer.md:56) points there; experience-plan.md §4a
-  is the spec's ### Rendering plan.
-- K1 re-keyed QA and the documenter to the spec (D25: test tags SPEC<NNN>-AC<k>, US<n>-AC<k> from a
-  backlog). product/skills/session-budget (SKILL.md:142, references/prompts-section-template.md:142,
-  158, 195, 242, 341) still writes TD/Q/DOC1 prompts from stories.md and US ids, outside the §7 grep:
-  re-key them the same way. qa/manual/agents/qa-test-planner.md and qa-test-case-designer.md sit just
-  under token-audit's 14,000-char agent budget: an edit there trims as much as it adds.
-
-Gate:
-  python3 tools/plugin-surface-check.py              → OK
-  python3 tools/skill-lint.py | tail -1              → 0 findings
-  python3 tools/token-audit.py --violations-only     → exit 0
-  python3 -m pytest tools/test_skill_lint.py -q      → green
-  the §7 grep                                        → only hits in the catalog, README.md and CLAUDE.md
-
-Commit: `library: hide product step skills; references follow plan 018 (018 M1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### C1 — The catalog, the README, CLAUDE.md and the manifest description (general-purpose, docs)
 
@@ -1104,7 +1101,8 @@ Read, in this order:
 1. CLAUDE.md.
 2. The plan: §2, §5, §7, D11–D13, task C1 and the As built notes above it, and "Close-out — every task".
 3. The §7 grep's hits in the three files, and the sections the task names. Do not read the whole
-   226 KB catalog.
+   226 KB catalog. After M1 the only other hit is the product description at
+   .claude-plugin/marketplace.json:52.
 4. The product entry in .claude-plugin/marketplace.json.
 
 Build: the task's bullets, in order. Recompute the product skill, agent and command counts from the
@@ -1113,6 +1111,8 @@ manifest; don't carry them over from the old text.
 Traps:
 - CLAUDE.md is loaded into every session: change only the bullets the task names.
 - Keep the product description within token-audit's description budget.
+- M1 renamed the engineering audit register to docs/audits/<NNN>-<slug>-register.md (D26): the catalog's
+  spec-vs-code-audit and engineering-rules entries follow it.
 
 Gate:
   the §7 grep                                        → prints nothing

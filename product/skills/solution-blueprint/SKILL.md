@@ -2,6 +2,7 @@
 name: plan-blueprint
 description: Use when writing a system plan's §3, the thin skeleton every feature binds to (stack, architecture, areas, auth, entities). Triggers "plan the skeleton". Not for a feature's design (plan-data-model).
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # Solution Blueprint — the system plan's skeleton

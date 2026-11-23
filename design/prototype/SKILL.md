@@ -13,7 +13,7 @@ Every variant shares one design language: the project's when it has one, a corpu
 
 - The screen or flow, and what a person must be able to do on it.
 - The project root, read for the design language, the stack and realistic data.
-- Optional: the number of variants, the states, the viewports, and the spec path when `/product:feature` (the `product` plugin) sent you here.
+- Optional: the number of variants, the states, the viewports, and the spec path when `/product:plan-feature` (the `product` plugin) sent you here.
 
 ## Procedure
 
@@ -27,7 +27,7 @@ Every variant shares one design language: the project's when it has one, a corpu
 
 5. **Show it.** Open the file: `open` on macOS, `xdg-open` on Linux, `Invoke-Item` in PowerShell on Windows. On request, screenshot every variant × state into `docs/prototypes/<slug>/screenshots/` (the command is in `references/html-shell.md`), or publish the page with the Artifact tool when the session has one. Give the user the `?variant=` keys and the keyboard shortcuts. **Done when** the file is open, or its path and URL keys are handed over when nothing can open it.
 
-6. **Record the verdict.** The user picks a variant or combines parts of several ("B's list with A's filter bar" is the usual answer, and a good one). Write it as the `prototype-verdict` line at the top of the file: date, the variant or the combination, and why. When `/product:feature` called this skill, also write it into that spec, beside the decision it settles, with a link to the file. **Done when** the verdict line is in the file and, for a spec-driven run, in the spec. A variant left unpicked is recorded as `undecided`, with the open question.
+6. **Record the verdict.** The user picks a variant or combines parts of several ("B's list with A's filter bar" is the usual answer, and a good one). Write it as the `prototype-verdict` line at the top of the file: date, the variant or the combination, and why. When `/product:plan-feature` called this skill, also write it into that spec, beside the decision it settles, with a link to the file. **Done when** the verdict line is in the file and, for a spec-driven run, in the spec. A variant left unpicked is recorded as `undecided`, with the open question.
 
 7. **In-app variants, on request only.** When the user asks for the variants inside the real app (beside its header, sidebar and data), read `references/in-app-handoff.md` and delegate the brief to the stack's agent, or have the user type its command (`/fe-react`, `/fe-blazor`, `/mobile-react-native`, `/mobile-ios`, `/mobile-android`, `/desktop-macos`, `/desktop-windows`). **Done when** the brief is delivered to the agent, or handed to the user to paste, and it names the file, the variants and the verdict so far.
 
@@ -91,7 +91,7 @@ Opened at `docs/prototypes/booking-list/index.html`. The verdict, a day later: "
 ## When to use
 
 - A screen or flow is about to be built and its shape is not yet settled: "show me options", "prototype this screen", "what could this look like".
-- `/product:feature` reached a decision that needs to be seen before it is written into the spec.
+- `/product:plan-feature` reached a decision that needs to be seen before it is written into the spec.
 - An existing screen is being redesigned, and the candidates should be compared side by side.
 
 ## When NOT to use
@@ -100,4 +100,4 @@ Opened at `docs/prototypes/booking-list/index.html`. The verdict, a day later: "
 - A brand book, logo or brand colours should become the project's tokens: type `/design:brand-import`.
 - A built UI, screenshot or mockup needs a UX review: delegate to the `design-auditor` agent, or type `/design:ux-review`.
 - The chosen variant should now be built for real: delegate to the stack agent, with the prototype and its verdict as the brief.
-- The question is about logic or a state model, not about how a screen looks: `/product:feature` interviews it (needs the `product` plugin enabled).
+- The question is about logic or a state model, not about how a screen looks: `/product:plan-feature` interviews it (needs the `product` plugin enabled).

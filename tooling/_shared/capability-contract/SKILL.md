@@ -28,7 +28,7 @@ Take the highest-fidelity input available and say in the document which one you 
 
 | Input available | What you do |
 |---|---|
-| An approved `api-surface.md` / OpenAPI / gRPC proto | **Map, don't re-derive.** Each operation is a candidate capability; skip to Step 3 |
+| An approved spec's `## API surface` / OpenAPI / gRPC proto | **Map, don't re-derive.** Each operation is a candidate capability; skip to Step 3 |
 | A codebase | **Derive** (Step 2) from entry points, then confirm |
 | Only a prose description of functionality | Ask for the entry points. Deriving a contract from prose alone produces a surface that does not compile |
 

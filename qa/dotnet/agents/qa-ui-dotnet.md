@@ -20,7 +20,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 
 **Test-first (a `Q` task in a plan):** load `qa/_shared/test-first`. The app is a stub or placeholder; red on `not-implemented` is the expected result.
 
-**Server-rendered routes:** where the experience plan's §4a `rendering_plan` marks a route `ssg`, `isr`, `ssr` or `ssr-streaming`, also write its raw-HTML and cache-header tests through a `PageHtmlClient`, and wait for the `data-hydrated` signal before interacting (`ui-test-author/playwright/references/server-rendered-pages.md`).
+**Server-rendered routes:** where the spec's `### Rendering plan` marks a route `ssg`, `isr`, `ssr` or `ssr-streaming`, also write its raw-HTML and cache-header tests through a `PageHtmlClient`, and wait for the `data-hydrated` signal before interacting (`ui-test-author/playwright/references/server-rendered-pages.md`).
 
 ## A URL or an HTML page as input
 

@@ -1,6 +1,6 @@
 # Module boundaries — crate per module
 
-A modular monolith that will be split later (blueprint `Modules:` line) is a **Cargo workspace with one library crate per module** plus one binary crate that composes them:
+A modular monolith that will be split later (the system plan skeleton's `Modules:` line) is a **Cargo workspace with one library crate per module** plus one binary crate that composes them:
 
 ```
 Cargo.toml                 # [workspace] members, [workspace.dependencies], [workspace.lints]

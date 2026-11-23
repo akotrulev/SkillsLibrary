@@ -2,6 +2,7 @@
 name: plan-integrations
 description: Use when a feature spec needs its ## Integrations section (external services, keys, limits, retries). Triggers "what external services do we depend on". Not for own endpoints (plan-api-surface).
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # Integrations — the feature spec's `## Integrations` section

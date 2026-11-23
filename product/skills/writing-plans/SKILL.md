@@ -2,6 +2,7 @@
 name: writing-plans
 description: Use when an approved feature spec needs its implementation plan (ordered tasks, a paste-ready prompt each). Triggers "write the implementation plan". Not for the design itself (plan-feature).
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # Writing Plans

@@ -2,6 +2,7 @@
 name: stories
 description: Use when turning an epic into stories (goal, plan, what is included, met-or-not acceptance criteria). Triggers "write the stories for X", "add acceptance criteria". Not for scoping (scoping).
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # Story Writer
@@ -12,9 +13,9 @@ A story describes **one feature that must be built**. It says what the goal is, 
 
 ## Inputs needed
 
-1. **The epics** (`epics.md` from `product:epics`, ideally) and the requirements document they cover
+1. **The epics** (the system plan's §4, ideally) and the requirements they cover (its §2, or the client's requirements document)
 2. **Who each feature is for**, specifically ("a member with a confirmed account", not "the user")
-3. **The business rules with their numbers** (limits, time windows, thresholds) and the quality targets from `requirements.md` §4, and the constraints in §5
+3. **The business rules with their numbers** (limits, time windows, thresholds) and the quality targets from §2 `### What it must do`, and the constraints in §2 `### Constraints`
 
 ## What makes one story
 
@@ -26,15 +27,15 @@ A story describes **one feature that must be built**. It says what the goal is, 
 
 ## Procedure
 
-1. **List the features under each epic.** Every capability in `requirements.md` §4 lands in exactly one story, as an included part or as the whole story.
+1. **List the features under each epic.** Every capability in §2 `### What it must do` lands in exactly one story, as an included part or as the whole story.
 2. **Write the goal.** One to three sentences: who needs this, what they can do once it is built, and why that matters to them or to the business. A goal that only names the feature ("add authentication") is not a goal yet.
-3. **Write how we get there.** The route, in the product's own terms: the approach chosen and what it was chosen over ("an emailed link rather than a code typed in"), what it builds on that already exists, the order the parts come in when one needs another, and any decision already taken with who took it. A reader should finish it knowing the plan, not just the destination. It carries no technology (no table, endpoint, screen, component or library); a constraint the business imposed is cited from `requirements.md` §5. The design is `solution-planner`'s.
+3. **Write how we get there.** The route, in the product's own terms: the approach chosen and what it was chosen over ("an emailed link rather than a code typed in"), what it builds on that already exists, the order the parts come in when one needs another, and any decision already taken with who took it. A reader should finish it knowing the plan, not just the destination. It carries no technology (no table, endpoint, screen, component or library); a constraint the business imposed is cited from the system plan's §2 `### Constraints`. The design is the feature spec's.
 4. **List what is included.** One bullet per part: its name, then a line or two saying what it does. Each part is something a person does or something that happens for them. Include the parts people forget because they are not the happy path: the lockout, the expired link, the "send it again".
 5. **Write the acceptance criteria as bullets that must be met.** Each one is a condition that is true when the story is done, written so that someone who did not write it can mark it met or not met:
    - One situation per bullet, with what comes of it: what the person ends up with or is told, and the number where there is one. A bullet that walks through several steps ("registers, gets the email, then logs in") is one bullet per step.
    - A validation names the field, the rule and what happens when it is broken.
    - Every included part has criteria for it working **and** for what happens when it cannot (wrong input, expired, refused, already done).
-   - What applies to the whole feature (security, accessibility, audit, speed) goes in a closing `Across the feature` group. Its number comes from a `requirements.md` §4 quality target, or is `[TBD — <who decides>]`.
+   - What applies to the whole feature (security, accessibility, audit, speed) goes in a closing `Across the feature` group. Its number comes from a §2 quality target, or is `[TBD — <who decides>]`.
    - Numbered `AC1..ACn`, flat within the story, grouped under the part they prove. Plans and tests cite them as `US3 AC7`, so an id is never reused or renumbered; a dropped criterion keeps its id with a line saying why.
    - Not Given / When / Then. Scenarios are written from these bullets by test design.
 6. **A number comes from the requirements, never from you.** Where the requirements give none, write `[TBD — <who decides>]` in its place and raise it as an open question.
@@ -90,7 +91,7 @@ No technology.>
 - US<n> (<what it provides>), or none
 
 ### Source
-<the requirements.md §4 lines and business rules this story realises; never designs or contracts, those are solution-planner's>
+<the §2 `What it must do` lines and business rules this story realises; never designs or contracts, those are the feature spec's>
 ```
 
 A complete story in this shape, three parts and sixteen criteria: [`references/example-authentication.md`](references/example-authentication.md). Read it before writing the first story of a set.

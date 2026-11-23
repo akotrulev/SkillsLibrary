@@ -10,7 +10,7 @@ Owns the **experience decisions a product UI is built from**: who uses it and fo
 
 **What this skill owns:** the task inventory and the IA derived from it; the app-shell decision; page anatomy per page type; form layout; density; expert accelerators; the notification surface; first-run and progressive disclosure; the responsiveness budget. **What it does not own — cross-link, never restate:** data-display and CRUD *correctness* (the stack's `ui-rules` — humanized enums, deterministic sort, disable-don't-hide, confirmations, modal-vs-route mechanics); the loading / failed / empty *states* and their rendering (the stack's `error-handling`); breakpoint *reflow* (the stack's `responsive-design`); motion *implementation* (the stack's `animation`); focus, landmarks, contrast (the stack's `accessibility`); the *words* ([`design/ux-writing`](../ux-writing/SKILL.md)); the *look* ([`design/visual-identity`](../visual-identity/SKILL.md)).
 
-Stack-agnostic and code-free by design: a planner loads it to write an experience plan, a frontend agent loads it to fill its decision record, and neither gets a component out of it.
+Stack-agnostic and code-free by design: a planner loads it to write a feature spec's `## Experience`, a frontend agent loads it to fill its decision record, and neither gets a component out of it.
 
 **Corpus authority.** The facts this skill decides with come from the [`design:corpus`](../ui-ux-pro-max/SKILL.md) corpus — **it is the source of truth, and where it and this skill disagree on a fact, the corpus wins.** 119 UX guidelines, each with platform, description, do/don't, good and bad code examples, and severity:
 
@@ -109,7 +109,7 @@ The **result set** after §6's search: visible removable filters, quick filters 
 
 ## Output — the experience decision block
 
-Whoever loads this skill produces this block (into the plan's `experience-plan.md`, or the frontend agent's decision record):
+Whoever loads this skill produces this block (into the feature spec's `## Experience`, or the frontend agent's decision record):
 
 ```markdown
 **Actors & primary tasks:** <actor> — <verb + object + outcome> (<frequency> · <stakes>), …

@@ -2,6 +2,7 @@
 name: epics
 description: Use when writing a system plan's §4, the capability-sized epics, each a measurable goal and the features that serve it. Triggers "slice this into epics". Not for the vision (scoping).
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # Epics — the system plan's §4

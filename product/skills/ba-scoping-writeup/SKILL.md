@@ -2,6 +2,7 @@
 name: scoping
 description: Use when writing a system plan's §2 (vision and scope) from a vague business problem or stakeholder request. Triggers "help me scope this system". Not for epics (epics).
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # Vision and scope — the system plan's §2

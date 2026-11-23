@@ -471,8 +471,8 @@ Rules:
   four things specific to that task: the convention that is easy to miss, the file that looks like the
   pattern but is not, the migration that must run before the test, the down-level API that does not
   exist here.
-- **Cite sections, never whole artifacts.** `api-surface.md` §5.3, not `api-surface.md`. This is the
-  single biggest lever on the budget holding: a session told to read the pack reads the pack.
+- **Cite sections, never whole artifacts.** the spec's `## API surface` endpoint block it tests, not the whole spec. This is the
+  single biggest lever on the budget holding: a session told to read the spec reads the spec.
 - **No block says "see the task" or "as above".** A session opened from the block starts without
   scrolling up.
 - **A prompt is living text.** A task that lands something different from what the plan predicted
