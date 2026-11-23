@@ -12,25 +12,25 @@ front doors.
 Every skill that is only a step inside one of the two front doors is hidden: neither the model nor the
 user can call it on its own.
 
-**Status:** S1, S2, F1, F2, K1, M1 and C1 landed (2026-11-23). S1: `system-plan-format.md`, the four section skills and
-`rules/system-plans.md`. S2: `solution-planner` runs NEW / EXISTING / EXTEND and writes
-`docs/plans/<NNN>-<system>-system.md`, `/product:plan-system` routes to it, and `requirements-author`,
-`/product:refine` and `delivery-plan` are gone from the tree and the manifest. F1: `/product:plan-feature`
-(`brainstorming`) runs SYSTEM / NEW / SHAPED through spec, acceptance criteria, implementation plan,
-write-back and on hold; `writing-plans` is hidden from the model and loaded by path; `TD` is keyed to a
-spec's acceptance criteria in `plan-format.md` and `plans.md`. F2: `data-model-plan`, `experience-plan`,
-`api-surface-plan` and `integration-plan` write the spec's `## Data model`, `## Experience` (with
-`### Rendering plan`), `## API surface` and `## Integrations`, on top of §3 and earlier specs; their
-examples are sections of one toy spec (D24). K1: `qa-test-planner`, `test-plan-writer`,
-`qa-test-case-designer`, `/qa-…:test-plan` and `test-first` take a spec's acceptance criteria first (tag
-`SPEC<NNN>-AC<k>`, D25) and still accept a story backlog; the documenter reads the spec as the source of
-purpose; `business-analyst` has `BACKLOG AUDIT`. M1: the twelve step skills set `user-invocable: false`, surface-check rule 10 enforces it, every §7 hit outside
-C1's files is rewritten, `session-budget` is re-keyed to the spec, and the audit register is renamed (D26).
-C1: the catalog, `README.md`, `CLAUDE.md` and the product manifest description describe the two
-front doors, the hidden steps and the `TD` rule; the §7 grep prints nothing. Next: G1. Unverified: no run
-of `/product:plan-system` or `/product:plan-feature` in a scratch repo; Claude Code hiding the twelve
-skills (D13); Plan Queue skipping `## Feature prompts` (D10); follow-ups for G1: C1's two (C1 As built), and S1's §3 example picks a Vite SPA where `rendering-strategy.md` would give
-`ssr` (F2 As built).
+**Status:** Delivered (2026-11-23); all eight tasks landed and the plan is filed. The `product` plugin has
+two front doors. `/product:plan-system` (`solution-planner`, NEW / EXISTING / EXTEND) writes one system plan,
+`docs/plans/<NNN>-<system>-system.md`, per `system-plan-format.md`, with a `/product:plan-feature` prompt per
+feature (S1, S2). `/product:plan-feature` (`brainstorming`, SYSTEM / NEW / SHAPED) runs the interview, the
+approved spec with its acceptance criteria and design sections, and the implementation plan, then writes
+back or puts the feature on hold (F1, F2). `TD`, QA and the documenter key to the spec's acceptance
+criteria (`SPEC<NNN>-AC<k>`) and still accept a story backlog (K1). The twelve step skills are hidden,
+enforced by surface-check rule 10, and every old name is rewritten (M1). The catalog, `README.md`, `CLAUDE.md`
+and the manifest describe it (C1). The G1 sweep (§7) is green on the merged tree. **Unverified:** no session
+has run `/product:plan-system` or `/product:plan-feature` yet; Claude Code hiding the twelve
+`user-invocable: false` skills is unchecked (D13); Plan Queue skipping `## Feature prompts` is unchecked
+(D10). The user restarts, runs `/product:plan-system` on a small vision in a scratch repo, pastes one
+feature prompt, puts another on hold, and checks that `/product:writing-plans` is not in the `/` menu.
+**Follow-ups outside §7:** `CLAUDE.md`'s filing bullet still says "a `solution-planner` pack moves its
+whole initiative folder" (a system plan is one file; C1); the catalog's `product:knowledge-base` entry
+still says KB sources are `US<n> AC<k>`, unchecked against `ba-project-memory` (C1); S1's §3 example in
+`system-plan-format.md` picks a Vite SPA where `rendering-strategy.md` would give `ssr` (F2); `documenter`,
+`business-documentation`, `codebase-survey` and `documenter-invariants.md` still say "a delivery plan's
+`DOC1`" (M1).
 
 **Test design:** none. The plan serves no stories and changes skill text, agent text, the manifest and
 one lint script. The checks are `tools/plugin-surface-check.py`, `tools/skill-lint.py`,
@@ -1060,6 +1060,32 @@ the commands in §7.
   The user restarts, runs `/product:plan-system` on a small vision in a scratch repo, pastes one feature
   prompt, puts another on hold, and checks that `/product:writing-plans` is not in the `/` menu.
 - **Not in G1:** new restructuring.
+- **As built (2026-11-23):**
+  - First §7 run green, so no task's work needed fixing: `plugin-surface-check` → `OK`;
+    `skill-lint | tail -1` → `0 findings`; `token-audit --violations-only` → exit 0, 0 violations in all
+    four budgets; `pytest tools/test_skill_lint.py -q` → `95 passed`; `qa-version-check` → `OK`; the §7
+    grep (run under `bash`) prints nothing; the manifest assertion prints `OK`.
+  - Hand-offs read end to end, every name and path resolving:
+    - `product/commands/plan-system.md` → `product/agents/solution-planner.md` (Steps 0–8 load
+      `agent-orientation-cache`, `requirements-breakdown`, `domain-modeling`, `ba-project-memory`,
+      `ba-scoping-writeup`, `solution-blueprint`, `pattern-guide`, `ba-epic-writer`, `epic-map`; all exist)
+      → `system-plan-format.md` (§5 prompt first line, §7 never-list that Step 8 loads, §8 close-out).
+    - The prompt's first line `/product:plan-feature F<n> of <path> — <title>` → `brainstorming/SKILL.md`
+      (`name: plan-feature`) SYSTEM mode reads §2, §3, §5, Decisions and the task block, as the prompt's
+      reading line says → step 8's four design skills by path → step 10 reads
+      `product/skills/writing-plans/SKILL.md`, whose "Execution Handoff" returns to step 10 → the system
+      plan's `## Close-out — every feature` (format §8).
+    - `writing-plans` → `plan-format.md` §4 `TD` (spec `## Acceptance criteria`, `<spec> AC<k>`) →
+      `qa/manual/agents/qa-test-planner.md` (spec basis row; `test-plan-writer`, `requirements-breakdown`,
+      `test-strategy`, `quality-metrics` exist) → `qa/_shared/test-first/SKILL.md` (`SPEC<NNN>-AC<k>`; the
+      `**Acceptance:**` lines it reads exist in `experience-plan` `### Journeys` and `api-surface-plan`
+      endpoint blocks, `Test ids:` under `### Screens`, `docs/specs/validation-catalog.md` copied by
+      `api-surface-plan`).
+  - Merge: `master` (`c2a5621f`) is already an ancestor of the plan branch, so the merge is a no-op and
+    no newly merged plan brought in an old name.
+  - Second §7 run (the gate): the same seven results.
+  - No commit made: under Plan Queue the queue commits this work and the filing together.
+  - `docs/plans/implemented/` has no README, so the filing adds no row.
 
 ## Close-out — every task
 
@@ -1117,41 +1143,4 @@ session that runs the task.
 | G1 | `docs` | `general-purpose` | C1 | — | ~90k |
 | — | restart, run `/product:plan-system` in a scratch repo, check the hidden skills and Plan Queue | **the user** | G1 | — | — |
 
-S1, S2, F1, F2, K1, M1 and C1 have landed, and their prompts are deleted.
-
----
-
-### G1 — The whole sweep, and filing the plan (general-purpose, docs)
-
-````
-Depends on: C1
-Agent: general-purpose · Stack: docs
-
-Task G1 of docs/plans/018-product-system-to-feature-lane.md: run the whole sweep on the merged tree,
-fix what it finds, and file the plan.
-
-Deliverable: Every command in §7 passes on the merged tree, and the plan is filed.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §7, every As built note, task G1, and "Close-out — every task".
-3. The three hand-off chains the task names, end to end.
-
-Run §7 once. Fix each failure at the narrowest file, rerun only what failed, then run §7 once more.
-
-Traps:
-- A failure may belong to any task above. Fix it where it is, and name that task in As built.
-- Merge master into the plan's branch before filing (close-out step 6). Rewrite per §6 any old name a
-  newly merged plan brought in.
-- No new restructuring. A finding outside §7 goes into Status as a follow-up.
-- Run the §7 grep under bash (`bash -c '…'`): in zsh an unquoted $X does not word-split, the excludes
-  are ignored and records under implemented/, audits/ and evals/ show up as hits.
-
-Gate (this is the last runnable task, so it runs the whole set once more across the plan, in order):
-  the commands in §7.
-
-Commit: `product: plan 018 sweep green (018 G1)`.
-When filing, Status names as unverified: no session has run either front door; Claude Code hiding
-the user-invocable: false skills (D13); Plan Queue skipping "## Feature prompts" (D10).
-Close out per the plan's "Close-out — every task" before you stop.
-````
+All eight tasks (S1, S2, F1, F2, K1, M1, C1 and G1) have landed, and their prompts are deleted.
