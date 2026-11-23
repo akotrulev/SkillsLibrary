@@ -1,7 +1,6 @@
 ---
 paths:
   - "docs/plans/*.md"
-  - "docs/plans/*/delivery-plan.md"
 ---
 
 <!-- product rules v5 (2026-11-23): plans. Installed by /product:rules; edit to fit this project, re-run to compare with the plugin's copy. -->
@@ -15,7 +14,7 @@ Apply to every plan you write, edit, run a task from, or review. Severity: **blo
 ## The document
 
 - One self-contained file: context, decisions, tasks and one prompt per task; no companion file. *major*
-- `docs/plans/NNN-<slug>.md`, or a `solution-planner` pack's `docs/plans/NNN-<initiative>/delivery-plan.md`. `NNN` is zero-padded and its high-water mark spans `docs/plans/` and `docs/plans/implemented/`; never reused, never renumbered. *blocker*
+- `docs/plans/NNN-<slug>.md`. `NNN` is zero-padded and its high-water mark spans `docs/plans/` and `docs/plans/implemented/`; never reused, never renumbered. *blocker*
 - Title `# NNN — <Title> — plan (YYYY-MM-DD)`, `**Goal:**`, then `**Status:**`: built, next, built but unverified (never just "in progress"). *major*
 - Narrative first, tasks last, in the order of plan-format §2, ending in `## Close-out — every task` and `## Prompts — one per task`. *major*
 - One flat ordered list of **tasks**: no phases, slices, stages or milestones. "Step" names only a task's internal actions. *minor*
@@ -34,7 +33,7 @@ Apply to every plan you write, edit, run a task from, or review. Severity: **blo
 - The last task's gate carries the fix loop of plan-format §5. Never a full run to check one fix; a failure that moves between runs is an isolation or scheduling defect fixed in the code, never retried until green; inside a `Q` test or fixture it is a `D<n>`, the test left as it is. *major*
 - Order is plan-format §4's: contract and stubs answering `501 not-implemented`, then `TD`, then `Q`, then implementation; human prerequisites first. *major*
 - The plan's last task is `DOC1`, stack `docs`, agent `documenter` or `feature-documenter`, depending on the gate task (plan-format §5); the gate task writes no product documentation. Left out only with `Documentation task: none — <why>`. *major*
-- A plan that serves stories and has no `TD` tasks says in its header who opted out and why. *major*
+- A plan that delivers a feature plans its testing: `TD` tasks (the test plan, then the test cases) keyed to the feature spec's `## Acceptance criteria`, each case citing `<spec> AC<k>`, before the `Q` tasks (plan-format §4). A plan built from a story backlog qualifies the same way, citing `US<n> AC<k>`. One with acceptance criteria and no `TD` tasks says in its header who opted out and why. *major*
 - `**Not in <id>:**` names what belongs elsewhere. A stack-cut task that cannot be demonstrated says so; never a fake success or an empty list. *major*
 - Acceptance tests a `Q` task wrote are read-only to every later task but the gate. A test you believe wrong stays red, recorded as a dated `D<n>` with both readings. *blocker*
 

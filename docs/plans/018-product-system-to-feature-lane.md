@@ -12,12 +12,15 @@ front doors.
 Every skill that is only a step inside one of the two front doors is hidden: neither the model nor the
 user can call it on its own.
 
-**Status:** S1 and S2 landed (2026-11-23). S1: `system-plan-format.md`, the four section skills and
+**Status:** S1, S2 and F1 landed (2026-11-23). S1: `system-plan-format.md`, the four section skills and
 `rules/system-plans.md`. S2: `solution-planner` runs NEW / EXISTING / EXTEND and writes
 `docs/plans/<NNN>-<system>-system.md`, `/product:plan-system` routes to it, and `requirements-author`,
-`/product:refine` and `delivery-plan` are gone from the tree and the manifest. Next: F1. Unverified: the
-prompts a system plan writes call `/product:plan-feature`, which does not exist until F1; the rest of the
-library still names the deleted lane until F1, F2, K1 and M1.
+`/product:refine` and `delivery-plan` are gone from the tree and the manifest. F1: `/product:plan-feature`
+(`brainstorming`) runs SYSTEM / NEW / SHAPED through spec, acceptance criteria, implementation plan,
+write-back and on hold; `writing-plans` is hidden from the model and loaded by path; `TD` is keyed to a
+spec's acceptance criteria in `plan-format.md` and `plans.md`. Next: F2. Unverified: no run of
+`/product:plan-feature` in a scratch repo; the four design skills still describe a `blueprint.md` and
+files of their own until F2; the rest of the library still names the deleted lane until K1 and M1.
 
 **Test design:** none. The plan serves no stories and changes skill text, agent text, the manifest and
 one lint script. The checks are `tools/plugin-surface-check.py`, `tools/skill-lint.py`,
@@ -352,6 +355,15 @@ Step 1 load `domain-modeling` "as `brainstorming` step 5 does", and that step wr
 now name both. Cost: `business-analyst` no longer owns every write to the KB; the boundary line says
 `solution-planner` writes glossary rows and nothing else there.
 
+**D23 (2026-11-23, F1) — F1 also cleared the pack paths and hid `writing-plans`' routing headings.**
+The bullets named `plan-format.md` §1, §5 and §8 and `plans.md:34-36`. F1 also removed the
+`solution-planner` pack clause from §7's verbatim close-out (no initiative folder exists after D2), the
+`docs/plans/*/delivery-plan.md` glob and pack path in `plans.md` (lines S2 left for M1), and the matching
+row in `rules/SKILL.md:19`. `writing-plans`' "When to use" / "When NOT to use" became `## Input`, because
+lint R6 bars routing headings on a skill with `disable-model-invocation: true`, and four of its paragraphs
+were tightened to keep the body under 16,000 chars. Cost: a plan written before F1 carries the old §7
+clause in its close-out, harmless now; M1 has three fewer hits to rewrite.
+
 ## Answered questions (2026-11-23)
 
 - **O1 — How much design does the system command do up front:** a thin skeleton (D3).
@@ -620,6 +632,36 @@ prints `OK`.
   - The QA agents and the documenter (K1).
   - `CLAUDE.md` (C1).
   - `user-invocable: false` (M1).
+- **As built (2026-11-23):**
+  - `product/skills/brainstorming/SKILL.md` rewritten: `name: plan-feature` (:2), the R3 description
+    from the bullet (:3); the front-door table `/product:plan-feature` vs `/product:plan-system` (:12-16);
+    modes SYSTEM / NEW / SHAPED (:22-30) with the SYSTEM reading list and "§3 and the decisions are
+    settled", a reopening question worded "this changes the system plan's D<n>" (:32); step 8 names the
+    four design skills by path with when each applies and the spec section each writes (:59-68); step 9
+    approves the spec; step 10 reads `product/skills/writing-plans/SKILL.md`, then in SYSTEM mode runs the
+    system plan's `## Close-out — every feature`, setting `State` to `specced (plan <NNN>)` and deleting
+    the prompt only in the follow-up commit (:72); `## On hold` (:74); the spec format gains
+    `**System plan:**`, `## Acceptance criteria` (`AC1…ACn`) and the four optional design sections (:88-116).
+    No route to `requirements-author` or `/product:refine` is left. Step 10 was added rather than
+    extending step 9, so approval and planning are separate `Done when`s.
+  - `product/skills/writing-plans/SKILL.md`: `name: writing-plans`, `disable-model-invocation: true`
+    (:2-4); `## Input` (:13) names the approved spec and its acceptance criteria as the `TD`/`Q` basis
+    and routes the design to `/product:plan-feature` and a whole system to `/product:plan-system`;
+    Step 5 points at `product/skills/session-budget/SKILL.md` (:146); the handoff returns to
+    `plan-feature` step 10. To stay under the 16,000-char body budget, four paragraphs were tightened
+    (intro, unit-of-work, property 1, human prerequisites) without changing their rules (D23).
+  - `plan-format.md`: line 16 names `writing-plans` and `session-budget`; the path paragraph points a
+    system plan at `system-plan-format.md`; §4's `Q` example cites `docs/specs/014-orders-design.md`
+    AC1–AC9; §4 `TD` is "Plans that deliver a feature" (:174), per feature, citing `<spec> AC<k>`, a
+    story backlog still qualifying; §5 `DOC1` reads the spec (or the backlog); the `solution-planner`
+    pack paths in §1, §5, §7 and §8 are gone (D23).
+  - `rules/plans.md`: the `TD` rule re-keyed (:36); the S1 system-plan line kept. Also its
+    `docs/plans/*/delivery-plan.md` glob and pack path, and the matching row in `rules/SKILL.md:19` (D23).
+  - `tools/plugin-surface-check.py:45`: `"product": frozenset("plan-feature notebooklm".split())`.
+  - Gate: `plugin-surface-check.py` → `OK`; `skill-lint.py product` → `0 findings` (whole library also
+    `0 findings`); `token-audit.py --violations-only` → exit 0; `pytest tools/test_skill_lint.py` → 95 passed.
+  - Unverified: no `/product:plan-feature` run in a scratch repo, so the write-back and on-hold flows are
+    unexercised (the user's check after G1).
 
 ### F2 — The four design skills write sections of a feature spec
 
@@ -891,55 +933,9 @@ session that runs the task.
 | G1 | `docs` | `general-purpose` | C1 | — | ~90k |
 | — | restart, run `/product:plan-system` in a scratch repo, check the hidden skills and Plan Queue | **the user** | G1 | — | — |
 
-S1 and S2 have landed, and their prompts are deleted.
+S1, S2 and F1 have landed, and their prompts are deleted.
 
 ---
-
-### F1 — /product:plan-feature: interview, spec, plan and write-back in one run (general-purpose, docs)
-
-````
-Depends on: S2
-Agent: general-purpose · Stack: docs
-
-Task F1 of docs/plans/018-product-system-to-feature-lane.md: rename product:feature to
-/product:plan-feature, make it run through to the implementation plan, and give it the system plan's
-write-back and on hold.
-
-Deliverable: product/skills/brainstorming/SKILL.md is name: plan-feature and runs SYSTEM, NEW and
-SHAPED as the plan's §4 describes, including the acceptance criteria, the write-back and on hold.
-product/skills/writing-plans/SKILL.md is name: writing-plans and is loaded by it. plan-format.md and
-plans.md key TD tasks to a feature spec's acceptance criteria (D11). plugin-surface-check prints OK.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3, §4, D6, D9–D12, D15, D20, task F1 and the As built notes above it, and
-   "Close-out — every task".
-3. product/skills/solution-blueprint/references/system-plan-format.md: its "Close-out — every feature"
-   is what SYSTEM mode runs.
-4. product/skills/brainstorming/SKILL.md and product/skills/writing-plans/SKILL.md.
-5. product/skills/writing-plans/references/plan-format.md §4, §5, §6 and line 16.
-6. product/skills/rules/plans.md and tools/plugin-surface-check.py (FRONT_DOORS, :41-46).
-
-Build: the task's bullets, in order.
-
-Traps:
-- The description must pass lint R3: starts "Use when", has Triggers "…", ends "Not for <case> (<sibling>)."
-- writing-plans is loaded by reading its SKILL.md path, never "invoke product:…" (lint R12).
-- SYSTEM mode treats the system plan's §3 as settled. Reopening it is a question to the user that names
-  the D<n> it would change.
-- The write-back deletes the feature's prompt only after the implementation plan is committed, in a
-  follow-up commit. It also sets the feature's State cell in the prompt table (D21).
-- S1 added one line to product/skills/rules/plans.md (a *-system.md plan follows system-plans.md);
-  keep it when you edit that file.
-
-Gate:
-  python3 tools/plugin-surface-check.py              → OK
-  python3 tools/skill-lint.py product | tail -1      → 0 findings
-  python3 tools/token-audit.py --violations-only     → exit 0
-
-Commit: `product: /product:plan-feature runs interview, spec, plan and write-back (018 F1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### F2 — The four design skills write sections of a feature spec (general-purpose, docs)
 

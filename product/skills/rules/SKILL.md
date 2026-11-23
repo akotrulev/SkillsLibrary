@@ -16,7 +16,7 @@ The ten files and the documents they load for:
 
 | File | `paths:` default |
 |---|---|
-| `plans.md` | `docs/plans/*.md`, `docs/plans/*/delivery-plan.md` |
+| `plans.md` | `docs/plans/*.md` |
 | `feature-docs.md` | `docs/features/*-*.md` |
 | `system-plans.md` | `docs/plans/*-system.md` |
 | `backlog-stories.md` | `docs/plans/**/stories.md` |

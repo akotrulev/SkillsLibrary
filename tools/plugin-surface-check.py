@@ -42,7 +42,7 @@ FRONT_DOORS = {
     "engineering": frozenset("""
         debugging verify quality-constraints source-grounding writing-for-agents audit-spec audit-feature audit-architecture untested-code
     """.split()),
-    "product": frozenset("feature plan-feature notebooklm".split()),
+    "product": frozenset("plan-feature notebooklm".split()),
     "design": frozenset(("prototype",)),
     "qa":frozenset(("inhouse-framework-conventions", "python-web-testing")),
 }
