@@ -8,8 +8,8 @@
 
 The last section of the plan document, and the reason the document is queueable whole. It answers one
 question — **what do I paste into a fresh session** — and it answers it as something runnable rather
-than something to read. It lives **inside** the plan (`docs/plans/<NNN>-<initiative>/delivery-plan.md`,
-or the single-file plan an `product:plan-feature` run produced). There is no `NEXT-PROMPTS.md`.
+than something to read. It lives **inside** the plan, the feature's implementation plan
+(`docs/plans/<NNN>-<feature>.md`). There is no `NEXT-PROMPTS.md`.
 
 **One block per task that has not landed.** No fewer: a task with no block is a session nobody knows
 they can open. No more: **a landed task's block is deleted**, because a prompt for finished work is a
@@ -73,7 +73,7 @@ someone runs by mistake. `<ids>` are live.
 Depends on: <ids only, or none>
 Agent: <exact agent name> · Stack: <stack>
 
-You are `<exact agent name>`. Task B1 of docs/plans/<NNN>-<initiative>/delivery-plan.md:
+You are `<exact agent name>`. Task B1 of docs/plans/<NNN>-<feature>.md:
 <the mission in one sentence>.
 
 Read your agent definition, then load exactly these skills: `<skill>`, `<skill>`, `<skill>`.
@@ -130,7 +130,7 @@ Close out per the plan's "Close-out — every task" before you stop.
 Depends on: <the stub task's id; ids only>
 Agent: qa-test-planner · Stack: qa
 
-You are `qa-test-planner`. Task TD1 of docs/plans/<NNN>-<initiative>/delivery-plan.md: write the test
+You are `qa-test-planner`. Task TD1 of docs/plans/<NNN>-<feature>.md: write the test
 plan for <E2 Booking | each of E1–E3>, one document per epic, before the acceptance tests exist.
 
 Read your agent definition, then load exactly these skills: `<qa-stack>:requirements-breakdown`,
@@ -184,7 +184,7 @@ Close out per the plan's "Close-out — every task" before you stop.
 Depends on: <TD1; ids only>
 Agent: qa-test-case-designer · Stack: qa
 
-You are `qa-test-case-designer`. Task TD2 of docs/plans/<NNN>-<initiative>/delivery-plan.md: write one
+You are `qa-test-case-designer`. Task TD2 of docs/plans/<NNN>-<feature>.md: write one
 test-case suite per story for <US6–US10>, from the stories and the test plan.
 
 Read your agent definition, then load exactly these skills: `<qa-stack>:requirements-breakdown`,
@@ -230,7 +230,7 @@ Close out per the plan's "Close-out — every task" before you stop.
 Depends on: <ids only, or none>
 Agent: <exact qa agent name> · Stack: qa
 
-You are `<exact qa agent name>`. Task Q1 of docs/plans/<NNN>-<initiative>/delivery-plan.md: write the
+You are `<exact qa agent name>`. Task Q1 of docs/plans/<NNN>-<feature>.md: write the
 acceptance tests for <the resource group or journeys>, against the stubs, before the implementation.
 
 Read your agent definition, then load exactly these skills: `<qa-stack>:test-first`,
@@ -284,7 +284,7 @@ Close out per the plan's "Close-out — every task" before you stop.
 Depends on: <every task nothing else waits for>
 Agent: <exact agent name> · Stack: <stack>
 
-You are `<exact agent name>`. Task F3 of docs/plans/<NNN>-<initiative>/delivery-plan.md:
+You are `<exact agent name>`. Task F3 of docs/plans/<NNN>-<feature>.md:
 <the mission>. **You are the gate task, the last task that builds and runs code, so you run the whole set.**
 
 … (the same reading list / deliverable / build / traps shape) …
@@ -326,7 +326,7 @@ Depends on: <the gate task's id; ids only>
 Agent: <documenter | feature-documenter> · Stack: docs
 
 You are `<documenter | feature-documenter>`. Task DOC1 of
-docs/plans/<NNN>-<initiative>/delivery-plan.md, the plan's last task: update the documentation to
+docs/plans/<NNN>-<feature>.md, the plan's last task: update the documentation to
 describe what this plan landed, from the code.
 
 Read your agent definition and run it in <REFRESH mode over the areas below | update mode for the
@@ -433,7 +433,7 @@ updates the documentation from the merged code and files the plan.
 Depends on: C1
 Agent: be-dotnet · Stack: be
 
-You are `be-dotnet`. Task B1 of docs/plans/003-workshop-booking/delivery-plan.md: implement the
+You are `be-dotnet`. Task B1 of docs/plans/003-workshop-booking.md: implement the
 Workshops and Sessions resources so a studio admin can publish a workshop and add sessions to it.
 
 Read your agent definition, then load exactly these skills: `be-dotnet:patterns-apply`,

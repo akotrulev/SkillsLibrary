@@ -1,6 +1,6 @@
 ---
 name: plan-session-budget
-description: Use when sizing plan tasks to one session each or writing each task's paste-ready prompt. Triggers "is this one session", "what do I paste next". Not for sequencing tasks (plan-delivery).
+description: Use when sizing plan tasks to one session each or writing each task's paste-ready prompt. Triggers "is this one session", "what do I paste next". Not for ordering tasks (writing-plans).
 disable-model-invocation: true
 ---
 
@@ -13,11 +13,11 @@ Two jobs, both about the boundary between a plan and the sessions that run it.
 
 **The estimate is a target, never a gate.** It says what to aim for. It does not decide what a task is — coherence does, and coherence wins every time the two disagree. Never split a task that is one thing to get under a number, and never merge unrelated work to fill one up.
 
-**Prerequisites:** a task list from `product:plan-delivery` with `Files` filled in, and `epic-map.md` for the lane structure. Sizing a task whose files are vague produces a number with nothing behind it.
+**Prerequisites:** a task list from `writing-plans` with `Files` filled in. Sizing a task whose files are vague produces a number with nothing behind it.
 
 ## Output
 
-Two things, both **inside the plan document** — `docs/plans/<NNN>-<initiative>/delivery-plan.md`, or the single-file plan an `product:plan-feature` run produced:
+Two things, both **inside the plan document**: the feature's implementation plan, `docs/plans/<NNN>-<feature>.md`, that `writing-plans` produced:
 
 1. A **`**Budget:**`** line on every task block, with its drivers itemized, and a matching `Budget` cell in the task table.
 2. The **`## Prompts — one per task`** section — one paste-ready block per task that has not landed. See `references/prompts-section-template.md`.

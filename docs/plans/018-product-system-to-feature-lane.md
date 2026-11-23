@@ -12,11 +12,12 @@ front doors.
 Every skill that is only a step inside one of the two front doors is hidden: neither the model nor the
 user can call it on its own.
 
-**Status:** S1 landed (2026-11-23): `system-plan-format.md` defines the system plan, the four section
-skills write §2–§5 of it, and `rules/system-plans.md` replaces the two backlog rule files. Next: S2.
-Unverified: `/product:plan-system` still runs the old `solution-planner`, which no longer matches the
-four skills, and `solution-planner.md:83` still points at the deleted `pack-cross-checks.md` (S2
-rewrites both).
+**Status:** S1 and S2 landed (2026-11-23). S1: `system-plan-format.md`, the four section skills and
+`rules/system-plans.md`. S2: `solution-planner` runs NEW / EXISTING / EXTEND and writes
+`docs/plans/<NNN>-<system>-system.md`, `/product:plan-system` routes to it, and `requirements-author`,
+`/product:refine` and `delivery-plan` are gone from the tree and the manifest. Next: F1. Unverified: the
+prompts a system plan writes call `/product:plan-feature`, which does not exist until F1; the rest of the
+library still names the deleted lane until F1, F2, K1 and M1.
 
 **Test design:** none. The plan serves no stories and changes skill text, agent text, the manifest and
 one lint script. The checks are `tools/plugin-surface-check.py`, `tools/skill-lint.py`,
@@ -344,6 +345,13 @@ and, in the close-out, a decision that changes §3 corrects the §3 line in plac
 always says what is true now. Cost: S2 writes the `**Mode:**` line and the `State` column, and F1's
 write-back sets `State`.
 
+**D22 (2026-11-23, S2) — `solution-planner`'s write reach includes the glossary rows and ADRs `domain-modeling` writes.**
+S2's bullet gave the reach as the system plan and the orientation cache only, but the same bullet has
+Step 1 load `domain-modeling` "as `brainstorming` step 5 does", and that step writes
+`docs/business-model/glossary.md` rows and `docs/adr/` files as terms settle. The agent and the command
+now name both. Cost: `business-analyst` no longer owns every write to the KB; the boundary line says
+`solution-planner` writes glossary rows and nothing else there.
+
 ## Answered questions (2026-11-23)
 
 - **O1 — How much design does the system command do up front:** a thin skeleton (D3).
@@ -523,6 +531,33 @@ replaces `backlog-requirements.md` and `backlog-epics.md`. `skill-lint` reports 
   - References in other files (M1). `business-analyst.md` and the catalog still name
     `requirements-author` until then, and `skill-lint` may flag a dead path to a deleted file. Fix any
     such R8 finding inside `product/` here, by pointing it at the replacement in §5.
+- **As built (2026-11-23):**
+  - `product/agents/solution-planner.md` rewritten (12.3 KB, under the 14 KB agent budget): modes NEW,
+    EXISTING, EXTEND (:49-51); `## Steps` table 0–8 with `Load` and `Done when` (:59-69), Step 6 the
+    blocking approval of §2, §3 and the feature list (:67), Step 7 writes the file per
+    `system-plan-format.md` with the `**Mode:**` line and every prompt-table `State` set to `live` (:68),
+    Step 8 the self-review that replaces the deleted `pack-cross-checks.md` (:69); `## Report` opens with
+    `Mode:`. Steps 2–5 draft in the session and send open decisions back to Step 1; nothing reaches disk
+    before Step 7. `§1` is written in Step 4, with the feature list, since its `Gap` column names features.
+  - `product/commands/plan-system.md` rewritten: routes to `solution-planner`; the three rules are plans
+    not code, Step 6 blocks, the system plan is not queued.
+  - Deleted: `product/agents/requirements-author.md`, `product/commands/refine.md`,
+    `product/skills/delivery-plan/` (8 files), and their three entries in `.claude-plugin/marketplace.json`.
+    The `product` description is untouched (C1).
+  - `session-budget/SKILL.md`: prerequisite "a task list from `writing-plans` with `Files` filled in",
+    output the feature's implementation plan `docs/plans/<NNN>-<feature>.md`, description
+    "Not for ordering tasks (writing-plans)". `prompts-section-template.md`: every
+    `…/delivery-plan.md` path is now `docs/plans/<NNN>-<feature>.md` (worked example
+    `docs/plans/003-workshop-booking.md`).
+  - EXISTING mode names the old pack as "an older initiative folder's requirements, epics and stories
+    files", not by file name, so the §7 grep stays quiet on the agent.
+  - No R8 finding appeared inside `product/` from the deletions, so nothing else was repointed. Textual
+    mentions of the deleted lane remain for later tasks: `brainstorming/SKILL.md:3,12,18,33,101` and
+    `writing-plans/references/plan-format.md:16,27,311` (F1); `integration-plan/SKILL.md:104,113` and its
+    example (F2); `business-analyst.md:3,16,61` and `rules/plans.md:4,18`, `rules/SKILL.md:19` (M1).
+  - Gate: `plugin-surface-check.py` → `OK`; `skill-lint.py product` → `0 findings` (whole library also
+    `0 findings`); `token-audit.py --violations-only` → exit 0; `pytest tools/test_skill_lint.py` → 95 passed.
+  - Unverified: no run of `/product:plan-system` in a scratch repo (the user's check after G1).
 
 ### F1 — `/product:plan-feature`: interview, spec, plan and write-back in one run
 
@@ -856,60 +891,9 @@ session that runs the task.
 | G1 | `docs` | `general-purpose` | C1 | — | ~90k |
 | — | restart, run `/product:plan-system` in a scratch repo, check the hidden skills and Plan Queue | **the user** | G1 | — | — |
 
-S1 has landed, and its prompt is deleted.
+S1 and S2 have landed, and their prompts are deleted.
 
 ---
-
-### S2 — solution-planner and /product:plan-system write the system plan (general-purpose, docs)
-
-````
-Depends on: S1
-Agent: general-purpose · Stack: docs
-
-Task S2 of docs/plans/018-product-system-to-feature-lane.md: rewrite solution-planner and the
-/product:plan-system command to produce the system plan, and delete the lane it replaces.
-
-Deliverable: product/agents/solution-planner.md runs NEW, EXISTING and EXTEND (D17) and writes
-docs/plans/<NNN>-<system>-system.md per system-plan-format.md. /product:plan-system routes to it.
-requirements-author, /product:refine and delivery-plan are gone from the tree and the manifest.
-plugin-surface-check prints OK.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3, §5, D1, D7, D8, D16–D19, task S2 and its As built notes from S1, and
-   "Close-out — every task".
-3. product/skills/solution-blueprint/references/system-plan-format.md (S1's output).
-4. product/agents/solution-planner.md and product/agents/requirements-author.md (the scoping and epic
-   steps that move in).
-5. product/commands/plan-system.md and product/commands/refine.md.
-6. product/skills/session-budget/SKILL.md (prerequisites only) and
-   references/prompts-section-template.md (the lines naming delivery-plan.md).
-7. The "product" entry in .claude-plugin/marketplace.json.
-
-Build: the task's bullets, in order.
-
-Traps:
-- Keep the house agent shape: a ## Steps table with Load and Done when columns, and a ## Report holding
-  Mode: (lint R13). No "when relevant" or "as needed" in a Load cell (R14).
-- Step 6, the approval of §2, §3 and the feature list, blocks: nothing is written before it.
-- Deleting delivery-plan/ leaves dead links inside product/. Fix every R8 finding the lint reports
-  inside product/ by pointing it at the replacement in §5. Files outside product/ are M1's.
-- Leave the manifest's product description alone (C1).
-- S1 deleted solution-blueprint/references/pack-cross-checks.md and key-flows-and-decisions.md, and
-  renamed the §3 template skeleton-template.md (D21). solution-planner.md:83 still names
-  pack-cross-checks.md: the new self-review step replaces it. The system plan header carries a
-  **Mode:** line and the feature-prompt table a State column (format §2, §5).
-- ba-epic-writer hands solution-planner the feature list (id, title, epic); solution-planner writes
-  each §6 task block and its prompt from it.
-
-Gate:
-  python3 tools/plugin-surface-check.py              → OK
-  python3 tools/skill-lint.py product | tail -1      → 0 findings
-  python3 tools/token-audit.py --violations-only     → exit 0
-
-Commit: `product: solution-planner writes the system plan; refine, requirements-author and delivery-plan removed (018 S2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### F1 — /product:plan-feature: interview, spec, plan and write-back in one run (general-purpose, docs)
 

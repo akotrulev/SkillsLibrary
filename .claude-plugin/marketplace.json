@@ -80,7 +80,6 @@
         "./product/skills/api-surface-plan",
         "./product/skills/integration-plan",
         "./product/skills/epic-map",
-        "./product/skills/delivery-plan",
         "./product/skills/session-budget",
         "./product/skills/codebase-survey",
         "./product/skills/feature-trace",
@@ -101,11 +100,9 @@
         "./product/agents/solution-planner.md",
         "./product/agents/documenter.md",
         "./product/agents/feature-documenter.md",
-        "./product/agents/requirements-author.md",
         "./product/agents/business-analyst.md"
       ],
       "commands": [
-        "./product/commands/refine.md",
         "./product/commands/plan-system.md",
         "./product/commands/document-system.md",
         "./product/commands/document-feature.md",
