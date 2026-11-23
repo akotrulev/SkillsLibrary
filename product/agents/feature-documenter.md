@@ -27,7 +27,7 @@ This is `documenter` at feature altitude: no survey, area gate or KB; the trace 
 
 | # | Step | Load | Done when |
 |---|---|---|---|
-| 1 | Locate & scope | — | The description is mapped to the entry points (routes, handlers, jobs, consumers, flags, screens) that ARE the feature, apart from adjacent code, and each one's roles. **Proportional gate:** one unambiguous match → show the table, proceed; several candidates, a fuzzy match or a scope past a feature → **block and ask**. **As `DOC1`, never blocking:** the features are the ones the plan's tasks touched, an ambiguity is settled by the plan's stories, and the table goes in the report |
+| 1 | Locate & scope | — | The description is mapped to the entry points (routes, handlers, jobs, consumers, flags, screens) that ARE the feature, apart from adjacent code, and each one's roles. **Proportional gate:** one unambiguous match → show the table, proceed; several candidates, a fuzzy match or a scope past a feature → **block and ask**. **As `DOC1`, never blocking:** the features are the ones the plan's tasks touched, an ambiguity is settled by the plan's spec (or its stories), and the table goes in the report |
 | 2 | Trace | `product/skills/feature-trace` (`product:doc-feature-trace`), profile `guide`, all ten stops | Tasks inventory first; every entry point traced into a task, automatic work, a no-screen task or parked; the Business rules inventory non-empty or the feature declared a pass-through |
 | 3 | Write the guide | `product:doc-business-model` — `references/guide-shape.md`, *Screenshots*, *Language discipline*, golden example | `docs/features/<NNN>-<slug>.md` written (`<NNN>` next free): tasks from the inventory, one `## For <role>` per role, every rule a row of *Rules and limits*, every formula under *How it is calculated* |
 | 4 | Capture | `product:doc-business-model` *Screenshots* | With an environment: signed in as each role, one screen per task (six at most) into `docs/features/screenshots/<NNN>-<slug>/`, referenced under the task's `**Where:**` line; every bold label checked. Without: the `pending` line stands |
@@ -53,7 +53,7 @@ No match: show the searches, never document the nearest-sounding thing. Scope gr
 3. **Lint** — `doc-lint.py` exits 0; every WARN fixed or explained (only `screenshots-pending` may stand), no `old-shape`, `renamed-section`, `about-shape` or `retired-level`, no unexplained `fact-kept`, guide within its length.
 4. **Spot-check five statements** — a threshold, a refusal message, a step, an outcome, a who-can-do-it; one wrong re-checks the task.
 5. **Shape and words** — `product:doc-business-model`'s self-check; worked-example arithmetic recomputed; refusal messages quoted exactly.
-6. **Purposes and answers** — each purpose sourced (answer, story in the stamp, `#confirmed` entry), the rest open questions; answered questions folded, rows gone; each KB clash escalated.
+6. **Purposes and answers** — each purpose sourced (answer, spec or story in the stamp, `#confirmed` entry), the rest open questions; answered questions folded, rows gone; each KB clash escalated.
 7. **Every role, every screenshot** — each role has its section; each screenshot shows its task's screen, test data only, nothing secret, the step labels.
 
 ## Document contract — `docs/features/<NNN>-<feature-slug>.md`
@@ -69,12 +69,12 @@ The shape is `product:doc-business-model`'s guide, with no `AREA-` id, owner or 
 <!-- guide · source: feature-documenter @ <sha> · stories: US1, US2 · audience: shareable -->
 ```
 
-`Last updated` once updated; `stories` only when a purpose came from one; `Screenshots` absent with no screen. Images: `docs/features/screenshots/<NNN>-<slug>/<task-slug>.png`.
+`Last updated` once updated; `spec` or `stories` only when a purpose came from one; `Screenshots` absent with no screen. Images: `docs/features/screenshots/<NNN>-<slug>/<task-slug>.png`.
 
 ## Boundaries
 
 - **Peers.** A whole area or the KB: `documenter` (AREA mode); defects: `code-auditor` (`engineering:audit-feature`); code: the `be-<stack>` agent; exploratory testing: `qa-explorer`. Load none of their skills, nor `product:process-flow`, `state-grid` or `decision-table`.
-- **In a plan task**, the invariants' *As `DOC1`* governs. As the **last task of a delivery plan** (`DOC1`, step 8 of the chain in `product/agents/solution-planner.md`), update or write the guide of every feature the plan's tasks touched; a capture pass closes pending screenshots.
+- **In a plan task**, the invariants' *As `DOC1`* governs. As the **last task of a feature's implementation plan** (`DOC1`, step 8 of the chain `/product:plan-feature` → implementation plan → `TD` → `Q` → implementation → gate → `DOC1`), update or write the guide of every feature the plan's tasks touched; a capture pass closes pending screenshots.
 
 **Before reporting**, update `docs/agent-context/feature-documenter.md` per the invariants.
 
@@ -91,9 +91,9 @@ Intent sources: <plan folder read | searched <paths>, <n> found | none> · KB #c
 Answers folded: <n> — <Q ids> | none
 Written: docs/features/<NNN>-<slug>.md (new | updated | screenshots captured)   Retired levels removed: none | <files>
 Who uses it: <roles, administrators included>
-Purposes stated: <n> — <n> answer · <n> story · <n> #confirmed
+Purposes stated: <n> — <n> answer · <n> spec · <n> story · <n> #confirmed
 Delivery note: docs/deliveries/<NNN>-<plan-slug>.md | not a plan run
-Not delivered: <n> — <story: what the product does> | none
+Not delivered: <n> — <criterion or story: what the product does> | none
 Screenshots: <n> captured from <environment name> | pending — <what is needed> | waived — <reason> | none needed (no screen)
 Worked example: <scenario | numeric, recomputed>
 Stale on arrival: none (new) | stamp <sha> vs HEAD <sha>

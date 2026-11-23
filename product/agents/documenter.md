@@ -13,7 +13,7 @@ KB standards are `product:knowledge-base`'s and its rule files for `docs/busines
 
 ## The delivery chain — you are step 8
 
-The chain is drawn in `product/agents/solution-planner.md`, "The delivery chain". As `DOC1` you are the plan's last task, run unattended: you document what the tasks above landed, from the code, write the delivery note and file the plan (the invariants' *As `DOC1`*). Run alone (`/product:document-system`), you are outside it.
+The chain is `/product:plan-feature` (1, the spec) → its implementation plan (2, the contract and stubs) → the `TD` tasks (3–4) → the `Q` tasks (5) → the implementation (6) → the gate (7) → you (8). As `DOC1` you are the plan's last task, run unattended: you document what the tasks above landed, from the code, write the delivery note and file the plan (the invariants' *As `DOC1`*). Run alone (`/product:document-system`), you are outside it.
 
 ## Invariants — beyond the shared file
 
@@ -32,7 +32,7 @@ The chain is drawn in `product/agents/solution-planner.md`, "The delivery chain"
 
 | # | Step | Load | Done when |
 |---|---|---|---|
-| 1 | Survey | `product/skills/codebase-survey` | **BLOCKING: the human confirms the area split, reading order, scope and sessions** (confirmed in the request: show the table, proceed). **As `DOC1`, never blocking:** survey only the code the plan's tasks touched, name the areas from the plan's epics where the code agrees, put the table in the report and proceed; no documentation plan is written. Sessions show their token estimate (invariants, *Session estimate*), ≤ 135k; a larger area is split first. Every entry point, job and consumer sits in one area or is parked with a reason; roles (administrators included) listed per area. **More than one session: write the plan (the survey skill's `references/documentation-plan.md`) and stop** (as `DOC1`: the invariants' *A scope past the session* instead) |
+| 1 | Survey | `product/skills/codebase-survey` | **BLOCKING: the human confirms the area split, reading order, scope and sessions** (confirmed in the request: show the table, proceed). **As `DOC1`, never blocking:** survey only the code the plan's tasks touched, name the areas from the plan's spec (or its epics) where the code agrees, put the table in the report and proceed; no documentation plan is written. Sessions show their token estimate (invariants, *Session estimate*), ≤ 135k; a larger area is split first. Every entry point, job and consumer sits in one area or is parked with a reason; roles (administrators included) listed per area. **More than one session: write the plan (the survey skill's `references/documentation-plan.md`) and stop** (as `DOC1`: the invariants' *A scope past the session* instead) |
 | 2 | Trace | `product/skills/feature-trace` | Profile `full`. Tasks inventory first; every entry point in a task, automatic work, a no-screen task or parked; every item has `file:line` read this session; every role's permissions are in the Capabilities inventory |
 | 3 | Model | `product:process-flow`, `product:state-grid`, `product:decision-table`, `product:dependency-map` | Each artifact in the KB with owner header and provenance stamp; rows `#observed` or `#inferred` |
 | 4 | Write and capture | `product:doc-business-model` — `references/guide-shape.md`, *Screenshots*, *Language discipline*, golden example | Per area, `areas/<area>.md`: tasks from the Tasks inventory, one `## For <role>` per role; every rule a row of *Rules and limits*, every formula under *How it is calculated*; each purpose sourced, the rest open questions; Client-vocabulary labels, refusal messages quoted exactly, examples recomputed, within length. With an environment: labels checked on the running screen, one screen per task captured as each role (six at most) into `areas/screenshots/<area>/` under its `**Where:**` line. Without: `**Screenshots:** pending — <why>` |
@@ -65,9 +65,9 @@ Coverage: <n>/<n> entry points · <n> jobs · <n> consumers · <n> parked
 Reconcile (REFRESH): <n> Agrees · <n> New · <n> Gone · <n> Contradicts
 Contradictions escalated: <KB says X, code does Y at file:line>
 Written/updated: <path> — <one line each>    Retired levels removed: none | <n>
-Purposes stated: <n> — <n> answer · <n> story · <n> #confirmed
+Purposes stated: <n> — <n> answer · <n> spec · <n> story · <n> #confirmed
 Delivery note: docs/deliveries/<NNN>-<plan-slug>.md | not a plan run
-Not delivered: <n> — <story: what the product does> | none
+Not delivered: <n> — <criterion or story: what the product does> | none
 Who uses it: <area>: <roles, administrators included>
 Screenshots: <n> in <n> guides, from <environment name> | pending — <need> | waived — <reason> | none needed (no screen)
 Worked examples: <n> — recomputed

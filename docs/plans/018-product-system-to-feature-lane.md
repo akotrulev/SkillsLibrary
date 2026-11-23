@@ -21,9 +21,11 @@ write-back and on hold; `writing-plans` is hidden from the model and loaded by p
 spec's acceptance criteria in `plan-format.md` and `plans.md`. F2: `data-model-plan`, `experience-plan`,
 `api-surface-plan` and `integration-plan` write the spec's `## Data model`, `## Experience` (with
 `### Rendering plan`), `## API surface` and `## Integrations`, on top of §3 and earlier specs; their
-examples are sections of one toy spec (D24). Next: K1. Unverified: no run of `/product:plan-feature` in a
-scratch repo; the rest of the library still names the deleted lane and the old design files until K1
-and M1; follow-up for G1: S1's §3 example picks a Vite SPA where `rendering-strategy.md` would give
+examples are sections of one toy spec (D24). K1: `qa-test-planner`, `test-plan-writer`,
+`qa-test-case-designer`, `/qa-…:test-plan` and `test-first` take a spec's acceptance criteria first (tag
+`SPEC<NNN>-AC<k>`, D25) and still accept a story backlog; the documenter reads the spec as the source of
+purpose; `business-analyst` has `BACKLOG AUDIT`. Next: M1. Unverified: no run of `/product:plan-feature` in a
+scratch repo; the rest of the library still names the deleted lane and the old design files until M1; follow-up for G1: S1's §3 example picks a Vite SPA where `rendering-strategy.md` would give
 `ssr` (F2 As built).
 
 **Test design:** none. The plan serves no stories and changes skill text, agent text, the manifest and
@@ -382,6 +384,16 @@ clause in its close-out, harmless now; M1 has three fewer hits to rewrite.
 - Cost: K1 and M1 point `test-first` and `tooling-engineer` at `docs/specs/validation-catalog.md`; a
   project whose specs live elsewhere (the user's preference wins, `plan-feature`'s Output format) keeps
   the copy beside them.
+
+**D25 (2026-11-23, K1) — The backlog audit is a new `BACKLOG AUDIT` mode, and a spec-bound test is tagged `SPEC<NNN>-AC<k>`.**
+- `business-analyst` already had an `AUDIT` mode (refresh the KB). Both readings: fold the backlog review
+  into it (rejected: one mode name for two inputs, KB versus backlog) or add a mode beside it (chosen,
+  `BACKLOG AUDIT`).
+- The plan says tests cite `<spec> AC<k>`, but a tag cannot hold a path or a space. `test-first` tags
+  `SPEC<NNN>-AC<k>` from the spec's number (unique in `docs/specs/`), `US<n>-AC<k>` from a backlog. Within
+  one test plan or suite a row cites `AC<k>` alone, the spec named once in **Covers** or the header.
+- Cost: a project whose specs live outside `docs/specs/` numbers them its own way; the tag still takes the
+  spec's `NNN`.
 
 ## Answered questions (2026-11-23)
 
@@ -801,6 +813,46 @@ findings over `qa` and `product`.
   `product/skills/ba-story-quality-review` verdict per story, with no file changed.
 - **Not in K1:** the design, frontend, mobile, tooling, data and backend references to the old pack
   files (M1).
+- **As built (2026-11-23):**
+  - QA. `qa/manual/test-plan-writer/SKILL.md`: the unit is one feature from its spec's acceptance criteria
+    (:9), the basis a feature spec first, a story backlog second (:15), `# Test Plan — <feature or epic>`
+    with **Covers** naming the spec and its AC range, §3 rows and §10 traces citing `AC<k>` of the spec in
+    **Covers** (`US6 AC3` from a backlog), Ready/Done and the section rules keyed to acceptance criteria.
+    `qa-test-planner.md:14-18`: the chain redrawn inline (`/product:plan-feature` 1 → implementation plan 2
+    → `TD` 3–4 → `Q` 5 → implementation, gate, `DOC1` 6–8), since `solution-planner.md` no longer has a
+    "delivery chain" section; a spec (or the plan that builds it) is the first input shape, one plan per
+    feature; the backlog row stays. `qa-test-case-designer.md:14-17,36-37`: one suite per feature from the
+    spec (`## Experience` journeys, `## Acceptance criteria` conditions), one per story from a backlog.
+    `qa/manual/commands/test-plan.md` and (beyond the bullet) `test-cases.md`: the argument is a spec or
+    its plan. `qa/_shared/test-first/SKILL.md:17-41`: inputs are the spec's `## API surface`,
+    `docs/specs/validation-catalog.md`, `## Experience` (`### Journeys`, `### Screens` `Test ids:`,
+    `### Rendering plan`); the tag is `SPEC<NNN>-AC<k>` (`SPEC006-AC2`), `US<n>-AC<k>` from a backlog,
+    with the `TP-` id beside it (D25).
+  - Documenter. `business-documentation/SKILL.md:21,25,103`, `documenter-invariants.md:24,37-38`: the
+    plan's feature spec (goal, decisions, acceptance criteria) is the source of purpose, a story backlog
+    where the plan was built from one. `delivery-note.md`: the template's first column is *Criterion*
+    (`AC<k>`) and its stamp carries `spec` and `criteria`; a backlog plan keeps *Story* and `stories`; "a
+    plan with no stories" became "no stories and no acceptance criteria" (it still puts `—`); the worked
+    example stays the story-based plan 004, said so in its lead-in, matching `example-area.md` and the
+    evals. The guide stamp gained an optional `spec` key (`guide-shape.md:88`, `system-overview.md:79`).
+    Beyond the bullet, `product/agents/documenter.md:16` and `feature-documenter.md:77` pointed at the
+    deleted "delivery chain" in `solution-planner.md`; both now draw it inline, and their report lines
+    and `DOC1` scope read the spec. `evals/` unchanged.
+  - `business-analyst.md`: description (:3) names the backlog audit and routes design to
+    `/product:plan-feature`; :16 "the user repairs those, or `solution-planner` for a system plan"; a
+    **BACKLOG AUDIT** mode row (:32) reads `product/skills/ba-story-quality-review/SKILL.md` by path, a
+    verdict per story, no backlog or KB file changed, rewrites proposed per
+    `product/skills/ba-story-writer/SKILL.md` in the report only; :61 routes to `/product:plan-feature` and
+    `/product:plan-system`; the report gains a backlog-verdicts line (D25).
+  - Token budget: `qa-test-planner.md` and `qa-test-case-designer.md` were already near token-audit's
+    14,000-char agent budget; both were tightened elsewhere (Fix/Extend, orient, step-2 prose) without
+    changing a rule, to 13,987 and 13,993 chars. The `business-analyst` description is 347 chars.
+  - Gate: `skill-lint.py qa/manual qa/_shared/test-first product` → `0 findings`; `qa-version-check.py` →
+    `OK`; `plugin-surface-check.py` → `OK`. Also `skill-lint.py` (whole library) → `0 findings`,
+    `token-audit.py --violations-only` → exit 0, `pytest tools/test_skill_lint.py` → 95 passed.
+  - Unverified: no `TD`/`Q`/`DOC1` task has run against a real spec, and `doc-lint.py` was not run on a
+    delivery note with `spec`/`criteria` (its stamp check requires only `plan`, `source`, `audience`,
+    `doc-lint.py:369-375`).
 
 ### M1 — Every remaining reference, and the hidden skills
 
@@ -983,55 +1035,9 @@ session that runs the task.
 | G1 | `docs` | `general-purpose` | C1 | — | ~90k |
 | — | restart, run `/product:plan-system` in a scratch repo, check the hidden skills and Plan Queue | **the user** | G1 | — | — |
 
-S1, S2, F1 and F2 have landed, and their prompts are deleted.
+S1, S2, F1, F2 and K1 have landed, and their prompts are deleted.
 
 ---
-
-### K1 — QA and the documenter read the feature spec (general-purpose, docs)
-
-````
-Depends on: F1, F2
-Agent: general-purpose · Stack: docs
-
-Task K1 of docs/plans/018-product-system-to-feature-lane.md: re-key the QA test-design agents, test-first
-and the documenter from stories.md to the feature spec's acceptance criteria, and give business-analyst
-the backlog audit.
-
-Deliverable: qa-test-planner, test-plan-writer, qa-test-case-designer, /qa-…:test-plan and test-first
-take a feature spec's ## Acceptance criteria as their primary basis, citing <spec> AC<k>, and still
-accept a story backlog. business-documentation reads the spec as the source of purpose. business-analyst
-owns the AUDIT of an imported backlog (D5). skill-lint reports 0 findings over qa and product.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §4, §6, D5, D11, task K1 and the As built notes above it, and "Close-out — every task".
-3. product/skills/writing-plans/references/plan-format.md §4 (TD) and §5 (DOC1), as F1 left them.
-4. qa/manual/test-plan-writer/SKILL.md, qa/manual/agents/qa-test-planner.md,
-   qa/manual/agents/qa-test-case-designer.md, qa/manual/commands/test-plan.md,
-   qa/_shared/test-first/SKILL.md.
-5. product/skills/business-documentation/SKILL.md, references/documenter-invariants.md,
-   references/delivery-note.md.
-6. product/agents/business-analyst.md.
-
-Build: the task's bullets, in order.
-
-Traps:
-- A story backlog stays a valid basis everywhere: add the spec first, don't delete the story path.
-- Leave product/skills/business-documentation/evals/ unchanged.
-- The QA files are shared by the three qa-* plugins: change the text, not the registration.
-- A spec's ## API surface cites the project's copy of the validation catalog at
-  docs/specs/validation-catalog.md (F2, D24): test-first's error-slug line points there. Journeys and
-  test ids are in the spec's ## Experience (### Journeys, ### Screens), the rendering entries in its
-  ### Rendering plan.
-
-Gate:
-  python3 tools/skill-lint.py qa/manual qa/_shared/test-first product | tail -1   → 0 findings
-  python3 tools/qa-version-check.py                  → OK
-  python3 tools/plugin-surface-check.py              → OK
-
-Commit: `qa, product: test design and documentation read the feature spec (018 K1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### M1 — Every remaining reference, and the hidden skills (general-purpose, docs)
 
@@ -1064,6 +1070,11 @@ Traps:
   catalog's project copy at docs/specs/validation-catalog.md (D24). A hit naming the plan's
   validation-catalog.md (tooling/agents/tooling-engineer.md:56) points there; experience-plan.md §4a
   is the spec's ### Rendering plan.
+- K1 re-keyed QA and the documenter to the spec (D25: test tags SPEC<NNN>-AC<k>, US<n>-AC<k> from a
+  backlog). product/skills/session-budget (SKILL.md:142, references/prompts-section-template.md:142,
+  158, 195, 242, 341) still writes TD/Q/DOC1 prompts from stories.md and US ids, outside the §7 grep:
+  re-key them the same way. qa/manual/agents/qa-test-planner.md and qa-test-case-designer.md sit just
+  under token-audit's 14,000-char agent budget: an edit there trims as much as it adds.
 
 Gate:
   python3 tools/plugin-surface-check.py              → OK

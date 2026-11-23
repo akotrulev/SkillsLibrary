@@ -10,16 +10,16 @@ One file per plan, **`docs/deliveries/<NNN>-<plan-slug>.md`** (`<NNN>` is the pl
 <One sentence: what people can do now that they could not before.>
 
 ## New — what people can do now
-| Story | Who | What they can do now | Read more |
+| Criterion | Who | What they can do now | Read more |
 |---|---|---|---|
-| US3 | Members | Cancel a booking and get the credits back when it is 24 hours or more ahead | [Cancel a booking](../business-model/areas/credits-and-charges.md#cancel-a-booking) |
+| AC3 | Members | Cancel a booking and get the credits back when it is 24 hours or more ahead | [Cancel a booking](../business-model/areas/credits-and-charges.md#cancel-a-booking) |
 
 ## Changed — what works differently
 | What | Before | Now | Who notices |
 |---|---|---|---|
 
 ## Not delivered
-| Story | What was planned | What the product does today |
+| Criterion | What was planned | What the product does today |
 |---|---|---|
 
 ## Questions this raised
@@ -29,23 +29,24 @@ One file per plan, **`docs/deliveries/<NNN>-<plan-slug>.md`** (`<NNN>` is the pl
 **Delivered:** YYYY-MM-DD
 **Describes:** the product as it was on YYYY-MM-DD
 
-<!-- delivery · plan: NNN · source: documenter @ <sha> · stories: US1, US2, US3 · audience: shareable -->
+<!-- delivery · plan: NNN · source: documenter @ <sha> · spec: 006 · criteria: AC1, AC2, AC3 · audience: shareable -->
 ````
 
 ## Rules
 
 - **Read from what landed, never from the plan's intentions.** *New* and *Changed* come from the code at `HEAD` and the guides just updated: the reconcile verdicts **New**, and the `~~old~~ → new` facts. *Read more* links the guide's task.
-- **`## Not delivered` is always present.** It holds every story or acceptance criterion the plan held that the code at `HEAD` does not do, or does differently, with what the product does today. When everything was built, the heading holds one line, "Everything the plan set out to build was built.", and no table.
-- **A plan with no stories** puts `—` in the *Story* column and takes its rows from the plan's task deliverables.
-- **Story ids are allowed in the *Story* column** — they are the product owner's own. They are the only ids; no `AREA-`, `FLOW-`, `Q<n>` or other internal id appears.
-- **The guide's language rules apply:** the client's words, no code names, jargon, status codes or tier tags, no judging words, no guarantee words, no roadmap promises. A difference between a story and the code is stated as a fact ("Unused credits are lost on the 1st of the month"), never as a fault.
+- **`## Not delivered` is always present.** It holds every acceptance criterion of the plan's spec (every story or story criterion, where the plan was built from a story backlog) that the code at `HEAD` does not do, or does differently, with what the product does today. When everything was built, the heading holds one line, "Everything the plan set out to build was built.", and no table.
+- **A plan built from a story backlog** heads the first column *Story* and fills it with `US<n>` (or `US<n> AC<k>`), and its stamp carries `stories` in place of `spec` and `criteria`.
+- **A plan with no stories** and no acceptance criteria puts `—` in the first column and takes its rows from the plan's task deliverables.
+- **Criterion and story ids are allowed in the first column** — the product owner approved them. They are the only ids; no `AREA-`, `FLOW-`, `Q<n>` or other internal id appears.
+- **The guide's language rules apply:** the client's words, no code names, jargon, status codes or tier tags, no judging words, no guarantee words, no roadmap promises. A difference between the spec or a story and the code is stated as a fact ("Unused credits are lost on the 1st of the month"), never as a fault.
 - **Empty tables are dropped with their heading**, except *Not delivered*. *Questions this raised* is dropped when the run raised none.
-- **The stamp** is the last line: `delivery`, `plan`, `source: <agent> @ <sha>`, `stories` (every story the plan held), `audience: shareable`. `**Delivered:**` is the date of the run; `**Describes:**` the date the product was read.
+- **The stamp** is the last line: `delivery`, `plan`, `source: <agent> @ <sha>`, `spec` (the spec's number) and `criteria` (every acceptance criterion the plan built) — or `stories` (every story the plan held) — and `audience: shareable`. `**Delivered:**` is the date of the run; `**Describes:**` the date the product was read.
 - **Rendering and lint** are the guide's: `render-html.py --dir docs/deliveries` and `doc-lint.py --dir docs/deliveries` (or a named file). The lint knows a delivery note by its first line, `# What was delivered`, runs the language rules on it, and requires `## Not delivered`, `## About this document` and the stamp.
 
 ## Worked example
 
-The `workshop-booking` toy of [`example-area.md`](example-area.md), as the plan that built the credits would leave it in `docs/deliveries/004-session-credits.md`:
+The `workshop-booking` toy of [`example-area.md`](example-area.md), as the plan that built the credits would leave it in `docs/deliveries/004-session-credits.md`. That plan was built from a story backlog, so the first column is *Story* and the stamp carries `stories`; a plan built from a spec has `AC<k>` there and `spec` and `criteria` in the stamp:
 
 ```markdown
 # What was delivered — Session credits and charges
