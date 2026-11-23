@@ -4,7 +4,7 @@ paths:
   - "docs/plans/*/delivery-plan.md"
 ---
 
-<!-- product rules v4 (2026-11-13): plans. Installed by /product:rules; edit to fit this project, re-run to compare with the plugin's copy. -->
+<!-- product rules v5 (2026-11-23): plans. Installed by /product:rules; edit to fit this project, re-run to compare with the plugin's copy. -->
 
 # Plan document standards
 
@@ -20,6 +20,7 @@ Apply to every plan you write, edit, run a task from, or review. Severity: **blo
 - Narrative first, tasks last, in the order of plan-format §2, ending in `## Close-out — every task` and `## Prompts — one per task`. *major*
 - One flat ordered list of **tasks**: no phases, slices, stages or milestones. "Step" names only a task's internal actions. *minor*
 - No `TODO`, "handle edge cases", "similar to B2", or an undefined type, file or command. An unknown is `[TBD — <who decides, by when>]` plus an open question. *major*
+- A system plan (`docs/plans/*-system.md`) follows `system-plans.md` for its feature blocks and prompts: its features carry no `Stack`, `Agent`, `Budget` or `Gate`, and it is not queued. *major*
 
 ## Tasks
 

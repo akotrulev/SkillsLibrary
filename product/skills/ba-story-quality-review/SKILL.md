@@ -20,7 +20,7 @@ Ask only what's missing, at most 2–3 questions:
 
 ## Review checklist
 
-Apply per story; each failed check becomes one finding row with a severity. The per-story checks (one whole feature with one goal, a plan and not a design, every included part proven, met-or-not acceptance criteria, testability, no technology) are the product rule files `backlog-stories.md`, and `backlog-epics.md` for epics, not a list here:
+Apply per story; each failed check becomes one finding row with a severity. The per-story checks (one whole feature with one goal, a plan and not a design, every included part proven, met-or-not acceptance criteria, testability, no technology) are the product rule file `backlog-stories.md`, not a list here:
 
 1. **The project's copies first**: `.claude/rules/product/`. The team may have edited them, and its edits win.
 2. **Otherwise the plugin's copies**: `product/skills/rules/`. Say in the report that the project has no installed rules and that `/product:rules` installs them.

@@ -12,7 +12,11 @@ front doors.
 Every skill that is only a step inside one of the two front doors is hidden: neither the model nor the
 user can call it on its own.
 
-**Status:** Not started. Next: S1.
+**Status:** S1 landed (2026-11-23): `system-plan-format.md` defines the system plan, the four section
+skills write §2–§5 of it, and `rules/system-plans.md` replaces the two backlog rule files. Next: S2.
+Unverified: `/product:plan-system` still runs the old `solution-planner`, which no longer matches the
+four skills, and `solution-planner.md:83` still points at the deleted `pack-cross-checks.md` (S2
+rewrites both).
 
 **Test design:** none. The plan serves no stories and changes skill text, agent text, the manifest and
 one lint script. The checks are `tools/plugin-surface-check.py`, `tools/skill-lint.py`,
@@ -330,6 +334,16 @@ auth wiring, the telemetry base, CI and the shared entities from §3. Every othe
 
 **D20 — Standalone `/product:plan-feature` (NEW mode) keeps working without a system plan.**
 
+**D21 (2026-11-23, S1) — The rewritten reference files take new names, and the format adds three small rules.**
+The plan said to rewrite `blueprint-template.md`, `example-blueprint.md` and `example-epic-map.md` in
+place. S1 renamed them `skeleton-template.md`, `example-skeleton.md` and
+`example-features-side-by-side.md`, because the §7 grep's `(blueprint|epic-map|…)\.md` matches the old
+names and G1 could never print nothing. The format also adds: a `**Mode:**` header line (NEW / EXISTING
+/ EXTEND, D17); a `State` column in the feature-prompt table (`live`, `specced (plan NNN)`, `on hold`);
+and, in the close-out, a decision that changes §3 corrects the §3 line in place citing its `D<n>`, so §3
+always says what is true now. Cost: S2 writes the `**Mode:**` line and the `State` column, and F1's
+write-back sets `State`.
+
 ## Answered questions (2026-11-23)
 
 - **O1 — How much design does the system command do up front:** a thin skeleton (D3).
@@ -414,6 +428,36 @@ replaces `backlog-requirements.md` and `backlog-epics.md`. `skill-lint` reports 
   - `plan-format.md` (F1).
   - Hiding the skills (M1).
   - The skills still carry their old `name:` values, so the plugin surface is unchanged.
+- **As built (2026-11-23):**
+  - `product/skills/solution-blueprint/references/system-plan-format.md` (476 lines): §1 path, §2
+    header, §3 sections, §4 feature task block, §5 `## Feature prompts — paste one per session` (heading
+    `### F<n> — <title> (/product:plan-feature)`, first line the slash command), §6 living text and
+    filing, §7 never, §8 the verbatim `## Close-out — every feature`, §9 a filled example
+    (`004-workshop-booking-system.md`: F1 specced, F2 live, F3 on hold).
+  - Renamed rather than rewritten in place (D21): `blueprint-template.md` → `skeleton-template.md`,
+    `example-blueprint.md` → `example-skeleton.md`, `epic-map/references/example-epic-map.md` →
+    `example-features-side-by-side.md`. Deleted `key-flows-and-decisions.md` and `pack-cross-checks.md`:
+    the grep found only `solution-blueprint/SKILL.md:75`, `product/agents/solution-planner.md:83` and
+    plan 015 in `implemented/` citing them. `solution-planner.md:83` still names `pack-cross-checks.md`;
+    lint does not flag it (the path does not start with `references/`), and S2 rewrites that step.
+  - `solution-blueprint/SKILL.md`: Steps 1–8 (read what exists, stack, architecture, areas → trees →
+    agents with the catalog updated to the manifest's agents, auth, shared entities, conventions, hand
+    the open decisions to the interview). No gate of its own: `solution-planner` holds the one approval.
+    `architecture-style.md` kept, "blueprint" → "skeleton" at :5, :16, :25.
+  - `ba-scoping-writeup`: §2 as nine `###` subsections; the tenth concern, open questions, goes to the
+    plan's `## Open questions`. `ba-epic-writer`: §4 as one table `| Epic | Goal | In plain English |
+    Features |`, and it hands the feature list (id, title, epic) to `solution-planner`. `epic-map`: §5's
+    table, Steps 1–6, no lanes or waves.
+  - `rules/system-plans.md` (`paths: ["docs/plans/*-system.md"]`); `backlog-requirements.md` and
+    `backlog-epics.md` deleted. `plans.md` v5: the `*-system.md` line under "The document".
+    `rules/SKILL.md`: ten files, the `system-plans.md` row, step 5 retires
+    `backlog-{requirements,epics}.md` (written as a brace glob so the §7 grep stays quiet), step 6 finds
+    system plans and story backlogs. `ba-story-quality-review/SKILL.md:23` no longer cites the deleted
+    `backlog-epics.md`.
+  - Names unchanged: `plan-blueprint`, `scoping`, `epics`, `plan-epic-map`; descriptions rewritten.
+  - Gate: `skill-lint.py product` → `0 findings`; whole-library `skill-lint.py` → `0 findings`;
+    `plugin-surface-check.py` → `OK`; `token-audit.py --violations-only` → exit 0;
+    `pytest tools/test_skill_lint.py` → 95 passed.
 
 ### S2 — `solution-planner` and `/product:plan-system` write the system plan
 
@@ -812,52 +856,9 @@ session that runs the task.
 | G1 | `docs` | `general-purpose` | C1 | — | ~90k |
 | — | restart, run `/product:plan-system` in a scratch repo, check the hidden skills and Plan Queue | **the user** | G1 | — | — |
 
-No prompt has landed yet.
+S1 has landed, and its prompt is deleted.
 
 ---
-
-### S1 — The system plan format and the four system-level skills (general-purpose, docs)
-
-````
-Depends on: none
-Agent: general-purpose · Stack: docs
-
-Task S1 of docs/plans/018-product-system-to-feature-lane.md: define the system plan and rescope the four
-skills that write its sections.
-
-Deliverable: product/skills/solution-blueprint/references/system-plan-format.md defines the system plan
-as the plan's §3 describes. solution-blueprint, ba-scoping-writeup, ba-epic-writer and epic-map each
-write their section of it (§3, §2, §4, §5) and nothing else. product/skills/rules/system-plans.md
-replaces backlog-requirements.md and backlog-epics.md. skill-lint reports 0 findings over product.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §1, §2, §3, §5, D2–D4, D7, D10, D14, D16–D19, task S1, and "Close-out — every task".
-3. product/skills/writing-plans/references/plan-format.md §1, §2, §6, §7, §8: the shape the system
-   plan borrows.
-4. product/skills/solution-blueprint/SKILL.md and its references; product/skills/ba-scoping-writeup/SKILL.md;
-   product/skills/ba-epic-writer/SKILL.md; product/skills/epic-map/SKILL.md and its example.
-5. product/skills/rules/plans.md, backlog-requirements.md, backlog-epics.md, SKILL.md.
-
-Build: the task's bullets, in order. The format file ends with the verbatim
-"## Close-out — every feature" section and a filled three-feature example.
-
-Traps:
-- The prompt block's first line is the slash command, not "Depends on:" (D10). The heading is
-  "## Feature prompts — paste one per session", never "## Prompts".
-- Keep each skill's name: field as it is. Hiding and renaming are M1's and F1's.
-- Before deleting key-flows-and-decisions.md or pack-cross-checks.md, grep for every citation. Keep a
-  file that anything other than solution-planner.md or delivery-plan cites.
-- The writing-for-agents rules apply (R3 descriptions, R8 links, R11: no "Phase" or "Slice" in a heading).
-
-Gate:
-  python3 tools/skill-lint.py product | tail -1      → 0 findings
-  python3 tools/plugin-surface-check.py              → OK
-  python3 tools/token-audit.py --violations-only     → exit 0
-
-Commit: `product: the system plan format and its four section skills (018 S1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### S2 — solution-planner and /product:plan-system write the system plan (general-purpose, docs)
 
@@ -894,6 +895,12 @@ Traps:
 - Deleting delivery-plan/ leaves dead links inside product/. Fix every R8 finding the lint reports
   inside product/ by pointing it at the replacement in §5. Files outside product/ are M1's.
 - Leave the manifest's product description alone (C1).
+- S1 deleted solution-blueprint/references/pack-cross-checks.md and key-flows-and-decisions.md, and
+  renamed the §3 template skeleton-template.md (D21). solution-planner.md:83 still names
+  pack-cross-checks.md: the new self-review step replaces it. The system plan header carries a
+  **Mode:** line and the feature-prompt table a State column (format §2, §5).
+- ba-epic-writer hands solution-planner the feature list (id, title, epic); solution-planner writes
+  each §6 task block and its prompt from it.
 
 Gate:
   python3 tools/plugin-surface-check.py              → OK
@@ -937,7 +944,9 @@ Traps:
 - SYSTEM mode treats the system plan's §3 as settled. Reopening it is a question to the user that names
   the D<n> it would change.
 - The write-back deletes the feature's prompt only after the implementation plan is committed, in a
-  follow-up commit.
+  follow-up commit. It also sets the feature's State cell in the prompt table (D21).
+- S1 added one line to product/skills/rules/plans.md (a *-system.md plan follows system-plans.md);
+  keep it when you edit that file.
 
 Gate:
   python3 tools/plugin-surface-check.py              → OK

@@ -2,7 +2,7 @@
 
 Read by Step 3 for a greenfield system or any live architecture decision. An existing codebase keeps the architecture it has; record it as `detected` and skip the styles table.
 
-**Done when** the blueprint states the style, why it is earned, what was rejected, each pattern's reason, the repository layout and the context diagram.
+**Done when** the skeleton (§3 of the system plan) states the style, why it is earned, what was rejected, each pattern's reason, the repository layout and the context diagram.
 
 State the decision, the reason it is **earned for this system**, and what you rejected. Default toward the least structure that works:
 
@@ -13,7 +13,7 @@ State the decision, the reason it is **earned for this system**, and what you re
 | **Services per area** | Several areas each meet a split trigger — independent teams on their own release cadence, or hard isolation requirements | Distributed transactions, versioned contracts, per-service observability, N pipelines |
 | **Event-driven core** | Fan-out to multiple consumers, or ordering/replay is a business requirement | A broker to run, idempotent consumers, eventual consistency the UI must reflect |
 
-**Built to be split later — four rules**, written into the blueprint and enforced from the first task:
+**Built to be split later — four rules**, written into the skeleton and enforced from the first task:
 
 1. **A module owns its data.** Its tables live in its own schema. No other module reads or writes them: no cross-module join, no shared table, no foreign key into another module's schema — another module holds the id.
 2. **Modules talk through a public surface.** Each module exposes one public API — a facade or interface shaped like the HTTP contract it would become, DTOs in and out, never an entity — and the events it publishes. Everything else is internal.
@@ -22,7 +22,7 @@ State the decision, the reason it is **earned for this system**, and what you re
 
 **Split triggers** — the only reasons a module becomes a service, each recorded as a dated decision when used: it must **scale apart** from the rest; **another team** will own it on its own release schedule; it needs **isolation the process cannot give** (untrusted input, a compliance scope — the sandboxed upload worker is the house example); it needs a **different runtime**. Size, tidiness and "we might need it later" are not triggers; the number of areas decides nothing. Splitting moves the module's folder to `services/<name>/`, gives its schema a database of its own, and replaces the in-process calls with a client generated from the same contract. An existing codebase keeps the architecture it has — this default is for new systems.
 
-Then, for each *pattern* in play, one line stating it is earned — CQRS, event sourcing, Saga, Outbox, Repository over the ORM. Load `backend/_shared/pattern-guide` for the concept card if the decision is live. **One pattern per problem**; a pattern with no stated reason is a finding against your own blueprint.
+Then, for each *pattern* in play, one line stating it is earned — CQRS, event sourcing, Saga, Outbox, Repository over the ORM. Load `backend/_shared/pattern-guide` for the concept card if the decision is live. **One pattern per problem**; a pattern with no stated reason is a finding against your own skeleton.
 
 **Propose the repository layout** beside the style. The default is **one repo per product**, because a plan runs in one worktree and a test-first plan keeps its contract, its acceptance tests and its code in one history:
 
