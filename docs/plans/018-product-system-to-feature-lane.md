@@ -12,7 +12,7 @@ front doors.
 Every skill that is only a step inside one of the two front doors is hidden: neither the model nor the
 user can call it on its own.
 
-**Status:** S1, S2, F1 and F2 landed (2026-11-23). S1: `system-plan-format.md`, the four section skills and
+**Status:** S1, S2, F1, F2, K1, M1 and C1 landed (2026-11-23). S1: `system-plan-format.md`, the four section skills and
 `rules/system-plans.md`. S2: `solution-planner` runs NEW / EXISTING / EXTEND and writes
 `docs/plans/<NNN>-<system>-system.md`, `/product:plan-system` routes to it, and `requirements-author`,
 `/product:refine` and `delivery-plan` are gone from the tree and the manifest. F1: `/product:plan-feature`
@@ -26,9 +26,10 @@ examples are sections of one toy spec (D24). K1: `qa-test-planner`, `test-plan-w
 `SPEC<NNN>-AC<k>`, D25) and still accept a story backlog; the documenter reads the spec as the source of
 purpose; `business-analyst` has `BACKLOG AUDIT`. M1: the twelve step skills set `user-invocable: false`, surface-check rule 10 enforces it, every §7 hit outside
 C1's files is rewritten, `session-budget` is re-keyed to the spec, and the audit register is renamed (D26).
-Next: C1. Unverified: no run of `/product:plan-feature` in a scratch repo; Claude Code hiding the
-twelve skills (D13); the catalog, README, `CLAUDE.md` and the product manifest description still name the
-deleted lane until C1; follow-up for G1: S1's §3 example picks a Vite SPA where `rendering-strategy.md` would give
+C1: the catalog, `README.md`, `CLAUDE.md` and the product manifest description describe the two
+front doors, the hidden steps and the `TD` rule; the §7 grep prints nothing. Next: G1. Unverified: no run
+of `/product:plan-system` or `/product:plan-feature` in a scratch repo; Claude Code hiding the twelve
+skills (D13); Plan Queue skipping `## Feature prompts` (D10); follow-ups for G1: C1's two (C1 As built), and S1's §3 example picks a Vite SPA where `rendering-strategy.md` would give
 `ssr` (F2 As built).
 
 **Test design:** none. The plan serves no stories and changes skill text, agent text, the manifest and
@@ -989,6 +990,42 @@ findings over `qa` and `product`.
   `/product:plan-feature` (a feature → spec → plan, written back), the documentation and analysis lanes.
   Keep it under token-audit's description budget.
 - **Not in C1:** new restructuring. A finding outside §7 goes into `Status` as a follow-up.
+- **As built (2026-11-23):**
+  - `CLAUDE.md`: the plan-format line names `/product:plan-feature` producing it through the hidden
+    `writing-plans` and `session-budget` steps, and the system plan's own unqueued format
+    (`CLAUDE.md:68`); the bullet is now "A plan that delivers a feature plans its testing", `TD` keyed to
+    the spec's `## Acceptance criteria` (`<spec> AC<k>`), a story backlog still qualifying (`CLAUDE.md:78`),
+    and its `In review` line follows (`CLAUDE.md:85`). Nothing else in the file changed.
+  - Manifest: the `product` description names the two front doors, the hidden steps, the documentation
+    and analysis lanes; 1,618 → 1,441 chars (token-audit does not budget plugin descriptions; it is
+    shorter than before and below six other plugins').
+  - Counts recomputed from the manifest: `product` 25 skills, 4 agents, 4 commands (3 skills listed to
+    the model, 12 hidden, 10 `disable-model-invocation` only); library-wide 76 command files, 86
+    registrations.
+  - `README.md`: the plugin bullet (`:132`), the registration paragraph (`:138`), the front-door
+    paragraph (`:152`, the hidden steps named as the exception to "every skill is slash-invocable"), the
+    command count, the `product` command table (4 rows, `plan-system` rewritten), the reasoning-skills
+    line, the `/product:plan-feature` modes paragraph, the `/product:rules` paths row, the
+    `/qa-<stack>:test-plan` argument row, the delivery chain diagram and its bullets (system plan →
+    spec → plan, `TD` per feature citing `<spec> AC<k>`, tests tagged `SPEC<NNN>-AC<k>`), the "How a
+    feature is built" rows 1, 2 and 4, and the status table's `product` row.
+  - `docs/skills-catalog.md`: plugin table row, command counts and examples (`:28`), the `product` command
+    row, the "two front doors, fenced" paragraph; the QA-manual `test-plan-writer`, delivery-chain and
+    `qa-test-planner` entries; the Product catalog rewritten — a front-door table and the §2 flow, Part 1
+    "The two front doors" (`solution-planner` NEW / EXISTING / EXTEND and its nine steps and system plan
+    sections; `/product:plan-feature` SYSTEM / NEW / SHAPED, write-back and on hold; the implementation
+    plan format), Part 2 "The hidden steps" (the twelve by path, grouped by who reads them, D13 and
+    surface-check rule 10), Part 4 now the reasoning lane only with `business-analyst`'s BACKLOG AUDIT.
+    Beyond the hits: Part 3's documenter and feature-documenter purposes read the spec, and their
+    `solution-planner` fence names EXISTING. The SPEC-lane audit register follows D26
+    (`<NNN>-<slug>-register.md`).
+  - Gate: §7 grep prints nothing (run under `bash`: in zsh an unquoted `$X` does not word-split, so the
+    excludes are ignored and `implemented/`, `audits/` and `evals/` hits appear); `skill-lint` 0 findings;
+    `token-audit --violations-only` exit 0; `plugin-surface-check` OK.
+  - Follow-ups for G1 (outside §7, left): `CLAUDE.md`'s filing bullet still says "a `solution-planner`
+    pack moves its whole initiative folder" (C1 changes only the bullets it names; a system plan is one
+    file); the catalog's `product:knowledge-base` entry still says KB sources are `US<n> AC<k>`
+    (unchecked against `ba-project-memory`).
 
 ### G1 — The whole sweep, and filing the plan
 
@@ -1080,48 +1117,9 @@ session that runs the task.
 | G1 | `docs` | `general-purpose` | C1 | — | ~90k |
 | — | restart, run `/product:plan-system` in a scratch repo, check the hidden skills and Plan Queue | **the user** | G1 | — | — |
 
-S1, S2, F1, F2, K1 and M1 have landed, and their prompts are deleted.
+S1, S2, F1, F2, K1, M1 and C1 have landed, and their prompts are deleted.
 
 ---
-
-### C1 — The catalog, the README, CLAUDE.md and the manifest description (general-purpose, docs)
-
-````
-Depends on: M1
-Agent: general-purpose · Stack: docs
-
-Task C1 of docs/plans/018-product-system-to-feature-lane.md: make the catalog, README.md, CLAUDE.md and
-the product manifest description describe the lane this plan built.
-
-Deliverable: docs/skills-catalog.md, README.md, CLAUDE.md and the product description in
-.claude-plugin/marketplace.json describe the two front doors, the system plan, the hidden steps and the
-TD rule as this plan built them. The §7 grep prints nothing anywhere.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §5, §7, D11–D13, task C1 and the As built notes above it, and "Close-out — every task".
-3. The §7 grep's hits in the three files, and the sections the task names. Do not read the whole
-   226 KB catalog. After M1 the only other hit is the product description at
-   .claude-plugin/marketplace.json:52.
-4. The product entry in .claude-plugin/marketplace.json.
-
-Build: the task's bullets, in order. Recompute the product skill, agent and command counts from the
-manifest; don't carry them over from the old text.
-
-Traps:
-- CLAUDE.md is loaded into every session: change only the bullets the task names.
-- Keep the product description within token-audit's description budget.
-- M1 renamed the engineering audit register to docs/audits/<NNN>-<slug>-register.md (D26): the catalog's
-  spec-vs-code-audit and engineering-rules entries follow it.
-
-Gate:
-  the §7 grep                                        → prints nothing
-  python3 tools/skill-lint.py | tail -1              → 0 findings
-  python3 tools/token-audit.py --violations-only     → exit 0
-
-Commit: `docs: catalog, README and CLAUDE.md describe the plan-system → plan-feature lane (018 C1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
 
 ### G1 — The whole sweep, and filing the plan (general-purpose, docs)
 
@@ -1146,6 +1144,8 @@ Traps:
 - Merge master into the plan's branch before filing (close-out step 6). Rewrite per §6 any old name a
   newly merged plan brought in.
 - No new restructuring. A finding outside §7 goes into Status as a follow-up.
+- Run the §7 grep under bash (`bash -c '…'`): in zsh an unquoted $X does not word-split, the excludes
+  are ignored and records under implemented/, audits/ and evals/ show up as hits.
 
 Gate (this is the last runnable task, so it runs the whole set once more across the plan, in order):
   the commands in §7.
