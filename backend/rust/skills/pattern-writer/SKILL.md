@@ -287,7 +287,7 @@ impl From<PlaceOrderError> for ApiError {
 
 - The `From<DomainError>` impl is an **exhaustive match**, so a new domain variant forces a decision about its status code. Never use a blanket `From<anyhow::Error>` that sends every failure to 500.
 - The 500 body says "internal error". The source is logged once, here, and never sent to the client.
-- The plan's `api-surface.md` validation catalog, when one exists, wins over this sketch.
+- The project's validation catalog (`docs/specs/validation-catalog.md`, cited by a spec's `## API surface`), when one exists, wins over this sketch.
 
 ### Body rejections as problems
 
@@ -403,7 +403,7 @@ async fn run() -> anyhow::Result<()> {
 
 ## Module boundaries — crate per module
 
-The blueprint names modules (`Modules:` line) or a second binary appears → read `references/crate-per-module.md`. A single-crate service does not become a workspace in anticipation.
+The system plan skeleton names modules (`Modules:` line) or a second binary appears → read `references/crate-per-module.md`. A single-crate service does not become a workspace in anticipation.
 
 ## Rules
 

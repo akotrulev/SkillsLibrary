@@ -1,25 +1,36 @@
 ---
 name: plan-integrations
-description: Use when a planned backend needs its external dependencies specified (auth, config keys, limits, retries). Triggers "what external services do we depend on". Not for own endpoints (plan-api-surface).
+description: Use when a feature spec needs its ## Integrations section (external services, keys, limits, retries). Triggers "what external services do we depend on". Not for own endpoints (plan-api-surface).
 disable-model-invocation: true
+user-invocable: false
 ---
 
-# Integration Plan — the external dependency register
+# Integrations — the feature spec's `## Integrations` section
 
-Everything the service does not control. The section of a plan most often written as a one-liner ("we'll use SendGrid for email") and most often the reason a build stalls — because nobody asked who has the account, which environment the key is for, what happens when it 429s, and whether a developer can run the system without it.
+Everything the feature depends on that the system does not control. The part of a design most often written as a one-liner ("we'll use SendGrid for email") and most often the reason a build stalls, because nobody asked who has the account, which environment the key is for, what happens when it 429s, and whether a developer can run the system without it.
 
-Two failure modes this document exists to prevent:
+Two failure modes this section exists to prevent:
 
-1. **The blocking unknown discovered late** — an API key that needs a procurement request, a sandbox that takes two weeks to provision, a partner contract that has not been signed. These are cheap to surface at plan time and expensive at task time.
-2. **The undefined failure mode** — nobody decided what the system does when the provider is down, so it does whatever the HTTP client's default happens to be.
+1. **The blocking unknown discovered late:** an API key that needs a procurement request, a sandbox that takes two weeks to provision, a partner contract not yet signed. Cheap to surface at design time, expensive at task time.
+2. **The undefined failure mode:** nobody decided what the system does when the provider is down, so it does whatever the HTTP client's default happens to be.
 
-**Prerequisites:** an approved `blueprint.md` (its External systems section is the seed list) and `api-surface.md` (endpoints that call out, and the outbound webhooks it emits).
+`/product:plan-feature` reads this file in its step 8 when the feature depends on a service outside the system, after the `## API surface`, and presents the result as one section of the spec. The user's approval of that section, then of the spec, is the gate; there is no other.
+
+## Input
+
+- **The spec so far:** the goal, the decisions from the interview, `## Acceptance criteria`, and the `## API surface` (endpoints that call out, background jobs, the outbound webhooks it emits).
+- **The system plan's §3, when the feature came from one:** the external systems in its architecture diagram, the auth provider, and the config-and-secrets convention. Read the specs of the features this one depends on: their `## Integrations` holds the dependencies already designed.
+- **Standalone (no system plan):** the existing clients, config keys and secret stores, `#observed` with `file:line`.
 
 ## Output
 
-**`docs/plans/<NNN>-<initiative>/integrations.md`** in the initiative folder.
+The `## Integrations` section of `docs/specs/NNN-<feature>-design.md`, with these subsections in this order: `### Builds on` · `### Register` · `### Dependencies` · `### Secrets` · `### Failure matrix` · `### Blocking unknowns` · `### Local development` · `### Routed to devops-engineer`. A subsection with nothing to say is one line saying so.
 
-**A filled golden example is at `references/example-integrations.md`** (the shared `001-workshop-booking` pack — shapes normative, domain content illustrative).
+[`references/example-integrations-section.md`](references/example-integrations-section.md) is a filled section from the toy spec all four design skills share: its shapes are normative, its domain content illustrative.
+
+## Scope
+
+**This feature only, on top of what exists.** A dependency §3 names, or that an earlier feature's spec designed, is **referenced, never redefined**: a row in `### Builds on` naming where it is defined, plus a delta block only where this feature changes how it is used (a new template, a new webhook event, a higher volume). The identity provider is §3's; this section never re-specifies it. A new external system the system plan did not foresee is put to the user as "this changes the system plan's §3 <line>: keep it or change it?", and `plan-feature`'s close-out records an approved change.
 
 ---
 
@@ -27,34 +38,36 @@ Two failure modes this document exists to prevent:
 
 ### Step 1 — The register
 
-Every external system on one screen. Seeded from the blueprint, then completed by walking `api-surface.md` for outbound calls and inbound triggers:
+Every external system this feature adds, on one screen; one this feature only uses is in `### Builds on`. Seeded from §3 and completed by walking `## API surface` for outbound calls and inbound triggers:
 
 | # | System | What it does for us | Direction | Protocol | Criticality | Account owner | Status |
 |---|---|---|---|---|---|---|---|
-| X1 | SendGrid | Transactional email (verification, receipts) | outbound | REST | **degraded** — queue and retry, never block the request | Platform team | account exists `#confirmed` |
+| X1 | SendGrid | Transactional email | outbound | REST | **degraded** — queue and retry, never block the request | Platform team | account exists `#confirmed` |
 | X2 | Stripe | Card payments + refunds | both | REST + inbound webhook | **critical** — checkout fails without it | Finance | sandbox `[TBD - Finance, wk 2]` |
-| X3 | Auth0 | Identity, token issuance, JWKS | inbound (token validation) | OIDC | **critical** | Platform team | tenant exists `#confirmed` |
+
+`X` ids are this spec's own; a dependency another spec defined keeps that spec's id and is cited as `007 X1`.
 
 **Criticality has exactly three values**, and each is a design commitment, not a label:
 
-| Value | Means | The plan must then say |
+| Value | Means | The section must then say |
 |---|---|---|
 | **critical** | The feature cannot function without it | What the user sees when it is down (503 + `Retry-After`, per the validation catalog) |
-| **degraded** | The feature works, something is deferred or reduced | *Which* behavior degrades, and how the deferred work completes later |
-| **optional** | Nice to have; absence is invisible to the user | Confirm it is genuinely invisible — analytics that block a request are not optional |
+| **degraded** | The feature works, something is deferred or reduced | *Which* behaviour degrades, and how the deferred work completes later |
+| **optional** | Absence is invisible to the user | Confirm it is genuinely invisible: analytics that block a request are not optional |
 
-**Direction** drives everything downstream: `outbound` needs credentials, timeouts, and retries; `inbound` needs signature verification, replay protection, and idempotency; `both` needs all of it.
+**Direction** drives everything downstream: `outbound` needs credentials, timeouts and retries; `inbound` needs signature verification, replay protection and idempotency; `both` needs all of it.
 
 ### Step 2 — A block per dependency
 
-One block per register row, with these fields — the worked content lives in `references/example-integrations.md`; do not restate it here:
+One block per register row, with these fields; the worked content lives in the example, so do not restate it here:
 
 ````markdown
-### X<n> — <System> (<what it is>)
+#### X<n> — <System> (<what it is>)
 
-**Purpose:** <one sentence — what it does for us>
+**Purpose:** <one sentence — what it does for this feature>
 **Direction:** <outbound | inbound | both> · **Criticality:** <critical | degraded | optional>
 **Docs:** <link> · **API version pinned to:** <version>
+**Acceptance:** <the AC<k> this dependency carries>
 
 **Auth** — method, rotation policy, and (if inbound) how we verify the caller
 **Configuration** — key **names** and store **locations** only, per environment, with who provisions each
@@ -67,113 +80,107 @@ One block per register row, with these fields — the worked content lives in `r
 **Open questions:** <or "none">
 ````
 
-Rules the block must honor, whatever the system:
+Rules the block must honour, whatever the system:
 
-- **Retry only on 5xx / timeout / 429 — never on a 4xx.** A 4xx retried is the same wrong request sent twice.
-- **Outbound idempotency keys are our own ids** (an order id, not a random UUID per attempt), so a retry cannot double-apply.
-- **A webhook endpoint is anonymous but signature-verified** — state it as an explicit exception to the API-wide 401 rule, and verify over the **raw** body before parsing.
-- **A fallback of "none" is stated, not omitted** — say what the user sees (e.g. 503 + `Retry-After`) and what state the affected record stays in.
-- **Fakes live at our own client interface, never the vendor's wire format**; the pinned API version means a version bump is its own task with its own test pass.
+- **Retry only on 5xx / timeout / 429, never on a 4xx.** A 4xx retried is the same wrong request sent twice.
+- **Outbound idempotency keys are our own ids** (a booking id, not a random UUID per attempt), so a retry cannot double-apply.
+- **A webhook endpoint is anonymous but signature-verified:** state it as an explicit exception to the API-wide 401 rule, and verify over the **raw** body before parsing.
+- **A fallback of "none" is stated, not omitted:** say what the user sees and what state the affected record stays in.
+- **Fakes live at our own client interface, never the vendor's wire format;** the pinned API version means a version bump is its own task with its own test pass.
 
 ### Step 3 — Category-specific rules
 
-The blocks above are the shape; these are the things each category needs that are easy to omit:
-
 | Category | Must state |
 |---|---|
-| **Email / SMS / push** | Sender identity + domain auth (SPF/DKIM/DMARC — a plan that skips this ships email into spam folders) · template ownership (in-provider vs in-repo) · **bounce and complaint handling** · a per-environment guard so staging cannot email real customers (allowlist or sandbox mode — state which) · unsubscribe/consent obligations · whether sending is synchronous (it should not be) |
-| **Payments** | Tokenization boundary and the resulting PCI scope · currency and rounding, matching `data-model.md` · refunds/chargebacks as first-class flows, not afterthoughts · **reconciliation** — which system is the source of truth when they disagree, and how the mismatch is detected |
-| **Identity provider** | Flows in use (Authorization Code + PKCE for SPAs, Client Credentials for M2M) · JWKS caching + rotation · claim mapping (permissions, tenant, roles) · what happens on IdP outage for already-issued tokens · handshake to `auth/_shared/{auth0-concepts,oidc-concepts}` |
-| **Object storage** | Bucket/container per environment · access model (pre-signed URLs vs proxying — pick one, say why) · size and content-type limits, validated server-side · lifecycle/retention · public-vs-private default |
-| **Message broker** | Topic/queue naming · delivery semantics (at-least-once by default → consumers are idempotent) · ordering guarantees actually required · **dead-letter queue and who watches it** · schema evolution rules · consumer-group/competing-consumer shape |
-| **Search index** | Source of truth stays the DB · indexing trigger (sync/async/batch) and acceptable staleness · reindex procedure · what the API returns when the index is behind or down |
-| **Partner / internal APIs** | Contract source (OpenAPI file? none?) · versioning and deprecation notice · a named human contact · SLA · sandbox availability — **the single most common blocking unknown** |
+| **Email / SMS / push** | Sender identity + domain auth (SPF/DKIM/DMARC; skip it and email lands in spam) · template ownership (in-provider vs in-repo) · **bounce and complaint handling** · a per-environment guard so staging cannot reach real customers (allowlist or sandbox mode; state which) · unsubscribe/consent obligations · sending is asynchronous |
+| **Payments** | Tokenization boundary and the resulting PCI scope · currency and rounding, matching `## Data model` · refunds/chargebacks as first-class flows · **reconciliation**: which system is the source of truth when they disagree, and how the mismatch is detected |
+| **Identity provider** | Only what this feature changes (a new claim, a new role, a new M2M client); the provider itself is §3's · JWKS caching + rotation · what happens on IdP outage for already-issued tokens · handshake to `auth/_shared/{auth0-concepts,oidc-concepts}` |
+| **Object storage** | Bucket/container per environment · access model (pre-signed URLs vs proxying; pick one, say why) · size and content-type limits, validated server-side · lifecycle/retention · public-vs-private default |
+| **Message broker** | Topic/queue naming · delivery semantics (at-least-once by default, so consumers are idempotent) · ordering actually required · **dead-letter queue and who watches it** · schema evolution · consumer-group shape |
+| **Search index** | Source of truth stays the DB · indexing trigger and acceptable staleness · reindex procedure · what the API returns when the index is behind or down |
+| **Partner / internal APIs** | Contract source (OpenAPI file? none?) · versioning and deprecation notice · a named human contact · SLA · sandbox availability, **the most common blocking unknown** |
 | **Inbound webhooks (any provider)** | Signature verification over the **raw** body before parsing · replay window · idempotency on the provider's event id · fast ack then async processing · what happens when the payload shape changes |
 
-### Step 4 — The consolidated secrets checklist
+### Step 4 — Secrets
 
-Every credential, in one table, because this is what someone has to action:
+Every credential the feature adds, in one table, because this is what someone has to action:
 
-| Secret | Store | Environments | Provisioned by | Needed by task | Rotation | Status |
+| Secret | Store | Environments | Provisioned by | Needed by | Rotation | Status |
 |---|---|---|---|---|---|---|
 
-Hard rules:
-
-- **No values.** Not in the plan, not in a repo file, not in a code comment, not "temporarily". The plan carries the key **name** and its **location**.
+- **No values.** Not in the spec, not in a repo file, not in a code comment, not "temporarily". The section carries the key **name** and its **location**, in the store §3's config-and-secrets convention names.
 - **Distinct per environment.** One key shared across staging and prod is a finding, stated as one.
-- **"Needed by task" ties to `delivery-plan.md`** — that is what turns "we need a key" into work that gets scheduled.
-- **`devops-engineer` owns the store and the wiring**; this table is its input.
+- **"Needed by"** names the component or behaviour that reads it; the implementation plan turns it into the task that wires it.
+- **`devops-engineer` owns the store and the wiring;** this table is its input.
 
 ### Step 5 — Blocking unknowns
 
-Anything a human must obtain — an account, a sandbox, a contract, a key, a partner contact, a compliance sign-off — is **three things at once**:
+Anything a human must obtain (an account, a sandbox, a contract, a key, a partner contact, a compliance sign-off) is **three things at once**:
 
-1. A row in the register with status `[TBD - <owner>, <by when>]`
-2. An open question in this document
-3. A **prerequisite task** in `delivery-plan.md`, on which the dependent tasks declare `dependsOn`
+1. A register row with status `[TBD - <owner>, <by when>]`.
+2. A row in `### Blocking unknowns`, and an open question of the spec.
+3. A **human prerequisite task** in the feature's implementation plan, which the dependent tasks name in `Depends on:`. `writing-plans` writes it from this row.
 
-That third one is what makes the difference. A blocking unknown recorded only as prose gets discovered by the agent that hits it.
+The third is what makes the difference: a blocking unknown recorded only as prose gets discovered by the agent that hits it.
 
-### Step 6 — The dependency-failure matrix
+### Step 6 — The failure matrix
 
-One table that makes the system's degraded behavior reviewable in one read:
+One table that makes the feature's degraded behaviour reviewable in one read, one row per dependency the feature adds or newly relies on:
 
 | System | If it is slow | If it is down | If it returns garbage | User-visible effect |
 |---|---|---|---|---|
-| SendGrid | queue, do not block | queue + alert; drain on recovery | log, alert, do not retry a 4xx | none — email arrives late |
 | Stripe | timeout at 10s → 504 | circuit opens → 503 + `Retry-After` | reject, order stays `pending` | checkout unavailable, no double charge |
 
-"Returns garbage" — a schema change, an unexpected enum, a 200 with an error body — is the column most often missing, and the one most often responsible for a 500 that should have been a handled 502.
+"Returns garbage" (a schema change, an unexpected enum, a 200 with an error body) is the column most often missing, and the one most often responsible for a 500 that should have been a handled 502.
 
 ---
 
-## Integration plan template
+## Section template
 
 ```markdown
-# <Initiative> — Integration Plan
+## Integrations
 
-**Date:** YYYY-MM-DD · **Written by:** `product:plan-integrations`
-**Blueprint:** `./blueprint.md` · **API surface:** `./api-surface.md`
+### Builds on
+| Dependency | Defined in | This feature |
+|---|---|---|
 
-## 1. Dependency register
+### Register
 | # | System | What it does for us | Direction | Protocol | Criticality | Account owner | Status |
 |---|---|---|---|---|---|---|---|
 
-## 2. Dependencies
-<!-- one block per system: purpose, auth, configuration, environments, limits & budget,
-     resilience, inbound webhook (if any), data crossing the boundary, local dev & test, open questions -->
+### Dependencies
+<one block per new dependency; one delta block per changed one, headed with its spec>
 
-## 3. Secrets checklist
-| Secret | Store | Environments | Provisioned by | Needed by task | Rotation | Status |
+### Secrets
+| Secret | Store | Environments | Provisioned by | Needed by | Rotation | Status |
 |---|---|---|---|---|---|---|
 
-## 4. Failure matrix
+### Failure matrix
 | System | If it is slow | If it is down | If it returns garbage | User-visible effect |
 |---|---|---|---|---|
 
-## 5. Blocking unknowns
-| # | Unknown | Owner | Needed by | Blocks tasks |
+### Blocking unknowns
+| # | Unknown | Owner | Needed by | Blocks |
 |---|---|---|---|---|
 
-## 6. Local development
-<!-- Can a developer run the system with nothing provisioned? What is faked, what is a sandbox,
-     what is genuinely required. If the answer is "nothing works without prod keys", that is a finding. -->
+### Local development
+<Can a developer run the feature with nothing provisioned? What is faked, what is a sandbox, what is genuinely required.>
 
-## 7. Routed to `devops-engineer`
+### Routed to `devops-engineer`
 | Need | Why |
 |---|---|
 ```
 
-## Self-check before handing off
+## Self-check before presenting the section
 
-1. Every system in the blueprint's External systems table has a block here; every block traces to a caller in `api-surface.md` or a named background job.
-2. Every outbound dependency has a timeout, a retry policy that excludes 4xx, and a stated failure mode. No dependency has an unstated one.
-3. Every inbound webhook has signature verification, a replay window, and idempotency on the provider event id.
-4. Every secret is name-and-location only, distinct per environment, with a provisioner and a task.
-5. Every blocking unknown exists in all three places (register row, open question, prerequisite task).
-6. Section 6 answers honestly whether a new developer can run the system on day one.
-7. Every `critical` dependency's user-visible failure is described in the same terms `api-surface.md` uses (503 + `Retry-After`, not "it errors").
+1. Every external system the feature touches is either in `### Builds on` with where it is defined, or a register row with a block; nothing §3 or an earlier spec defined is redefined.
+2. Every block traces to a caller in `## API surface` or a named background job, and carries an `**Acceptance:**` line where a criterion depends on it.
+3. Every outbound dependency has a timeout, a retry policy that excludes 4xx, and a stated failure mode; every inbound webhook has signature verification, a replay window and idempotency on the provider event id.
+4. Every secret is name-and-location only, distinct per environment, with a provisioner and a "needed by".
+5. Every blocking unknown exists in all three places (register row, blocking-unknowns row, the human prerequisite task the plan will hold).
+6. `### Local development` answers honestly whether a developer can run the feature on day one.
+7. Every `critical` dependency's user-visible failure is described in the same terms `## API surface` uses (503 + `Retry-After`, not "it errors").
 
 ## Version policy
 
-The integration contract is version-agnostic; two things are not. **Pin the provider's API version explicitly** where the provider supports it (Stripe, Twilio, Shopify) — an unpinned integration breaks on someone else's release schedule, and a version bump is its own task with its own test pass. And keep **SDK majors keyed to the project's runtime lane** per `CLAUDE.md`'s Stack defaults (.NET 10 / 8-9 · Java 21 + Spring Boot 3.x · Node 24 / 22): never plan an SDK major that requires a runtime the project does not target.
+The integration contract is version-agnostic; two things are not. **Pin the provider's API version explicitly** where the provider supports it (Stripe, Twilio, Shopify): an unpinned integration breaks on someone else's release schedule, and a version bump is its own task with its own test pass. And keep **SDK majors keyed to the project's runtime lane** per `CLAUDE.md`'s Stack defaults (.NET 10 / 8-9 · Java 21 + Spring Boot 3.x · Node 24 / 22): never plan an SDK major that requires a runtime the project does not target.

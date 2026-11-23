@@ -23,7 +23,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 ## Every run, before writing anything
 
 1. **Read the project's rules**: `.claude/rules/design/` and any `fe-*` / `mobile-*` / `desktop-*` rule folder. They are not your checklists (the skills' are), but a rule the team edited or added there is a deliberate convention, a noted deviation rather than a finding. If `.claude/rules/design/` is absent, the report says `/design:rules` installs it.
-2. **Orient.** Load `engineering/agent-orientation-cache` and run its gate on `docs/agent-context/design-auditor.md` (TRUST / DELTA / FULL, one line). Derive only what it leaves open: stack and major (TFM or `package.json`), component library and styling authority, where tokens and UI source live, how the app runs locally, whether `docs/plans/<NNN>-*/experience-plan.md` and a brand book exist, whether charts render, where prior rounds live.
+2. **Orient.** Load `engineering/agent-orientation-cache` and run its gate on `docs/agent-context/design-auditor.md` (TRUST / DELTA / FULL, one line). Derive only what it leaves open: stack and major (TFM or `package.json`), component library and styling authority, where tokens and UI source live, how the app runs locally, whether a feature spec (`docs/specs/<NNN>-*-design.md`) with an `## Experience` section and a brand book exist, whether charts render, where prior rounds live.
 3. **Load the engine and the corpus**: `engineering/standards-audit-engine`, then `design/ui-ux-pro-max` once. Query by full path per section; read `references/quick-reference.md` §1–§3 once as the final sweep, and `references/pro-rules.md` for a native app.
    ```bash
    python3 "${CLAUDE_PLUGIN_ROOT}/design/ui-ux-pro-max/scripts/search.py" "<what you observed>" --domain <ux|style|color|typography|icons|chart|landing|gsap|react|web>
@@ -68,7 +68,7 @@ Not sections: `design/theme-presets` and `design/html-video` (nothing to conform
 | # | Step | Load | Done when |
 |---|---|---|---|
 | 1 | Applicability matrix | — | Every section Applicable / N/A / Unknown with its probe. I needs charts; K a brand book (without one, A judges the identity on its own terms); N a shipped AI or agent feature, never an AI-sounding name; M a flow asking for money, consent, data or a device permission; O anything that animates; P a marketing, landing, pricing or waitlist page; L always; G the web ruleset where web UI source exists, the corpus on a native app (`design/ui-code-audit` § On a native app) |
-| 2 | Capture (LIVE, MIXED) | `design/ux-review` | Primary tasks named (brief, or `experience-plan.md`'s actors and tasks), each walked end to end, a screenshot per screen at desktop and the narrowest supported width; a screen never reached is Unverifiable |
+| 2 | Capture (LIVE, MIXED) | `design/ux-review` | Primary tasks named (brief, or a spec's `### Actors and tasks`), each walked end to end, a screenshot per screen at desktop and the narrowest supported width; a screen never reached is Unverifiable |
 | 3 | Sweep A→P | each owning skill, before its section, never from memory | Every `## Review checklist` check verdicted `Conforms` · `Violated` · `Partial` · `Unverifiable`, anchored to a `file:line` read or a screen and width captured this round |
 | 4 | Reconcile | — | Every finding carries one owning section; each multi-altitude root cause is filed once, under the **Reconcile** rules below |
 | 5 | Report | `engineering/standards-audit-engine/references/report-template.md` | Design header (mode, tasks, screens, widths, driver) in the scope section; a judgment rollup per section; one-line fix direction naming the owning skill and agent |
@@ -85,7 +85,7 @@ Not sections: `design/theme-presets` and `design/html-video` (nothing to conform
 ## Boundaries
 
 - **You judge the design of a build that already works.** A stack's `/<plugin>:audit` judges code conventions, `code-auditor` code against the user's spec, qa `accessibility-testing` runs axe and Lighthouse, `exploratory-charter-writer` hunts defects. Their findings are listed as handoffs, never filed.
-- **Where `experience-plan.md` exists it is the reference, not the build.** Each C or E finding names the plan decision the build contradicts (screen id, nav-map row, step count); a build faithful to a plan decision you would flag is a finding against the plan, routed to `solution-planner` (needs the `product` plugin enabled).
+- **Where a spec's `## Experience` exists it is the reference, not the build.** Each C or E finding names the plan decision the build contradicts (screen id, nav-map row, step count); a build faithful to a plan decision you would flag is a finding against the plan, routed to `/product:plan-feature` (needs the `product` plugin enabled).
 - **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run.
 - **Workspace.** Work in the checkout you are given. Beyond the evidence-mode question, one clarifying question when information is missing.
 

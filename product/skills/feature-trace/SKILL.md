@@ -32,7 +32,7 @@ Before walking entry points, list what people do. Sources in order — the first
 
 1. **The UI in the repository** — routes, navigation, screens, forms, web and mobile (`references/trace-recipes.md` Part 3a).
 2. **Journey tests and `docs/test-cases/` suites**, where the repository has them (Part 5).
-3. **The experience plan** — `docs/plans/<NNN>-<initiative>/experience-plan.md`, its screen ↔ endpoint matrix.
+3. **The feature specs** — the `## Experience` of each `docs/specs/<NNN>-*-design.md` that covers the area, its `### Screen ↔ endpoint matrix`.
 
 Each **Tasks** row is one goal in the person's words, with its actor, the screen and control that start it, and every entry point it calls.
 
@@ -128,7 +128,7 @@ Record the client's own words so the guide speaks them: UI copy, resource files,
 - **Every item carries `file:line`, read this session** — not from the cache, a prior run or memory; only the read is evidence.
 - **Negative claims name their search:** *searched for `RateLimit|Throttle|Bucket` across `src/Ordering/**` — no matches* `#observed`, never a bare "no rate limiting".
 - **Tier every item:** `#observed` for behavior, `#inferred` for intent. Never `#confirmed`.
-- **Intent has sources of two kinds.** A purpose **stated** by a story of the plan that built the area (`docs/plans/**/stories.md`, `requirements.md`, `epics.md`, also under `implemented/`; cite `US<n>`/`AC<k>` and `file:line`) or by a `#confirmed` KB entry (cite its id) goes in `Intent notes` with that source as basis, and its question cell reads `none — stated`. Comments, tests, naming and commit messages are **leads**: a probable purpose, the question kept. Stories come from the folder the caller names, else a search of `docs/plans/**` for the area's terms; none found is normal. Where a story and the code disagree, the code is the behavior and the gap is a `contradiction` finding with both readings.
+- **Intent has sources of two kinds.** A purpose **stated** by the spec that designed the area (`docs/specs/*-design.md`, its `## Acceptance criteria`; cite `SPEC<NNN>-AC<k>`), by the system plan's §2 (`docs/plans/**/*-system.md`, also under `implemented/`), or by a story of a backlog or an older plan folder (`stories.md`; cite `US<n>`/`AC<k>`), each with `file:line`, or by a `#confirmed` KB entry (cite its id) goes in `Intent notes` with that source as basis, and its question cell reads `none — stated`. Comments, tests, naming and commit messages are **leads**: a probable purpose, the question kept. Specs and stories come from the path the caller names, else a search of `docs/specs/` and `docs/plans/**` for the area's terms; none found is normal. Where a story and the code disagree, the code is the behavior and the gap is a `contradiction` finding with both readings.
 - **Comments and tests evidence intent, not behavior.** "30-day window per card scheme rules" is a strong `#inferred` *why*; only code evidences *what*. A stale comment contradicting the code is a finding.
 - **Commit history is a source for intent** — `git log -S'<the constant>'` or `git log --follow <file>` often surfaces the ticket. Cite it; still `#inferred` unless the message states the rule.
 - **Config and flags change the answer.** A rule inside `if (featureFlags.NewPricing)` is conditional: record both branches and which environments run which, or `[TBD - who knows the flag state]`.

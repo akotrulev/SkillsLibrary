@@ -1,7 +1,8 @@
 ---
 name: plan-session-budget
-description: Use when sizing plan tasks to one session each or writing each task's paste-ready prompt. Triggers "is this one session", "what do I paste next". Not for sequencing tasks (plan-delivery).
+description: Use when sizing plan tasks to one session each or writing each task's paste-ready prompt. Triggers "is this one session", "what do I paste next". Not for ordering tasks (writing-plans).
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # Session Budget — one task, one session, one prompt
@@ -9,15 +10,15 @@ disable-model-invocation: true
 Two jobs, both about the boundary between a plan and the sessions that run it.
 
 - **Sizing.** A task is executed in one session, so its context cost is a property of the task. This skill estimates that cost before the task is ever run, so tasks are authored at the size the work actually is instead of being discovered too large halfway through a session.
-- **Handoff.** Every task is written as a **prompt** — the agent, the skills, the exact pack sections to read, the deliverable, the files, the bullets, the traps and the gate — into the plan's own `## Prompts — one per task` section. The operator pastes it; nobody re-derives it. The plan document is self-contained and queueable on purpose: there is no `NEXT-PROMPTS.md`. When a task lands, the agent that ran it **deletes its own block** and rewrites the ones below it wherever what it landed differs from what they assume.
+- **Handoff.** Every task is written as a **prompt** — the agent, the skills, the exact spec sections to read, the deliverable, the files, the bullets, the traps and the gate — into the plan's own `## Prompts — one per task` section. The operator pastes it; nobody re-derives it. The plan document is self-contained and queueable on purpose: there is no `NEXT-PROMPTS.md`. When a task lands, the agent that ran it **deletes its own block** and rewrites the ones below it wherever what it landed differs from what they assume.
 
 **The estimate is a target, never a gate.** It says what to aim for. It does not decide what a task is — coherence does, and coherence wins every time the two disagree. Never split a task that is one thing to get under a number, and never merge unrelated work to fill one up.
 
-**Prerequisites:** a task list from `product:plan-delivery` with `Files` filled in, and `epic-map.md` for the lane structure. Sizing a task whose files are vague produces a number with nothing behind it.
+**Prerequisites:** a task list from `writing-plans` with `Files` filled in. Sizing a task whose files are vague produces a number with nothing behind it.
 
 ## Output
 
-Two things, both **inside the plan document** — `docs/plans/<NNN>-<initiative>/delivery-plan.md`, or the single-file plan an `product:plan-feature` run produced:
+Two things, both **inside the plan document**: the feature's implementation plan, `docs/plans/<NNN>-<feature>.md`, that `writing-plans` produced:
 
 1. A **`**Budget:**`** line on every task block, with its drivers itemized, and a matching `Budget` cell in the task table.
 2. The **`## Prompts — one per task`** section — one paste-ready block per task that has not landed. See `references/prompts-section-template.md`.
@@ -47,7 +48,7 @@ Add up the lines that apply, then apply the churn multiplier. Everything is in t
 |---|---|
 | Each distinct skill the task loads (`SKILL.md` + the references it opens) | 8k |
 | The task block itself | 1k |
-| Each design-pack section the task cites (`api-surface.md` §5.3, one `data-model.md` entity block, one `experience-plan.md` screen) | 2k |
+| Each spec section the task cites (one `## API surface` endpoint block, one `## Data model` entity block, one `## Experience` screen) | 2k |
 | Orientation — repo survey + orientation cache, **brownfield only** | 8k |
 
 **Per file the task touches** — this is where the real weight is:
@@ -69,15 +70,15 @@ Add up the lines that apply, then apply the churn multiplier. Everything is in t
 | The **last runnable task only**: the whole set, its output, and the fix loop it triggers across the plan | 12k, plus 2k per earlier task |
 | Conversation, tool churn, re-reads after edits | **× 1.2** on the sum of everything above |
 
-So: `Budget = (floor + skills + pack sections + orientation + files + read-back) × 1.2`, with read-back 10k + the task's own gate output on any code task.
+So: `Budget = (floor + skills + spec sections + orientation + files + read-back) × 1.2`, with read-back 10k + the task's own gate output on any code task.
 
-**Worked example** — a `be-dotnet` task creating an Orders resource: floor 25k + 3 skills 24k + task block 1k + 3 pack sections 6k + 5 files created (4 source at 2k, 1 test at 2k) 10k + 1 file modified 1.5k + read-back 10k = 77.5k, × 1.2 = **~95k**. Comfortably one session, with room to absorb the next coherent piece.
+**Worked example** — a `be-dotnet` task creating an Orders resource: floor 25k + 3 skills 24k + task block 1k + 3 spec sections 6k + 5 files created (4 source at 2k, 1 test at 2k) 10k + 1 file modified 1.5k + read-back 10k = 77.5k, × 1.2 = **~95k**. Comfortably one session, with room to absorb the next coherent piece.
 
 ### Step 2 — Compare against the target and act
 
 | Estimate | What it means | What to do |
 |---|---|---|
-| **under ~80k** | The session is underfilled | Look at the next task in the same story, same stack, same agent. If merging them still yields **one** deliverable, merge. The goal is the **fewest sessions**, not the smallest tasks — an agent switch costs a whole context reload. If it does not merge cleanly, leave it alone — a small task is not a defect |
+| **under ~80k** | The session is underfilled | Look at the next task in the same feature, same stack, same agent. If merging them still yields **one** deliverable, merge. The goal is the **fewest sessions**, not the smallest tasks — an agent switch costs a whole context reload. If it does not merge cleanly, leave it alone — a small task is not a defect |
 | **~80k – ~150k** | The size to aim for | Nothing. This is the target |
 | **over ~150k** | The session will be long, and may need a compaction | Annotate, do not force. Record the estimate on the task and name the natural split point if one exists (`splits cleanly after the endpoints land`). Split **only along a seam inside the same stack**, and only if that point yields two tasks that each state one deliverable |
 
@@ -94,7 +95,7 @@ A task that overshoots the target with all three rules satisfied is a **large ta
 On the task block, under `Depends on`:
 
 ```markdown
-**Budget:** ~95k — CLAUDE.md 25k, `api-surface.md` §5 and two `data-model.md` entity blocks 6k,
+**Budget:** ~95k — CLAUDE.md 25k, the spec's `## API surface` and two `## Data model` entity blocks 6k,
 3 skills 24k, `src/Billing/*` as the module pattern ~12k, 5 files created and 1 modified 11.5k,
 commit, diff and gate read-back 10k, churn ×1.2
 ```
@@ -124,22 +125,23 @@ everything that session needs and names nothing it does not:
   earlier task it shares files or a build tree with. The table gains a `Runs beside` column and the
   preamble names what runs together (plan format §6).
 - The agent to adopt and the skills to load.
-- **The exact pack sections to read** — `api-surface.md` §5.3, not `api-surface.md`. This is the single
-  biggest lever on the budget holding: a session told to read the whole pack reads the whole pack.
+- **The exact spec sections to read** — the `## API surface` endpoint block, not the spec. This is the
+  single biggest lever on the budget holding: a session told to read the whole spec reads the whole spec.
 - The deliverable, the files, the work bullets, and what is out of scope — copied from the task block,
   never paraphrased.
 - **The traps**: the two to four things specific to that task. The convention that is easy to miss, the
   file that looks like the pattern but is not, the migration that must run before the test, the
   down-level API that does not exist here. This is the part the prompt adds, and it is what earns it.
 - **The gate line**, in the form of `plan-format.md` §5: `Gate: own tests — <commands>` on every block that writes code or tests, `Gate: none — <why>` only on a block with nothing runnable, and on the last block the project's own commands for the whole set, in run order, with the fix loop and its narrowest-rerun and rerun-failed commands filled in. A `Q` block expects **red** for the recorded reason (or proves its tests load and list when its app cannot start in one command); any other code block expects **green**.
-- **A `TD` block** names one of two agents. The test-plan block (`qa-test-planner`) reads the epics and
-  stories it covers whole, the surfaces by section, and the repo for the harness; the test-case block
-  (`qa-test-case-designer`) reads its stories whole and the test plan's §2, §8 and §10 by the path in the
+- **A `TD` block** names one of two agents. The test-plan block (`qa-test-planner`) reads the spec's
+  `## Acceptance criteria` whole (or, on a backlog, the stories it covers), the surfaces by section,
+  and the repo for the harness; the test-case block
+  (`qa-test-case-designer`) reads the same criteria whole and the test plan's §2, §8 and §10 by the path in the
   test-plan task's `As built`. Both say `Gate: none` with the reason, and the test-plan block ends by
-  writing each `Q` block's `TP-` rows into it. Budget them on the stories read and the documents written:
+  writing each `Q` block's `TP-` rows into it. Budget them on the criteria read and the documents written:
   a plan is ~6k written, a suite with its basis ~12k.
-- **A `Q` block** reads the endpoint blocks it tests by section (`api-surface.md` §5.2, not §5), the
-  validation catalog's standard set, the ACs it proves (`stories.md` US7–US9), and the OpenAPI asset's
+- **A `Q` block** reads the endpoint blocks it tests by section (the spec's `## API surface` blocks, not
+  the spec), `docs/specs/validation-catalog.md`, the ACs it proves (`SPEC<NNN>-AC3…AC5`), and the OpenAPI asset's
   path from the contract task's `As built`. Its traps are red for the right reason — red on the
   `not-implemented` stub or the screen's placeholder, never on a `404`, a compile error or a wrong URL —
   never asserting the stub, and binding to the contract and the test ids, never to code.
@@ -196,7 +198,7 @@ The standards the `**Budget:**` lines and the prompt blocks must meet are the pr
 6. The last runnable block runs the whole set with the project's own commands and the fix instruction. Every other code block says `Gate: own tests` with its filtered commands and the colour it expects; `Gate: none` carries its reason. Every implementation block in a test-first plan repeats the read-only rule.
 7. `## Close-out — every task` sits directly above `## Prompts — one per task`, verbatim from plan format §7; every block names it last in its reading list and ends with its close-out line; and the block that will delete the **last** one is the one the filing falls to.
 8. Blocked tasks appear with their blocker and its owner.
-9. A plan that serves stories has its `TD` blocks (the test plan, then the test cases) above the `Q` blocks, each `Gate: none` with its reason; the last block is `DOC1`, the documenter agent, with the doc lint as its gate, or the header says why there is none.
+9. A plan that delivers a feature's acceptance criteria has its `TD` blocks (the test plan, then the test cases) above the `Q` blocks, each `Gate: none` with its reason; the last block is `DOC1`, the documenter agent, with the doc lint as its gate, or the header says why there is none.
 
 ## Version policy
 

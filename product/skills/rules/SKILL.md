@@ -10,16 +10,15 @@ Plugins cannot ship Claude Code rules, so this skill copies them into the projec
 
 The rules hold each document's **standards**: what must be in it, what must never be, ids and invariants. Templates and procedures stay in the skills.
 
-Finished plans in `docs/plans/implemented/` match no glob on purpose: later work reads them often and never edits them. The detail artifacts of a planning pack (`blueprint.md`, `data-model.md`, …) get no rule: only `solution-planner` writes them, and it loads their skills.
+Finished plans in `docs/plans/implemented/` match no glob on purpose: later work reads them often and never edits them. A feature spec's design sections get no rule of their own: only `/product:plan-feature` writes them, and it loads their skills.
 
-The eleven files and the documents they load for:
+The ten files and the documents they load for:
 
 | File | `paths:` default |
 |---|---|
-| `plans.md` | `docs/plans/*.md`, `docs/plans/*/delivery-plan.md` |
+| `plans.md` | `docs/plans/*.md` |
 | `feature-docs.md` | `docs/features/*-*.md` |
-| `backlog-requirements.md` | `docs/plans/**/requirements.md` |
-| `backlog-epics.md` | `docs/plans/**/epics.md` |
+| `system-plans.md` | `docs/plans/*-system.md` |
 | `backlog-stories.md` | `docs/plans/**/stories.md` |
 | `business-model.md` | `docs/business-model/**/*.md` |
 | `business-model-entities.md` | `docs/business-model/entities/**/*.md` |
@@ -51,12 +50,15 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
    - Different: the team edited it, and the new copy sits in `.claude/rules/product/` already. Show `diff -u <old> <source>` and ask: **delete** the old file (its edits are lost), or **keep** it. With the `replace` argument, delete it. With the `keep` or `beside` argument, or with nobody to ask, keep it and list it under `Waiting for the user:`.
    - A file in the `dev` folder that is not `plans.md` or `feature-docs.md` is left alone (`audits.md` belongs to `engineering:rules`).
 
+   Then retire the two files merged into `system-plans.md`, `backlog-{requirements,epics}.md`, in `<root>/.claude/rules/product/` and in the `business-analysis` folder. The plugin no longer ships them, so there is nothing to `cmp` against. Ask: **delete** it (its rules now live in `system-plans.md`, and the documents it loaded for are no longer written), or **keep** it. With the `replace` argument, delete it. With the `keep` or `beside` argument, or with nobody to ask, keep it and list it under `Waiting for the user:`.
+
    Remove each old folder once it is empty. Done when each old file is deleted or listed as kept.
 6. **Fit the paths to where this project keeps its documents.** The defaults assume `docs/plans/`, `docs/features/` and the KB at `docs/business-model/`, all at the root. Find the real places:
    - Plans: `git grep -l -e '^## Prompts' -e '^## Close-out — every task' -- '*.md'`.
    - Feature docs: the folder holding the `docs/features`-style documents, when the project keeps them somewhere else.
    - The KB: `git ls-files '*INDEX.md' | xargs grep -l '^# Business Model'`, plus any directory named `business-model`. A KB somewhere else (a monorepo package's `docs/`, a `documentation/` folder) gets its own globs, the same suffixes under its real prefix (for example `"services/billing/docs/business-model/**/*.md"`), added to each `business-model*.md` copy.
-   - Backlogs: `git ls-files '*requirements.md' '*epics.md' '*stories.md'`. Any outside `docs/plans/` that follow the same shape (`US<n>` stories, `E<n>` epics) get the matching glob added to the `backlog-*.md` copies. Never widen to a bare `**/requirements.md`: it would load on unrelated files.
+   - System plans: `git grep -l '^## Feature prompts — paste one per session' -- '*.md'`. One outside `docs/plans/` gets its glob added to the `system-plans.md` copy.
+   - Story backlogs: `git ls-files '*stories.md'`. Any outside `docs/plans/` that follow the same shape (`US<n>` stories) get the matching glob added to the `backlog-stories.md` copy. Never widen to a bare `**/stories.md`: it would load on unrelated files.
    - No KB yet: keep the defaults; the `business-analyst` agent creates it there (it loads `product:knowledge-base`, which you cannot invoke yourself).
 
    For each document found that no default glob covers, propose the glob that would cover it and add it to the installed copy with the user's agreement. Never widen to `**/*.md`: every README and design doc would load these rules. With nobody to ask, change no path and list each proposed glob under `Waiting for the user:` in the report. Done when every document each command lists is matched by an installed glob, or a glob is proposed for it.
@@ -68,7 +70,7 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
 ```
 product rules: <file>: installed | up to date | replaced | kept | written as .plugin   (one line per file)
 Path: <root>/.claude/rules/product/
-Old folders: removed | <file kept in the dev or business-analysis folder under .claude/rules> | none found
+Old files: removed | <file kept: an old-folder file, or a backlog-{requirements,epics}.md> | none found
 Document paths: default | widened with <globs>
 Committed: yes | ignored by git
 Conflicts: none | <one line each, with the file that states it>

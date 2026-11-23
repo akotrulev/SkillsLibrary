@@ -1,23 +1,24 @@
 ---
-name: plan-feature
-description: Use when an approved spec needs an implementation plan (ordered tasks, one paste-ready prompt each) before code. Triggers "write the implementation plan". Not for the design itself (feature).
+name: writing-plans
+description: Use when an approved feature spec needs its implementation plan (ordered tasks, a paste-ready prompt each). Triggers "write the implementation plan". Not for the design itself (plan-feature).
+disable-model-invocation: true
+user-invocable: false
 ---
 
 # Writing Plans
 
-Write the plan for an engineer who is skilled but has zero context for this codebase. Document what
-they need: what exists today and what is missing, the decisions already made and what they cost,
-which files each task touches, the real values the code will use, and the traps that specific task
-will hit. A decision bound to a framework or version cites its official doc: see `source-grounding`.
+Write the plan for a skilled engineer with zero context for this codebase: what exists and what is
+missing, the decisions made and what they cost, the files each task touches, the real values the code
+will use, and each task's traps. A decision bound to a framework or version cites its official doc: see `source-grounding`.
 
-## When to use
+## Input
 
-An approved spec, design or set of requirements that must become an ordered list of tasks, each with a paste-ready prompt, before any code.
-
-## When NOT to use
-
-- The design itself, with the *how* still open: `feature` (brainstorming) writes the spec this skill plans from.
-- A whole initiative's task list from stories: `/product:plan-system` (`solution-planner`).
+`/product:plan-feature` reads this file after the user approves a feature spec (its step 10). The input is
+that spec, `docs/specs/NNN-<feature>-design.md`: its design sections say what to build, and its
+`## Acceptance criteria` (`AC1…ACn`) are the basis of the plan's `TD` and `Q` tasks, each cited as
+`<spec path> AC<k>`. A spec written elsewhere comes in through `/product:plan-feature`'s SHAPED mode.
+A design with the *how* still open goes back to `/product:plan-feature`; a whole system's list of
+features is `/product:plan-system`'s.
 
 ## The format is a contract
 
@@ -31,22 +32,18 @@ states its own plan rules, those win, and where this skill and the rule file dis
 
 **Three properties of that format drive everything below:**
 
-1. **One self-contained file.** The plan is queued whole — by the Plan Queue VS Code plugin, by a
-   session, by a person. Everything a cold reader needs is in it, including the paste-ready prompt for
-   each task. There is no companion file.
+1. **One self-contained file.** The plan is queued whole, so everything a cold reader needs is in it,
+   each task's paste-ready prompt included. There is no companion file.
 2. **The narrative comes first; the tasks come last.** A task block is only readable against the
    context above it, so `## 1. What already exists, and what is missing` and the sections that decide
    the work are written *before* any task is.
 3. **Every task gates its own work and the work landed above it** (plan-format §5).
 
 **The unit of work is a task.** A plan is one flat, ordered list of them, ids prefixed by the family of
-work (`B1`, `B2`, `B3`, then `P1`) — never a "slice", never a "phase", never a "stage", and never
-grouped into any of those. A task's *internal* actions are its **steps**; that is the only thing the
-word "step" names. Use the word **task** in the plan, in the task reports, and when talking to the
-user, so the same thing has the same name everywhere.
+work (`B1`, `B2`, then `P1`), never a "slice", "phase" or "stage" nor grouped into one. A task's
+internal actions are its **steps**. Say **task** in the plan, the reports and to the user.
 
-**Context:** Write the plan on whatever branch you are already on — do not create or check out a branch
-or worktree to author it.
+**Context:** Write the plan on the branch you are on; create or check out no branch or worktree.
 
 **Save plans to** `docs/plans/NNN-<feature-name>.md` under the **current project's** root, never this
 skills-library checkout and never a global config directory unless the user asks for a global copy
@@ -59,9 +56,9 @@ skills-library checkout and never a global config directory unless the user asks
 
 ## Scope Check
 
-If the spec covers multiple independent subsystems, it should have been broken into sub-project specs
-during brainstorming. If it wasn't, suggest one plan per subsystem. Each plan should produce working,
-testable software on its own.
+A spec covering several independent subsystems belongs in a system plan (`/product:plan-system`), one
+feature each. If it reached you whole, suggest one plan per subsystem, each producing working, testable
+software on its own.
 
 ## Step 1 — Ground the plan before you decompose it
 
@@ -116,8 +113,7 @@ them — the sequence itself carries the ordering, and the third task is "the th
   (the gate task, `DOC1`), and in `rules/plans.md`: the contract and stubs first, then the `Q`
   acceptance tests, then the implementation tasks.
 - **Prerequisites a human must do come first**, as their own tasks with `Agent: human` and an
-  `**Owner:**` line (an account to provision, an API key to request, a run only they can start), so
-  nothing downstream stalls on them silently.
+  `**Owner:**` line (an account, an API key, a run only they can start).
 - **Fill the session, then stop.** Merge consecutive same-stack work into one task until it would
   exceed the budget target, then start the next. **The goal is the fewest sessions, not the smallest
   tasks** — an agent switch costs a whole context reload, so twenty tiny tasks cost more than
@@ -147,6 +143,9 @@ is the most damaging defect in the document.
 **Done when** every task names one stack from plan-format §4 and one exact catalog agent.
 
 ## Step 5 — Budget the session
+
+The tables below are the working estimate; `product/skills/session-budget/SKILL.md` holds the detail
+(target, merge and split, the prompts section) for a task that is hard to size.
 
 **One task is executed in one session, so its context cost is a property of the task.** Estimate it
 **while you are authoring the task** — not afterwards, which turns the number into trivia rather than
@@ -199,7 +198,7 @@ from a 95k of one large one:
 3 skills 24k, 5 files created and 1 modified 11.5k, commit, diff and gate read-back 10k, churn ×1.2
 ```
 
-Re-derive it whenever the task's files, skills or cited sections change.
+Re-derive it when the task's files, skills or cited sections change.
 
 > **The budget is a guide, never a gate.** Three rules outrank it, always: one deliverable; one stack
 > and one agent; every task gates its own work and the work landed above it. A task that overshoots with
@@ -262,9 +261,7 @@ criteria. Fix what you find inline; a spec requirement with no task gets a task.
 
 ## Execution Handoff
 
-After saving the plan, hand off to execution.
-
-**"Plan complete and saved to `docs/plans/<filename>.md` — ready to queue in Plan Queue."**
-
-The plan file is the whole handoff. Plan Queue runs it in its own worktree, one prompt block per
-session, in order, and each session closes out per the plan's `## Close-out — every task`.
+Return to `/product:plan-feature` step 10, which commits the plan (and, from a system plan, runs its
+close-out). Then tell the user: **"Plan complete and saved to `docs/plans/<filename>.md` — ready to
+queue in Plan Queue."** The plan file is the whole handoff: Plan Queue runs one prompt block per
+session, in its own worktree.

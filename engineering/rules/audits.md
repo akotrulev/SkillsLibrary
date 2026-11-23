@@ -1,10 +1,10 @@
 ---
 paths:
-  - "docs/audits/*-requirements.md"
+  - "docs/audits/*-register.md"
   - "docs/audits/*-audit-r*.md"
 ---
 
-<!-- engineering rules v1 (2026-11-03): audits. Installed by /engineering:rules; edit the paths above if this project keeps its audits elsewhere. -->
+<!-- engineering rules v2 (2026-11-23): audits. Installed by /engineering:rules; edit the paths above if this project keeps its audits elsewhere. -->
 
 # Audit register and round standards
 

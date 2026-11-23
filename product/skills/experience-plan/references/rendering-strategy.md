@@ -1,6 +1,6 @@
 # Rendering strategy — SSR, CSR and hybrid, decided per route
 
-**Rendering is decided per route, never per app.** The planner classifies every web route as SSG, ISR, SSR, streaming SSR or CSR, records the signals behind the choice, and writes it into `experience-plan.md` §4a before any code exists. The `fe-<stack>` agent builds to that spec and may not change a route's `mode` on its own; the `qa-ui-<stack>` agent proves it from the raw HTML.
+**Rendering is decided per route, never per app.** The planner classifies every web route as SSG, ISR, SSR, streaming SSR or CSR, records the signals behind the choice, and writes it into the feature spec's `### Rendering plan` (under `## Experience`) before any code exists. The `fe-<stack>` agent builds to that spec and may not change a route's `mode` on its own; the `qa-ui-<stack>` agent proves it from the raw HTML.
 
 Web UIs only. Native mobile and desktop apps are client-rendered by nature and skip this file.
 
@@ -81,7 +81,7 @@ A Vite SPA is the right stack only when **every** route classifies `csr`. One pu
 
 **Blazor:** `InteractiveServer` holds a SignalR circuit per user, so it suits internal tools with modest concurrency; public traffic takes `InteractiveWebAssembly` or `InteractiveAuto`.
 
-## Output contract — `experience-plan.md` §4a
+## Output contract — the spec's `### Rendering plan`
 
 One block per route, in this shape. The implementer may not change `mode`; a disagreement is a dated `D<n>` the planner rules on.
 
@@ -90,7 +90,7 @@ rendering_plan:
   stack: nextjs-app-router        # nextjs-app-router | vite-spa | blazor
   routes:
     - path: /p/[slug]
-      screen: S2                   # the §4 screen id
+      screen: S2                   # the screen id in `## Experience`
       mode: ssr                    # ssg | isr | ssr | ssr-streaming | csr
       revalidate_seconds: null     # isr only
       cache: cdn-public            # cdn-public | private | none
@@ -126,7 +126,7 @@ rendering_plan:
     - LCP under 2.5 s on mid-range mobile over 4G; CLS under 0.1
 ```
 
-Required: `path`, `screen`, `mode`, `cache`, `signals`, and `server_rendered_content` on every non-`csr` route. The JS and LCP figures are starting targets; the planner sets the project's own. In `RESUME`, routes read out of the code are marked `#observed` and a mode the procedure would change becomes an open question, never a silent rewrite.
+Required: `path`, `screen`, `mode`, `cache`, `signals`, and `server_rendered_content` on every non-`csr` route. The JS and LCP figures are starting targets; the planner sets the project's own. In an existing app, routes read out of the code are marked `#observed` and a mode the procedure would change becomes an open question, never a silent rewrite.
 
 ## Verification — who proves what
 

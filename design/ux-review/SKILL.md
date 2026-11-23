@@ -37,11 +37,11 @@ Best practice from the discipline: a heuristic evaluation catches more when **ru
 
 A review without evidence is an opinion. Before the first heuristic:
 
-1. **Name the primary user tasks** you will walk (from the brief, or from `docs/plans/<NNN>-*/experience-plan.md`'s actors & tasks where the initiative has one).
+1. **Name the primary user tasks** you will walk (from the brief, or from the `### Actors and tasks` of a feature spec's `## Experience` in `docs/specs/<NNN>-*-design.md` where the feature has one).
 2. **Capture each task end to end.** With a running app, drive it through the Playwright MCP and take one screenshot per screen in the task's path, at the desktop and the narrowest supported width; a native app is captured the way its stack agent's Review step does (simulator and emulator screenshots on mobile, `screencapture -l <windowid>` on macOS, `winapp ui screenshot` on Windows), on the smallest and largest supported device or window size. Without one, use the user-supplied screenshots / mockup / Figma frames and say so.
 3. **Record what was captured** in the report header — tasks walked, screens seen, widths — so the coverage is legible and a screen you never reached is not silently "passed".
 
-**Where an `experience-plan.md` exists it is the reference, not the build.** Every IA or steps-to-goal finding names the plan decision the build contradicts — the screen id (`S4`), the nav-map row, the journey's step count — and a build that matches a plan decision you would have flagged is a finding *against the plan*, routed to `solution-planner`, not against the build.
+**Where a spec's `## Experience` exists it is the reference, not the build.** Every IA or steps-to-goal finding names the plan decision the build contradicts — the screen id (`S4`), the nav-map row, the journey's step count — and a build that matches a plan decision you would have flagged is a finding *against the plan*, routed to `/product:plan-feature`, not against the build.
 
 ## Nielsen's 10 heuristics, as review questions
 
@@ -93,7 +93,7 @@ Perceived speed is part of the experience; the budget is [`design/ux-patterns`](
 1. **Evidence captured** — tasks walked, screens seen, widths — before any judgement; the report says what was and was not reached.
 2. **Two passes**, primary user tasks named, each task walked against **all ten heuristics** — findings, not vibes.
 3. **Responsiveness measured** against the §9 budget: press feedback, skeletons, the ~4 s acknowledgement, no layout shift, optimism only where reversible.
-4. **Plan referenced** where `experience-plan.md` exists — each IA / steps-to-goal finding names the screen id or nav-map row it contradicts.
+4. **Spec referenced** where a spec's `## Experience` exists — each IA / steps-to-goal finding names the screen id or nav-map row it contradicts.
 5. **Flow measured:** steps-to-goal minimized, no dead ends, back-button safe, **undo preferred over confirm** for reversible actions, state always legible.
 6. **IA checked:** nav shallow and scannable, labels predict destinations, one-name-one-concept holds, you-are-here always shown.
 7. **Output is a findings table** (severity / location / heuristic / suggested fix) on the **house severity scale** — **no rewrites**, each finding ranked by user-task impact.

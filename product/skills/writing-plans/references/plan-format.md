@@ -13,8 +13,9 @@
 - 9. Never in a plan
 
 The shape every plan in this library is written in — the one the Plan Queue VS Code plugin queues, and
-the one `product:plan-feature`, `product:plan-delivery` and `product:plan-session-budget` all produce, and the one
-`documenter` writes when documenting a system takes more than one session.
+the one `writing-plans` produces (with `session-budget` sizing its tasks) when `/product:plan-feature`
+plans an approved spec, and the one `documenter` writes when documenting a system takes more than one
+session.
 
 **One file, self-contained.** The plugin queues whole plan documents, so everything a cold reader or a
 fresh session needs is *in the file*: the context, the decisions, the tasks, and the paste-ready prompt
@@ -23,9 +24,10 @@ per task. There is no companion file — no `NEXT-PROMPTS.md`, no `HANDOFF.md`. 
 
 **Path:** `docs/plans/NNN-<slug>.md` while the plan is live, `docs/plans/implemented/NNN-<slug>.md`
 once every task in it has landed (§8) — under the **target project's** root, never the skills-library
-checkout and never a global config directory. A `solution-planner` pack puts its plan at
-`docs/plans/<NNN>-<initiative>/delivery-plan.md` beside the rest of its artifacts, and the whole folder
-moves.
+checkout and never a global config directory. A system plan (`docs/plans/<NNN>-<system>-system.md`,
+written by `/product:plan-system`) is not this shape and is not queued: its format is
+`product/skills/solution-blueprint/references/system-plan-format.md`, and each of its features gets an
+implementation plan of this shape.
 
 **`NNN` is zero-padded, and its high-water mark spans both folders** — `docs/plans/` *and*
 `docs/plans/implemented/`, files and folders alike. List both before picking a number. A number is
@@ -157,9 +159,10 @@ the chat route's request shape and stream ~10k, writes ~40k, test output ~15k.
 - **Order:** everything both sides bind to — the schema, the contract, the shared types and **the
   stubs** — then **the acceptance tests written against them**, then the backend tasks, the
   shared-package tasks, and the frontend and mobile tasks.
-- **A `Q` task's deliverable names its tests and their red reason** — "every endpoint in
-  `api-surface.md` §5.2 and every AC of US7–US9 has an acceptance test in
-  `services/orders/tests/Orders.AcceptanceTests/`, and each fails on `501 not-implemented`." **An
+- **A `Q` task's deliverable names its tests and their red reason** — "every endpoint in the spec's
+  `## API surface` and every criterion of `docs/specs/014-orders-design.md` AC1–AC9 has an acceptance
+  test in `services/orders/tests/Orders.AcceptanceTests/`, each citing its `AC<k>`, and each fails on
+  `501 not-implemented`." **An
   implementation task's deliverable names the acceptance tests it turns green** — "the 14 Orders
   acceptance tests from Q1 pass, and B3's unit tests cover its branches."
 
@@ -168,29 +171,32 @@ verbatim:
 
 > The acceptance tests a `Q` task wrote are the spec, and they are **read-only** to every later task except the gate. Never edit, skip, delete or weaken one: not its assertion, its data or its timeout. A test you believe is wrong is a dated `D<n>` with both readings, and it stays red; the gate task resolves it with the user.
 
-**Plans built on stories add the test-design family, `TD`.** Where the plan serves stories (`US<n>` in
-`stories.md`), testing is planned and designed inside the plan, by the same queue that builds it:
+**Plans that deliver a feature add the test-design family, `TD`.** Where the plan builds a feature
+spec's `## Acceptance criteria` (`AC1…ACn` in `docs/specs/NNN-<feature>-design.md`), testing is planned
+and designed inside the plan, by the same queue that builds it. A plan built from a story backlog
+(`US<n> AC<k>`) qualifies the same way, with the epic and the story in place of the feature and the
+spec:
 
 - **`TD` tasks are stack `qa` and come in two kinds, in this order.** First **the test plan**
-  (agent `qa-test-planner`): one document per epic in `docs/test-plans/`, with the versions under test,
-  what is to be tested (every included part of the epic's stories), the harness looked up from the repo,
-  a scenario (`TP-###`) for every acceptance criterion with the agent that will carry it out, and the
-  Definition of Ready and the Definition of Done. Then **the test cases** (agent `qa-test-case-designer`):
-  one suite per story in `docs/test-cases/`, every included part with a journey case and every criterion
-  with a case, each citing its `US<n> AC<k>` and its `TP-` row.
-- **Fill the session.** One test-plan task covers as many epics as fit its budget, one plan document
-  each; test-case tasks likewise cover as many stories as fit. A task spanning epics names the first as
-  its `Epic` and every story it covers in `Story`.
+  (agent `qa-test-planner`): one document per feature in `docs/test-plans/`, with the versions under
+  test, what is to be tested (every acceptance criterion the plan builds), the harness looked up from
+  the repo, a scenario (`TP-###`) for every criterion with the agent that will carry it out, and the
+  Definition of Ready and the Definition of Done. Then **the test cases** (agent
+  `qa-test-case-designer`): one suite per feature in `docs/test-cases/`, every journey the spec
+  describes with a journey case and every criterion with a case, each citing its `<spec> AC<k>` and its
+  `TP-` row.
+- **Fill the session.** A test-plan task and a test-case task each cover the plan's feature in one
+  session; on a story backlog, one covers as many epics or stories as fit its budget.
 - **Order:** after everything both sides bind to (the contract and the stubs, so the harness and the API
   surface are looked up, not proposed), and **before the `Q` tasks**. A `Q` task depends on the test-plan
-  task for its epic and automates the scenarios that plan binds to its agent, each test carrying its
-  `TP-` id beside its AC id. The test-case tasks depend on the test-plan task and block nothing.
+  task and automates the scenarios that plan binds to its agent, each test carrying its `TP-` id beside
+  its `AC<k>`. The test-case tasks depend on the test-plan task and block nothing.
 - **Gate:** `**Gate: none** — a test plan and a test-case suite are documents; the agent's own review
   (scope closed, every criterion traced, every executor resolves) is the check.`
 - **The last task checks each test plan's Definition of Done** line by line and records every unmet line
   in `Status:`. It never edits a plan's scenarios or a suite's cases to make a line true.
-- **Left out only on an answer.** A plan with stories and no `TD` tasks records, in its header, who
-  opted out and why. A plan with no stories (an internal refactor, a tool) has none.
+- **Left out only on an answer.** A plan with acceptance criteria and no `TD` tasks records, in its
+  header, who opted out and why. A plan with none (an internal refactor, a tool) has no `TD` tasks.
 
 **Red for the right reason.** A `Q` test is red **on the `not-implemented` stub** — in Arrange or in
 Act, since a setup call that reaches a stub is also the right reason — or, for a journey, **on the
@@ -237,13 +243,14 @@ work when the plan has any, and it writes no product documentation.
 - **It updates the documentation from the code that landed, never from the plan.** It re-traces the areas
   or features the plan's tasks touched (their `As built` notes are leads, the code is the evidence),
   updates the existing documents in place and writes the ones a new area or feature needs. It reads the
-  plan's stories (`stories.md`) as the source of purpose, never as evidence of what was built; what the
+  plan's feature spec (or the story backlog, where the plan was built from one) as the source of purpose,
+  never as evidence of what was built; what the
   plan intended and did not build is not documented as built — it goes into the delivery note's
   *Not delivered* table.
 - **Deliverable:** names the documents and the delivery note — "the Booking and Membership areas in
   `docs/business-model/` describe what this plan landed: every guide's tasks, rules and worked example
   match the code at HEAD; `docs/deliveries/<NNN>-<plan-slug>.md` states what people can do now, what
-  works differently and which stories were not delivered."
+  works differently and which acceptance criteria were not delivered."
 - **Screenshots come from a non-production environment, and never block it.** The task names that
   environment and where the person keeps its test logins (never their values). Without one the guides
   land with `**Screenshots:** pending`, the plan's `Status:` line says so under built-but-unverified,
@@ -307,8 +314,7 @@ stack's command from the table below. The gate ends with the coverage floor over
 whenever the plan wrote code: unit tests cover **at least 80% of the branches in the code the plan
 wrote** — every file it created, whole, and the methods it
 changed in files that already existed. The scope is the plan's change, never the repo. The gate takes
-the file list from git, starting at the commit that added this plan (a `solution-planner` pack: its
-`delivery-plan.md`):
+the file list from git, starting at the commit that added this plan:
 
 ```bash
 git diff --name-only "$(git log --diff-filter=A --format=%h -1 -- docs/plans/NNN-<slug>.md)" HEAD
@@ -465,8 +471,8 @@ Rules:
   four things specific to that task: the convention that is easy to miss, the file that looks like the
   pattern but is not, the migration that must run before the test, the down-level API that does not
   exist here.
-- **Cite sections, never whole artifacts.** `api-surface.md` §5.3, not `api-surface.md`. This is the
-  single biggest lever on the budget holding: a session told to read the pack reads the pack.
+- **Cite sections, never whole artifacts.** the spec's `## API surface` endpoint block it tests, not the whole spec. This is the
+  single biggest lever on the budget holding: a session told to read the spec reads the spec.
 - **No block says "see the task" or "as above".** A session opened from the block starts without
   scrolling up.
 - **A prompt is living text.** A task that lands something different from what the plan predicted
@@ -541,8 +547,7 @@ block and the line that says which have landed.
    commits the work and the deletion together.
 8. **Filing** — if your deletion left no blocks, rewrite `**Status:**` one final time (what the plan
    delivered, what is still unverified), `git mv` this plan into `docs/plans/implemented/`, same name and
-   number — a `solution-planner` pack moves its whole initiative folder — and add its row to that
-   folder's README where there is one, in the same follow-up commit.
+   number, and add its row to that folder's README where there is one, in the same follow-up commit.
 ````
 
 Every prompt block ends its reading list with this section and closes with the line
@@ -560,9 +565,8 @@ that files the plan: normally the documentation task (§5). Before it stops, it:
    built against a stub). This is the line the next person reads instead of the whole document.
 2. `git mv`s the file into `docs/plans/implemented/`, **keeping its filename and its number** —
    `docs/plans/030-agent-model-effort-benchmark.md` → `docs/plans/implemented/030-agent-model-effort-benchmark.md`.
-   A `solution-planner` pack moves its **whole initiative folder**:
-   `docs/plans/003-workshop-booking/` → `docs/plans/implemented/003-workshop-booking/`, with every
-   artifact in it, so the plan never loses the pack it cites.
+   A system plan is filed by its own `## Close-out — every feature`, when its last feature prompt is
+   deleted.
 3. Adds the plan's row to `docs/plans/implemented/README.md` where the project keeps one.
 4. Commits the move in the follow-up commit that deletes its prompt (§7 step 7), and says in its report
    where the plan went.

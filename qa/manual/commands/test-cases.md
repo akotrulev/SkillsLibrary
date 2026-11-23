@@ -1,6 +1,6 @@
 ---
 description: Run the step-by-step manual test-design workflow — documentation (or a live page) to a systematically-derived test-case suite
-argument-hint: [the doc, story, contract, or URL to work from]
+argument-hint: [the feature spec, test plan, doc, story, contract, or URL to work from]
 disable-model-invocation: true
 ---
 
@@ -14,4 +14,4 @@ Adopt the **`qa-test-case-designer` senior manual QA engineer** role for this ta
 
 $ARGUMENTS
 
-If no task was given above, ask for the test basis to work from — a story, BRD, AC set, API contract, or state diagram — or a URL to explore in **Exploration mode** when the documentation is thin.
+If no task was given above, ask for the test basis to work from — a feature spec from `/product:plan-feature` (one suite per feature, from its acceptance criteria) or its test plan, a story, BRD, AC set, API contract, or state diagram — or a URL to explore in **Exploration mode** when the documentation is thin.

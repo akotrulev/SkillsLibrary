@@ -47,7 +47,7 @@ No server runtime, no RSC — every component is a client component, data comes 
 
 ## Rendering strategy — per route, not per app
 
-**Server Components are the default; client interactivity is opt-in per island.** The mode of each route comes from the plan's `rendering_plan` (`experience-plan.md` §4a). With no plan, classify each route with the decision procedure in [`rendering-strategy.md`](../../../../product/skills/experience-plan/references/rendering-strategy.md): discoverability, audience, freshness, personalisation, interactivity and session length decide it, in that file's order. Then express the mode with Next's own mechanism:
+**Server Components are the default; client interactivity is opt-in per island.** The mode of each route comes from the plan's `rendering_plan` (the feature spec's `### Rendering plan`). With no plan, classify each route with the decision procedure in [`rendering-strategy.md`](../../../../product/skills/experience-plan/references/rendering-strategy.md): discoverability, audience, freshness, personalisation, interactivity and session length decide it, in that file's order. Then express the mode with Next's own mechanism:
 
 | Mode | Next.js mechanism | Best for | Cost |
 |---|---|---|---|

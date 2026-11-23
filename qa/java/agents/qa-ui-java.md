@@ -29,7 +29,7 @@ The Playwright MCP server must be registered as `page-objects-from-url` "Prerequ
 3. **Build or update the POM**: test id first, every fallback a `missing-testids.md` row; in update mode ask before deleting a vanished element. Gate: it compiles.
 4. **Automate the cases the user provides** (or `qa-test-case-designer` produced): ask for them when there are none, never invent scenarios. One tagged test per TC-ID through `ui-test-author/playwright`.
 
-**Server-rendered routes:** where the experience plan's §4a `rendering_plan` marks a route `ssg`, `isr`, `ssr` or `ssr-streaming`, also write its raw-HTML and cache-header tests through a `PageHtmlClient`, and wait for the `data-hydrated` signal before interacting (`ui-test-author/playwright/references/server-rendered-pages.md`).
+**Server-rendered routes:** where the spec's `### Rendering plan` marks a route `ssg`, `isr`, `ssr` or `ssr-streaming`, also write its raw-HTML and cache-header tests through a `PageHtmlClient`, and wait for the `data-hydrated` signal before interacting (`ui-test-author/playwright/references/server-rendered-pages.md`).
 
 ## Steps
 

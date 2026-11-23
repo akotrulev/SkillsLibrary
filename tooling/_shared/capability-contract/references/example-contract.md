@@ -7,7 +7,7 @@
 # Orders tool contract
 
 **Surface:** `orders` — the ordering slice of the Contoso storefront, exposed so an agent can place and track orders without a human in the browser.
-**Source of truth:** derived from the codebase (`src/Contoso.Api`), cross-checked against `docs/plans/003-ordering/api-surface.md`.
+**Source of truth:** derived from the codebase (`src/Contoso.Api`), cross-checked against the `## API surface` of `docs/specs/003-ordering-design.md`.
 **Detected stack:** .NET 10 (`net10.0`, `Directory.Build.props:7`) · API reached over HTTP · tool surface to be built in **TypeScript / Node 24** as a sidecar (see Dependencies).
 **Envelope:** inherits `references/output-contract.md` unchanged — offset paging, default `pageSize` 50, max 200.
 

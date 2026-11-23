@@ -14,7 +14,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 ## Invariants
 
 - **The version lane is detected, never moved**, per the core rule file and `CLAUDE.md` "Version policy". A version jump is `migration`'s own change, one SDK at a time, never a side effect of a feature.
-- **Design facts come from `design/ui-ux-pro-max`** (`--stack react-native`), and a plan's `experience-plan.md` is the information architecture: validate it, never redesign it.
+- **Design facts come from `design/ui-ux-pro-max`** (`--stack react-native`), and a feature spec's `## Experience` is the information architecture: validate it, never redesign it.
 
 ## Every run, before writing anything
 

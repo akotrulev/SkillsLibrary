@@ -12,7 +12,25 @@ front doors.
 Every skill that is only a step inside one of the two front doors is hidden: neither the model nor the
 user can call it on its own.
 
-**Status:** Not started. Next: S1.
+**Status:** Delivered (2026-11-23); all eight tasks landed and the plan is filed. The `product` plugin has
+two front doors. `/product:plan-system` (`solution-planner`, NEW / EXISTING / EXTEND) writes one system plan,
+`docs/plans/<NNN>-<system>-system.md`, per `system-plan-format.md`, with a `/product:plan-feature` prompt per
+feature (S1, S2). `/product:plan-feature` (`brainstorming`, SYSTEM / NEW / SHAPED) runs the interview, the
+approved spec with its acceptance criteria and design sections, and the implementation plan, then writes
+back or puts the feature on hold (F1, F2). `TD`, QA and the documenter key to the spec's acceptance
+criteria (`SPEC<NNN>-AC<k>`) and still accept a story backlog (K1). The twelve step skills are hidden,
+enforced by surface-check rule 10, and every old name is rewritten (M1). The catalog, `README.md`, `CLAUDE.md`
+and the manifest describe it (C1). The G1 sweep (§7) is green on the merged tree. **Unverified:** no session
+has run `/product:plan-system` or `/product:plan-feature` yet; Claude Code hiding the twelve
+`user-invocable: false` skills is unchecked (D13); Plan Queue skipping `## Feature prompts` is unchecked
+(D10). The user restarts, runs `/product:plan-system` on a small vision in a scratch repo, pastes one
+feature prompt, puts another on hold, and checks that `/product:writing-plans` is not in the `/` menu.
+**Follow-ups outside §7:** `CLAUDE.md`'s filing bullet still says "a `solution-planner` pack moves its
+whole initiative folder" (a system plan is one file; C1); the catalog's `product:knowledge-base` entry
+still says KB sources are `US<n> AC<k>`, unchecked against `ba-project-memory` (C1); S1's §3 example in
+`system-plan-format.md` picks a Vite SPA where `rendering-strategy.md` would give `ssr` (F2); `documenter`,
+`business-documentation`, `codebase-survey` and `documenter-invariants.md` still say "a delivery plan's
+`DOC1`" (M1).
 
 **Test design:** none. The plan serves no stories and changes skill text, agent text, the manifest and
 one lint script. The checks are `tools/plugin-surface-check.py`, `tools/skill-lint.py`,
@@ -330,6 +348,69 @@ auth wiring, the telemetry base, CI and the shared entities from §3. Every othe
 
 **D20 — Standalone `/product:plan-feature` (NEW mode) keeps working without a system plan.**
 
+**D21 (2026-11-23, S1) — The rewritten reference files take new names, and the format adds three small rules.**
+The plan said to rewrite `blueprint-template.md`, `example-blueprint.md` and `example-epic-map.md` in
+place. S1 renamed them `skeleton-template.md`, `example-skeleton.md` and
+`example-features-side-by-side.md`, because the §7 grep's `(blueprint|epic-map|…)\.md` matches the old
+names and G1 could never print nothing. The format also adds: a `**Mode:**` header line (NEW / EXISTING
+/ EXTEND, D17); a `State` column in the feature-prompt table (`live`, `specced (plan NNN)`, `on hold`);
+and, in the close-out, a decision that changes §3 corrects the §3 line in place citing its `D<n>`, so §3
+always says what is true now. Cost: S2 writes the `**Mode:**` line and the `State` column, and F1's
+write-back sets `State`.
+
+**D22 (2026-11-23, S2) — `solution-planner`'s write reach includes the glossary rows and ADRs `domain-modeling` writes.**
+S2's bullet gave the reach as the system plan and the orientation cache only, but the same bullet has
+Step 1 load `domain-modeling` "as `brainstorming` step 5 does", and that step writes
+`docs/business-model/glossary.md` rows and `docs/adr/` files as terms settle. The agent and the command
+now name both. Cost: `business-analyst` no longer owns every write to the KB; the boundary line says
+`solution-planner` writes glossary rows and nothing else there.
+
+**D23 (2026-11-23, F1) — F1 also cleared the pack paths and hid `writing-plans`' routing headings.**
+The bullets named `plan-format.md` §1, §5 and §8 and `plans.md:34-36`. F1 also removed the
+`solution-planner` pack clause from §7's verbatim close-out (no initiative folder exists after D2), the
+`docs/plans/*/delivery-plan.md` glob and pack path in `plans.md` (lines S2 left for M1), and the matching
+row in `rules/SKILL.md:19`. `writing-plans`' "When to use" / "When NOT to use" became `## Input`, because
+lint R6 bars routing headings on a skill with `disable-model-invocation: true`, and four of its paragraphs
+were tightened to keep the body under 16,000 chars. Cost: a plan written before F1 carries the old §7
+clause in its close-out, harmless now; M1 has three fewer hits to rewrite.
+
+**D24 (2026-11-23, F2) — The design examples take new names and spec 006, and the validation catalog's project copy lives in `docs/specs/`.**
+- The bullet said to rewrite each `example-*.md` in place. Their old names (`example-data-model.md`,
+  `example-api-surface.md`, `example-integrations.md`, `example-experience-plan.md`) match F2's own grep,
+  so they were renamed `example-<section>-section.md`, as D21 did for S1.
+- The bullet named the toy spec `docs/specs/004-booking-cancellation-design.md`. The system-plan-format
+  example S1 wrote already names F3's spec draft `docs/specs/006-booking-cancellation-design.md` (004 is
+  the system plan, 005 F1's spec), so the examples use 006 and add F2's spec as 007.
+- The old skill copied the catalog into the initiative folder; no folder exists after D2. Both readings:
+  copy it into every spec's folder per feature (rejected: one copy per spec in one folder), or the first
+  spec with an `## API surface` copies it to `docs/specs/validation-catalog.md` and every spec cites
+  that copy (chosen).
+- Cost: K1 and M1 point `test-first` and `tooling-engineer` at `docs/specs/validation-catalog.md`; a
+  project whose specs live elsewhere (the user's preference wins, `plan-feature`'s Output format) keeps
+  the copy beside them.
+
+**D25 (2026-11-23, K1) — The backlog audit is a new `BACKLOG AUDIT` mode, and a spec-bound test is tagged `SPEC<NNN>-AC<k>`.**
+- `business-analyst` already had an `AUDIT` mode (refresh the KB). Both readings: fold the backlog review
+  into it (rejected: one mode name for two inputs, KB versus backlog) or add a mode beside it (chosen,
+  `BACKLOG AUDIT`).
+- The plan says tests cite `<spec> AC<k>`, but a tag cannot hold a path or a space. `test-first` tags
+  `SPEC<NNN>-AC<k>` from the spec's number (unique in `docs/specs/`), `US<n>-AC<k>` from a backlog. Within
+  one test plan or suite a row cites `AC<k>` alone, the spec named once in **Covers** or the header.
+- Cost: a project whose specs live outside `docs/specs/` numbers them its own way; the tag still takes the
+  spec's `NNN`.
+
+**D26 (2026-11-23, M1) — The engineering audit register is renamed `<NNN>-<slug>-register.md`.**
+- The §7 grep's `requirements\.md` matches `spec-vs-code-audit`'s register, `docs/audits/<NNN>-<slug>-requirements.md`,
+  which has nothing to do with the deleted product lane. Both readings: leave it and let G1's grep carry
+  three known hits (rejected: the deliverable is a grep that prints nothing), or rename the register
+  (chosen: the file is already headed **Register:**).
+- `spec-vs-code-audit/SKILL.md`, `engineering/rules/SKILL.md` and `engineering/rules/audits.md` (rules v2,
+  `paths:` `docs/audits/*-register.md`) changed. `engineering:rules` step 6 also searches
+  `'*-requirements.*'`, so a project's older registers are still found and a glob proposed for them.
+- Cost: a project that re-installs the engineering rules loses the default glob for its old
+  `*-requirements.md` registers until step 6's proposed glob is accepted; this repo's own
+  `docs/audits/` holds none.
+
 ## Answered questions (2026-11-23)
 
 - **O1 — How much design does the system command do up front:** a thin skeleton (D3).
@@ -414,6 +495,36 @@ replaces `backlog-requirements.md` and `backlog-epics.md`. `skill-lint` reports 
   - `plan-format.md` (F1).
   - Hiding the skills (M1).
   - The skills still carry their old `name:` values, so the plugin surface is unchanged.
+- **As built (2026-11-23):**
+  - `product/skills/solution-blueprint/references/system-plan-format.md` (476 lines): §1 path, §2
+    header, §3 sections, §4 feature task block, §5 `## Feature prompts — paste one per session` (heading
+    `### F<n> — <title> (/product:plan-feature)`, first line the slash command), §6 living text and
+    filing, §7 never, §8 the verbatim `## Close-out — every feature`, §9 a filled example
+    (`004-workshop-booking-system.md`: F1 specced, F2 live, F3 on hold).
+  - Renamed rather than rewritten in place (D21): `blueprint-template.md` → `skeleton-template.md`,
+    `example-blueprint.md` → `example-skeleton.md`, `epic-map/references/example-epic-map.md` →
+    `example-features-side-by-side.md`. Deleted `key-flows-and-decisions.md` and `pack-cross-checks.md`:
+    the grep found only `solution-blueprint/SKILL.md:75`, `product/agents/solution-planner.md:83` and
+    plan 015 in `implemented/` citing them. `solution-planner.md:83` still names `pack-cross-checks.md`;
+    lint does not flag it (the path does not start with `references/`), and S2 rewrites that step.
+  - `solution-blueprint/SKILL.md`: Steps 1–8 (read what exists, stack, architecture, areas → trees →
+    agents with the catalog updated to the manifest's agents, auth, shared entities, conventions, hand
+    the open decisions to the interview). No gate of its own: `solution-planner` holds the one approval.
+    `architecture-style.md` kept, "blueprint" → "skeleton" at :5, :16, :25.
+  - `ba-scoping-writeup`: §2 as nine `###` subsections; the tenth concern, open questions, goes to the
+    plan's `## Open questions`. `ba-epic-writer`: §4 as one table `| Epic | Goal | In plain English |
+    Features |`, and it hands the feature list (id, title, epic) to `solution-planner`. `epic-map`: §5's
+    table, Steps 1–6, no lanes or waves.
+  - `rules/system-plans.md` (`paths: ["docs/plans/*-system.md"]`); `backlog-requirements.md` and
+    `backlog-epics.md` deleted. `plans.md` v5: the `*-system.md` line under "The document".
+    `rules/SKILL.md`: ten files, the `system-plans.md` row, step 5 retires
+    `backlog-{requirements,epics}.md` (written as a brace glob so the §7 grep stays quiet), step 6 finds
+    system plans and story backlogs. `ba-story-quality-review/SKILL.md:23` no longer cites the deleted
+    `backlog-epics.md`.
+  - Names unchanged: `plan-blueprint`, `scoping`, `epics`, `plan-epic-map`; descriptions rewritten.
+  - Gate: `skill-lint.py product` → `0 findings`; whole-library `skill-lint.py` → `0 findings`;
+    `plugin-surface-check.py` → `OK`; `token-audit.py --violations-only` → exit 0;
+    `pytest tools/test_skill_lint.py` → 95 passed.
 
 ### S2 — `solution-planner` and `/product:plan-system` write the system plan
 
@@ -479,6 +590,33 @@ replaces `backlog-requirements.md` and `backlog-epics.md`. `skill-lint` reports 
   - References in other files (M1). `business-analyst.md` and the catalog still name
     `requirements-author` until then, and `skill-lint` may flag a dead path to a deleted file. Fix any
     such R8 finding inside `product/` here, by pointing it at the replacement in §5.
+- **As built (2026-11-23):**
+  - `product/agents/solution-planner.md` rewritten (12.3 KB, under the 14 KB agent budget): modes NEW,
+    EXISTING, EXTEND (:49-51); `## Steps` table 0–8 with `Load` and `Done when` (:59-69), Step 6 the
+    blocking approval of §2, §3 and the feature list (:67), Step 7 writes the file per
+    `system-plan-format.md` with the `**Mode:**` line and every prompt-table `State` set to `live` (:68),
+    Step 8 the self-review that replaces the deleted `pack-cross-checks.md` (:69); `## Report` opens with
+    `Mode:`. Steps 2–5 draft in the session and send open decisions back to Step 1; nothing reaches disk
+    before Step 7. `§1` is written in Step 4, with the feature list, since its `Gap` column names features.
+  - `product/commands/plan-system.md` rewritten: routes to `solution-planner`; the three rules are plans
+    not code, Step 6 blocks, the system plan is not queued.
+  - Deleted: `product/agents/requirements-author.md`, `product/commands/refine.md`,
+    `product/skills/delivery-plan/` (8 files), and their three entries in `.claude-plugin/marketplace.json`.
+    The `product` description is untouched (C1).
+  - `session-budget/SKILL.md`: prerequisite "a task list from `writing-plans` with `Files` filled in",
+    output the feature's implementation plan `docs/plans/<NNN>-<feature>.md`, description
+    "Not for ordering tasks (writing-plans)". `prompts-section-template.md`: every
+    `…/delivery-plan.md` path is now `docs/plans/<NNN>-<feature>.md` (worked example
+    `docs/plans/003-workshop-booking.md`).
+  - EXISTING mode names the old pack as "an older initiative folder's requirements, epics and stories
+    files", not by file name, so the §7 grep stays quiet on the agent.
+  - No R8 finding appeared inside `product/` from the deletions, so nothing else was repointed. Textual
+    mentions of the deleted lane remain for later tasks: `brainstorming/SKILL.md:3,12,18,33,101` and
+    `writing-plans/references/plan-format.md:16,27,311` (F1); `integration-plan/SKILL.md:104,113` and its
+    example (F2); `business-analyst.md:3,16,61` and `rules/plans.md:4,18`, `rules/SKILL.md:19` (M1).
+  - Gate: `plugin-surface-check.py` → `OK`; `skill-lint.py product` → `0 findings` (whole library also
+    `0 findings`); `token-audit.py --violations-only` → exit 0; `pytest tools/test_skill_lint.py` → 95 passed.
+  - Unverified: no run of `/product:plan-system` in a scratch repo (the user's check after G1).
 
 ### F1 — `/product:plan-feature`: interview, spec, plan and write-back in one run
 
@@ -541,6 +679,36 @@ prints `OK`.
   - The QA agents and the documenter (K1).
   - `CLAUDE.md` (C1).
   - `user-invocable: false` (M1).
+- **As built (2026-11-23):**
+  - `product/skills/brainstorming/SKILL.md` rewritten: `name: plan-feature` (:2), the R3 description
+    from the bullet (:3); the front-door table `/product:plan-feature` vs `/product:plan-system` (:12-16);
+    modes SYSTEM / NEW / SHAPED (:22-30) with the SYSTEM reading list and "§3 and the decisions are
+    settled", a reopening question worded "this changes the system plan's D<n>" (:32); step 8 names the
+    four design skills by path with when each applies and the spec section each writes (:59-68); step 9
+    approves the spec; step 10 reads `product/skills/writing-plans/SKILL.md`, then in SYSTEM mode runs the
+    system plan's `## Close-out — every feature`, setting `State` to `specced (plan <NNN>)` and deleting
+    the prompt only in the follow-up commit (:72); `## On hold` (:74); the spec format gains
+    `**System plan:**`, `## Acceptance criteria` (`AC1…ACn`) and the four optional design sections (:88-116).
+    No route to `requirements-author` or `/product:refine` is left. Step 10 was added rather than
+    extending step 9, so approval and planning are separate `Done when`s.
+  - `product/skills/writing-plans/SKILL.md`: `name: writing-plans`, `disable-model-invocation: true`
+    (:2-4); `## Input` (:13) names the approved spec and its acceptance criteria as the `TD`/`Q` basis
+    and routes the design to `/product:plan-feature` and a whole system to `/product:plan-system`;
+    Step 5 points at `product/skills/session-budget/SKILL.md` (:146); the handoff returns to
+    `plan-feature` step 10. To stay under the 16,000-char body budget, four paragraphs were tightened
+    (intro, unit-of-work, property 1, human prerequisites) without changing their rules (D23).
+  - `plan-format.md`: line 16 names `writing-plans` and `session-budget`; the path paragraph points a
+    system plan at `system-plan-format.md`; §4's `Q` example cites `docs/specs/014-orders-design.md`
+    AC1–AC9; §4 `TD` is "Plans that deliver a feature" (:174), per feature, citing `<spec> AC<k>`, a
+    story backlog still qualifying; §5 `DOC1` reads the spec (or the backlog); the `solution-planner`
+    pack paths in §1, §5, §7 and §8 are gone (D23).
+  - `rules/plans.md`: the `TD` rule re-keyed (:36); the S1 system-plan line kept. Also its
+    `docs/plans/*/delivery-plan.md` glob and pack path, and the matching row in `rules/SKILL.md:19` (D23).
+  - `tools/plugin-surface-check.py:45`: `"product": frozenset("plan-feature notebooklm".split())`.
+  - Gate: `plugin-surface-check.py` → `OK`; `skill-lint.py product` → `0 findings` (whole library also
+    `0 findings`); `token-audit.py --violations-only` → exit 0; `pytest tools/test_skill_lint.py` → 95 passed.
+  - Unverified: no `/product:plan-feature` run in a scratch repo, so the write-back and on-hold flows are
+    unexercised (the user's check after G1).
 
 ### F2 — The four design skills write sections of a feature spec
 
@@ -582,6 +750,37 @@ the feature spec and the system plan's §3 as input and write their section of t
   other.
 - **Not in F2:** files outside these four skills that cite `experience-plan.md` §4a or `api-surface.md`
   (M1).
+- **As built (2026-11-23):**
+  - The four `SKILL.md` files rewritten, `name:` kept (D14), each with `## Input` (the spec so far, the
+    system plan's §3 and the specs of the features it depends on; standalone, the code), `## Output`
+    (its spec section and the subsections in order), `## Scope` (this feature only; what §3 or an
+    earlier spec defined is a `### Builds on` row and a delta, never redefined; a §3 change is put to
+    the user as "this changes the system plan's §3 <line>") and a `## Section template`. No approved
+    `blueprint.md` gate: step 8's section approval and step 9's spec approval are the gate.
+    `data-model-plan/SKILL.md:8-27`, `api-surface-plan/SKILL.md:8-31`, `experience-plan/SKILL.md:8-29`,
+    `integration-plan/SKILL.md:8-32`. Every "Delivery task" column became "the implementation plan
+    assigns it"; a blocking unknown's third place is a human prerequisite task `writing-plans` writes.
+    `**Acceptance:**` lines cite the spec's own `AC<k>`.
+  - `experience-plan`: the rendering plan is the spec's `### Rendering plan` (Step 5), same contract;
+    `references/rendering-strategy.md` changed only at :3, :84, :93 and :129 (`RESUME` → "an existing
+    app"). `api-surface-plan`: the spec cites `docs/specs/validation-catalog.md`, copied there by the
+    first spec with an API surface (D24); `references/validation-catalog.md` changed only at its
+    `data-model.md` / `api-surface.md` / `integrations.md` / `product:plan-integrations` references
+    (:67, :94, :133, :149, :170, :171, :190, :198).
+  - The examples were renamed `example-data-model-section.md`, `example-experience-section.md`,
+    `example-api-surface-section.md`, `example-integrations-section.md` (D24) and rewritten as filled
+    sections of `docs/specs/006-booking-cancellation-design.md`, F3 of the system-plan-format example
+    `docs/plans/004-workshop-booking-system.md` (D24), sharing AC1–AC6 (listed in the data-model
+    example), spec 005's tables and spec 007's screens and endpoints.
+  - `state-grid` is named by path (`product/skills/ba-entity-state-grid/SKILL.md`), not as
+    `product:state-grid`. The integration description was shortened to 194 chars for token-audit.
+  - Gate: `skill-lint.py product` → `0 findings`; `token-audit.py --violations-only` → exit 0; the F2
+    grep prints nothing; `plugin-surface-check.py` → `OK`.
+  - Follow-up, outside F2's files: S1's §3 example (`system-plan-format.md` §9, `example-skeleton.md`)
+    puts the app on a Vite SPA, while `rendering-strategy.md` gives signed-in pages that are not
+    long-session tools `ssr`. The experience example shows it as a §3 question the owner settled (all
+    `csr` kept); G1 decides whether the §3 example should say Next.js instead.
+  - Unverified: no `/product:plan-feature` run has loaded these four files and written a spec section.
 
 ### K1 — QA and the documenter read the feature spec
 
@@ -630,6 +829,46 @@ findings over `qa` and `product`.
   `product/skills/ba-story-quality-review` verdict per story, with no file changed.
 - **Not in K1:** the design, frontend, mobile, tooling, data and backend references to the old pack
   files (M1).
+- **As built (2026-11-23):**
+  - QA. `qa/manual/test-plan-writer/SKILL.md`: the unit is one feature from its spec's acceptance criteria
+    (:9), the basis a feature spec first, a story backlog second (:15), `# Test Plan — <feature or epic>`
+    with **Covers** naming the spec and its AC range, §3 rows and §10 traces citing `AC<k>` of the spec in
+    **Covers** (`US6 AC3` from a backlog), Ready/Done and the section rules keyed to acceptance criteria.
+    `qa-test-planner.md:14-18`: the chain redrawn inline (`/product:plan-feature` 1 → implementation plan 2
+    → `TD` 3–4 → `Q` 5 → implementation, gate, `DOC1` 6–8), since `solution-planner.md` no longer has a
+    "delivery chain" section; a spec (or the plan that builds it) is the first input shape, one plan per
+    feature; the backlog row stays. `qa-test-case-designer.md:14-17,36-37`: one suite per feature from the
+    spec (`## Experience` journeys, `## Acceptance criteria` conditions), one per story from a backlog.
+    `qa/manual/commands/test-plan.md` and (beyond the bullet) `test-cases.md`: the argument is a spec or
+    its plan. `qa/_shared/test-first/SKILL.md:17-41`: inputs are the spec's `## API surface`,
+    `docs/specs/validation-catalog.md`, `## Experience` (`### Journeys`, `### Screens` `Test ids:`,
+    `### Rendering plan`); the tag is `SPEC<NNN>-AC<k>` (`SPEC006-AC2`), `US<n>-AC<k>` from a backlog,
+    with the `TP-` id beside it (D25).
+  - Documenter. `business-documentation/SKILL.md:21,25,103`, `documenter-invariants.md:24,37-38`: the
+    plan's feature spec (goal, decisions, acceptance criteria) is the source of purpose, a story backlog
+    where the plan was built from one. `delivery-note.md`: the template's first column is *Criterion*
+    (`AC<k>`) and its stamp carries `spec` and `criteria`; a backlog plan keeps *Story* and `stories`; "a
+    plan with no stories" became "no stories and no acceptance criteria" (it still puts `—`); the worked
+    example stays the story-based plan 004, said so in its lead-in, matching `example-area.md` and the
+    evals. The guide stamp gained an optional `spec` key (`guide-shape.md:88`, `system-overview.md:79`).
+    Beyond the bullet, `product/agents/documenter.md:16` and `feature-documenter.md:77` pointed at the
+    deleted "delivery chain" in `solution-planner.md`; both now draw it inline, and their report lines
+    and `DOC1` scope read the spec. `evals/` unchanged.
+  - `business-analyst.md`: description (:3) names the backlog audit and routes design to
+    `/product:plan-feature`; :16 "the user repairs those, or `solution-planner` for a system plan"; a
+    **BACKLOG AUDIT** mode row (:32) reads `product/skills/ba-story-quality-review/SKILL.md` by path, a
+    verdict per story, no backlog or KB file changed, rewrites proposed per
+    `product/skills/ba-story-writer/SKILL.md` in the report only; :61 routes to `/product:plan-feature` and
+    `/product:plan-system`; the report gains a backlog-verdicts line (D25).
+  - Token budget: `qa-test-planner.md` and `qa-test-case-designer.md` were already near token-audit's
+    14,000-char agent budget; both were tightened elsewhere (Fix/Extend, orient, step-2 prose) without
+    changing a rule, to 13,987 and 13,993 chars. The `business-analyst` description is 347 chars.
+  - Gate: `skill-lint.py qa/manual qa/_shared/test-first product` → `0 findings`; `qa-version-check.py` →
+    `OK`; `plugin-surface-check.py` → `OK`. Also `skill-lint.py` (whole library) → `0 findings`,
+    `token-audit.py --violations-only` → exit 0, `pytest tools/test_skill_lint.py` → 95 passed.
+  - Unverified: no `TD`/`Q`/`DOC1` task has run against a real spec, and `doc-lint.py` was not run on a
+    delivery note with `spec`/`criteria` (its stamp check requires only `plan`, `source`, `audience`,
+    `doc-lint.py:369-375`).
 
 ### M1 — Every remaining reference, and the hidden skills
 
@@ -681,6 +920,36 @@ findings over `qa` and `product`.
   read, never called as `product:<name>`.
 - **Not in M1:** `docs/skills-catalog.md`, `README.md` and `CLAUDE.md` (C1), and `docs/plans/implemented/`
   and `docs/audits/`, which are records and are never edited.
+- **As built (2026-11-23):**
+  - Hidden: the twelve skills set `user-invocable: false` on the line after `disable-model-invocation: true`
+    (e.g. `product/skills/epic-map/SKILL.md:5`). `tools/plugin-surface-check.py` gains `HIDDEN` (keyed by
+    the skills' `name:` values: `writing-plans plan-session-budget plan-blueprint scoping epics
+    plan-epic-map plan-data-model plan-api-surface plan-experience plan-integrations stories
+    story-review`) and rule 10 with D13's citation in the docstring. Proved: removing the line from
+    `epic-map` printed `product: hidden skill 'plan-epic-map' must set user-invocable: false and
+    disable-model-invocation: true`; restored, `OK`.
+  - References: every §7 hit outside C1's files rewritten per §6. Experience, data-model and API-surface
+    readers (design, fe, mobile, desktop, qa server-rendered pages and the three `qa-ui-*` agents,
+    tooling, data-architect, backend rust) now cite the spec's `## Experience` / `### Rendering plan`,
+    `## Data model`, `## API surface` and `docs/specs/validation-catalog.md`; `product-analytics` takes
+    metrics from the system plan's §2 `### Success`; `ba-story-writer`, its example and
+    `rules/backlog-stories.md` (rules v6) cite §2 `What it must do` / `Constraints` and are read by
+    `business-analyst`; `feature-trace` takes stated intent from the spec's criteria, the system plan's
+    §2 or a backlog; `tools/MISSION-CONTROL-MOVED.md` says the delivery-plan ingestion format is gone.
+  - Beyond the grep: `session-budget` (SKILL.md and `references/prompts-section-template.md`) re-keyed
+    to the spec: TD1/TD2/Q1/DOC1 templates read `## Acceptance criteria` and tag `SPEC<NNN>-AC<k>` (D25),
+    one test plan and one suite per feature, the task table takes `plan-format.md` §6's columns (Epic,
+    Story and Stream dropped), the filled example cites spec blocks. The four backend `pattern-writer`
+    files say "the system plan skeleton's `Modules:` line", not "blueprint". The seven stack-plugin
+    manifest descriptions name `/product:plan-system, /product:plan-feature`.
+  - Engineering audit register renamed (D26).
+  - Gate: `plugin-surface-check` OK; `skill-lint` 0 findings; `token-audit --violations-only` exit 0;
+    `pytest tools/test_skill_lint.py` 95 passed; `qa-version-check` OK. §7 grep: 58 hits, all in C1's
+    files — `docs/skills-catalog.md` 40, `README.md` 16, `CLAUDE.md` 1, and the `product` description at
+    `.claude-plugin/marketplace.json:52` (C1's manifest bullet).
+  - Left for later, outside §7: `documenter`, `business-documentation`, `codebase-survey` and
+    `documenter-invariants.md` still say "a delivery plan's `DOC1`" (generic for an implementation plan,
+    harmless).
 
 ### C1 — The catalog, the README, `CLAUDE.md` and the manifest description
 
@@ -721,6 +990,42 @@ findings over `qa` and `product`.
   `/product:plan-feature` (a feature → spec → plan, written back), the documentation and analysis lanes.
   Keep it under token-audit's description budget.
 - **Not in C1:** new restructuring. A finding outside §7 goes into `Status` as a follow-up.
+- **As built (2026-11-23):**
+  - `CLAUDE.md`: the plan-format line names `/product:plan-feature` producing it through the hidden
+    `writing-plans` and `session-budget` steps, and the system plan's own unqueued format
+    (`CLAUDE.md:68`); the bullet is now "A plan that delivers a feature plans its testing", `TD` keyed to
+    the spec's `## Acceptance criteria` (`<spec> AC<k>`), a story backlog still qualifying (`CLAUDE.md:78`),
+    and its `In review` line follows (`CLAUDE.md:85`). Nothing else in the file changed.
+  - Manifest: the `product` description names the two front doors, the hidden steps, the documentation
+    and analysis lanes; 1,618 → 1,441 chars (token-audit does not budget plugin descriptions; it is
+    shorter than before and below six other plugins').
+  - Counts recomputed from the manifest: `product` 25 skills, 4 agents, 4 commands (3 skills listed to
+    the model, 12 hidden, 10 `disable-model-invocation` only); library-wide 76 command files, 86
+    registrations.
+  - `README.md`: the plugin bullet (`:132`), the registration paragraph (`:138`), the front-door
+    paragraph (`:152`, the hidden steps named as the exception to "every skill is slash-invocable"), the
+    command count, the `product` command table (4 rows, `plan-system` rewritten), the reasoning-skills
+    line, the `/product:plan-feature` modes paragraph, the `/product:rules` paths row, the
+    `/qa-<stack>:test-plan` argument row, the delivery chain diagram and its bullets (system plan →
+    spec → plan, `TD` per feature citing `<spec> AC<k>`, tests tagged `SPEC<NNN>-AC<k>`), the "How a
+    feature is built" rows 1, 2 and 4, and the status table's `product` row.
+  - `docs/skills-catalog.md`: plugin table row, command counts and examples (`:28`), the `product` command
+    row, the "two front doors, fenced" paragraph; the QA-manual `test-plan-writer`, delivery-chain and
+    `qa-test-planner` entries; the Product catalog rewritten — a front-door table and the §2 flow, Part 1
+    "The two front doors" (`solution-planner` NEW / EXISTING / EXTEND and its nine steps and system plan
+    sections; `/product:plan-feature` SYSTEM / NEW / SHAPED, write-back and on hold; the implementation
+    plan format), Part 2 "The hidden steps" (the twelve by path, grouped by who reads them, D13 and
+    surface-check rule 10), Part 4 now the reasoning lane only with `business-analyst`'s BACKLOG AUDIT.
+    Beyond the hits: Part 3's documenter and feature-documenter purposes read the spec, and their
+    `solution-planner` fence names EXISTING. The SPEC-lane audit register follows D26
+    (`<NNN>-<slug>-register.md`).
+  - Gate: §7 grep prints nothing (run under `bash`: in zsh an unquoted `$X` does not word-split, so the
+    excludes are ignored and `implemented/`, `audits/` and `evals/` hits appear); `skill-lint` 0 findings;
+    `token-audit --violations-only` exit 0; `plugin-surface-check` OK.
+  - Follow-ups for G1 (outside §7, left): `CLAUDE.md`'s filing bullet still says "a `solution-planner`
+    pack moves its whole initiative folder" (C1 changes only the bullets it names; a system plan is one
+    file); the catalog's `product:knowledge-base` entry still says KB sources are `US<n> AC<k>`
+    (unchecked against `ba-project-memory`).
 
 ### G1 — The whole sweep, and filing the plan
 
@@ -755,6 +1060,32 @@ the commands in §7.
   The user restarts, runs `/product:plan-system` on a small vision in a scratch repo, pastes one feature
   prompt, puts another on hold, and checks that `/product:writing-plans` is not in the `/` menu.
 - **Not in G1:** new restructuring.
+- **As built (2026-11-23):**
+  - First §7 run green, so no task's work needed fixing: `plugin-surface-check` → `OK`;
+    `skill-lint | tail -1` → `0 findings`; `token-audit --violations-only` → exit 0, 0 violations in all
+    four budgets; `pytest tools/test_skill_lint.py -q` → `95 passed`; `qa-version-check` → `OK`; the §7
+    grep (run under `bash`) prints nothing; the manifest assertion prints `OK`.
+  - Hand-offs read end to end, every name and path resolving:
+    - `product/commands/plan-system.md` → `product/agents/solution-planner.md` (Steps 0–8 load
+      `agent-orientation-cache`, `requirements-breakdown`, `domain-modeling`, `ba-project-memory`,
+      `ba-scoping-writeup`, `solution-blueprint`, `pattern-guide`, `ba-epic-writer`, `epic-map`; all exist)
+      → `system-plan-format.md` (§5 prompt first line, §7 never-list that Step 8 loads, §8 close-out).
+    - The prompt's first line `/product:plan-feature F<n> of <path> — <title>` → `brainstorming/SKILL.md`
+      (`name: plan-feature`) SYSTEM mode reads §2, §3, §5, Decisions and the task block, as the prompt's
+      reading line says → step 8's four design skills by path → step 10 reads
+      `product/skills/writing-plans/SKILL.md`, whose "Execution Handoff" returns to step 10 → the system
+      plan's `## Close-out — every feature` (format §8).
+    - `writing-plans` → `plan-format.md` §4 `TD` (spec `## Acceptance criteria`, `<spec> AC<k>`) →
+      `qa/manual/agents/qa-test-planner.md` (spec basis row; `test-plan-writer`, `requirements-breakdown`,
+      `test-strategy`, `quality-metrics` exist) → `qa/_shared/test-first/SKILL.md` (`SPEC<NNN>-AC<k>`; the
+      `**Acceptance:**` lines it reads exist in `experience-plan` `### Journeys` and `api-surface-plan`
+      endpoint blocks, `Test ids:` under `### Screens`, `docs/specs/validation-catalog.md` copied by
+      `api-surface-plan`).
+  - Merge: `master` (`c2a5621f`) is already an ancestor of the plan branch, so the merge is a no-op and
+    no newly merged plan brought in an old name.
+  - Second §7 run (the gate): the same seven results.
+  - No commit made: under Plan Queue the queue commits this work and the filing together.
+  - `docs/plans/implemented/` has no README, so the filing adds no row.
 
 ## Close-out — every task
 
@@ -812,326 +1143,4 @@ session that runs the task.
 | G1 | `docs` | `general-purpose` | C1 | — | ~90k |
 | — | restart, run `/product:plan-system` in a scratch repo, check the hidden skills and Plan Queue | **the user** | G1 | — | — |
 
-No prompt has landed yet.
-
----
-
-### S1 — The system plan format and the four system-level skills (general-purpose, docs)
-
-````
-Depends on: none
-Agent: general-purpose · Stack: docs
-
-Task S1 of docs/plans/018-product-system-to-feature-lane.md: define the system plan and rescope the four
-skills that write its sections.
-
-Deliverable: product/skills/solution-blueprint/references/system-plan-format.md defines the system plan
-as the plan's §3 describes. solution-blueprint, ba-scoping-writeup, ba-epic-writer and epic-map each
-write their section of it (§3, §2, §4, §5) and nothing else. product/skills/rules/system-plans.md
-replaces backlog-requirements.md and backlog-epics.md. skill-lint reports 0 findings over product.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §1, §2, §3, §5, D2–D4, D7, D10, D14, D16–D19, task S1, and "Close-out — every task".
-3. product/skills/writing-plans/references/plan-format.md §1, §2, §6, §7, §8: the shape the system
-   plan borrows.
-4. product/skills/solution-blueprint/SKILL.md and its references; product/skills/ba-scoping-writeup/SKILL.md;
-   product/skills/ba-epic-writer/SKILL.md; product/skills/epic-map/SKILL.md and its example.
-5. product/skills/rules/plans.md, backlog-requirements.md, backlog-epics.md, SKILL.md.
-
-Build: the task's bullets, in order. The format file ends with the verbatim
-"## Close-out — every feature" section and a filled three-feature example.
-
-Traps:
-- The prompt block's first line is the slash command, not "Depends on:" (D10). The heading is
-  "## Feature prompts — paste one per session", never "## Prompts".
-- Keep each skill's name: field as it is. Hiding and renaming are M1's and F1's.
-- Before deleting key-flows-and-decisions.md or pack-cross-checks.md, grep for every citation. Keep a
-  file that anything other than solution-planner.md or delivery-plan cites.
-- The writing-for-agents rules apply (R3 descriptions, R8 links, R11: no "Phase" or "Slice" in a heading).
-
-Gate:
-  python3 tools/skill-lint.py product | tail -1      → 0 findings
-  python3 tools/plugin-surface-check.py              → OK
-  python3 tools/token-audit.py --violations-only     → exit 0
-
-Commit: `product: the system plan format and its four section skills (018 S1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### S2 — solution-planner and /product:plan-system write the system plan (general-purpose, docs)
-
-````
-Depends on: S1
-Agent: general-purpose · Stack: docs
-
-Task S2 of docs/plans/018-product-system-to-feature-lane.md: rewrite solution-planner and the
-/product:plan-system command to produce the system plan, and delete the lane it replaces.
-
-Deliverable: product/agents/solution-planner.md runs NEW, EXISTING and EXTEND (D17) and writes
-docs/plans/<NNN>-<system>-system.md per system-plan-format.md. /product:plan-system routes to it.
-requirements-author, /product:refine and delivery-plan are gone from the tree and the manifest.
-plugin-surface-check prints OK.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3, §5, D1, D7, D8, D16–D19, task S2 and its As built notes from S1, and
-   "Close-out — every task".
-3. product/skills/solution-blueprint/references/system-plan-format.md (S1's output).
-4. product/agents/solution-planner.md and product/agents/requirements-author.md (the scoping and epic
-   steps that move in).
-5. product/commands/plan-system.md and product/commands/refine.md.
-6. product/skills/session-budget/SKILL.md (prerequisites only) and
-   references/prompts-section-template.md (the lines naming delivery-plan.md).
-7. The "product" entry in .claude-plugin/marketplace.json.
-
-Build: the task's bullets, in order.
-
-Traps:
-- Keep the house agent shape: a ## Steps table with Load and Done when columns, and a ## Report holding
-  Mode: (lint R13). No "when relevant" or "as needed" in a Load cell (R14).
-- Step 6, the approval of §2, §3 and the feature list, blocks: nothing is written before it.
-- Deleting delivery-plan/ leaves dead links inside product/. Fix every R8 finding the lint reports
-  inside product/ by pointing it at the replacement in §5. Files outside product/ are M1's.
-- Leave the manifest's product description alone (C1).
-
-Gate:
-  python3 tools/plugin-surface-check.py              → OK
-  python3 tools/skill-lint.py product | tail -1      → 0 findings
-  python3 tools/token-audit.py --violations-only     → exit 0
-
-Commit: `product: solution-planner writes the system plan; refine, requirements-author and delivery-plan removed (018 S2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### F1 — /product:plan-feature: interview, spec, plan and write-back in one run (general-purpose, docs)
-
-````
-Depends on: S2
-Agent: general-purpose · Stack: docs
-
-Task F1 of docs/plans/018-product-system-to-feature-lane.md: rename product:feature to
-/product:plan-feature, make it run through to the implementation plan, and give it the system plan's
-write-back and on hold.
-
-Deliverable: product/skills/brainstorming/SKILL.md is name: plan-feature and runs SYSTEM, NEW and
-SHAPED as the plan's §4 describes, including the acceptance criteria, the write-back and on hold.
-product/skills/writing-plans/SKILL.md is name: writing-plans and is loaded by it. plan-format.md and
-plans.md key TD tasks to a feature spec's acceptance criteria (D11). plugin-surface-check prints OK.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §3, §4, D6, D9–D12, D15, D20, task F1 and the As built notes above it, and
-   "Close-out — every task".
-3. product/skills/solution-blueprint/references/system-plan-format.md: its "Close-out — every feature"
-   is what SYSTEM mode runs.
-4. product/skills/brainstorming/SKILL.md and product/skills/writing-plans/SKILL.md.
-5. product/skills/writing-plans/references/plan-format.md §4, §5, §6 and line 16.
-6. product/skills/rules/plans.md and tools/plugin-surface-check.py (FRONT_DOORS, :41-46).
-
-Build: the task's bullets, in order.
-
-Traps:
-- The description must pass lint R3: starts "Use when", has Triggers "…", ends "Not for <case> (<sibling>)."
-- writing-plans is loaded by reading its SKILL.md path, never "invoke product:…" (lint R12).
-- SYSTEM mode treats the system plan's §3 as settled. Reopening it is a question to the user that names
-  the D<n> it would change.
-- The write-back deletes the feature's prompt only after the implementation plan is committed, in a
-  follow-up commit.
-
-Gate:
-  python3 tools/plugin-surface-check.py              → OK
-  python3 tools/skill-lint.py product | tail -1      → 0 findings
-  python3 tools/token-audit.py --violations-only     → exit 0
-
-Commit: `product: /product:plan-feature runs interview, spec, plan and write-back (018 F1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### F2 — The four design skills write sections of a feature spec (general-purpose, docs)
-
-````
-Depends on: F1
-Agent: general-purpose · Stack: docs
-
-Task F2 of docs/plans/018-product-system-to-feature-lane.md: rescope data-model-plan, experience-plan,
-api-surface-plan and integration-plan from whole-system files to sections of one feature's spec.
-
-Deliverable: data-model-plan, experience-plan, api-surface-plan and integration-plan each take the
-feature spec and the system plan's §3 as input and write their section of the spec (## Data model,
-## Experience with ### Rendering plan, ## API surface, ## Integrations). None of them names blueprint.md,
-a pack file or a US<n>. Each example is a filled spec section.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §4, §6, D3, D6, task F2 and the As built notes above it, and "Close-out — every task".
-3. product/skills/brainstorming/SKILL.md: the spec format and step 8, as F1 left them.
-4. The four skills, each SKILL.md then its references.
-
-Build: the task's bullets, in order. If the session runs long, finish data-model-plan and
-api-surface-plan, commit, and leave a "Picking up from:" line for the other two.
-
-Traps:
-- Keep rendering-strategy.md's and validation-catalog.md's content. Only their references to plan
-  files change: fe-react and fe-blazor read rendering-strategy.md by path.
-- An entity, endpoint or screen the system plan's §3 owns is referenced, never redefined.
-- The four examples share one toy spec, so their names and ids agree.
-
-Gate:
-  python3 tools/skill-lint.py product | tail -1      → 0 findings
-  python3 tools/token-audit.py --violations-only     → exit 0
-  grep -rnE 'blueprint\.md|data-model\.md|experience-plan\.md|api-surface\.md|integrations\.md|epic-map\.md|delivery-plan|US[0-9<]' product/skills/{data-model-plan,experience-plan,api-surface-plan,integration-plan}   → prints nothing
-
-Commit: `product: the four design skills write feature spec sections (018 F2)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### K1 — QA and the documenter read the feature spec (general-purpose, docs)
-
-````
-Depends on: F1, F2
-Agent: general-purpose · Stack: docs
-
-Task K1 of docs/plans/018-product-system-to-feature-lane.md: re-key the QA test-design agents, test-first
-and the documenter from stories.md to the feature spec's acceptance criteria, and give business-analyst
-the backlog audit.
-
-Deliverable: qa-test-planner, test-plan-writer, qa-test-case-designer, /qa-…:test-plan and test-first
-take a feature spec's ## Acceptance criteria as their primary basis, citing <spec> AC<k>, and still
-accept a story backlog. business-documentation reads the spec as the source of purpose. business-analyst
-owns the AUDIT of an imported backlog (D5). skill-lint reports 0 findings over qa and product.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §4, §6, D5, D11, task K1 and the As built notes above it, and "Close-out — every task".
-3. product/skills/writing-plans/references/plan-format.md §4 (TD) and §5 (DOC1), as F1 left them.
-4. qa/manual/test-plan-writer/SKILL.md, qa/manual/agents/qa-test-planner.md,
-   qa/manual/agents/qa-test-case-designer.md, qa/manual/commands/test-plan.md,
-   qa/_shared/test-first/SKILL.md.
-5. product/skills/business-documentation/SKILL.md, references/documenter-invariants.md,
-   references/delivery-note.md.
-6. product/agents/business-analyst.md.
-
-Build: the task's bullets, in order.
-
-Traps:
-- A story backlog stays a valid basis everywhere: add the spec first, don't delete the story path.
-- Leave product/skills/business-documentation/evals/ unchanged.
-- The QA files are shared by the three qa-* plugins: change the text, not the registration.
-
-Gate:
-  python3 tools/skill-lint.py qa/manual qa/_shared/test-first product | tail -1   → 0 findings
-  python3 tools/qa-version-check.py                  → OK
-  python3 tools/plugin-surface-check.py              → OK
-
-Commit: `qa, product: test design and documentation read the feature spec (018 K1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### M1 — Every remaining reference, and the hidden skills (general-purpose, docs)
-
-````
-Depends on: F2, K1
-Agent: general-purpose · Stack: docs
-
-Task M1 of docs/plans/018-product-system-to-feature-lane.md: hide the step-only product skills, enforce
-it in the surface check, and rewrite every remaining reference to a removed or renamed name.
-
-Deliverable: The §7 grep prints nothing. Every skill in §5 marked "Hidden" sets both
-disable-model-invocation: true and user-invocable: false, and plugin-surface-check enforces it (rule 10).
-skill-lint reports 0 findings over the whole library.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §5, §6, §7, D13, task M1 and the As built notes above it, and "Close-out — every task".
-3. tools/plugin-surface-check.py.
-4. The §7 grep's output: run it first, then edit each hit at its line.
-
-Build: the task's bullets, in order.
-
-Traps:
-- Never edit docs/plans/ (live or implemented), docs/audits/, auth/cognito-*, communication/ or
-  product/skills/business-documentation/evals/.
-- A hidden skill is named by path and read, never "invoke product:<name>" (lint R12).
-- docs/skills-catalog.md, README.md and CLAUDE.md are C1's. Leave their hits.
-- Run the grep under bash: in zsh the unquoted $X is not split.
-
-Gate:
-  python3 tools/plugin-surface-check.py              → OK
-  python3 tools/skill-lint.py | tail -1              → 0 findings
-  python3 tools/token-audit.py --violations-only     → exit 0
-  python3 -m pytest tools/test_skill_lint.py -q      → green
-  the §7 grep                                        → only hits in the catalog, README.md and CLAUDE.md
-
-Commit: `library: hide product step skills; references follow plan 018 (018 M1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### C1 — The catalog, the README, CLAUDE.md and the manifest description (general-purpose, docs)
-
-````
-Depends on: M1
-Agent: general-purpose · Stack: docs
-
-Task C1 of docs/plans/018-product-system-to-feature-lane.md: make the catalog, README.md, CLAUDE.md and
-the product manifest description describe the lane this plan built.
-
-Deliverable: docs/skills-catalog.md, README.md, CLAUDE.md and the product description in
-.claude-plugin/marketplace.json describe the two front doors, the system plan, the hidden steps and the
-TD rule as this plan built them. The §7 grep prints nothing anywhere.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §2, §5, §7, D11–D13, task C1 and the As built notes above it, and "Close-out — every task".
-3. The §7 grep's hits in the three files, and the sections the task names. Do not read the whole
-   226 KB catalog.
-4. The product entry in .claude-plugin/marketplace.json.
-
-Build: the task's bullets, in order. Recompute the product skill, agent and command counts from the
-manifest; don't carry them over from the old text.
-
-Traps:
-- CLAUDE.md is loaded into every session: change only the bullets the task names.
-- Keep the product description within token-audit's description budget.
-
-Gate:
-  the §7 grep                                        → prints nothing
-  python3 tools/skill-lint.py | tail -1              → 0 findings
-  python3 tools/token-audit.py --violations-only     → exit 0
-
-Commit: `docs: catalog, README and CLAUDE.md describe the plan-system → plan-feature lane (018 C1)`.
-Close out per the plan's "Close-out — every task" before you stop.
-````
-
-### G1 — The whole sweep, and filing the plan (general-purpose, docs)
-
-````
-Depends on: C1
-Agent: general-purpose · Stack: docs
-
-Task G1 of docs/plans/018-product-system-to-feature-lane.md: run the whole sweep on the merged tree,
-fix what it finds, and file the plan.
-
-Deliverable: Every command in §7 passes on the merged tree, and the plan is filed.
-
-Read, in this order:
-1. CLAUDE.md.
-2. The plan: §7, every As built note, task G1, and "Close-out — every task".
-3. The three hand-off chains the task names, end to end.
-
-Run §7 once. Fix each failure at the narrowest file, rerun only what failed, then run §7 once more.
-
-Traps:
-- A failure may belong to any task above. Fix it where it is, and name that task in As built.
-- Merge master into the plan's branch before filing (close-out step 6). Rewrite per §6 any old name a
-  newly merged plan brought in.
-- No new restructuring. A finding outside §7 goes into Status as a follow-up.
-
-Gate (this is the last runnable task, so it runs the whole set once more across the plan, in order):
-  the commands in §7.
-
-Commit: `product: plan 018 sweep green (018 G1)`.
-When filing, Status names as unverified: no session has run either front door; Claude Code hiding
-the user-invocable: false skills (D13); Plan Queue skipping "## Feature prompts" (D10).
-Close out per the plan's "Close-out — every task" before you stop.
-````
+All eight tasks (S1, S2, F1, F2, K1, M1, C1 and G1) have landed, and their prompts are deleted.

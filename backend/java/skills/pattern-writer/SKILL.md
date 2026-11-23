@@ -214,7 +214,7 @@ For HTTP, use Spring's existing `HandlerInterceptor` / `OncePerRequestFilter` �
 
 ## Module boundaries
 
-For a modular monolith built to be split later (blueprint `Modules:` line) — one package per module, one schema, one public surface, one architecture test. An existing codebase keeps the architecture it has.
+For a modular monolith built to be split later (the system plan skeleton's `Modules:` line) — one package per module, one schema, one public surface, one architecture test. An existing codebase keeps the architecture it has.
 
 - **One public API per module.** Spring Modulith treats each direct sub-package of the application's main package as a module (`com.shop.orders`). Types in that root package are the module's API — an `OrdersApi` interface, DTO records, published events; an entity never lives there. Everything else goes in a sub-package (`com.shop.orders.internal`), which other modules cannot reference.
 - **One schema per module.** `@Table(schema = "orders")` on its entities and its own Flyway location (`db/migration/orders`). A module holds another module's id as a plain column — no `@ManyToOne` to a foreign entity, no foreign key into its schema.

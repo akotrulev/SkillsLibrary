@@ -13,7 +13,7 @@ Skill paths below resolve against `${CLAUDE_PLUGIN_ROOT}` in an installed plugin
 
 **The render mode of the surface decides what a change may do.** Interop needs an interactive mode, offline needs WASM, and a handler on a static-SSR page does nothing.
 
-**Rendering is decided per route, and the plan decides it.** Build to the plan's `rendering_plan` (`experience-plan.md` §4a, or the plan's `## Rendering per route`) and map it to Blazor's mechanisms with `product/skills/experience-plan/references/rendering-strategy.md`; with no plan, run that file's decision procedure and record the result in the Step-1 decision record.
+**Rendering is decided per route, and the plan decides it.** Build to the plan's `rendering_plan` (the spec's `### Rendering plan`, or the plan's `## Rendering per route`) and map it to Blazor's mechanisms with `product/skills/experience-plan/references/rendering-strategy.md`; with no plan, run that file's decision procedure and record the result in the Step-1 decision record.
 
 ## Every run, before writing anything
 
@@ -37,7 +37,7 @@ A new build runs them in order; a fix or an extension re-enters only the steps i
 | 4 | Tests | `component-testing` | `dotnet test` green; bUnit on logic-bearing components, plain tests on non-rendering logic; ≥ 80% of the branches written |
 | 5 | Review | `code-review` · a new or restyled screen → `design/ui-code-audit`, `design/ux-review`, `design/visual-identity` | No blocker or major left; a Playwright screenshot critiqued with the restraint check; `ux-review` checks the build against the Step-1 experience block |
 
-**Where `docs/plans/<NNN>-*/experience-plan.md` exists**, its screen map, app shell and journeys are the Step-1 IA decision: validate them against the running code, never redesign. A disagreement is a dated `D<n>` in that plan's `## Decisions`, decided by the human.
+**Where the feature spec has an `## Experience`**, its screen map, app shell and journeys are the Step-1 IA decision: validate them against the running code, never redesign. A disagreement is a dated `D<n>` in that plan's `## Decisions`, decided by the human.
 
 **QA handshake.** When QA hands over a `missing-testids.md`, load `test-ids` alone, add the listed ids, and report locator counts and collisions. No other step runs.
 

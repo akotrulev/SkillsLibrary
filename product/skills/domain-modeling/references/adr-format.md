@@ -48,6 +48,6 @@ Add a section only when it earns its place:
 
 ## Writers and changes
 
-- **Written by** `product:feature` during the interview, the `solution-planner` blueprint step, and any plan task that records a `D<n>` passing the three tests. A plan-born ADR cites the plan and its `D<n>`.
+- **Written by** `/product:plan-feature` during the interview, `solution-planner` while it writes the system plan's §3, and any plan task that records a `D<n>` passing the three tests. A plan-born ADR cites the plan and its `D<n>`.
 - **Superseded, never edited away.** A changed decision is a new ADR; the old one gains `**Status:** superseded by NNNN` and keeps its text.
 - **Read before changing what it covers.** Work that touches what an ADR decides respects it, or writes the ADR that supersedes it.

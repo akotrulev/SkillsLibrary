@@ -2,6 +2,7 @@
 name: story-review
 description: Use when reviewing stories or epics someone else wrote for readiness (whole feature, goal and plan, met-or-not AC, testability). Triggers "review these stories". Not for writing stories (stories).
 disable-model-invocation: true
+user-invocable: false
 ---
 
 # Backlog Reviewer
@@ -20,7 +21,7 @@ Ask only what's missing, at most 2–3 questions:
 
 ## Review checklist
 
-Apply per story; each failed check becomes one finding row with a severity. The per-story checks (one whole feature with one goal, a plan and not a design, every included part proven, met-or-not acceptance criteria, testability, no technology) are the product rule files `backlog-stories.md`, and `backlog-epics.md` for epics, not a list here:
+Apply per story; each failed check becomes one finding row with a severity. The per-story checks (one whole feature with one goal, a plan and not a design, every included part proven, met-or-not acceptance criteria, testability, no technology) are the product rule file `backlog-stories.md`, not a list here:
 
 1. **The project's copies first**: `.claude/rules/product/`. The team may have edited them, and its edits win.
 2. **Otherwise the plugin's copies**: `product/skills/rules/`. Say in the report that the project has no installed rules and that `/product:rules` installs them.
@@ -80,7 +81,7 @@ Calibrate to the stated purpose: for a *testability* review, silent validations 
 <The findings that would stall `qa/manual/requirements-breakdown` — silent validations, contradictions, unfalsifiable AC — so QA knows exactly what to chase. "None" if clean.>
 
 ## Recommended next step
-<one sentence: e.g. "Route US13/US14 to product:stories for repair; US12 can proceed to requirements-breakdown now.">
+<one sentence: e.g. "Route US13/US14 to the business-analyst for repair; US12 can proceed to requirements-breakdown now.">
 ```
 
 Story and epic ids are quoted as the source backlog writes them; where the backlog has none, assign `US<n>`/`E<n>` in reading order and say so, so the findings are citable.
@@ -91,7 +92,7 @@ Story and epic ids are quoted as the source backlog writes them; where the backl
 - Every finding cites its location (story ID + AC number) so the author can act without re-reading the review.
 - Verdicts are per story; a batch never gets one blended verdict.
 - Don't manufacture findings to look thorough — a clean story gets ✅ and zero rows.
-- Don't re-litigate product decisions; review the story's *quality*, not whether the feature is a good idea (that was settled upstream in `product:scoping`).
+- Don't re-litigate product decisions; review the story's *quality*, not whether the feature is a good idea (that was settled upstream, in the system plan's §2).
 
 ## Anti-patterns to flag in the backlog
 

@@ -1,6 +1,6 @@
 # Example — a complete story
 
-`US1 Authentication`, the first story of an initiative whose epic `E1` is "people have their own account". Every number in it (12 characters, 24 hours, 60 minutes, five attempts, 15 minutes, 30 days) is a business rule from that initiative's `requirements.md` §4; none was chosen by the story's author.
+`US1 Authentication`, the first story of an initiative whose epic `E1` is "people have their own account". Every number in it (12 characters, 24 hours, 60 minutes, five attempts, 15 minutes, 30 days) is a business rule from that system plan's §2 What it must do; none was chosen by the story's author.
 
 ```markdown
 ## US1 — Authentication
@@ -22,7 +22,7 @@ that shows "my" anything waits on it.
   and chooses a new password themselves.
 - Registration comes first, because login and reset both need an account to exist. Login second,
   reset last.
-- The company's existing identity provider is reused (requirements.md §5, stated by the CTO).
+- The company's existing identity provider is reused (system plan §2 Constraints, stated by the CTO).
 
 ### What is included
 - **Register with confirmation**: a person signs up with their name, email and a password, gets a
@@ -81,8 +81,8 @@ that shows "my" anything waits on it.
 - none
 
 ### Source
-requirements.md §4.1 (accounts), §4.2 (rules R1–R6: password length, link lifetimes, lockout,
-session length), §5 (existing identity provider).
+System plan §2 What it must do (accounts; rules R1–R6: password length, link lifetimes,
+lockout, session length), §2 Constraints (existing identity provider).
 ```
 
 ## What to read in it

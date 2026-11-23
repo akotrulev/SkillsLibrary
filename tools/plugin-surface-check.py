@@ -12,6 +12,9 @@ Over .claude-plugin/marketplace.json, verifies:
      `disable-model-invocation`, and every other registered skill sets it to true
   8. no skill `description:` is a plain scalar holding ': ', which is invalid YAML
   9. every command sets `disable-model-invocation: true`: a command is typed, never listed to the model
+ 10. a skill in HIDDEN sets both `user-invocable: false` and `disable-model-invocation: true`, and a
+     front door never sets `user-invocable: false`. Per code.claude.com/docs/en/skills (read
+     2026-11-23), `user-invocable: false` hides a skill from the `/` menu; plan 018 D13
 
 Prints OK and exits 0, or one line per failure and exits 1.
 
@@ -42,9 +45,16 @@ FRONT_DOORS = {
     "engineering": frozenset("""
         debugging verify quality-constraints source-grounding writing-for-agents audit-spec audit-feature audit-architecture untested-code
     """.split()),
-    "product": frozenset("feature plan-feature notebooklm".split()),
+    "product": frozenset("plan-feature notebooklm".split()),
     "design": frozenset(("prototype",)),
     "qa":frozenset(("inhouse-framework-conventions", "python-web-testing")),
+}
+
+HIDDEN = {
+    "product": frozenset("""
+        writing-plans plan-session-budget plan-blueprint scoping epics plan-epic-map plan-data-model
+        plan-api-surface plan-experience plan-integrations stories story-review
+    """.split()),
 }
 
 
@@ -136,6 +146,12 @@ def main():
             if not is_front_door(pname, label) and not hidden:
                 failures.append(f"{pname}: skill '{label}' is listed to the model but is not a front door; "
                                 f"set disable-model-invocation: true or add it to FRONT_DOORS ({rel})")
+            user_hidden = re.search(r"^user-invocable:\s*false\s*$", block, re.M) is not None
+            if label in HIDDEN.get(pname, ()) and not (hidden and user_hidden):
+                failures.append(f"{pname}: hidden skill '{label}' must set user-invocable: false and "
+                                f"disable-model-invocation: true ({rel})")
+            if is_front_door(pname, label) and user_hidden:
+                failures.append(f"{pname}: front-door skill '{label}' sets user-invocable: false ({rel})")
             if re.search(r"^description:[ \t]*[^\s\"'>|][^\n]*: ", block, re.M):
                 failures.append(f"{pname}: description of '{label}' holds an unquoted ': ' ({rel})")
 

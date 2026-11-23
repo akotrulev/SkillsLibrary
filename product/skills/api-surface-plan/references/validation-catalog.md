@@ -64,7 +64,7 @@ Pick **one** status for field validation API-wide: `400` (common, unambiguous) o
 | V2.7 | Collection size outside bounds | every array | Empty-array policy stated: is `[]` valid or is `null` required? |
 | V2.8 | Date logically invalid | every date | Past-only / future-only / range order (`from <= to`) — a cross-field rule, keyed to the *later* field |
 | V2.9 | Whitespace-only string in a required field | every required string | Trim then validate; `"   "` is not a value |
-| V2.10 | Precision/scale exceeded | money, decimals | Money is minor units or a fixed scale, per `data-model.md` |
+| V2.10 | Precision/scale exceeded | money, decimals | Money is minor units or a fixed scale, per the spec's `## Data model` |
 | V2.11 | Cross-field rule violated | stated per endpoint | e.g. `discount <= total`, `endsAt > startsAt`. Keyed to one field, not the whole object |
 
 **Normalization happens before validation and is stated once:** trim strings, lowercase emails, strip formatting from phone numbers, canonicalize unicode. Otherwise `"Bob@x.com "` and `"bob@x.com"` become two accounts.
@@ -91,7 +91,7 @@ Rules:
 - **401 is uniform on purpose.** "Invalid signature" vs "unknown issuer" tells an attacker how far they got. Expiry is the only useful exception.
 - **The response body carries no token content**, not even echoed claims.
 - **Clock skew tolerance** is stated once (60s is typical) rather than per endpoint.
-- **Anonymous endpoints are listed explicitly** — health, readiness, the OpenAPI document, public webhooks (which have their own signature check instead, see `product:plan-integrations`). An endpoint that is anonymous by omission is a finding.
+- **Anonymous endpoints are listed explicitly** — health, readiness, the OpenAPI document, public webhooks (which have their own signature check instead, see `product/skills/integration-plan`). An endpoint that is anonymous by omission is a finding.
 
 ---
 
@@ -130,7 +130,7 @@ Rules:
 - **V5.3 is one decision for the whole API.** Default to **404 for cross-tenant**: a 403 confirms the id exists, which is an enumeration oracle. Use 403 only where the object's existence is not sensitive and users need the clearer message. Record the choice and its reason.
 - **The distinction between V5.1 in a path and in a body matters.** `GET /orders/{missingId}` → 404, the *resource* is absent. `POST /orders {"customerId": "<missing>"}` → 400/422 with a field error, the *request* is invalid — the resource being created is not the thing that is missing.
 - **Batch requests state their policy**: all-or-nothing (one bad id fails the whole request) or partial (per-item results with a 207-style body). Never leave it implicit.
-- **V5.4 is derived mechanically** from `data-model.md`'s state diagrams: every transition the diagram does *not* draw is a 409 with a message naming the current state and the allowed ones — `"Order is 'closed'; cancel requires 'pending' or 'paid'."`
+- **V5.4 is derived mechanically** from the `## Data model` state diagrams: every transition the diagram does *not* draw is a 409 with a message naming the current state and the allowed ones — `"Order is 'closed'; cancel requires 'pending' or 'paid'."`
 
 ---
 
@@ -146,7 +146,7 @@ Rules:
 | V6.6 | Illegal state transition | 409 | `invalid-state` (V5.4) |
 | V6.7 | Business invariant violated (would overdraw, oversell, exceed a quota) | 409 or 422 | Named slug per invariant |
 
-**Every unique constraint in `data-model.md` produces a V6.1 rule** — that mapping is mechanical, and a missing one is a race between the check and the insert. Catch the DB violation and translate it; do not rely on a prior `SELECT` to prevent it.
+**Every unique constraint in the `## Data model` produces a V6.1 rule** — that mapping is mechanical, and a missing one is a race between the check and the insert. Catch the DB violation and translate it; do not rely on a prior `SELECT` to prevent it.
 
 ---
 
@@ -167,8 +167,8 @@ Rules:
 |---|---|---|---|
 | V8.1 | Unhandled exception | 500 | Generic title, `traceId` present, **nothing else**. The detail is in the log |
 | V8.2 | Upstream dependency failed | 502 | Never surface the vendor's error body |
-| V8.3 | Dependency unavailable / circuit open | 503 + `Retry-After` | Ties to the resilience policy in `integrations.md` |
-| V8.4 | Upstream timed out | 504 | The timeout budget is stated in `integrations.md`, not invented per call site |
+| V8.3 | Dependency unavailable / circuit open | 503 + `Retry-After` | Ties to the resilience policy in the spec's `## Integrations` |
+| V8.4 | Upstream timed out | 504 | The timeout budget is stated in the spec's `## Integrations`, not invented per call site |
 | V8.5 | Shutting down / not ready | 503 | Readiness probe is separate from liveness |
 | V8.6 | Endpoint routed but not yet implemented (a contract-task stub) | 501 | `application/problem+json`, `type` slug `not-implemented`, `detail` naming the task that implements the endpoint (`"B3"`) |
 
@@ -187,7 +187,7 @@ One contract for the whole API, not per endpoint:
 | `page` / `cursor` | `1` / absent | — | Page must be ≥ 1; an out-of-range page returns 200 with an empty `items`, **not** 404 |
 | `pageSize` | 20 | 100 | Above max → clamp *or* 400. Pick one API-wide |
 | `sort` | a stated default | — | Only allowlisted fields; unknown field → 400. **Always tie-break on a unique column** (`id`), or paging is nondeterministic and rows repeat or vanish between pages |
-| Filters | none | — | Allowlisted; unknown filter follows the V1.7 policy; a filter on a non-indexed column at scale is a `data-model.md` gap |
+| Filters | none | — | Allowlisted; unknown filter follows the V1.7 policy; a filter on a non-indexed column at scale is a `## Data model` gap |
 
 Total counts: state whether `total` is exact, approximate, or omitted (cursor pagination usually omits it — an exact count on a large table is a full scan).
 
@@ -195,7 +195,7 @@ Total counts: state whether `total` is exact, approximate, or omitted (cursor pa
 
 ## 10. Applying the catalog
 
-In `api-surface.md` section 4, state:
+In the `## API surface` section's validation & error contract, state:
 
 1. The choices this catalog leaves open — **V1.5/V1.7** unknown-field policy · **section 2** 400 vs 422 · **V5.3** not-found vs forbidden · **V7.1** rate-limit identity · **section 9** clamp vs reject.
 2. The API's permission model (the claim, the naming scheme).
