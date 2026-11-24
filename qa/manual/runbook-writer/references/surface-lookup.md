@@ -26,17 +26,19 @@ Every row of the Access table and the Surface map carries one:
 Where the API has an OpenAPI 3 JSON document, committed or served (`/swagger/v1/swagger.json`, `/openapi/v1.json`, `/v3/api-docs`), generate the catalogue before reading any route by hand:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/qa/manual/runbook-writer/scripts/openapi-to-http.py" <file or URL> \
-  --out docs/runbooks/api-requests --env <environment>
+python3 "${CLAUDE_PLUGIN_ROOT}/qa/manual/runbook-writer/scripts/openapi-to-requests.py" <file or URL> \
+  --out docs/runbooks/api-requests
 ```
 
-It writes one `.http` file per tag, with every operation as a named request: path parameters and required query parameters as `{{variables}}`, the header its security scheme needs, a JSON body sampled from the schema, and the documented statuses and optional query parameters as comments. `http-client.env.json` gets the environment's `baseUrl`; pass `--base-url` where the document names no server.
+It writes one Markdown file per tag. Every operation is a `###` heading (its `operationId` and summary), its documented statuses and optional query parameters, and one `curl` command in the form of a runbook's API step: path and required query parameters as shell variables (`$PRODUCT_ID`), the header its security scheme needs (`$TOKEN`), a JSON body sampled from the schema, the response saved to `$OUT` and the status printed. Pass `--base-url` where the document names no server.
 
-- **A person sends a request from the editor** (Rider, IntelliJ, VS Code's REST Client) after replacing the sampled values, and `ijhttp` sends a whole file. The token is the tester's to supply, in `http-client.private.env.json`, which is git-ignored and never written by the agent.
-- **The Surface map's API cells and each request's shape are read from the catalogue**, stamped `stated`.
-- **A step copies its request from the catalogue** and gives every field the test's own value. A sampled value (`"string"`, `0`) never stays in a step.
-- **The catalogue is regenerated, never edited.** A rerun overwrites the `.http` files and keeps what a person added to the environment file.
-- **It is this lane's own output**, so the detection under "How the project makes API calls" leaves `docs/runbooks/api-requests/` out: the runbook's API form stays the project's tool, else `curl`.
+1. **Find an operation** with `grep -n "^### " docs/runbooks/api-requests/*.md`, and read only its block.
+2. **Fill the Surface map's API cell and the request's shape from it**, stamped `stated`.
+3. **Copy the command into the step** and give every field the test's own value, name the saved file for the step (`P01.1.json`) and add the step's Capture line. A sampled value (`"string"`, `0`) never stays in a step.
+
+- **The catalogue is regenerated, never edited**: a rerun overwrites its files.
+- **A project whose own tool is `.http` files** gets the same catalogue as `.http` requests with `--format http --env <environment>`: one file per tag plus `http-client.env.json` with `baseUrl`, for a person to send from the editor or `ijhttp` to send a file at a time. The token is the tester's to supply, in a git-ignored `http-client.private.env.json` the agent never writes.
+- **The catalogue is this lane's own output**, so the detection under "How the project makes API calls" leaves `docs/runbooks/api-requests/` out.
 - **A Swagger 2.0 or YAML document** makes the script exit `1` and say so. Ask the user for an OpenAPI 3 JSON export, or go on without the catalogue.
 
 ## With the codebase

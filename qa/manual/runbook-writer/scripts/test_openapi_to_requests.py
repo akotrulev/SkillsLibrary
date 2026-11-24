@@ -9,9 +9,9 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-SPEC = importlib.util.spec_from_file_location("openapi_to_http", HERE / "openapi-to-http.py")
-openapi_to_http = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(openapi_to_http)
+SPEC = importlib.util.spec_from_file_location("openapi_to_requests", HERE / "openapi-to-requests.py")
+openapi_to_requests = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(openapi_to_requests)
 
 BEARER = {"type": "http", "scheme": "bearer"}
 
@@ -35,8 +35,17 @@ def a_document_with_body(schema, schemas=None):
 
 
 def the_only_file(document):
-    catalogue = openapi_to_http.build_catalogue(document)
+    catalogue = openapi_to_requests.http_catalogue(document)
     return catalogue[next(iter(catalogue))]
+
+
+def the_only_curl_file(document):
+    catalogue = openapi_to_requests.curl_catalogue(document, "openapi.json", "https://a.example.test")
+    return catalogue[next(iter(catalogue))]
+
+
+def the_curl_requests(document):
+    return the_only_curl_file(document).split("\n\n", 3)[3]
 
 
 def the_body(document):
@@ -69,7 +78,7 @@ class RequestLineTests(unittest.TestCase):
             components={"securitySchemes": {"main": BEARER}},
         )
 
-        catalogue = openapi_to_http.build_catalogue(document)
+        catalogue = openapi_to_requests.http_catalogue(document)
 
         self.assertEqual(
             catalogue,
@@ -137,14 +146,14 @@ class FileTests(unittest.TestCase):
             }
         )
 
-        catalogue = openapi_to_http.build_catalogue(document)
+        catalogue = openapi_to_requests.http_catalogue(document)
 
         self.assertEqual(sorted(catalogue), ["default.http", "order-admin.http", "users.http"])
 
     def test_should_share_a_file_when_two_tags_have_the_same_file_name(self):
         document = a_document({"/a": {"get": {"tags": ["Order Admin"]}}, "/b": {"get": {"tags": ["order-admin"]}}})
 
-        catalogue = openapi_to_http.build_catalogue(document)
+        catalogue = openapi_to_requests.http_catalogue(document)
 
         self.assertEqual(
             catalogue,
@@ -152,12 +161,110 @@ class FileTests(unittest.TestCase):
         )
 
     def test_should_refuse_when_the_document_is_swagger_2(self):
-        with self.assertRaisesRegex(openapi_to_http.CatalogueError, "not an OpenAPI 3 document"):
-            openapi_to_http.build_catalogue({"swagger": "2.0", "paths": {"/a": {"get": {}}}})
+        with self.assertRaisesRegex(openapi_to_requests.CatalogueError, "not an OpenAPI 3 document"):
+            openapi_to_requests.http_catalogue({"swagger": "2.0", "paths": {"/a": {"get": {}}}})
 
     def test_should_refuse_when_the_document_holds_no_operation(self):
-        with self.assertRaisesRegex(openapi_to_http.CatalogueError, "no operation"):
-            openapi_to_http.build_catalogue(a_document({"/a": {"description": "empty"}}))
+        with self.assertRaisesRegex(openapi_to_requests.CatalogueError, "no operation"):
+            openapi_to_requests.http_catalogue(a_document({"/a": {"description": "empty"}}))
+
+
+class CurlTests(unittest.TestCase):
+    def test_should_write_the_whole_command_when_the_operation_declares_every_part(self):
+        document = a_document(
+            {
+                "/api/products/{productId}": {
+                    "put": {
+                        "tags": ["Products"],
+                        "operationId": "updateProduct",
+                        "summary": "Update a product",
+                        "parameters": [
+                            {"name": "productId", "in": "path", "required": True},
+                            {"name": "dryRun", "in": "query"},
+                            {"name": "version", "in": "query", "required": True},
+                            {"name": "tenant-id", "in": "query", "required": True},
+                            {"name": "X-Request-Id", "in": "header", "required": True},
+                        ],
+                        "requestBody": {"content": {"application/json": {"schema": {"type": "object", "properties": {"sku": {"type": "string"}}}}}},
+                        "responses": {"200": {}, "404": {}},
+                    }
+                }
+            },
+            security=[{"main": []}],
+            components={"securitySchemes": {"main": BEARER}},
+        )
+
+        catalogue = openapi_to_requests.curl_catalogue(document, "docs/openapi.json", "https://a.example.test")
+
+        self.assertEqual(
+            catalogue,
+            {
+                "products.md": "# Products — API requests\n"
+                "\n"
+                "Generated from `docs/openapi.json` by `openapi-to-requests.py`. Regenerate it; never edit it.\n"
+                "\n"
+                "Set `BASE_URL` (`https://a.example.test`), `OUT` (the folder responses are saved to) and the "
+                "variables a request names. Copy a request and replace every sampled value.\n"
+                "\n"
+                "### updateProduct — Update a product\n"
+                "Responses: 200, 404\n"
+                "Optional query: dryRun\n"
+                "\n"
+                "```bash\n"
+                'curl -sS -X PUT "$BASE_URL/api/products/$PRODUCT_ID?version=$VERSION&tenant-id=$TENANT_ID" \\\n'
+                '  -H "Authorization: Bearer $TOKEN" -H "X-Request-Id: $X_REQUEST_ID" -H "Content-Type: application/json" \\\n'
+                '  -d "{\\"sku\\":\\"string\\"}" \\\n'
+                "  -o \"$OUT/updateProduct.json\" -w '%{http_code}\\n'\n"
+                "```\n"
+            },
+        )
+
+    def test_should_write_a_plain_read_when_the_operation_is_an_open_get(self):
+        document = a_document({"/health/live": {"get": {}}})
+
+        self.assertEqual(
+            the_curl_requests(document),
+            "### GET /health/live\n\n```bash\n"
+            'curl -sS "$BASE_URL/health/live" \\\n'
+            "  -o \"$OUT/GET-health-live.json\" -w '%{http_code}\\n'\n"
+            "```\n",
+        )
+
+    def test_should_pass_user_and_password_when_the_scheme_is_http_basic(self):
+        document = a_secured_document({"type": "http", "scheme": "basic"})
+
+        self.assertIn('\n  -u "$API_USER:$API_PASSWORD" \\\n', the_curl_requests(document))
+
+    def test_should_send_the_named_header_when_the_scheme_is_an_api_key_header(self):
+        document = a_secured_document({"type": "apiKey", "in": "header", "name": "X-Api-Key"})
+
+        self.assertIn('\n  -H "X-Api-Key: $API_KEY" \\\n', the_curl_requests(document))
+
+    def test_should_escape_what_the_shell_would_expand_when_the_body_holds_it(self):
+        document = a_document(
+            {"/notes": {"post": {"requestBody": {"content": {"application/json": {"example": {"text": 'costs $5 at `noon` in "C:\\tmp"'}}}}}}}
+        )
+
+        self.assertIn(
+            '  -d "{\\"text\\":\\"costs \\$5 at \\`noon\\` in \\\\\\"C:\\\\\\\\tmp\\\\\\"\\"}" \\\n',
+            the_curl_requests(document),
+        )
+
+    def test_should_leave_the_body_to_the_sender_when_no_content_is_json(self):
+        document = a_document({"/files": {"post": {"requestBody": {"content": {"multipart/form-data": {}}}}}})
+
+        self.assertEqual(
+            the_curl_requests(document),
+            "### POST /files\nBody: multipart/form-data, added by hand\n\n```bash\n"
+            'curl -sS -X POST "$BASE_URL/files" \\\n'
+            "  -o \"$OUT/POST-files.json\" -w '%{http_code}\\n'\n"
+            "```\n",
+        )
+
+    def test_should_title_the_file_by_its_first_tag_when_two_tags_share_it(self):
+        document = a_document({"/a": {"get": {"tags": ["Order Admin"]}}, "/b": {"get": {"tags": ["order-admin"]}}})
+
+        self.assertTrue(the_only_curl_file(document).startswith("# Order Admin — API requests\n"))
 
 
 class AuthorizationTests(unittest.TestCase):
@@ -316,46 +423,46 @@ class BodyTests(unittest.TestCase):
 
         self.assertEqual(
             the_only_file(document),
-            "### POST /files\n# Body: multipart/form-data, written by hand\nPOST {{baseUrl}}/files\nContent-Type: multipart/form-data\n",
+            "### POST /files\n# Body: multipart/form-data, written by hand\nPOST {{baseUrl}}/files\n",
         )
 
     def test_should_refuse_when_a_reference_leaves_the_document(self):
         document = a_document_with_body({"$ref": "other.json#/Order"})
 
-        with self.assertRaisesRegex(openapi_to_http.CatalogueError, "only references inside the document"):
-            openapi_to_http.build_catalogue(document)
+        with self.assertRaisesRegex(openapi_to_requests.CatalogueError, "only references inside the document"):
+            openapi_to_requests.http_catalogue(document)
 
     def test_should_refuse_when_a_reference_names_nothing(self):
         document = a_document_with_body({"$ref": "#/components/schemas/Missing~1Name"})
 
-        with self.assertRaisesRegex(openapi_to_http.CatalogueError, "reference not found"):
-            openapi_to_http.build_catalogue(document)
+        with self.assertRaisesRegex(openapi_to_requests.CatalogueError, "reference not found"):
+            openapi_to_requests.http_catalogue(document)
 
 
 class BaseUrlTests(unittest.TestCase):
     def test_should_use_the_override_when_one_is_given(self):
-        url = openapi_to_http.base_url({"servers": [{"url": "https://a.example.test"}]}, "openapi.json", "https://b.example.test/")
+        url = openapi_to_requests.base_url({"servers": [{"url": "https://a.example.test"}]}, "openapi.json", "https://b.example.test/")
 
         self.assertEqual(url, "https://b.example.test")
 
     def test_should_use_the_first_server_when_it_is_absolute(self):
-        url = openapi_to_http.base_url({"servers": [{"url": "https://a.example.test/v1/"}]}, "openapi.json", None)
+        url = openapi_to_requests.base_url({"servers": [{"url": "https://a.example.test/v1/"}]}, "openapi.json", None)
 
         self.assertEqual(url, "https://a.example.test/v1")
 
     def test_should_join_the_server_to_the_source_when_the_server_is_relative(self):
-        url = openapi_to_http.base_url({"servers": [{"url": "/v1"}]}, "https://a.example.test/swagger/v1/swagger.json", None)
+        url = openapi_to_requests.base_url({"servers": [{"url": "/v1"}]}, "https://a.example.test/swagger/v1/swagger.json", None)
 
         self.assertEqual(url, "https://a.example.test/v1")
 
     def test_should_use_the_origin_of_the_source_when_the_document_names_no_server(self):
-        url = openapi_to_http.base_url({}, "https://a.example.test/swagger/v1/swagger.json", None)
+        url = openapi_to_requests.base_url({}, "https://a.example.test/swagger/v1/swagger.json", None)
 
         self.assertEqual(url, "https://a.example.test")
 
     def test_should_refuse_when_a_file_names_no_absolute_server(self):
-        with self.assertRaisesRegex(openapi_to_http.CatalogueError, "pass --base-url"):
-            openapi_to_http.base_url({"servers": [{"url": "/v1"}]}, "openapi.json", None)
+        with self.assertRaisesRegex(openapi_to_requests.CatalogueError, "pass --base-url"):
+            openapi_to_requests.base_url({"servers": [{"url": "/v1"}]}, "openapi.json", None)
 
 
 class DocumentHandler(BaseHTTPRequestHandler):
@@ -381,7 +488,7 @@ class CommandLine:
 
     def run(self, *argv):
         with contextlib.redirect_stdout(self.stdout), contextlib.redirect_stderr(self.stderr):
-            return openapi_to_http.main(list(argv))
+            return openapi_to_requests.main(list(argv))
 
     def document_file(self, text):
         path = self.folder / "openapi.json"
@@ -396,10 +503,17 @@ class CommandLineTests(unittest.TestCase):
         self.command_line = CommandLine(Path(directory.name))
         self.out = self.command_line.out
 
-    def test_should_write_the_catalogue_and_the_environment_when_the_source_is_a_file(self):
+    def test_should_write_curl_files_and_no_environment_when_no_format_is_given(self):
         source = self.command_line.document_file(json.dumps(a_document({"/orders": {"get": {"tags": ["Orders"]}}}, servers=[{"url": "https://a.example.test"}])))
 
-        code = self.command_line.run(source, "--out", str(self.out), "--env", "staging")
+        code = self.command_line.run(source, "--out", str(self.out))
+
+        self.assertEqual((code, sorted(p.name for p in self.out.iterdir())), (0, ["orders.md"]))
+
+    def test_should_write_http_files_and_the_environment_when_the_format_is_http(self):
+        source = self.command_line.document_file(json.dumps(a_document({"/orders": {"get": {"tags": ["Orders"]}}}, servers=[{"url": "https://a.example.test"}])))
+
+        code = self.command_line.run(source, "--out", str(self.out), "--format", "http", "--env", "staging")
 
         self.assertEqual(
             (code, sorted(p.name for p in self.out.iterdir()), json.loads((self.out / "http-client.env.json").read_text())),
@@ -409,7 +523,7 @@ class CommandLineTests(unittest.TestCase):
     def test_should_report_each_file_with_its_request_count_when_it_succeeds(self):
         source = self.command_line.document_file(json.dumps(a_document({"/orders": {"get": {}, "post": {}}})))
 
-        self.command_line.run(source, "--out", str(self.out), "--base-url", "https://a.example.test")
+        self.command_line.run(source, "--out", str(self.out), "--format", "http", "--base-url", "https://a.example.test")
 
         self.assertEqual(
             self.command_line.stdout.getvalue(),
@@ -421,7 +535,7 @@ class CommandLineTests(unittest.TestCase):
         self.out.mkdir()
         (self.out / "http-client.env.json").write_text('{"dev": {"baseUrl": "old", "tenant": "t1"}, "uat": {"baseUrl": "u"}}')
 
-        self.command_line.run(source, "--out", str(self.out), "--base-url", "https://a.example.test")
+        self.command_line.run(source, "--out", str(self.out), "--format", "http", "--base-url", "https://a.example.test")
 
         self.assertEqual(
             json.loads((self.out / "http-client.env.json").read_text()),
@@ -437,7 +551,7 @@ class CommandLineTests(unittest.TestCase):
 
         self.command_line.run(f"{origin}/swagger/v1/swagger.json", "--out", str(self.out))
 
-        self.assertEqual(json.loads((self.out / "http-client.env.json").read_text()), {"dev": {"baseUrl": origin}})
+        self.assertIn(f"Set `BASE_URL` (`{origin}`)", (self.out / "default.md").read_text())
 
     def test_should_fail_and_write_nothing_when_the_file_is_not_json(self):
         source = self.command_line.document_file("openapi: 3.0.3\n")
@@ -446,13 +560,13 @@ class CommandLineTests(unittest.TestCase):
 
         self.assertEqual(
             (code, self.out.exists(), self.command_line.stderr.getvalue()),
-            (1, False, f"openapi-to-http: {source} is not JSON (Expecting value at line 1); export a YAML document as JSON\n"),
+            (1, False, f"openapi-to-requests: {source} is not JSON (Expecting value at line 1); export a YAML document as JSON\n"),
         )
 
     def test_should_fail_when_the_file_does_not_exist(self):
         code = self.command_line.run(str(self.command_line.folder / "missing.json"), "--out", str(self.out))
 
-        self.assertEqual((code, self.command_line.stderr.getvalue().startswith("openapi-to-http: ")), (1, True))
+        self.assertEqual((code, self.command_line.stderr.getvalue().startswith("openapi-to-requests: ")), (1, True))
 
     def test_should_fail_when_no_base_url_can_be_found(self):
         source = self.command_line.document_file(json.dumps(a_document({"/orders": {"get": {}}})))
@@ -461,7 +575,7 @@ class CommandLineTests(unittest.TestCase):
 
         self.assertEqual(
             (code, self.out.exists(), self.command_line.stderr.getvalue()),
-            (1, False, "openapi-to-http: the document names no absolute server URL; pass --base-url\n"),
+            (1, False, "openapi-to-requests: the document names no absolute server URL; pass --base-url\n"),
         )
 
 
