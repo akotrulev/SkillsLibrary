@@ -21,6 +21,24 @@ Every row of the Access table and the Surface map carries one:
 | `observed` | Seen on the running system this session |
 | `assumed` | Inferred; listed in §14 until confirmed |
 
+## An OpenAPI document becomes a request catalogue
+
+Where the API has an OpenAPI 3 JSON document, committed or served (`/swagger/v1/swagger.json`, `/openapi/v1.json`, `/v3/api-docs`), generate the catalogue before reading any route by hand:
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/qa/manual/runbook-writer/scripts/openapi-to-http.py" <file or URL> \
+  --out docs/runbooks/api-requests --env <environment>
+```
+
+It writes one `.http` file per tag, with every operation as a named request: path parameters and required query parameters as `{{variables}}`, the header its security scheme needs, a JSON body sampled from the schema, and the documented statuses and optional query parameters as comments. `http-client.env.json` gets the environment's `baseUrl`; pass `--base-url` where the document names no server.
+
+- **A person sends a request from the editor** (Rider, IntelliJ, VS Code's REST Client) after replacing the sampled values, and `ijhttp` sends a whole file. The token is the tester's to supply, in `http-client.private.env.json`, which is git-ignored and never written by the agent.
+- **The Surface map's API cells and each request's shape are read from the catalogue**, stamped `stated`.
+- **A step copies its request from the catalogue** and gives every field the test's own value. A sampled value (`"string"`, `0`) never stays in a step.
+- **The catalogue is regenerated, never edited.** A rerun overwrites the `.http` files and keeps what a person added to the environment file.
+- **It is this lane's own output**, so the detection under "How the project makes API calls" leaves `docs/runbooks/api-requests/` out: the runbook's API form stays the project's tool, else `curl`.
+- **A Swagger 2.0 or YAML document** makes the script exit `1` and say so. Ask the user for an OpenAPI 3 JSON export, or go on without the catalogue.
+
 ## With the codebase
 
 Read the API project first: it names the operations, and the UI is then matched to them.
@@ -82,7 +100,7 @@ Record the globs searched when nothing is found. Reuse the project's variable na
 
 | Actor | Source, strongest first |
 |---|---|
-| API | The contract the user gave; the running API's OpenAPI document (`/swagger/v1/swagger.json`, `/v3/api-docs`, `/openapi.json`); a question |
+| API | The contract the user gave; the running API's OpenAPI document (`/swagger/v1/swagger.json`, `/v3/api-docs`, `/openapi.json`), turned into the request catalogue above; a question |
 | UI | A look-only pass over the screens the cases name, by the driving routes of `qa/manual/app-exploration/references/probes.md`: read labels and routes from the snapshot and write nothing. Stamp `observed` |
 | DB | The schema the user gives; on a non-production database, the catalogue read-only (`information_schema.columns`, the collection's sample document); a question |
 
