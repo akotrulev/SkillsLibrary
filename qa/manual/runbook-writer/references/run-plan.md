@@ -21,32 +21,40 @@ A run plan is the file that puts one run of a runbook on the Plan Queue: one pro
 - **A rerun** holds only the families with a test to rerun, and each block names its tests.
 - **A test with a Hand step** is named in its task's row of the task table, with what the user must do, so the user sees it before the queue reaches it.
 
+## What the queue needs before the first task
+
+Plan Queue runs each task as an unattended session in the plan's own worktree, with file edits accepted and every command outside its allowlist denied. The plan's header lists what that takes, and `E1` checks each before the first step, asking the user for whatever is missing:
+
+- **Allowlist entries** (`planQueue.allowedTools`) for what the runbook's steps call beyond the queue's defaults: the engine's client (`Bash(psql:*)`), the project's API tool (`Bash(ijhttp:*)`, `Bash(newman:*)`, `Bash(bru:*)`), `Bash(uuidgen:*)`, `Bash(date:*)`, `Bash(source:*)`, any helper script's interpreter, and the MCP servers that drive the screens (`mcp__playwright`, `mcp__appium-mcp`).
+- **The MCP servers** registered for the user or the project, since a queued session takes its servers from the Claude Code configuration.
+- **The secrets** as environment variables of the VS Code window that runs the queue. The header lists their names.
+- **An evidence folder outside the worktree.** The queue removes the worktree when the plan finishes, and git-ignored files go with it. The header names an absolute folder in the main checkout (`<repo>/evidence/<YYYY-MM-DD>-<slug>-run/`), and the queue is given it with `--add-dir <repo>/evidence` in `planQueue.extraArgs`.
+- **The runbook and the run plan committed**: the worktree holds only what is committed.
+
 ## What carries a run from one session to the next
 
 Each task is a new session, so nothing lives in the shell.
 
-- **The run record** is created by `E1` and committed by every task. Beside the sections of `execution.md` it holds a **Run state** table: the run marker, and every captured value that is not a secret (ids, names, baselines), each with the step that captured it.
+- **The run record** is created by `E1` and committed with every task. Beside the sections of `execution.md` it holds a **Run state** table: the run marker, the evidence folder, and every captured value that is not a secret (ids, names, baselines), each with the step that captured it.
+- **A test's row is written to the record when that test ends**, not when the task ends.
 - **Re-entry.** Every task after `E1` starts by rebuilding `vars.env` in the evidence folder from the Run state table, obtaining the tokens again by Setup's token steps, signing in on each UI again, and re-checking the preconditions that drift between sessions: the right app or site in front, the right user, each shared switch.
-- **The evidence folder** is fixed in the plan header and git-ignored. Under Plan Queue it lives in the plan's worktree.
-- **The secrets** are environment variables of the shell the queue starts sessions in. The header lists their names.
-- **The runbook and the run plan are committed before the first task is queued**: the queue works from a worktree of the branch.
 
 ## Progress, pausing and resuming
 
-- **`## 2. Progress`** has one row per task: the runbook part, its tests and its result. Each task fills its own row when it lands (`3 pass`, `5 pass · 1 fail new (KI-4) · 1 blocked`). With the live prompt blocks and the header's `Status:` line, it is the picture of the run.
-- **To pause**, stop the queue between two tasks. The task that just landed has written `Status:`: which tasks are done, which is next, and what data the run has on the environment.
-- **To resume**, queue the next block. Its re-entry puts the session back where the last one ended.
-- **To end a paused run early**, delete the blocks of the families that will not be run and queue the last task: it records their tests as *not run* and cleans up.
-- **A task stopped in the middle** keeps its block, with a `Picking up from: <test id>` line, and its finished tests are already in the record.
+- **The queue's sidebar** shows each task as pending, working, paused, waiting for a reply or done. **`## 2. Progress`** in the plan adds what the run found: one row per task with the runbook part, its tests and its result (`3 pass`, `5 pass · 1 fail new (KI-4) · 1 blocked`), filled by the task when it lands.
+- **Pause** (the queue's own button) interrupts a task at any point and keeps its session. On **Resume**, before repeating the step that was cut off, the task reads back what that step did (the response saved, the record, the row): a request sent twice is a second record.
+- **Stop**, or a task that failed, leaves the task pending, and it starts again from its block. It reads the record first and continues with the first of its tests that has no row.
+- **Between two tasks** the header's `Status:` line says which tasks are done, which is next, and what data the run has on the environment.
+- **To end a run early**, delete the blocks of the families that will not be run and queue the last task: it records their tests as *not run* and cleans up.
 - **Run data stays on the environment until the last task.** Nothing is cleaned between tasks, so a later task may use what an earlier one made.
 
 ## What a queued task does differently from a direct run
 
-- **It asks as a direct run does**: the Plan Queue passes a session's questions to the user.
-- **The environment is confirmed once per run.** Where the plan header says `not confirmed`, `E1` asks the user before anything else and writes the answer into that line; every later task reads it there.
-- **At a Hand step it asks** the user to do what the step says, and continues when they report back. With no answer, it marks the test `blocked`, keeps its block with `Blocked: Hand step <test.step> — <what the user must do>`, and goes on with the tests that do not depend on it.
-- **A failed test does not stop the task.** The task runs every test of its family, and the result goes in its Progress row.
-- **Its commit is the run record, the runbook's §10 and §11, any bug report and the plan edits.** Evidence is never committed.
+- **It asks only where it cannot go on without a person**, and says so in the way the queue's own instructions describe; the queue brings the answer back to the same session. Two cases are always that: an environment the header does not confirm, and a Hand step.
+- **The environment is confirmed once per run.** Where the header says `not confirmed`, `E1` asks before anything else and writes the answer into that line; every later task reads it there.
+- **A failed test is a result, not a failure of the task.** The task runs every test of its family and ends done. It ends blocked only when the run cannot go on at all: an actor every test needs is down, a credential is missing.
+- **A command the allowlist denied** is not worked around: the step is blocked, and the task names the entry that would allow it.
+- **The queue commits what the task leaves**: the run record, the runbook's §10 and §11, any bug report and the plan edits. Evidence is never in it.
 
 ## Output format
 
@@ -58,8 +66,8 @@ Each task is a new session, so nothing lives in the shell.
 **Status:** Nothing run yet. Next: E1.
 
 **Environment:** <name> — not production, confirmed by <who> on <date> | **not confirmed**
-**Run record:** `docs/runbooks/<NNN>-<slug>-run-<YYYY-MM-DD>.md` (created by E1)   **Evidence:** `evidence/<YYYY-MM-DD>-<slug>-run/`
-**Variables the queue's shell must hold:** `QA_ADMIN_USER`, `QA_ADMIN_PASSWORD`, `DB_URL`
+**Run record:** `docs/runbooks/<NNN>-<slug>-run-<YYYY-MM-DD>.md` (created by E1)   **Evidence:** `<repo>/evidence/<YYYY-MM-DD>-<slug>-run/` (outside the worktree)
+**The queue needs:** allowlist `Bash(psql:*)`, `Bash(uuidgen:*)`, `Bash(date:*)`, `Bash(source:*)`, `mcp__playwright`, `mcp__appium-mcp` · `--add-dir <repo>/evidence` · variables `QA_ADMIN_USER`, `QA_ADMIN_PASSWORD`, `DB_URL`
 **Test-design tasks: none** and **Documentation task: none** — a run carries out a suite that exists and changes no behaviour.
 
 ## 1. What already exists, and what is missing
@@ -79,7 +87,7 @@ Each task is a new session, so nothing lives in the shell.
 
 ## 3. How a task runs
 
-<The four lists above this template, copied: what carries the run between sessions, re-entry, what a queued task does differently, and how to pause, resume and end early.>
+<The three lists above this template, copied: what carries the run between sessions, how it pauses and resumes, and what a queued task does differently.>
 
 ## Decisions
 
@@ -129,8 +137,8 @@ Agent: qa-manual-tester · Stack: qa
 You are `qa-manual-tester`, in RUN mode. Task E2 of docs/plans/<PPP>-<slug>-runbook-run.md: run the
 journey tests J01, J02 and J03 of docs/runbooks/<NNN>-<slug>-runbook.md on <environment>.
 
-The plan header records that <environment> is not production. Act on no other environment. At a
-Hand step, ask the user as §3 of the plan says.
+The plan header records that <environment> is not production. Act on no other environment. A
+Hand step is a case you cannot go on without a person: ask, and wait for the reply.
 
 Read, in this order:
 1. `qa/manual/agents/qa-manual-tester.md` and `qa/manual/runbook-writer/references/execution.md`
@@ -140,12 +148,13 @@ Read, in this order:
 4. The run record: the Run state table and the rows already written.
 
 Do:
-- Re-enter: rebuild vars.env from the Run state table, obtain the tokens by Setup steps S-2 and S-3,
+- Read the record: skip any of these tests that already has a row. Re-enter: rebuild vars.env
+  from the Run state table, obtain the tokens by Setup steps S-2 and S-3,
   sign in on each UI, re-check PRE-1 and PRE-2.
 - Run J01, J02, J03 in order. Capture evidence at every step; keep the end result of a passed test
   and the whole chain of a failed one.
-- Append each test's row to the run record, add new captures to its Run state table, and fill the
-  E2 row of §2 in this plan.
+- Write each test's row to the run record as that test ends, add new captures to its Run state
+  table, and fill the E2 row of §2 in this plan when all three are done.
 
 Traps:
 - <the two to four things specific to these tests: the cache budget, the known issue a test will hit>
@@ -158,7 +167,7 @@ Close out per the plan's "Close-out — every task" before you stop.
 ````
 `````
 
-The first and the last block follow the same shape. `E1`'s block reads the environment line first and asks the user where it is not confirmed, runs the checks, the preconditions and Setup, and creates the record with its Run state table. The last block runs every Cleanup step, reconciles the baselines, completes the record's summary, permanent changes and left-behind sections, updates the runbook's §10 and §11, and files the plan.
+The first and the last block follow the same shape. `E1`'s block reads the environment line first and asks the user where it is not confirmed, checks what the queue needs, runs the checks of `execution.md`, the preconditions and Setup, and creates the record with its Run state table. The last block runs every Cleanup step, reconciles the baselines, completes the record's summary, permanent changes and left-behind sections, updates the runbook's §10 and §11, and files the plan.
 
 ## The run-plan check
 
@@ -170,4 +179,4 @@ The first and the last block follow the same shape. `E1`'s block reads the envir
 | A task that does not depend on the one above | major |
 | A block with no re-entry, or the last block without Cleanup and the baselines | major |
 | A secret's value anywhere in the plan | blocker |
-| The environment line missing, or a Hand step missing from the task table | major |
+| The environment line or the queue-needs line missing, an evidence folder inside the worktree, or a Hand step missing from the task table | major |

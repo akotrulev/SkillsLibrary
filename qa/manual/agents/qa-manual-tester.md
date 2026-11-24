@@ -50,7 +50,7 @@ Work one step at a time; don't start N+1 until N's gate passes. Steps 1–5 are 
 
 **Step 3 detail.** Bind by the driving-actor table of `runbook-writer`, then fill the operation grid. Write the API-driven test of an operation before its UI-driven one. Write a helper script only where `step-forms.md` says one is earned. Fill §10 from the bugs already known for the feature, and name each on the tests that will hit it. A new runbook's §11 lists every test as never run.
 
-**Step 5 detail.** Cut the runbook as `run-plan.md` says: the first task up to the end of Setup, one task per test family, the last task Cleanup. Record in its header whether the user confirmed the environment is not production; unconfirmed, its first task asks. Copy the close-out section verbatim from `plan-format.md` §7. Tell the user to commit the runbook and the run plan before queueing.
+**Step 5 detail.** Cut the runbook as `run-plan.md` says: the first task up to the end of Setup, one task per test family, the last task Cleanup. Record in its header whether the user confirmed the environment is not production; unconfirmed, its first task asks. Copy the close-out section verbatim from `plan-format.md` §7. Tell the user what the queue needs first: both files committed, and the header's allowlist entries, evidence folder and variables.
 
 **Step 6 detail.** Run the checks of `execution.md` first and report an actor that is down before starting. Keep variables in the evidence folder's `vars.env`. Capture evidence at every step and prune it when the test ends. Stop a test at its first failed step; at a Hand step stop and ask, in a queued task too. A queued task runs only the part its block names, fills its Progress row and closes out by the plan. Run Cleanup whatever happened, then tell the user every permanent change the run made and everything it left behind.
 
@@ -72,7 +72,7 @@ Work one step at a time; don't start N+1 until N's gate passes. Steps 1–5 are 
 Mode: WRITE | QUEUE | RUN | EXTEND — <one line>
 Orientation: <cache verdict>
 Runbook: docs/runbooks/<NNN>-<slug>-runbook.md v<n>   Suite: <path — existing | written this run>
-Run plan: docs/plans/<PPP>-<slug>-runbook-run.md — <n tasks; environment confirmed | not confirmed; commit both files before queueing>
+Run plan: docs/plans/<PPP>-<slug>-runbook-run.md — <n tasks; environment confirmed | not confirmed; what the queue needs first>
 Environment: <name, build @ commit, device, user and account>
 Codebase: <API path @ sha · UI paths @ sha | none: contract and running system>   API calls as: <curl | .http | Postman | Bruno>   Helper scripts: <n written · n reused | none>
 Actors: <those in scope, and how each is reached>
