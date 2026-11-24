@@ -49,7 +49,7 @@ Write the form the lookup detected. In every form the request names the test and
    **Expect:** `201`; the body's `sku` is `<RUN>-LAMP`, `price` is `39.90`, `status` is `Active`.   **Capture:** `PRODUCT_ID` = `id`
 ````
 
-**`.http` files** (a folder `<NNN>-<slug>-runbook-http/` beside the runbook, one file for Setup and one per test, because the command line runs a whole file). The step names the request; the file holds it. Two dialects exist, and the files follow the one the project's own files use:
+**`.http` files** (a folder `<NNN>-<slug>-runbook-http/` beside the runbook, one file per API step, named for it: the command line runs a whole file, and a test's API steps have DB and UI steps between them). A helper script that sends one file and prints its status is earned here. The step names the request; the file holds it. Two dialects exist, and the files follow the one the project's own files use:
 
 | | JetBrains HTTP Client | VS Code REST Client |
 |---|---|---|
@@ -77,7 +77,7 @@ In a tool file the step in the runbook reads `1. **API** — Create the product:
 
 - **One request per API step**, in the runbook's order, even when two steps send the same call with different data.
 - **Every Capture the runbook names is implemented in the file**, by the tool's own means.
-- **The project's environment file is used where it lies.** §1 names it and how it is passed (`--env-file api/requests/http-client.env.json`), and lists each variable it lacks. Those go in a private environment file the tester creates beside the tool file and never commits.
+- **The project's environment file is used where it lies.** §1 names it and how it is passed (`--env-file api/requests/http-client.env.json`), and lists each variable it lacks. Those are passed on the command line from the shell's variables, so no secret is written to a file.
 - **The response is kept by the tool's own means** (a `>>!` redirect, a `newman` reporter). Where it has none, the run record holds the actual values.
 
 **A read-back** is its own step: `GET` the record, and expect each field the case asserts. A refusal is three steps: the refused request with its status and error code, a read-back, and a DB read, both showing nothing changed.
@@ -272,7 +272,7 @@ A step is one command where one command can do it. A helper script is written on
 
 ## Preconditions, Setup and Cleanup
 
-**Preconditions** are `PRE-1`…, a table checked before every session and never changed by it: the right app or site in front and the right build, the right user and account signed in, each shared switch in the state the tests need, each fixture in its required state, nothing left over from an earlier run (a search for the run-marker prefix), and each baseline noted into its `BASELINE_…` variable. Each row has how to check it and the required state. A precondition that fails stops the session; it is never "fixed" by a step outside Setup. Where nothing reports a fact the row needs (no version endpoint), the row is a Hand check: the user states it.
+**Preconditions** are `PRE-1`…, a table checked before every session and never changed by it: the right app or site in front and the right build, the right user and account signed in, each shared switch in the state the tests need, each fixture in its required state, nothing left over from an earlier run (a search for the run-marker prefix), and each baseline noted into its `BASELINE_…` variable (a baseline that needs a value Setup captures is noted by the Setup step after it). Each row has how to check it and the required state. A precondition that fails stops the session; it is never "fixed" by a step outside Setup. Where nothing reports a fact the row needs (no version endpoint), the row is a Hand check: the user states it.
 
 **Setup** steps are `S-1`…, once per run: set the variables with the day's `RUN`, obtain each token, sign in on each UI, confirm the database name, seed through the API the reference data every test shares, and declare each budget a step polls against. Each has an Expect. Tests then start signed in.
 
