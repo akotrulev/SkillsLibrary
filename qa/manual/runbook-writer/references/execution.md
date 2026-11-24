@@ -20,7 +20,7 @@ The run carries out a saved runbook on one environment and writes a **run record
    An actor that cannot be reached blocks every test using it; the others still run. A missing driver is reported with what to install or register (web and app: `qa/manual/app-exploration/references/probes.md`, §1 and §4).
 4. **Secrets come from the environment.** Each variable the Access table names is set in the shell by the user. A value is never echoed, written to the record or saved in evidence.
 5. **The preconditions hold.** Check every row of §5 and note each baseline. A row that fails stops the session.
-6. **The evidence folder exists**: `evidence/<YYYY-MM-DD>-<slug>-run/`, git-ignored, set as `OUT`.
+6. **The evidence folder exists**: `evidence/<YYYY-MM-DD>-<slug>-run/`, set as `OUT`. `git check-ignore -q evidence` must pass; where it does not, add `evidence/` to `.gitignore` first. A queued run uses the folder its plan header names, outside the worktree.
 
 **Variables across shell calls.** An agent's shell calls do not share state. Keep every variable in `$OUT/vars.env`: each block starts with `. "$OUT/vars.env"`, and each capture appends its line. Tokens go in the same file, which is why the folder is never committed.
 

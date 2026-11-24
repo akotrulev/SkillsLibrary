@@ -23,27 +23,28 @@ A run plan is the file that puts one run of a runbook on the Plan Queue: one pro
 
 ## What the queue needs before the first task
 
-Plan Queue runs each task as an unattended session in the plan's own worktree, with file edits accepted and every command outside its allowlist denied. The plan's header lists what that takes, and `E1` checks each before the first step, asking the user for whatever is missing:
+Plan Queue (checked against its 0.6.0 source) runs each task as an unattended session in the plan's own worktree, with file edits accepted and every command outside its allowlist denied. It commits a passed task with `git add -A`, stashes what a stopped or failed task left, and removes the worktree when the plan finishes. The plan's header lists what a run takes, and `E1` checks each before the first step, asking the user for whatever is missing:
 
 - **Allowlist entries** (`planQueue.allowedTools`) for what the runbook's steps call beyond the queue's defaults: the engine's client (`Bash(psql:*)`), the project's API tool (`Bash(ijhttp:*)`, `Bash(newman:*)`, `Bash(bru:*)`), `Bash(uuidgen:*)`, `Bash(date:*)`, `Bash(source:*)`, any helper script's interpreter, and the MCP servers that drive the screens (`mcp__playwright`, `mcp__appium-mcp`).
 - **The MCP servers** registered for the user or the project, since a queued session takes its servers from the Claude Code configuration.
 - **The secrets** as environment variables of the VS Code window that runs the queue. The header lists their names.
-- **An evidence folder outside the worktree.** The queue removes the worktree when the plan finishes, and git-ignored files go with it. The header names an absolute folder in the main checkout (`<repo>/evidence/<YYYY-MM-DD>-<slug>-run/`), and the queue is given it with `--add-dir <repo>/evidence` in `planQueue.extraArgs`.
+- **An evidence folder outside the worktree.** Inside it, evidence would be committed with the task when it is not git-ignored, and deleted with the worktree when it is. The header names an absolute folder in the main checkout (`<repo>/evidence/<YYYY-MM-DD>-<slug>-run/`), the queue is given it with `--add-dir <repo>/evidence` in `planQueue.extraArgs`, and `evidence/` is in the project's `.gitignore` (the line is added with the run plan when it is missing).
 - **The runbook and the run plan committed**: the worktree holds only what is committed.
 
 ## What carries a run from one session to the next
 
 Each task is a new session, so nothing lives in the shell.
 
-- **The run record** is created by `E1` and committed with every task. Beside the sections of `execution.md` it holds a **Run state** table: the run marker, the evidence folder, and every captured value that is not a secret (ids, names, baselines), each with the step that captured it.
-- **A test's row is written to the record when that test ends**, not when the task ends.
-- **Re-entry.** Every task after `E1` starts by rebuilding `vars.env` in the evidence folder from the Run state table, obtaining the tokens again by Setup's token steps, signing in on each UI again, and re-checking the preconditions that drift between sessions: the right app or site in front, the right user, each shared switch.
+- **The journal** is the run's working state, in the evidence folder: `vars.env` with every captured value, and `results.md` with one row per finished test, written the moment that test ends. It survives a stop, a stash and the end of a session.
+- **The run record** is created by `E1` and committed with every task. Before a task ends it copies its new journal rows into the record's Results table and its new captures that are not secrets into the record's **Run state** table.
+- **Re-entry.** Every task after `E1` starts by reading the journal (rebuilding `vars.env` from the record's Run state table where the folder is gone), obtaining the tokens again by Setup's token steps, signing in on each UI again, and re-checking the preconditions that drift between sessions: the right app or site in front, the right user, each shared switch.
 
 ## Progress, pausing and resuming
 
 - **The queue's sidebar** shows each task as pending, working, paused, waiting for a reply or done. **`## 2. Progress`** in the plan adds what the run found: one row per task with the runbook part, its tests and its result (`3 pass`, `5 pass · 1 fail new (KI-4) · 1 blocked`), filled by the task when it lands.
-- **Pause** (the queue's own button) interrupts a task at any point and keeps its session. On **Resume**, before repeating the step that was cut off, the task reads back what that step did (the response saved, the record, the row): a request sent twice is a second record.
-- **Stop**, or a task that failed, leaves the task pending, and it starts again from its block. It reads the record first and continues with the first of its tests that has no row.
+- **Pause** interrupts a task at any point and keeps its session: the queue's own button, a closed window, or the usage limit, which the queue lifts by itself at the reset. On **Resume**, before repeating the step that was cut off, the task reads back what that step did (the response saved, the row): a request sent twice is a second record. A pause can last hours, so the task also re-enters, and a test whose data is set relative to now starts again from its Arrange.
+- **Stop**, or a task that ended blocked, leaves the task pending and its uncommitted edits stashed, and it starts again from its block. It reads the journal first, restores its rows in the record from it, and continues with the first of its tests that has no row.
+- **On the backlog**, a task waiting for a reply keeps its plan out of the unattended sweeps until the user answers.
 - **Between two tasks** the header's `Status:` line says which tasks are done, which is next, and what data the run has on the environment.
 - **To end a run early**, delete the blocks of the families that will not be run and queue the last task: it records their tests as *not run* and cleans up.
 - **Run data stays on the environment until the last task.** Nothing is cleaned between tasks, so a later task may use what an earlier one made.
@@ -148,13 +149,13 @@ Read, in this order:
 4. The run record: the Run state table and the rows already written.
 
 Do:
-- Read the record: skip any of these tests that already has a row. Re-enter: rebuild vars.env
-  from the Run state table, obtain the tokens by Setup steps S-2 and S-3,
+- Read the journal in the evidence folder: skip any of these tests that already has a row.
+  Re-enter: load vars.env (rebuild it from the record's Run state table if the folder is gone), obtain the tokens by Setup steps S-2 and S-3,
   sign in on each UI, re-check PRE-1 and PRE-2.
 - Run J01, J02, J03 in order. Capture evidence at every step; keep the end result of a passed test
   and the whole chain of a failed one.
-- Write each test's row to the run record as that test ends, add new captures to its Run state
-  table, and fill the E2 row of §2 in this plan when all three are done.
+- Write each test's row to the journal as that test ends. When all three are done, copy the rows
+  into the run record, add the new captures to its Run state table, and fill the E2 row of §2.
 
 Traps:
 - <the two to four things specific to these tests: the cache budget, the known issue a test will hit>
@@ -177,6 +178,6 @@ The first and the last block follow the same shape. `E1`'s block reads the envir
 | A block that holds a test step instead of pointing at the runbook | major |
 | A block whose first two lines are not `Depends on:` and `Agent: qa-manual-tester · Stack: qa`, or a heading that is not `### <id> — <title> (qa-manual-tester, qa)` | blocker |
 | A task that does not depend on the one above | major |
-| A block with no re-entry, or the last block without Cleanup and the baselines | major |
+| A block with no journal read and re-entry, or the last block without Cleanup and the baselines | major |
 | A secret's value anywhere in the plan | blocker |
 | The environment line or the queue-needs line missing, an evidence folder inside the worktree, or a Hand step missing from the task table | major |
