@@ -49,7 +49,7 @@ Write the form the lookup detected. In every form the request names the test and
    **Expect:** `201`; the body's `sku` is `<RUN>-LAMP`, `price` is `39.90`, `status` is `Active`.   **Capture:** `PRODUCT_ID` = `id`
 ````
 
-**A `.http` file** (`<NNN>-<slug>-runbook.http` beside the runbook). The step names the request; the file holds it. Two dialects exist, and the file follows the one the project's own files use:
+**`.http` files** (a folder `<NNN>-<slug>-runbook-http/` beside the runbook, one file for Setup and one per test, because the command line runs a whole file). The step names the request; the file holds it. Two dialects exist, and the files follow the one the project's own files use:
 
 | | JetBrains HTTP Client | VS Code REST Client |
 |---|---|---|
@@ -82,7 +82,7 @@ In a tool file the step in the runbook reads `1. **API** — Create the product:
 
 **A read-back** is its own step: `GET` the record, and expect each field the case asserts. A refusal is three steps: the refused request with its status and error code, a read-back, and a DB read, both showing nothing changed.
 
-**A later outcome** is polled: repeat the read every second until the value appears or `ASYNC_BUDGET` passes, and expect the value.
+**A later outcome** is polled: repeat the read every second until the value appears or `ASYNC_BUDGET` passes, and expect the value. A poll one step needs is a short loop in that step.
 
 ## UI steps
 
@@ -182,7 +182,7 @@ When the guard returns another row count, the statement is not run: the test is 
 
 Timestamps are written in the zone the column is stored in. On MongoDB the guard is `countDocuments({ _id })`, the statement `updateOne({ _id }, { $set: … })`, and its Expect is `matchedCount: 1, modifiedCount: 1`.
 
-**A boundary on a time rule** is one recipe per side, each with its own captured id. Where the suite gives the values, they are used. Where it names only a side ("still new"), the inside value sits far enough from the threshold (an hour, for a rule in days) that the run cannot cross it while it checks.
+**A boundary on a time rule** is one recipe per side, each with its own captured id. Where the suite gives the values, they are used. Where it names only a side ("still new"), the inside value sits far enough from the threshold (an hour, for a rule in days) that the run cannot cross it while it checks. A value the suite puts exactly on the threshold is set there, and the test says that the seconds the run takes carry it past.
 
 ## Sim and Job steps
 
@@ -196,7 +196,7 @@ A **Sim** step tells the stand-in for a third party what to answer, through its 
 
 A simulator switch that changes its behaviour for everyone (auto-answer on or off) is a `shared` step with its reverse in Cleanup.
 
-A **Job** step runs scheduled work now, through the admin endpoint or command the project has for it, and is `shared` when the job processes other users' data too. Before it, a DB read shows what the job will pick up, so the run knows it touches only its own rows:
+A **Job** step runs scheduled work now, through the admin endpoint or command the project has for it. Before it, a DB read shows what the job will pick up. When that is more than the run's own rows, the step is `shared`, and what it does to other users' data that cannot be taken back (an email sent) is a §4 permanent change. A figure in the job's reply is a Capture:
 
 ```markdown
 5. **DB** — What is due for the reminder job.
@@ -224,7 +224,7 @@ A **Notify** step asserts a message where it arrives:
 | Message | Read through | Expect names |
 |---|---|---|
 | Push | A Device step opens the notification shade, then the Appium snapshot | The title, the text, and the screen a tap opens |
-| Email | The environment's mail catcher, by the recipient holding `RUN` | The subject, the figures in the body, where its link leads |
+| Email | The environment's mail catcher, by the recipient and the time of the step that caused it (and by `RUN`, where the address or the subject carries it) | The subject, the figures in the body, where its link leads |
 | In-app | A UI step on the inbox or the banner | The text and the screen it opens |
 | Any, as sent | The dispatch row, as a DB step | The type and the recipient |
 
@@ -272,7 +272,7 @@ A step is one command where one command can do it. A helper script is written on
 
 ## Preconditions, Setup and Cleanup
 
-**Preconditions** are `PRE-1`…, a table checked before every session and never changed by it: the right app or site in front and the right build, the right user and account signed in, each shared switch in the state the tests need, each fixture in its required state, nothing left over from an earlier run (a search for the run-marker prefix), and each baseline noted into its `BASELINE_…` variable. Each row has how to check it and the required state. A precondition that fails stops the session; it is never "fixed" by a step outside Setup.
+**Preconditions** are `PRE-1`…, a table checked before every session and never changed by it: the right app or site in front and the right build, the right user and account signed in, each shared switch in the state the tests need, each fixture in its required state, nothing left over from an earlier run (a search for the run-marker prefix), and each baseline noted into its `BASELINE_…` variable. Each row has how to check it and the required state. A precondition that fails stops the session; it is never "fixed" by a step outside Setup. Where nothing reports a fact the row needs (no version endpoint), the row is a Hand check: the user states it.
 
 **Setup** steps are `S-1`…, once per run: set the variables with the day's `RUN`, obtain each token, sign in on each UI, confirm the database name, seed through the API the reference data every test shares, and declare each budget a step polls against. Each has an Expect. Tests then start signed in.
 
@@ -282,7 +282,7 @@ A step is one command where one command can do it. A helper script is written on
 2. the recipes' rows, then the Setup's;
 3. every `shared` step reversed, by the values written down when it was changed;
 4. each fixture restored to its required state;
-5. a search for `RUN` on each actor, expecting nothing;
+5. a search for `RUN` on each actor, and a read of each captured id whose record carries no marker, expecting nothing;
 6. each baseline read again and compared with its `BASELINE_…`, every difference explained by a test.
 
 What cannot be removed or reversed is not hidden: it is the §4 permanent-change list, and the run reports it.

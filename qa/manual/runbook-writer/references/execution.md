@@ -30,6 +30,8 @@ Preconditions, Setup, then each test in the runbook's order (or its §12 executi
 
 A filter (`P03, T01`, or `P1 only`) runs the preconditions, Setup, those tests with their recipes, and Cleanup. The record lists the rest as *not run*.
 
+**Through the Plan Queue** the same run is cut into tasks by its run plan (`run-plan.md`): the first task runs up to the end of Setup, each family is a task, and the last task is Cleanup. A queued task follows this file for its own part and that file for what carries the run between sessions.
+
 ## One step
 
 1. Do exactly what the step says, with the actor it names.
@@ -107,6 +109,10 @@ Saved to `docs/runbooks/<NNN>-<slug>-run-<YYYY-MM-DD>.md`; a second run on the s
 **Device and browser:** <…>   **User and account:** <…>
 **Executed by:** <agent | person>   **Driven by:** <curl · Playwright MCP · Appium MCP · psql · …>
 **Tests:** <all | filter>   **Evidence:** `evidence/<YYYY-MM-DD>-<slug>-run/`
+
+## Run state
+| Variable | Value | Captured by |
+<The run marker and every captured value that is not a secret. A queued run re-enters from this table.>
 
 ## Summary
 | Passed | Failed (new) | Failed (known) | Observed | Blocked | Not run |

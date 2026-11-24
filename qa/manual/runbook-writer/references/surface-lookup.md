@@ -54,7 +54,7 @@ A field the server sets and no endpoint accepts is what a data recipe exists for
 
 Match each screen to the API operation it calls: that pairing is one row of the Surface map. A screen that calls no endpoint of the feature is out of the map.
 
-A fact the checkout should hold and does not (a form component that is imported and absent, a page a link points at) is `assumed`. A row whose facts have different sources gives each fact its own stamp in the Source cell.
+A fact the checkout should hold and does not (a form component that is imported and absent, a page a link points at) is `assumed`. A screen or control with no trace at all in the code and nobody's word for it is `not found`: its grid cell says where it was looked for, and no test is written on a guess. A row whose facts have different sources gives each fact its own stamp in the Source cell.
 
 ### How the project makes API calls
 

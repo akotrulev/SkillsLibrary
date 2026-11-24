@@ -6,11 +6,11 @@ disable-model-invocation: true
 
 # QA Runbook Writer
 
-A test-case suite says **what** to check and what the business effect must be. A runbook says **how to carry each case out on a real environment**: the exact request, screen action or database statement, by a named **actor**, and the one value each must give. A tester, or the `qa-manual-tester` agent in its RUN mode, follows it and records a result per test.
+A test-case suite says **what** to check and what the business effect must be. A runbook says **how to carry each case out on a real environment**: the exact request, screen action or database statement, by a named **actor**, and the one value each must give.
 
 A runbook is a set of **tests**. One test carries out one case through one **driving actor**, and checks the outcome on every other actor that shows it. The cases and their expected results come from the suite (`qa/manual/test-case-writer`); this skill adds the actors, the commands and the data, and changes no expected result.
 
-**It owns** the actor binding, the test and step forms, the data, the runbook document and the run record. The run itself is in `references/execution.md`.
+**It owns** the actor binding, the test and step forms, the data, the runbook document, the run plan that puts a run on the Plan Queue, and the run record. The run itself is in `references/execution.md`.
 
 ## Inputs needed
 
@@ -49,7 +49,7 @@ A test has three parts. **Arrange** produces its data. **Act** is the one operat
 | **Temporal, or data only time or history produces** | The test its layer calls for, arranged by a data recipe or a Job step | As its layer |
 | **Data, interaction, concurrency** | One driven by the API; Sim, Job and Device steps where the case needs a third party's answer, a schedule or a device state | A read-back, the other feature's API or screen within the named budget, the DB rows, a Doc or Notify step where the case names one |
 
-The layer is the suite's group heading; in a suite without groups it is read from the case's technique.
+The layer is the suite's group heading. In a suite without groups it is read from the case's technique: use-case → journey; decision table, calculation, state transition, role × action → rule; equivalence or boundary values on a field → field; a boundary on a time threshold, a schedule → temporal; CRUD, def-use, chains, concurrency → data.
 
 ### Every operation, on every actor that offers it
 
@@ -58,7 +58,7 @@ Whatever the layers give, each **create, read, update and delete** of the featur
 - A test the layers already produced fills its cell: a journey that creates on the web is the UI-web-driven create.
 - An empty cell gets an **operation test**. It adds no expected result of its own: it carries out, through the missing actor, a case whose expected result covers that operation (`Carries out: TC-…-002, API-driven`).
 - An operation no case covers is a gap in the suite: a §14 row for its owner, never an invented expected result.
-- A UI that does not offer the operation gets `not offered: <why>` in its cell.
+- A UI that does not offer the operation gets `not offered: <why>` in its cell. A screen or control the cases need that neither the code nor anyone's word shows gets `not found: <where it was looked for>` and a §14 row, and no test until it is settled.
 
 ## Procedure
 
@@ -67,8 +67,9 @@ Whatever the layers give, each **create, read, update and delete** of the featur
 3. **Bind each case to tests** with the two rules above, and give each test its id. Done when the coverage matrix has a row per test, every case appears in at least one, and every cell of the operation grid holds a test id or `not offered` with its reason.
 4. **Settle the data** (*Data*, below): fixtures, the leave-alone list, the recipes, the permanent changes. Done when every precondition of every test names the fixture, Setup step or recipe that produces it.
 5. **Write the preconditions, Setup, the tests and Cleanup** in the forms of `references/step-forms.md`. Done when every step has an actor, one action and one expected value or a marked observation, and Cleanup removes or reverses everything it can.
-6. **Fill the register and the closing sections**: known issues, results so far, the execution order when time matters, what is not covered, the open questions. Done when every known issue is on the tests that hit it.
+6. **Fill the register and the closing sections**: known issues, results so far, the execution order when time matters, what is not covered, the open questions. Done when every known issue is on the tests that hit it, or says in its Tests cell that no case covers it.
 7. **Check it** against *The runbook check*. Done when no row fails.
+8. **Write the run plan** with `references/run-plan.md`, so the run can be queued, paused and resumed. Done when every test is named in exactly one of its tasks and its own check passes.
 
 ## Tests
 
@@ -94,18 +95,18 @@ Whatever the layers give, each **create, read, update and delete** of the featur
 ## Data
 
 - **Per-run data is the default.** Every record a run creates carries the run marker `RUN` (`rb-<yyyymmdd>-<n>`, `n` the day's run number, set by the first Setup step) in a field a person can search. A name the suite gives gains the marker (`Buy stamps <RUN>`). A field whose exact value is the test carries none: that record is found by its captured id.
-- **A fixture is long-lived data the runbook reuses**: an account, a funded record, reference data. §4 names each with the state every run needs it in and the Cleanup step that restores it.
+- **A fixture is long-lived data the runbook reuses**: an account, a funded record, reference data. §4 names each with the state every run needs it in and the Cleanup step that restores it. On a fixture other people also use, a test asserts only on records carrying the run marker, never on a count or an order across the whole fixture.
 - **The leave-alone list** names data on the environment that looks like the runbook's and is not: no step touches it.
 - **A permanent change** is one no step can reverse (an applied corporate action, a sent document). It is listed in §4 with why the test needs it and what isolated data it is done on, and a run reports it at the end.
 - **A baseline** (a balance, a count) is noted by a precondition and reconciled by the last Cleanup step, every difference explained.
 
 ### DB writes
 
-Direct writes are the last resort, under the one confirmation that the environment is not production: API first, with a `Why not the API` line; a guard, the change and a verify; updates on rows the runbook created or declared; inserts and deletes only for what no actor can produce or remove. The seven rules are in `references/step-forms.md`, "DB steps".
+Direct writes are the last resort, under the seven DB-write rules of `references/step-forms.md`, "DB steps": API first with a `Why not the API` line, then a guard, the change and a verify.
 
 ## Output format
 
-Saved to `docs/runbooks/<NNN>-<slug>-runbook.md` (`NNN` = the suite's number where it has one, else the next free). A project's own location wins. A tool file and helper scripts sit beside it under the same stem.
+Saved to `docs/runbooks/<NNN>-<slug>-runbook.md` (`NNN` = the suite's number where it has one, else the next free). A project's own location wins. A tool file and helper scripts sit beside it under the same stem; its run plan goes to `docs/plans/`.
 
 ```markdown
 # Runbook — <Feature> (<NNN>)
@@ -167,7 +168,7 @@ Saved to `docs/runbooks/<NNN>-<slug>-runbook.md` (`NNN` = the suite's number whe
 ## 14. Assumptions and open questions
 ```
 
-In the matrix, Arrange holds the fixtures, Setup steps and recipes a test uses, `API` when its own first steps create its data, `—` for none. A grid cell holds a test id or `not offered: <why>`.
+In the matrix, Arrange holds the fixtures, Setup steps and recipes a test uses, `API` when its own first steps create its data, `—` for none.
 
 A full runbook is in [`references/example-product-catalogue.md`](references/example-product-catalogue.md).
 
@@ -176,7 +177,7 @@ A full runbook is in [`references/example-product-catalogue.md`](references/exam
 | Check | Fails as |
 |---|---|
 | Every case of the suite is carried out by a test, or sits in §13 with its reason | blocker |
-| Every cell of the operation grid holds a test or `not offered` with its reason, and each of those tests asserts on another actor | blocker |
+| Every cell of the operation grid holds a test, `not offered` or `not found` with its reason, and each of those tests has an Expect on another actor (an Observe is not one) | blocker |
 | A secret written into the runbook, a tool file or a helper script | blocker |
 | A step with two acceptable values, or with "works", "correct" or "as expected" in its Expect | major |
 | A step with neither `Expect` nor `Observe`, or an observe step citing no open question | major |
@@ -186,16 +187,8 @@ A full runbook is in [`references/example-product-catalogue.md`](references/exam
 | An endpoint, route, label, test id or column with no stamp, or stamped `assumed` and missing from §14 | major |
 | A step that says "as above", or needs a value no earlier step captures | major |
 | An expected result that differs from the suite's | major |
-| A known issue in §10 that no test names, or a test that hits one without naming it | minor |
+| A known issue in §10 with an empty Tests cell, a test that hits one without naming it, or a test bent to reach one | minor |
 
 ## Changing a runbook
 
 A changed case, endpoint, screen or column changes the tests that use it and bumps **Version**. A runbook rewritten for another environment or build gains §0, and the earlier version is kept beside it as `<NNN>-<slug>-runbook-v<n>.md`. A run edits §10 and §11 only; a defect in the runbook found during a run is listed in the run record and corrected after it.
-
-## Anti-example
-
-Asked for a runbook for product ingestion.
-
-Bad: twelve `curl` calls for create, read, update and delete with their status codes. Every endpoint answers, and nobody has looked at a screen or a row: the product created through the API never appears in the shopper app because the list is cached, and the delete that answers `204` leaves the row live.
-
-Good: the example above. Each operation is driven once through the API and once through each screen that offers it, each checked on the other side and in the database, and the product that must be five days old is made through the API and aged by one guarded `UPDATE`.
