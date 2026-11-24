@@ -14,8 +14,9 @@
 
 The shape every plan in this library is written in — the one the Plan Queue VS Code plugin queues, and
 the one `writing-plans` produces (with `session-budget` sizing its tasks) when `/product:plan-feature`
-plans an approved spec, and the one `documenter` writes when documenting a system takes more than one
-session.
+plans an approved spec, the one `documenter` writes when documenting a system takes more than one
+session, and the one `qa-manual-tester` writes to put a run of a runbook on the queue (a **run plan**,
+`qa/manual/runbook-writer/references/run-plan.md`).
 
 **One file, self-contained.** The plugin queues whole plan documents, so everything a cold reader or a
 fresh session needs is *in the file*: the context, the decisions, the tasks, and the paste-ready prompt
@@ -263,6 +264,12 @@ work when the plan has any, and it writes no product documentation.
 - **Left out only with a reason in the header**: `Documentation task: none — <why>`, for a plan that
   changes no behaviour a reader of the documentation would notice (a refactor, a tooling change), or a
   documentation plan, whose tasks are already the documenter's.
+
+**A run plan has no gate task.** Its tasks carry out a runbook on an environment: they write no code
+and no tests, and no suite or lint runs over what they leave. Its header says
+`Gate task: none — <why>`, and every task carries `**Gate: none**` naming the check it makes in a
+gate's place (a result row per test). It is the one kind of plan without a gate task: a plan with a
+task that writes code or tests, or with a lint over its documents (a documentation plan), has one.
 
 **The project's whole e2e suite runs in its nightly CI run**, not in any task. Each test red there goes on
 the project's tracked list with an owner, and comes off it only when a nightly run is green for it; it is
@@ -601,7 +608,8 @@ These are plan failures, not style:
 - A `**Budget:**` with no drivers behind it
 - A task with no `**Gate:**` line, a code task whose gate runs nothing, or an intermediate task that runs
   the unfiltered whole suite or another plan's tests
-- A plan with no last task running the whole set
+- A plan with no last task running the whole set, unless it is a run plan whose header says
+  `Gate task: none — <why>` (§5)
 - A plan that changes behaviour and does not end with a documentation task run by the documenter agent,
   or a gate task that writes the product documentation itself
 - An implementation task that edits, skips or deletes an acceptance test

@@ -6,7 +6,7 @@ A run plan is the file that puts one run of a runbook on the Plan Queue: one pro
 
 **Path:** `docs/plans/<PPP>-<slug>-runbook-run.md`. `PPP` is the next free plan number across `docs/plans/` and `docs/plans/implemented/`; it is not the runbook's number.
 
-**What it is not.** It writes no code and no tests, so it has no test-design tasks, no gate task and no documentation task, and its header says so. It holds no test steps: every block points at the runbook's sections, and the runbook stays the one place a step is written.
+**What it is not.** It writes no code and no tests, so it has no test-design tasks, no gate task and no documentation task. The plan format allows each (§4 and §5 of `plan-format.md`), and the header says so in the format's words. It holds no test steps: every block points at the runbook's sections, and the runbook stays the one place a step is written.
 
 ## How the runbook is cut
 
@@ -23,7 +23,7 @@ A run plan is the file that puts one run of a runbook on the Plan Queue: one pro
 
 ## What the queue needs before the first task
 
-Plan Queue (checked against its 0.6.0 source) runs each task as an unattended session in the plan's own worktree, with file edits accepted and every command outside its allowlist denied. It commits a passed task with `git add -A`, stashes what a stopped or failed task left, and removes the worktree when the plan finishes. The plan's header lists what a run takes, and `E1` checks each before the first step, asking the user for whatever is missing:
+Plan Queue (checked against its 0.7.0 source) runs each task as a Claude Code background session in the plan's own worktree, under `<repo>/.claude/worktrees/`. File edits are accepted; a command outside its allowlist stops the task until the user allows it in the task's session, so a run nobody watches needs the allowlist complete. It commits a passed task with `git add -A`, stashes what a stopped or failed task left, and removes the worktree when the plan finishes. The plan's header lists what a run takes, and `E1` checks each before the first step, asking the user for whatever is missing:
 
 - **Allowlist entries** (`planQueue.allowedTools`) for what the runbook's steps call beyond the queue's defaults: the engine's client (`Bash(psql:*)`), the project's API tool (`Bash(ijhttp:*)`, `Bash(newman:*)`, `Bash(bru:*)`), `Bash(uuidgen:*)`, `Bash(date:*)`, `Bash(source:*)`, any helper script's interpreter, and the MCP servers that drive the screens (`mcp__playwright`, `mcp__appium-mcp`).
 - **The MCP servers** registered for the user or the project, since a queued session takes its servers from the Claude Code configuration.
@@ -54,7 +54,7 @@ Each task is a new session, so nothing lives in the shell.
 - **It asks only where it cannot go on without a person**, and says so in the way the queue's own instructions describe; the queue brings the answer back to the same session. Two cases are always that: an environment the header does not confirm, and a Hand step.
 - **The environment is confirmed once per run.** Where the header says `not confirmed`, `E1` asks before anything else and writes the answer into that line; every later task reads it there.
 - **A failed test is a result, not a failure of the task.** The task runs every test of its family and ends done. It ends blocked only when the run cannot go on at all: an actor every test needs is down, a credential is missing.
-- **A command the allowlist denied** is not worked around: the step is blocked, and the task names the entry that would allow it.
+- **A command outside the allowlist** waits for the user in the task's session. The step is never rewritten to avoid the prompt; when the user declines, the step is blocked and the task names the entry that would allow it.
 - **The queue commits what the task leaves**: the run record, the runbook's §10 and §11, any bug report and the plan edits. Evidence is never in it.
 
 ## Output format
@@ -69,7 +69,8 @@ Each task is a new session, so nothing lives in the shell.
 **Environment:** <name> — not production, confirmed by <who> on <date> | **not confirmed**
 **Run record:** `docs/runbooks/<NNN>-<slug>-run-<YYYY-MM-DD>.md` (created by E1)   **Evidence:** `<repo>/evidence/<YYYY-MM-DD>-<slug>-run/` (outside the worktree)
 **The queue needs:** allowlist `Bash(psql:*)`, `Bash(uuidgen:*)`, `Bash(date:*)`, `Bash(source:*)`, `mcp__playwright`, `mcp__appium-mcp` · `--add-dir <repo>/evidence` · variables `QA_ADMIN_USER`, `QA_ADMIN_PASSWORD`, `DB_URL`
-**Test-design tasks: none** and **Documentation task: none** — a run carries out a suite that exists and changes no behaviour.
+**Gate task: none** — a run writes no code and no tests; each task's check is a result row per test.
+**Documentation task: none** — a run changes no behaviour. No `TD` tasks: the plan builds no acceptance criteria.
 
 ## 1. What already exists, and what is missing
 
@@ -168,6 +169,8 @@ Close out per the plan's "Close-out — every task" before you stop.
 ````
 `````
 
+A filled run plan, with its first and last blocks written out, is in [`example-product-catalogue-run-plan.md`](example-product-catalogue-run-plan.md): read it before the first run plan in a project.
+
 The first and the last block follow the same shape. `E1`'s block reads the environment line first and asks the user where it is not confirmed, checks what the queue needs, runs the checks of `execution.md`, the preconditions and Setup, and creates the record with its Run state table. The last block runs every Cleanup step, reconciles the baselines, completes the record's summary, permanent changes and left-behind sections, updates the runbook's §10 and §11, and files the plan.
 
 ## The run-plan check
@@ -180,4 +183,4 @@ The first and the last block follow the same shape. `E1`'s block reads the envir
 | A task that does not depend on the one above | major |
 | A block with no journal read and re-entry, or the last block without Cleanup and the baselines | major |
 | A secret's value anywhere in the plan | blocker |
-| The environment line or the queue-needs line missing, an evidence folder inside the worktree, or a Hand step missing from the task table | major |
+| The environment line, the queue-needs line, `Gate task: none` or `Documentation task: none` missing from the header, an evidence folder inside the worktree, or a Hand step missing from the task table | major |
