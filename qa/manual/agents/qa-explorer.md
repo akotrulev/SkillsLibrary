@@ -57,7 +57,7 @@ Work one step at a time; don't start N+1 until N's gate passes.
 
 - A finding that needs more than hygiene probing (unescaped output, another account's data, a leaked internal) is recorded and handed to `qa-security`; you do not take it further.
 - An experience that works but is awkward goes to `design:ux-review`; a full accessibility audit, visual baselines and a breakpoint matrix go to the matching `qa/<stack>/skills`; you ran the first pass only.
-- Turning the report into a test basis and scripted cases is `qa-test-case-designer`'s (its Exploration mode starts from your report); automating a journey is `qa-ui-<stack>` / `qa-mobile-<stack>`'s.
+- Turning the report into a test basis and scripted cases is `qa-test-case-designer`'s (its Exploration mode starts from your report); carrying scripted cases out through API, UI and DB is `qa-manual-tester`'s; automating a journey is `qa-ui-<stack>` / `qa-mobile-<stack>`'s.
 - **In a plan task, the prompt block is the spec** and the plan's `## Close-out — every task` section is the close-out. Its `Gate:` line decides what you run.
 - **Workspace.** Work in the checkout you are given; commit only when asked or when the plan says to. Evidence is never committed.
 

@@ -1,0 +1,91 @@
+# Surface lookup — where each operation lives
+
+Step 2 of `runbook-writer`. For every operation the cases use, find its endpoint, its screen on each UI and its table, and record how the tester reaches each channel. The result is the runbook's **§1 Access** and **§2 Surface map**.
+
+## What the code is for
+
+The spec and the suite say what **should** happen: every expected result comes from them. The code says what **is**: the route, the field name, the label, the test id, the column. Take addresses from the code and outcomes from the suite.
+
+Where the code disagrees with the suite (the spec says a duplicate SKU is refused with `409`, the controller returns `400`), the script keeps the suite's value and the disagreement goes in the runbook's §9 as a question for the owner. It is also the likeliest place for the run to find a defect.
+
+Where the suite is silent on a value a step must assert (a status code, an error code), take the contract's, else the code's, and list it in §9 as a value the owner confirms.
+
+## Stamps
+
+Every row of the Access table and the Surface map carries one:
+
+| Stamp | Meaning |
+|---|---|
+| `detected <file:line>` | Read in the codebase this session |
+| `stated` | Given by the user, the spec or the contract |
+| `observed` | Seen on the running system this session |
+| `assumed` | Inferred; listed in §9 until confirmed |
+
+## With the codebase
+
+Read the API project first: it names the operations, and the UI is then matched to them.
+
+### The API project
+
+| Fact needed | .NET | Spring | Node (Nest, Express) | Any other stack |
+|---|---|---|---|---|
+| Routes and verbs | `[HttpGet]`…`[HttpDelete]`, `Map{Get,Post,Put,Patch,Delete}(` | `@GetMapping`…`@DeleteMapping`, `@RequestMapping` | `@Get(`…`@Delete(`, `router.<verb>(` | `Grep` the path segment the spec names |
+| Request and response shape | the request and response records | the DTO classes and records | the DTO classes, Zod schemas | the handler's parameter and return types |
+| Server-side validation | FluentValidation validators, DataAnnotations | `jakarta.validation` constraints behind `@Valid` | `class-validator` decorators, Zod | the handler's first lines |
+| Who may call it | `[Authorize]`, policies, roles | `@PreAuthorize`, the `SecurityFilterChain` | guards, auth middleware | the router's middleware |
+| Fields the server sets | entity defaults, `SaveChanges` interceptors | `@CreatedDate`, `@PrePersist` | Prisma `@default(now())`, entity hooks | column defaults in the migrations |
+| Tables and columns | EF Core migrations, `OnModelCreating` | Flyway or Liquibase scripts, `@Table`, `@Column` | `schema.prisma`, TypeORM entities, Knex migrations | the migrations folder |
+| Derived copies | cache keys, search indexers, read models, outbox and event handlers that react to the entity | the same | the same | the same |
+
+A committed OpenAPI document wins over the code for the request and response shape; where the two differ, that is a §9 row.
+
+A field the server sets and no endpoint accepts is what a data recipe exists for: it is the `Why not the API` line. The derived copies are what DB rule 7 needs.
+
+### The UI projects
+
+| Fact needed | React, Next.js | Blazor | React Native (Expo) | iOS · Android |
+|---|---|---|---|---|
+| Screens and routes | `app/**/page.tsx`, the React Router route table | `@page` directives | `app/` (Expo Router) | the navigation graph, `NavigationStack`, `NavHost` |
+| Which endpoint a screen calls | the typed client, Server Actions, query hooks | the typed `HttpClient` services | the query hooks | the repository or service layer |
+| Labels, headings, messages | JSX text, translation files | markup, `.resx` | `<Text>`, translation files | `Localizable`, `strings.xml` |
+| Test ids | `data-testid` | `data-testid` | `testID` | `accessibilityIdentifier` · `testTag` |
+| Rules enforced only in the browser or app | Zod schemas, form `rules` | `EditForm` validators | the form schema | the view model |
+| What gates a screen | role checks, feature flags | `[Authorize]`, `AuthorizeView` | the same | the same |
+
+Match each screen to the API operation it calls: that pairing is one row of the Surface map. A screen that calls no endpoint of the feature is out of the map.
+
+A fact the checkout should hold and does not (a form component that is imported and absent, a page a link points at) is `assumed`. A row whose facts have different sources gives each fact its own stamp in the Source cell.
+
+### How the project makes API calls
+
+| Found (`Glob`) | The runbook's API form |
+|---|---|
+| `**/*.http`, `**/*.rest`, `http-client.env.json` | A `.http` file beside the runbook, in the dialect the project's files use |
+| `**/*.postman_collection.json`, `*.postman_environment.json` | A Postman collection beside the runbook, reusing the project's environment variable names |
+| `bruno.json`, `**/*.bru` | A Bruno folder beside the runbook |
+| None of these | `curl` blocks in the runbook |
+
+Record the globs searched when nothing is found. Reuse the project's variable names (`baseUrl`, `token`) so its environment files work unchanged.
+
+## Without the codebase
+
+| Channel | Source, strongest first |
+|---|---|
+| API | The contract the user gave; the running API's OpenAPI document (`/swagger/v1/swagger.json`, `/v3/api-docs`, `/openapi.json`); a question |
+| UI | A look-only pass over the screens the cases name, by the driving routes of `qa/manual/app-exploration/references/probes.md`: read labels and routes from the snapshot and write nothing. Stamp `observed` |
+| DB | The schema the user gives; on a non-production database, the catalogue read-only (`information_schema.columns`, the collection's sample document); a question |
+
+A table or column nobody stated and no catalogue showed is `assumed`, and every script that depends on it is listed in §9.
+
+## The Access table
+
+One row per channel, per environment the runbook is written for:
+
+| Channel | Where | How to get in | Source |
+|---|---|---|---|
+| API | `BASE_URL` = `https://api.staging.example.test` | `POST /auth/token` with `QA_ADMIN_USER` / `QA_ADMIN_PASSWORD`, role `catalogue-admin` | detected `src/Api/Program.cs:41` |
+| UI-web | `WEB_URL` = `https://admin.staging.example.test` | Sign in as the same account | stated |
+| UI-app | build `2.14.0 (381)` on a Pixel 8 emulator, Android 16 | Sign in as `QA_SHOPPER_USER` | stated |
+| DB | PostgreSQL 17, database `catalogue_staging`, `DB_URL` | `psql "$DB_URL"`, a role with DML on schema `catalog` | stated |
+
+Each account is named with its role. Each secret is the name of the variable that holds it. The database row names the database, because the run checks that name before its first statement.

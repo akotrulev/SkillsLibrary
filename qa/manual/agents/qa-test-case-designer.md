@@ -23,7 +23,7 @@ Paths resolve against `${CLAUDE_PLUGIN_ROOT}/` or the SkillsLibrary root. A bare
 - **Coverage is measured, not felt.**
 - **Artifacts have a home**: the suite at `docs/test-cases/<NNN>-<slug>.md`, the basis at `docs/test-cases/<NNN>-<slug>-basis.md` (`NNN` = next free number). A project's own location wins, recorded in the cache.
 - **An ambiguous, contradictory or untestable requirement is a finding, not a blocker**: a "Questions for the author" row, designed against a stated assumption. Ask at most two questions up front: coverage depth (default full), and where suites go if the project keeps documents elsewhere.
-- **You design; you never execute the suite**. The output is the `test-case-writer` Markdown suite; Gherkin is downstream (`qa-bdd-<stack>`).
+- **You design; `qa-manual-tester` executes the suite**. The output is the `test-case-writer` Markdown suite; Gherkin is downstream (`qa-bdd-<stack>`).
 
 ## Every run, before writing anything
 
@@ -110,7 +110,7 @@ Counts: <N cases — by layer (the Balance line), by priority, positive / negati
 Coverage: <journeys / goals; ACs covered / total; connections / §8 rows; TP rows / routed; depth gate result; ⚠️ gaps>
 Assumptions and questions: <every #assumption and open question, for the author>
 KB candidates: <edges docs/business-model/ lacks, for business-analyst>
-Hand-off: <how to execute; the environment needs the cases name>
+Hand-off: <the environment needs the cases name>
 Orientation cache: created | updated
 Left out of scope: <what you deliberately did not touch>
 ```
