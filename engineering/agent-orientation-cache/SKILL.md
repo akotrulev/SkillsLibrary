@@ -27,7 +27,7 @@ Run these checks in order and stop at the first that matches.
 | # | Condition | Verdict |
 |---|---|---|
 | 1 | File absent, or no `<!-- orientation-cache v1 -->` marker, or a version marker you don't understand, or the header block won't parse | **FULL** |
-| 2 | `git rev-parse HEAD` fails (not a git repo) | **FULL** |
+| 2 | `git rev-parse HEAD` fails (not a git repo) | the gate by file time, below |
 | 3 | `git merge-base --is-ancestor <baseline> HEAD` fails — the baseline is not an ancestor of HEAD (rebase, squash, shallow clone, different branch lineage) | **FULL** |
 | 4 | `Last verified` is more than **30 days** old | **FULL** |
 | 5 | The delta set (below) is **empty** | **TRUST** — skip orientation entirely |
@@ -44,6 +44,17 @@ git status --porcelain && git diff --name-only <baseline>..HEAD   # 5, 6
 ```
 
 **Use `merge-base --is-ancestor`, never `cat-file -e`.** After a rebase or squash the old baseline commit usually still *exists* in the local object store while no longer being on your branch — `cat-file -e` would pass and `git diff <baseline>..HEAD` would then report a large, meaningless delta. Ancestry is the question that matters.
+
+### Not a git repository — the gate by file time
+
+The header reads `**Baseline commit:** none (not a git repository)`. Row 4 still applies. The delta set is every file changed since the cache file was last written, with the project's dependency and build folders pruned:
+
+```bash
+find . -type f -newer docs/agent-context/<agent-name>.md \
+  -not -path './docs/agent-context/*' -not -path './node_modules/*' -not -path './bin/*' -not -path './obj/*'
+```
+
+Empty is **TRUST**; anything else is **DELTA**, with that set in place of the git paths. A header naming a commit where there is no repository is **FULL**.
 
 ### The delta pass
 
@@ -72,7 +83,7 @@ Every run that reached the work — fix, extend, or full build — closes by upd
 
 1. **Correct anything the run disproved.** A wrong line in the cache is worse than a missing one; if you found the map lying, fix the line before you finish.
 2. **Add the seams the run created.** A new page object, typed client, builder, migration, state container, endpoint, dashboard — this is the highest-value delta in the whole protocol, and the one most often skipped.
-3. **Re-stamp** `Last verified` (today) and `Baseline commit` (current `HEAD`), and recompute the fingerprint hashes.
+3. **Re-stamp** `Last verified` (today) and `Baseline commit` (current `HEAD`; `none (not a git repository)` without one), and recompute the fingerprint hashes.
 4. **Prepend one session-log line** — date · mode · one line on what changed. Keep the newest 10, drop the rest.
 5. If the run ended early or was blocked, still update what you learned, and say in your output contract that the cache is partial.
 

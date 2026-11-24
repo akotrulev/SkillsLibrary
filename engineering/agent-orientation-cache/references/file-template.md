@@ -11,7 +11,7 @@ The skeleton written to `docs/agent-context/<agent-name>.md`. The **header block
 **Agent:** <agent-name>
 **Written:** <YYYY-MM-DD>
 **Last verified:** <YYYY-MM-DD>
-**Baseline commit:** <full sha>
+**Baseline commit:** <full sha | none (not a git repository)>
 **Fingerprint:** <path>@<sha256:8>, <path>@<sha256:8>, ...
 
 > Written and maintained by the `<agent-name>` agent per `engineering/agent-orientation-cache`.
