@@ -1,10 +1,11 @@
 # Worked example — a product catalogue
 
-The filled example for `runbook-writer`: a ten-case suite in, a runbook out. The system has an API, a web admin where a catalogue admin manages products, and a shopper app that only shows them. **Shape is normative; domain content is illustrative.** The matrix lists all seventeen tests; six are written out here, and a real runbook writes every one. "In the form of P01 step 1" abbreviates this example only: a real runbook holds every command whole.
+The filled example for `runbook-writer`: a ten-case suite in, a runbook out. The system has an API, a web admin where a catalogue admin manages products, and a shopper app that only shows them. **Shape is normative; domain content is illustrative.** The matrix lists all seventeen tests; six are written out here, every step with its whole command, and a real runbook writes all seventeen that way. Setup, the recipes and Cleanup are complete for those six: C-1 to C-3 name the nine products they create, where a real runbook names every product its tests capture.
 
 **Contents:**
 - Input — the suite, in short
 - Output
+- The same steps with a .http tool file
 
 ## Input — the suite, in short
 
@@ -58,8 +59,8 @@ Version 1 (2026-11-20, for dev) is kept as `004-product-catalogue-runbook-v1.md`
 |---|---|---|
 | `RUN` | Run marker, `rb-<yyyymmdd>-<n>`, `n` the day's run number | S-1 |
 | `OUT` | The run's evidence folder | S-1 |
-| `TOKEN`, `TOKEN_VIEWER` | Bearer tokens | S-2 |
-| `CATEGORY_ID` | The fixture *QA Lighting* | S-4 |
+| `TOKEN`, `TOKEN_VIEWER` | Bearer tokens | S-2, S-3 |
+| `CATEGORY_ID` | The fixture *QA Lighting* | S-5 |
 | `LIST_BUDGET` | 60 s: the shopper list is cached for that long (detected `services/catalogue/Products/ProductListCache.cs:14`) | S-1 |
 | `BASELINE_PRODUCTS` | Rows in `catalog.products` before the run | PRE-5 |
 | `QA_*_USER`, `QA_*_PASSWORD`, `DB_URL` | Accounts and the connection | the tester's shell, from the secret store |
@@ -83,9 +84,9 @@ Version 1 (2026-11-20, for dev) is kept as `004-product-catalogue-runbook-v1.md`
 |---|---|---|---|---|---|---|
 | J01 | TC-PROD-001 | journey | P1 | F-1 | UI-web | UI-web · UI-app · API · DB |
 | P01 | TC-PROD-002 | data | P1 | F-1 | API | API · DB · UI-web · UI-app |
-| P02 | TC-PROD-003 | data | P2 | S-5 | API | API |
-| P03 | TC-PROD-003, UI-web-driven | data | P2 | S-5 | UI-web | UI-web |
-| P04 | TC-PROD-003, UI-app-driven | data | P2 | S-5 | UI-app | UI-app |
+| P02 | TC-PROD-003 | data | P2 | S-6, S-7 | API | API |
+| P03 | TC-PROD-003, UI-web-driven | data | P2 | S-6, S-7 | UI-web | UI-web |
+| P04 | TC-PROD-003, UI-app-driven | data | P2 | S-6, S-7 | UI-app | UI-app |
 | P05 | TC-PROD-004 | data | P1 | API | API | API · DB · UI-web · UI-app |
 | P06 | TC-PROD-004, UI-web-driven | data | P1 | API | UI-web | UI-web · API · DB · UI-app |
 | P07 | TC-PROD-005 | data | P1 | API | API | API · DB · UI-web · UI-app |
@@ -112,7 +113,7 @@ Version 1 (2026-11-20, for dev) is kept as `004-product-catalogue-runbook-v1.md`
 
 | Fixture | What it is | State every run needs | Restored by |
 |---|---|---|---|
-| F-1 | The category *QA Lighting* | Exists, Active, holding no product | C-2 |
+| F-1 | The category *QA Lighting* | Exists, Active, holding no product | C-3 |
 | F-2 | The three QA accounts | Can sign in; roles as in the header | nothing changes them |
 
 **Leave alone:** every product whose SKU does not start `rb-`, and the category *Lighting*: they are the demo data the sales team shows.
@@ -136,12 +137,12 @@ Version 1 (2026-11-20, for dev) is kept as `004-product-catalogue-runbook-v1.md`
 - **S-1** Set the variables. Raise the last digit of `RUN` for a second run on the same day.
   ```bash
   RUN=rb-$(date +%Y%m%d)-1
-  OUT=evidence/$(date +%F)-product-catalogue-run
+  OUT=$PWD/evidence/$(date +%F)-product-catalogue-run
   LIST_BUDGET=60
   mkdir -p "$OUT"
   ```
   **Expect:** the folder exists.
-- **S-2** **API** — Obtain the admin token. Repeat with `QA_VIEWER_USER` for `TOKEN_VIEWER`.
+- **S-2** **API** — Obtain the admin token.
   ```bash
   curl -sS -X POST "$BASE_URL/auth/token" -H "Content-Type: application/json" \
     -d "{\"username\":\"$QA_ADMIN_USER\",\"password\":\"$QA_ADMIN_PASSWORD\"}" \
@@ -149,21 +150,45 @@ Version 1 (2026-11-20, for dev) is kept as `004-product-catalogue-runbook-v1.md`
   TOKEN=$(jq -r '.accessToken' "$OUT/S-2.json")
   ```
   **Expect:** `200`.   **Capture:** `TOKEN` = `accessToken`
-- **S-3** **DB** — Confirm the database.
+- **S-3** **API** — Obtain the viewer token.
+  ```bash
+  curl -sS -X POST "$BASE_URL/auth/token" -H "Content-Type: application/json" \
+    -d "{\"username\":\"$QA_VIEWER_USER\",\"password\":\"$QA_VIEWER_PASSWORD\"}" \
+    -o "$OUT/S-3.json" -w '%{http_code}\n'
+  TOKEN_VIEWER=$(jq -r '.accessToken' "$OUT/S-3.json")
+  ```
+  **Expect:** `200`.   **Capture:** `TOKEN_VIEWER` = `accessToken`
+- **S-4** **DB** — Confirm the database.
   ```bash
   psql "$DB_URL" -At -c "SELECT current_database();"
   ```
   **Expect:** `catalogue_staging`.
-- **S-4** **API** — Find the fixture category.
+- **S-5** **API** — Find the fixture category.
   ```bash
   curl -sS "$BASE_URL/api/categories?name=QA%20Lighting" -H "Authorization: Bearer $TOKEN" \
-    -o "$OUT/S-4.json" -w '%{http_code}\n'
-  CATEGORY_ID=$(jq -r '.[0].id' "$OUT/S-4.json")
+    -o "$OUT/S-5.json" -w '%{http_code}\n'
+  CATEGORY_ID=$(jq -r '.[0].id' "$OUT/S-5.json")
   ```
   **Expect:** `200`; one category.   **Capture:** `CATEGORY_ID` = `id`
-- **S-5** **API** — Create the two products the read tests list: `<RUN>-SHELF` (*Wall shelf `<RUN>`*, 24.00) and `<RUN>-STOOL` (*Step stool `<RUN>`*, 18.50), in the form of P01 step 1.
-  **Expect:** `201` twice.   **Capture:** `SHELF_ID`, `STOOL_ID`
-- **S-6** **UI-web** — Open `WEB_URL` and sign in as `QA_ADMIN_USER`.
+- **S-6** **API** — Create the first product the read tests list.
+  ```bash
+  curl -sS -X POST "$BASE_URL/api/products" \
+    -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+    -d "{\"sku\":\"$RUN-SHELF\",\"name\":\"Wall shelf $RUN\",\"price\":24.00,\"categoryId\":\"$CATEGORY_ID\"}" \
+    -o "$OUT/S-6.json" -w '%{http_code}\n'
+  SHELF_ID=$(jq -r '.id' "$OUT/S-6.json")
+  ```
+  **Expect:** `201`.   **Capture:** `SHELF_ID` = `id`
+- **S-7** **API** — Create the second.
+  ```bash
+  curl -sS -X POST "$BASE_URL/api/products" \
+    -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+    -d "{\"sku\":\"$RUN-STOOL\",\"name\":\"Step stool $RUN\",\"price\":18.50,\"categoryId\":\"$CATEGORY_ID\"}" \
+    -o "$OUT/S-7.json" -w '%{http_code}\n'
+  STOOL_ID=$(jq -r '.id' "$OUT/S-7.json")
+  ```
+  **Expect:** `201`.   **Capture:** `STOOL_ID` = `id`
+- **S-8** **UI-web** — Open `WEB_URL` and sign in as `QA_ADMIN_USER`.
   **Expect:** The *Products* heading.
 
 ## 7. Data recipes
@@ -172,7 +197,14 @@ Version 1 (2026-11-20, for dev) is kept as `004-product-catalogue-runbook-v1.md`
 
 *Why not the API: `created_at` is set by a column default, and no endpoint accepts it.* The suite names only the side ("still new"), so the value sits an hour inside the threshold. Derived copy: the shopper list cache, which the tests wait out with `LIST_BUDGET`.
 
-1. **API** — Create `<RUN>-AGED-IN` (*Floor lamp `<RUN>`*, 59.00) in the form of P01 step 1.
+1. **API** — Create the product.
+   ```bash
+   curl -sS -X POST "$BASE_URL/api/products" \
+     -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+     -d "{\"sku\":\"$RUN-AGED-IN\",\"name\":\"Floor lamp $RUN\",\"price\":59.00,\"categoryId\":\"$CATEGORY_ID\"}" \
+     -o "$OUT/R-1.1.json" -w '%{http_code}\n'
+   AGED_IN_ID=$(jq -r '.id' "$OUT/R-1.1.json")
+   ```
    **Expect:** `201`.   **Capture:** `AGED_IN_ID` = `id`
 2. **DB** — Guard: the row exists and is new.
    ```bash
@@ -201,7 +233,41 @@ Version 1 (2026-11-20, for dev) is kept as `004-product-catalogue-runbook-v1.md`
 
 ### R-2 — A product exactly 5 days old
 
-As R-1 with SKU `<RUN>-AGED-OUT` (*Table lamp `<RUN>`*, 45.00), captured as `AGED_OUT_ID`, and `created_at = now() - interval '5 days'`. The verify selects `(now() - created_at) >= interval '5 days' AS outside` and expects `t`.
+*Why not the API: `created_at` is set by a column default, and no endpoint accepts it.* The suite puts this value on the threshold, and the seconds the run takes carry it past. Derived copy: the shopper list cache, which the tests wait out with `LIST_BUDGET`.
+
+1. **API** — Create the product.
+   ```bash
+   curl -sS -X POST "$BASE_URL/api/products" \
+     -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+     -d "{\"sku\":\"$RUN-AGED-OUT\",\"name\":\"Table lamp $RUN\",\"price\":45.00,\"categoryId\":\"$CATEGORY_ID\"}" \
+     -o "$OUT/R-2.1.json" -w '%{http_code}\n'
+   AGED_OUT_ID=$(jq -r '.id' "$OUT/R-2.1.json")
+   ```
+   **Expect:** `201`.   **Capture:** `AGED_OUT_ID` = `id`
+2. **DB** — Guard: the row exists and is new.
+   ```bash
+   psql "$DB_URL" -v ON_ERROR_STOP=1 -v id="$AGED_OUT_ID" <<'SQL'
+   SELECT id, created_at FROM catalog.products WHERE id = :'id';
+   SQL
+   ```
+   **Expect:** 1 row, `created_at` within the last minute.
+3. **DB** — Age it.
+   ```bash
+   psql "$DB_URL" -v ON_ERROR_STOP=1 -v id="$AGED_OUT_ID" <<'SQL'
+   UPDATE catalog.products
+      SET created_at = now() - interval '5 days',
+          updated_at = now() - interval '5 days'
+    WHERE id = :'id';
+   SQL
+   ```
+   **Expect:** `UPDATE 1`.
+4. **DB** — Verify.
+   ```bash
+   psql "$DB_URL" -v ON_ERROR_STOP=1 -v id="$AGED_OUT_ID" <<'SQL'
+   SELECT (now() - created_at) >= interval '5 days' AS outside FROM catalog.products WHERE id = :'id';
+   SQL
+   ```
+   **Expect:** `outside` is `t`.
 
 ### R-3 — A product from before categories existed
 
@@ -235,7 +301,7 @@ As R-1 with SKU `<RUN>-AGED-OUT` (*Table lamp `<RUN>`*, 45.00), captured as `AGE
 Legend: **J** journeys · **P** product operations · **R** rules · **T** time · **D** data from history · **V** field validation · **A** access.
 
 ### J01 — An admin adds a product on the web and a shopper finds it in the app (P1 · journey)
-**Carries out:** TC-PROD-001   **Uses:** PRE-2, F-1, S-6
+**Carries out:** TC-PROD-001   **Uses:** PRE-2, F-1, S-8
 
 1. **UI-web** — Open *Products* (`/admin/products`).
    **Expect:** The *Products* heading and the *New product* button.
@@ -258,7 +324,7 @@ Legend: **J** journeys · **P** product operations · **R** rules · **T** time 
    **Expect:** `200`; `sku` is `<RUN>-LAMP`, `price` is `39.90`, `status` is `Active`, `isNew` is `true`.
 
 ### P01 — A product created through the API shows on the web and in the app (P1 · data)
-**Carries out:** TC-PROD-002   **Uses:** PRE-2, F-1, S-6
+**Carries out:** TC-PROD-002   **Uses:** PRE-2, F-1, S-8
 
 1. **API** — Create the product.
    ```bash
@@ -282,24 +348,47 @@ Legend: **J** journeys · **P** product operations · **R** rules · **T** time 
    **Expect:** *Folding chair `<RUN>`* at `€32.00`.
 
 ### P06 — A price changed on the web is the price the API and the app give (P1 · data)
-**Carries out:** TC-PROD-004, UI-web-driven   **Uses:** PRE-2, F-1, S-6   **Known:** KI-1
+**Carries out:** TC-PROD-004, UI-web-driven   **Uses:** PRE-2, F-1, S-8   **Known:** KI-1
 
-1. **API** — Create `<RUN>-DESK` (*Standing desk `<RUN>`*, 310.00) in the form of P01 step 1.
+1. **API** — Create the product.
+   ```bash
+   curl -sS -X POST "$BASE_URL/api/products" \
+     -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+     -d "{\"sku\":\"$RUN-DESK\",\"name\":\"Standing desk $RUN\",\"price\":310.00,\"categoryId\":\"$CATEGORY_ID\"}" \
+     -o "$OUT/P06.1.json" -w '%{http_code}\n'
+   DESK_ID=$(jq -r '.id' "$OUT/P06.1.json")
+   ```
    **Expect:** `201`.   **Capture:** `DESK_ID` = `id`
 2. **UI-web** — Open `/admin/products/<DESK_ID>`, press *Edit* [Product.Edit], set the price to `289.00` and press *Save* [ProductForm.Save].
    **Expect:** The detail page shows `€289.00`.
-3. **DB** — The product row, in the form of P01 step 2 selecting `price`.
+3. **DB** — The product row.
+   ```bash
+   psql "$DB_URL" -v ON_ERROR_STOP=1 -At -v id="$DESK_ID" <<'SQL'
+   SELECT price FROM catalog.products WHERE id = :'id';
+   SQL
+   ```
    **Expect:** `289.00`.
-4. **API** — Read the product back in the form of J01 step 5, saving the body as `P06.4.json`.
+4. **API** — Read the product back.
+   ```bash
+   curl -sS "$BASE_URL/api/products/$DESK_ID" -H "Authorization: Bearer $TOKEN" \
+     -o "$OUT/P06.4.json" -w '%{http_code}\n'
+   ```
    **Expect:** `200`; `price` is `289.00`, `name` is `Standing desk <RUN>`.
 5. **UI-app** — Open *Shop → QA Lighting* and pull to refresh until the price changes, within `LIST_BUDGET`.
    **Expect:** *Standing desk `<RUN>`* at `€289.00`.
 
 ### P07 — A product deleted through the API is gone everywhere, and its record is kept (P1 · data)
-**Carries out:** TC-PROD-005   **Uses:** PRE-2, F-1, S-6
+**Carries out:** TC-PROD-005   **Uses:** PRE-2, F-1, S-8
 **Why:** a deleted product a shopper can still open can still be ordered.
 
-1. **API** — Create `<RUN>-RUG` (*Wool rug `<RUN>`*, 120.00) in the form of P01 step 1.
+1. **API** — Create the product.
+   ```bash
+   curl -sS -X POST "$BASE_URL/api/products" \
+     -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+     -d "{\"sku\":\"$RUN-RUG\",\"name\":\"Wool rug $RUN\",\"price\":120.00,\"categoryId\":\"$CATEGORY_ID\"}" \
+     -o "$OUT/P07.1.json" -w '%{http_code}\n'
+   RUG_ID=$(jq -r '.id' "$OUT/P07.1.json")
+   ```
    **Expect:** `201`.   **Capture:** `RUG_ID` = `id`
 2. **API** — Delete it.
    ```bash
@@ -314,9 +403,13 @@ Legend: **J** journeys · **P** product operations · **R** rules · **T** time 
    SQL
    ```
    **Expect:** `1`.
-4. **API** — Read it back in the form of J01 step 5, saving the body as `P07.4.json`.
+4. **API** — Read it back.
+   ```bash
+   curl -sS "$BASE_URL/api/products/$RUG_ID" -H "Authorization: Bearer $TOKEN" \
+     -o "$OUT/P07.4.json" -w '%{http_code}\n'
+   ```
    **Expect:** `404`; the error code is `product-not-found`.
-5. **UI-web** — On *Products*, search for `<RUN>-RUG`.
+5. **UI-web** — On *Products* (`/admin/products`), search for `<RUN>-RUG` [Products.Search].
    **Expect:** *No products found*.
 6. **UI-app** — Open *Shop → QA Lighting* and pull to refresh until the product is gone, within `LIST_BUDGET`.
    **Expect:** No *Wool rug `<RUN>`* in the list.
@@ -329,15 +422,23 @@ Legend: **J** journeys · **P** product operations · **R** rules · **T** time 
 | `AGED_IN_ID` | 5 days − 1 hour | 119 h < 120 h | `true` |
 | `AGED_OUT_ID` | 5 days | 120 h is not < 120 h | `false` |
 
-1. **API** — Read `AGED_IN_ID` in the form of J01 step 5, saving the body as `T01.1.json`.
+1. **API** — Read the product one hour short of 5 days old.
+   ```bash
+   curl -sS "$BASE_URL/api/products/$AGED_IN_ID" -H "Authorization: Bearer $TOKEN" \
+     -o "$OUT/T01.1.json" -w '%{http_code}\n'
+   ```
    **Expect:** `200`; `isNew` is `true`.
-2. **API** — Read `AGED_OUT_ID` the same way, saving the body as `T01.2.json`.
+2. **API** — Read the product exactly 5 days old.
+   ```bash
+   curl -sS "$BASE_URL/api/products/$AGED_OUT_ID" -H "Authorization: Bearer $TOKEN" \
+     -o "$OUT/T01.2.json" -w '%{http_code}\n'
+   ```
    **Expect:** `200`; `isNew` is `false`.
 
 ### D01 — A product with no category is listed under Uncategorised (P2 · data)
-**Carries out:** TC-PROD-008   **Uses:** PRE-2, R-3, S-6
+**Carries out:** TC-PROD-008   **Uses:** PRE-2, R-3, S-8
 
-1. **UI-web** — On *Products*, choose the category filter *Uncategorised* [Products.CategoryFilter] and search for `<RUN>-LEGACY`.
+1. **UI-web** — On *Products* (`/admin/products`), choose the category filter *Uncategorised* [Products.CategoryFilter] and search for `<RUN>-LEGACY`.
    **Expect:** One row: *Reading lamp `<RUN>`*, `€29.00`, *Active*.
 2. **UI-web** — Open the row.
    **Expect:** The detail page shows category *Uncategorised* and no *New* badge.
@@ -346,16 +447,40 @@ Legend: **J** journeys · **P** product operations · **R** rules · **T** time 
 
 ## 9. Cleanup — always runs
 
-- **C-1** **API** — `DELETE /api/products/{id}` for every product id captured except `RUG_ID` (deleted by P07), newest first. **Expect:** `204` each.
-- **C-2** **DB** — Remove the run's product rows, which also empties fixture F-1. *Why not the API: its delete keeps the record.* Guard:
+- **C-1** **API** — Delete every product the run still holds, newest first (P07 deleted `RUG_ID`).
+  ```bash
+  for id in "$DESK_ID" "$CHAIR_ID" "$LAMP_ID" "$LEGACY_ID" "$AGED_OUT_ID" "$AGED_IN_ID" "$STOOL_ID" "$SHELF_ID"; do
+    curl -sS -X DELETE "$BASE_URL/api/products/$id" -H "Authorization: Bearer $TOKEN" \
+      -o /dev/null -w "$id %{http_code}\n"
+  done | tee "$OUT/C-1.txt"
+  ```
+  **Expect:** eight lines, each ending `204`.
+- **C-2** **DB** — Guard: the run's product rows. *Why not the API: its delete keeps the record.*
   ```bash
   psql "$DB_URL" -v ON_ERROR_STOP=1 -At -v run="$RUN" <<'SQL'
   SELECT count(*) FROM catalog.products WHERE sku LIKE :'run' || '-%';
   SQL
   ```
-  **Expect:** as many rows as product ids the run captured. Then the same `WHERE` in a `DELETE`, expecting `DELETE` with that count.
-- **C-3** Search for `<RUN>` on *Products*, in the app's *Shop*, and in `catalog.products`. **Expect:** nothing on any of the three.
-- **C-4** **DB** — The baseline.
+  **Expect:** `9`.
+- **C-3** **DB** — Remove them, which also empties fixture F-1.
+  ```bash
+  psql "$DB_URL" -v ON_ERROR_STOP=1 -v run="$RUN" <<'SQL'
+  DELETE FROM catalog.products WHERE sku LIKE :'run' || '-%';
+  SQL
+  ```
+  **Expect:** `DELETE 9`.
+- **C-4** **DB** — Verify: nothing of the run is left.
+  ```bash
+  psql "$DB_URL" -v ON_ERROR_STOP=1 -At -v run="$RUN" <<'SQL'
+  SELECT count(*) FROM catalog.products WHERE sku LIKE :'run' || '-%';
+  SQL
+  ```
+  **Expect:** `0`.
+- **C-5** **UI-web** — On *Products* (`/admin/products`), search for `<RUN>` [Products.Search].
+  **Expect:** *No products found*.
+- **C-6** **UI-app** — Open *Shop → QA Lighting* and pull to refresh until no product of the run is listed, within `LIST_BUDGET`.
+  **Expect:** No product whose name holds `<RUN>`.
+- **C-7** **DB** — The baseline.
   ```bash
   psql "$DB_URL" -At -c "SELECT count(*) FROM catalog.products;"
   ```
@@ -393,3 +518,63 @@ Not needed: no test depends on a time window, a calendar day or a shared switch.
 - **OQ-2** The suite says where the web admin lists a product with no category, and nothing about the shopper app. D01 step 3 records what the app does.
 - **A-1** The app has no test ids on its list rows (`apps/shopper/app/shop/[category].tsx:31`), so UI-app steps find a product by its name.
 ````
+
+## The same steps with a .http tool file
+
+Where the lookup finds the project's own `.http` files, the runbook's API steps name a request and the request sits in a file. Below is what changes when `services/catalogue/requests/` holds JetBrains-dialect files and `ijhttp` is on `PATH`. The UI and DB steps, the Expect lines and the Capture names stay as above.
+
+The header and §1:
+
+````markdown
+**API calls as:** `.http`, JetBrains dialect, sent by `ijhttp` (detected `services/catalogue/requests/products.http`)
+
+| Variable | Meaning | Set by |
+|---|---|---|
+| `BASE_URL` / `baseUrl` | The API | `services/catalogue/requests/http-client.env.json`, environment `staging` |
+| `TOKEN` / `token` | The admin bearer token | S-2, passed with `-P` |
+| `RUN` / `run`, `OUT` / `out` | The run marker and the evidence folder, `out` absolute | S-1, passed with `-V` |
+| `CATEGORY_ID` / `categoryId`, `DESK_ID` / `deskId` | Captured ids | the step that captures each, passed with `-V` |
+
+**Tools:** none. Every step is one command. The requests are in `004-product-catalogue-runbook-http/`, one file per API step.
+````
+
+Two steps of P06, the create that captures and the read-back that uses the capture:
+
+````markdown
+1. **API** — Create the product: request **P06.1**.
+   ```bash
+   ijhttp --env-file services/catalogue/requests/http-client.env.json --env staging -L HEADERS \
+     -V run="$RUN" -V out="$OUT" -V categoryId="$CATEGORY_ID" -P token="$TOKEN" \
+     docs/runbooks/004-product-catalogue-runbook-http/P06.1.http
+   DESK_ID=$(jq -r '.id' "$OUT/P06.1.json")
+   ```
+   **Expect:** the status line `HTTP/1.1 201 Created`.   **Capture:** `DESK_ID` = `id`
+4. **API** — Read the product back: request **P06.4**.
+   ```bash
+   ijhttp --env-file services/catalogue/requests/http-client.env.json --env staging -L HEADERS \
+     -V out="$OUT" -V deskId="$DESK_ID" -P token="$TOKEN" \
+     docs/runbooks/004-product-catalogue-runbook-http/P06.4.http
+   ```
+   **Expect:** the status line `HTTP/1.1 200 OK`; in `P06.4.json`, `price` is `289.00` and `name` is `Standing desk <RUN>`.
+````
+
+Their files, `P06.1.http` and `P06.4.http`:
+
+```http
+### P06.1 Create the product
+POST {{baseUrl}}/api/products
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "sku": "{{run}}-DESK", "name": "Standing desk {{run}}", "price": 310.00, "categoryId": "{{categoryId}}" }
+
+>>! {{out}}/P06.1.json
+```
+
+```http
+### P06.4 Read the product back
+GET {{baseUrl}}/api/products/{{deskId}}
+Authorization: Bearer {{token}}
+
+>>! {{out}}/P06.4.json
+```

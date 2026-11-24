@@ -54,7 +54,8 @@ Write the form the lookup detected. In every form the request names the test and
 | | JetBrains HTTP Client | VS Code REST Client |
 |---|---|---|
 | Name a request | `### P01.1 Create the product` | `# @name p01_1` above the request |
-| Capture | `> {% client.global.set("productId", response.body.id); %}` | `@productId = {{p01_1.response.body.$.id}}` |
+| Capture, sent from the editor | `> {% client.global.set("productId", response.body.id); %}` | `@productId = {{p01_1.response.body.$.id}}` |
+| Capture, sent by the command line | read from the saved response and passed on with `-V` (below) | none |
 | Environment | `http-client.env.json`, `http-client.private.env.json` for secrets | `rest-client.environmentVariables` in settings |
 | Command line | `ijhttp --env-file http-client.env.json --env staging <file>.http` | none: a person sends it from the editor |
 
@@ -66,8 +67,17 @@ Content-Type: application/json
 
 { "sku": "{{run}}-LAMP", "name": "Desk lamp {{run}}", "price": 39.90, "categoryId": "{{categoryId}}" }
 
-> {% client.global.set("productId", response.body.id); %}
+>>! {{out}}/P01.1.json
 ```
+
+**Sent by `ijhttp`, a capture travels through the shell** (checked on the 2025.3 command line): a file is always run whole, and a value set with `client.global.set` is gone when the next invocation starts.
+
+- Each file saves its response with `>>! {{out}}/<step>.json`. `out` is the evidence folder as an absolute path: a relative one is read from the `.http` file's folder.
+- The step reads the captured value from that file into its variable (`jq`), as a `curl` step does.
+- Every later file receives it as `-V productId="$PRODUCT_ID"`, and a token or any other secret as `-P token="$TOKEN"`, which the output masks.
+- `-L HEADERS` prints the status line (`HTTP/1.1 201 Created`); the default output holds no status. The exit code is `1` when a request could not be sent.
+
+The helper script wraps this: it sends the one file a step names with the variables of `vars.env` and prints the status. A file a person sends from the editor captures by the dialect's own means.
 
 **A Postman collection** (`<NNN>-<slug>-runbook.postman_collection.json`): one folder per test, one request per API step, named `P01.1 Create the product`. A capture is one line in the request's post-response script, `pm.environment.set("productId", pm.response.json().id)`. Run a test with `newman run <collection> -e <environment> --folder "P01"`.
 
@@ -76,11 +86,13 @@ Content-Type: application/json
 In a tool file the step in the runbook reads `1. **API** — Create the product: request **P01.1**.` and keeps its `Expect` and `Capture` lines. The expected value stays in the runbook, where the tester reads it.
 
 - **One request per API step**, in the runbook's order, even when two steps send the same call with different data.
-- **Every Capture the runbook names is implemented in the file**, by the tool's own means.
+- **Every Capture the runbook names is implemented**, in the file by the tool's own means, or for `ijhttp` by the step's read of the saved response.
 - **The project's environment file is used where it lies.** §1 names it and how it is passed (`--env-file api/requests/http-client.env.json`), and lists each variable it lacks. Those are passed on the command line from the shell's variables, so no secret is written to a file.
 - **The response is kept by the tool's own means** (a `>>!` redirect, a `newman` reporter). Where it has none, the run record holds the actual values.
 
 **A read-back** is its own step: `GET` the record, and expect each field the case asserts. A refusal is three steps: the refused request with its status and error code, a read-back, and a DB read, both showing nothing changed.
+
+**A refused create** (a request or a form submission) still carries `RUN`, in a field the refusal does not turn on. Its DB read selects the id of any row holding that value and expects no row. An id it does return is a record the refusal created against its Expect: the step captures it (`STRAY_ID`), the test fails there, and Cleanup removes it with the other captured ids. Where the refused field is the only one that could carry the marker, the read selects the rows the test's user created since the request was sent.
 
 **A later outcome** is polled: repeat the read every second until the value appears or `ASYNC_BUDGET` passes, and expect the value. A poll one step needs is a short loop in that step.
 
@@ -127,7 +139,7 @@ A Device step's Expect is the state reached (`Shopper is not in front`). The out
    **Expect:** `Active|39.90|t`.
 ````
 
-Read what the suite's outcome means for the rows: the state, the amounts, the history or transition row, the ledger entries. A row that must not exist is a `count(*)` expecting `0`.
+Read what the suite's outcome means for the rows: the state, the amounts, the history or transition row, the ledger entries. A row that must not exist is a `count(*)` expecting `0`; after a refused create it is the select of "A refused create", above.
 
 ### The DB-write rules
 
@@ -278,7 +290,7 @@ A step is one command where one command can do it. A helper script is written on
 
 **Cleanup** steps are `C-1`…, in the reverse of creation:
 
-1. the records the tests made, by captured id through the API where an endpoint exists, else by a guarded DB statement keyed on the id or on `RUN`;
+1. the records the tests made, a `STRAY_ID` a failed refusal captured among them, by captured id through the API where an endpoint exists, else by a guarded DB statement keyed on the id or on `RUN`;
 2. the recipes' rows, then the Setup's;
 3. every `shared` step reversed, by the values written down when it was changed;
 4. each fixture restored to its required state;

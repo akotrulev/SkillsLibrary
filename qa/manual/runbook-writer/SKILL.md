@@ -31,7 +31,7 @@ A step names one actor. An actor is used only where the feature has it.
 | **UI-web** · **UI-app** | The screens, through the Playwright or Appium MCP | Every operation a screen offers | Never | What a person sees |
 | **DB** | Direct SQL | Never | Only what no API, Admin, Sim or Job step can produce | The rows the action should have changed, after every action |
 | **Sim** | A simulator or test double for a third party | The third party's answer: fill, reject, expire | The third party's state | What the third party received |
-| **Job** | A scheduled job run on demand | Never | Time-driven work that would otherwise wait for its schedule | — |
+| **Job** | A scheduled job run on demand | Only a case that is the scheduled run itself | Time-driven work that would otherwise wait for its schedule | — |
 | **Device** | Device or browser state, through the same MCP | Background, force-stop, offline, a double tap, the notification shade | — | — |
 | **Doc** | A generated document: a PDF, an export | Never | — | Its rows and figures |
 | **Notify** | A push, an email, an in-app message | Never | — | That it arrived, what it says, where it leads |
@@ -49,7 +49,7 @@ A test has three parts. **Arrange** produces its data. **Act** is the one operat
 | **Temporal, or data only time or history produces** | The test its layer calls for, arranged by a data recipe or a Job step | As its layer |
 | **Data, interaction, concurrency** | One driven by the API; Sim, Job and Device steps where the case needs a third party's answer, a schedule or a device state | A read-back, the other feature's API or screen within the named budget, the DB rows, a Doc or Notify step where the case names one |
 
-The layer is the suite's group heading. In a suite without groups it is read from the case's technique: use-case → journey; decision table, calculation, state transition, role × action → rule; equivalence or boundary values on a field → field; a boundary on a time threshold, a schedule → temporal; CRUD, def-use, chains, concurrency → data.
+The layer is the suite's group heading. A suite without groups, a journey no screen carries (a job and an email), or a case asserting a count or an order across a list → `references/binding.md`.
 
 ### Every operation, on every actor that offers it
 
@@ -95,7 +95,7 @@ Whatever the layers give, each **create, read, update and delete** of the featur
 ## Data
 
 - **Per-run data is the default.** Every record a run creates carries the run marker `RUN` (`rb-<yyyymmdd>-<n>`, `n` the day's run number, set by the first Setup step) in a field a person can search. A name the suite gives gains the marker (`Buy stamps <RUN>`). A field whose exact value is the test carries none: that record is found by its captured id.
-- **A fixture is long-lived data the runbook reuses**: an account, a funded record, reference data. §4 names each with the state every run needs it in and the Cleanup step that restores it. On a fixture other people also use, a test asserts only on records carrying the run marker, never on a count or an order across the whole fixture.
+- **A fixture is long-lived data the runbook reuses**: an account, a funded record, reference data. §4 names each with the state every run needs it in and the Cleanup step that restores it. On a fixture other people also use, a test asserts only on records carrying the run marker, never on a count or an order across the whole fixture; a case that asserts one runs on data only the run owns, marked `exclusive`.
 - **The leave-alone list** names data on the environment that looks like the runbook's and is not: no step touches it.
 - **A permanent change** is one no step can reverse (an applied corporate action, a sent document). It is listed in §4 with why the test needs it and what isolated data it is done on, and a run reports it at the end.
 - **A baseline** (a balance, a count) is noted by a precondition and reconciled by the last Cleanup step, every difference explained.
@@ -182,6 +182,7 @@ A full runbook is in [`references/example-product-catalogue.md`](references/exam
 | A step with two acceptable values, or with "works", "correct" or "as expected" in its Expect | major |
 | A step with neither `Expect` nor `Observe`, or an observe step citing no open question | major |
 | A state-changing action with no DB read after it, where the DB is in scope | major |
+| A count, a position or an order asserted across a fixture §4 does not mark `exclusive` | major |
 | A DB write without its `Why not the API` line, its guard or its verify | major |
 | A record or shared change that Cleanup neither removes nor reverses, and §4 does not list as permanent | major |
 | An endpoint, route, label, test id or column with no stamp, or stamped `assumed` and missing from §14 | major |
@@ -191,4 +192,4 @@ A full runbook is in [`references/example-product-catalogue.md`](references/exam
 
 ## Changing a runbook
 
-A changed case, endpoint, screen or column changes the tests that use it and bumps **Version**. A runbook rewritten for another environment or build gains §0, and the earlier version is kept beside it as `<NNN>-<slug>-runbook-v<n>.md`. A run edits §10 and §11 only; a defect in the runbook found during a run is listed in the run record and corrected after it.
+A changed case, endpoint, screen or column changes the tests that use it and bumps **Version**. A runbook rewritten for another environment or build gains §0, and the earlier version is kept beside it as `<NNN>-<slug>-runbook-v<n>.md`. A run edits §10 and §11 only (`references/execution.md`).
