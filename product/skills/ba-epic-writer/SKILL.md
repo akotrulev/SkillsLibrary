@@ -47,8 +47,12 @@ are written in its spec, not here.
    asked for, unless it is the foundation feature.
 6. **Ids are never renumbered.** In EXTEND mode new epics take the next free `E` id and new features
    the next free `F` id; an existing epic gains a feature by adding its id to the row.
-7. **Hand the feature list to `solution-planner`**: id, title and the epic it serves. It writes each
-   one's task block in §6, and `epic-map` places them in §5.
+7. **Number the features in the suggested order of implementation**, across all epics: the foundation
+   feature first, where there is one; a feature below everything it needs from another; and among
+   features free at the same point, the one that gives a person something usable soonest, the epic
+   the decision-maker ranks highest first. Ask the ranking in the interview when §2 does not give it.
+8. **Hand the feature list to `solution-planner`** in that order: id, title and the epic it serves. It
+   writes each one's task block in §6, and `epic-map` places them in §5.
 
 ## Output format
 

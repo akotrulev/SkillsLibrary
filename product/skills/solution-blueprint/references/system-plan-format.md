@@ -6,16 +6,18 @@
 - 2. The header
 - 3. The sections, in order
 - 4. The feature task block
-- 5. ## Feature prompts — paste one per session
+- 5. ## Prompts — one per feature
 - 6. Living text and filing
 - 7. Never in a system plan
 - 8. The close-out every feature runs
 - 9. A filled example
 
 The shape of the one file `/product:plan-system` writes for a whole system, in a new or an existing
-repo: the vision, a thin technical skeleton, the epics and a flat list of features, each with a prompt
-that starts with `/product:plan-feature`. Each feature is then designed and planned in a session of its
-own, and that session writes its result back here.
+repo: the vision, a thin technical skeleton, the epics and a flat list of features in the suggested
+order of implementation, each with a prompt that runs `/product:plan-feature`. Plan Queue reads the
+file as it reads any plan and runs one feature at a time, top to bottom. Each feature's session
+interviews the user until no question about the feature is open, writes the feature's implementation
+plan, and writes its result back here.
 
 It is modelled on the implementation plan format,
 [`plan-format.md`](../../writing-plans/references/plan-format.md). The same rules hold where this file
@@ -27,11 +29,12 @@ filing into `docs/plans/implemented/`. **What differs is the point of this file:
 |---|---|---|
 | Unit of work | A task, one stack, one agent, one session | A feature, one interview session, any number of stacks |
 | Task block | `Stack`, `Agent`, `Budget`, `Gate` | `Epic`, `Command`, `Deliverable`, `Depends on`, `Brief`; no `Stack`, `Agent`, `Budget` or `Gate` |
-| Prompts heading | `## Prompts — one per task` | `## Feature prompts — paste one per session` |
-| A prompt's first line | `Depends on: <ids>` | The slash command `/product:plan-feature F<n> of <path> — <title>` |
-| Queued by Plan Queue | Yes | No: each prompt opens an interview the user answers |
+| Prompts heading | `## Prompts — one per task` | `## Prompts — one per feature` |
+| A prompt's heading | `### <id> — <title> (<agent>, <stack>)` | `### F<n> — <title>`, no agent: the session runs the skill itself |
+| A prompt's first lines | `Depends on: <ids>`, then `Agent: <agent> · Stack: <stack>` | `Depends on: <id>`, then `Skill: /product:plan-feature F<n> of <path> — <title>` |
+| Queued by Plan Queue | Yes, in parallel where `Depends on:` allows | Yes, one feature at a time: each task is an interview the user answers in its session |
 | Close-out section | `## Close-out — every task` | `## Close-out — every feature` |
-| Done when | Every task's work is committed | Every feature has a committed spec and implementation plan |
+| Done when | Every task's work is committed | Every feature has a committed spec and an implementation plan with no open question |
 
 Four skills write its numbered sections, and `solution-planner` assembles them:
 
@@ -48,8 +51,8 @@ Four skills write its numbered sections, and `solution-planner` assembles them:
 
 **`docs/plans/<NNN>-<system>-system.md`** under the target project's root, never the skills-library
 checkout and never a global directory. `<system>` is a short kebab-case noun phrase (`workshop-booking`).
-The `-system` suffix is what the rule file `system-plans.md` keys on, and what tells a reader the file
-is not queued.
+The `-system` suffix is what the rule file `system-plans.md` keys on, and what tells a reader that the
+file's tasks are interviews, not builds.
 
 `NNN` is zero-padded and takes the high-water mark across `docs/plans/` **and**
 `docs/plans/implemented/`, files and folders alike, as any plan does. A number is never reused.
@@ -65,7 +68,7 @@ them. There is no initiative folder.
 
 **Goal:** <what the system is for and who it serves, in one to three sentences.>
 
-**Status:** <features specced (with their plan numbers), features on hold, the next feature to paste,
+**Status:** <features specced (with their plan numbers), features on hold, the next feature to run,
 and what is unverified.>
 
 **Mode:** NEW | EXISTING | EXTEND — <what settled it>
@@ -88,9 +91,9 @@ and what is unverified.>
 | `## 4. Epics` | `E1…En`: a goal sentence each, a plain-English line, and the features that serve it | `ba-epic-writer` |
 | `## 5. Features side by side` | `\| Feature \| Epic \| Areas and trees \| Depends on \| Refined beside \| Built beside \|` | `epic-map` |
 | `## Decisions` · `## Answered questions (YYYY-MM-DD)` · `## Open questions` | As in `plan-format.md` §2: `D1…Dn` with what each costs, `O1…On` one line each, and the open-questions table `\| # \| Question \| Options \| Blocks \| Owner \|` | the interview |
-| `## 6. Features` | One task block per feature, flat, `F1…Fn` (§4 below) | — |
+| `## 6. Features` | One task block per feature, flat, `F1…Fn`, in the suggested order of implementation (§4 below) | — |
 | `## Close-out — every feature` | The write-back duties every feature session runs, copied verbatim from §8 below | this file |
-| `## Feature prompts — paste one per session` | The feature table, then one prompt block per feature not yet specced (§5 below) | — |
+| `## Prompts — one per feature` | The feature table, then one prompt block per feature not yet specced (§5 below) | — |
 
 - **§1 grounds everything.** Every feature traces to a row of it, and a row with a gap is covered by
   at least one feature.
@@ -107,17 +110,27 @@ and what is unverified.>
 ### F3 — Booking cancellation
 
 **Epic:** E2 · **Command:** `/product:plan-feature`
-**Deliverable:** an approved spec in `docs/specs/` and its implementation plan in `docs/plans/`, both committed.
+**Deliverable:** an approved spec in `docs/specs/` and its implementation plan in `docs/plans/`, no question left open, both committed.
 **Depends on:** F1 (the member entity and auth).
 **Brief:** <one paragraph: what it does and for whom, what is in and out, and the skeleton decisions
 (§3) it builds on.>
 ````
 
-- **Ids are `F1…Fn`, in the order the features should be specced**, never renumbered. A feature the
-  interview splits in two keeps its id for the first half; the second half gets the next free `F` id.
-  In EXTEND mode new features take the next free ids after the highest one in the file.
+- **The features are listed in the suggested order of implementation**, and that is the order the
+  queue runs them in: each feature is specced, then built, before the one below it needs it. The order is decided
+  by three tests, in turn: the foundation feature first; a feature below everything it depends on;
+  and among features free at the same point, the one that gives a person something usable soonest,
+  the epic the decision-maker ranks highest first. §6's blocks, the prompt table and the prompt blocks
+  all hold this one order.
+- **Ids are `F1…Fn`, assigned in that order when the plan is written**, never renumbered. A feature
+  the interview splits in two keeps its id for the first half; the second half gets the next free `F`
+  id. In EXTEND mode new features take the next free ids after the highest one in the file. A block
+  added later is placed where the feature is to be built, whatever its id.
 - **No `Stack`, `Agent`, `Budget` or `Gate` line.** The session is the user's interview, and the
   implementation plan it produces carries those lines on every task it holds.
+- **The `**Deliverable:**` is a plan ready to implement.** The session asks until every question about
+  the feature is answered, the rows of `## Open questions` that block it included, and writes the
+  implementation plan only then. A feature the user cannot finish answering goes on hold with no plan.
 - **`**Epic:**`** names the one epic in §4 the feature serves. The foundation feature serves none and
   says `**Epic:** — (foundation)`.
 - **`**Depends on:**`** points backwards only and names what it waits on in a few words, the same edge
@@ -133,11 +146,13 @@ and what is unverified.>
   `**As built (YYYY-MM-DD):** spec <path>, plan <path>` when it finishes, or
   `**On hold (YYYY-MM-DD):** <reason> — spec draft <path>` when the user puts it on hold (§8).
 
-## 5. `## Feature prompts — paste one per session`
+## 5. `## Prompts — one per feature`
 
-The last section. It opens with a short preamble: paste one block per fresh session, in the table's
-order where a dependency says so; a pasted block runs the feature's interview, spec and plan; nothing
-here is queued. Then the feature table:
+The last section, and the one Plan Queue reads. It scans a plan for a `## Prompts` heading and takes
+one task per `###` heading inside it, so the shape below is fixed. It opens with a short preamble: the
+queue runs one block at a time, top to bottom, which is the suggested order of implementation; a block
+runs the feature's interview, spec and plan; a block pasted into a fresh session does the same. Then
+the feature table, in the same order:
 
 ```markdown
 | # | Feature | Epic | Depends on | Refined beside | State |
@@ -150,28 +165,42 @@ here is queued. Then the feature table:
 `State` is `live`, `specced (plan <NNN>)` or `on hold`. Then one line saying which prompts are gone,
 then `---`, then one block per feature that is live or on hold.
 
-**The heading is `### F<n> — <title> (/product:plan-feature)`.** The body follows after one blank line,
-fenced in four backticks, and **its first line is the slash command**, so pasting the block into a fresh
-session runs it:
+**The heading is `### F<n> — <title>`**, with no trailing parenthetical: the queue reads one as the
+agent to start, and a feature session runs as itself. The body follows after one blank line, fenced in
+four backticks:
 
 ````markdown
-/product:plan-feature F3 of docs/plans/004-workshop-booking-system.md — Booking cancellation
+Depends on: F2
+Skill: /product:plan-feature F3 of docs/plans/004-workshop-booking-system.md — Booking cancellation
+
+Run the `product:plan-feature` skill for F3 of this system plan: load it with the Skill tool and follow
+it in SYSTEM mode. This task is an interview. Ask every round with AskUserQuestion and wait for the
+answers; never settle a question for the user, whatever a queue's note about making the call says.
 
 Members cancel their own bookings and staff cancel anyone's. In: cancellation, the refund rule, the
 notification. Out: waiting lists (deferred). Builds on §3's Member and Booking entities and the Auth0
 roles.
 
-Read the system plan's §2, §3, §5, D1–D<n> and task F3 first. Close out per its
-"Close-out — every feature" when the plan is written, or when the user puts F3 on hold.
+Read the system plan's §2, §3, §5, D1–D<n>, the open questions that block F3 and task F3 first. Close
+out per its "Close-out — every feature" when the plan is written, or when the user puts F3 on hold.
 ````
 
-- **Line 1 is the command, the id, the path and the title**, and nothing else: a slash command runs
-  only at the start of a message, and `/product:plan-feature` reads the id and the path from it.
+- **Line 1 is `Depends on:` and one id: the block directly above**, or `Depends on: none` for the first
+  block the plan was written with. It is the queue's order, not the feature's dependencies: every block
+  waits on the one above it, so the interviews run one at a time, in the order of implementation. What
+  a feature really waits on is its task block's `**Depends on:**` and §5. A block whose line names a
+  feature already specced starts at once: the queue ignores an id the plan no longer has.
+- **Line 2 is `Skill:`, the command, the id, the path and the title**, and nothing else.
+  `/product:plan-feature` reads the id and the path from it.
+- **Then the run paragraph, word for word**, with the feature's id in it. A queued session is told to
+  make the call itself rather than ask; this paragraph is what makes the interview the task.
 - **Then the brief**, copied from the task block, not paraphrased.
 - **Then the reading line**, citing sections and decision ids, never the whole plan, and the close-out
   line.
-- **It is not queued.** The heading is not `## Prompts`, which is what Plan Queue scans for, and no
-  block starts with `Depends on:`. Dependencies live in the task block and the table.
+- **Nothing else is a `###` inside `## Prompts`**, and nothing sits between a heading and its fence:
+  the queue would list the first as a task and lose the second.
+- **A feature on hold stops the queue at its block.** Mark it skipped in the queue to let the features
+  below it run, and run it again when its question is answered.
 
 ## 6. Living text and filing
 
@@ -184,7 +213,11 @@ Read the system plan's §2, §3, §5, D1–D<n> and task F3 first. Close out per
 - **A feature's prompt is deleted once its spec and plan are committed**, in a follow-up commit
   `docs: delete F<n>'s prompt (<system plan>)`. The live prompt set is the system's progress: what is
   left to spec is exactly what is still written down.
-- **A feature on hold keeps its prompt.** Pasting it again resumes from the spec draft.
+- **A feature on hold keeps its prompt.** Running it again resumes from the spec draft.
+- **Where Plan Queue gives the plan a worktree and a branch**, each feature's spec and implementation
+  plan are committed there, and reach the branch the system plan was cut from when the queue merges
+  it: after the last feature is specced or skipped. The implementation plans are queued from then on,
+  in the features' order. The system plan itself has to be committed before the queue can run it.
 - **Filing.** The system plan moves to `docs/plans/implemented/`, same name and number, when its last
   prompt block is deleted. A plan with a feature on hold still has a block, so it stays in
   `docs/plans/`: moving it would hide the wait. A moved system plan is never edited; a system that
@@ -196,12 +229,19 @@ Read the system plan's §2, §3, §5, D1–D<n> and task F3 first. Close out per
   ("the API", "the screens") rather than something a person can do
 - A per-feature design at system level: a table's columns, an endpoint list, a screen list, a key
   flow, an integration's retry policy. Those are the feature spec's
-- A prompt block whose first line is not the slash command, or a `## Prompts` heading
+- A prompts heading other than `## Prompts — one per feature`, a prompt heading with a trailing
+  parenthetical, or a block whose first line is not `Depends on:` and whose second is not the `Skill:`
+  line
+- A prompt's `Depends on:` line naming anything but the block directly above it, or `none`
 - A feature with no epic and no `— (foundation)`, or an epic no feature serves
-- A forward-pointing `Depends on`, or a renumbered `F` or `E` id
+- A forward-pointing `Depends on`, a feature listed above one it depends on, or a renumbered `F` or
+  `E` id
+- A feature marked `specced` whose implementation plan holds an open question, or a row of
+  `## Open questions` still naming a specced feature under `Blocks`
 - A capability with a gap in §1 that no feature covers
 - `TBD`, `TODO` or "decide later" without an owner and an open question
 - A `**Status:**` line that does not say which features are specced, which are on hold and what is next
+- A system plan left uncommitted: Plan Queue runs only what is committed
 
 ## 8. The close-out every feature runs
 
@@ -215,33 +255,44 @@ from here:
 The session that `/product:plan-feature` runs for one feature does this before it stops, in this file.
 Another feature session may be running beside you: re-read this file immediately before these edits,
 and touch only your feature's task block and prompt block, the briefs and prompt blocks of later
-features, `## Decisions`, §3 lines a decision changes, `**Status:**`, the prompt table and the line
-above the blocks.
+features, `## Decisions`, §3 lines a decision changes, the `## Open questions` rows that block your
+feature, `**Status:**`, the prompt table and the line above the blocks.
 
-**When the implementation plan is written and committed:**
+**When the implementation plan is written and committed.** It is written only when no question about
+your feature is open: every row of `## Open questions` naming it under `Blocks` was put to the user and
+answered, and the plan's own `## Open questions` is empty. A question the user cannot answer now puts
+the feature on hold instead.
 
 1. **As built** — append `**As built (YYYY-MM-DD):** spec <path>, plan <path>` to your feature's task
    block. Add any decision the spec made that changes §3, and append each one to `## Decisions` as a
-   dated `D<n>`, correcting the §3 line it changes and citing the `D<n>`. Never edit an earlier note.
+   dated `D<n>`, correcting the §3 line it changes and citing the `D<n>`. Move each `## Open questions`
+   row the interview answered to `## Answered questions` as `**O<n> — <question>: <answer>.**`, dated.
+   Never edit an earlier note.
 2. **Later features** — rewrite, in place, the brief and the prompt block of every later feature whose
    assumptions your spec changed. If the interview split your feature, give the second half the next
-   free `F` id, its own task block, its rows in §5 and in the prompt table, and its own prompt block.
+   free `F` id, its own task block, its rows in §5 and in the prompt table, and its own prompt block,
+   each placed where the feature is to be built in the order of implementation.
 3. **Status** — rewrite the header `**Status:**` line: the features specced and planned, the features
-   on hold, the next feature to paste. Set your row's `State` to `specced (plan <NNN>)`.
+   on hold, the next feature to run. Set your row's `State` to `specced (plan <NNN>)`.
 4. **Commit, then delete your prompt** — commit these edits with the spec and the plan, on the current
    branch, by path. Then delete your feature's prompt block and update the line above the blocks, in a
    follow-up commit `docs: delete F<n>'s prompt (<system plan>)`. If that leaves no block, rewrite
    `**Status:**` one last time and `git mv` this file into `docs/plans/implemented/`, same name, in the
-   same commit, adding its row to that folder's README where there is one.
+   same commit, adding its row to that folder's README where there is one. When a queue says other
+   tasks of this plan are running beside you, do not commit at all: make the deletion your last edit,
+   and the queue commits everything together.
 
 **When the user puts the feature on hold:**
 
 1. **Draft** — write the answers so far into the spec draft in `docs/specs/`, with `**Status:** on hold`
    and the open question that stopped it.
 2. **On hold** — append `**On hold (YYYY-MM-DD):** <reason> — spec draft <path>` to your feature's task
-   block, set your row's `State` to `on hold`, and rewrite `**Status:**`.
+   block, set your row's `State` to `on hold`, and rewrite `**Status:**`. A question still open goes
+   into `## Open questions` with your feature under `Blocks` and its owner.
 3. **Keep the prompt** — leave the prompt block as it is, and commit the draft and these edits
-   together. Pasting the prompt again resumes from the draft.
+   together. Running the prompt again resumes from the draft. When a queue runs this session, end
+   with the line `PLAN_QUEUE: BLOCKED F<n> on hold: <reason>`, so the queue stops at your block
+   instead of marking it done.
 ````
 
 The section is the same in every system plan; a system plan does not edit it.
@@ -400,7 +451,7 @@ changes identity provider is a new member.
 ### F1 — Foundation
 
 **Epic:** — (foundation) · **Command:** `/product:plan-feature`
-**Deliverable:** an approved spec in `docs/specs/` and its implementation plan in `docs/plans/`, both committed.
+**Deliverable:** an approved spec in `docs/specs/` and its implementation plan in `docs/plans/`, no question left open, both committed.
 **Depends on:** —
 **Brief:** The scaffold every feature builds on: the solution and module layout, config with startup
 validation, the Auth0 wiring on both sides, the telemetry base, CI, the app shell with its top nav,
@@ -412,7 +463,7 @@ Added D3 (Member keyed by the Auth0 `sub`, not an email).
 ### F2 — Booking a seat
 
 **Epic:** E1 · **Command:** `/product:plan-feature`
-**Deliverable:** an approved spec in `docs/specs/` and its implementation plan in `docs/plans/`, both committed.
+**Deliverable:** an approved spec in `docs/specs/` and its implementation plan in `docs/plans/`, no question left open, both committed.
 **Depends on:** F1 (the Member entity and auth).
 **Brief:** A member browses published future sessions and books one seat in a session with room; a
 full session says so. Staff see who is booked. In: the schedule, booking, my bookings. Out:
@@ -421,7 +472,7 @@ cancelling (F3), waiting lists (deferred). Builds on §3's Member, Session and B
 ### F3 — Booking cancellation
 
 **Epic:** E2 · **Command:** `/product:plan-feature`
-**Deliverable:** an approved spec in `docs/specs/` and its implementation plan in `docs/plans/`, both committed.
+**Deliverable:** an approved spec in `docs/specs/` and its implementation plan in `docs/plans/`, no question left open, both committed.
 **Depends on:** F1 (auth roles and the Booking entity).
 **Brief:** Members cancel their own bookings and staff cancel anyone's, and the seat is freed at once.
 In: cancellation, the late-cancellation rule, the member's notification. Out: waiting lists. Builds on
@@ -434,9 +485,10 @@ In: cancellation, the late-cancellation rule, the member's notification. Out: wa
 
 <the section in §8 of the format, copied verbatim>
 
-## Feature prompts — paste one per session
+## Prompts — one per feature
 
-Paste one block per fresh session. F2 is next; F3 waits for Q1. Nothing here is queued.
+Plan Queue runs one block at a time, top to bottom: the order of implementation. A block pasted into a
+fresh session runs the same way. F2 is next; F3 waits for Q1.
 
 | # | Feature | Epic | Depends on | Refined beside | State |
 |---|---|---|---|---|---|
@@ -448,29 +500,39 @@ F1's prompt is deleted.
 
 ---
 
-### F2 — Booking a seat (/product:plan-feature)
+### F2 — Booking a seat
 
 ````
-/product:plan-feature F2 of docs/plans/004-workshop-booking-system.md — Booking a seat
+Depends on: F1
+Skill: /product:plan-feature F2 of docs/plans/004-workshop-booking-system.md — Booking a seat
+
+Run the `product:plan-feature` skill for F2 of this system plan: load it with the Skill tool and follow
+it in SYSTEM mode. This task is an interview. Ask every round with AskUserQuestion and wait for the
+answers; never settle a question for the user, whatever a queue's note about making the call says.
 
 A member browses published future sessions and books one seat in a session with room; a full
 session says so. Staff see who is booked. In: the schedule, booking, my bookings. Out: cancelling
 (F3), waiting lists (deferred). Builds on §3's Member, Session and Booking entities and D1.
 
-Read the system plan's §2, §3, §5, D1–D3 and task F2 first. Close out per its
-"Close-out — every feature" when the plan is written, or when the user puts F2 on hold.
+Read the system plan's §2, §3, §5, D1–D3, the open questions that block F2 and task F2 first. Close
+out per its "Close-out — every feature" when the plan is written, or when the user puts F2 on hold.
 ````
 
-### F3 — Booking cancellation (/product:plan-feature)
+### F3 — Booking cancellation
 
 ````
-/product:plan-feature F3 of docs/plans/004-workshop-booking-system.md — Booking cancellation
+Depends on: F2
+Skill: /product:plan-feature F3 of docs/plans/004-workshop-booking-system.md — Booking cancellation
+
+Run the `product:plan-feature` skill for F3 of this system plan: load it with the Skill tool and follow
+it in SYSTEM mode. This task is an interview. Ask every round with AskUserQuestion and wait for the
+answers; never settle a question for the user, whatever a queue's note about making the call says.
 
 Members cancel their own bookings and staff cancel anyone's, and the seat is freed at once. In:
 cancellation, the late-cancellation rule, the member's notification. Out: waiting lists. Builds on
 §3's Booking entity and the member / staff roles.
 
-Read the system plan's §2, §3, §5, D1–D3 and task F3 first. Close out per its
-"Close-out — every feature" when the plan is written, or when the user puts F3 on hold.
+Read the system plan's §2, §3, §5, D1–D3, the open questions that block F3 and task F3 first. Close
+out per its "Close-out — every feature" when the plan is written, or when the user puts F3 on hold.
 ````
 `````

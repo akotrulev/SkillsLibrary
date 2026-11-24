@@ -26,9 +26,9 @@ per task. There is no companion file — no `NEXT-PROMPTS.md`, no `HANDOFF.md`. 
 **Path:** `docs/plans/NNN-<slug>.md` while the plan is live, `docs/plans/implemented/NNN-<slug>.md`
 once every task in it has landed (§8) — under the **target project's** root, never the skills-library
 checkout and never a global config directory. A system plan (`docs/plans/<NNN>-<system>-system.md`,
-written by `/product:plan-system`) is not this shape and is not queued: its format is
-`product/skills/solution-blueprint/references/system-plan-format.md`, and each of its features gets an
-implementation plan of this shape.
+written by `/product:plan-system`) is not this shape, though Plan Queue runs it too: its format is
+`product/skills/solution-blueprint/references/system-plan-format.md`, each of its tasks is one
+feature's `/product:plan-feature` interview, and each feature gets an implementation plan of this shape.
 
 **`NNN` is zero-padded, and its high-water mark spans both folders** — `docs/plans/` *and*
 `docs/plans/implemented/`, files and folders alike. List both before picking a number. A number is

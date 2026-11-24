@@ -57,7 +57,7 @@ Where a step needs the user's answer and nobody is there to give it (a queued pl
    - Plans: `git grep -l -e '^## Prompts' -e '^## Close-out — every task' -- '*.md'`.
    - Feature docs: the folder holding the `docs/features`-style documents, when the project keeps them somewhere else.
    - The KB: `git ls-files '*INDEX.md' | xargs grep -l '^# Business Model'`, plus any directory named `business-model`. A KB somewhere else (a monorepo package's `docs/`, a `documentation/` folder) gets its own globs, the same suffixes under its real prefix (for example `"services/billing/docs/business-model/**/*.md"`), added to each `business-model*.md` copy.
-   - System plans: `git grep -l '^## Feature prompts — paste one per session' -- '*.md'`. One outside `docs/plans/` gets its glob added to the `system-plans.md` copy.
+   - System plans: `git grep -l '^## Close-out — every feature' -- '*.md'`. One outside `docs/plans/` gets its glob added to the `system-plans.md` copy.
    - Story backlogs: `git ls-files '*stories.md'`. Any outside `docs/plans/` that follow the same shape (`US<n>` stories) get the matching glob added to the `backlog-stories.md` copy. Never widen to a bare `**/stories.md`: it would load on unrelated files.
    - No KB yet: keep the defaults; the `business-analyst` agent creates it there (it loads `product:knowledge-base`, which you cannot invoke yourself).
 

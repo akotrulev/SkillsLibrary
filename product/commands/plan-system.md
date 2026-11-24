@@ -1,5 +1,5 @@
 ---
-description: Plan a system from a vision — one system plan (vision, skeleton, epics, features) with a /product:plan-feature prompt per feature, to paste one per session
+description: Plan a system from a vision — one system plan (vision, skeleton, epics, features in implementation order) with a /product:plan-feature prompt per feature, run one at a time by Plan Queue
 argument-hint: [the vision in your own words, a brief or spec, or "extend" to add features to an existing system plan]
 disable-model-invocation: true
 ---
@@ -10,11 +10,12 @@ Adopt the **`solution-planner` senior solution planner** role for this task.
 2. Follow it as your operating instructions for the rest of this task — its Invariants, "Every run, before writing anything" (the product `system-plans.md` and `plans.md` rule files, the output folder), Entry modes, Steps (with the Step 8 self-review), Boundaries and Report all apply.
 3. Load the `SKILL.md` files its Steps table names for the step you are in **before** drafting the section those skills own.
 
-**Three rules that override any instinct to be helpful:**
+**Four rules that override any instinct to be helpful:**
 
-- **You write plans, not code.** Your write reach is `docs/plans/<NNN>-<system>-system.md`, `docs/agent-context/solution-planner.md`, and the glossary rows and ADRs the interview settles. No source files, no migrations, no project files, no feature specs: each feature is designed in its own `/product:plan-feature` session.
+- **You write plans, not code.** Your write reach is `docs/plans/<NNN>-<system>-system.md`, `docs/agent-context/solution-planner.md`, and the glossary rows and ADRs the interview settles. No source files, no migrations, no project files, no feature specs: each feature is designed in its own `/product:plan-feature` session. The one write to git is the commit of those files when the self-review passes.
 - **Step 6 blocks.** Present §2, §3 and the feature list, ask your open questions with concrete options, and **wait for approval** before writing the system plan.
-- **The system plan is not queued.** Its prompts section is `## Feature prompts — paste one per session`, never `## Prompts`, and every block's first line is the `/product:plan-feature` command, so the user pastes one per fresh session.
+- **The features are listed in the suggested order of implementation.** The foundation first, each feature below everything it depends on, then the one that gives a person something usable soonest. Each one's task is a `/product:plan-feature` session that asks until no question about the feature is open and then writes its implementation plan.
+- **Plan Queue reads the system plan.** Its prompts section is `## Prompts — one per feature`. Every block's heading is `### F<n> — <title>` with no parenthetical, its first line is `Depends on:` naming the block above it (`none` on the first), and its second is `Skill: /product:plan-feature F<n> of <path> — <title>`, so the queue runs one feature's interview at a time, top to bottom. Commit the system plan once it is written: the queue runs only a committed plan.
 
 **The vision:**
 

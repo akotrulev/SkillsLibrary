@@ -3,7 +3,7 @@ paths:
   - "docs/plans/*-system.md"
 ---
 
-<!-- product rules v1 (2026-11-23): system plans. Installed by /product:rules; edit to fit this project. -->
+<!-- product rules v2 (2026-11-24): system plans. Installed by /product:rules; edit to fit this project. -->
 
 # System plan standards
 
@@ -13,11 +13,11 @@ start from it or acts wrongly, **major** will mislead a feature or lose the reco
 or format, **nit** is wording. The project's own convention wins where it consistently does otherwise.
 The full format is the `product` plugin's `solution-blueprint/references/system-plan-format.md`.
 `plans.md` also loads for this file: its document rules hold, and its task and prompt rules give way to
-the feature rules below.
+the feature rules below. Plan Queue queues this file like any plan.
 
 ## The document
 
-- Sections in order: header (`**Goal:**`, `**Status:**`, `**Mode:**`), `## 1. What already exists, and what is missing`, `## 2. Vision and scope`, `## 3. The skeleton`, `## 4. Epics`, `## 5. Features side by side`, `## Decisions`, `## Answered questions`, `## Open questions`, `## 6. Features`, `## Close-out — every feature`, `## Feature prompts — paste one per session`. *major*
+- Sections in order: header (`**Goal:**`, `**Status:**`, `**Mode:**`), `## 1. What already exists, and what is missing`, `## 2. Vision and scope`, `## 3. The skeleton`, `## 4. Epics`, `## 5. Features side by side`, `## Decisions`, `## Answered questions`, `## Open questions`, `## 6. Features`, `## Close-out — every feature`, `## Prompts — one per feature`. *major*
 - `**Status:**` names the features specced and planned, the features on hold and why, and the next feature. *major*
 - Every §1 row with a gap is covered by a feature, and every feature traces to a §1 row. *major*
 - No grouping layer over the features: no phases, waves, stages or milestones. *minor*
@@ -63,18 +63,23 @@ the feature rules below.
 
 ## §6 Features
 
-- Ids are `F1..Fn` in the order to spec them, never renumbered; a split feature's second half takes the next free id. *blocker*
+- The features are listed in the suggested order of implementation, which is the order Plan Queue runs them in: the foundation first, each feature below everything it depends on, then the one that gives a person something usable soonest. §6, the prompt table and the prompt blocks hold the same order. *major*
+- Ids are `F1..Fn`, assigned in that order when the plan is written and never renumbered; a split feature's second half takes the next free id, and its block is placed where the feature is to be built. *blocker*
 - Each block carries `**Epic:**` (or `— (foundation)`), `**Command:** /product:plan-feature`, `**Deliverable:**`, `**Depends on:**` and `**Brief:**`, and **no** `Stack`, `Agent`, `Budget` or `Gate` line. *major*
 - A feature is something a person can do, never a layer ("the API", "the screens"). *major*
 - In a repo where the skeleton is not built, `F1` is the foundation feature and every other feature depends on it. *major*
 - The brief says what the feature does and for whom, what is in and out (naming the feature that owns what is out), and the §3 decisions it builds on. *major*
 - `As built` and `On hold` notes are dated and appended, never edited. *major*
+- A feature is `specced` only when its implementation plan holds no open question and no row of `## Open questions` still names it under `Blocks`; a feature the user cannot finish answering is `on hold`, with no plan. *blocker*
 
 ## Prompts and close-out
 
-- The prompts heading is `## Feature prompts — paste one per session`, never `## Prompts`: the system plan is not queued. *blocker*
-- Each block's heading is `### F<n> — <title> (/product:plan-feature)`, followed after one blank line by a four-backtick fence. *blocker*
-- Each block's first line is `/product:plan-feature F<n> of <system plan path> — <title>`, never `Depends on:`. Then the brief, the reading line (sections and decision ids, never the whole plan) and the close-out line. *blocker*
+- The prompts heading is `## Prompts — one per feature`: Plan Queue reads the system plan as it reads any plan, and nothing else is a `###` under that heading. *blocker*
+- Each block's heading is `### F<n> — <title>` with no trailing parenthetical (the queue reads one as an agent to start), followed after one blank line by a four-backtick fence. *blocker*
+- Each block's first line is `Depends on:` with one id, the block directly above it, or `none` on the first: the interviews run one at a time, in the order of implementation. *blocker*
+- Each block's second line is `Skill: /product:plan-feature F<n> of <system plan path> — <title>`. Then the run paragraph from the format file word for word, the brief, the reading line (sections and decision ids, never the whole plan) and the close-out line. *blocker*
+- The system plan is committed once written: Plan Queue runs only a committed plan. *major*
+- A feature session that puts its feature on hold under a queue ends with `PLAN_QUEUE: BLOCKED F<n> on hold: <reason>`, after committing the draft. *major*
 - `## Close-out — every feature` is copied verbatim from the format file. *blocker*
 - A feature's prompt is deleted only after its spec and plan are committed, in the follow-up commit `docs: delete F<n>'s prompt (<system plan>)`. A feature on hold keeps its prompt. *blocker*
 - The system plan moves to `docs/plans/implemented/` when its last prompt block is deleted, and not before; a held feature keeps it in `docs/plans/`. *major*
