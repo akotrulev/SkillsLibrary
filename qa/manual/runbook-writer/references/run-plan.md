@@ -42,8 +42,9 @@ Each task is a new session, so nothing lives in the shell.
 
 ## What a queued task does differently from a direct run
 
-- **It cannot ask.** The environment's confirmation is read from the plan header. While that line says `not confirmed`, `E1` stops and keeps its block, blocked on the user.
-- **At a Hand step it stops**, marks the test `blocked`, keeps its block with `Blocked: Hand step <test.step> — <what the user must do>`, and goes on with the tests that do not depend on it.
+- **It asks as a direct run does**: the Plan Queue passes a session's questions to the user.
+- **The environment is confirmed once per run.** Where the plan header says `not confirmed`, `E1` asks the user before anything else and writes the answer into that line; every later task reads it there.
+- **At a Hand step it asks** the user to do what the step says, and continues when they report back. With no answer, it marks the test `blocked`, keeps its block with `Blocked: Hand step <test.step> — <what the user must do>`, and goes on with the tests that do not depend on it.
 - **A failed test does not stop the task.** The task runs every test of its family, and the result goes in its Progress row.
 - **Its commit is the run record, the runbook's §10 and §11, any bug report and the plan edits.** Evidence is never committed.
 
@@ -128,8 +129,8 @@ Agent: qa-manual-tester · Stack: qa
 You are `qa-manual-tester`, in RUN mode. Task E2 of docs/plans/<PPP>-<slug>-runbook-run.md: run the
 journey tests J01, J02 and J03 of docs/runbooks/<NNN>-<slug>-runbook.md on <environment>.
 
-The plan header records that <environment> is not production. Act on no other environment, and ask
-nothing: where you would ask, stop as §3 of the plan says.
+The plan header records that <environment> is not production. Act on no other environment. At a
+Hand step, ask the user as §3 of the plan says.
 
 Read, in this order:
 1. `qa/manual/agents/qa-manual-tester.md` and `qa/manual/runbook-writer/references/execution.md`
@@ -157,7 +158,7 @@ Close out per the plan's "Close-out — every task" before you stop.
 ````
 `````
 
-The first and the last block follow the same shape. `E1`'s block reads the environment line first, runs the checks, the preconditions and Setup, and creates the record with its Run state table. The last block runs every Cleanup step, reconciles the baselines, completes the record's summary, permanent changes and left-behind sections, updates the runbook's §10 and §11, and files the plan.
+The first and the last block follow the same shape. `E1`'s block reads the environment line first and asks the user where it is not confirmed, runs the checks, the preconditions and Setup, and creates the record with its Run state table. The last block runs every Cleanup step, reconciles the baselines, completes the record's summary, permanent changes and left-behind sections, updates the runbook's §10 and §11, and files the plan.
 
 ## The run-plan check
 
