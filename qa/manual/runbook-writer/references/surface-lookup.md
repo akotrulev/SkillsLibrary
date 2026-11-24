@@ -1,14 +1,14 @@
 # Surface lookup — where each operation lives
 
-Step 2 of `runbook-writer`. For every operation the cases use, find its endpoint, its screen on each UI and its table, and record how the tester reaches each channel. The result is the runbook's **§1 Access** and **§2 Surface map**.
+Step 2 of `runbook-writer`. For every operation the cases use, find its endpoint, its screen on each UI, its table, and any admin call, simulator or job the cases need, and record how the tester reaches each actor. The result is the runbook's **§1 Access and tools** and **§2 Surface map**.
 
 ## What the code is for
 
 The spec and the suite say what **should** happen: every expected result comes from them. The code says what **is**: the route, the field name, the label, the test id, the column. Take addresses from the code and outcomes from the suite.
 
-Where the code disagrees with the suite (the spec says a duplicate SKU is refused with `409`, the controller returns `400`), the script keeps the suite's value and the disagreement goes in the runbook's §9 as a question for the owner. It is also the likeliest place for the run to find a defect.
+Where the code disagrees with the suite (the spec says a duplicate SKU is refused with `409`, the controller returns `400`), the test keeps the suite's value and the disagreement goes in the runbook's §14 as a question for the owner. It is also the likeliest place for the run to find a defect.
 
-Where the suite is silent on a value a step must assert (a status code, an error code), take the contract's, else the code's, and list it in §9 as a value the owner confirms.
+Where the suite is silent on a value a step must assert (a status code, an error code), take the contract's, else the code's, and list it in §14 as a value the owner confirms.
 
 ## Stamps
 
@@ -19,7 +19,7 @@ Every row of the Access table and the Surface map carries one:
 | `detected <file:line>` | Read in the codebase this session |
 | `stated` | Given by the user, the spec or the contract |
 | `observed` | Seen on the running system this session |
-| `assumed` | Inferred; listed in §9 until confirmed |
+| `assumed` | Inferred; listed in §14 until confirmed |
 
 ## With the codebase
 
@@ -37,9 +37,9 @@ Read the API project first: it names the operations, and the UI is then matched 
 | Tables and columns | EF Core migrations, `OnModelCreating` | Flyway or Liquibase scripts, `@Table`, `@Column` | `schema.prisma`, TypeORM entities, Knex migrations | the migrations folder |
 | Derived copies | cache keys, search indexers, read models, outbox and event handlers that react to the entity | the same | the same | the same |
 
-A committed OpenAPI document wins over the code for the request and response shape; where the two differ, that is a §9 row.
+A committed OpenAPI document wins over the code for the request and response shape; where the two differ, that is a §14 row.
 
-A field the server sets and no endpoint accepts is what a data recipe exists for: it is the `Why not the API` line. The derived copies are what DB rule 7 needs.
+A field the server sets and no endpoint accepts is what a data recipe exists for: it is the `Why not the API` line. The derived copies are what DB-write rule 6 needs. The tables and columns also give every DB read its query: the status, amount and history columns an action changes.
 
 ### The UI projects
 
@@ -67,25 +67,36 @@ A fact the checkout should hold and does not (a form component that is imported 
 
 Record the globs searched when nothing is found. Reuse the project's variable names (`baseUrl`, `token`) so its environment files work unchanged.
 
+### The other actors
+
+| Actor | Where to look |
+|---|---|
+| Admin | Controllers and routes under an admin or management prefix, and the policies that guard them |
+| Sim | A simulator or fake-provider project, a test-mode controller, the provider's sandbox settings in the environment's configuration |
+| Job | Scheduler registrations (hosted services, `@Scheduled`, cron tables), and any "run now" endpoint or command for them |
+| Doc | The endpoint that returns the document, and the template that fixes its rows |
+| Notify | The dispatch table or outbox, the message templates, the environment's mail catcher |
+| Helper scripts | A `tools/`, `scripts/` or QA folder with callers, waiters or simulator drivers the project already has: these are used before a new one is written |
+
 ## Without the codebase
 
-| Channel | Source, strongest first |
+| Actor | Source, strongest first |
 |---|---|
 | API | The contract the user gave; the running API's OpenAPI document (`/swagger/v1/swagger.json`, `/v3/api-docs`, `/openapi.json`); a question |
 | UI | A look-only pass over the screens the cases name, by the driving routes of `qa/manual/app-exploration/references/probes.md`: read labels and routes from the snapshot and write nothing. Stamp `observed` |
 | DB | The schema the user gives; on a non-production database, the catalogue read-only (`information_schema.columns`, the collection's sample document); a question |
 
-A table or column nobody stated and no catalogue showed is `assumed`, and every script that depends on it is listed in §9.
+A table or column nobody stated and no catalogue showed is `assumed`, and every test that depends on it is listed in §14.
 
 ## The Access table
 
-One row per channel, per environment the runbook is written for:
+One row per actor in scope, for the environment the runbook is written for:
 
-| Channel | Where | How to get in | Source |
+| Actor | Where | How to get in | Source |
 |---|---|---|---|
 | API | `BASE_URL` = `https://api.staging.example.test` | `POST /auth/token` with `QA_ADMIN_USER` / `QA_ADMIN_PASSWORD`, role `catalogue-admin` | detected `src/Api/Program.cs:41` |
 | UI-web | `WEB_URL` = `https://admin.staging.example.test` | Sign in as the same account | stated |
 | UI-app | build `2.14.0 (381)` on a Pixel 8 emulator, Android 16 | Sign in as `QA_SHOPPER_USER` | stated |
 | DB | PostgreSQL 17, database `catalogue_staging`, `DB_URL` | `psql "$DB_URL"`, a role with DML on schema `catalog` | stated |
 
-Each account is named with its role. Each secret is the name of the variable that holds it. The database row names the database, because the run checks that name before its first statement.
+Each account is named with its role. Each secret is the name of the variable that holds it. The database row names the database, because the run checks that name before its first statement. The runbook's header repeats the environment, the build and its commit, the device and the accounts, so a reader knows what it was written for before reading a step.

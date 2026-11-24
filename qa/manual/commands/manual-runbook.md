@@ -1,6 +1,6 @@
 ---
-description: Write an executable manual-test runbook for a feature — every case carried out through the API, the web or app UI and, where needed, the DB — or run a saved runbook on a non-production environment
-argument-hint: [the feature's spec, suite or explanation, with the API and UI code paths if any — or "run <runbook path>" with the environment and an optional script filter]
+description: Write an executable manual-test runbook for a feature in one flow — the test cases first when none exist, then every case carried out through the API, the web or app UI and the DB — or run a saved runbook on a non-production environment
+argument-hint: [the feature's spec, suite or explanation, with the API and UI code paths if any — or "run <runbook path>" with the environment and an optional test filter]
 disable-model-invocation: true
 ---
 
@@ -14,4 +14,4 @@ Adopt the **`qa-manual-tester` senior manual tester** role for this task.
 
 $ARGUMENTS
 
-If no task was given above, ask for three things: the feature to cover — a spec, an existing test-case suite, or an explanation in your own words; which channels are in scope (API, web, app, database) and how each is reached on the test environment; and where the API and UI codebases are, or that there are none. To run instead of write, ask for the runbook's path and the environment.
+If no task was given above, ask for three things: the feature to cover — a spec, an existing test-case suite, or an explanation in your own words; the test environment, its build, and how each actor is reached on it (API, admin API, web, app and device, database, any simulator); and where the API and UI codebases are, or that there are none. To run instead of write, ask for the runbook's path and the environment.
