@@ -57,11 +57,13 @@ Install at user scope, keep every `skills-library` plugin `false` in `~/.claude/
 
 **List `engineering` (and `product` where the project plans or documents, `design` for `fe-*` / `mobile-*`) explicitly.** A dependency is installed with its dependent, but an explicit `false` at user scope still wins: with the global `false` above, `claude plugin list` run inside the project shows `engineering` and `design` disabled unless the project enables them itself (verified 2026-10-11). Check a project with `claude plugin list --json` from its root.
 
+**Enabling is not installing.** `enabledPlugins` only switches a plugin on. A session loads it at start only when the plugin is installed at user scope or for that project. A plugin installed for other projects only is enabled here and still missing: its commands are unknown, `/reload-plugins` loads it into the running session, and the next session starts without it again. Install it once from the project root with `claude plugin install <plugin>@skills-library --scope project` (`--scope local` where the project keeps its Claude settings untracked). A git worktree of the project uses the project's install (verified 2026-11-24, Claude Code 2.1.331).
+
 ### Install the rules, once per project
 
 A plugin's coding and document standards are **Claude Code rules**: files with `paths:` frontmatter that load on their own once a session (or a subagent) reads or edits a matching file, so a session pays only for the standards its files need. Plugins cannot ship rules, so each plugin that has them carries an install command that copies them into `.claude/rules/<plugin>/`. Run it once per enabled plugin and commit the folder; re-run it after a plugin update to compare (it never overwrites a copy the team edited without asking).
 
-A model can run them too: asked to "set up this project", it reads `enabledPlugins` in `.claude/settings.json` and runs `<plugin>:rules` for each enabled plugin in the table. One argument answers the edited-copy question in advance (`replace`, `keep`, or `beside` to write the plugin's copy as `<name>.plugin`); with no argument and nobody to ask, it takes `beside`, changes no paths and reports what is waiting for you.
+A model can run them too: asked to "set up this project", it reads `enabledPlugins` in `.claude/settings.json`, installs each enabled plugin that has no install for the project (a plugin installed this way loads after `/reload-plugins` or a restart) and runs `<plugin>:rules` for each enabled plugin in the table. One argument answers the edited-copy question in advance (`replace`, `keep`, or `beside` to write the plugin's copy as `<name>.plugin`); with no argument and nobody to ask, it takes `beside`, changes no paths and reports what is waiting for you.
 
 | Command | Loads when a session touches |
 |---|---|
@@ -94,7 +96,7 @@ The `dev` and `business-analysis` plugins are gone, with no alias. `dev` became 
 
 Per project:
 
-1. In `.claude/settings.json` `enabledPlugins`, replace `dev@skills-library` with `engineering@skills-library`. Add `product@skills-library` where the project plans or documents. Replace `business-analysis@skills-library` with `product@skills-library`.
+1. In `.claude/settings.json` `enabledPlugins`, replace `dev@skills-library` with `engineering@skills-library`. Add `product@skills-library` where the project plans or documents. Replace `business-analysis@skills-library` with `product@skills-library`. Where the plugins are installed per project, install the new ones from the project root (see "Configure per project").
 2. Restart the session, then run `engineering:rules` and `product:rules`. They install the new folders and then retire the old rules files. A copy is deleted only when it is identical to the plugin's, and **every old copy now differs** (the plugin's files name the new plugin and paths), so each one is asked about: replace it, keep it, or write the plugin's copy beside it as `<name>.plugin`. Pass `replace` to take the plugin's copies without being asked.
 3. Commit `.claude/rules/` where the project commits its settings.
 
