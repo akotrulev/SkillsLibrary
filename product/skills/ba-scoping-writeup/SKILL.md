@@ -8,7 +8,7 @@ user-invocable: false
 # Vision and scope — the system plan's §2
 
 Turns an ambiguous business request into **§2 of a system plan, `## 2. Vision and scope`**, and
-nothing else: the ask, the problem, the actors, what the system must do, constraints, success, scope,
+nothing else: the ask, the product in plain words, the problem, the actors, what the system must do, constraints, success, scope,
 assumptions and risks, separated and labelled so the skeleton (§3), the epics (§4) and every feature
 session can be checked against them. `solution-planner` loads it for `/product:plan-system`; the file
 around it is defined by `product/skills/solution-blueprint/references/system-plan-format.md`.
@@ -50,31 +50,46 @@ instance, never the general case: "usually" hides the edge cases that become ope
 
 ## Procedure
 
-1. **Separate observation from inference.** Quote the stakeholder verbatim; attribute each constraint
+1. **The product in plain words, first.** Three to five sentences anyone outside the team could read:
+   what a person gets and what it is not. Then the journeys, one row each: who, what they do, what they
+   end up with, in their words; `solution-planner` fills each row's features once the feature list
+   exists. Then the kinds of choice the decision-maker wants put to them (what people see, who and what
+   is in, the risk and cost they carry); the feature sessions decide how it works inside and list those
+   calls in each spec. No code identifier, library, protocol or decision id in this subsection.
+2. **Separate observation from inference.** Quote the stakeholder verbatim; attribute each constraint
    to whoever stated it; put every inference in Assumptions.
-2. **The problem before any solution wording.** "Add a CSV export button" is a solution; the problem
+3. **The problem before any solution wording.** "Add a CSV export button" is a solution; the problem
    is the workflow it unblocks.
-3. **Actors, not a stakeholder list.** Every actor has a goal, and one is named the decision-maker who
+4. **Actors, not a stakeholder list.** Every actor has a goal, and one is named the decision-maker who
    approves scope.
-4. **What it must do, as outcomes, never mechanism.** What an actor gets, business rules with their
+5. **What it must do, as outcomes, never mechanism.** What an actor gets, business rules with their
    numbers, and quality targets with their number and who stated it. No stack, table, endpoint, screen
    or component: those are §3's or a feature spec's.
-5. **Scope in three columns**: in, out (refused) and deferred (a follow-up commitment).
-6. **Success is measurable or explicitly qualitative**, with a baseline → target where one exists.
-7. **Risks on two axes**, likelihood and impact, each with a mitigation.
-8. **Open questions are unknowns, not risks.** Each goes to the system plan's `## Open questions`
+6. **Scope in three columns**: in, out (refused) and deferred (a follow-up commitment).
+7. **Success is measurable or explicitly qualitative**, with a baseline → target where one exists.
+8. **Risks on two axes**, likelihood and impact, each with a mitigation.
+9. **Open questions are unknowns, not risks.** Each goes to the system plan's `## Open questions`
    table, naming its options, what it blocks and who can answer it.
 
 ## Output format
 
-Nine subsections, in this order, none dropped; an empty one says why. The tenth concern, open
-questions, lives in the plan's `## Open questions` table.
+Ten subsections, in this order, none dropped; an empty one says why. Open questions live in the plan's `## Open questions` table.
 
 ````markdown
 ## 2. Vision and scope
 
 ### The ask, verbatim
 > <what the stakeholder said, quoted, never paraphrased> — <who, where, when>
+
+### The product, in plain words
+<three to five sentences: what a person gets, and what it is not>
+
+| Journey | Who | Does | Ends up with | Features |
+|---|---|---|---|---|
+| J1 | <actor> | <what they do, in their words> | <what they see or have afterwards> | <F ids> |
+
+**The decision-maker is asked:** <the kinds of choice put to them>. **Feature sessions decide:** how it
+works inside, listed in each spec's engineering calls for review.
 
 ### Problem and why now
 <one paragraph: the problem in the business's terms, and what not doing it costs>

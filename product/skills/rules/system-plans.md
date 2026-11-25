@@ -3,7 +3,7 @@ paths:
   - "docs/plans/*-system.md"
 ---
 
-<!-- product rules v2 (2026-11-24): system plans. Installed by /product:rules; edit to fit this project. -->
+<!-- product rules v3 (2026-11-25): system plans. Installed by /product:rules; edit to fit this project. -->
 
 # System plan standards
 
@@ -24,8 +24,9 @@ the feature rules below. Plan Queue queues this file like any plan.
 
 ## §2 Vision and scope
 
-- Nine subsections in order, none dropped (an empty one says why): the ask verbatim, problem and why now, actors, what it must do, constraints, success, scope, assumptions, risks. Open questions go to the plan's `## Open questions`. *minor*
+- Ten subsections in order, none dropped (an empty one says why): the ask verbatim, the product in plain words, problem and why now, actors, what it must do, constraints, success, scope, assumptions, risks. Open questions go to the plan's `## Open questions`. *minor*
 - The ask is quoted verbatim, never paraphrased; everything below is checked against it. *major*
+- The product in plain words: what a person gets, in sentences anyone outside the team reads; one journey row per thing an actor does, each naming its features, every feature in at least one; and the kinds of choice the decision-maker is asked. No code identifier, library or decision id. *major*
 - The problem is stated in the business's terms before any solution wording. "Add a button" is a solution: the requirement is the workflow it unblocks. *major*
 - "What it must do" states capabilities as outcomes an actor gets, business rules with their numbers, and quality targets. No technology: no stack, table, endpoint, screen or component. *major*
 - A quality target carries its number and who stated it, or `[TBD - <who decides>]` plus an open question. Never an invented number. *blocker*

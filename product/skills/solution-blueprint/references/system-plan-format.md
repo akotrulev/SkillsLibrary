@@ -86,7 +86,7 @@ and what is unverified.>
 |---|---|---|
 | Header | As §2 above | — |
 | `## 1. What already exists, and what is missing` | `\| Need \| Today \| Gap \|`, one row per capability the system needs. In an existing repo `Today` cites `file:line`. A capability already built is a row with no gap and no feature. On a greenfield system `Today` is `—`, and the table is still written | the code |
-| `## 2. Vision and scope` | The ask verbatim, the problem, actors and their goals, the decision-maker, what it must do with its quality targets, constraints, success measures, in / out / deferred, assumptions, risks | `ba-scoping-writeup` |
+| `## 2. Vision and scope` | The ask verbatim, the product in plain words (its journeys, each naming its features, and the choices the decision-maker is asked), the problem, actors and their goals, the decision-maker, what it must do with its quality targets, constraints, success measures, in / out / deferred, assumptions, risks | `ba-scoping-writeup` |
 | `## 3. The skeleton` | Stack and versions (`detected` / `stated` / `proposed`), architecture style, functional areas with their file trees and agents, auth, the shared entities (name, owner, one line each), cross-cutting conventions | `solution-blueprint` |
 | `## 4. Epics` | `E1…En`: a goal sentence each, a plain-English line, and the features that serve it | `ba-epic-writer` |
 | `## 5. Features side by side` | `\| Feature \| Epic \| Areas and trees \| Depends on \| Refined beside \| Built beside \|` | `epic-map` |
@@ -328,6 +328,18 @@ the owner's accountant. Next: F2. Unverified: nothing is built yet.
 ### The ask, verbatim
 > "I want people to book online instead of ringing me, and I never want two people in one seat."
 > — studio owner, email of 2026-07-30
+
+### The product, in plain words
+Members book and cancel their own seats online, and staff see who is coming. It replaces the phone and
+the spreadsheet; it takes no payments.
+
+| Journey | Who | Does | Ends up with | Features |
+|---|---|---|---|---|
+| J1 | Member | Picks a session with room and books a seat | A seat, shown in their bookings | F1, F2 |
+| J2 | Member or staff | Cancels a booking | The seat free for someone else | F3 |
+
+**The owner is asked:** who may do what, the booking rules, what members are told. **Feature sessions
+decide:** how it works inside, listed in each spec's engineering calls for review.
 
 ### Problem and why now
 The owner spends about five hours a week on the phone and on the spreadsheet, and twice this year a
